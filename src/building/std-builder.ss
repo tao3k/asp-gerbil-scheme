@@ -14,6 +14,15 @@
         :std/misc/path
         (only-in :std/srfi/1 drop filter filter-map take)
         (only-in :std/srfi/13 string-prefix? string-suffix?)
+        (only-in ./persistent-worker
+                 make-gxi-persistent-worker-pool
+                 make-persistent-worker-request
+                 persistent-worker-pool?
+                 persistent-worker-pool-worker-count
+                 persistent-worker-pool-run-window!
+                 persistent-worker-pool-close!
+                 persistent-worker-result?
+                 persistent-worker-result-outcome)
         ./model
         ./native-toolchain)
 
@@ -50,9 +59,10 @@
         make-adaptive-execution-window-plan
         adaptive-execution-window-plan?
         adaptive-execution-window-plan-topology-groups
-  adaptive-execution-window-plan-controller
-  make-adaptive-execution-window-result
-  adaptive-execution-window-result?
+        adaptive-execution-window-plan-controller
+        adaptive-execution-window-plan-worker-pool-factory
+        make-adaptive-execution-window-result
+        adaptive-execution-window-result?
         adaptive-execution-window-result-topology-groups
         adaptive-execution-window-result-execution-windows
         adaptive-execution-window-result-window-observations
@@ -205,13 +215,22 @@
 (def (execution-window-observation-elapsed-ms observation)
   (execution-window-observation-slot observation 'elapsed-ms))
 
-(def (make-adaptive-execution-window-plan topology-groups controller)
+(def (make-adaptive-execution-window-plan
+      topology-groups
+      controller
+      (worker-pool-factory 'auto))
   (unless (execution-window-controller? controller)
     (error "invalid adaptive execution-window controller" controller))
+  (unless (or (eq? worker-pool-factory 'auto)
+              (not worker-pool-factory)
+              (procedure? worker-pool-factory))
+    (error "invalid adaptive execution-window worker-pool factory"
+           worker-pool-factory))
   (object<-alist
    `((kind . gslph.adaptive-execution-window-plan.v1)
      (topology-groups . ,topology-groups)
-     (controller . ,controller))))
+     (controller . ,controller)
+     (worker-pool-factory . ,worker-pool-factory))))
 
 (def (adaptive-execution-window-plan? plan)
   (and (object? plan)
@@ -224,6 +243,9 @@
 
 (def (adaptive-execution-window-plan-controller plan)
   (.ref plan 'controller))
+
+(def (adaptive-execution-window-plan-worker-pool-factory plan)
+  (.ref plan 'worker-pool-factory))
 
 (def (std-builder-request-spec-count spec)
   (if (adaptive-execution-window-plan? spec)
@@ -267,7 +289,7 @@
     (error "invalid adaptive execution-window value" label value))
   value)
 
-(def (std-builder-run-adaptive-plan! builder plan (extra-options []))
+(def (std-builder-run-adaptive-plan/sequential! builder plan (extra-options []))
   (let* ((topology-groups
           (adaptive-execution-window-plan-topology-groups plan))
          (specs (apply append topology-groups))
@@ -358,6 +380,222 @@
                  next-controller
                  (cons window execution-windows)
                  (cons observation window-observations))))))))))
+
+(def (adaptive-execution-window-next-controller
+      controller observation window-size)
+  (unless (execution-window-observation? observation)
+    (error "adaptive controller returned an invalid observation" observation))
+  (let* ((outcome (execution-window-observation-outcome observation))
+         (observed-rss-bytes
+          (execution-window-observation-peak-rss-bytes observation))
+         (observation-max-rss-bytes
+          (execution-window-observation-max-rss-bytes observation))
+         (elapsed-ms (execution-window-observation-elapsed-ms observation))
+         (hard-max-rss-bytes
+          (execution-window-positive-integer
+           (execution-window-controller-hard-max-rss-bytes controller)
+           'hard-max-rss-bytes)))
+    (unless (memq outcome '(completed ok))
+      (error "adaptive execution-window observation failed closed"
+             outcome observed-rss-bytes hard-max-rss-bytes))
+    (unless (and (integer? observed-rss-bytes)
+                 (>= observed-rss-bytes 0))
+      (error "invalid adaptive execution-window RSS observation"
+             observed-rss-bytes))
+    (unless (and (integer? observation-max-rss-bytes)
+                 (> observation-max-rss-bytes 0)
+                 (= observation-max-rss-bytes hard-max-rss-bytes))
+      (error "adaptive observation RSS limit does not match controller"
+             observation-max-rss-bytes hard-max-rss-bytes))
+    (unless (and (integer? elapsed-ms) (>= elapsed-ms 0))
+      (error "invalid adaptive execution-window elapsed observation"
+             elapsed-ms))
+    (when (> observed-rss-bytes hard-max-rss-bytes)
+      (error
+       (if (= window-size 1)
+         "one build spec cannot fit the adaptive RSS budget"
+         "adaptive execution window exceeded the RSS budget")
+       observed-rss-bytes hard-max-rss-bytes))
+    (let (next-controller
+          (execution-window-controller-next-state
+           controller observation window-size))
+      (unless (execution-window-controller? next-controller)
+        (error "adaptive controller returned an invalid next state"
+               next-controller))
+      next-controller)))
+
+(def (std-builder-persistent-worker-compatible? builder)
+  (eq? (std-builder-make-proc builder) make))
+
+(def (std-builder-persistent-worker-requests
+      builder specs extra-options)
+  (let (options (std-builder-effective-options builder extra-options))
+    (map
+     (lambda (spec)
+       (make-persistent-worker-request
+        spec
+        (std-builder-srcdir builder)
+        options
+        (std-builder-toolchain builder)))
+     specs)))
+
+(def (persistent-worker-window-results-valid? results expected-count)
+  (and (= (length results) expected-count)
+       (andmap
+        (lambda (result)
+          (and (persistent-worker-result? result)
+               (eq? (persistent-worker-result-outcome result)
+                    'completed)))
+        results)))
+
+(def (std-builder-run-persistent-plan!
+      builder plan pool initial-controller (extra-options []))
+  (let ((topology-groups
+         (adaptive-execution-window-plan-topology-groups plan)))
+    (let next-layer ((remaining-groups topology-groups)
+                     (controller initial-controller)
+                     (execution-windows [])
+                     (window-observations []))
+      (if (null? remaining-groups)
+        (make-adaptive-execution-window-result
+         topology-groups
+         (reverse execution-windows)
+         (reverse window-observations)
+         controller)
+        (let next-window
+             ((remaining (car remaining-groups))
+              (controller controller)
+              (execution-windows execution-windows)
+              (window-observations window-observations))
+          (if (null? remaining)
+            (next-layer
+             (cdr remaining-groups)
+             controller
+             execution-windows
+             window-observations)
+            (let* ((requested-window-size
+                    (execution-window-positive-integer
+                     (execution-window-controller-window-size controller)
+                     'window-size))
+                   (controller-worker-count
+                    (execution-window-positive-integer
+                     (execution-window-controller-worker-count controller)
+                     'worker-count))
+                   (pool-worker-count
+                    (execution-window-positive-integer
+                     (persistent-worker-pool-worker-count pool)
+                     'persistent-worker-pool-worker-count))
+                   (window-size
+                    (min requested-window-size
+                         controller-worker-count
+                         pool-worker-count
+                         (length remaining)))
+                   (window (take remaining window-size))
+                   (requests
+                    (std-builder-persistent-worker-requests
+                     builder window extra-options))
+                   (observation
+                    (execution-window-controller-observe-run!
+                     controller
+                     "std/make persistent topology window"
+                     (lambda ()
+                       (let (results
+                             (persistent-worker-pool-run-window!
+                              pool requests))
+                         (unless
+                             (persistent-worker-window-results-valid?
+                              results window-size)
+                           (error
+                            "persistent-worker window returned invalid results"
+                            results))
+                         results))))
+                   (next-controller
+                    (adaptive-execution-window-next-controller
+                     controller observation window-size)))
+              (next-window
+               (drop remaining window-size)
+               next-controller
+               (cons window execution-windows)
+               (cons observation window-observations)))))))))
+
+(def (call-with-persistent-worker-pool pool thunk)
+  (with-catch
+   (lambda (exception)
+     (persistent-worker-pool-close! pool)
+     (raise exception))
+   (lambda ()
+     (let (result (thunk))
+       (persistent-worker-pool-close! pool)
+       result))))
+
+(def (adaptive-execution-window-worker-pool builder plan controller)
+  (let (factory
+        (adaptive-execution-window-plan-worker-pool-factory plan))
+    (cond
+     ((not factory) #f)
+     ((procedure? factory)
+      (factory builder controller))
+     ((and (eq? factory 'auto)
+           (std-builder-persistent-worker-compatible? builder))
+      (make-gxi-persistent-worker-pool
+       (execution-window-positive-integer
+        (execution-window-controller-worker-count controller)
+        'worker-count)))
+     (else #f))))
+
+(def (adaptive-execution-window-worker-pool-enabled? builder plan)
+  (let ((topology-groups
+         (adaptive-execution-window-plan-topology-groups plan))
+        (factory
+         (adaptive-execution-window-plan-worker-pool-factory plan)))
+    (and (pair? topology-groups)
+         (null? (cdr topology-groups))
+         (or (procedure? factory)
+             (and (eq? factory 'auto)
+                  (std-builder-persistent-worker-compatible? builder))))))
+
+(def (std-builder-run-with-persistent-pool!
+      builder plan controller extra-options)
+  (let* ((worker-count
+          (execution-window-positive-integer
+           (execution-window-controller-worker-count controller)
+           'worker-count))
+         (startup-observation
+          (execution-window-controller-observe-run!
+           controller
+           "gxi persistent-worker pool startup"
+           (lambda ()
+             (adaptive-execution-window-worker-pool
+              builder plan controller))))
+         (pool
+          (and (execution-window-observation? startup-observation)
+               (execution-window-observation-result
+                startup-observation))))
+    (unless (persistent-worker-pool? pool)
+      (error "persistent-worker constructor returned an invalid pool"
+             pool))
+    (let (startup-controller
+          (adaptive-execution-window-next-controller
+           controller startup-observation worker-count))
+      (call-with-persistent-worker-pool
+       pool
+       (lambda ()
+         (std-builder-run-persistent-plan!
+          builder plan pool startup-controller extra-options))))))
+
+(def (std-builder-run-adaptive-plan! builder plan (extra-options []))
+  (let* ((topology-groups
+          (adaptive-execution-window-plan-topology-groups plan))
+         (specs (apply append topology-groups))
+         (controller
+          (adaptive-execution-window-plan-controller plan)))
+    (if (and (pair? specs)
+             (adaptive-execution-window-worker-pool-enabled?
+              builder plan))
+      (std-builder-run-with-persistent-pool!
+       builder plan controller extra-options)
+      (std-builder-run-adaptive-plan/sequential!
+       builder plan extra-options))))
 
 (def (std-builder-run-spec! builder spec (extra-options []))
   (if (adaptive-execution-window-plan? spec)
@@ -501,10 +739,15 @@
 (def (package-source-stage-request-specs stage)
   (let (batching (package-source-stage-batched? stage))
     (if (execution-window-controller? batching)
-      (list
-       (make-adaptive-execution-window-plan
-        (package-source-stage-topology-request-spec-groups stage)
-        batching))
+      (let (topology-groups
+            (package-source-stage-topology-request-spec-groups stage))
+        (if (and (pair? topology-groups)
+                 (null? (cdr topology-groups)))
+          (list
+           (make-adaptive-execution-window-plan
+            topology-groups
+            batching))
+          (topology-groups->upstream-execution-windows topology-groups)))
       (package-source-stage-request-specs/default stage))))
 
 ;; : (-> PackageSourceStage [[BuildSpec]])
@@ -512,7 +755,7 @@
   (let (specs (package-source-stage-specs stage))
     (cond
       ((eq? (package-source-stage-batched? stage) 'topology)
-       (package-source-stage-topology-request-spec-groups stage))
+       (package-source-stage-topology-request-specs stage))
      ((package-source-stage-batched? stage)
       (list specs))
      (else

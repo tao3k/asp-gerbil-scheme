@@ -3,7 +3,26 @@
 ;;; Invariant: package-specific currentness and receipt persistence remain in Build API.
 (import ./model
         ./std-builder
-        ./native-toolchain)
+        ./native-toolchain
+        (only-in ./persistent-worker
+                 persistent-worker-request?
+                 make-persistent-worker-request
+                 persistent-worker-request-spec
+                 persistent-worker-request-srcdir
+                 persistent-worker-request-options
+                 persistent-worker-request-toolchain
+                 persistent-worker-result?
+                 make-persistent-worker-result
+                 persistent-worker-result-request
+                 persistent-worker-result-worker-id
+                 persistent-worker-result-outcome
+                 persistent-worker-result-elapsed-ms
+                 persistent-worker-result-detail
+                 persistent-worker-pool?
+                 persistent-worker-pool-worker-count
+                 persistent-worker-pool-run-window!
+                 persistent-worker-pool-close!
+                 make-gxi-persistent-worker-pool))
 
 (export build-stage
         build-stage?
@@ -97,3 +116,50 @@
 ;; Building facade owns public stage plans and receipt projections; native policy remains upstream.
 (import ./observability)
 (export (import: ./observability))
+
+(export
+        execution-window-controller?
+        execution-window-controller-worker-count
+        execution-window-controller-hard-max-rss-bytes
+        execution-window-controller-headroom-bytes
+        execution-window-controller-window-size
+        execution-window-controller-observe-run!
+        execution-window-controller-next-state
+        make-execution-window-observation
+        execution-window-observation?
+        execution-window-observation-result
+        execution-window-observation-outcome
+        execution-window-observation-baseline-rss-bytes
+        execution-window-observation-peak-rss-bytes
+        execution-window-observation-max-rss-bytes
+        execution-window-observation-elapsed-ms
+        make-adaptive-execution-window-plan
+        adaptive-execution-window-plan?
+        adaptive-execution-window-plan-topology-groups
+        adaptive-execution-window-plan-controller
+        adaptive-execution-window-plan-worker-pool-factory
+        make-adaptive-execution-window-result
+        adaptive-execution-window-result?
+        adaptive-execution-window-result-topology-groups
+        adaptive-execution-window-result-execution-windows
+        adaptive-execution-window-result-window-observations
+        adaptive-execution-window-result-controller
+        std-builder-run-adaptive-plan!
+        persistent-worker-request?
+        make-persistent-worker-request
+        persistent-worker-request-spec
+        persistent-worker-request-srcdir
+        persistent-worker-request-options
+        persistent-worker-request-toolchain
+        persistent-worker-result?
+        make-persistent-worker-result
+        persistent-worker-result-request
+        persistent-worker-result-worker-id
+        persistent-worker-result-outcome
+        persistent-worker-result-elapsed-ms
+        persistent-worker-result-detail
+        persistent-worker-pool?
+        persistent-worker-pool-worker-count
+        persistent-worker-pool-run-window!
+        persistent-worker-pool-close!
+        make-gxi-persistent-worker-pool)
