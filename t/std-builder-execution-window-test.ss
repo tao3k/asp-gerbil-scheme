@@ -2,6 +2,13 @@
         :std/test
         ../src/building/model
         ../src/building/native-toolchain
+        (only-in ../src/building/persistent-worker
+                 make-gxi-persistent-worker-pool
+                 make-persistent-worker-result
+                 persistent-worker-pool-close!
+                 persistent-worker-pool-run-window!
+                 persistent-worker-pool-worker-count
+                 persistent-worker-request-spec)
         ../src/building/std-builder)
 
 (export std-builder-execution-window-test main)
@@ -172,6 +179,71 @@
              (std-builder-run-spec! builder window []))
            windows)
           (check calls => 1))))
+
+    (test-case
+        "persistent workers preserve topology barriers and adaptive capacity"
+      (let ((dispatched-windows [])
+            (closed? #f)
+            (upstream-calls 0))
+        (let* ((builder
+                (make-std-builder
+                 "fake-std/make"
+                 (lambda args
+                   (set! upstream-calls (+ upstream-calls 1))
+                   args)
+                 'compile
+                 "fake upstream make"
+                 #f
+                 []
+                 (native-toolchain-default)))
+               (controller
+                (make-fake-execution-window-controller
+                 2 '(1024 1024 1024 1024) '(2 1 2) 4096 2))
+               (pool
+                (object<-alist
+                 `((kind . gslph.persistent-worker-pool.v1)
+                   (worker-count . 2)
+                   (.run-window! .
+                    ,(lambda (requests)
+                       (let (specs
+                             (map persistent-worker-request-spec requests))
+                         (set! dispatched-windows
+                           (append dispatched-windows (list specs))))
+                       (map
+                        (lambda (request)
+                          (make-persistent-worker-result
+                           request "fake-worker" 'completed 1 "ok"))
+                        requests)))
+                   (.close! .
+                    ,(lambda ()
+                       (set! closed? #t)
+                       (void))))))
+               (plan
+                (make-adaptive-execution-window-plan
+                 '((prepare compile link) (package publish))
+                 controller
+                 (lambda (received-builder received-controller)
+                   (check received-builder => builder)
+                   (check received-controller => controller)
+                   pool)))
+               (result (std-builder-run-spec! builder plan [])))
+          (check dispatched-windows
+                 => '((prepare compile) (link) (package publish)))
+          (check
+           (adaptive-execution-window-result-execution-windows result)
+           => dispatched-windows)
+          (check
+           (length
+            (adaptive-execution-window-result-window-observations result))
+           => 3)
+          (check upstream-calls => 0)
+          (check closed? => #t))))
+
+    (test-case "concrete gxi pool completes its JSON lifecycle"
+      (let (pool (make-gxi-persistent-worker-pool 2))
+        (check (persistent-worker-pool-worker-count pool) => 2)
+        (check (persistent-worker-pool-run-window! pool []) => '())
+        (persistent-worker-pool-close! pool)))
 
     (test-case "current topology window stays skipped without invoking make"
       (let (calls 0)
