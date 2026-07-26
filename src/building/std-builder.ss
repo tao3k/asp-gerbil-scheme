@@ -739,10 +739,15 @@
 (def (package-source-stage-request-specs stage)
   (let (batching (package-source-stage-batched? stage))
     (if (execution-window-controller? batching)
-      (list
-       (make-adaptive-execution-window-plan
-        (package-source-stage-topology-request-spec-groups stage)
-        batching))
+      (let (topology-groups
+            (package-source-stage-topology-request-spec-groups stage))
+        (if (and (pair? topology-groups)
+                 (null? (cdr topology-groups)))
+          (list
+           (make-adaptive-execution-window-plan
+            topology-groups
+            batching))
+          (topology-groups->upstream-execution-windows topology-groups)))
       (package-source-stage-request-specs/default stage))))
 
 ;; : (-> PackageSourceStage [[BuildSpec]])
