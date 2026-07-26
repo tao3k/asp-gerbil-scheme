@@ -181,7 +181,7 @@
           (check calls => 1))))
 
     (test-case
-        "persistent workers preserve topology barriers and adaptive capacity"
+        "persistent workers serve one dependency-free topology group"
       (let ((dispatched-windows [])
             (closed? #f)
             (upstream-calls 0))
@@ -220,7 +220,7 @@
                        (void))))))
                (plan
                 (make-adaptive-execution-window-plan
-                 '((prepare compile link) (package publish))
+                 '((prepare compile link package publish))
                  controller
                  (lambda (received-builder received-controller)
                    (check received-builder => builder)
@@ -238,6 +238,47 @@
            => 3)
           (check upstream-calls => 0)
           (check closed? => #t))))
+
+    (test-case
+        "multiple topology groups delegate dependency scheduling upstream"
+      (let ((upstream-windows [])
+            (pool-created? #f))
+        (let* ((builder
+                (make-std-builder
+                 "fake-std/make"
+                 (lambda args
+                   (set! upstream-windows
+                     (append upstream-windows (list args)))
+                   (void))
+                 'compile
+                 "fake upstream make"
+                 #f
+                 []
+                 (native-toolchain-default)))
+               (controller
+                (make-fake-execution-window-controller
+                 2 '(1024 1024 1024 1024) '(2 1 2) 4096 2))
+               (plan
+                (make-adaptive-execution-window-plan
+                 '((prepare compile link) (package publish))
+                 controller
+                 (lambda _args
+                   (set! pool-created? #t)
+                   (error "multi-group plan must stay upstream-owned"))))
+               (result (std-builder-run-spec! builder plan []))
+               (expected-windows
+                '((prepare compile) (link package) (publish)))
+               (expected-upstream-calls
+                (map list expected-windows)))
+          (check upstream-windows => expected-upstream-calls)
+          (check
+           (adaptive-execution-window-result-execution-windows result)
+           => expected-windows)
+          (check
+           (length
+            (adaptive-execution-window-result-window-observations result))
+           => 3)
+          (check pool-created? => #f))))
 
     (test-case "concrete gxi pool completes its JSON lifecycle"
       (let (pool (make-gxi-persistent-worker-pool 2))

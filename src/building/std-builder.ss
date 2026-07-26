@@ -544,11 +544,15 @@
      (else #f))))
 
 (def (adaptive-execution-window-worker-pool-enabled? builder plan)
-  (let (factory
-        (adaptive-execution-window-plan-worker-pool-factory plan))
-    (or (procedure? factory)
-        (and (eq? factory 'auto)
-             (std-builder-persistent-worker-compatible? builder)))))
+  (let ((topology-groups
+         (adaptive-execution-window-plan-topology-groups plan))
+        (factory
+         (adaptive-execution-window-plan-worker-pool-factory plan)))
+    (and (pair? topology-groups)
+         (null? (cdr topology-groups))
+         (or (procedure? factory)
+             (and (eq? factory 'auto)
+                  (std-builder-persistent-worker-compatible? builder))))))
 
 (def (std-builder-run-with-persistent-pool!
       builder plan controller extra-options)
