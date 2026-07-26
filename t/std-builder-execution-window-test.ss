@@ -57,13 +57,28 @@
 
 (def std-builder-execution-window-test
   (test-suite "std-builder execution windows"
-    (test-case "topology groups flatten into one ordered execution window"
-      (check
-       (topology-groups->upstream-execution-windows
-        '((prepare compile) () (link package)))
-       => '((prepare compile link package))))
+  (test-case "topology groups flatten into one ordered execution window"
+    (check
+      (topology-groups->upstream-execution-windows
+       '((prepare compile) () (link package)))
+      => '((prepare compile link package))))
 
-    (test-case "empty topology groups produce no execution window"
+  (test-case "topology batching preserves one upstream package stage"
+    (let* ((stage
+            (make-package-source-stage
+             "fixture"
+             "t/fixtures/std-builder-topology"
+             "fixture"
+             '("a.ss" "b.ss")
+             'topology))
+           (request (package-source-stage->request stage '()))
+           (request-summary (build-request->alist request)))
+      (check
+        (package-source-stage-topology-layers stage)
+        => '(("a.ss") ("b.ss")))
+      (check (cdr (assoc 'stage-count request-summary)) => 1)))
+
+  (test-case "empty topology groups produce no execution window"
       (check (topology-groups->upstream-execution-windows '()) => '())
       (check (topology-groups->upstream-execution-windows '(() ())) => '()))
 

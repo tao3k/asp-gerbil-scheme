@@ -755,7 +755,7 @@
   (let (specs (package-source-stage-specs stage))
     (cond
       ((eq? (package-source-stage-batched? stage) 'topology)
-       (package-source-stage-topology-request-spec-groups stage))
+       (package-source-stage-topology-request-specs stage))
      ((package-source-stage-batched? stage)
       (list specs))
      (else
