@@ -158,7 +158,6 @@
   (let (source
         (call-with-input-file "src/commands/search-prime-light.ss" read-all-as-string))
     (check (source-contains? source "collect-source-files-preview") => #t)
-    (check (source-contains? source "workspace-scope-preview-files-light") => #t)
     (check (source-contains? source "filePreview=") => #t)
     (check (source-contains? source ":gslph/src/parser/package") => #f)
     (check (source-contains? source ":gslph/src/parser/source-scope") => #f)
@@ -206,7 +205,7 @@
            => #t)
     (check (source-contains?
             output
-            "nextCommand=\"asp gerbil-scheme query --selector gerbil-scheme://src/parser/selectors.ss#item/def/selector-from --workspace . --code\"")
+            "nextCommand=\"asp gerbil-scheme query --selector gerbil-scheme://src/parser/selectors.ss#item/def/selector-from --workspace . --projection source\"")
            => #t)
     (check (source-contains? output "selector=selector-from") => #f)))
 

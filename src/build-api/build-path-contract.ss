@@ -32,13 +32,27 @@
   (path-expand ".bin/gslph" package-root))
 
 ;; : (-> Path)
-(def (install-launcher-binpath)
-  (path-expand ".local/bin/gslph" (user-home-directory)))
+(def (asp-state-home-directory)
+  (or (getenv "ASP_STATE_HOME" #f)
+      (path-expand ".agent-semantic-protocols" (user-home-directory))))
+
+(def (asp-install-launcher-directory)
+  (or (getenv "SEMANTIC_AGENT_BIN_DIR" #f)
+      (path-expand "runtime/bin" (asp-state-home-directory))))
+
+(def (install-launcher-binpath (flag #f))
+  (case flag
+    ((#f)
+     (path-expand ".local/bin/gslph" (user-home-directory)))
+    ((asp)
+     (path-expand "gslph" (asp-install-launcher-directory)))
+    (else
+     (error "unsupported gerbil-scheme install flag" flag))))
 
 ;; : (-> Path)
 (def (user-home-directory)
   (or (getenv "HOME" #f)
-      (error "HOME is required to install asp gerbil-scheme into $HOME/.local/bin")))
+      (error "HOME is required when ASP_STATE_HOME is unset")))
 
 ;; : (-> Path Void)
 (def (delete-file* path)

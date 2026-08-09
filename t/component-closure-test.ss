@@ -1,4 +1,7 @@
-(import :std/test
+;;; Intent:
+;;; - Component receipts prove the checked POO subset is deterministic and complete.
+;;; - Tests compare generated evidence to the versioned manifest, not incidental filesystem order.
+(import (only-in :std/test test-suite test-case check)
         (only-in :std/sugar hash-get with-catch)
         (only-in :std/text/json read-json)
         :gslph/src/build-api/component-closure)

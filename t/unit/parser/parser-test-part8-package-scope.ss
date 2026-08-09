@@ -9,7 +9,7 @@
         :gslph/src/protocol/json
         :gslph/src/protocol/structural-facts
         :std/srfi/13)
-(import :unit/parser/parser-test-part8-support)
+(import :gslph/t/unit/parser/parser-test-part8-support)
 (export parser-test-part-8-package-scope)
 
 ;; PolicyTest

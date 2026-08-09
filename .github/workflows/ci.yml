@@ -206,8 +206,6 @@ jobs:
           set -euo pipefail
           .bin/gslph search prime --view seeds --workspace . | tee /tmp/gslph-prime.txt
           grep -q 'filePreview=' /tmp/gslph-prime.txt
-          .bin/gslph search workspace-scope --workspace . | tee /tmp/gslph-workspace-scope.txt
-          grep -q 'filePreview=' /tmp/gslph-workspace-scope.txt
 
       - name: Verify binary policy check command is removed
         if: runner.os == 'Linux'

@@ -94,7 +94,8 @@
 ;; Their nested call facts are declarations, not executable effects.
 (def +declarative-top-level-heads+
   '("declare" "c-declare" "c-define-type" "define-c-lambda"
-    "begin-ffi" "begin-foreign" "c-define" "namespace"))
+    "begin-ffi" "begin-foreign" "c-define" "namespace"
+    "declare-gxtest-memory-exception"))
 
 ;; : (-> Datum FormCallerName )
 (def (form-caller-name datum)

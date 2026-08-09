@@ -3,6 +3,7 @@
 
 (import :gerbil/expander
         :gerbil/gambit
+        (only-in :gslph/src/parser/definition-syntax definitions-from-form)
         :gslph/src/parser/exports
         :gslph/src/parser/model
         (only-in :gslph/src/parser/package

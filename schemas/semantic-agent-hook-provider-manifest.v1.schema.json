@@ -59,6 +59,9 @@
     "source": {
       "$ref": "#/$defs/sourceDefaults"
     },
+    "projectResolution": {
+      "$ref": "provider-project-resolution-descriptor.v1.schema.json"
+    },
     "searchCapabilities": {
       "$ref": "#/$defs/searchCapabilities"
     },
@@ -111,9 +114,7 @@
       "additionalProperties": false,
       "required": [
         "defaultExtensions",
-        "defaultConfigFiles",
-        "defaultSourceRoots",
-        "defaultIgnoredPathPrefixes"
+        "defaultConfigFiles"
       ],
       "properties": {
         "defaultExtensions": {
@@ -124,20 +125,6 @@
           }
         },
         "defaultConfigFiles": {
-          "type": "array",
-          "uniqueItems": true,
-          "items": {
-            "$ref": "#/$defs/pathPattern"
-          }
-        },
-        "defaultSourceRoots": {
-          "type": "array",
-          "uniqueItems": true,
-          "items": {
-            "$ref": "#/$defs/pathPattern"
-          }
-        },
-        "defaultIgnoredPathPrefixes": {
           "type": "array",
           "uniqueItems": true,
           "items": {
@@ -237,6 +224,9 @@
           "$ref": "#/$defs/methodBinding"
         },
         "query": {
+          "$ref": "#/$defs/methodBinding"
+        },
+        "exactSelectorNative": {
           "$ref": "#/$defs/methodBinding"
         },
         "ingest": {

@@ -112,8 +112,25 @@
      (let* ((path (path-expand "build.ss" root))
             (forms (read-package-forms path))
             (entry (build-source-coverage-entry forms)))
-       (and entry
-            (build-source-coverage-policy entry))))))
+       (or (and entry
+                (build-source-coverage-policy entry))
+           (and (ormap all-gerbil-modules-form? forms)
+                (make-source-scope-policy
+                 '(".")
+                 '(".")
+                 '()
+                 "Declared by build.ss all-gerbil-modules.")))))))
+
+;; `all-gerbil-modules` is package-manager build semantics, not a provider
+;; default. Recognize it recursively without executing build.ss.
+(def (all-gerbil-modules-form? datum)
+  (cond
+   ((pair? datum)
+    (or (eq? (car datum) 'all-gerbil-modules)
+        (ormap all-gerbil-modules-form? datum)))
+   ((vector? datum)
+    (ormap all-gerbil-modules-form? (vector->list datum)))
+   (else #f)))
 ;;; Boundary:
 ;;; - merge-source-scope-policies keeps gerbil.pkg metadata and build.ss
 ;;;   coverage declarations additive instead of letting one hide the other.
@@ -239,7 +256,7 @@
 ;; : (-> Datum Boolean )
 (def (source-scope-policy-form? datum)
   (and (pair? datum)
-       (member (car datum) '(source-scope source-policy project-scope))))
+       (member (car datum) '(source-scope source-policy project-resolution))))
 ;; : (-> Root Datum PackageModularityPolicy )
 (def (package-modularity-policy root datum)
   (let* ((policy (package-field-value datum 'policy:))

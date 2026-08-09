@@ -474,7 +474,7 @@ This is the desired pattern for future quality rules: native parser facts first,
 - Do not copy all of =io.ss= into fixtures.
 - Do not make brace syntax a parser fact without expansion-level evidence.
 - Do not add policy warnings for style before fixtures and docs are stable.
-- Do not rewrite unrelated workspace-scope changes while doing this cleanup.
+- Do not rewrite unrelated project-resolution changes while doing this cleanup.
 
 * Working Definition of "Best Practice"
 For this harness, "POO best practice" means:

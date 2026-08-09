@@ -14,7 +14,6 @@
 
 (export +definition-heads+
         +declarative-top-level-heads+
-        definitions-from-form
         calls-from-form
         module-import-facts-from-form
         macro-facts-from-form
@@ -35,22 +34,6 @@
         module-refs
         export-symbols
         string-datums)
-;;; Boundary:
-;;; - definitions-from-form composes first-class procedures.
-;;; - Keep data-flow evidence visible.
-;; : (-> Relpath Form Datum DefinitionsFromForm )
-(def (definitions-from-form relpath form datum)
-  (let ((head (car datum))
-        (name-datums (definition-name-datums datum)))
-    (map (lambda (name)
-             (let* ((loc (stx-source form))
-                  (start (source-start-line loc))
-                  (end (source-end-line loc)))
-             (make-definition (datum->string name) (symbol->string head)
-                              relpath start end
-                              (definition-formal-names datum name)
-                              (definition-formal-arity datum name))))
-         name-datums)))
 ;; macro-facts-from-form
 ;;   : (-> Relpath Form Datum (List MacroFact))
 ;;   | doc m%

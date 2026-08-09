@@ -5,28 +5,27 @@
   "providerId": "gerbil-scheme-harness",
   "binary": "gslph",
   "workspaceArtifact": {
-    "root": "languages/gerbil-scheme-language-project-harness/target/asp-home/.local/bin/gslph",
-    "entrypoint": "."
+    "root": "languages/gerbil-scheme-language-project-harness/build/workspace-provider",
+    "entrypoint": "bin/gslph"
   },
   "workspaceBuild": {
     "program": "gxi",
     "args": [
-      "-e",
-      "(import :gslph/src/build-api/native-build)",
-      "-e",
-      "(install-target #f #f #f #f #f #t)"
+      "provider/workspace-build.ss"
     ],
     "workingDirectory": "languages/gerbil-scheme-language-project-harness",
     "sourceSnapshotAnchors": [
       "languages/gerbil-scheme-language-project-harness/gerbil.pkg",
       "languages/gerbil-scheme-language-project-harness/manifest.ss",
-      "languages/gerbil-scheme-language-project-harness/build.ss"
+      "languages/gerbil-scheme-language-project-harness/build.ss",
+      "languages/gerbil-scheme-language-project-harness/provider/workspace-build.ss"
     ],
     "derivedPaths": [
-      "languages/gerbil-scheme-language-project-harness/target"
+      "languages/gerbil-scheme-language-project-harness/build/workspace-provider"
     ],
     "env": {
-      "HOME": "${ASP_WORKSPACE_ROOT}/languages/gerbil-scheme-language-project-harness/target/asp-home"
+      "GERBIL_PATH": "${ASP_WORKSPACE_ROOT}/languages/gerbil-scheme-language-project-harness/.gerbil",
+      "GSLPH_WORKSPACE_ARTIFACT_ROOT": "${ASP_WORKSPACE_ROOT}/languages/gerbil-scheme-language-project-harness/build/workspace-provider"
     }
   }
 }

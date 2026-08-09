@@ -20,5 +20,5 @@
 (def (configure-project-build-root! root)
   (configure-build-root! root))
 
-(def (project-install-target verbose debug no-optimize optimized release full)
-  (install-target verbose debug no-optimize optimized release full))
+(def (project-install-target verbose debug no-optimize optimized release full (flag #f))
+  (install-target verbose debug no-optimize optimized release full flag))

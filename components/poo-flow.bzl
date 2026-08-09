@@ -11,6 +11,7 @@ POO_FLOW_COMPONENT_SOURCES = [
     "src/building/model.ss",
     "src/building/native-toolchain.ss",
     "src/building/observability.ss",
+    "src/building/persistent-worker.ss",
     "src/building/std-builder.ss",
     "src/constants.ss",
     "src/extensions/poo-object-validation.ss",

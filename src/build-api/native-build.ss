@@ -53,7 +53,7 @@
                  gslph-package-api-spec
                  gslph-package-api-stage-specs)
         (only-in "./release-modules" cli-release-modules)
-        (only-in :gerbil/gambit current-jiffy jiffies-per-second))
+        (only-in :gerbil/gambit current-jiffy jiffies-per-second setenv))
 (export clean-target
         compile-target
          install-target
@@ -70,7 +70,8 @@
         package-api-build-source-files
          compile-package-api-if-stale
          run-package-api-build-request!
-         compile-selected-gxtest-target
+        compile-selected-gxtest-target
+        workspace-install-target
         write-package-api-build-receipt!
         package-build-spec)
 
@@ -158,6 +159,10 @@
 (def (cli-install-spec optimized?)
   (cli-exe-spec optimized? "cli-release-linker"))
 
+;; : (-> (List BuildSpec))
+(def (cli-workspace-install-spec)
+  (cli-exe-spec #f "cli-install-linker"))
+
 ;; : (-> (List ModulePath))
 (def (cli-install-module-spec)
   (cli-launcher-source-modules #t))
@@ -167,7 +172,6 @@
   '("constants.ss"
     "commands/search-prime-light-list.ss"
     "commands/search-prime-light.ss"
-    "commands/search-workspace-scope-light.ss"
     "search-light-launcher.ss"
     "support/time.ss"))
 
@@ -226,6 +230,18 @@
 ;; : (-> (List BuildSpec))
 (def (runtime-library-spec)
   (filter runtime-library-module? (all-package-gerbil-modules)))
+
+;; Build a relocatable ASP artifact with sibling bin/ and lib/ roots.  The
+;; launcher remains small and loads cold command modules from the library tree.
+;; : (-> Path Path)
+(def (workspace-install-target artifact-root)
+  (configure-build-root! (current-directory))
+  (setenv "GERBIL_PATH" artifact-root)
+  (compile-binary-artifact
+   (path-expand "bin/gslph" artifact-root)
+   (runtime-library-spec)
+   (cli-workspace-install-spec)
+   #f #f #f #f #f))
 
 ;; : (-> (List BuildSpec))
 (def (native-runtime-spec)
@@ -499,7 +515,7 @@
 
 ;; : (-> (List ModulePath))
 (def (install-launcher-source-modules)
-  (all-package-gerbil-modules))
+  (cli-launcher-source-modules #t))
 
 ;; : (-> Boolean (List ModulePath))
 (def (cli-launcher-source-modules release?)
@@ -605,11 +621,10 @@
 
 ;; : (-> Boolean Boolean Boolean Boolean Boolean Void)
 ;; : (-> Boolean Boolean Boolean Boolean Boolean Boolean Void)
-(def (install-target verbose debug _no-optimize _optimized _release full)
+(def (install-target verbose debug _no-optimize _optimized _release full (flag #f))
   (ensure-build-root!)
   (current-directory package-root)
-  (compile-package-api-with-receipt verbose full)
-  (compile-install-binary-with-receipt (install-launcher-binpath)
+  (compile-install-binary-with-receipt (install-launcher-binpath flag)
                                        verbose debug #f
                                        #f #f full)
   #!void)

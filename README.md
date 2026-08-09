@@ -58,8 +58,8 @@ This first native version aligns the common provider surface:
 - compact text by default
 - `agent doctor --json` provider metadata for protocol consumers
 - `search workspace`, `prime`, `owner`, `owner items`, `symbol`, `import`, `lexical`, and `ingest`
-- parser-owned `query --term`, `query --names-only`, and `query --code`
-- parser-owned exact-item `query --selector ... --code`
+- ASP-owned exact projection backed by the provider-native typed request
+- exact source and callable skeletons via `asp gerbil-scheme query --selector ... --projection source|callable-skeleton`
 - `agent doctor --json`
 - `agent guide`
 The next implementation layer should enrich this with expanded module exports, phase-aware import/export facts, and compiler/type facts from Gerbil's expander and compiler modules.

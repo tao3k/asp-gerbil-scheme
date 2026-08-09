@@ -31,12 +31,19 @@
 ;; : (List ProviderCommandDescriptor)
 (def provider-command-descriptors
   [(make-provider-command-descriptor
+    "project-resolution-stdin"
+    "gslph/src/commands/project-resolution"
+    'gslph/src/commands/project-resolution#project-resolution-main
+    'project-resolution-main
+    ["project-resolution-stdin"]
+    0
+    [])
+   (make-provider-command-descriptor
     "search"
     "gslph/src/commands/search"
     'gslph/src/commands/search#search-main
     'search-main
-    ["search <view> ... [--json] [--code] [PROJECT_ROOT]"
-     "search workspace-scope [--json] [PROJECT_ROOT]"]
+    ["search <view> ... [--json] [--code] [PROJECT_ROOT]"]
     10
     ["search/prime" "search/owner" "search/lexical" "search/ingest"
      "search/pattern" "search/runtime-source" "search/compare"
@@ -47,16 +54,24 @@
     "gslph/src/commands/query"
     'gslph/src/commands/query#query-main
     'query-main
-    ["query <owner-path> --term <symbol> [--term <symbol>] [--workspace PROJECT_ROOT] [--names-only | --code]"
-     "query --from-hook direct-source-read --selector <workspace-path:start-end> --workspace PROJECT_ROOT --code"]
+    ["query --selector <gerbil-scheme-structural-selector> --projection source --workspace PROJECT_ROOT"
+     "query --selector <gerbil-scheme-callable-selector> --projection callable-skeleton --workspace PROJECT_ROOT"]
     20
-    ["query/selector"])
+    ["query/selector" "query/exact-selector-native-v1"])
    (make-provider-command-descriptor
     "projection"
     "gslph/src/commands/projection"
     'gslph/src/commands/projection#projection-main
     'projection-main
     ["projection <owner-path> --workspace PROJECT_ROOT --json"]
+    0
+    [])
+   (make-provider-command-descriptor
+    "projection-batch-stdin"
+    "gslph/src/commands/projection-batch"
+    'gslph/src/commands/projection-batch#projection-batch-main
+    'projection-batch-main
+    []
     0
     [])
    (make-provider-command-descriptor

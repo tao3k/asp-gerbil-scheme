@@ -2,7 +2,7 @@
 ;;; Fast smoke for downstream-facing POO source-ref validation.
 
 (import :gerbil/gambit
-        :std/test
+        (only-in :std/test test-suite test-case check-equal?)
         :gslph/src/extensions/poo-source-ref-validation)
 
 (export poo-object-validation-test)
