@@ -6,6 +6,7 @@
         :gslph/src/parser/comment-quality
         :gslph/src/parser/control-flow
         :gslph/src/parser/dependency-adapter-quality
+        (only-in :gslph/src/parser/definition-syntax definitions-from-form)
         :gslph/src/parser/exports
         :gslph/src/parser/function-quality
         :gslph/src/parser/higher-order

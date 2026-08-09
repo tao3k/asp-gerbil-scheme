@@ -258,6 +258,7 @@
     "begin-syntax"
     "use-module"
     "use-live-case"
+    "declare-gxtest-memory-exception"
     "modularity-policy"
     "poo-flow-module-object"
     "poo-flow-module-field-contract"))

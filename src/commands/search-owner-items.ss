@@ -165,7 +165,7 @@
                " source=native-parser"
                " nextCommand=\"asp gerbil-scheme query --selector "
                selector
-               " --workspace . --code\"")))
+               " --workspace . --projection source\"")))
 
 (def (owner-items-effective-limit maybe-limit)
   (if (and (pair? maybe-limit) (car maybe-limit))
@@ -233,7 +233,7 @@
                      (string-append
                       "asp gerbil-scheme query --selector '"
                       (definition-selector defn)
-                      "' --workspace . --code"))))))
+                      "' --workspace . --projection source"))))))
 
 ;; : (-> Path Line Line Selector)
 (def (owner-item-source-span path start end)

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Fast smoke coverage for the POO-shaped testing framework.
 
-(import :std/test
+(import (only-in :std/test test-suite test-case check)
         (only-in :clan/poo/object object? .ref .slot?)
         :gslph/src/testing/model
         :gslph/src/testing/framework)

@@ -704,18 +704,17 @@ with a compact Rust-owned next action. Symbol discovery belongs to the indexed
 owner selector for the subsequent exact query. The obsolete scanner, manual GC,
 and its compatibility test are deleted rather than retained behind an alias.
 
-*** 11.13.11.4 Fourth Landed Slice: Bound Workspace Scope Discovery
+*** 11.13.11.4 Fourth Landed Slice: Bound Project Resolution
 
-The workspace-scope renderer advertised a small =filePreview= but first called
+The retired scope renderer advertised a small =filePreview= but first called
 =collect-source-files= and sorted the complete owner list. The visible packet
 was bounded while allocation and traversal remained proportional to repository
 size. This is the same hidden-work pattern as ownerless symbol lookup.
 
-The renderer now shares the light launcher's fixed root-configuration preview.
-Scheme reads package topology and at most the declared configuration anchors;
-Rust remains the owner of source enumeration, authoritative counts, and index
-construction. JSON and line receipts keep their existing shape, while the full
-source list and its sort are removed from the Scheme path.
+The replacement is the typed project-resolution parser. Scheme parses package
+topology only over the Git candidate snapshot; Rust owns candidate enumeration,
+authoritative counts, and index construction. The full source list and its sort
+are absent from the Scheme path.
 
 *** 11.13.11.5 Fifth Landed Slice: Make Light Prime Truly Index-Free
 

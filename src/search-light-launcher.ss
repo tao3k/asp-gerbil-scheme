@@ -4,8 +4,6 @@
 (import :gerbil/gambit
         (only-in :gslph/src/commands/search-prime-light
                  search-prime-light-main)
-        (only-in :gslph/src/commands/search-workspace-scope-light
-                 search-workspace-scope-light-main)
         (only-in :std/misc/process run-process)
         (only-in :std/srfi/13 string-index))
 
@@ -13,7 +11,7 @@
         try-search-light-main)
 
 (def +search-help+
-  "gslph search - Gerbil Scheme native fast search\n\nUsage:\n  gslph search prime [--view seeds] [--workspace PROJECT_ROOT]\n  gslph search workspace-scope [--workspace PROJECT_ROOT]\n")
+  "gslph search - Gerbil Scheme native fast search\n\nUsage:\n  gslph search prime [--view seeds] [--workspace PROJECT_ROOT]\n")
 
 (def +query-light-limit+ 40)
 
@@ -29,8 +27,6 @@
     0)
    ((search-prime-light-argv? args)
     (search-prime-light-main args))
-   ((search-workspace-scope-light-argv? args)
-    (search-workspace-scope-light-main args))
    ((search-rg-query-light-argv? args)
     (emit-search-query-light "rg-query" args))
    ((search-fd-query-light-argv? args)
@@ -58,12 +54,6 @@
        (let (rest (cdr args))
          (and (search-prime-seeds-view? rest)
               (not (arg-present? "--json" rest))))))
-
-;; : (-> Args Boolean )
-(def (search-workspace-scope-light-argv? args)
-  (and (pair? args)
-       (equal? (car args) "workspace-scope")
-       (not (arg-present? "--json" (cdr args)))))
 
 ;; : (-> Args Boolean )
 (def (search-rg-query-light-argv? args)
@@ -236,6 +226,6 @@
 
 ;; : (-> (List String) Integer)
 (def (emit-unsupported-native-search args)
-  (display "gslph search supports native fast seed views only; use `gslph search prime --view seeds --workspace .` or `gslph search workspace-scope --workspace .`.\n"
+  (display "gslph search supports native fast seed views only; use `gslph search prime --view seeds --workspace .`.\n"
            (current-error-port))
   64)

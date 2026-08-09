@@ -37,9 +37,6 @@
 (def +prime-light-preview-limit+ 12)
 
 ;; : String
-(def +semantic-workspace-scope-schema-id+
-  "agent.semantic-protocols.semantic-workspace-scope")
-;; : String
 (def +semantic-language-protocol-id+
   "agent.semantic-protocols.semantic-language")
 
@@ -225,7 +222,7 @@
 ;; : (-> Datum Boolean)
 (def (source-scope-policy-form? datum)
   (and (pair? datum)
-       (member (car datum) '(source-scope source-policy project-scope))))
+       (member (car datum) '(source-scope source-policy project-resolution))))
 
 ;; package-field-value
 ;;   : (-> Datum Symbol Datum)

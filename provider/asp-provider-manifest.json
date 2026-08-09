@@ -9,21 +9,44 @@
   "providerId": "gerbil-scheme-harness",
   "namespace": "agent.semantic-protocols.languages.gerbil-scheme.gerbil-scheme-harness",
   "binary": "gslph",
+  "development": {
+    "schemaId": "agent.semantic-protocols.provider-development-descriptor",
+    "schemaVersion": "1",
+    "sourceRoot": "languages/gerbil-scheme-language-project-harness",
+    "buildBinding": "provider-workspace-install-v1",
+    "workspaceInstall": "provider/asp-provider-workspace-install.json",
+    "artifactDomain": "checkout"
+  },
   "execution": "external-process",
-  "source": {
-    "defaultExtensions": [".ss", ".ssi", ".scm", ".sld"],
-    "defaultConfigFiles": ["gerbil.pkg", "build.ss"],
-    "defaultSourceRoots": ["src", "test", "tests", "doc", "docs", "examples", "tutorial"],
-    "defaultIgnoredPathPrefixes": [],
-    "defaultProjectMarkers": ["gerbil.pkg"],
-    "defaultDependencyMarkers": ["gerbil.pkg"]
+  "languageProjection": {
+    "schemaId": "agent.semantic-protocols.provider-language-projection-descriptor",
+    "schemaVersion": "1",
+    "commandBinding": "projection-batch-stdin",
+    "transport": "framed-stdin-v1",
+    "requestSchema": "https://schemas.agent-semantic-protocols.dev/provider-language-projection-batch-request.v1.schema.json",
+    "responseSchema": "https://schemas.agent-semantic-protocols.dev/provider-language-projection-batch-response.v1.schema.json",
+    "identitySchema": "https://schemas.agent-semantic-protocols.dev/canonical-language-item-identity.v1.schema.json"
+  },
+  "projectResolution": {
+    "schemaId": "agent.semantic-protocols.provider-project-resolution-descriptor",
+    "schemaVersion": "1",
+    "capabilityId": "project-resolution",
+    "entryMarkers": ["gerbil.pkg"],
+    "sourceExtensions": [".ss", ".scm", ".sld"],
+    "manifestKinds": ["gerbil-package"],
+    "lockfileKinds": [],
+    "parserId": "gerbil.package-spec",
+    "commandBinding": "project-resolution-stdin",
+    "requestSchema": "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-request.v1.schema.json",
+    "responseSchema": "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-response.v1.schema.json",
+    "packageGraphSchema": "https://schemas.agent-semantic-protocols.dev/language-package-graph.v1.schema.json",
+    "projectResolutionSchema": "https://schemas.agent-semantic-protocols.dev/project-resolution.v1.schema.json"
   },
   "searchCapabilities": {
     "ownerItems": true,
     "semanticFacts": false,
-    "dependencyTopology": false,
+    "dependencyTopology": true,
     "dependencyTopologyMetadata": false,
-    "workspaceScope": true,
     "sourceSnapshot": {
       "descriptorId": "gerbil-scheme.source-snapshot",
       "descriptorVersion": "1",
@@ -88,9 +111,11 @@
   },
   "routeBindings": {
     "prime": "search/prime",
+    "dependencyTopology": "search/dependency-topology",
     "owner": "search/owner",
     "lexical": "search/lexical",
     "query": "query/exact-selector",
+    "exactSelectorNative": "query/exact-selector-native-v1",
     "ingest": "search/ingest",
     "checkChanged": "check/changed",
     "guide": "guide"

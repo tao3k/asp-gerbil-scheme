@@ -7,12 +7,12 @@
         :gslph/src/parser/facade
         :gslph/src/parser/query
         :gslph/src/policy/repair
+        (only-in :gslph/src/protocol/json-output write-json-line)
         :gslph/src/protocol/structural-index
         :gslph/src/protocol/structural-facts
         (only-in :std/sort sort)
         (only-in :std/srfi/1 iota take)
         (only-in :std/sugar hash hash-key? hash-put!)
-        (only-in :std/text/json write-json)
         :gslph/src/types/facade)
 
 (export source-file-json
@@ -572,7 +572,3 @@
   (hash (path (source-file-path file))
         (ruleId "GERBIL-SCHEME-READ-R001")
         (message (source-file-parse-error file))))
-;; : (-> Obj String )
-(def (write-json-line obj)
-  (write-json obj)
-  (newline))

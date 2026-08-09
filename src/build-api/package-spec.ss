@@ -51,6 +51,8 @@
      "parser/support.ss"
      "parser/formals.ss"
      "parser/syntax-support.ss"
+     "parser/definition-syntax.ss"
+     "parser/exact-owner.ss"
      "parser/syntax-calls.ss"
      "parser/imports.ss"
      "parser/syntax.ss"
@@ -82,6 +84,7 @@
      "extensions/poo-pattern-support.ss"
      "extensions/poo-pattern-typeclass.ss"
      "extensions/poo-patterns.ss")
+    ("exact-source-projection.ss")
     ("testing/commands.ss")
     ("testing/framework.ss")))
 

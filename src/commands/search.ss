@@ -14,7 +14,6 @@
                  emit-prime-light
                  source-path-class)
         :gslph/src/commands/search-proof
-        :gslph/src/commands/search-workspace-scope
         :gslph/src/parser/facade
         :gslph/src/parser/query
         :gslph/src/protocol/json
@@ -64,16 +63,100 @@
          args
          json?))))
 ;; : (-> SearchView Root Args Boolean MaybeStatus )
+(def +dependency-topology-unresolved-version+ "unresolved")
+(def +dependency-topology-hex-digits+ "0123456789abcdef")
+
+(def (dependency-topology-byte->hex byte)
+  (string
+   (string-ref +dependency-topology-hex-digits+ (quotient byte 16))
+   (string-ref +dependency-topology-hex-digits+ (modulo byte 16))))
+
+(def (dependency-topology-fingerprint dependencies manifest-path)
+  (string-append
+   "sha256:"
+   (apply
+    string-append
+    (map dependency-topology-byte->hex
+         (u8vector->list
+          (sha256
+           (apply
+            string-append
+            (map (lambda (dependency)
+                   (string-append
+                    dependency
+                    "|"
+                    +dependency-topology-unresolved-version+
+                    "|"
+                    manifest-path
+                    "\n"))
+                 dependencies))))))))
+
+(def (dependency-topology-nodes dependency manifest-path)
+  (list
+   (hash
+    (id (string-append "dependency:" dependency))
+    (kind "dependency")
+    (value dependency)
+    (path manifest-path)
+    (fields
+     (hash
+      (dependencyName dependency)
+      (manifestPath manifest-path))))
+   (hash
+    (id (string-append "dependency-version:" dependency))
+    (kind "dependency-version")
+    (value +dependency-topology-unresolved-version+)
+    (fields
+     (hash
+      (version +dependency-topology-unresolved-version+))))))
+
+(def (dependency-topology-edge dependency)
+  (hash
+   (source (string-append "dependency:" dependency))
+   (target (string-append "dependency-version:" dependency))
+   (relation "version_locked")))
+
+(def (dependency-topology-packet index)
+  (let* ((package (project-index-package index))
+         (dependencies
+          (if package
+            (project-package-dependencies package)
+            '()))
+         (manifest-path
+          (if package
+            (project-package-path package)
+            "gerbil.pkg")))
+    (hash
+     (packetKind "dependency-topology")
+     (fingerprint
+      (dependency-topology-fingerprint dependencies manifest-path))
+     (graph
+      (hash
+       (nodes
+        (apply append
+               (map (lambda (dependency)
+                      (dependency-topology-nodes dependency manifest-path))
+                    dependencies)))
+       (edges (map dependency-topology-edge dependencies)))))))
+
+(def (emit-dependency-topology-search root json?)
+  (unless json?
+    (error "search dependency-topology requires --json"))
+  (write-json-line
+   (dependency-topology-packet
+    (collect-project-package-only root)))
+  0)
+
 (def (emit-index-free-search view root args json?)
   (cond
    ((equal? view "compare") (emit-compare-search args json?))
    ((equal? view "proof") (emit-type-proof-search args json?))
+   ((equal? view "dependency-topology")
+    (emit-dependency-topology-search root json?))
    ((language-evidence-index-free-view? view)
     (emit-language-evidence-search root view args json?))
    ((language-pattern-package-only-search? view args)
     (emit-pattern-search (collect-project-package-only root) args json?))
-   ((equal? view "workspace-scope")
-    (emit-workspace-scope root json?))
     ((and (equal? view "prime")
           (prime-seeds-view? args))
      (if json?
@@ -231,5 +314,7 @@
                 " selector=" (definition-selector defn)))
    (let (definitions (source-file-definitions file))
      (take definitions (min 30 (length definitions)))))
-  (displayln "nextCommand=gerbil-scheme-harness query " (source-file-path file)
-             " --term '<symbol>' --workspace . --names-only"))
+  (displayln "nextCommand=asp gerbil-scheme search owner "
+             (source-file-path file)
+             " items --query '<symbol>' --workspace . --view seeds"))
+(import :std/crypto/digest)

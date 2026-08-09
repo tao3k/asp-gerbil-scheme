@@ -90,6 +90,24 @@
               (command "search structural --owner <path> --json")
               (summary "Emit owner-bounded native syntax facts for ASP-side fan-out and incremental structural indexing.")
               (outputSchemaIds ["agent.semantic-protocols.semantic-native-syntax-fact-index"]))
+        (hash (method "query/exact-selector-native-v1")
+              (command "query")
+              (view "exact-selector")
+              (acceptsStdin #t)
+              (requiresQuery #t)
+              (supportsJson #t)
+              (supportsCompact #f)
+              (supportsPackageScope #f)
+              (outputSchemaIds
+               ["agent.semantic-protocols.provider-native-exact-projection"])
+              (packetSchemas
+               ["provider-native-exact-request.v1"
+                "provider-native-exact-response.v1"])
+              (invocation
+               (hash (argv
+                      ["gslph"
+                       "query"
+                       "--asp-exact-request-stdin"]))))
         (hash (method "evidence/graph")
               (command "evidence")
               (summary "Emit a portable semantic evidence graph for Gerbil Scheme provider evidence.")

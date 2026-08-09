@@ -5,11 +5,10 @@
 (import (only-in :gerbil/gambit
                  current-directory
                  getenv)
-        (only-in :std/make make)
         (only-in :std/misc/path path-expand path-normalize)
         (only-in :std/misc/process run-process/batch)
-        (only-in "../src/build-api/release-modules"
-                 cli-release-modules))
+        (only-in "../src/build-api/native-build"
+                 workspace-install-target))
 (export main)
 
 (def +workspace-artifact-relative-root+
@@ -20,7 +19,7 @@
   (let* ((expected (path-normalize
                     (path-expand +workspace-artifact-relative-root+
                                  (current-directory))))
-         (configured (getenv "GERBIL_PATH" #f))
+         (configured (getenv "GSLPH_WORKSPACE_ARTIFACT_ROOT" #f))
          (actual (and configured
                       (path-normalize
                        (path-expand configured (current-directory))))))
@@ -31,29 +30,7 @@
     actual))
 
 ;; : (-> Void)
-(def (install-workspace-dependencies!)
-  (run-process/batch ["gxpkg" "deps" "--install"]))
-
-;; : (-> Void)
-(def (compile-workspace-runtime!)
-  (make cli-release-modules
-        srcdir: "src"
-        prefix: "gslph/src"
-        optimize: #f
-        parallelize: 1))
-
-;; : (-> Void)
-(def (compile-workspace-launcher!)
-  (make '((exe: "cli-install-linker" bin: "gslph"))
-        srcdir: "src"
-        prefix: "gslph/src"
-        optimize: #f
-        parallelize: 1))
-
-;; : (-> Void)
 (def (main . _)
   (let (artifact-root (workspace-artifact-root))
     (run-process/batch ["rm" "-rf" artifact-root])
-    (install-workspace-dependencies!)
-    (compile-workspace-runtime!)
-    (compile-workspace-launcher!)))
+    (workspace-install-target artifact-root)))
