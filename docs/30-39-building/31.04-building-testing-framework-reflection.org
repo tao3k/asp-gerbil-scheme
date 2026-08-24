@@ -106,10 +106,25 @@ flowchart LR
   Model --> Builder["building/std-builder"]
   Builder --> Facade["building/facade"]
   Facade --> Declarative["building/declarative"]
-  Declarative --> Requests["parallel BuildRequest stages"]
-  Requests --> Receipt["active gxpkg environment receipt"]
+  Declarative --> Requests["BuildRequest admission"]
+  Requests --> Make["one upstream std/make executor"]
+  Make --> Receipt["active gxpkg environment receipt"]
 #+end_src
-The bootstrap is intentionally =parallelize: 1=: each module publishes an SSI consumed by the next module. This is an interface-order constraint, not a machine-capacity decision. Once the Framework is available, package requests use =sync-build-worker-count!= so independent stages use the available worker budget.
+The bootstrap is intentionally staged: each module publishes an SSI consumed by
+the next module. This is an interface-order constraint, not a machine-capacity
+decision. The Framework does not set a second worker budget. It preserves a
+positive =GERBIL_BUILD_CORES= override or re-enters before compiler imports
+with Gambit's =##cpu-count= when Homebrew Gerbil 0.18.2 would otherwise select
+one worker, then performs one =std/make= invocation. =GERBIL_BUILD_PREFIX= pins
+that child to the active runtime cohort instead of the implicit user cache.
+
+The public =building/build-script= bridge adds one kernel lease per
+=GERBIL_PATH=. This is cache isolation, not compiler scheduling: after an
+interrupted process releases the kernel lease, the next admitted build can
+remove Gerbil 0.18.x's otherwise permanent empty =.o.lock= files from both the
+module static cache and executable bindir before handing the unchanged build
+spec to =std/make=. Native pending jobs use the declared bindir as cwd, aligning
+Gambit's relative =__exe.c= generation with Gerbil's absolute path on macOS.
 
 =NativeToolchain= is the explicit boundary for the C compiler environment. Its default clears inherited =SDKROOT= and =DEVELOPER_DIR= values that can cross-contaminate a native Gerbil installation; callers can construct a toolchain object with their own values. The receipt and output root are both resolved from the active =gxpkg= environment, so a linked dependency never writes its state into the Harness source checkout.
 

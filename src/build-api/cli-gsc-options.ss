@@ -4,19 +4,27 @@
 (import (only-in :std/misc/path path-directory path-expand)
         (only-in :std/misc/process run-process)
         (only-in :std/srfi/13 string-tokenize)
-        :gerbil/gambit)
+        :gerbil/gambit
+        (only-in "../building/native-toolchain"
+                 native-toolchain-default
+                 native-toolchain-compiler-path
+                 native-toolchain-toolchain-kind
+                 native-toolchain-sdk-kind))
 (export gslph-cli-gsc-options
         gslph-cli-gsc-options-cache-key)
 
 ;; : (-> (List (Maybe String)))
 (def (gslph-cli-gsc-options-cache-key)
-  [(getenv "CC" #f)
+  (let (toolchain (native-toolchain-default))
+    [(native-toolchain-compiler-path toolchain)
+     (native-toolchain-toolchain-kind toolchain)
+     (native-toolchain-sdk-kind toolchain)
    (getenv "OPENSSL_DIR" #f)
    (getenv "OPENSSL_ROOT_DIR" #f)
    (getenv "PKG_CONFIG" #f)
    (getenv "PKG_CONFIG_PATH" #f)
    (getenv "PKG_CONFIG_LIBDIR" #f)
-   (homebrew-openssl-prefix)])
+   (homebrew-openssl-prefix)]))
 
 ;; : (-> String)
 (def (pkg-config-command)
@@ -53,7 +61,7 @@
 
 ;; : (-> (List String))
 (def (cc-compiler-option)
-  (let (cc (getenv "CC" #f))
+  (let (cc (native-toolchain-compiler-path (native-toolchain-default)))
     (if (and cc (not (string=? cc "")))
       ["-cc" cc]
       [])))

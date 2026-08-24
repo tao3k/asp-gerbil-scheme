@@ -15,7 +15,7 @@
 ;; String
 (def +cli-id+ "gslph")
 ;; String
-(def +provider-id+ "gerbil-scheme-harness")
+(def +provider-id+ "asp-gerbil-scheme")
 ;; String
 (def +release-version+ "v0.1.0-67-g20798be")
 ;; String

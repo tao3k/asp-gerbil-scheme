@@ -23,7 +23,7 @@
 
 ;; : (List String)
 (def +launcher-names+
-  '("gxi" "gslph"))
+  '("gxi" "asp-gerbil-scheme"))
 
 ;; Keep the executable boundary safe even when a stale parser artifact is
 ;; accidentally selected during static linking.
@@ -83,7 +83,7 @@
 ;; : (-> String Boolean)
 (def (launcher-binary-path? arg)
   (or (string-suffix? "/gxi" arg)
-      (string-suffix? "/gslph" arg)))
+      (string-suffix? "/asp-gerbil-scheme" arg)))
 
 ;; : (-> String Boolean)
 (def (launcher-script-path? arg)
@@ -298,9 +298,13 @@
 
 ;; : (-> Unit)
 (def (launcher-add-runtime-load-paths!)
-  (launcher-add-load-path! (path-expand ".gerbil/lib" (current-directory)))
-  (launcher-add-load-path! (path-expand "lib" (gerbil-home)))
-  (launcher-add-load-path! (path-expand "lib" (gerbil-path))))
+  ;; Installed artifacts are hermetic: cli-install-linker already mounted the
+  ;; sibling artifact lib directory. Global/development paths are allowed
+  ;; only for the developer launcher.
+  (unless (equal? (getenv "GSLPH_ARTIFACT_ONLY" #f) "1")
+    (launcher-add-load-path! (path-expand ".gerbil/lib" (current-directory)))
+    (launcher-add-load-path! (path-expand "lib" (gerbil-home)))
+    (launcher-add-load-path! (path-expand "lib" (gerbil-path)))))
 
 ;; : (-> Path Unit)
 (def (launcher-add-load-path! path)

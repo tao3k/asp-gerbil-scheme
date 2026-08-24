@@ -1,31 +1,55 @@
 {
+  "$schema": "../schemas/provider-workspace-install.schema.json",
   "schemaId": "agent.semantic-protocols.provider-workspace-install",
   "schemaVersion": "1",
   "schemaAuthority": "https://tao3k.github.io/agent-semantic-protocols/schemas/",
-  "providerId": "gerbil-scheme-harness",
-  "binary": "gslph",
+  "languageId": "gerbil-scheme",
+  "providerId": "asp-gerbil-scheme",
+  "binary": "asp-gerbil-scheme",
+  "providerRegistration": "asp-provider-registration.json",
+  "schemaBundleReceipt": "../schemas/.asp-schema-manager-receipt.json",
   "workspaceArtifact": {
     "root": "languages/gerbil-scheme-language-project-harness/build/workspace-provider",
-    "entrypoint": "bin/gslph"
+    "entrypoint": "bin/asp-gerbil-scheme"
   },
   "workspaceBuild": {
-    "program": "gxi",
+    "program": "/usr/bin/env",
     "args": [
-      "provider/workspace-build.ss"
+      "-u",
+      "SDKROOT",
+      "gxi",
+      "build.ss"
     ],
     "workingDirectory": "languages/gerbil-scheme-language-project-harness",
     "sourceSnapshotAnchors": [
       "languages/gerbil-scheme-language-project-harness/gerbil.pkg",
       "languages/gerbil-scheme-language-project-harness/manifest.ss",
       "languages/gerbil-scheme-language-project-harness/build.ss",
-      "languages/gerbil-scheme-language-project-harness/provider/workspace-build.ss"
+      "languages/gerbil-scheme-language-project-harness/src/building/native-toolchain.ss",
+      "languages/gerbil-scheme-language-project-harness/src/parser/model.ss",
+      "languages/gerbil-scheme-language-project-harness/src/parser/selectors.ss",
+      "languages/gerbil-scheme-language-project-harness/src/parser/support.ss",
+      "languages/gerbil-scheme-language-project-harness/src/parser/formals.ss",
+      "languages/gerbil-scheme-language-project-harness/src/parser/syntax-support.ss",
+      "languages/gerbil-scheme-language-project-harness/src/parser/definition-syntax.ss",
+      "languages/gerbil-scheme-language-project-harness/src/parser/exact-owner.ss",
+      "languages/gerbil-scheme-language-project-harness/src/commands/projection-batch.ss",
+      "languages/gerbil-scheme-language-project-harness/src/parser/package.ss",
+      "languages/gerbil-scheme-language-project-harness/src/protocol/command-catalog.ss",
+      "languages/gerbil-scheme-language-project-harness/src/constants.ss",
+      "languages/gerbil-scheme-language-project-harness/src/commands/project-resolution.ss",
+      "languages/gerbil-scheme-language-project-harness/src/commands/provider-runtime.ss",
+      "languages/gerbil-scheme-language-project-harness/src/runtime/provider-operation.ss",
+      "languages/gerbil-scheme-language-project-harness/src/runtime/provider-http-json-server.ss",
+      "languages/gerbil-scheme-language-project-harness/src/provider-server.ss"
     ],
     "derivedPaths": [
       "languages/gerbil-scheme-language-project-harness/build/workspace-provider"
     ],
     "env": {
+      "ASP_PROVIDER_ARTIFACT_ROOT": "${ASP_WORKSPACE_ROOT}/languages/gerbil-scheme-language-project-harness/build/workspace-provider",
       "GERBIL_PATH": "${ASP_WORKSPACE_ROOT}/languages/gerbil-scheme-language-project-harness/.gerbil",
-      "GSLPH_WORKSPACE_ARTIFACT_ROOT": "${ASP_WORKSPACE_ROOT}/languages/gerbil-scheme-language-project-harness/build/workspace-provider"
+      "GERBIL_LOADPATH": "${ASP_WORKSPACE_ROOT}/languages/gerbil-scheme-language-project-harness/.gerbil/lib"
     }
   }
 }

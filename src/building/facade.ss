@@ -3,26 +3,7 @@
 ;;; Invariant: package-specific currentness and receipt persistence remain in Build API.
 (import ./model
         ./std-builder
-        ./native-toolchain
-        (only-in ./persistent-worker
-                 persistent-worker-request?
-                 make-persistent-worker-request
-                 persistent-worker-request-spec
-                 persistent-worker-request-srcdir
-                 persistent-worker-request-options
-                 persistent-worker-request-toolchain
-                 persistent-worker-result?
-                 make-persistent-worker-result
-                 persistent-worker-result-request
-                 persistent-worker-result-worker-id
-                 persistent-worker-result-outcome
-                 persistent-worker-result-elapsed-ms
-                 persistent-worker-result-detail
-                 persistent-worker-pool?
-                 persistent-worker-pool-worker-count
-                 persistent-worker-pool-run-window!
-                 persistent-worker-pool-close!
-                 make-gxi-persistent-worker-pool))
+        ./native-toolchain)
 
 (export build-stage
         build-stage?
@@ -93,6 +74,9 @@
         make-native-toolchain
         native-toolchain-sdkroot
         native-toolchain-developer-dir
+        native-toolchain-compiler-path
+        native-toolchain-toolchain-kind
+        native-toolchain-sdk-kind
         native-toolchain-default
         with-native-toolchain)
 (export package-source-stage
@@ -119,7 +103,6 @@
 
 (export
         execution-window-controller?
-        execution-window-controller-worker-count
         execution-window-controller-hard-max-rss-bytes
         execution-window-controller-headroom-bytes
         execution-window-controller-window-size
@@ -137,29 +120,10 @@
         adaptive-execution-window-plan?
         adaptive-execution-window-plan-topology-groups
         adaptive-execution-window-plan-controller
-        adaptive-execution-window-plan-worker-pool-factory
         make-adaptive-execution-window-result
         adaptive-execution-window-result?
         adaptive-execution-window-result-topology-groups
         adaptive-execution-window-result-execution-windows
         adaptive-execution-window-result-window-observations
         adaptive-execution-window-result-controller
-        std-builder-run-adaptive-plan!
-        persistent-worker-request?
-        make-persistent-worker-request
-        persistent-worker-request-spec
-        persistent-worker-request-srcdir
-        persistent-worker-request-options
-        persistent-worker-request-toolchain
-        persistent-worker-result?
-        make-persistent-worker-result
-        persistent-worker-result-request
-        persistent-worker-result-worker-id
-        persistent-worker-result-outcome
-        persistent-worker-result-elapsed-ms
-        persistent-worker-result-detail
-        persistent-worker-pool?
-        persistent-worker-pool-worker-count
-        persistent-worker-pool-run-window!
-        persistent-worker-pool-close!
-        make-gxi-persistent-worker-pool)
+        std-builder-run-adaptive-plan!)

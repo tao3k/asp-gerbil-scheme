@@ -1,0 +1,6 @@
+.bin
+.cache
+.data
+.gerbil
+build
+src/.run

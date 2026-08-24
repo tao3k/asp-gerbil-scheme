@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-;;; Installed executable root for gslph.
+;;; Installed executable root for asp-gerbil-scheme.
 
 (import :gerbil/gambit
         (only-in :std/misc/path path-directory path-expand path-normalize))
@@ -22,6 +22,13 @@
 
 ;; : (-> Args Integer)
 (def (main . args)
+  ;; Installed artifacts must resolve only against their sibling lib tree.
+  ;; Development launchers intentionally retain the broader GERBIL_PATH
+  ;; search behavior; this marker is set only by the installed boundary.
+  (setenv "GSLPH_ARTIFACT_ONLY" "1")
+  ;; Keep Gambit's module resolver aligned with the mounted sibling tree even
+  ;; when the caller deliberately supplies a polluted GERBIL_PATH.
+  (setenv "GERBIL_PATH" (path-directory (artifact-library-directory)))
   (add-load-path! (artifact-library-directory))
   (##global-var-set! (##make-global-var 'load-module) load-module)
   (load-module "gslph/src/cli-launcher")

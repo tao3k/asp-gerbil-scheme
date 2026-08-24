@@ -175,7 +175,15 @@
 
 ;; : (List String)
 (def +gslph-package-api-building-stages+
-  '(("testing/building.ss")))
+  '(("building/model.ss"
+     "building/native-toolchain.ss")
+    ("building/build-script.ss")
+    ("building/std-builder.ss")
+    ("building/observability.ss")
+    ("building/facade.ss")
+    ("building/declarative.ss"
+     "building/commands.ss")
+    ("testing/building.ss")))
 
 ;; Native build interfaces must precede directory-wide parallel compilation.
 ;; : (List (List Path))

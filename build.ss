@@ -1,17 +1,35 @@
 #!/usr/bin/env gxi
 ;;; -*- Gerbil -*-
 
-(import
- :clan/building
- :std/build-script
- :std/source)
+(include "src/building/build-script-body.inc")
+
+;; std/make owns compiler scheduling.  Homebrew Gerbil 0.18.2 requires the
+;; provider's compiler-derived runtime closure to be materialized before the
+;; executable link; this target manifest is verified against the emitted
+;; executable stub rather than widened to every module under src/.
+(def +provider-runtime-modules+
+  '("src/parser/model"
+    "src/parser/selectors"
+    "src/parser/support"
+    "src/parser/formals"
+    "src/parser/syntax-support"
+    "src/parser/definition-syntax"
+    "src/parser/exact-owner"
+    "src/commands/projection-batch"
+    "src/parser/package"
+    "src/protocol/command-catalog"
+    "src/constants"
+    "src/commands/project-resolution"
+    "src/runtime/provider-operation"
+    "src/runtime/provider-http-json-server"
+    "src/commands/provider-runtime"))
+
+(def +provider-runtime-build-spec+
+  (framework-executable-build-spec
+   "src/provider-server"
+   "asp-gerbil-scheme"
+   +provider-runtime-modules+))
 
 (defbuild-script
- (all-gerbil-modules
-  exclude: '("manifest.ss"
-             "version.ss"
-             "policy/modularity.ss"
-             "src/cli-dev-linker.ss"
-             "src/cli-release-linker.ss"
-             "src/cli-install-linker.ss"))
-  parallelize: #t)
+ +provider-runtime-build-spec+
+ bindir: (framework-build-bindir))
