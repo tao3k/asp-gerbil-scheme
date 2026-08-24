@@ -198,7 +198,7 @@ jobs:
       - name: Run resident provider and semantic contract tests
         shell: bash
         env:
-          GERBIL_LOADPATH: ${{ github.workspace }}/.gerbil/pkg
+          GERBIL_LOADPATH: ${{ github.workspace }}/.gerbil/pkg:${{ github.workspace }}/t
         run: |
           set -euo pipefail
           gxpkg env gxtest \
