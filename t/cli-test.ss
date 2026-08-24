@@ -38,7 +38,7 @@
              => ["--help"]))
     (test-case "provider argv strips no-argument launcher frames"
       (check (provider-command-line-args
-              ["gslph"])
+              ["asp-gerbil-scheme"])
              => []))
     (test-case "provider argv preserves unknown commands"
       (check (provider-command-line-args
@@ -49,6 +49,7 @@
               ["gslph" "fmt" "--check" "."])
              => ["fmt" "--check" "."]))
     (test-case "command catalog owns dynamic and release command names"
+      (check (member "serve" provider-command-names) => #f)
       (check (map car provider-dynamic-command-dispatch)
              => provider-command-names)
       (check (map car release-command-dispatch)
@@ -118,7 +119,7 @@
    ("schemaId" "agent.semantic-protocols.provider-project-resolution-request")
    ("schemaVersion" "1")
    ("languageId" "gerbil-scheme")
-   ("providerId" "gerbil-scheme-harness")
+   ("providerId" "asp-gerbil-scheme")
    ("candidateBase" ".")
    ("candidateGeneration"
     (hash

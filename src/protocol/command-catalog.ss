@@ -31,14 +31,6 @@
 ;; : (List ProviderCommandDescriptor)
 (def provider-command-descriptors
   [(make-provider-command-descriptor
-    "serve"
-    "gslph/src/commands/provider-runtime"
-    'gslph/src/commands/provider-runtime#provider-runtime-main
-    'provider-runtime-main
-    ["serve"]
-    0
-    [])
-   (make-provider-command-descriptor
     "search"
     "gslph/src/commands/search"
     'gslph/src/commands/search#search-main
