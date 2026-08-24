@@ -2,8 +2,8 @@
   "schemaId": "agent.semantic-protocols.language-schema-bundle-receipt",
   "schemaVersion": "1",
   "languageId": "gerbil-scheme",
-  "profileDigest": "blake3-256:86acee9fd66cf07221233d8e0fc985f7b7fe508bc9d851314f6ef8de8d87a80b",
-  "bundleDigest": "blake3-256:b0ee16d0733b31dd52707b4e89bb3bc01cb976c77c82fa00f9232af485657fa1",
+  "profileDigest": "blake3-256:9050f4dcf3e969236553f03cf2825be0889bf84e2ad8cba173906581a050f2c6",
+  "bundleDigest": "blake3-256:4a520cc36ab31e83ef6e95a04133fd6dcfe5cfa91f1a05c026580b9a817ff942",
   "schemas": [
     {
       "name": "asp-client-conformance.schema.json",
@@ -67,7 +67,7 @@
     },
     {
       "name": "provider-definitions.v1.schema.json",
-      "digest": "blake3-256:c777cc4f9e497321e157dfbec3600e7f19c801b26787ad898ee3fde33057fc92"
+      "digest": "blake3-256:a380166bfe786f23a33972c357d7a058d3b116f12bbc91ff18bd8ec55640b0da"
     },
     {
       "name": "provider-language-projection-batch-request.schema.json",
@@ -76,10 +76,6 @@
     {
       "name": "provider-language-projection-batch-response.schema.json",
       "digest": "blake3-256:5053370366b61b10844e084d9a0d622f93d7df7fa244798a69d74d5b592122ae"
-    },
-    {
-      "name": "provider-method-argument-projection.v1.schema.json",
-      "digest": "blake3-256:4f6716b4dda5710f523cd06292a33dd91b9b6b171c022cd9ff04f3796d3765ed"
     },
     {
       "name": "provider-native-exact-request.v1.schema.json",
@@ -130,34 +126,6 @@
       "digest": "blake3-256:0dcc57d7b2f8ffc931901231a72c61f4dca1b22d8eb7ffeccb544e3aad9c5b01"
     },
     {
-      "name": "semantic-assurance-case.v1.schema.json",
-      "digest": "blake3-256:f672ea13226296635f24c033bb6e238f6eae8ca1639d13d9f20c94fc9cb9ac3c"
-    },
-    {
-      "name": "semantic-assurance-definitions.v1.schema.json",
-      "digest": "blake3-256:b8afa21d876917b25887799e41a7710f8dd1cbf22be26c515a91d5b97c91497e"
-    },
-    {
-      "name": "semantic-ast-patch-definitions.v1.schema.json",
-      "digest": "blake3-256:5d462a785c510104a7f5ca25cfe2849453452798362cc23863164ab35cfab43e"
-    },
-    {
-      "name": "semantic-ast-patch-receipt.v1.schema.json",
-      "digest": "blake3-256:234ddf5df9c58b68c7d4fdbd58e4815aeaf54018c13c6d352466568a73e6641d"
-    },
-    {
-      "name": "semantic-ast-patch.v1.schema.json",
-      "digest": "blake3-256:d8fc49ecf5b6bc85b735cc22b7b15610eb00ab8a9e72b432bb0bb84349249701"
-    },
-    {
-      "name": "semantic-behavior-snapshot.v1.schema.json",
-      "digest": "blake3-256:84354e29c9b8e7854df3361d29e65e7d914ac202bdc1a99d1e2a8072b7588dc2"
-    },
-    {
-      "name": "semantic-codeql-evidence.v1.schema.json",
-      "digest": "blake3-256:33713f45901c55bf13286646c87135918f95e1534d522aaaa42d8e2fb3cf4cfc"
-    },
-    {
       "name": "semantic-content-compaction.v1.schema.json",
       "digest": "blake3-256:8567552403687cfb06c97604862d754dcf044e168bbd9d66348a22fdce336ca0"
     },
@@ -166,60 +134,8 @@
       "digest": "blake3-256:da29ac203939d09c6b7e8e62e529ae820489817ec74e101baa8635a9eeb35df2"
     },
     {
-      "name": "semantic-dependency-topology.v1.schema.json",
-      "digest": "blake3-256:b52c183a98032ea7634a956c50d1b9d3bf5ce5033635949a85d136a3feda6c05"
-    },
-    {
-      "name": "semantic-determinism-readiness.v1.schema.json",
-      "digest": "blake3-256:775296e77bde56263c8568006fdec741292d441b855a1ede63c76624863d418d"
-    },
-    {
-      "name": "semantic-dev-command-log.v1.schema.json",
-      "digest": "blake3-256:d42cd166c1e47a2769584f86efde7f89cab0bd24174a805552b623d39a23e6ee"
-    },
-    {
-      "name": "semantic-evidence-graph.v1.schema.json",
-      "digest": "blake3-256:abc6ed9c3a39730d55f34d0f8ac17f9569cf191449570851c9c6905d1166c746"
-    },
-    {
-      "name": "semantic-exact-selector-receipt.v1.schema.json",
-      "digest": "blake3-256:eabd5d76ef05a8ed48745ce6efe896a91224649fff64f469cb4b221f4e764cb9"
-    },
-    {
       "name": "semantic-extension-pattern-mapping.v1.schema.json",
       "digest": "blake3-256:71784b3a775f6cd19b33a72988e20c575581f3d13a7e8873af925bb9a9206c62"
-    },
-    {
-      "name": "semantic-fact-definitions.v1.schema.json",
-      "digest": "blake3-256:f49dbf083d84d1a44c8dcea72b8ed6160a36532380ce966da5110c24e44e30a5"
-    },
-    {
-      "name": "semantic-fact-graph.v1.schema.json",
-      "digest": "blake3-256:5cb49f85016a9250b4926a9d2e685974aca681b1374b2890b0bad7720baf9dcb"
-    },
-    {
-      "name": "semantic-fact-ontology.v1.schema.json",
-      "digest": "blake3-256:90481a76d65c4e088c221dca528a9c69e4b1f1bdcb4de9aa32dedb54f4adc017"
-    },
-    {
-      "name": "semantic-flow-lite.v1.schema.json",
-      "digest": "blake3-256:2362a5be3afd923fe7eb9109214529b692c66c0ee97268a4c4f1866a9b407c41"
-    },
-    {
-      "name": "semantic-formal-proof-pilot.v1.schema.json",
-      "digest": "blake3-256:f3d04cc56caa24b4a48f524810ccafe3e77838c96d600d78776108e3373202db"
-    },
-    {
-      "name": "semantic-graph-turbo-definitions.v1.schema.json",
-      "digest": "blake3-256:ab404159bbec13e0b35ef35a8994009ef79fa1abd3025eefce3ddc70780c554e"
-    },
-    {
-      "name": "semantic-graph-turbo-request.v1.schema.json",
-      "digest": "blake3-256:3869108c49bb06f42f1bb370b333ffca30cb8ece9a1b5d63cba92355aee9b39c"
-    },
-    {
-      "name": "semantic-graph.v1.schema.json",
-      "digest": "blake3-256:0ecb8b9b830d2212dd6a6bf776f10f763e96e232cdfcbc2effc5f5189ea37a34"
     },
     {
       "name": "semantic-handle.v1.schema.json",
@@ -234,14 +150,6 @@
       "digest": "blake3-256:7435aaf476193a4ddd36dc51b8ac6820e649d2dac6a343a5636dc4f5627683f3"
     },
     {
-      "name": "semantic-language-projection.v1.schema.json",
-      "digest": "blake3-256:70113f49e94ac82bc3d2a1dfaec34da537516cf77a680aa05f1758cfbe57734a"
-    },
-    {
-      "name": "semantic-language-registry.v1.schema.json",
-      "digest": "blake3-256:5d440b89b13de434b5fdc6144f0e41678bb5dd89569e28cccd13db73ff37fff7"
-    },
-    {
       "name": "semantic-native-syntax-fact-index.v1.schema.json",
       "digest": "blake3-256:0f7f98c4281e7fb025b9aaf4f643f915aa5cc6f4cbbe093c66c5d9c89d0fe030"
     },
@@ -254,18 +162,6 @@
       "digest": "blake3-256:fb181854af59044d1c25819087924118df835af466b6a869ccf36a2ccc46ed27"
     },
     {
-      "name": "semantic-read-packet.v1.schema.json",
-      "digest": "blake3-256:c6141d808a7ce236cb25506fc122aedfae69379b856846ceb3b6ec3a4de19058"
-    },
-    {
-      "name": "semantic-relation-plan.v1.schema.json",
-      "digest": "blake3-256:fa0ca667f89e068257fd82ca1e28d5d9c988b6a907c9d7c7a13eba922031c1ff"
-    },
-    {
-      "name": "semantic-review-packet.v1.schema.json",
-      "digest": "blake3-256:5114705b02088801a5ca0e446c749dc0b515f8990fcc3e3a2284b9a6656defbd"
-    },
-    {
       "name": "semantic-runtime-source-acquisition.v1.schema.json",
       "digest": "blake3-256:937f416ca7ae9d36e46790a8fe569180ab8456f19439c7db192b4da541011108"
     },
@@ -274,28 +170,12 @@
       "digest": "blake3-256:993623779091e9fa3e0689a591481cda8393c0f42d3b55dd58b53af620598d71"
     },
     {
-      "name": "semantic-search-storage-route.v1.schema.json",
-      "digest": "blake3-256:cd1011b2097bfdc9b9f0a878ebadac50a7d227405ee637358a64d76763783fa0"
-    },
-    {
       "name": "semantic-source-location.v1.schema.json",
       "digest": "blake3-256:b82cfd34a715c3b4beadc8cffe6875f56bb62ac548bc27014f3a407a24ca4d5d"
     },
     {
-      "name": "semantic-structural-index.v1.schema.json",
-      "digest": "blake3-256:9101c64b8621b7a748a47d86adcef03eedf1e786e3f3ddf47273343d545048a7"
-    },
-    {
-      "name": "semantic-tree-sitter-grammar-profile.v1.schema.json",
-      "digest": "blake3-256:e88ed4a014b4b5d5e5c97a10bca3f5b723c7b23fec4aeae4f0e9b992c5700f77"
-    },
-    {
       "name": "semantic-tree-sitter-provenance.v1.schema.json",
       "digest": "blake3-256:bae387d2ac500d1752bbfe01ebd33a49bd577fcd25b140837a4e633d21ca8a67"
-    },
-    {
-      "name": "semantic-tree-sitter-query.v1.schema.json",
-      "digest": "blake3-256:5dd9530db1fcb34a89e4c33086128dc1df62879529126fae8dac242a1ef298b5"
     },
     {
       "name": "semantic-type-proof.v1.schema.json",
@@ -304,18 +184,6 @@
     {
       "name": "semantic-type-surface.v1.schema.json",
       "digest": "blake3-256:4ac7fb4a0a1fb1230cdb66d0b674049d79d180da19883d001a8c2e4fc55d30dc"
-    },
-    {
-      "name": "semantic-verification-receipt.v1.schema.json",
-      "digest": "blake3-256:4cc1c1dab5c0c4f3e544817e6dc05f66a86304fe315bd711e0d3feca45d4d41c"
-    },
-    {
-      "name": "software-criterion-catalog.v1.schema.json",
-      "digest": "blake3-256:a9bcc4f2cd83ff3f26f7a8bc31e7f3032f8dc5679649ace6c6aec913345bc478"
-    },
-    {
-      "name": "source-snapshot-evidence.v1.schema.json",
-      "digest": "blake3-256:b22f980c1c70e1927670be25e8d86c4d3b78538e81e6aad28b608ca9707f99cb"
     }
   ]
 }
