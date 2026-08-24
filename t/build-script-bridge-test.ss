@@ -90,7 +90,7 @@
             (check (framework-build-reexec-required? []) => #f)
             (check (framework-build-reexec-required? ["compile"]) => #f))
           (lambda ()
-            (setenv "GERBIL_BUILD_CORES" (or previous-cores "")))))))
+            (setenv "GERBIL_BUILD_CORES" (or previous-cores ""))))))))
 
 (def (main . _args)
   (run-tests! build-script-bridge-test))
