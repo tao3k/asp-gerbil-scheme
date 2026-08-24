@@ -22,8 +22,9 @@
     (test-case "explicit include roots do not widen the build graph"
       (let (files
             (gslph-source-coverage-files-for-roots
-             (current-directory) '("src/parser")))
+             (current-directory) '("src/parser" "src/utilities")))
         (check (member "src/parser/core.ss" files) ? true)
+        (check (member "src/utilities/functional.ss" files) ? true)
         (check (member "src/commands/query.ss" files) => #f)))
     (test-case "source coverage declaration keeps runtime roots and excludes"
       (configure-build-root! (current-directory))
