@@ -78,7 +78,12 @@
              (byte-length (u8vector-length source-bytes))
              (next-source-total (+ source-total byte-length)))
         (validate-owner-byte-length path byte-length next-source-total)
-        (let* ((projected (project-owner path digest source-text source-bytes))
+        (let* ((projected
+                (with-catch
+                 (lambda (failure)
+                   (error "projection batch owner failed" path failure))
+                 (lambda ()
+                   (project-owner path digest source-text source-bytes))))
                (next-item-total
                 (validated-next-item-total projected item-total path)))
           (loop (cdr rest) next-source-total next-item-total

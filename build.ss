@@ -1,7 +1,12 @@
 #!/usr/bin/env gxi
 ;;; -*- Gerbil -*-
 
+(include "src/build-api/source-coverage.ss")
 (include "src/building/build-script-body.inc")
+
+(gslph-source-coverage
+ roots: ["src"]
+ runtime-roots: ["src"])
 
 ;; std/make owns compiler scheduling.  Homebrew Gerbil 0.18.2 requires the
 ;; provider's compiler-derived runtime closure to be materialized before the

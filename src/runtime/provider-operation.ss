@@ -99,13 +99,9 @@
       (error "resident Gerbil provider environment is missing" name))
     value))
 
-(def (json->u8vector value)
-  (let (output (open-output-u8vector))
-    (write-json value output)
-    (get-output-u8vector output)))
-
 (def (json->string value)
-  (utf8->string (json->u8vector value)))
+  (call-with-output-string ""
+    (lambda (output) (write-json value output))))
 
 (def (provider-runtime-contract-receipt)
   (hash ("schemaId" "agent.semantic-protocols.provider-runtime-contract-receipt")

@@ -37,9 +37,9 @@
     value))
 
 (def (json->u8vector value)
-  (let (output (open-output-u8vector))
-    (write-json value output)
-    (get-output-u8vector output)))
+  (string->utf8
+   (call-with-output-string ""
+     (lambda (output) (write-json value output)))))
 
 (def (u8vector->json bytes)
   ;; HTTP owns UTF-8 bytes while `read-json` owns characters.  Passing a raw
@@ -75,8 +75,13 @@
           ((and (string? message) (> (string-length message) 0)) message)
           (else
            (let (rendered
-                 (call-with-output-string
-                  (lambda (port) (display error port))))
+                 (with-catch
+                  (lambda (_)
+                    (call-with-output-string
+                     (lambda (port) (display error port))))
+                  (lambda ()
+                    (call-with-output-string ""
+                      (lambda (port) (display-exception error port))))))
              (if (> (string-length rendered) 0)
                  rendered
                  "provider runtime operation failed"))))))))))
