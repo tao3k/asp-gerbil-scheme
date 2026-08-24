@@ -38,7 +38,7 @@
 ;; after the executable target. They share the same std/make graph without
 ;; becoming part of the resident executable closure.
 (def +provider-library-source-roots+
-  '("src/parser" "src/types"))
+  '("src/parser" "src/types" "src/utilities"))
 
 (def (provider-source-file->module path)
   (substring path 0 (- (string-length path) 3)))
