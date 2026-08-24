@@ -34,11 +34,21 @@
     "src/runtime/provider-http-json-server"
     "src/commands/provider-runtime"))
 
+;; Package modules required by provider contract and acceptance tests are built
+;; after the executable target. They share the same std/make graph without
+;; becoming part of the resident executable closure.
+(def +provider-library-modules+
+  '("src/support/time"
+    "src/commands/guide"
+    "src/commands/query"
+    "src/commands/projection"))
+
 (def +provider-runtime-build-spec+
   (framework-executable-build-spec
    "src/provider-server"
    "asp-gerbil-scheme"
-   +provider-runtime-modules+))
+   +provider-runtime-modules+
+   +provider-library-modules+))
 
 (defbuild-script
  +provider-runtime-build-spec+

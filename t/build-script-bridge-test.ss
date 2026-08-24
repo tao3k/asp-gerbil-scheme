@@ -5,6 +5,7 @@
                  call-with-framework-build-cores
                  framework-build-core-count
                  framework-build-reexec-required?
+                 framework-executable-build-spec
                  framework-build-contract))
 
 (export build-script-bridge-test main)
@@ -26,6 +27,11 @@
         (check (string-contains spec "exe:") ? true)
         (check (string-contains spec "support.ss") ? true)
         (check (string-contains spec "downstream-build-script-probe") ? true)))
+    (test-case "package libraries follow and do not enter the executable closure"
+      (check
+       (framework-executable-build-spec
+        "main" "provider" '("runtime") '("library"))
+       => '("runtime" (exe: "main" bin: "provider") "library")))
     (test-case "publishes one explicit ownership contract"
       (let (contract (framework-build-contract))
         (check (cdr (assoc 'executor contract)) => "std/make")
@@ -42,6 +48,8 @@
                => "declared-bindir")
         (check (cdr (assoc 'buildGraphProjection contract))
                => "declared-compiler-runtime-closure-to-std/make")
+        (check (cdr (assoc 'libraryBuildProjection contract))
+               => "post-executable-package-modules-to-std/make")
         (check (cdr (assoc 'runtimeClosureDriftOracle contract))
                => "gerbil-executable-stub")
         (check (cdr (assoc 'executableFreshnessOwner contract))
