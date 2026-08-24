@@ -182,7 +182,6 @@ jobs:
       - name: Build resident ASP provider
         shell: bash
         env:
-          GERBIL_LOADPATH: ${{ github.workspace }}/.gerbil/pkg
           ASP_PROVIDER_ARTIFACT_ROOT: ${{ github.workspace }}/build/workspace-provider
         run: |
           set -euo pipefail
@@ -197,8 +196,6 @@ jobs:
 
       - name: Run resident provider and semantic contract tests
         shell: bash
-        env:
-          GERBIL_LOADPATH: ${{ github.workspace }}/.gerbil/pkg:${{ github.workspace }}/t
         run: |
           set -euo pipefail
           gxpkg env gxtest \
