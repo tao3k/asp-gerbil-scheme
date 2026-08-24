@@ -3,7 +3,7 @@
 
 (import :gerbil/gambit
         :gslph/src/parser/language-projection
-        :gslph/src/protocol/json
+        (only-in :gslph/src/protocol/json-output write-json-line)
         (only-in :std/misc/path path-normalize)
         :gslph/src/support/args)
 

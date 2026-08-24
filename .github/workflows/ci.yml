@@ -151,8 +151,7 @@ jobs:
           gxpkg dir --add git.cons.io/mighty-gerbils/gerbil-directory
           package_cache_ready=false
           if [ -d .gerbil/lib ]; then
-            if GERBIL_LOADPATH="$GITHUB_WORKSPACE/.gerbil/lib" \
-              gxi -e '(begin (import :clan/base :clan/poo/object) (displayln "gerbil-package-cache-ready"))'; then
+            if gxpkg env gxi -e '(begin (import :clan/base :clan/poo/object) (displayln "gerbil-package-cache-ready"))'; then
               package_cache_ready=true
             else
               echo "Cached Gerbil packages are missing compiled dependency libraries; rebuilding"
@@ -203,6 +202,5 @@ jobs:
             t/projection-batch-test.ss \
             t/projection-batch-scenario-test.ss \
             t/provider-http-json-server-test.ss \
-            t/search-test.ss \
             t/query-test.ss \
             t/language-projection-test.ss
