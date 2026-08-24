@@ -192,7 +192,7 @@ jobs:
           GERBIL_BUILD_CORES="$(build_cores)" \
             gxpkg env gxi ./build.ss clean
           GERBIL_BUILD_CORES="$(build_cores)" \
-            gxpkg env gxi ./build.ss compile --release --optimized
+            gxpkg env gxi ./build.ss compile
           test -x build/workspace-provider/bin/asp-gerbil-scheme
 
       - name: Run resident provider and semantic contract tests
