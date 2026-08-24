@@ -38,7 +38,7 @@
 ;; after the executable target. They share the same std/make graph without
 ;; becoming part of the resident executable closure.
 (def +provider-library-source-roots+
-  '("src/parser" "src/testing"))
+  '("src/parser" "src/types"))
 
 (def (provider-source-file->module path)
   (substring path 0 (- (string-length path) 3)))
@@ -49,7 +49,10 @@
    (append
     '("src/support/time"
       "src/support/args"
-      "src/protocol/json-output")
+      "src/protocol/json-output"
+      "src/testing/gxtest-context"
+      "src/testing/gxtest-syntax"
+      "src/testing/execution-profile")
     (map provider-source-file->module
          (gslph-source-coverage-files-for-roots
           "." +provider-library-source-roots+))
