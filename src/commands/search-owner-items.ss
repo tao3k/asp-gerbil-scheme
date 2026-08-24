@@ -2,6 +2,7 @@
 ;;; Owner-items rendering over definitions plus parser-owned owner facts.
 
 (import :gslph/src/parser/owner-items
+        (only-in :gslph/src/parser/selectors item-structural-selector)
         :gslph/src/protocol/json
         :gslph/src/support/args
         (only-in :std/srfi/1 take)
@@ -165,7 +166,7 @@
                " source=native-parser"
                " nextCommand=\"asp gerbil-scheme query --selector "
                selector
-               " --workspace . --code\"")))
+               " --workspace . --projection source\"")))
 
 (def (owner-items-effective-limit maybe-limit)
   (if (and (pair? maybe-limit) (car maybe-limit))
@@ -191,12 +192,7 @@
 
 ;; : (-> Path Kind Name Selector)
 (def (owner-item-structural-selector path kind name)
-  (string-append "gerbil-scheme://"
-                 path
-                 "#item/"
-                 kind
-                 "/"
-                 name))
+  (item-structural-selector path kind name))
 
 ;; : (-> SourceFile (List Definition) (List SyntaxFact) Nat Json)
 (def (owner-items-evidence-packet file definition-matches syntax-matches limit)
@@ -233,7 +229,7 @@
                      (string-append
                       "asp gerbil-scheme query --selector '"
                       (definition-selector defn)
-                      "' --workspace . --code"))))))
+                      "' --workspace . --projection source"))))))
 
 ;; : (-> Path Line Line Selector)
 (def (owner-item-source-span path start end)

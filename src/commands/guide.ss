@@ -5,6 +5,8 @@
         :gslph/src/commands/guide-sections
         :gslph/src/language/evidence
         :gslph/src/parser/facade
+        (only-in :gslph/src/parser/owner-items
+                 parse-owner-items-source-file)
         :gslph/src/policy/catalog
         :gslph/src/support/args
         :gslph/src/support/io
@@ -110,8 +112,9 @@
 (def (advanced-level? level)
      (or (equal? level "advanced") (equal? level "full")))
 (def (emit-exemplar-source root owner symbols include-file-comment?)
-     (let* ((index (collect-project root))
-            (file (guide-source-file index owner)))
+     (let* ((normalized-root (path-normalize root))
+            (path (path-expand owner normalized-root))
+            (file (parse-owner-items-source-file normalized-root path)))
        (when include-file-comment?
          (let (comment (read-source-file-purpose-comment root owner))
            (when (not (string=? comment "")) (display comment) (newline))))
@@ -123,40 +126,147 @@
                (map (cut read-definition-with-leading-comments root <>)
                     definitions)
                "\n")))
-(def (guide-source-file index owner)
-     (or (find (lambda (file) (equal? (source-file-path file) owner))
-               (project-index-files index))
-         (error "guide exemplar owner not found" owner)))
 (def (guide-definition file owner symbol)
      (or (find (lambda (defn) (equal? (definition-name defn) symbol))
                (source-file-definitions file))
          (error "guide exemplar definition not found" owner symbol)))
-(def (emit-higher-order-exemplar-source root)
-     (emit-exemplar-source
-      root
-      "src/policy/agent.ss"
-      ["functional-idiom-advice-findings"]
-      #t))
-(def (emit-typed-combinator-style-exemplar-source root)
-     (emit-exemplar-source
-      root
-      "src/policy/agent-style.ss"
-      ["typed-combinator-style-findings"
-       "typed-combinator-style-function-definitions"
-       "typed-combinator-style-evidence-callers"]
-      #f))
-(def (emit-typed-combinator-style-more-source root)
-     (emit-exemplar-source
-      root
-      "src/policy/agent.ss"
-      ["functional-idiom-advice-findings"]
-      #f))
-(def (emit-poo-policy-exemplar-source root)
-     (emit-exemplar-source
-      root
-      "src/parser/poo.ss"
-      ["poo-form-facts-from-form"]
-      #t))
+(defstruct guide-exemplar-spec
+  (owner symbols include-file-comment?)
+  transparent: #t)
+(def +guide-exemplar-specs+
+     [(cons 'higher-order
+            (make-guide-exemplar-spec
+             "src/policy/agent-basic.ss"
+             ["functional-idiom-advice-findings"]
+             #t))
+      (cons 'typed-combinator-style
+            (make-guide-exemplar-spec
+             "src/policy/agent-style.ss"
+             ["typed-combinator-style-findings"
+              "typed-combinator-style-function-definitions"
+              "typed-combinator-style-evidence-callers"]
+             #f))
+      (cons 'typed-combinator-style-more
+            (make-guide-exemplar-spec
+             "src/policy/agent-basic.ss"
+             ["functional-idiom-advice-findings"]
+             #f))
+      (cons 'poo-policy
+            (make-guide-exemplar-spec
+             "src/parser/poo.ss"
+             ["poo-form-facts-from-form"]
+             #t))
+      (cons 'controlled-branch-shape
+            (make-guide-exemplar-spec
+             "src/commands/search-render.ss"
+             ["ranked-syntax-facts" "select-ranked-syntax-facts"]
+             #t))
+      (cons 'engineering-comment-quality
+            (make-guide-exemplar-spec
+             "src/policy/agent-comment.ss"
+             ["comment-quality-details"
+              "comment-quality-fact-summary"
+              "weak-required-comment-quality-fact?"]
+             #f))
+      (cons 'predicate-family-combinator
+            (make-guide-exemplar-spec
+             "src/parser/quality-shape.ss"
+             ["predicate-family-facts-from-source"
+              "field-access-pattern-facts-from-source"]
+             #t))
+      (cons 'dependency-protocol-adapter
+            (make-guide-exemplar-spec
+             "src/parser/dependency-adapter-quality.ss"
+             ["dependency-adapter-quality-facts-from-candidates"
+              "dependency-adapter-derived-capabilities"
+              "dependency-adapter-manual-object-encoding-risk"
+              "dependency-adapter-quality-facets"]
+             #t))
+      (cons 'explicit-precise-import
+            (make-guide-exemplar-spec
+             "src/policy/agent-import.ss"
+             ["explicit-precise-import-finding"
+              "imprecise-runtime-import?"
+              "explicit-precise-import-details"]
+             #t))
+      (cons 'package-build-canonical-shape
+            (make-guide-exemplar-spec
+             "src/policy/agent-build.ss"
+             ["package-build-canonical-shape-finding"
+              "package-build-init-environment-call?"
+              "package-build-manual-compiler-dispatch-call?"]
+             #t))])
+(defstruct guide-topic-route
+  (topics primary progressive advanced)
+  transparent: #t)
+(def +guide-topic-routes+
+     [(make-guide-topic-route
+       ["higher-order-control" "functional-data-transform"]
+       'higher-order
+       'poo-policy
+       'macro-runtime-source)
+      (make-guide-topic-route
+       ["typed-combinator-style" "m3-policy-repair-loop"]
+       'typed-combinator-style
+       'typed-combinator-style-more
+       'poo-policy)
+      (make-guide-topic-route
+       ["poo-policy"]
+       'poo-policy
+       'higher-order
+       'macro-runtime-source)
+      (make-guide-topic-route
+       ["macro-runtime-source"]
+       'macro-runtime-source
+       'macro-runtime-source-next
+       'higher-order)
+      (make-guide-topic-route
+       ["controlled-branch-shape"]
+       'controlled-branch-shape
+       'typed-combinator-style
+       'higher-order)
+      (make-guide-topic-route
+       ["engineering-comment-quality"]
+       'engineering-comment-quality
+       'typed-combinator-style
+       'controlled-branch-shape)
+      (make-guide-topic-route
+       ["predicate-family-combinator"]
+       'predicate-family-combinator
+       'controlled-branch-shape
+       'typed-combinator-style)
+      (make-guide-topic-route
+       ["dependency-protocol-adapter"]
+       'poo-rationaldict
+       'dependency-protocol-adapter
+       'typed-combinator-style)
+      (make-guide-topic-route
+       ["explicit-precise-import"]
+       'explicit-precise-import
+       'poo-policy
+       #f)
+      (make-guide-topic-route
+       ["package-build-canonical-shape"]
+       'package-build-canonical-shape
+       'explicit-precise-import
+       'higher-order)])
+(def +default-guide-topic-route+
+     (make-guide-topic-route [] 'higher-order 'poo-policy #f))
+(def (guide-exemplar-spec-ref id)
+     (cond ((assq id +guide-exemplar-specs+) => cdr)
+           (else (error "unknown guide exemplar descriptor" id))))
+(def (guide-topic-route-ref topic)
+     (or (find (lambda (route)
+                 (member topic (guide-topic-route-topics route)))
+               +guide-topic-routes+)
+         +default-guide-topic-route+))
+(def (emit-local-exemplar-source root id)
+     (let (spec (guide-exemplar-spec-ref id))
+       (emit-exemplar-source
+        root
+        (guide-exemplar-spec-owner spec)
+        (guide-exemplar-spec-symbols spec)
+        (guide-exemplar-spec-include-file-comment? spec))))
 (def (emit-macro-runtime-source-exemplar-source query)
      (emit-runtime-source-exemplar-source query 0 1))
 (def (emit-runtime-source-exemplar-source query start limit)
@@ -271,27 +381,6 @@
              (path-expand (source-file-path file) root)
              (top-form-start form)
              (top-form-end form)))))
-(def (emit-controlled-branch-shape-exemplar-source root)
-     (emit-exemplar-source
-      root
-      "src/commands/search-render.ss"
-      ["ranked-syntax-facts" "select-ranked-syntax-facts"]
-      #t))
-(def (emit-engineering-comment-quality-exemplar-source root)
-     (emit-exemplar-source
-      root
-      "src/policy/agent-comment.ss"
-      ["comment-quality-details"
-       "comment-quality-fact-summary"
-       "weak-required-comment-quality-fact?"]
-      #f))
-(def (emit-predicate-family-combinator-exemplar-source root)
-     (emit-exemplar-source
-      root
-      "src/parser/quality-shape.ss"
-      ["predicate-family-facts-from-source"
-       "field-access-pattern-facts-from-source"]
-      #t))
 (def +poo-rationaldict-exemplar-relpath+
      ".gerbil/pkg/git.cons.io/mighty-gerbils/gerbil-poo/rationaldict.ss")
 (def (emit-poo-rationaldict-exemplar-source root)
@@ -315,116 +404,39 @@
               (path-expand +poo-rationaldict-exemplar-relpath+ candidate)))
            (unique (append [root (current-directory)]
                            (runtime-source-ancestor-directories)))))
-(def (emit-dependency-protocol-adapter-exemplar-source root)
-     (emit-exemplar-source
-      root
-      "src/parser/dependency-adapter-quality.ss"
-      ["dependency-adapter-quality-facts-from-candidates"
-       "dependency-adapter-derived-capabilities"
-       "dependency-adapter-manual-object-encoding-risk"
-       "dependency-adapter-quality-facets"]
-      #t))
-(def (emit-explicit-precise-import-exemplar-source root)
-     (emit-exemplar-source
-      root
-      "src/policy/agent-import.ss"
-      ["explicit-precise-import-finding"
-       "imprecise-runtime-import?"
-       "explicit-precise-import-details"]
-      #t))
-(def (emit-package-build-canonical-shape-exemplar-source root)
-     (emit-exemplar-source
-      root
-      "src/policy/agent-build.ss"
-      ["package-build-canonical-shape-finding"
-       "package-build-spec-call?"
-       "package-build-manual-compiler-dispatch-call?"]
-      #t))
-(def (emit-topic-exemplar-source topic root runtime-source-query)
-     (cond ((or (equal? topic "higher-order-control")
-                (equal? topic "functional-data-transform"))
-            (emit-higher-order-exemplar-source root))
-           ((member topic '("typed-combinator-style" "m3-policy-repair-loop"))
-            (emit-typed-combinator-style-exemplar-source root))
-           ((equal? topic "poo-policy") (emit-poo-policy-exemplar-source root))
-           ((equal? topic "macro-runtime-source")
-            (emit-macro-runtime-source-exemplar-source runtime-source-query))
-           ((equal? topic "controlled-branch-shape")
-            (emit-controlled-branch-shape-exemplar-source root))
-           ((equal? topic "engineering-comment-quality")
-            (emit-engineering-comment-quality-exemplar-source root))
-           ((equal? topic "predicate-family-combinator")
-            (emit-predicate-family-combinator-exemplar-source root))
-           ((equal? topic "dependency-protocol-adapter")
+(def (emit-guide-exemplar-action action root runtime-source-query)
+     (cond ((assq action +guide-exemplar-specs+)
+            (emit-local-exemplar-source root action))
+           ((eq? action 'poo-rationaldict)
             (emit-poo-rationaldict-exemplar-source root))
-           ((equal? topic "explicit-precise-import")
-            (emit-explicit-precise-import-exemplar-source root))
-           ((equal? topic "package-build-canonical-shape")
-            (emit-package-build-canonical-shape-exemplar-source root))
-           (else (emit-higher-order-exemplar-source root))))
+           ((eq? action 'macro-runtime-source)
+            (emit-macro-runtime-source-exemplar-source runtime-source-query))
+           ((eq? action 'macro-runtime-source-next)
+            (emit-runtime-source-exemplar-source runtime-source-query 1 1))
+           (else (error "unknown guide exemplar action" action))))
+(def (emit-topic-exemplar-source topic root runtime-source-query)
+     (let (route (guide-topic-route-ref topic))
+       (emit-guide-exemplar-action
+        (guide-topic-route-primary route)
+        root
+        runtime-source-query)))
 ;;; Progressive exemplars retain the first topic-specific proof and add an
 ;;; advanced companion only when it clarifies the same repair boundary.
 (def (emit-progressive-exemplar-source
       topic
       root
       advanced?
-      runtime-source-query)
-     (cond ((or (equal? topic "higher-order-control")
-                (equal? topic "functional-data-transform"))
-            (newline)
-            (emit-poo-policy-exemplar-source root)
-            (when advanced?
-              (newline)
-              (emit-macro-runtime-source-exemplar-source
-               runtime-source-query)))
-           ((member topic '("typed-combinator-style" "m3-policy-repair-loop"))
-            (newline)
-            (emit-typed-combinator-style-more-source root)
-            (when advanced? (newline) (emit-poo-policy-exemplar-source root)))
-           ((equal? topic "poo-policy")
-            (newline)
-            (emit-higher-order-exemplar-source root)
-            (when advanced?
-              (newline)
-              (emit-macro-runtime-source-exemplar-source
-               runtime-source-query)))
-           ((equal? topic "macro-runtime-source")
-            (newline)
-            (emit-runtime-source-exemplar-source runtime-source-query 1 1)
-            (when advanced?
-              (newline)
-              (emit-higher-order-exemplar-source root)))
-           ((equal? topic "controlled-branch-shape")
-            (newline)
-            (emit-typed-combinator-style-exemplar-source root)
-            (when advanced?
-              (newline)
-              (emit-higher-order-exemplar-source root)))
-           ((equal? topic "engineering-comment-quality")
-            (newline)
-            (emit-typed-combinator-style-exemplar-source root)
-            (when advanced?
-              (newline)
-              (emit-controlled-branch-shape-exemplar-source root)))
-           ((equal? topic "predicate-family-combinator")
-            (newline)
-            (emit-controlled-branch-shape-exemplar-source root)
-            (when advanced?
-              (newline)
-              (emit-typed-combinator-style-exemplar-source root)))
-           ((equal? topic "dependency-protocol-adapter")
-            (newline)
-            (emit-dependency-protocol-adapter-exemplar-source root)
-            (when advanced?
-              (newline)
-              (emit-typed-combinator-style-exemplar-source root)))
-           ((equal? topic "package-build-canonical-shape")
-            (newline)
-            (emit-explicit-precise-import-exemplar-source root)
-            (when advanced?
-              (newline)
-              (emit-higher-order-exemplar-source root)))
-           (else (newline) (emit-poo-policy-exemplar-source root))))
+     runtime-source-query)
+     (let* ((route (guide-topic-route-ref topic))
+            (progressive (guide-topic-route-progressive route))
+            (advanced (and advanced? (guide-topic-route-advanced route))))
+       (when progressive
+         (newline)
+         (emit-guide-exemplar-action
+          progressive root runtime-source-query))
+       (when advanced
+         (newline)
+         (emit-guide-exemplar-action advanced root runtime-source-query))))
 (def (default-guide-source-root args)
      (cond ((option "--workspace" args) => values)
            ((file-directory? "src") ".")

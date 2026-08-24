@@ -19,6 +19,13 @@
         (check (member "t/policy/agent-source-scope-test.ss" files) ? true)
         (check (member "src/policy/gxtest.ss" files) ? true)
         (check (member "src/build-api/native-build.ss" files) ? true)))
+    (test-case "explicit include roots do not widen the build graph"
+      (let (files
+            (gslph-source-coverage-files-for-roots
+             (current-directory) '("src/parser" "src/utilities")))
+        (check (member "src/parser/core.ss" files) ? true)
+        (check (member "src/utilities/functional.ss" files) ? true)
+        (check (member "src/commands/query.ss" files) => #f)))
     (test-case "source coverage declaration keeps runtime roots and excludes"
       (configure-build-root! (current-directory))
       (gslph-source-coverage

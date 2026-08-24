@@ -26,6 +26,14 @@
 (def (fmt-scenario-expected-text)
   (read-source-text +fmt-scenario-expected+))
 
+;; : (-> (List String) Boolean)
+(def (fmt-targets-fail? targets)
+  (with-catch
+   (lambda (_) #t)
+   (lambda ()
+     (fmt-target-files "t" targets)
+     #f)))
+
 ;; FmtTest
 (def fmt-test
   (test-suite "gerbil scheme harness fmt"
@@ -45,10 +53,10 @@
                (lambda ()
                  (fmt-format-text input)))))
         (check (benchmark-contract-receipt-pass? receipt) => #t)))
-    (test-case "default formatter target discovery skips scenario fixtures"
+    (test-case "formatter requires bounded explicit source files"
       (let (scenario-input "scenarios/format/rs7-basic-style/input/main.ss")
-        (check (member scenario-input (fmt-target-files "t" []))
-               => #f)
-        (check (member scenario-input
-                       (fmt-target-files "t" ["scenarios/format/rs7-basic-style/input"]))
+        (check (fmt-targets-fail? []) => #t)
+        (check (fmt-targets-fail? ["scenarios/format/rs7-basic-style/input"])
+               => #t)
+        (check (fmt-target-files "t" [scenario-input])
                => (list scenario-input))))))

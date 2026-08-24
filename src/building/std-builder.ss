@@ -33,7 +33,6 @@
         std-builder-effective-options
         std-builder-run-spec!
         execution-window-controller?
-        execution-window-controller-worker-count
         execution-window-controller-hard-max-rss-bytes
         execution-window-controller-headroom-bytes
         execution-window-controller-window-size
@@ -50,9 +49,9 @@
         make-adaptive-execution-window-plan
         adaptive-execution-window-plan?
         adaptive-execution-window-plan-topology-groups
-  adaptive-execution-window-plan-controller
-  make-adaptive-execution-window-result
-  adaptive-execution-window-result?
+        adaptive-execution-window-plan-controller
+        make-adaptive-execution-window-result
+        adaptive-execution-window-result?
         adaptive-execution-window-result-topology-groups
         adaptive-execution-window-result-execution-windows
         adaptive-execution-window-result-window-observations
@@ -91,8 +90,9 @@
 (defstruct std-builder
   (name make-proc stage-kind description srcdir make-options toolchain))
 
-;;; Boundary: projects declare source topology and phase ordering; std-builder
-;;; remains the sole compiler, concurrency, native-toolchain, and clean owner.
+;;; Boundary: projects declare source topology and phase ordering.  std/make
+;;; owns compiler scheduling and GERBIL_BUILD_CORES; this layer owns only
+;;; stage admission, receipts, toolchain scope, and clean delegation.
 (defstruct package-source-stage
   (label source prefix specs batched?))
 
@@ -117,7 +117,6 @@
 (def (execution-window-controller? controller)
   (and (object? controller)
        (.has? controller kind)
-       (.has? controller worker-count)
        (.has? controller hard-max-rss-bytes)
        (.has? controller headroom-bytes)
        (.has? controller window-size)
@@ -130,9 +129,6 @@
   (unless (execution-window-controller? controller)
     (error "invalid execution-window controller" controller))
   (.ref controller slot))
-
-(def (execution-window-controller-worker-count controller)
-  (execution-window-controller-slot controller 'worker-count))
 
 (def (execution-window-controller-hard-max-rss-bytes controller)
   (execution-window-controller-slot controller 'hard-max-rss-bytes))
@@ -267,7 +263,7 @@
     (error "invalid adaptive execution-window value" label value))
   value)
 
-(def (std-builder-run-adaptive-plan! builder plan (extra-options []))
+(def (std-builder-run-adaptive-plan/sequential! builder plan (extra-options []))
   (let* ((topology-groups
           (adaptive-execution-window-plan-topology-groups plan))
          (specs (apply append topology-groups))
@@ -358,6 +354,52 @@
                  next-controller
                  (cons window execution-windows)
                  (cons observation window-observations))))))))))
+
+(def (adaptive-execution-window-next-controller
+      controller observation window-size)
+  (unless (execution-window-observation? observation)
+    (error "adaptive controller returned an invalid observation" observation))
+  (let* ((outcome (execution-window-observation-outcome observation))
+         (observed-rss-bytes
+          (execution-window-observation-peak-rss-bytes observation))
+         (observation-max-rss-bytes
+          (execution-window-observation-max-rss-bytes observation))
+         (elapsed-ms (execution-window-observation-elapsed-ms observation))
+         (hard-max-rss-bytes
+          (execution-window-positive-integer
+           (execution-window-controller-hard-max-rss-bytes controller)
+           'hard-max-rss-bytes)))
+    (unless (memq outcome '(completed ok))
+      (error "adaptive execution-window observation failed closed"
+             outcome observed-rss-bytes hard-max-rss-bytes))
+    (unless (and (integer? observed-rss-bytes)
+                 (>= observed-rss-bytes 0))
+      (error "invalid adaptive execution-window RSS observation"
+             observed-rss-bytes))
+    (unless (and (integer? observation-max-rss-bytes)
+                 (> observation-max-rss-bytes 0)
+                 (= observation-max-rss-bytes hard-max-rss-bytes))
+      (error "adaptive observation RSS limit does not match controller"
+             observation-max-rss-bytes hard-max-rss-bytes))
+    (unless (and (integer? elapsed-ms) (>= elapsed-ms 0))
+      (error "invalid adaptive execution-window elapsed observation"
+             elapsed-ms))
+    (when (> observed-rss-bytes hard-max-rss-bytes)
+      (error
+       (if (= window-size 1)
+         "one build spec cannot fit the adaptive RSS budget"
+         "adaptive execution window exceeded the RSS budget")
+       observed-rss-bytes hard-max-rss-bytes))
+    (let (next-controller
+          (execution-window-controller-next-state
+           controller observation window-size))
+      (unless (execution-window-controller? next-controller)
+        (error "adaptive controller returned an invalid next state"
+               next-controller))
+      next-controller)))
+
+(def (std-builder-run-adaptive-plan! builder plan (extra-options []))
+  (std-builder-run-adaptive-plan/sequential! builder plan extra-options))
 
 (def (std-builder-run-spec! builder spec (extra-options []))
   (if (adaptive-execution-window-plan? spec)
@@ -501,18 +543,23 @@
 (def (package-source-stage-request-specs stage)
   (let (batching (package-source-stage-batched? stage))
     (if (execution-window-controller? batching)
-      (list
-       (make-adaptive-execution-window-plan
-        (package-source-stage-topology-request-spec-groups stage)
-        batching))
+      (let (topology-groups
+            (package-source-stage-topology-request-spec-groups stage))
+        (if (and (pair? topology-groups)
+                 (null? (cdr topology-groups)))
+          (list
+           (make-adaptive-execution-window-plan
+            topology-groups
+            batching))
+          (topology-groups->upstream-execution-windows topology-groups)))
       (package-source-stage-request-specs/default stage))))
 
 ;; : (-> PackageSourceStage [[BuildSpec]])
 (def (package-source-stage-request-specs/default stage)
   (let (specs (package-source-stage-specs stage))
     (cond
-     ((eq? (package-source-stage-batched? stage) 'topology)
-      (package-source-stage-topology-request-specs stage))
+      ((eq? (package-source-stage-batched? stage) 'topology)
+       (package-source-stage-topology-request-specs stage))
      ((package-source-stage-batched? stage)
       (list specs))
      (else
@@ -660,7 +707,9 @@
    ((and (string? reference) (string-prefix? "." reference))
     (let* ((root (path-normalize (package-source-stage-source stage)))
            (directory (path-expand (path-directory owner) root))
-           (absolute (path-normalize (path-expand reference directory))))
+             (absolute (path-normalize
+                         (path-expand (package-source-module-path reference)
+                                      directory))))
       (package-source-module-path
        (substring absolute
                   (+ (string-length root)

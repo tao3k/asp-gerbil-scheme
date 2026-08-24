@@ -488,3 +488,34 @@ risk exists. Only after the scenario passes may the older collector or policy
 branch be deleted. The refactor is complete when all macro policy findings and
 search receipts originate from =macro-facade= and repeated targets reuse one
 module-context graph without a project-wide rescan.
+
+*** 11.12.11.7 High-Return Use Of Macros: Compile Policy Metadata, Not Work
+
+The highest-return macro application is not another syntax convenience. The
+current policy entry point manually appends 42 rule families, while policy
+owners contain about 60 =project-index-files= traversals. The parser must know
+which fact families every enabled rule requires before it starts parsing if it
+is to avoid constructing the complete rich =SourceFile= for every owner.
+
+Introduce one compile-time =defpolicy-rule= form whose expansion registers:
+
+- stable rule id and output order;
+- execution stage: =file-local= or =project-finalizer=;
+- required fact families;
+- file applicability predicate;
+- runner procedure;
+- optional compact project-summary reducer.
+
+The macro expands to ordinary typed descriptors and a static registry. It must
+not parse source, walk directories, inspect the runtime module registry, or
+perform policy work during expansion. Its value is that the runtime can compute
+the union of required facts once, build a bounded parse plan, dispatch all
+file-local rules while an owner is resident, and run only the declared
+cross-file finalizers after the stream closes.
+
+This makes the macro/module research operational: compile-time metadata removes
+manual registry drift and enables demand-driven runtime work, while Rust remains
+the owner of workspace indexing, owner enumeration, and global search graphs.
+The macro slice is accepted only after a handwritten two-rule prototype proves
+the streaming contract and its memory gate; metaprogramming is not the first
+implementation step.

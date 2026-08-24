@@ -40,6 +40,10 @@
       "type": "integer",
       "minimum": 0
     },
+    "indexStatsStatus": {
+      "type": "string",
+      "enum": ["rust-owned-not-materialized"]
+    },
     "package": {
       "oneOf": [
         {

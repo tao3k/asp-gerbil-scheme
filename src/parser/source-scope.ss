@@ -21,6 +21,7 @@
 (export +source-extensions+
         +config-files+
         +ignored-dirs+
+        minimal-scan-roots
         collect-source-files
         collect-source-files-preview
         changed-source-files
@@ -34,7 +35,20 @@
 (def +config-files+ '("gerbil.pkg" "build.ss"))
 ;; Boolean
 (def +ignored-dirs+
-  '(".devenv" ".git" ".cache" ".run" ".gerbil" "build" "dist" "target" "src/gambit" "tree-sitter"))
+  '(".devenv" ".git" ".cache" ".run" ".gerbil" "build" "dist" "target"
+    "src/gambit" "tree-sitter"
+    "t/scenarios" "t/fixtures" "t/snapshots"))
+
+;; : (-> (List Path) (List Path))
+(def (minimal-scan-roots roots)
+  (filter
+   (lambda (candidate)
+     (not
+      (ormap (lambda (other)
+               (and (not (equal? candidate other))
+                    (path-under-scan-root? candidate other)))
+             roots)))
+   roots))
 
 ;; collect-source-files
 ;;   : (-> String MaybePackage (List String))
@@ -55,7 +69,8 @@
                             (project-package-source-scope-policy package)))
          (source-roots (configured-source-roots scope-policy))
          (test-roots (configured-test-roots package))
-         (scan-roots (unique (append source-roots test-roots)))
+         (scan-roots
+          (minimal-scan-roots (unique (append source-roots test-roots))))
          (ignored-dirs (append +ignored-dirs+
                                (if scope-policy
                                  (source-scope-policy-exclude-directories scope-policy)
@@ -83,7 +98,8 @@
                             (project-package-source-scope-policy package)))
          (source-roots (configured-source-roots scope-policy))
          (test-roots (configured-test-roots package))
-         (scan-roots (unique (append source-roots test-roots)))
+         (scan-roots
+          (minimal-scan-roots (unique (append source-roots test-roots))))
          (ignored-dirs (append +ignored-dirs+
                                (if scope-policy
                                  (source-scope-policy-exclude-directories scope-policy)
@@ -425,7 +441,8 @@
 
 ;; : (-> String String Entry IgnoredDirs Boolean )
 (def (ignored-source-directory? root path entry ignored-dirs)
-  (let (relpath (relative-path root path))
+  (let (relpath
+        (normalize-relative-rule-path (relative-path root path)))
     (or (member entry ignored-dirs)
         (member relpath ignored-dirs))))
 

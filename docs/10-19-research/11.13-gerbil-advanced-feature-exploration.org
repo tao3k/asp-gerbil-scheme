@@ -616,3 +616,323 @@ producer-consumer plumbing.
 These should be used by the future reasoning stage before generation. The
 diagnostic check should only name the missing boundary and show one compact
 idiom example; it should not rewrite serializers or concurrency logic by rule.
+
+** 11.13.11 Current Harness Refactor Queue
+
+This research is also an audit lens for the harness itself. Apply it to current
+owners in descending return-on-risk order; do not create policy that the
+harness violates in its own command and parser layers.
+
+1. *P0 — delete ghost command surfaces.* =check=, =bench=, =test=, and
+   =snapshot= are build-era commands, not semantic provider methods. Remove
+   them from launcher recognition, registry methods, info closure receipts,
+   docs, snapshots, and tests. Keep build/test ownership on =build.ss=, =gxi=,
+   and =gxtest=. Version packet schemas when fields disappear.
+2. *P1 — one declarative command descriptor.* =constants.ss=,
+   =cli-launcher.ss=, =cli-release-linker.ss=, and =protocol/registry.ss=
+   currently repeat command names and capabilities. Replace those parallel
+   lists with one phase-safe descriptor source that generates help, dynamic
+   dispatch metadata, static linker roots, and registry projection. A macro is
+   justified only if it preserves compile-time function identity without
+   hiding runtime ownership.
+3. *P1 — one native parser projection per fact.* Split owner acquisition,
+   native form reading, module-context facts, and rendering. Search, query,
+   guide, and policy consume the same syntax/definition/module projection;
+   they must not grow private datum walkers or rediscover project owners.
+4. *P2 — replace growth-shaped loops.* Where evidence shows repeated =append=,
+   =string-append=, full line lists, or accumulator reversal, prefer bounded
+   writers, list builders, native iteration, or a single streaming pass.
+   Preserve manual loops only behind benchmark evidence.
+5. *P2 — consolidate policy composition.* Compose small parser-owned signals
+   into quality profiles instead of adding another near-duplicate
+   =agent-style-*= owner for each symptom. MOP/interfaces and contracts model
+   stable domain protocols; they are not decoration for command plumbing.
+
+Each slice exits only when the old owner is deleted, public registry/help/info
+agree, focused tests exercise the real installed binary, and latency plus heap
+receipts remain bounded. A compatibility alias is not success for a legacy
+subcommand migration.
+
+*** 11.13.11.1 First Landed Slice: Command Descriptor Ownership
+
+The first P1 slice uses a transparent Gerbil =defstruct= descriptor in
+=src/protocol/command-catalog.ss=. It owns command name, dynamic module and
+binding identity, static binding key, usage lines, registry ordering, and
+registry methods. =constants.ss=, =cli-launcher.ss=, and
+=protocol/registry.ss= now consume projections from that owner.
+
+=cli-release-linker.ss= deliberately retains one explicit =case= from static
+binding key to imported procedure. This is the narrow compile-time identity
+boundary required by the research rule: it contains no repeated command names,
+usage text, or method lists. The release dispatch rows are generated from the
+descriptor collection and a focused test proves that every row resolves to a
+procedure.
+
+This slice also repaired a real configuration-drift defect. =projection= was a
+tested public command and appeared in help and dynamic dispatch, but it was
+absent from the release static closure. It is not legacy; the descriptor now
+drives its release root and the native release binary exercises it directly.
+
+*** 11.13.11.2 Second Landed Slice: Delete Unreachable Indexed Search
+
+The Scheme search dispatcher now admits an index only for one explicit Gerbil
+owner. Workspace, prime, symbol, import, structural, lexical, pipe, and ingest
+search remain Rust-owned and fail before Scheme project collection.
+
+The old downstream =emit-indexed-search= tower nevertheless retained branches
+and renderers for all of those whole-project views. They were unreachable after
+the P0 ownership guard, duplicated Rust behavior, kept unnecessary imports in
+the release closure, and invited a future edit to restore unbounded Scheme
+collection accidentally. The second slice deletes those branches, their five
+private renderers, their stale documentation blocks, and their unused command
+dependencies. The indexed Scheme boundary is now structurally owner-only, not
+merely owner-only by an upstream convention.
+
+*** 11.13.11.3 Third Landed Slice: Delete Ownerless Symbol Scanning
+
+The exact-query adapter still contained one workspace-scale compatibility path:
+a bare symbol selector enumerated every Scheme source file, read each file to
+find a textual candidate, parsed matching owners, and manually invoked garbage
+collection between misses. That implementation reduced retained garbage but did
+not bound file enumeration, I/O, latency, or total allocation; it also hid
+search behavior behind the exact-read command.
+
+Scheme =query --selector= now accepts only owner-bearing structural selectors
+and explicit file/range selectors. Bare symbols fail before source collection
+with a compact Rust-owned next action. Symbol discovery belongs to the indexed
+=asp gerbil-scheme search symbol= route; its result supplies the parser-owned
+owner selector for the subsequent exact query. The obsolete scanner, manual GC,
+and its compatibility test are deleted rather than retained behind an alias.
+
+*** 11.13.11.4 Fourth Landed Slice: Bound Project Resolution
+
+The retired scope renderer advertised a small =filePreview= but first called
+=collect-source-files= and sorted the complete owner list. The visible packet
+was bounded while allocation and traversal remained proportional to repository
+size. This is the same hidden-work pattern as ownerless symbol lookup.
+
+The replacement is the typed project-resolution parser. Scheme parses package
+topology only over the Git candidate snapshot; Rust owns candidate enumeration,
+authoritative counts, and index construction. The full source list and its sort
+are absent from the Scheme path.
+
+*** 11.13.11.5 Fifth Landed Slice: Make Light Prime Truly Index-Free
+
+The light prime preview still recursively walked source roots. Although the
+result count was capped, each visited directory was fully materialized and
+sorted before traversal stopped. A single generated or vendor directory could
+therefore allocate far beyond the visible preview budget.
+
+Light prime now reports only the fixed package/configuration anchors already
+owned by its package receipt. Recursive source discovery, owner ranking, and
+authoritative preview composition remain Rust source-index work. The Scheme
+walker, directory sorts, ignore-list policy, and traversal-only helpers are
+deleted, so the implementation is bounded structurally rather than by a final
+=take=.
+
+*** 11.13.11.6 Sixth Landed Slice: Describe Local Guide Exemplars As Data
+
+The guide renderer encoded each local exemplar as a one-line emitter function.
+Topic routing, progressive routing, owner paths, symbol groups, and comment
+policy were therefore spread across several nearly identical procedures. This
+made a static content table look like control flow and made route drift hard to
+review.
+
+Local source-backed exemplars now use a transparent descriptor with named
+=owner=, =symbols=, and =include-file-comment?= fields. Topic and progressive
+routes select descriptor ids; the shared emitter interprets the descriptor.
+Custom behavior remains procedural: runtime-source excerpts still use their
+explicit selector, and the dependency-protocol topic still begins with the
+external RationalDict protocol exemplar before showing the local analyzer in
+the progressive stage. Centralizing the owner data also exposed and repaired a
+stale =agent.ss= reference after the higher-order policy moved to
+=agent-basic.ss=. This is a representation and route-validity repair, not a
+search or indexing expansion.
+
+*** 11.13.11.7 Seventh Landed Slice: Make Guide Progression A Typed Route Table
+
+The first descriptor slice centralized local owner and symbol data, but topic
+aliases and the primary, progressive, and advanced relationships remained
+duplicated across two conditional dispatchers. Adding or moving a topic still
+required synchronizing control-flow branches by hand.
+
+A transparent topic-route descriptor now owns the accepted aliases and the
+three exemplar actions. One action interpreter admits only catalog-backed local
+exemplars, runtime-source excerpts, and the explicit external RationalDict
+example. The primary and progressive renderers therefore interpret the same
+route record, while unknown topics retain the existing higher-order/POO
+fallback. This removes duplicated policy-shaped branching without turning
+runtime selection or external source resolution into hidden data magic. The
+installed-binary replay also repaired the renamed package-build helper from
+=package-build-spec-call?= to =package-build-init-environment-call?=.
+
+** 11.13.12 High-Return Architecture Program: Bounded Streaming Policy
+
+The descriptor cleanups improve maintainability but are not the primary return
+surface. A live self-project audit found that full policy cost is dominated by
+source-scope expansion and retention of rich parser facts.
+
+*** 11.13.12.1 Measured Baseline
+
+| Measurement | Result |
+|--------------+--------|
+| collected owners with current default scope | 1071 |
+| owners under =src/= | 227 |
+| owners under =t/= | 839 |
+| owners under =t/scenarios/= | 567 |
+| active owners after excluding scenarios, fixtures, snapshots | 425 |
+| 425-owner concurrent parse | 4073 ms |
+| 425-owner policy evaluation | 2362 ms |
+| 425-owner findings | 66 |
+| 425-owner retained-index wall time | 9.09 s |
+| 425-owner retained-index maximum RSS | 891371520 bytes |
+| 425-owner release-after-each-file parse | 20267 ms |
+| release-after-each-file maximum RSS | 186580992 bytes |
+| current 1071-owner full collect plus policy | exceeded 3 minutes; stopped |
+| current 1071-owner bounded profile | exceeded 5 minutes; stopped |
+
+No single active owner explains the cost: the slowest measured owner took 108
+ms and most slow owners stayed below 80 ms. The dominant effects are corpus
+amplification, construction of every fact family, concurrent retention of all
+rich =SourceFile= values, and repeated policy traversal.
+
+The default source scope is structurally wrong for this repository. With no
+explicit source policy, =configured-source-roots= returns =["."]= while the
+default test root adds =["t"]=. =collect-source-files= walks both roots before
+deduplication, so =t/= is traversed and allocated twice. It also treats scenario
+input/expected trees, fixtures, and snapshots as active project owners.
+
+*** 11.13.12.2 P0-A: Correct The Owner Scope Before Parsing
+
+1. Normalize scan roots before traversal: remove a descendant root when an
+   ancestor already covers it. Never deduplicate only after recursive walks.
+2. Give this package an explicit =src/= source root and an explicit active test
+   root. Exclude =t/scenarios/=, =t/fixtures/=, and =t/snapshots/= from the normal
+   self-policy corpus; scenario runners remain responsible for those fixtures.
+3. In the public ASP workflow, consume the Rust-owned selected owner set rather
+   than rebuilding a Scheme workspace index. Standalone Scheme collection stays
+   only as a bounded package/test fallback.
+4. Emit a compact scope receipt with selected owner count and excluded corpus
+   counts before any full policy parse starts.
+
+This phase alone reduces the live self corpus from 1071 to 425 owners, a 60.3%
+reduction, and removes the pathological fixture corpus that caused both five
+minute profiling failure and full-policy non-completion.
+
+*** 11.13.12.3 P0-B: Bounded Batch Streaming Instead Of A Retained Project AST
+
+Neither current extreme is acceptable. Concurrent parsing finishes quickly but
+retains 891 MB for only 425 owners. Releasing each owner bounds the heap near
+187 MB but expands parse time to 20 seconds because it serializes work and
+forces collection after every file.
+
+The target engine parses a small bounded batch concurrently, runs all file-local
+rules while each =SourceFile= is resident, folds only declared cross-file facts
+into a compact project summary, emits lightweight findings, and releases the
+batch. Batch size is benchmark-selected and receipt-visible; it is not an
+unbounded worker count or a hidden global constant.
+
+Cross-file rules may retain only typed summary records such as owner identity,
+imports/exports, public definitions, and explicitly declared evidence. They may
+not retain native syntax objects, source lines, full calls, or every derived
+fact family. Findings are sorted at the end by stable rule order, owner, and
+selector so streaming does not change public output order.
+
+*** 11.13.12.4 P1: Demand-Driven Fact Families And One Policy Registry
+
+Today =parse-source-file*= constructs macro, binding, POO, higher-order,
+control-flow, predicate-family, field-access, projection-burst, boolean,
+loop-driver, dependency-adapter, typed-contract, comment-quality, and
+function-quality data for every full parse. The enabled rule registry should
+instead produce a fact plan, and the parser should derive only the union required
+by those rules.
+
+After the streaming prototype works, migrate the 42 manually appended policy
+families into typed rule descriptors. File-local rules change from
+=(Index -> Findings)= scans to =(PolicyContext SourceFile -> Findings)=. True
+project rules become finalizers over the compact summary. Only then introduce
+the =defpolicy-rule= macro from 11.12 to generate the static registry and fact
+dependency table.
+
+*** 11.13.12.5 Acceptance Gates
+
+- selected self-policy corpus at or below 425 owners unless an explicit new
+  active source root is added;
+- no recursive scan of a descendant root already covered by an ancestor;
+- 425-owner full policy maximum RSS below 256 MiB;
+- 425-owner full policy wall time below 15 seconds on the measured machine;
+- findings and ordering identical to the 66-finding scoped baseline;
+- scenario/fixture policies still run through their explicit scenario owners;
+- no Scheme-side global source index, global search graph, or hidden full owner
+  collection is introduced.
+
+The implementation order is scope normalization, self-scope configuration,
+bounded two-rule streaming prototype, memory/runtime gate, cross-file summary,
+rule migration, demand-driven fact plan, and only then macro-generated registry.
+
+*** 11.13.12.6 P0-A Landed Receipt
+
+The first architecture slice is now implemented in =parser/source-scope.ss=.
+=minimal-scan-roots= removes descendant roots before recursive walking, and the
+normal corpus excludes =t/scenarios/=, =t/fixtures/=, and =t/snapshots/= while
+their explicit scenario/test runners remain intact.
+
+The implementation also exposed and fixed a boundary bug: directory
+=relative-path= values carry a trailing slash, while multi-segment exclusion
+rules do not. =ignored-source-directory?= now normalizes the relative path
+before policy comparison, so the declared corpus classes are actually pruned
+at traversal time.
+
+Fresh locally compiled modules produced this self-project receipt:
+
+| Measurement | Before P0-A | After P0-A |
+|-------------+-------------+------------|
+| selected owners | 1071 | 425 |
+| full collection plus policy | exceeded 3 minutes | 26.75 s |
+| findings | unavailable before timeout | 66 |
+| maximum RSS | unavailable before timeout | 944111616 bytes |
+
+P0-A therefore closes source-scope amplification and turns a non-completing
+path into a measurable one, but it does not close the memory incident. The
+retained rich project index still exceeds the 256 MiB gate by more than 3.5x.
+P0-B bounded batch streaming is the next required slice; no further descriptor
+cleanup should displace it.
+
+*** 11.13.12.7 P0-B1 Two-Rule Streaming Prototype Receipt
+
+The first bounded engine slice now runs =generic-owner= and =vague-definition=
+as file-local rules. Their existing project-index entry points delegate to new
+file-list entry points, while =policy/streaming.ss= performs sorted source
+discovery once, parses at most one configured batch concurrently, evaluates
+both rules, retains only lightweight findings, and forces release before the
+next batch. Separate finding accumulators preserve the existing rule-major
+public order.
+
+A focused fixture with findings from both rule families produced identical
+=(rule-id path selector)= projections for the retained and batch-size-one
+paths. The 425-owner self corpus contains no findings for these two rules, so
+that corpus measures cost rather than semantic coverage.
+
+| Engine | Batch | Wall time | Maximum RSS |
+|--------+-------+-----------+-------------|
+| retained =ProjectIndex=, two rules | all 425 | 14.46 s | 698138624 bytes |
+| bounded prototype | 8 | 18.78 s | 161529856 bytes |
+| bounded prototype | 16 | 16.59 s repeated | 204095488 bytes |
+| bounded prototype | 24 | 15.39 s | 228360192 bytes |
+| bounded prototype | 32 | 15.94 s | 244219904 bytes |
+
+Batch 16 reduces measured maximum RSS by 70.8% relative to the retained
+two-rule path and stays below the 256 MiB architecture gate. Wall time remains
+above the final 15-second gate on the repeated run because explicit collection
+runs after every batch; GC cadence and demand-driven fact construction remain
+later tuning surfaces, not reasons to restore an unbounded index.
+
+An exploratory all-42-rule batch run is intentionally not shipped as policy
+behavior. It used 309788672 bytes and emitted 71 findings versus 70 for the
+fresh retained baseline. The single extra finding was R017, whose generic
+contract witness is project-wide and often lives in a separate test owner.
+Other known project-summary dependencies include facade sibling detection,
+facade export conflict detection, and cross-owner POO class/protocol evidence.
+The next slice must therefore define a compact typed project summary and move
+these rules to finalizers; blindly invoking every project-index rule per batch
+would be semantically wrong even when the self-project count happens to match.

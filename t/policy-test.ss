@@ -6,25 +6,25 @@
 (import :std/test
         :gslph/src/policy/gxtest
         :gslph/src/testing/memory-profile
-        :policy/modularity-test
-        :policy/agent-basic-test
-        :policy/agent-list-growth-test
-        :policy/agent-list-random-access-test
-        :policy/agent-macro-io-test
-        :policy/agent-string-growth-test
-        :policy/agent-alist-access-test
-        :policy/agent-anonymous-pair-test
-        :policy/agent-build-test
-        :policy/agent-source-scope-test
-        :policy/agent-repair-test
-        :policy/agent-style-higher-order-test
-        :policy/agent-style-test
-        :policy/agent-dependency-adapter-test
-        :policy/agent-poo-test
-        :policy/downstream-gxtest-policy-scope-test
-        :policy/scenario-benchmark-test
-        :policy/detection-test
-        :policy/gerbil-utils-source-test)
+  "./policy/modularity-test"
+  "./policy/agent-basic-test"
+  "./policy/agent-list-growth-test"
+  "./policy/agent-list-random-access-test"
+  "./policy/agent-macro-io-test"
+  "./policy/agent-string-growth-test"
+  "./policy/agent-alist-access-test"
+  "./policy/agent-anonymous-pair-test"
+  "./policy/agent-build-test"
+  "./policy/agent-source-scope-test"
+  "./policy/agent-repair-test"
+  "./policy/agent-style-higher-order-test"
+  "./policy/agent-style-test"
+  "./policy/agent-dependency-adapter-test"
+  "./policy/agent-poo-test"
+  "./policy/downstream-gxtest-policy-scope-test"
+  "./policy/scenario-benchmark-test"
+  "./policy/detection-test"
+  "./policy/gerbil-utils-source-test")
 (export policy-test)
 
 (declare-gxtest-memory-exception

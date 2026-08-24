@@ -1,10 +1,16 @@
 ;;; -*- Gerbil -*-
 ;;; Build/install path contract tests.
+;;; Boundary:
+;;; - Package-local paths must remain independent of a developer's global Gerbil installation.
+;;; - Closure checks reject linker and checker modules before a release can package them.
 
 (import :gerbil/gambit
-        :std/test
+        (only-in :std/test test-suite test-case check)
         (only-in :std/misc/path path-expand)
-        "../src/build-api/build-path-contract"
+        (only-in "../src/build-api/build-path-contract"
+                 configure-build-root!
+                 install-launcher-binpath
+                 dev-launcher-binpath)
         (only-in "../src/build-api/native-build"
                  cli-binary-module-spec
                  package-api-build-output-files)
@@ -14,6 +20,9 @@
         (only-in "../src/constants" +help+))
 (export build-install-test)
 
+;;; Boundary:
+;;; - This suite keeps development and release module closures separate before artifacts are produced.
+;;; - The long contract guards package boundaries where an omitted exclusion would ship non-runtime code.
 ;; : TestSuite
 (def build-install-test
   (test-suite "asp gerbil-scheme build install path contract"

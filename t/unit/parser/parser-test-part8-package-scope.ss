@@ -4,17 +4,50 @@
 (import :std/test
         :gslph/src/extensions/facade
         :gslph/src/parser/facade
+        (only-in :gslph/src/parser/source-scope minimal-scan-roots)
         :gslph/src/parser/typed-contract-scheme
         :gslph/src/protocol/json
         :gslph/src/protocol/structural-facts
         :std/srfi/13)
-(import :unit/parser/parser-test-part8-support)
+(import :gslph/t/unit/parser/parser-test-part8-support)
 (export parser-test-part-8-package-scope)
 
 ;; PolicyTest
 (def parser-test-part-8-package-scope
   (test-suite "gerbil scheme harness parser part 8 package scope"
-(test-case "project package infers runtime roots from build script"
+    (test-case "project collection prunes covered roots and inactive corpora"
+          (let* ((root (path-normalize ".run/parser-active-source-scope"))
+                 (src-dir (string-append root "/src"))
+                 (test-dir (string-append root "/t"))
+                 (scenario-dir (string-append test-dir "/scenarios"))
+                 (scenario-case-dir (string-append scenario-dir "/case"))
+                 (fixture-dir (string-append test-dir "/fixtures"))
+                 (snapshot-dir (string-append test-dir "/snapshots")))
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src-dir)
+            (ensure-dir test-dir)
+            (ensure-dir scenario-dir)
+            (ensure-dir scenario-case-dir)
+            (ensure-dir fixture-dir)
+            (ensure-dir snapshot-dir)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/active-scope)\n")
+            (write-text (string-append src-dir "/main.ss")
+                        "(def main-value 1)\n")
+            (write-text (string-append test-dir "/main-test.ss")
+                        "(def main-test-value 1)\n")
+            (write-text (string-append scenario-case-dir "/input.ss")
+                        "(def scenario-input-value 1)\n")
+            (write-text (string-append fixture-dir "/raw.ss")
+                        "(def fixture-value 1)\n")
+            (write-text (string-append snapshot-dir "/expected.ss")
+                        "(def snapshot-value 1)\n")
+            (check (minimal-scan-roots '("." "src" "t")) => '("."))
+            (check (map source-file-path
+                        (project-index-files (collect-project root)))
+                   => ["gerbil.pkg" "src/main.ss" "t/main-test.ss"])))
+    (test-case "project package infers runtime roots from build script"
           (let* ((root (path-normalize ".run/parser-build-scope"))
                  (lib-dir (string-append root "/lib"))
                  (package-path (string-append root "/gerbil.pkg"))
@@ -39,7 +72,7 @@
               (check (source-scope-policy-runtime-roots scope) => ["lib" "."])
               (check (source-scope-policy-explanation scope)
                      => "Inferred from build.ss defbuild-script targets."))))
-(test-case "project package dependency activates poo extension"
+    (test-case "project package dependency activates poo extension"
           (let* ((root (path-normalize ".run/parser-poo-dependency"))
                  (source-dir (string-append root "/src"))
                  (package-path (string-append root "/gerbil.pkg"))

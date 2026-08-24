@@ -20,9 +20,11 @@
 (export facade-intent-findings
         facade-intent-finding
         generic-owner-findings
+        generic-owner-findings/files
         generic-owner-segment
         generic-owner-finding
         vague-definition-findings
+        vague-definition-findings/files
         vague-definition-finding
         top-level-executable-findings
         top-level-executable-finding
@@ -124,11 +126,14 @@
 ;;; - Keep data-flow evidence visible.
 ;; : (-> ProjectIndex (List TypeFinding) )
 (def (generic-owner-findings index)
+  (generic-owner-findings/files (project-index-files index)))
+;; : (-> (List SourceFile) (List TypeFinding) )
+(def (generic-owner-findings/files files)
   (filter-map
    (lambda (file)
      (let (segment (generic-owner-segment (source-file-path file)))
        (and segment (generic-owner-finding file segment))))
-   (project-index-files index)))
+   files))
 ;;; Boundary:
 ;;; - facade-has-intent-doc? composes first-class procedures.
 ;;; - Keep data-flow evidence visible.
@@ -184,6 +189,9 @@
 ;;; - Keep data-flow evidence visible.
 ;; : (-> ProjectIndex (List TypeFinding) )
 (def (vague-definition-findings index)
+  (vague-definition-findings/files (project-index-files index)))
+;; : (-> (List SourceFile) (List TypeFinding) )
+(def (vague-definition-findings/files files)
   (apply append
          (map (lambda (file)
                 (filter-map
@@ -191,7 +199,7 @@
                    (and (vague-definition-name? (definition-name definition))
                         (vague-definition-finding file definition)))
                  (source-file-definitions file)))
-              (project-index-files index))))
+              files)))
 ;; : (-> String Boolean )
 (def (vague-definition-name? name)
   (member name +vague-definition-names+))
@@ -250,6 +258,7 @@
     "begin-syntax"
     "use-module"
     "use-live-case"
+    "declare-gxtest-memory-exception"
     "modularity-policy"
     "poo-flow-module-object"
     "poo-flow-module-field-contract"))

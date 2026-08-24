@@ -79,7 +79,7 @@
 ;;       ```
 ;;     %
 (def (evidence-graph-packet root)
-  (let* ((index (collect-project root))
+  (let* ((index (collect-project-package-only root))
          (owner-path (evidence-owner-path index))
          (owner-id (evidence-node-id "gerbil-scheme:owner" owner-path))
          (claim-id (evidence-node-id "gerbil-scheme:claim" owner-path))

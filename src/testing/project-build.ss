@@ -47,8 +47,8 @@
 ;; => receipt for the selected parser test file
 ;; ```
 ;;     %
-(def (project-test-file-target file)
-  (test-file-target [file]))
+(def (project-test-file-target files)
+  (test-file-target files))
 
 ;; project-test-full-target
 ;;   : (-> TestReceipt)

@@ -182,7 +182,7 @@
     "cxr-selectors"))
 
 (def (scenario-input-files)
-  (fmt-target-files "." (list +scenario-input-root+)))
+  (map scenario-input-path +required-r7rs-basic-fixtures+))
 
 (def (scenario-input-path relative)
   (string-append +scenario-input-root+ "/" relative))

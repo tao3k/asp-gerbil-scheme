@@ -5,7 +5,6 @@
         :gslph/src/constants
         :gslph/src/commands/search-prime-light-list
         (only-in :std/misc/path directory-files path-expand path-normalize)
-        (only-in :std/sort sort)
         (only-in :std/srfi/13
                  string-contains
                  string-index
@@ -38,9 +37,6 @@
 (def +prime-light-preview-limit+ 12)
 
 ;; : String
-(def +semantic-workspace-scope-schema-id+
-  "agent.semantic-protocols.semantic-workspace-scope")
-;; : String
 (def +semantic-language-protocol-id+
   "agent.semantic-protocols.semantic-language")
 
@@ -49,8 +45,6 @@
 ;; : (List String)
 (def +config-files+ '("gerbil.pkg" "build.ss"))
 ;; : (List String)
-(def +ignored-dirs+
-  '(".devenv" ".git" ".cache" ".run" ".gerbil" "build" "dist" "target" "src/gambit" "tree-sitter"))
 ;; : (List String)
 (def +boolean-flags+
   '("--json" "--code" "--names-only" "--changed" "--full" "--more"
@@ -228,7 +222,7 @@
 ;; : (-> Datum Boolean)
 (def (source-scope-policy-form? datum)
   (and (pair? datum)
-       (member (car datum) '(source-scope source-policy project-scope))))
+       (member (car datum) '(source-scope source-policy project-resolution))))
 
 ;; package-field-value
 ;;   : (-> Datum Symbol Datum)
@@ -458,20 +452,8 @@
 ;;; - Config files are emitted before source previews.
 ;;; - The source walk receives only the remaining preview budget.
 ;; : (-> Root Integer ProjectPackage (List Path))
-(def (collect-source-files-preview root limit package)
-  (let* ((scope-policy (and package
-                            (project-package-source-scope-policy package)))
-         (source-roots (workspace-source-roots scope-policy))
-         (ignored-dirs (append +ignored-dirs+
-                               (workspace-exclude-directories scope-policy)))
-         (configs (take-up-to (root-config-files root) limit))
-         (remaining (- limit (length configs))))
-    (unique
-     (map path-normalize
-          (append configs
-                  (if (> remaining 0)
-                    (scan-source-files-preview root source-roots ignored-dirs remaining)
-                    '()))))))
+(def (collect-source-files-preview root limit _package)
+  (take-up-to (root-config-files root) limit))
 
 ;;; Config preview boundary:
 ;;; - Package config files are checked in stable order before source traversal.
@@ -488,50 +470,13 @@
 ;;; - The walker shares one mutable budget across nested directories.
 ;;; - It returns paths in deterministic traversal order for stable prime output.
 ;; : (-> Root (List String) (List String) Integer (List Path))
-(def (scan-source-files-preview root scan-roots ignored-dirs limit)
-  (let ((result '())
-        (remaining limit))
-    (def (add-file path)
-      (when (> remaining 0)
-        (set! result (cons path result))
-        (set! remaining (- remaining 1))))
-    (def (walk dir)
-      (when (> remaining 0)
-        (for-each
-         (lambda (entry)
-           (when (> remaining 0)
-             (unless (member entry '("." ".."))
-               (let ((path (path-expand entry dir)))
-                 (cond
-                  ((and (source-directory? path)
-                        (not (ignored-source-directory? root path entry ignored-dirs)))
-                   (walk path))
-                  ((gerbil-source-path? path)
-                   (add-file path))
-                  (else #!void))))))
-         (sort (directory-files dir) string<?))))
-    (for-each
-     (lambda (source-root)
-       (when (> remaining 0)
-         (let ((path (path-expand source-root root)))
-           (when (source-directory? path)
-             (walk path)))))
-     scan-roots)
-    (reverse result)))
 
 ;;; Source directory probe:
 ;;; - Directory lookup failures mean the scan root is unavailable.
 ;;; - The caller decides whether a missing root is acceptable.
 ;; : (-> String Boolean)
-(def (source-directory? path)
-  (with-catch
-   (lambda (_) #f)
-   (lambda () (eq? (file-type path) 'directory))))
 
 ;; : (-> Root Path String (List String) Boolean)
-(def (ignored-source-directory? root path entry ignored-dirs)
-  (or (member entry ignored-dirs)
-      (member (relative-owner-path root path) ignored-dirs)))
 
 ;;; Source extension predicate:
 ;;; - The light launcher recognizes only Gerbil-family source suffixes.
@@ -624,8 +569,8 @@
                     " imports=skipped"
                     " next=owner:" owner)))
      (take files (min +prime-light-preview-limit+ (length files))))
-    (displayln "recommendedNext=gerbil-scheme-harness search lexical '<term>' owner tests --workspace . --view seeds")
-    (displayln "nextCommand=gerbil-scheme-harness search lexical '<term>' owner tests --workspace . --view seeds"))
+    (displayln "recommendedNext=asp gerbil-scheme search lexical --query '<term>' --workspace . --view seeds")
+    (displayln "nextCommand=asp gerbil-scheme search lexical --query '<term>' --workspace . --view seeds"))
   0)
 
 ;; : (-> Root MaybePackage (List Path) )

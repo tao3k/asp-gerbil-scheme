@@ -1,7 +1,11 @@
+;;; Intent:
+;;; - This test owns the correspondence between registered POO scenarios and benchmark witnesses.
+;;; - Keep the registry-facing paths stable so policy coverage cannot silently lose a representative case.
 (import
  :gerbil/gambit
- :std/test
+ (only-in :std/test test-suite test-case check)
  (only-in :std/misc/path path-expand)
+ (only-in :std/sugar filter-map)
  :gslph/t/policy/agent-poo-scenario-registry)
 
 (export agent-poo-scenario-contract-test)
@@ -9,18 +13,24 @@
 (def +representative-poo-scenario+
   "poo-marlin-config-interface-large-object-performance")
 
+;;; Boundary:
+;;; - Benchmark paths stay rooted at policy scenarios to catch registration drift.
+;; : (-> ScenarioId Path)
 (def (scenario-benchmark-path scenario-id)
   (path-expand "benchmark.ss" (path-expand scenario-id "t/scenarios/policy")))
 
+;;; Invariant:
+;;; - Every POO performance scenario has a checked-in benchmark witness.
+;; : (-> (List ScenarioId) (List Path))
 (def (missing-scenario-benchmarks scenario-ids)
-  (cond
-   ((null? scenario-ids) (@list))
-   ((file-exists? (scenario-benchmark-path (car scenario-ids)))
-    (missing-scenario-benchmarks (cdr scenario-ids)))
-   (else
-    (cons (scenario-benchmark-path (car scenario-ids))
-          (missing-scenario-benchmarks (cdr scenario-ids))))))
+  (filter-map (lambda (scenario-id)
+                (let (path (scenario-benchmark-path scenario-id))
+                  (and (not (file-exists? path)) path)))
+              scenario-ids))
 
+;;; Intent:
+;;; - Keep native scenario registry coverage aligned with benchmark ownership.
+;; : TestSuite
 (def agent-poo-scenario-contract-test
   (test-suite
    "gerbil scheme harness agent POO scenario smoke"

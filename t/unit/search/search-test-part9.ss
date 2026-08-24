@@ -9,8 +9,8 @@
         :gslph/src/support/args
         :std/misc/ports
         (only-in :std/text/json read-json)
-        :unit/poo/runtime-witness
-        :unit/search/structural-index)
+        "../poo/runtime-witness"
+        "./structural-index")
 (export search-test-part-9)
 ;; : (-> Table Key Json )
 (def (json-get table key)

@@ -12,6 +12,7 @@
         gslph-source-coverage-roots
         gslph-source-coverage-runtime-roots
         gslph-source-coverage-exclude-directories
+        gslph-source-coverage-files-for-roots
         gslph-source-coverage-files)
 
 ;; : (List Path)
@@ -57,10 +58,19 @@
 
 ;; : (-> Root (List Path))
 (def (gslph-source-coverage-files root)
+  (gslph-source-coverage-files-for-roots
+   root
+   (gslph-source-coverage-roots)))
+
+;; Explicit include roots are the source of truth for downstream build graphs.
+;; This keeps library materialization on the same declared source universe
+;; without widening it to unrelated command or compatibility directories.
+;; : (-> Root (List Path) (List Path))
+(def (gslph-source-coverage-files-for-roots root roots)
   (sort (apply append
                (map (lambda (coverage-root)
                       (source-coverage-root-files root coverage-root))
-                    (gslph-source-coverage-roots)))
+                    roots))
         string<?))
 
 ;; : (-> Root Path (List Path))

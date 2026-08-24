@@ -51,6 +51,8 @@
      "parser/support.ss"
      "parser/formals.ss"
      "parser/syntax-support.ss"
+     "parser/definition-syntax.ss"
+     "parser/exact-owner.ss"
      "parser/syntax-calls.ss"
      "parser/imports.ss"
      "parser/syntax.ss"
@@ -82,6 +84,7 @@
      "extensions/poo-pattern-support.ss"
      "extensions/poo-pattern-typeclass.ss"
      "extensions/poo-patterns.ss")
+    ("exact-source-projection.ss")
     ("testing/commands.ss")
     ("testing/framework.ss")))
 
@@ -172,7 +175,15 @@
 
 ;; : (List String)
 (def +gslph-package-api-building-stages+
-  '(("testing/building.ss")))
+  '(("building/model.ss"
+     "building/native-toolchain.ss")
+    ("building/build-script.ss")
+    ("building/std-builder.ss")
+    ("building/observability.ss")
+    ("building/facade.ss")
+    ("building/declarative.ss"
+     "building/commands.ss")
+    ("testing/building.ss")))
 
 ;; Native build interfaces must precede directory-wide parallel compilation.
 ;; : (List (List Path))
@@ -183,7 +194,7 @@
     ("build-api/framework.ss")))
 
 (def +gslph-package-api-directories+
-  '("utilities" "types" "parser" "policy" "extensions" "language" "format" "commands"))
+  '("utilities" "types" "parser" "policy" "protocol" "extensions" "language" "format" "commands"))
 
 ;; : (List (List Path))
 (def +gslph-package-api-launcher-stages+

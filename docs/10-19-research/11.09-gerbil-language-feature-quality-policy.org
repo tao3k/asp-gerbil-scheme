@@ -207,7 +207,6 @@ Scenario requirement:
 6. Validate with:
 #+begin_src sh
 direnv exec ../.. rtk --ultra-compact err gxpkg env ./build.ss test
-direnv exec ../.. .bin/gslph check --full .
 #+end_src
 
 ** 11.09.5 Continuing Mining Result

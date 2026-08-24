@@ -39,6 +39,9 @@
 
 (def install-getopt
   (native-build-getopt
+   (option 'flag "--flag"
+           help: "Installation profile; use asp for ASP State Home runtime"
+           value: string->symbol)
    (flag 'full "--full"
          help: "Compile every library module before installing the CLI launcher")))
 
@@ -71,12 +74,13 @@
                              (debug #f)
                              (no-optimize #f)
                              (optimized #f)
-                             (release #f)
-                             (full #f))
-  (help: "Install optimized release gslph into $HOME/.local/bin"
+        (release #f)
+        (flag #f)
+        (full #f))
+  (help: "Install standalone gslph; use --flag asp for ASP State Home runtime"
    getopt: install-getopt)
   (project-install-target
-   verbose debug no-optimize optimized release full))
+   verbose debug no-optimize optimized release full flag))
 
 (define-entry-point (clean)
   (help: "Clean package-local development build artifacts"

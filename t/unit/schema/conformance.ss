@@ -4,6 +4,8 @@
 ;;; - Keep typed contracts and fixture intent explicit.
 (import :gslph/src/commands/info
         :gslph/src/commands/search
+        :gslph/src/parser/facade
+        :gslph/src/protocol/json
         :std/misc/ports
         :std/srfi/13
         :std/test
@@ -29,6 +31,14 @@
                 (set! status (search-main args)))))))
     (check status => 0)
     (call-with-input-string output read-json)))
+
+(def (packet-json packet)
+  (call-with-input-string
+   (call-with-output-string
+    (lambda (out)
+      (parameterize ((current-output-port out))
+        (write-json packet))))
+   read-json))
 ;; : (-> (List String) Json )
 (def (info-json args)
   (let* ((status #f)
@@ -62,14 +72,14 @@
          (steering (json-get packet "agentSteering"))
          (commands (json-get packet "closureCommands")))
     (check-packet-conforms-to-schema!
-     packet
-     "semantic-gerbil-scheme-harness-info.v1.schema.json")
-    (check (> (json-get packet "files") 0) => #t)
-    (check (> (json-get packet "definitions") 0) => #t)
+      packet
+      "semantic-gerbil-scheme-harness-info.v1.schema.json")
+    (check (json-get packet "files") => 0)
+    (check (json-get packet "definitions") => 0)
     (check (not (not (member "macroFacts" (json-get steering "facts")))) => #t)
     (check (has-rule-id? (json-get steering "rules") "GERBIL-SCHEME-AGENT-POLICY-011") => #t)
-    (check (json-get commands "check")
-           => "gslph check .")))
+    (check (json-get commands "selfApply")
+           => "gxi build.ss")))
 
 ;; Json
 (def (check-language-evidence-json-schema-conformance)
@@ -170,7 +180,7 @@
     (check (json-get (json-get source-ref "localSource") "missingAction")
            => "install-package-before-repository-fallback")
     (check (json-get (json-get source-ref "localSource") "installHint")
-           => "gxpkg install git.cons.io/mighty-gerbils/gerbil-poo")
+           => "gxpkg install github.com/mighty-gerbils/gerbil-poo")
     (check (json-get (json-get source-ref "repositorySource") "url")
            => "https://git.cons.io/mighty-gerbils/gerbil-poo")
     (check (json-get (json-get source-ref "indexHint") "backend")
@@ -183,7 +193,7 @@
            => "gerbil-poo-logical-symbol")
     (check (json-get selector-resolver "querySelector") => "not-direct")
     (check (json-get selector-resolver "sourceRef")
-           => "package-manager-source:gxpkg:git.cons.io/mighty-gerbils/gerbil-poo:runtime-resolved")
+           => "package-manager-source:gxpkg:github.com/mighty-gerbils/gerbil-poo:runtime-resolved")
     (check (json-get source-lookup "order") => "local-source-before-git")
     (check (json-get source-lookup "missingLocalAction")
            => "install-package-before-repository-fallback")
@@ -192,7 +202,7 @@
     (check (json-get (json-get source-lookup "localSource") "status")
            => "probe-first")
     (check (json-get (json-get source-lookup "localSource") "installHint")
-           => "gxpkg install git.cons.io/mighty-gerbils/gerbil-poo")
+           => "gxpkg install github.com/mighty-gerbils/gerbil-poo")
     (check (json-get (json-get source-lookup "repositorySource") "status")
            => "fallback")
     (check (json-get (json-get source-lookup "indexHint") "mode")
@@ -229,15 +239,18 @@
     (check (not (null? (json-get comparison "qualitySignals"))) => #t)))
 ;; Integer
 (def (check-structural-index-json-schema-conformance)
-  (let* ((packet (search-json ["structural" "--json" "t/fixtures"]))
+  (let* ((index (collect-project "t/fixtures"))
+         (packet (packet-json (structural-index-packet-json index)))
          (owner-packet
-         (search-json
-           ["structural" "--owner" "parser/complex-syntax.ss"
-            "--json" "t/fixtures"]))
+          (packet-json
+           (native-syntax-owner-facts-packet-json
+            index
+            (find-owner index "parser/complex-syntax.ss"))))
          (higher-order-packet
-          (search-json
-           ["structural" "--owner" "parser/higher-order.ss"
-            "--json" "t/fixtures"]))
+          (packet-json
+           (native-syntax-owner-facts-packet-json
+            index
+            (find-owner index "parser/higher-order.ss"))))
          (syntax-facts (json-get owner-packet "facts"))
          (higher-order-facts (json-get higher-order-packet "facts"))
          (macro-fact (find-syntax-fact syntax-facts "macro" "capture-safe"))

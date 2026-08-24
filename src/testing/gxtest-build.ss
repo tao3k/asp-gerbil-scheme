@@ -41,7 +41,6 @@
   '("constants.ss"
     "commands/search-prime-light-list.ss"
     "commands/search-prime-light.ss"
-    "commands/search-workspace-scope-light.ss"
     "commands/search.ss"
     "commands/query.ss"
     "commands/check-cache.ss"
@@ -85,9 +84,11 @@
     (display-package-api-build-receipt-status status)
     (if (selected-gxtest-build-current? status)
       status
-      (let (metadata (begin
-                       (compile-package-api-if-stale)
-                       (compile-selected-gxtest! files)))
+      ;; The selected source closure is already dependency ordered and is the
+      ;; complete build input for this target.  Prebuilding the package API
+      ;; here turns a one-file gxtest into a whole-package (currently hundreds
+      ;; of modules) build and defeats the lightweight provider boundary.
+      (let (metadata (compile-selected-gxtest! files))
         (write-selected-gxtest-build-receipt! files metadata)
         (selected-gxtest-build-receipt-status files)))))
 

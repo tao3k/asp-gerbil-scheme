@@ -9,8 +9,8 @@
         :gslph/src/support/args
         :std/misc/ports
         (only-in :std/text/json read-json)
-        :unit/poo/runtime-witness
-        :unit/search/structural-index)
+        "../poo/runtime-witness"
+        "./structural-index")
 (export search-test-part-3)
 ;; : (-> Table Key Json )
 (def (json-get table key)
@@ -185,7 +185,8 @@
             (check (contains? output "|cmd guide-code-advanced=gerbil-scheme-harness guide --code --topic higher-order-control --level advanced") => #t)
             (check (contains? output "|cmd prime=gerbil-scheme-harness search prime --workspace . --view seeds") => #t)
             (check (contains? output "|cmd pipe=gerbil-scheme-harness search pipe '<term>' --workspace . --view seeds") => #t)
-            (check (contains? output "|cmd query-code=gerbil-scheme-harness query --selector <path:start-end> --workspace . --code") => #t)
+            (check (contains? output "|cmd exact-source=gerbil-scheme-harness query --selector <gerbil-scheme://owner#item/kind/name> --projection source --workspace .") => #t)
+            (check (contains? output "|cmd callable-skeleton=gerbil-scheme-harness query --selector <gerbil-scheme://owner#item/kind/name> --projection callable-skeleton --workspace .") => #t)
             (check (contains? output "|cmd env=gerbil-scheme-harness search env [term ...] --workspace . --view seeds") => #t)
             (check (contains? output "|cmd runtime-source=gerbil-scheme-harness search runtime-source [term ...] --workspace . --view seeds") => #t)
             (check (contains? output "|cmd compiler-evidence=gerbil-scheme-harness search compiler-evidence optimizer subtype assertion --workspace . --view seeds") => #t)

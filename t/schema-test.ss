@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 (import :std/test
-        :unit/schema/bundle
-        :unit/schema/conformance)
+  "./unit/schema/bundle"
+  "./unit/schema/conformance")
 (export schema-test)
 ;; SchemaTest
 (def schema-test

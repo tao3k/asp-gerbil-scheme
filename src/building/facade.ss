@@ -74,6 +74,9 @@
         make-native-toolchain
         native-toolchain-sdkroot
         native-toolchain-developer-dir
+        native-toolchain-compiler-path
+        native-toolchain-toolchain-kind
+        native-toolchain-sdk-kind
         native-toolchain-default
         with-native-toolchain)
 (export package-source-stage
@@ -97,3 +100,30 @@
 ;; Building facade owns public stage plans and receipt projections; native policy remains upstream.
 (import ./observability)
 (export (import: ./observability))
+
+(export
+        execution-window-controller?
+        execution-window-controller-hard-max-rss-bytes
+        execution-window-controller-headroom-bytes
+        execution-window-controller-window-size
+        execution-window-controller-observe-run!
+        execution-window-controller-next-state
+        make-execution-window-observation
+        execution-window-observation?
+        execution-window-observation-result
+        execution-window-observation-outcome
+        execution-window-observation-baseline-rss-bytes
+        execution-window-observation-peak-rss-bytes
+        execution-window-observation-max-rss-bytes
+        execution-window-observation-elapsed-ms
+        make-adaptive-execution-window-plan
+        adaptive-execution-window-plan?
+        adaptive-execution-window-plan-topology-groups
+        adaptive-execution-window-plan-controller
+        make-adaptive-execution-window-result
+        adaptive-execution-window-result?
+        adaptive-execution-window-result-topology-groups
+        adaptive-execution-window-result-execution-windows
+        adaptive-execution-window-result-window-observations
+        adaptive-execution-window-result-controller
+        std-builder-run-adaptive-plan!)

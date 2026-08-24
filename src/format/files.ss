@@ -5,79 +5,46 @@
         :gslph/src/format/core
         (only-in :std/misc/path path-expand)
         (only-in :std/sort sort)
-        (only-in :std/srfi/1 append-map)
         :gslph/src/support/io)
 
 (export fmt-target-files
         fmt-file
         fmt-result-changed?)
 
-(def +fmt-ignored-dirs+
-  '("." ".." ".cache" ".devenv" ".git" ".gerbil" ".run"
-    "build" "dist" "node_modules" "scenarios" "snapshots" "target" "tree-sitter"))
+(def +fmt-max-explicit-files+ 64)
+(def +fmt-max-source-bytes+ (* 1024 1024))
 
 ;; fmt-target-files
 ;;   : (-> String (List String) (List Path))
-;;   | result sorted formatter source files under explicit targets or project root
+;;   | result sorted formatter source files under explicit file targets
 ;;   | doc m%
 ;;       `fmt-target-files root targets` expands command targets into a stable
-;;       list of Gerbil source files. Empty targets mean the project root.
+;;       list of Gerbil source files. Bulk discovery is Rust-owned.
 ;;
 ;;       # Examples
 ;;
 ;;       ```scheme
-;;       (fmt-target-files "." ["src"])
-;;       ;; => sorted .ss/.scm files under src
+;;       (fmt-target-files "." ["src/core.ss"])
+;;       ;; => ["src/core.ss"]
 ;;       ```
 ;;     %
 (def (fmt-target-files root targets)
-  (sort
-   (if (pair? targets)
-     (append-map (lambda (target)
-                   (fmt-target-paths root target))
-                 targets)
-     (fmt-directory-source-files root "."))
-   string<?))
+  (unless (pair? targets)
+    (error "Scheme fmt requires explicit source files; bulk formatting is Rust-owned"))
+  (when (> (length targets) +fmt-max-explicit-files+)
+    (error "too many Scheme fmt files; bulk formatting is Rust-owned"
+           (length targets)))
+  (sort (map (lambda (target) (fmt-explicit-source-file root target)) targets)
+        string<?))
 
-;; : (-> String String (List Path))
-(def (fmt-target-paths root target)
+;; : (-> String String Path)
+(def (fmt-explicit-source-file root target)
   (let (path (path-expand target root))
-    (cond
-     ((not (file-exists? path)) [])
-     ((eq? (file-type path) 'directory)
-      (fmt-directory-source-files root target))
-     ((fmt-source-file? target) [target])
-     (else []))))
-
-;; : (-> String String (List Path))
-(def (fmt-directory-source-files root relpath)
-  (let (directory (path-expand relpath root))
-    (with-catch
-     (lambda (_) [])
-     (lambda ()
-       (append-map
-        (lambda (entry)
-          (fmt-directory-entry-source-files root relpath entry))
-        (sort (directory-files directory) string<?))))))
-
-;; : (-> String String String (List Path))
-(def (fmt-directory-entry-source-files root relpath entry)
-  (if (member entry +fmt-ignored-dirs+)
-    []
-    (let* ((child (fmt-child-path relpath entry))
-           (path (path-expand child root)))
-      (cond
-       ((eq? (file-type path) 'directory)
-        (fmt-directory-source-files root child))
-       ((fmt-source-file? child) [child])
-       (else [])))))
-
-;; : (-> String String String)
-(def (fmt-child-path relpath entry)
-  (if (or (string=? relpath "")
-          (string=? relpath "."))
-    entry
-    (string-append relpath "/" entry)))
+    (unless (and (file-exists? path)
+                 (not (eq? (file-type path) 'directory))
+                 (fmt-source-file? target))
+      (error "fmt target must be an explicit Gerbil source file" target))
+    target))
 
 ;; fmt-file
 ;;   : (-> String String Boolean FmtResult)
@@ -95,6 +62,9 @@
 ;;     %
 (def (fmt-file root relpath check?)
   (let* ((path (path-expand relpath root))
+         (bytes (file-info-size (file-info path)))
+         (_ (when (> bytes +fmt-max-source-bytes+)
+              (error "source exceeds Scheme fmt budget" relpath bytes)))
          (original (read-source-text path))
          (formatted (fmt-format-text original))
          (changed? (not (string=? original formatted))))

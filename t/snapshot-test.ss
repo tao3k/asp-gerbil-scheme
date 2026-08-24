@@ -3,10 +3,10 @@
 ;;; Individual snapshot domains live in smaller owners under t/snapshot/.
 
 (import :std/test
-        :snapshot/evidence-test
-        :snapshot/policy-parser-test
-        :snapshot/protocol-test
-        :snapshot/search-test)
+  "./snapshot/evidence-test"
+  "./snapshot/policy-parser-test"
+  "./snapshot/protocol-test"
+  "./snapshot/search-test")
 
 (export snapshot-test)
 

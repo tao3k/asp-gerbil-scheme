@@ -1,6 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Project constants shared by command and protocol modules.
 
+(import (only-in :gslph/src/protocol/command-catalog provider-command-help))
+
 (export +language-id+
         +cli-id+
         +provider-id+
@@ -13,7 +15,7 @@
 ;; String
 (def +cli-id+ "gslph")
 ;; String
-(def +provider-id+ "gerbil-scheme-harness")
+(def +provider-id+ "asp-gerbil-scheme")
 ;; String
 (def +release-version+ "v0.1.0-67-g20798be")
 ;; String
@@ -23,18 +25,4 @@
 (def +display-name+ "Gerbil Scheme Harness")
 ;; ConfigConstant
 (def +help+
-  "gslph - Gerbil Scheme semantic search and project harness
-
-Usage:
-  gslph search <view> ... [--json] [--code] [PROJECT_ROOT]
-  gslph search workspace-scope [--json] [PROJECT_ROOT]
-  gslph query <owner-path> --term <symbol> [--term <symbol>] [--workspace PROJECT_ROOT] [--names-only | --code]
-  gslph query --from-hook direct-source-read --selector <workspace-path:start-end> --workspace PROJECT_ROOT --code
-  gslph projection <owner-path> --workspace PROJECT_ROOT --json
-  gslph fmt [--check] [--json] [--workspace PROJECT_ROOT] [PATH ...]
-  gslph evidence graph [--json] [PROJECT_ROOT]
-  gslph evidence analyze [--json] [PROJECT_ROOT]
-  gslph agent doctor [--json] [PROJECT_ROOT]
-  gslph agent guide [PROJECT_ROOT]
-  gslph info [--json] [PROJECT_ROOT]
-")
+  (provider-command-help +cli-id+))

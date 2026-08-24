@@ -2,10 +2,11 @@
 ;;; Boundary:
 ;;; - module owns the search command dispatcher and compact owner views.
 ;;; - Evidence packet rendering lives in :commands/search-evidence.
+;;; - shared Rust owns workspace search planning, ranking, and budgets.
+;;; - unsupported or incomplete routes fail before project collection.
 ;;; Search command adapter.
 
-(import :gslph/src/constants
-        :gslph/src/commands/guide
+(import :gslph/src/commands/guide
         :gslph/src/commands/search-evidence
         :gslph/src/commands/search-extension
         :gslph/src/commands/search-owner-items
@@ -13,16 +14,13 @@
                  emit-prime-light
                  source-path-class)
         :gslph/src/commands/search-proof
-        :gslph/src/commands/search-structural
-        :gslph/src/commands/search-workspace-scope
-        :gslph/src/extensions/facade
         :gslph/src/parser/facade
         :gslph/src/parser/query
         :gslph/src/protocol/json
         :gslph/src/support/args
         :gslph/src/support/io
         (only-in :std/srfi/1 take)
-        (only-in :std/srfi/13 string-contains string-join)
+        (only-in :std/srfi/13 string-join)
         (only-in :std/sugar cut filter match ormap))
 
 (export search-main
@@ -65,16 +63,100 @@
          args
          json?))))
 ;; : (-> SearchView Root Args Boolean MaybeStatus )
+(def +dependency-topology-unresolved-version+ "unresolved")
+(def +dependency-topology-hex-digits+ "0123456789abcdef")
+
+(def (dependency-topology-byte->hex byte)
+  (string
+   (string-ref +dependency-topology-hex-digits+ (quotient byte 16))
+   (string-ref +dependency-topology-hex-digits+ (modulo byte 16))))
+
+(def (dependency-topology-fingerprint dependencies manifest-path)
+  (string-append
+   "sha256:"
+   (apply
+    string-append
+    (map dependency-topology-byte->hex
+         (u8vector->list
+          (sha256
+           (apply
+            string-append
+            (map (lambda (dependency)
+                   (string-append
+                    dependency
+                    "|"
+                    +dependency-topology-unresolved-version+
+                    "|"
+                    manifest-path
+                    "\n"))
+                 dependencies))))))))
+
+(def (dependency-topology-nodes dependency manifest-path)
+  (list
+   (hash
+    (id (string-append "dependency:" dependency))
+    (kind "dependency")
+    (value dependency)
+    (path manifest-path)
+    (fields
+     (hash
+      (dependencyName dependency)
+      (manifestPath manifest-path))))
+   (hash
+    (id (string-append "dependency-version:" dependency))
+    (kind "dependency-version")
+    (value +dependency-topology-unresolved-version+)
+    (fields
+     (hash
+      (version +dependency-topology-unresolved-version+))))))
+
+(def (dependency-topology-edge dependency)
+  (hash
+   (source (string-append "dependency:" dependency))
+   (target (string-append "dependency-version:" dependency))
+   (relation "version_locked")))
+
+(def (dependency-topology-packet index)
+  (let* ((package (project-index-package index))
+         (dependencies
+          (if package
+            (project-package-dependencies package)
+            '()))
+         (manifest-path
+          (if package
+            (project-package-path package)
+            "gerbil.pkg")))
+    (hash
+     (packetKind "dependency-topology")
+     (fingerprint
+      (dependency-topology-fingerprint dependencies manifest-path))
+     (graph
+      (hash
+       (nodes
+        (apply append
+               (map (lambda (dependency)
+                      (dependency-topology-nodes dependency manifest-path))
+                    dependencies)))
+       (edges (map dependency-topology-edge dependencies)))))))
+
+(def (emit-dependency-topology-search root json?)
+  (unless json?
+    (error "search dependency-topology requires --json"))
+  (write-json-line
+   (dependency-topology-packet
+    (collect-project-package-only root)))
+  0)
+
 (def (emit-index-free-search view root args json?)
   (cond
    ((equal? view "compare") (emit-compare-search args json?))
    ((equal? view "proof") (emit-type-proof-search args json?))
+   ((equal? view "dependency-topology")
+    (emit-dependency-topology-search root json?))
    ((language-evidence-index-free-view? view)
     (emit-language-evidence-search root view args json?))
    ((language-pattern-package-only-search? view args)
     (emit-pattern-search (collect-project-package-only root) args json?))
-   ((equal? view "workspace-scope")
-    (emit-workspace-scope root json?))
     ((and (equal? view "prime")
           (prime-seeds-view? args))
      (if json?
@@ -89,33 +171,36 @@
    (else #f)))
 ;; : (-> SearchView Root Args ProjectIndex )
 (def (search-index-for-view view root args)
-  (if (equal? view "owner")
-    (owner-search-index root args)
-    (collect-project root)))
+  (cond
+   ((equal? view "owner")
+    (owner-search-index root args))
+   ((rust-owned-search-view? view)
+    (error "whole-workspace search is Rust-owned; use asp search/query" view))
+   (else
+    (error "unsupported search view" view))))
+;; : (-> SearchView Boolean )
+(def (rust-owned-search-view? view)
+  (or (equal? view "workspace")
+      (equal? view "prime")
+      (equal? view "symbol")
+      (equal? view "import")
+      (equal? view "structural")
+      (equal? view "extension")
+      (equal? view "pattern")
+      (language-evidence-view? view)
+      (equal? view "lexical")
+      (equal? view "pipe")
+      (equal? view "ingest")))
 ;; : (-> SearchView ProjectIndex Args Boolean Integer )
 (def (emit-indexed-search view index args json?)
-  (cond
-   ((equal? view "workspace") (emit-workspace index json?))
-   ((equal? view "prime") (emit-prime index json?))
-   ((equal? view "owner") (emit-owner-search index args json?))
-   ((equal? view "symbol") (emit-symbol-search index args json?))
-   ((equal? view "import") (emit-import-search index args json?))
-   ((equal? view "structural") (emit-structural-index index args json?))
-   ((equal? view "extension") (emit-extension-search index args json?))
-   ((equal? view "pattern") (emit-pattern-search index args json?))
-   ((equal? view "compare") (emit-compare-search args json?))
-   ((equal? view "proof") (emit-type-proof-search args json?))
-   ((language-evidence-view? view)
-    (emit-language-evidence-search index view args json?))
-   ((or (equal? view "lexical") (equal? view "pipe"))
-    (emit-lexical-search index args json?))
-   ((equal? view "ingest") (emit-ingest index json?))
-   (else (error "unsupported search view" view))))
+  (if (equal? view "owner")
+    (emit-owner-search index args json?)
+    (error "Scheme indexed search only supports explicit owners" view)))
 ;; : (-> String (List String) ProjectIndex )
 (def (owner-search-index root args)
   (if (explicit-owner-search-path? root args)
     (collect-project-package-only root)
-    (collect-project root)))
+    (error "owner search requires an explicit Gerbil source path")))
 
 ;; : (-> String (List String) Boolean )
 (def (explicit-owner-search-path? root args)
@@ -130,91 +215,6 @@
 (def (prime-seeds-view? args)
   (or (equal? (option "--view" args) "seeds")
       (member "seeds" args)))
-;; emit-workspace
-;;   : (-> ProjectIndex Boolean Integer)
-;;   | doc m%
-;;       `emit-workspace index json?` emits workspace owners and package
-;;       metadata as JSON or compact human-readable lines.
-;;
-;;       # Examples
-;;
-;;       ```scheme
-;;       (emit-workspace index #f)
-;;       ;; => 0
-;;       ```
-;;     %
-(def (emit-workspace index json?)
-  (if json?
-    (write-json-line
-     (hash (languageId +language-id+)
-           (providerId +provider-id+)
-           (root (project-index-root index))
-           (projectPackage (project-package-json (project-index-package index)))
-           (extensions (project-extension-json index))
-           (files (map source-file-json (project-index-files index)))))
-    (begin
-      (displayln "[gerbil-workspace] root=" (project-index-root index)
-                 " files=" (length (project-index-files index))
-                 " definitions=" (length (project-definitions index)))
-      (emit-package-line index)
-      (emit-extension-lines index)
-      (for-each
-        (lambda (file)
-          (displayln "|owner path=" (source-file-path file)
-                     " package=" (or (source-file-package file) "-")
-                     " defs=" (length (source-file-definitions file))))
-        (let (files (project-index-files index))
-          (take files (min 20 (length files)))))))
-  0)
-;; emit-prime
-;;   : (-> ProjectIndex Boolean Integer)
-;;   | doc m%
-;;       `emit-prime index json?` emits the prime search packet or the compact
-;;       seed view for the current project.
-;;
-;;       # Examples
-;;
-;;       ```scheme
-;;       (emit-prime index #f)
-;;       ;; => 0
-;;       ```
-;;     %
-(def (emit-prime index json?)
-  (if json?
-    (write-json-line
-     (search-prime-packet-json index))
-    (begin
-      (displayln "[gerbil-search-prime] root=" (project-index-root index)
-                 " files=" (length (project-index-files index))
-                 " definitions=" (length (project-definitions index)))
-      (displayln "|language id=" +language-id+ " provider=" +provider-id+
-                 " parser=core-read-module")
-      (emit-package-line index)
-      (emit-extension-lines index)
-      (for-each
-       (lambda (file)
-         (displayln "owner:path(" (source-file-path file) ")"
-                    " package=" (or (source-file-package file) "-")
-                    " sourceClass=" (source-path-class (source-file-path file))
-                    " defs=" (length (source-file-definitions file))
-                    " imports=" (length (source-file-imports file))))
-       (let (files (ranked-files index))
-         (take files (min 12 (length files)))))
-      (displayln "recommendedNext=gerbil-scheme-harness search lexical '<term>' owner tests --workspace . --view seeds")
-      (displayln "nextCommand=gerbil-scheme-harness search lexical '<term>' owner tests --workspace . --view seeds")))
-  0)
-
-;; : (-> ProjectIndex String )
-(def (emit-package-line index)
-  (let (package (project-index-package index))
-    (when package
-      (displayln "|package name=" (project-package-name package)
-                 " path=" (project-package-path package)
-                 " packageManager=" (project-package-manager package)
-                 " dependencies=" (string-join (project-package-dependencies package) ",")))))
-;; : (-> ProjectIndex (List String) )
-(def (emit-extension-lines index)
-  (for-each displayln (project-extension-search-lines index)))
 ;;; Boundary:
 ;;; - resolve-owner-file owns owner path fallback semantics.
 ;;; - Keep indexed owners first; parse explicit files only when they are Gerbil sources.
@@ -314,100 +314,7 @@
                 " selector=" (definition-selector defn)))
    (let (definitions (source-file-definitions file))
      (take definitions (min 30 (length definitions)))))
-  (displayln "nextCommand=gerbil-scheme-harness query " (source-file-path file)
-             " --term '<symbol>' --workspace . --names-only"))
-;; emit-symbol-search
-;;   : (-> ProjectIndex (List String) Boolean Integer)
-;;   | doc m%
-;;       `emit-symbol-search index args json?` searches indexed definitions by
-;;       symbol query and emits JSON or compact match rows.
-;;
-;;       # Examples
-;;
-;;       ```scheme
-;;       (emit-symbol-search index '("datum-list-items") #f)
-;;       ;; => 0
-;;       ```
-;;     %
-(def (emit-symbol-search index args json?)
-  (let* ((positionals (positional-args args))
-         (query (and (pair? positionals) (car positionals))))
-    (unless query (error "search symbol requires a query"))
-    (let (matches (matching-definitions (project-definitions index) [query]))
-      (if json?
-        (write-json-line (hash (query query) (matches (map definition-json matches))))
-        (begin
-          (displayln "[gerbil-search-symbol] query=" query
-                     " matches=" (length matches))
-          (for-each
-           (lambda (defn)
-             (displayln "|match name=" (definition-name defn)
-                        " kind=" (definition-kind defn)
-                        " selector=" (definition-selector defn)))
-           (take matches (min 40 (length matches)))))))
-    0))
-;; emit-import-search
-;;   : (-> ProjectIndex (List String) Boolean Integer)
-;;   | doc m%
-;;       `emit-import-search index args json?` searches source imports and
-;;       includes for the query term and emits matching owners.
-;;
-;;       # Examples
-;;
-;;       ```scheme
-;;       (emit-import-search index '(":gslph/src/parser/support") #f)
-;;       ;; => 0
-;;       ```
-;;     %
-(def (emit-import-search index args json?)
-  (let* ((positionals (positional-args args))
-         (query (and (pair? positionals) (car positionals))))
-    (unless query (error "search import requires a query"))
-    (let (matches
-          (filter
-           (lambda (file)
-             (ormap (cut string-contains <> query)
-                    (append (source-file-imports file) (source-file-includes file))))
-           (project-index-files index)))
-      (if json?
-        (write-json-line (hash (query query) (matches (map source-file-json matches))))
-        (begin
-          (displayln "[gerbil-search-import] query=" query " owners=" (length matches))
-          (for-each
-           (lambda (file)
-             (displayln "|owner path=" (source-file-path file)))
-           (take matches (min 40 (length matches)))))))
-    0))
-;; emit-lexical-search
-;;   : (-> ProjectIndex (List String) Boolean Integer)
-;;   | doc m%
-;;       `emit-lexical-search index args json?` ranks owners for a fuzzy query and
-;;       emits JSON or compact owner rows with a follow-up command.
-;;
-;;       # Examples
-;;
-;;       ```scheme
-;;       (emit-lexical-search index '("typed doc") #f)
-;;       ;; => 0
-;;       ```
-;;     %
-(def (emit-lexical-search index args json?)
-  (let* ((positionals (positional-args args))
-         (query (and (pair? positionals) (car positionals))))
-    (unless query (error "search lexical requires a query"))
-    (let (matches (ranked-query-files index query))
-      (if json?
-        (write-json-line (hash (query query) (matches (map source-file-json matches))))
-        (begin
-          (displayln "[gerbil-search-lexical] query=" query " matches=" (length matches))
-          (for-each
-           (lambda (file)
-             (displayln "|owner path=" (source-file-path file)
-                        " package=" (or (source-file-package file) "-")
-                        " sourceClass=" (source-path-class (source-file-path file))
-                        " defs=" (length (source-file-definitions file))))
-           (take matches (min 24 (length matches))))
-          (when (pair? matches)
-            (displayln "recommendedNext=gerbil-scheme-harness search owner "
-                       (source-file-path (car matches)) " --workspace . --view seeds")))))
-    0))
+  (displayln "nextCommand=asp gerbil-scheme search owner "
+             (source-file-path file)
+             " items --query '<symbol>' --workspace . --view seeds"))
+(import :std/crypto/digest)

@@ -60,8 +60,8 @@
         (check (member "policy/core.ss" spec) => #f)))
     (test-case "release binary uses the bounded parser-owned projection"
       (let (spec (cli-binary-build-spec #t))
-  (check cli-release-module-count => 103)
-  (check cli-release-closure-count => 104)
+      (check cli-release-module-count => 109)
+      (check cli-release-closure-count => 110)
         (check (length (filter string? spec)) => cli-release-module-count)
         (check (member "commands/evidence.ss" spec) ? true)
         (check (member "format/facade.ss" spec) ? true)

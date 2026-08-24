@@ -15,7 +15,6 @@
            "index/structural"
            "index/native-syntax-owner-facts"
            "query/direct-source-read"
-           "check/changed"
            "guide"
            "info"
            "evidence/graph"
@@ -27,8 +26,8 @@
     (path "schemas/semantic-extension-pattern-mapping.v1.schema.json"))
    (schema
     (schemaId "agent.semantic-protocols.gerbil-scheme-harness-info")
-    (schemaVersion "1")
-    (path "schemas/semantic-gerbil-scheme-harness-info.v1.schema.json"))
+    (schemaVersion "2")
+    (path "schemas/semantic-gerbil-scheme-harness-info.v2.schema.json"))
    (schema
     (schemaId "agent.semantic-protocols.semantic-runtime-source-acquisition")
     (schemaVersion "1")

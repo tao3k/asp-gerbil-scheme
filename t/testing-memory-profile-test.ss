@@ -1,9 +1,15 @@
+;;; Intent:
+;;; - This suite validates source-declared test memory budgets before execution.
+;;; - Malformed metadata must fail closed rather than silently use unrestricted heap.
 (import :gerbil/gambit
-        :std/test
+        (only-in :std/test test-suite test-case check)
         :gslph/src/testing/memory-profile)
 
 (export testing-memory-profile-test)
 
+;;; Boundary:
+;;; - The helper turns malformed metadata into a testable boolean receipt.
+;; : (-> (-> Value) Boolean)
 (def (gxtest-memory-exception-raised? thunk)
   (with-catch (lambda (_exception) #t)
               (lambda ()

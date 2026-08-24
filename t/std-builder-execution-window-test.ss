@@ -11,7 +11,6 @@
       observed-rss-values
       next-window-sizes
       (hard-max-rss-bytes 4096)
-      (worker-count 2)
       (headroom-bytes 512))
   (let (observed-rss-bytes
         (if (pair? observed-rss-values)
@@ -19,7 +18,6 @@
           0))
     (object<-alist
      `((kind . gslph.execution-window-controller.v1)
-       (worker-count . ,worker-count)
        (hard-max-rss-bytes . ,hard-max-rss-bytes)
        (headroom-bytes . ,headroom-bytes)
        (window-size . ,window-size)
@@ -45,18 +43,32 @@
               (cdr next-window-sizes)
               [])
             hard-max-rss-bytes
-            worker-count
             headroom-bytes)))))))
 
 (def std-builder-execution-window-test
   (test-suite "std-builder execution windows"
-    (test-case "topology groups flatten into one ordered execution window"
-      (check
-       (topology-groups->upstream-execution-windows
-        '((prepare compile) () (link package)))
-       => '((prepare compile link package))))
+  (test-case "topology groups flatten into one ordered execution window"
+    (check
+      (topology-groups->upstream-execution-windows
+       '((prepare compile) () (link package)))
+      => '((prepare compile link package))))
 
-    (test-case "empty topology groups produce no execution window"
+  (test-case "topology batching preserves one upstream package stage"
+    (let* ((stage
+            (make-package-source-stage
+             "fixture"
+             "t/fixtures/std-builder-topology"
+             "fixture"
+             '("a.ss" "b.ss")
+             'topology))
+           (request (package-source-stage->request stage '()))
+           (request-summary (build-request->alist request)))
+      (check
+        (package-source-stage-topology-layers stage)
+        => '(("a.ss") ("b.ss")))
+      (check (cdr (assoc 'stage-count request-summary)) => 1)))
+
+  (test-case "empty topology groups produce no execution window"
       (check (topology-groups->upstream-execution-windows '()) => '())
       (check (topology-groups->upstream-execution-windows '(() ())) => '()))
 
@@ -172,6 +184,42 @@
              (std-builder-run-spec! builder window []))
            windows)
           (check calls => 1))))
+
+    (test-case
+        "multiple topology groups delegate dependency scheduling upstream"
+      (let ((upstream-windows []))
+        (let* ((builder
+                (make-std-builder
+                 "fake-std/make"
+                 (lambda args
+                   (set! upstream-windows
+                     (append upstream-windows (list args)))
+                   (void))
+                 'compile
+                 "fake upstream make"
+                 #f
+                 []
+                 (native-toolchain-default)))
+               (controller
+                (make-fake-execution-window-controller
+                 2 '(1024 1024 1024 1024) '(2 1 2) 4096))
+               (plan
+                (make-adaptive-execution-window-plan
+                 '((prepare compile link) (package publish))
+                 controller))
+               (result (std-builder-run-spec! builder plan []))
+               (expected-windows
+                '((prepare compile) (link package) (publish)))
+               (expected-upstream-calls
+                (map list expected-windows)))
+          (check upstream-windows => expected-upstream-calls)
+          (check
+           (adaptive-execution-window-result-execution-windows result)
+           => expected-windows)
+          (check
+           (length
+            (adaptive-execution-window-result-window-observations result))
+           => 3))))
 
     (test-case "current topology window stays skipped without invoking make"
       (let (calls 0)

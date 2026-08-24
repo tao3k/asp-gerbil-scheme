@@ -17,15 +17,16 @@
   "agent.semantic-protocols.gerbil-scheme-harness-info")
 ;; : (-> String JsonPacket )
 (def (info-packet root)
-  (let* ((index (collect-project root))
+  (let* ((index (collect-project-package-only root))
          (package (project-index-package index)))
     (hash (schemaId +info-schema-id+)
           (schemaVersion "1")
           (languageId +language-id+)
           (providerId +provider-id+)
           (projectRoot root)
-          (files (length (project-index-files index)))
-          (definitions (length (project-definitions index)))
+          (files 0)
+          (definitions 0)
+          (indexStatsStatus "rust-owned-not-materialized")
           (package (package-info-json package))
           (configurableInterface (configurable-interface-json))
           (agentSteering (agent-steering-json))
@@ -53,9 +54,7 @@
         (rules (agent-steering-rule-json))))
 ;; Json
 (def (closure-commands-json)
-  (hash (selfApply "gxi build.ss test")
-        (check (string-append +cli-id+ " check ."))
-        (bench (string-append +cli-id+ " bench --iterations 1 --max-interface-ms 50 ."))))
+  (hash (selfApply "gxi build.ss")))
 ;;; Boundary:
 ;;; - The info command emits line protocol and keeps packet field selection here.
 ;;; - Callers provide the already-built packet so command routing stays projection-free.
@@ -89,13 +88,7 @@
   (let (closure (hash-get packet 'closureCommands))
     (emit-field-line
      "|closure"
-     [(line-field "self-apply" (hash-get closure 'selfApply))])
-    (emit-field-line
-     "|closure"
-     [(line-field "check" (hash-get closure 'check))])
-    (emit-field-line
-     "|closure"
-     [(line-field "bench" (hash-get closure 'bench))])))
+     [(line-field "self-apply" (hash-get closure 'selfApply))])))
 ;; info-main
 ;;   : (-> (List String) Integer)
 ;;   | doc m%

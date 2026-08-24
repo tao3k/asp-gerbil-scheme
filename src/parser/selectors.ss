@@ -40,6 +40,7 @@
         comment-quality-fact-selector
         top-form-selector
         item-structural-selector
+        selector-component-canonicalize
         relative-path
         source-full-path
         normalize-owner)
@@ -303,9 +304,95 @@
   (string-append "gerbil-scheme://"
                  path
                  "#item/"
-                 kind
+                 (selector-component-encode kind)
                  "/"
-                 name))
+                 (selector-component-encode name)))
+
+;; Canonical selector components use the shared RFC 3986 unreserved set and
+;; uppercase percent escapes, matching the language-neutral ASP contract.
+(def (selector-component-encode component)
+  (let ((bytes (string->utf8 component))
+        (output (open-output-string)))
+    (let loop ((index 0))
+      (when (< index (u8vector-length bytes))
+        (let (byte (u8vector-ref bytes index))
+          (if (selector-component-unreserved-byte? byte)
+            (write-char (integer->char byte) output)
+            (begin
+              (write-char #\% output)
+              (write-char (selector-hex-digit (quotient byte 16)) output)
+              (write-char (selector-hex-digit (modulo byte 16)) output)))
+          (loop (+ index 1)))))
+    (get-output-string output)))
+
+(def (selector-component-canonicalize component)
+  (let ((bytes (string->utf8 component))
+        (output (open-output-string)))
+    (let loop ((index 0))
+      (when (< index (u8vector-length bytes))
+        (let* ((byte (u8vector-ref bytes index))
+               (first-hex
+                (and (= byte 37)
+                     (< (+ index 2) (u8vector-length bytes))
+                     (selector-hex-byte-value
+                      (u8vector-ref bytes (+ index 1)))))
+               (second-hex
+                (and first-hex
+                     (selector-hex-byte-value
+                      (u8vector-ref bytes (+ index 2))))))
+          (cond
+           ((and first-hex second-hex)
+            (write-char #\% output)
+            (write-char (selector-hex-digit first-hex) output)
+            (write-char (selector-hex-digit second-hex) output)
+            (loop (+ index 3)))
+           ((selector-component-unreserved-byte? byte)
+            (write-char (integer->char byte) output)
+            (loop (+ index 1)))
+           (else
+            (write-char #\% output)
+            (write-char (selector-hex-digit (quotient byte 16)) output)
+            (write-char (selector-hex-digit (modulo byte 16)) output)
+            (loop (+ index 1)))))))
+    (get-output-string output)))
+
+;;; Boundary:
+;;; - Byte classification stays composable so percent encoding does not grow a branch ladder.
+;; : (-> Integer Boolean)
+(def (selector-component-unreserved-byte? byte)
+  (ormap (lambda (predicate) (predicate byte))
+         (list selector-digit-byte?
+               selector-uppercase-byte?
+               selector-lowercase-byte?
+               selector-unreserved-punctuation-byte?)))
+
+;; : (-> Integer Boolean)
+(def (selector-digit-byte? byte)
+  (and (>= byte 48) (<= byte 57)))
+
+;; : (-> Integer Boolean)
+(def (selector-uppercase-byte? byte)
+  (and (>= byte 65) (<= byte 90)))
+
+;; : (-> Integer Boolean)
+(def (selector-lowercase-byte? byte)
+  (and (>= byte 97) (<= byte 122)))
+
+;; : (-> Integer Boolean)
+(def (selector-unreserved-punctuation-byte? byte)
+  ;; Structural selector components use RFC 3986 unreserved bytes only;
+  ;; query delimiters such as `?` must be percent-encoded.
+  (member byte '(45 46 95 126)))
+
+(def (selector-hex-byte-value byte)
+  (cond
+   ((selector-digit-byte? byte) (- byte 48))
+   ((and (>= byte 65) (<= byte 70)) (+ 10 (- byte 65)))
+   ((and (>= byte 97) (<= byte 102)) (+ 10 (- byte 97)))
+   (else #f)))
+
+(def (selector-hex-digit value)
+  (integer->char (+ value (if (< value 10) 48 55))))
 
 ;;; Range selector encoding is shared by parser, search, snapshots, and CLI query.
 ;;; Keep the string shape centralized so colon/dash compatibility cannot drift.

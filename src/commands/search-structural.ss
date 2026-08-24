@@ -151,7 +151,7 @@
                      " facts=" (length facts)
                      " schemaId=" (hash-get packet 'schemaId))
           (emit-structural-syntax-fact-lines facts)
-          (displayln "nextCommand=gerbil-scheme-harness query --selector <path:start-end> --workspace . --code")))))
+          (displayln "nextCommand=asp gerbil-scheme search owner <owner-path> items --query <symbol> --workspace . --view seeds")))))
   0)
 
 ;;; Artifact mode is explicit validation/debug transport.

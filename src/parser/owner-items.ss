@@ -3,6 +3,7 @@
 
 (import :gerbil/expander
         :gerbil/gambit
+        (only-in :gslph/src/parser/definition-syntax definitions-from-form)
         :gslph/src/parser/exports
         :gslph/src/parser/model
         (only-in :gslph/src/parser/package
@@ -63,6 +64,10 @@
 (def +owner-items-source-extensions+ '(".ss" ".ssi" ".scm" ".sld"))
 ;; (List ConfigFileName)
 (def +owner-items-config-files+ '("gerbil.pkg" "build.ss"))
+;; Exact-owner Scheme parsing is intentionally bounded. Shared Rust owns bulk
+;; and oversized-source indexing.
+(def +owner-items-max-source-bytes+ (* 1024 1024))
+(def +owner-items-max-source-lines+ 50000)
 
 ;; : (-> Path Boolean )
 (def (owner-items-source-path? path)
@@ -491,13 +496,28 @@
                                   (number->string end)))))
 
 ;;; Size boundary:
-;;; - Line count is advisory owner metadata.
-;;; - Read failures become zero so owner browsing can still show parse errors.
+;;; - Scan once with constant memory before native form materialization.
+;;; - Reject oversized owners instead of retaining both a line list and forms.
 ;; : (-> SourcePath Integer )
 (def (owner-source-line-count path)
-  (with-catch
-   (lambda (_) 0)
-   (lambda () (length (read-file-lines path)))))
+  (let (bytes (file-info-size (file-info path)))
+    (when (> bytes +owner-items-max-source-bytes+)
+      (error "owner source exceeds Scheme parse budget; use asp search/query"
+             path bytes))
+    (call-with-input-file path
+      (lambda (port)
+        (let (lines 1)
+          (let loop ()
+            (let (char (read-char port))
+              (if (eof-object? char)
+                lines
+                (begin
+                  (when (char=? char #\newline)
+                    (set! lines (+ lines 1)))
+                  (when (> lines +owner-items-max-source-lines+)
+                    (error "owner source exceeds Scheme parse line budget; use asp search/query"
+                           path lines))
+                  (loop))))))))))
 
 ;;; Read strategy:
 ;;; - Prefer core-read-module for ordinary Gerbil modules.
