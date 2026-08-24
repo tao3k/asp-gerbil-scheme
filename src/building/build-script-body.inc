@@ -35,37 +35,48 @@
 ;; that missing edge visible by invalidating only a stale generated executable;
 ;; the same std/make invocation remains the sole builder and linker.
 (def (framework-invalidate-stale-executables! build-spec source-directory bindir)
-  (let (runtime-modules (filter string? build-spec))
-    (for-each
-     (lambda (spec)
-       (match spec
-         ([exe: module bin: binary]
-          (let ((executable (path-expand binary bindir))
-                (sources (cons module runtime-modules)))
-            (when (and (file-exists? executable)
-                       (ormap
-                        (lambda (source)
-                          (framework-runtime-source-newer-than-executable?
-                           source-directory source executable))
-                        sources))
-              (delete-file executable))))
-         (else (void))))
-     build-spec)))
+  (for-each
+   (lambda (spec)
+     (match spec
+       ([exe: module bin: binary]
+        (let ((executable (path-expand binary bindir))
+              (sources
+               (cons module
+                     (framework-modules-before-target build-spec spec))))
+          (when (and (file-exists? executable)
+                     (ormap
+                      (lambda (source)
+                        (framework-runtime-source-newer-than-executable?
+                         source-directory source executable))
+                      sources))
+            (delete-file executable))))
+       (else (void))))
+   build-spec))
+
+(def (framework-modules-before-target build-spec target)
+  (let loop ((rest build-spec) (modules []))
+    (cond
+     ((null? rest) (reverse modules))
+     ((eq? (car rest) target) (reverse modules))
+     ((string? (car rest)) (loop (cdr rest) (cons (car rest) modules)))
+     (else (loop (cdr rest) modules)))))
 
 (def (framework-executable-build-spec module binary
-                                      (runtime-modules []))
+                                      (runtime-modules [])
+                                      (library-modules []))
   (append runtime-modules
-          `((exe: ,module bin: ,binary))))
+          `((exe: ,module bin: ,binary))
+          library-modules))
 
 (def (framework-validate-runtime-closure! build-spec)
   (def (module-name id)
     (if (symbol? id) (symbol->string id) id))
-  (let (declared (filter string? build-spec))
-    (for-each
-     (lambda (spec)
-       (match spec
-         ([exe: module bin: binary]
-          (let* ((stub-path
+  (for-each
+   (lambda (spec)
+     (match spec
+       ([exe: module bin: binary]
+        (let* ((declared (framework-modules-before-target build-spec spec))
+               (stub-path
                   (string-append
                    (path-expand binary (framework-build-bindir))
                    "__exe.scm"))
@@ -98,8 +109,8 @@
               (unless (equal? actual expected)
                 (error "provider runtime closure drift"
                        expected actual stub-path)))))
-         (else (void))))
-     build-spec)))
+       (else (void))))
+   build-spec))
 
 (def (framework-build-cache-root)
   (getenv "GERBIL_PATH" (gerbil-home)))
@@ -259,6 +270,7 @@
     (dependencyCacheIsolation . "GERBIL_BUILD_PREFIX")
     (nativeLinkWorkingDirectory . "declared-bindir")
     (buildGraphProjection . "declared-compiler-runtime-closure-to-std/make")
+    (libraryBuildProjection . "post-executable-package-modules-to-std/make")
     (runtimeClosureDriftOracle . "gerbil-executable-stub")
     (executableFreshnessOwner . "declared-runtime-closure-to-std-make")
     (cacheConcurrencyOwner . "kernel-flock-per-GERBIL_PATH")
