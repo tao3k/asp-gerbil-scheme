@@ -41,6 +41,8 @@
   '("src/support/time"
     "src/support/args"
     "src/protocol/json-output"
+    "src/testing/gxtest-syntax"
+    "src/parser/comment-quality-classifier"
     "src/parser/comment-quality"
     "src/parser/dependency-adapter-quality"
     "src/parser/exports"
