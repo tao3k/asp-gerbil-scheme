@@ -39,9 +39,28 @@
 ;; becoming part of the resident executable closure.
 (def +provider-library-modules+
   '("src/support/time"
-    "src/commands/guide"
+    "src/support/args"
+    "src/protocol/json-output"
+    "src/parser/comment-quality"
+    "src/parser/dependency-adapter-quality"
+    "src/parser/exports"
+    "src/parser/function-quality"
+    "src/parser/higher-order"
+    "src/parser/parse-workers"
+    "src/parser/profile"
+    "src/parser/poo"
+    "src/parser/quality-shape"
+    "src/parser/reader"
+    "src/parser/source-file"
+    "src/parser/source-scope"
+    "src/parser/test-source-scope"
+    "src/parser/typed-contract"
+    "src/parser/core"
+    "src/parser/facade"
+    "src/parser/language-projection"
     "src/commands/query"
-    "src/commands/projection"))
+    "src/commands/projection"
+    "src/testing/execution-profile"))
 
 (def +provider-runtime-build-spec+
   (framework-executable-build-spec

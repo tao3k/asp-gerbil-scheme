@@ -2,7 +2,7 @@
 ;;; Provider-native exact projection transport.
 
 (import :gslph/src/exact-source-projection
-        :gslph/src/protocol/json
+        (only-in :gslph/src/protocol/json-output write-json-line)
         (only-in :std/text/json read-json)
         :gslph/src/support/args)
 
