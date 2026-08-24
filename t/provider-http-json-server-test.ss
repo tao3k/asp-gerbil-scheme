@@ -10,7 +10,8 @@
         (only-in :std/misc/path path-expand)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
-        (only-in :std/sugar hash)
+        (only-in :std/sugar hash hash-key?)
+        (only-in :std/text/base64 base64-encode)
         (only-in :std/text/json read-json write-json)
         (only-in :gslph/src/support/time
                  duration-micros
@@ -129,6 +130,35 @@
            ("requestId" request-id)
            ("operation" "projection-batch")
            ("payload" header)))))
+
+(def (exact-query-request request-id projection-kind)
+  (let* ((owner-path "src/sample.ss")
+         (selector "gerbil-scheme://src/sample.ss#item/function/sample")
+         (source "(def (sample value) (+ value 1))\n")
+         (source-bytes (string->utf8 source)))
+    (json-string
+     (hash
+      ("schemaId" "agent.semantic-protocols.provider-runtime-request-frame")
+      ("schemaVersion" "1")
+      ("requestId" request-id)
+      ("operation" "query")
+      ("payload"
+       (hash
+        ("schemaId" "agent.semantic-protocols.provider-native-exact-request")
+        ("schemaVersion" "1")
+        ("languageId" "gerbil-scheme")
+        ("providerId" "asp-gerbil-scheme")
+        ("projectionKind" projection-kind)
+        ("structuralSelector" selector)
+        ("ownerPath" owner-path)
+        ("generationIdentityDigest" (make-string 64 #\a))
+        ("parserIdentityDigest" (make-string 64 #\b))
+        ("queryPackDigest" (make-string 64 #\c))
+        ("sourceDigest" (make-string 64 #\d))
+        ("sourceByteLength" (u8vector-length source-bytes))
+        ("sourceEncoding" "base64")
+        ("sourceBytesBase64" (base64-encode source-bytes))
+        ("transport" "stdin-json")))))))
 
 (def (read-nonempty-line port)
   (let (line (read-line port))
@@ -263,7 +293,7 @@
            (check (hash-ref health "registrationDigest") => +registration-digest+)
            (check (hash-ref health "contractDigest") => +contract-digest+)
            (let ((operations (hash-ref health "operations")))
-             (check (length operations) => 2)
+             (check (length operations) => 3)
              (check (hash-ref (car operations) "operation") => "projection-batch")
              (check (hash-ref (car operations) "requestSchemaId")
                     => "https://schemas.agent-semantic-protocols.dev/provider-language-projection-batch-request.schema.json")
@@ -273,11 +303,55 @@
              (check (hash-ref (cadr operations) "requestSchemaId")
                     => "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-request.schema.json")
              (check (hash-ref (cadr operations) "responseSchemaId")
-                    => "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-response.schema.json"))
+                    => "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-response.schema.json")
+             (check (hash-ref (caddr operations) "operation") => "query")
+             (check (hash-ref (caddr operations) "requestSchemaId")
+                    => "https://agent-semantic-protocols.dev/schemas/provider-native-exact-request.v1.schema.json")
+             (check (hash-ref (caddr operations) "responseSchemaId")
+                    => "https://agent-semantic-protocols.dev/schemas/provider-native-exact-response.v1.schema.json"))
            (check (hash-ref invalid "schemaVersion") => "1")
            (check (hash-ref invalid "outcome") => "error")
            (check (string? (hash-ref invalid "error" #f)) => #t)
            (check (> (string-length (hash-ref invalid "error" "")) 0) => #t)
+           (check (hash-ref shutdown "state") => "draining")
+           (read-all-as-string process))))))
+   (test-case
+    "exact source and callable skeleton query share the resident HTTP lifecycle"
+    (let* ((package-root (current-directory))
+           (artifact (provider-test-artifact package-root)))
+      (run-process
+       (provider-environment package-root artifact #t)
+       directory: package-root
+       coprocess:
+       (lambda (process)
+         (let* ((bootstrap (read-bootstrap-json process))
+                (endpoint (hash-ref bootstrap "endpoint"))
+                (source-response
+                 (http-post-json
+                  (string-append endpoint "v1/provider-runtime")
+                  (exact-query-request "exact-source" "source")))
+                (skeleton-response
+                 (http-post-json
+                  (string-append endpoint "v1/provider-runtime")
+                  (exact-query-request "exact-skeleton" "callable-skeleton")))
+                (shutdown
+                 (http-post-json (string-append endpoint "shutdown") "{}")))
+           (for-each
+            (lambda (response)
+              (check (hash-ref response "outcome") => "ready")
+              (let* ((payload (hash-ref response "payload"))
+                     (facts (hash-ref payload "normalizedParserFacts")))
+                (check (hash-ref payload "ownerPath") => "src/sample.ss")
+                (check (hash-ref payload "resolutionState") => "resolved")
+                (check (hash-ref facts "itemName") => "sample")
+                (check (hash-ref facts "ownerPath") => "src/sample.ss")))
+            (list source-response skeleton-response))
+           (check (hash-ref (hash-ref source-response "payload") "projectionText")
+                  => "(def (sample value) (+ value 1))\n")
+           (check (hash-table?
+                   (hash-ref (hash-ref skeleton-response "payload")
+                             "projectionPayload"))
+                  => #t)
            (check (hash-ref shutdown "state") => "draining")
            (read-all-as-string process))))))
    (test-case
@@ -411,6 +485,32 @@
                  (http-post-json
                   (string-append endpoint "v1/provider-runtime")
                   frame))
+                (not-applicable-frame
+                 (json-string
+                  (hash
+                   ("schemaId" "agent.semantic-protocols.provider-runtime-request-frame")
+                   ("schemaVersion" "1")
+                   ("requestId" "project-resolution-not-applicable")
+                   ("operation" "project-resolution")
+                   ("payload"
+                    (hash
+                     ("schemaId" "agent.semantic-protocols.provider-project-resolution-request")
+                     ("schemaVersion" "1")
+                     ("languageId" "gerbil-scheme")
+                     ("providerId" "asp-gerbil-scheme")
+                     ("candidateBase" ".")
+                     ("candidateGeneration"
+                      (hash
+                       ("algorithm" "blake3-path-set-v1")
+                       ("digest" (string-append "blake3:" (make-string 64 #\d)))
+                       ("authorities" ["asp-workspace-admission"])))
+                     ("collectionScope" (hash ("kind" "complete-generation")))
+                     ("candidatePaths" ["Cargo.toml" "src/lib.rs"])
+                     ("policyExclusions" []))))))
+                (not-applicable-response
+                 (http-post-json
+                  (string-append endpoint "v1/provider-runtime")
+                  not-applicable-frame))
                 (shutdown
                  (http-post-json (string-append endpoint "shutdown") "{}")))
            (unless (equal? (hash-ref response "outcome") "ready")
@@ -420,6 +520,13 @@
              (check (hash-ref inner "schemaVersion") => "1")
              (check (hash-ref inner "providerId") => "asp-gerbil-scheme")
              (check (hash-ref inner "state") => "resolved"))
+           (check (hash-ref not-applicable-response "outcome") => "ready")
+           (let (inner (hash-ref not-applicable-response "payload"))
+             (check (hash-ref inner "schemaVersion") => "1")
+             (check (hash-ref inner "providerId") => "asp-gerbil-scheme")
+             (check (hash-ref inner "state") => "not-applicable")
+             (check (hash-key? inner "scope") => #f)
+             (check (hash-key? inner "failure") => #f))
            (check (hash-ref shutdown "state") => "draining")
            (read-all-as-string process))))))
    (test-case

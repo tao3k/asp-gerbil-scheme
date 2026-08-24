@@ -1,6 +1,7 @@
 (import :gerbil/gambit
         (only-in :gslph/src/commands/project-resolution project-resolution-request->response)
         (only-in :gslph/src/commands/projection-batch project-provider-projection-batch)
+        (only-in :gslph/src/exact-source-projection project-provider-native-exact-request)
         (only-in :std/sugar hash)
         (only-in :std/text/json write-json))
 
@@ -85,7 +86,12 @@
          ("requestSchemaId"
           "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-request.schema.json")
          ("responseSchemaId"
-          "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-response.schema.json"))])
+          "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-response.schema.json"))
+   (hash ("operation" "query")
+         ("requestSchemaId"
+          "https://agent-semantic-protocols.dev/schemas/provider-native-exact-request.v1.schema.json")
+         ("responseSchemaId"
+          "https://agent-semantic-protocols.dev/schemas/provider-native-exact-response.v1.schema.json"))])
 
 (def (required-environment name)
   (let (value (getenv name #f))
@@ -118,7 +124,19 @@
     (project-provider-projection-batch payload))
    ((string=? operation "project-resolution")
     (project-resolution-request->response payload))
+   ((string=? operation "query")
+    (project-provider-native-exact-request
+     payload
+     (required-environment "ASP_PROVIDER_ID")
+     (required-payload-string payload "parserIdentityDigest")
+     (required-payload-string payload "queryPackDigest")))
    (else (error "resident Gerbil provider operation is not admitted" operation))))
+
+(def (required-payload-string payload name)
+  (let (value (hash-ref payload name #f))
+    (unless (and (string? value) (> (string-length value) 0))
+      (error "resident Gerbil provider payload identity is missing" name))
+    value))
 
 (def (provider-runtime-request->response request)
   (let* ((request-id (hash-ref request "requestId" "invalid-request"))

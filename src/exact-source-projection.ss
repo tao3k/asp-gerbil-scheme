@@ -1,7 +1,36 @@
 ;;; -*- Gerbil -*-
 ;;; Provider-core exact source and callable-skeleton projection.
 
-(import :gslph/src/parser/facade
+(import :gerbil/expander
+        :gerbil/gambit
+        (only-in :gslph/src/parser/control-flow
+                 control-flow-facts-from-form)
+        (only-in :gslph/src/parser/exact-owner
+                 parse-exact-owner-definitions
+                 read-exact-owner-forms)
+        (only-in :gslph/src/parser/model
+                 binding-fact-end
+                 binding-fact-kind
+                 binding-fact-name
+                 binding-fact-scope
+                 binding-fact-start
+                 call-fact-callee
+                 call-fact-caller
+                 call-fact-end
+                 call-fact-start
+                 control-flow-fact-caller
+                 control-flow-fact-end
+                 control-flow-fact-kind
+                 control-flow-fact-role
+                 control-flow-fact-start
+                 definition-end
+                 definition-formals
+                 definition-kind
+                 definition-name
+                 definition-start)
+        (only-in :gslph/src/parser/syntax
+                 binding-facts-from-form
+                 calls-from-form)
         (only-in :std/srfi/1 find foldl)
         (only-in :std/srfi/13 string-contains string-index string-prefix? string-split)
         (only-in :std/text/base64 base64-decode))
@@ -115,7 +144,10 @@
        (call-with-output-file path
          (lambda (port)
            (display source-text port)))
-       (let (result (proc (parse-source-file "/tmp" name)))
+       (let (result
+             (proc (vector
+                    (parse-exact-owner-definitions path name)
+                    (read-exact-owner-forms path))))
          (delete-file path)
          result)))))
 
@@ -172,7 +204,13 @@
 (def (exit-callee? callee)
   (member callee '("abort" "error" "errorf" "exit" "raise")))
 
-(def (collect-callable-segments file definition)
+(def (facts-from-forms extractor owner-path forms)
+  (apply append
+         (map (lambda (form)
+                (extractor owner-path form (syntax->datum form)))
+              forms)))
+
+(def (collect-callable-segments owner-path forms definition)
   (let* ((name (definition-name definition))
          (bindings
           (map (lambda (fact)
@@ -184,7 +222,13 @@
                          (and (equal? (binding-fact-scope fact) name)
                               (not (equal? (binding-fact-kind fact)
                                            "formal"))))
-                       (source-file-bindings file))))
+                       (facts-from-forms binding-facts-from-form
+                                         owner-path forms))))
+         (control-flow
+          (filter (lambda (fact)
+                    (equal? (control-flow-fact-caller fact) name))
+                  (facts-from-forms control-flow-facts-from-form
+                                    owner-path forms)))
          (branches
           (map (lambda (fact)
                  (make-segment "branch"
@@ -192,17 +236,19 @@
                                (control-flow-fact-start fact)
                                (control-flow-fact-end fact)))
                (filter (lambda (fact)
-                         (equal? (control-flow-fact-caller fact) name))
-                       (source-file-control-flow-forms file))))
+                         (not (equal? (control-flow-fact-role fact)
+                                      "manual-loop")))
+                       control-flow)))
          (loops
           (map (lambda (fact)
                  (make-segment "loop"
-                               (loop-driver-fact-driver-kind fact)
-                               (loop-driver-fact-start fact)
-                               (loop-driver-fact-end fact)))
+                               (control-flow-fact-kind fact)
+                               (control-flow-fact-start fact)
+                               (control-flow-fact-end fact)))
                (filter (lambda (fact)
-                         (equal? (loop-driver-fact-caller fact) name))
-                       (source-file-loop-driver-facts file))))
+                         (equal? (control-flow-fact-role fact)
+                                 "manual-loop"))
+                       control-flow)))
          (exits
           (map (lambda (fact)
                  (make-segment "exit"
@@ -212,7 +258,7 @@
                (filter (lambda (fact)
                          (and (equal? (call-fact-caller fact) name)
                               (exit-callee? (call-fact-callee fact))))
-                       (source-file-calls file))))
+                       (facts-from-forms calls-from-form owner-path forms))))
          (ordered (sort-segments (append bindings branches loops exits))))
     (let loop ((rest ordered) (ordinal 1) (out '()))
       (if (null? rest)
@@ -354,9 +400,18 @@
          (schemaVersion "1")
          (languageId +language-id+)
          (providerId +provider-id+)
+         (ownerPath (selector-owner selector))
          (projectionMode projection-kind)
          (requestedStructuralSelector (selector-requested selector))
          (structuralSelector (selector-requested selector))
+         (resolutionState "resolved")
+         (normalizedParserFacts
+          (hash
+           (itemKind (selector-kind selector))
+           (itemName (selector-symbol selector))
+           (ownerPath (selector-owner selector))
+           (resolvedSelector (selector-requested selector))
+           (resolutionState "resolved")))
          (sourceContentDigest (required-string request "sourceDigest"))
          (sourceByteStart (vector-ref byte-range 0))
          (sourceByteEnd (- (vector-ref byte-range 1) 1))))
@@ -379,15 +434,17 @@
                        identity)))
                segments))))
 
-(def (project-parsed-request request selector source-bytes file)
-  (let* ((definition
+(def (project-parsed-request request selector source-bytes parsed)
+  (let* ((definitions (vector-ref parsed 0))
+         (forms (vector-ref parsed 1))
+         (definition
           (find (lambda (candidate)
                   (and (equal? (definition-name candidate)
                                (selector-symbol selector))
                        (definition-kind-matches?
                         (selector-kind selector)
                         (definition-kind candidate))))
-                (source-file-definitions file)))
+                definitions))
          (byte-length (u8vector-length source-bytes))
          (starts (line-start-offsets source-bytes)))
     (unless definition
@@ -398,7 +455,8 @@
                                     byte-length
                                     (definition-start definition)
                                     (definition-end definition)))
-           (segments (collect-callable-segments file definition))
+           (segments (collect-callable-segments
+                      (selector-owner selector) forms definition))
            (projection-kind (required-string request "projectionKind")))
       (cond
        ((equal? projection-kind "source")

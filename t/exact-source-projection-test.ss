@@ -22,14 +22,14 @@
             "agent.semantic-protocols.provider-native-exact-request")
       (cons "schemaVersion" "1")
       (cons "languageId" "gerbil-scheme")
-      (cons "providerId" "gerbil-scheme-harness")
+      (cons "providerId" "asp-gerbil-scheme")
       (cons "structuralSelector" selector)
       (cons "ownerPath" "src/sample.ss")
       (cons "projectionKind" projection-kind)
       (cons "generationIdentityDigest" "generation-digest")
       (cons "parserIdentityDigest" "parser-digest")
       (cons "queryPackDigest" "query-pack-digest")
-      (cons "sourceDigest" "asp-owned-content-identity")
+      (cons "sourceDigest" (make-string 64 #\e))
       (cons "sourceByteLength" (u8vector-length source-bytes))
       (cons "sourceEncoding" "base64")
       (cons "sourceBytesBase64" (base64-encode source-bytes))
@@ -46,7 +46,7 @@
            (skeleton
             (project-provider-native-exact-request
              (native-request root "callable-skeleton")
-             "gerbil-scheme-harness"
+             "asp-gerbil-scheme"
              "parser-digest"
              "query-pack-digest"))
            (payload (hash-ref skeleton 'projectionPayload))
@@ -59,7 +59,7 @@
            (source
             (project-provider-native-exact-request
              (native-request child-selector "source")
-             "gerbil-scheme-harness"
+             "asp-gerbil-scheme"
              "parser-digest"
              "query-pack-digest")))
       (check (hash-ref payload 'rootNodeId) => "callable:root")
@@ -77,8 +77,14 @@
            (source
             (project-provider-native-exact-request
              (native-request root "source")
-             "gerbil-scheme-harness"
+             "asp-gerbil-scheme"
              "parser-digest"
              "query-pack-digest")))
       (check (hash-ref source 'sourceContentDigest)
-             => "asp-owned-content-identity")))))
+             => (make-string 64 #\e))
+      (check (hash-ref source 'ownerPath) => "src/sample.ss")
+      (let (facts (hash-ref source 'normalizedParserFacts))
+        (check (hash-ref facts 'itemKind) => "function")
+        (check (hash-ref facts 'itemName) => "sample")
+        (check (hash-ref facts 'ownerPath) => "src/sample.ss")
+        (check (hash-ref facts 'resolutionState) => "resolved"))))))

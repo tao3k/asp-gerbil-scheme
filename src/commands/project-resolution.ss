@@ -46,38 +46,39 @@
           (if (member "gerbil.pkg" candidate-manifests)
             ["gerbil.pkg"]
             [])))
-    (when (null? candidate-manifests)
-      (raise (make-project-resolution-not-applicable)))
-    (when (null? manifests)
-      (error "provider project entry is required: tracked gerbil.pkg"))
-    (let* ((packages
-            (filter-map
-             (lambda (manifest)
-               (gerbil-package-scope workspace-root manifest candidates))
-             manifests))
-           (entry-manifest (car manifests)))
-      (when (null? packages)
-        (error "candidate gerbil.pkg files declare no package metadata"))
-      (let* ((generation
-              (required-string
-               (required-hash request "candidateGeneration")
-               "digest"))
-             (unresolved
-              (filter-map package-unresolved packages))
-             (scopes
-              (filter-map package-source-scope packages))
-             (internal-edges
-              (package-internal-dependencies packages))
-             (external-dependencies
-              (package-external-dependencies packages)))
-        (hash
-         ("schemaId" +response-schema-id+)
-         ("schemaVersion" "1")
-         ("languageId" +language-id+)
-         ("providerId" +provider-id+)
-         ("state" "resolved")
-         ("scope"
-          (hash
+    (if (null? candidate-manifests)
+      (project-resolution-not-applicable-response)
+      (begin
+        (when (null? manifests)
+          (error "provider project entry is required: tracked gerbil.pkg"))
+        (let* ((packages
+                (filter-map
+                 (lambda (manifest)
+                   (gerbil-package-scope workspace-root manifest candidates))
+                 manifests))
+               (entry-manifest (car manifests)))
+          (when (null? packages)
+            (error "candidate gerbil.pkg files declare no package metadata"))
+          (let* ((generation
+                  (required-string
+                   (required-hash request "candidateGeneration")
+                   "digest"))
+                 (unresolved
+                  (filter-map package-unresolved packages))
+                 (scopes
+                  (filter-map package-source-scope packages))
+                 (internal-edges
+                  (package-internal-dependencies packages))
+                 (external-dependencies
+                  (package-external-dependencies packages)))
+            (hash
+             ("schemaId" +response-schema-id+)
+             ("schemaVersion" "1")
+             ("languageId" +language-id+)
+             ("providerId" +provider-id+)
+             ("state" "resolved")
+             ("scope"
+              (hash
            ("schemaId" +scope-schema-id+)
            ("schemaVersion" "1")
            ("state" "resolved")
@@ -114,7 +115,7 @@
              ("fullWorkspaceReads" 0)
              ("fullManifestReparses" 0)
              ("dbOpens" 0)
-             ("elapsedMicros" 0))))))))))
+             ("elapsedMicros" 0))))))))))))
 
 (def (validate-project-resolution-request request)
   (unless (hash-table? request)
