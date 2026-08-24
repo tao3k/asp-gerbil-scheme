@@ -3,4 +3,4 @@
 ((ownerCount . 64)
  (itemsPerOwner . 3)
  (workspaceAnalysis . #f)
- (transport . framed-stdin-v1))
+ (transport . http-json))

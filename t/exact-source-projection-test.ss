@@ -62,7 +62,7 @@
              "gerbil-scheme-harness"
              "parser-digest"
              "query-pack-digest")))
-      (check (hash-ref skeleton 'schemaVersion) => "1")
+      (check (hash-ref payload 'rootNodeId) => "callable:root")
       (check (not branch) => #f)
       (check (not
               (not

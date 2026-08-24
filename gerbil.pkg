@@ -1,7 +1,7 @@
 (package:
  gslph
- depend:
-("github.com/mighty-gerbils/gerbil-poo")
+depend:
+("github.com/mighty-gerbils/gerbil-poo@1c3225637525400341a09e958296962c10184ead")
  policy:
  ((macro-governance
    allow-generated:

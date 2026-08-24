@@ -82,7 +82,7 @@
 
 (let* ((manifest
         (call-with-input-file
-         "provider/asp-provider-manifest.json"
+         "schemas/asp-provider.json"
          read-json))
        (capabilities (hash-get manifest "searchCapabilities"))
        (routes (hash-get manifest "routeBindings")))

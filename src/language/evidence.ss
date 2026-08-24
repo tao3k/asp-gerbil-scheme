@@ -534,7 +534,7 @@
           (policyRules ["GERBIL-SCHEME-MOD-R006"
                         "GERBIL-SCHEME-AGENT-POLICY-004"
                         "GERBIL-SCHEME-AGENT-POLICY-005"])
-          (styleDoc "docs/10-19-rfcs/10.05-cli-first-harness-ux/10.05.90-gerbil-scheme-style-conventions.org"))
+          (styleDoc "languages/gerbil-scheme-language-project-harness/docs/50-59-policy/51.05-current-project-programming-style.org"))
     [(hash (role "style-reference")
            (symbol "generating<-list")
            (selector "gerbil-utils://generator.ss#generating<-list"))

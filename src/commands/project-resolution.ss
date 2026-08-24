@@ -10,17 +10,14 @@
                  read-project-package
                  source-scope-policy-roots
                  source-scope-policy-runtime-roots)
-        (only-in :gslph/src/protocol/json write-json-line)
         :std/crypto/digest
         (only-in :std/misc/path path-directory path-expand path-normalize)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/srfi/1 filter-map find)
         (only-in :std/srfi/13 string-prefix? string-suffix?)
-        (only-in :std/sugar hash)
-        (only-in :std/text/json read-json))
+        (only-in :std/sugar hash))
 
-(export project-resolution-main
-        project-resolution-request->response)
+(export project-resolution-request->response)
 
 (def +request-schema-id+
   "agent.semantic-protocols.provider-project-resolution-request")
@@ -34,20 +31,7 @@
 (def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld"))
 (def +hex-digits+ "0123456789abcdef")
 
-(def (project-resolution-main args)
-  (unless (null? args)
-    (error "project-resolution-stdin accepts only a typed stdin request"))
-  (write-json-line
-   (with-catch
-    (lambda (error)
-      (project-resolution-failure
-       "project-entry-invalid"
-       (call-with-output-string (lambda (port) (display-exception error port)))
-       "repair-gerbil-package-entry"))
-    (lambda ()
-      (project-resolution-request->response
-       (read-json (current-input-port))))))
-  0)
+(defstruct project-resolution-not-applicable ())
 
 (def (project-resolution-request->response request)
   (validate-project-resolution-request request)
@@ -62,6 +46,8 @@
           (if (member "gerbil.pkg" candidate-manifests)
             ["gerbil.pkg"]
             [])))
+    (when (null? candidate-manifests)
+      (raise (make-project-resolution-not-applicable)))
     (when (null? manifests)
       (error "provider project entry is required: tracked gerbil.pkg"))
     (let* ((packages
@@ -137,10 +123,22 @@
     (error "project-resolution request schema must be v1"))
   (unless (equal? (required-string request "schemaVersion") "1")
     (error "project-resolution request schema must be v1"))
-  (unless (equal? (required-string request "languageId") +language-id+)
-    (error "project-resolution language identity mismatch"))
-  (unless (equal? (required-string request "providerId") +provider-id+)
-    (error "project-resolution provider identity mismatch"))
+  (let ((received-language-id (required-string request "languageId"))
+        (received-provider-id (required-string request "providerId")))
+    (unless (equal? received-language-id +language-id+)
+      (error
+       (string-append
+        "project-resolution language identity mismatch expected="
+        +language-id+
+        " received="
+        received-language-id)))
+    (unless (equal? received-provider-id +provider-id+)
+      (error
+       (string-append
+        "project-resolution provider identity mismatch expected="
+        +provider-id+
+        " received="
+        received-provider-id))))
   (unless (equal? (required-string request "candidateBase") ".")
     (error "project-resolution candidateBase must be ."))
   (required-string (required-hash request "candidateGeneration") "digest")
@@ -375,6 +373,14 @@
    ((vector? value) (vector->list value))
    ((list? value) value)
    (else (error "project-resolution request field must be an array"))))
+
+(def (project-resolution-not-applicable-response)
+  (hash
+   ("schemaId" +response-schema-id+)
+   ("schemaVersion" "1")
+   ("languageId" +language-id+)
+   ("providerId" +provider-id+)
+   ("state" "not-applicable")))
 
 (def (project-resolution-failure reason message next-action)
   (hash

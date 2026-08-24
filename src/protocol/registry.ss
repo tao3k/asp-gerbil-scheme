@@ -21,7 +21,7 @@
     [(hash
       (languageId +language-id+)
       (providerId +provider-id+)
-      (binary "gerbil-scheme-harness")
+      (binary "asp-gerbil-scheme")
       (execution "external-process")
       (namespace "agent.semantic-protocols.languages.gerbil-scheme.gerbil-scheme-harness")
       (displayName +display-name+)

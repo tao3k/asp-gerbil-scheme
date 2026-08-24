@@ -12,14 +12,12 @@
   "agent.semantic-protocols.provider-native-exact-request")
 (def +response-schema-id+
   "agent.semantic-protocols.provider-native-exact-projection")
-(def +skeleton-schema-id+
-  "agent.semantic-protocols.callable-skeleton-projection")
 (def +exact-selector-schema-id+
   "agent.semantic-protocols.exact-selector")
 (def +canonical-selector-schema-id+
   "asp.canonical-item-selector.v1")
 (def +language-id+ "gerbil-scheme")
-(def +provider-id+ "gerbil-scheme-harness")
+(def +provider-id+ "asp-gerbil-scheme")
 (def +selector-prefix+ "gerbil-scheme://")
 
 (def (required-string request key)
@@ -332,11 +330,6 @@
                          0
                          segments)))))
     (hash
-     (schemaId +skeleton-schema-id+)
-     (schemaVersion "1")
-     (projectionKind "callable-skeleton")
-     (languageId +language-id+)
-     (providerId +provider-id+)
      (rootSelector root-exact)
      (rootNodeId "callable:root")
      (callable

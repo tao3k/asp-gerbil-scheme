@@ -13,3 +13,7 @@ bin
 manifest.ss
 .bin
 version.ss
+bazel-bin
+bazel-gerbil-scheme-language-project-harness
+bazel-out
+bazel-testlogs

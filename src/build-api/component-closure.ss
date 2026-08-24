@@ -21,12 +21,14 @@
 
 (export gslph-component-names
         gslph-component-entry-files
+        gslph-source-dependency-order
         gslph-component-source-files
         gslph-component-receipt
         write-gslph-component-receipt)
 
 (def +gslph-package-module-prefix+ ":gslph/")
-(def +gslph-component-support-files+ '("build.ss" "gerbil.pkg"))
+(def +gslph-component-support-files+
+  '("build.ss" "gerbil.pkg" "src/building/build-script-body.inc"))
 (def +gslph-component-entry-files+
   '((poo-flow
      "src/build-api/framework.ss"
@@ -152,7 +154,7 @@
 ;;; only once.
 ;; : (forall (path) (-> path (List path) (List path)))
 ;; : (-> PackageRoot (List SourcePath) (List SourcePath))
-(def (gslph-component-closure root entries)
+(def (gslph-source-dependency-order root entries)
   (let ((visited (make-hash-table))
         (visiting (make-hash-table))
         (dependency-cache (make-hash-table))
@@ -184,7 +186,7 @@
 
 ;; : (-> ComponentName PackageRoot (List SourcePath))
 (def (gslph-component-source-files name root: (root (current-directory)))
-  (sort (gslph-component-closure root (gslph-component-entry-files name))
+  (sort (gslph-source-dependency-order root (gslph-component-entry-files name))
         string<?))
 
 ;;; Intent: the sorted receipt is the deterministic analysis boundary consumed

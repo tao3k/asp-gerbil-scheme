@@ -325,14 +325,12 @@
             (let (request (package-source-stage->request stage []))
               (check
                (build-request-stage-specs request)
-               => '(((ssi: "topology-core.ss"))
-                    ("topology-policy.ss")
-                    ("topology-api.ss")))
+               => '(((ssi: "topology-core.ss")
+                    "topology-policy.ss"
+                    "topology-api.ss")))
               (check
                (map build-stage-label (build-request-stage-plan request))
-               => '("topology-fixture modules=1"
-                    "topology-fixture modules=1"
-                    "topology-fixture modules=1"))))
+               => '("topology-fixture modules=3"))))
           (lambda ()
             (for-each (lambda (path)
                         (when (file-exists? path) (delete-file path)))

@@ -72,7 +72,6 @@
       ((controller
         (object<-alist
          `((kind . gslph.execution-window-controller.v1)
-           (worker-count . 2)
            (hard-max-rss-bytes . 4096)
            (headroom-bytes . 256)
            (window-size . 2)
@@ -125,9 +124,8 @@
      "adaptive execution preserves dependency order"
      (hash-get object "dependency-order-preserved"))
     (assert-true
-     "adaptive execution reports controller policy"
-     (and (= (hash-get object "worker-count") 2)
-          (= (hash-get object "hard-max-rss-bytes") 4096)))
+     "adaptive execution reports its memory admission policy"
+     (= (hash-get object "hard-max-rss-bytes") 4096))
     (assert-true
      "adaptive window observations expose canonical measurements"
      (and (equal? (hash-get (car windows) "outcome") "completed")

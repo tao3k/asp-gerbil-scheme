@@ -4,20 +4,22 @@
 * Purpose
 
 The Building Framework is a library, not a project-specific shell recipe.
-Downstream =build.ss= files declare a build plan with hygienic Gerbil macros;
-the framework executes ordinary =BuildProfile= and =BuildRequest= values.
+Downstream =build.ss= files use =building/build-script= for executable builds.
+The declarative BuildRequest macros remain the typed plan/receipt surface for
+Testing and inspection; they are not a second compiler entry point.
 
-The declaration layer never detects a host platform, changes =SDKROOT=, selects
-a compiler, or writes environment variables.  The caller owns its environment,
-=std/make= options, stages, freshness predicate, context, and Testing gates.
+The declaration layer does not schedule compiler workers. Native toolchain
+selection, cache admission, and the default host-core projection belong to
+Building, while =std/make= owns the dependency graph and consumes
+=GERBIL_BUILD_CORES=.
 
 * Dependency Boundary
 
 #+begin_mermaid
 flowchart LR
-  Script["Downstream build.ss"] --> Decl["building/declarative"]
-  Decl --> Build["building/facade"]
-  Build --> Make["std/make"]
+  Script["Downstream build.ss"] --> Bridge["building/build-script"]
+  Bridge --> Make["std/make"]
+  Decl["typed plan and receipt"] --> Build["building/facade"]
   TestDecl["testing/building"] --> TestModel["testing/model"]
   TestDecl --> Build
   Script --> TestDecl
@@ -30,13 +32,27 @@ strictly =Testing -> Building=.
 * Downstream Form
 
 #+begin_src scheme
+(import :gslph/src/building/build-script)
+
+(defbuild-script
+  (framework-executable-build-spec
+   "src/main"
+   "example-provider"
+   '("src/core" "src/workflow"))
+  bindir: (framework-build-bindir))
+#+end_src
+
+For typed plan inspection and Testing projection, downstream libraries may also
+compose the declarative API:
+
+#+begin_src scheme
 (import :gslph/src/building/declarative
         :gslph/src/testing/building)
 
 (define-std-build project-build
   label: "project-build"
   source: "src"
-  make-options: [parallelize: 4]
+  make-options: []
   label-of: car
   after: (lambda (_stage _context _result) #!void)
   stage-specs: [["core.ss"] ["workflow.ss"]]
@@ -62,9 +78,11 @@ composition when a named binding is not appropriate.
 
 - A BuildRequest is inspectable before execution and can be projected into a
   receipt without running a compiler.
-- Process configuration is inherited by default.  Any explicit compiler or SDK
-  choice remains a downstream concern, expressed through normal invocation or
-  the caller's =std/make= options.
+- Compiler worker count is never duplicated in the declaration. A positive
+  =GERBIL_BUILD_CORES= remains authoritative; otherwise the Scheme Framework
+  supplies =##cpu-count= before compiler import to the single upstream
+  scheduler. The declared runtime-module closure is target data, not another
+  scheduler; Gerbil's emitted executable stub is its conformance oracle.
 - The Testing projection produces plan-only runners.  Stage execution remains
   an explicit Building operation.
 - Multiple suite and case names are mapped functionally, so matrix coverage is

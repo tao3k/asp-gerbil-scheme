@@ -1,6 +1,6 @@
-load("//components:poo-flow.bzl", "POO_FLOW_COMPONENT_SOURCES")
+load("@gerbil_bazel//gerbil:defs.bzl", "gerbil_project_compile")
 
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//visibility:private"])
 
 exports_files([
     "build.ss",
@@ -8,18 +8,41 @@ exports_files([
 ])
 
 filegroup(
-    name = "sources",
-    srcs = glob(
-        ["**/*.ss"],
-        exclude = [
-            ".bin/**",
-            ".gerbil/**",
-            "bazel-*/**",
-        ],
-    ) + ["gerbil.pkg"],
+    name = "project_sources",
+    srcs = ["gerbil.pkg"] + glob([
+        "src/**/*.inc",
+        "src/**/*.ss",
+    ]),
 )
 
-filegroup(
-    name = "poo_flow_component_sources",
-    srcs = POO_FLOW_COMPONENT_SOURCES + ["gerbil.pkg"],
+gerbil_project_compile(
+    name = "gerbil_utils_package",
+    srcs = ["@gerbil_utils_sources//:sources"],
+    build_script = "@gerbil_utils_sources//:build_script",
+    process_guard = True,
+    require_library_output = True,
+    source_resolution_receipts = [
+        "@gerbil_utils_sources//:source_resolution_receipt",
+    ],
+)
+
+gerbil_project_compile(
+    name = "gerbil_poo_package",
+    srcs = ["@gerbil_poo_sources//:sources"],
+    build_script = "@gerbil_poo_sources//:build_script",
+    process_guard = True,
+    require_library_output = True,
+    source_resolution_receipts = [
+        "@gerbil_poo_sources//:source_resolution_receipt",
+    ],
+    deps = [":gerbil_utils_package"],
+)
+
+gerbil_project_compile(
+    name = "compile",
+    srcs = [":project_sources"],
+    args = ["compile"],
+    build_script = ":build.ss",
+    deps = [":gerbil_poo_package"],
+    visibility = ["//visibility:public"],
 )

@@ -3,7 +3,7 @@
 
 (import :gerbil/gambit
         (only-in :std/misc/path path-directory path-expand path-strip-directory)
-        (only-in "./launcher-receipt" gslph-build-module-output-file))
+        (only-in "./launcher-receipt" gslph-build-module-artifact-files))
 (export cleanup-compile-exe-artifacts!
         cleanup-generated-artifacts!
         cleanup-launcher-binary-artifacts!
@@ -45,6 +45,7 @@
 ;; Remove stale module interfaces so relinking compiles the complete closure.
 (def (cleanup-launcher-module-artifacts! output-root module-spec)
   (cleanup-generated-artifacts!
-   (map (lambda (module)
-          (gslph-build-module-output-file output-root module))
-        module-spec)))
+   (apply append
+          (map (lambda (module)
+                 (gslph-build-module-artifact-files output-root module))
+               module-spec))))

@@ -286,8 +286,6 @@
      ("spec-count" (length attempted-specs))
      ("dependency-order-preserved"
       (equal? topology-specs attempted-specs))
-     ("worker-count"
-      (execution-window-controller-worker-count controller))
      ("hard-max-rss-bytes"
       (execution-window-controller-hard-max-rss-bytes controller))
      ("windows"

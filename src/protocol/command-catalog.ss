@@ -31,11 +31,11 @@
 ;; : (List ProviderCommandDescriptor)
 (def provider-command-descriptors
   [(make-provider-command-descriptor
-    "project-resolution-stdin"
-    "gslph/src/commands/project-resolution"
-    'gslph/src/commands/project-resolution#project-resolution-main
-    'project-resolution-main
-    ["project-resolution-stdin"]
+    "serve"
+    "gslph/src/commands/provider-runtime"
+    'gslph/src/commands/provider-runtime#provider-runtime-main
+    'provider-runtime-main
+    ["serve"]
     0
     [])
    (make-provider-command-descriptor
@@ -64,14 +64,6 @@
     'gslph/src/commands/projection#projection-main
     'projection-main
     ["projection <owner-path> --workspace PROJECT_ROOT --json"]
-    0
-    [])
-   (make-provider-command-descriptor
-    "projection-batch-stdin"
-    "gslph/src/commands/projection-batch"
-    'gslph/src/commands/projection-batch#projection-batch-main
-    'projection-batch-main
-    []
     0
     [])
    (make-provider-command-descriptor
