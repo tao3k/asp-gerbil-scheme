@@ -137,31 +137,22 @@
   (and (or (null? arguments)
            (and (pair? arguments)
                 (string=? (car arguments) "compile")))
-       (or (not (framework-positive-core-count
-                 (getenv "GERBIL_BUILD_CORES" #f)))
-           (not (framework-environment-value?
-                 (getenv "GERBIL_BUILD_PREFIX" #f))))))
+       (not (framework-positive-core-count
+             (getenv "GERBIL_BUILD_CORES" #f)))))
 
 (def (framework-reexec-build-script source-file arguments)
   (let ((absolute-source-file (path-expand source-file))
         (previous-cores (getenv "GERBIL_BUILD_CORES" #f))
-        (previous-prefix (getenv "GERBIL_BUILD_PREFIX" #f))
-        (selected (number->string (max 1 (##cpu-count))))
-        (runtime-prefix (gerbil-home)))
+        (selected (number->string (max 1 (##cpu-count)))))
     (dynamic-wind
       (lambda ()
         (unless (framework-positive-core-count previous-cores)
-          (setenv "GERBIL_BUILD_CORES" selected))
-        ;; Exclude the implicit user-global Gerbil cache.  Explicit
-        ;; GERBIL_LOADPATH entries and the runtime cohort remain available.
-        (unless (framework-environment-value? previous-prefix)
-          (setenv "GERBIL_BUILD_PREFIX" runtime-prefix)))
+          (setenv "GERBIL_BUILD_CORES" selected)))
       (lambda ()
         (run-process/batch
-         (append ["gxi" absolute-source-file] arguments)))
+         (append ["gxpkg" "env" "gxi" absolute-source-file] arguments)))
       (lambda ()
-        (setenv "GERBIL_BUILD_CORES" (or previous-cores ""))
-        (setenv "GERBIL_BUILD_PREFIX" (or previous-prefix ""))))))
+        (setenv "GERBIL_BUILD_CORES" (or previous-cores ""))))))
 
 (def (call-with-framework-build-cores thunk)
   (let ((previous (getenv "GERBIL_BUILD_CORES" #f))
@@ -267,7 +258,7 @@
     (parallelismOwner . "GERBIL_BUILD_CORES")
     (defaultCoreSelection . "host-cpu-count")
     (compilerCoreCapture . "pre-import-child-process")
-    (dependencyCacheIsolation . "GERBIL_BUILD_PREFIX")
+    (dependencyEnvironmentOwner . "gxpkg-env")
     (nativeLinkWorkingDirectory . "declared-bindir")
     (buildGraphProjection . "declared-compiler-runtime-closure-to-std/make")
     (libraryBuildProjection . "post-executable-package-modules-to-std/make")
