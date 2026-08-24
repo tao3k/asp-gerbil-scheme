@@ -1,6 +1,7 @@
 ;;; Single implementation shared by the root build.ss bootstrap and the public
 ;;; :gslph/src/building/build-script module.
-(import :std/make
+(import :gerbil/gambit
+        :std/make
         (only-in :std/misc/path path-directory path-expand path-normalize)
         (only-in :std/misc/process run-process/batch)
         (only-in :std/os/flock open-output-file/lock LOCK_EX)
@@ -15,6 +16,41 @@
 
 (def (framework-build-bindir)
   (path-expand "bin" (framework-build-artifact-root)))
+
+(def (framework-file-modification-seconds path)
+  (time->seconds (file-info-last-modification-time (file-info path))))
+
+(def (framework-runtime-source-path source-directory module)
+  (path-expand (string-append module ".ss") source-directory))
+
+(def (framework-runtime-source-newer-than-executable? source-directory module
+                                                       executable)
+  (let (source (framework-runtime-source-path source-directory module))
+    (and (file-exists? source)
+         (> (framework-file-modification-seconds source)
+            (framework-file-modification-seconds executable)))))
+
+;; std/make owns compilation and linking, but its executable target does not
+;; model the explicitly embedded runtime-module closure as dependencies. Make
+;; that missing edge visible by invalidating only a stale generated executable;
+;; the same std/make invocation remains the sole builder and linker.
+(def (framework-invalidate-stale-executables! build-spec source-directory bindir)
+  (let (runtime-modules (filter string? build-spec))
+    (for-each
+     (lambda (spec)
+       (match spec
+         ([exe: module bin: binary]
+          (let ((executable (path-expand binary bindir))
+                (sources (cons module runtime-modules)))
+            (when (and (file-exists? executable)
+                       (ormap
+                        (lambda (source)
+                          (framework-runtime-source-newer-than-executable?
+                           source-directory source executable))
+                        sources))
+              (delete-file executable))))
+         (else (void))))
+     build-spec)))
 
 (def (framework-executable-build-spec module binary
                                       (runtime-modules []))
@@ -173,6 +209,8 @@
       (create-directory* bindir)
       (call-with-framework-build-lease
        (lambda ()
+         (framework-invalidate-stale-executables!
+          build-spec source-directory bindir)
          ;; std/make compiles sources under its absolute srcdir, then drains
          ;; Gambit native jobs in the caller cwd.  Gerbil 0.18.2's macOS
          ;; executable linker emits __exe.c relative to that cwd, so the
@@ -222,6 +260,7 @@
     (nativeLinkWorkingDirectory . "declared-bindir")
     (buildGraphProjection . "declared-compiler-runtime-closure-to-std/make")
     (runtimeClosureDriftOracle . "gerbil-executable-stub")
+    (executableFreshnessOwner . "declared-runtime-closure-to-std-make")
     (cacheConcurrencyOwner . "kernel-flock-per-GERBIL_PATH")
     (objectLockRecovery . "static-and-binary-under-exclusive-build-lease")
     (artifactRootEnvironment . "ASP_PROVIDER_ARTIFACT_ROOT")))

@@ -44,6 +44,8 @@
                => "declared-compiler-runtime-closure-to-std/make")
         (check (cdr (assoc 'runtimeClosureDriftOracle contract))
                => "gerbil-executable-stub")
+        (check (cdr (assoc 'executableFreshnessOwner contract))
+               => "declared-runtime-closure-to-std-make")
         (check (cdr (assoc 'cacheConcurrencyOwner contract))
                => "kernel-flock-per-GERBIL_PATH")
         (check (cdr (assoc 'objectLockRecovery contract))
