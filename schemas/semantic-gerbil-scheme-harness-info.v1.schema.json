@@ -27,7 +27,7 @@
       "const": "gerbil-scheme"
     },
     "providerId": {
-      "const": "gerbil-scheme-harness"
+      "const": "asp-gerbil-scheme"
     },
     "projectRoot": {
       "type": "string"

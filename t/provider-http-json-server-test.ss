@@ -106,6 +106,7 @@
 (def (owner-header path bytes)
   (hash ("ownerPath" path)
         ("sourceLeafDigest" (string-append "digest:" path))
+        ("sourceEncoding" "utf8")
         ("sourceText" (utf8->string bytes))))
 
 (def (live-corpus-request package-root request-id

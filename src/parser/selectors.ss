@@ -20,6 +20,7 @@
         project-comment-quality-facts
         find-owner
         definition-selector
+        selector-owner-path-encode
         call-fact-selector
         module-import-fact-selector
         module-export-fact-selector
@@ -302,7 +303,7 @@
 ;; : (-> Path Kind Name Selector)
 (def (item-structural-selector path kind name)
   (string-append "gerbil-scheme://"
-                 path
+                 (selector-owner-path-encode path)
                  "#item/"
                  (selector-component-encode kind)
                  "/"
@@ -311,12 +312,21 @@
 ;; Canonical selector components use the shared RFC 3986 unreserved set and
 ;; uppercase percent escapes, matching the language-neutral ASP contract.
 (def (selector-component-encode component)
+  (selector-encode component selector-component-unreserved-byte?))
+
+(def (selector-owner-path-encode path)
+  (selector-encode
+   path
+   (lambda (byte)
+     (or (= byte 47) (selector-component-unreserved-byte? byte)))))
+
+(def (selector-encode component byte-allowed?)
   (let ((bytes (string->utf8 component))
         (output (open-output-string)))
     (let loop ((index 0))
       (when (< index (u8vector-length bytes))
         (let (byte (u8vector-ref bytes index))
-          (if (selector-component-unreserved-byte? byte)
+          (if (byte-allowed? byte)
             (write-char (integer->char byte) output)
             (begin
               (write-char #\% output)
