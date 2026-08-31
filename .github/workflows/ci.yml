@@ -97,9 +97,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: .ci/gerbil/${{ matrix.gerbil-label }}
-          key: gerbil-install-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-label }}-${{ matrix.gerbil-ref }}
+          key: gerbil-install-asp-gerbil-scheme-v1-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-label }}-${{ matrix.gerbil-ref }}
           restore-keys: |
-            gerbil-install-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-label }}-
+            gerbil-install-asp-gerbil-scheme-v1-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-label }}-
 
       - name: Build Gerbil
         if: steps.gerbil-cache.outputs.cache-hit != 'true'
@@ -125,7 +125,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: .ci/gerbil/${{ matrix.gerbil-label }}
-          key: gerbil-install-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-label }}-${{ matrix.gerbil-ref }}
+          key: gerbil-install-asp-gerbil-scheme-v1-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-label }}-${{ matrix.gerbil-ref }}
 
       - name: Activate Gerbil
         run: |
@@ -143,9 +143,9 @@ jobs:
             .gerbil/pkg
             .gerbil/lib
             .gerbil/bin
-          key: gerbil-pkg-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-label }}-${{ matrix.gerbil-ref }}-${{ hashFiles('gerbil.pkg') }}
+          key: gerbil-pkg-asp-gerbil-scheme-v1-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-label }}-${{ matrix.gerbil-ref }}-${{ hashFiles('gerbil.pkg') }}
           restore-keys: |
-            gerbil-pkg-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-label }}-${{ matrix.gerbil-ref }}-
+            gerbil-pkg-asp-gerbil-scheme-v1-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-label }}-${{ matrix.gerbil-ref }}-
 
       - name: Install Gerbil package dependencies from gerbil.pkg
         run: |
@@ -165,10 +165,10 @@ jobs:
           else
             gxpkg deps --install
           fi
-          if [ ! -e .gerbil/pkg/gslph ]; then
-            gxpkg link gslph .
+          if [ ! -e .gerbil/pkg/asp-gerbil-scheme ]; then
+            gxpkg link asp-gerbil-scheme .
           fi
-          rm -rf .gerbil/lib/gslph .gerbil/build
+          rm -rf .gerbil/lib/asp-gerbil-scheme .gerbil/build
           gxpkg list
 
       - name: Save Gerbil package dependency cache
@@ -179,7 +179,7 @@ jobs:
             .gerbil/pkg
             .gerbil/lib
             .gerbil/bin
-          key: gerbil-pkg-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-label }}-${{ matrix.gerbil-ref }}-${{ hashFiles('gerbil.pkg') }}
+          key: gerbil-pkg-asp-gerbil-scheme-v1-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-label }}-${{ matrix.gerbil-ref }}-${{ hashFiles('gerbil.pkg') }}
 
       - name: Build canonical asp-gerbil-scheme binary
         shell: bash
