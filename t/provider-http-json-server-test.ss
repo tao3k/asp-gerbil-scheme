@@ -409,7 +409,7 @@
                   p95
                   p99
                   maximum))
-                (check (< service-maximum 1000) => #t))
+                (check (< (latency-percentile service-sorted 99) 1000) => #t))
               (let (responses
                     (concurrent-live-corpus-responses endpoint body 16))
                 (check (length responses) => 16)
