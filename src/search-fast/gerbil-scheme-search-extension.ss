@@ -99,7 +99,7 @@
           " installHint=\"gxpkg install " +poo-dependency+ "\""
           " repository=" +poo-dependency+
           " repositoryUrl=https://git.cons.io/mighty-gerbils/gerbil-poo"
-          " indexOwner=asp-client"
+          " indexOwner=asp-server"
           " indexBackend=rust-sql"
           " indexPackageManager=gxpkg")
     (emit "next=search pattern gerbil-poo " next-focus)

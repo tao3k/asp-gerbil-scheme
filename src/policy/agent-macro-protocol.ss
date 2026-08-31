@@ -84,7 +84,7 @@
                 (selectorScheme "gerbil-runtime-source")
                 (selectorFormat "gerbil-runtime-source://<source-path>#<symbol>")
                 (output "code-with-comments")
-                (indexOwner "asp-structural-index")))
+                (indexOwner "asp-server")))
          (qualityReference
           (gerbil-utils-source-details 'macro-helper))
          (allowedMacroShape

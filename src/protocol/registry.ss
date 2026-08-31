@@ -57,11 +57,11 @@
               (outputSchemaIds ["agent.semantic-protocols.semantic-compare-packet"]))
         (hash (method "index/structural")
               (command "search structural --json")
-              (summary "Emit a lightweight native-parser structural interface; ASP Rust owns full index construction, graph topology, caching, and refresh planning.")
+              (summary "Emit a provider-local native-parser structural interface; this packet is not a graph service or cross-provider index authority.")
               (outputSchemaIds ["agent.semantic-protocols.semantic-structural-index"]))
         (hash (method "index/native-syntax-owner-facts")
               (command "search structural --owner <path> --json")
-              (summary "Emit owner-bounded native syntax facts for ASP-side fan-out and incremental structural indexing.")
+              (summary "Emit owner-bounded native syntax facts for the provider contract; aggregation and indexing remain outside this Scheme provider.")
               (outputSchemaIds ["agent.semantic-protocols.semantic-native-syntax-fact-index"]))
         (hash (method "query/exact-selector-native-v1")
               (command "query")
@@ -78,7 +78,7 @@
                 "provider-native-exact-response.v1"])
               (invocation
                (hash (argv
-                      ["gslph"
+                      ["asp-gerbil-scheme"
                        "query"
                        "--asp-exact-request-stdin"]))))
         (hash (method "evidence/graph")

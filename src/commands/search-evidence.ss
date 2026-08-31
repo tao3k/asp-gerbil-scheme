@@ -10,9 +10,8 @@
         :gslph/src/protocol/json
         :gslph/src/support/args
         :gslph/src/support/io
-        (only-in :std/misc/ports read-all-as-lines read-all-as-string)
-        (only-in :std/misc/process process-status run-process)
-        (only-in :std/srfi/13 string-contains string-join string-prefix?)
+        (only-in :std/misc/ports read-all-as-string)
+        (only-in :std/srfi/13 string-contains string-join)
         (only-in :std/sugar cut filter hash ormap))
 
 (export language-evidence-view?
@@ -471,7 +470,12 @@
     (begin
       (displayln "|missing fact-registry-or-query-match")
       (displayln "|witness pending")
-      (emit-language-source-index-fallback context namespace query))
+      (when (and (runtime-source-index-namespace? namespace)
+                 (not (equal? query "-")))
+        (displayln "|sourceIndexLookup deferred reason=asp-server-ipc-required"
+                   " owner=asp-server"
+                   " namespace=" namespace
+                   " query=" query)))
     (for-each emit-language-evidence-line facts)))
 ;; : (-> (U ProjectIndex ProjectRoot) Namespace Authority Query Grade (List LanguageEvidenceFact) Next Unit )
 (def (emit-language-evidence-text context namespace authority query grade facts next)
@@ -496,131 +500,12 @@
         (emit-language-evidence-text context namespace authority query grade facts next))
       0)))
 
-;; : (-> (U ProjectIndex ProjectRoot) Namespace Query Unit )
-(def (emit-language-source-index-fallback context namespace query)
-  (when (and (string? context)
-             (runtime-source-index-namespace? namespace)
-             (not (equal? query "-")))
-    (let (index-root (runtime-source-index-root context))
-      (if index-root
-        (emit-source-index-lookup-lines namespace query index-root)
-        (emit-source-index-acquire-line namespace query)))))
-
 ;; : (-> Namespace Boolean )
 (def (runtime-source-index-namespace? namespace)
   (or (equal? namespace "std")
       (equal? namespace "compiler-evidence")
       (equal? namespace "runtime-source")))
 
-;; : (-> ProjectRoot (U #f Path) )
-(def (runtime-source-index-root root)
-  (let* ((base (path-expand
-                ".cache/agent-semantic-protocol/client/runtime-source/gerbil-scheme"
-                root))
-         (version-key (runtime-source-version-key))
-         (version-root (and version-key (path-expand version-key base))))
-    (cond
-     ((and version-root (file-directory? version-root)) version-root)
-     ((file-directory? base)
-      (let (checkouts (runtime-source-checkout-roots base))
-        (and (pair? checkouts) (car checkouts))))
-     (else #f))))
-
-;; : (-> (U #f String) )
-(def (runtime-source-version-key)
-  (let* ((facts (runtime-source-facts))
-         (fact (and (pair? facts) (car facts)))
-         (details (and fact (hash-get fact 'details)))
-         (acquisition (and details (hash-get details 'acquisition))))
-    (and acquisition (hash-get acquisition 'versionKey))))
-
-;;; Runtime-source selection boundary:
-;;; - Only existing child directories become checkout roots.
-;;; - Expansion stays relative to the cache base so compact output never leaks
-;;;   unrelated local paths into agent-facing evidence.
-;; : (-> Path (List Path) )
-(def (runtime-source-checkout-roots base)
-  (map (cut path-expand <> base)
-       (filter (lambda (entry)
-                 (file-directory? (path-expand entry base)))
-               (directory-files base))))
-
-;; : (-> Namespace Query Unit )
-(def (emit-source-index-acquire-line namespace query)
-  (displayln "|sourceIndexLookup noOutput reason=runtime-source-not-acquired"
-             " namespace=" namespace
-             " query=" query
-             " nextCommand=\"asp cache runtime-source acquire --language-id gerbil-scheme --repository <gerbil-repo-or-path> --checkout <ref> --state-namespace runtime-source/gerbil-scheme --index-owner asp-structural-index --root .\""))
-
-;; : (-> Namespace Query Path Unit )
-(def (emit-source-index-lookup-lines namespace query index-root)
-  (let (result (source-index-lookup-result query index-root 4))
-    (if (and (source-index-lookup-ok? result)
-             (source-index-hit? (cdr result)))
-      (begin
-        (displayln "|sourceIndexLookup status=hit namespace=" namespace
-                   " query=" query
-                   " indexRoot=runtime-source")
-        (for-each displayln (source-index-candidate-summary-lines (cdr result) 4)))
-      (displayln "|sourceIndexLookup noOutput reason=source-index-miss"
-                 " namespace=" namespace
-                 " query=" query
-                 " indexRoot=runtime-source"))))
-
-;;; Process boundary: source-index lookup delegates to the installed `asp`
-;;; command and captures status plus stdout lines as data, not shell text.
-;;; The caller owns hit/miss interpretation so acquisition guidance stays
-;;; explicit and no hidden repository fallback is introduced here.
-;; : (-> Query Path PositiveInteger (Pair ProcessStatus (List String)) )
-(def (source-index-lookup-result query index-root limit)
-  (let ((asp (or (getenv "SEMANTIC_AGENT_PROTOCOL_BIN" #f) "asp")))
-    (run-process [asp "gerbil-scheme" "cache" "source-index" "lookup"
-                  "--query" query
-                  "--index-root" index-root
-                  "--limit" (number->string limit)]
-                 stdin-redirection: #f
-                 stdout-redirection: #t
-                 stderr-redirection: #t
-                 check-status: #f
-                 coprocess:
-                 (lambda (process)
-                   (cons (process-status process)
-                         (read-all-as-lines process))))))
-
-;; : (-> (Pair ProcessStatus (List String)) Boolean )
-(def (source-index-lookup-ok? result)
-  (zero? (car result)))
-
-;;; Hit detection is intentionally narrow: only provider-emitted status lines
-;;; can mark a lookup successful, while candidate text remains presentation.
-;; : (-> (List String) Boolean )
-(def (source-index-hit? lines)
-  (ormap (lambda (line)
-           (string-contains line "status=hit"))
-         lines))
-
-;;; Agent-facing compression keeps candidate order and removes bulky query-key
-;;; payloads after lookup succeeds; semantic lookup already happened upstream.
-;; : (-> (List String) PositiveInteger (List String) )
-(def (source-index-candidate-summary-lines lines limit)
-  (take-up-to
-   (map compact-source-index-candidate-line
-        (filter (cut string-prefix? "|candidate " <>) lines))
-   limit))
-
-;; : (-> String String )
-(def (compact-source-index-candidate-line line)
-  (let (query-key-start (string-contains line " queryKeys="))
-    (if query-key-start
-      (substring line 0 query-key-start)
-      line)))
-
-;; : (-> (List X) Natural (List X) )
-(def (take-up-to values limit)
-  (cond
-   ((or (zero? limit) (null? values)) '())
-   (else (cons (car values)
-               (take-up-to (cdr values) (- limit 1))))))
 ;; matching-language-evidence-facts
 ;;   : (-> ProjectIndex String (List String) (List LanguageEvidenceFact))
 ;;   | doc m%

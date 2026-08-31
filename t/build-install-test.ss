@@ -30,14 +30,20 @@
       (configure-build-root! (current-directory))
       (check (getenv "GERBIL_PATH")
              => (path-expand ".gerbil" (current-directory))))
-    (test-case "install path is user-local bin"
+    (test-case "install path is ASP State Home runtime bin"
       (configure-build-root! (current-directory))
-      (check (install-launcher-binpath)
-             => (path-expand ".local/bin/gslph" (getenv "HOME"))))
+      (let* ((state-home
+              (or (getenv "ASP_STATE_HOME")
+                  (path-expand ".agent-semantic-protocols" (getenv "HOME"))))
+             (bin-dir
+              (or (getenv "SEMANTIC_AGENT_BIN_DIR")
+                  (path-expand "runtime/bin" state-home))))
+        (check (install-launcher-binpath)
+               => (path-expand "asp-gerbil-scheme" bin-dir))))
     (test-case "development binary path is package-local .bin"
       (configure-build-root! (current-directory))
       (check (dev-launcher-binpath)
-             => (path-expand ".bin/gslph" (current-directory))))
+             => (path-expand ".bin/asp-gerbil-scheme" (current-directory))))
     (test-case "bootstrap and release module closures exclude linker roots"
       (let* ((development-modules (cli-binary-module-spec #f))
              (release-modules (cli-binary-module-spec #t)))

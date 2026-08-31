@@ -17,7 +17,8 @@
 
 ;;; Boundary:
 ;;; - emit-structural-index routes interface, owner facts, and explicit artifacts.
-;;; - Default output stays lightweight so ASP Rust owns full index construction.
+;;; - Default output stays lightweight because this is a provider-local
+;;;   parser/interface packet, not a graph construction or ranking service.
 ;; : (-> ProjectIndex (List String) Json Integer )
 (def (emit-structural-index index args json?)
   (let ((owner (option "--owner" args))
@@ -27,10 +28,10 @@
      (artifact? (emit-structural-artifact index json?))
      (else (emit-structural-interface index json?)))))
 
-;;; Interface mode reports stable owner handles, counts, and consumer commands.
+;;; Interface mode reports stable owner handles and parser fact counts.
 ;;; The hot path must not materialize workspace syntaxFacts.
-;;; ASP Rust fans out owner facts through --owner.
-;;; ASP Rust owns graph topology, cache state, and ranking.
+;;; ASP Server may route owner facts through the provider contract; this module
+;;; does not own graph topology, cache state, or ranking.
 ;; : (-> ProjectIndex Json Integer )
 (def (emit-structural-interface index json?)
   (let* ((packet (structural-index-packet-json index))
@@ -62,15 +63,10 @@
          "|factInterface"
          [(line-field "mode" (hash-get fact-interface 'mode))
           (line-field "granularity" (hash-get fact-interface 'granularity))
-          (line-field "indexOwner" (hash-get fact-interface 'indexOwner))
-          (line-field "heavyIndexOwner" (hash-get fact-interface 'heavyIndexOwner))
-          (line-field "graphTurboOwner" (hash-get fact-interface 'graphTurboOwner))
           (line-field "factSchemaId" (hash-get fact-interface 'factSchemaId))])
         (emit-field-line
          "|projectionVocabulary"
-         [(line-field "facts" "macroFacts,bindingFacts,pooFormFacts,higherOrderFacts,controlFlowFacts,predicateFamilyFacts,fieldAccessPatternFacts,booleanConditionFacts,loopDriverFacts,dependencyAdapterQualityFacts,functionQualityProfiles,typedContractFacts,commentQualityFacts,dependencyUsageFacts")
-          (line-field "consumer" "asp-rust-structural-index")
-          (line-field "graphTurbo" "asp-graph-turbo")])
+         [(line-field "facts" "macroFacts,bindingFacts,pooFormFacts,higherOrderFacts,controlFlowFacts,predicateFamilyFacts,fieldAccessPatternFacts,booleanConditionFacts,loopDriverFacts,dependencyAdapterQualityFacts,functionQualityProfiles,typedContractFacts,commentQualityFacts,dependencyUsageFacts")])
         (for-each
          (lambda (owner)
            (emit-field-line

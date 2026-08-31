@@ -18,17 +18,17 @@
      (statePathPolicy "asp-state-managed")
      (selectorScheme "runtime-source-owner-selector"))
     (acquisition
-     (owner "asp")
-     (operation "clone-or-fetch-checkout-index")
+     (owner "asp-server")
+     (operation "clone-or-fetch-checkout")
      (stateNamespace "runtime-source/gerbil-scheme")
-     (indexOwner "asp-structural-index"))
+     (indexOwner "asp-server"))
     (selectorResolver
      (scheme "gerbil-runtime-source")
-     (owner "asp")
+     (owner "gerbil-scheme")
      (stateNamespace "runtime-source/gerbil-scheme")
      (selectorFormat "gerbil-runtime-source://<source-path>#<symbol>")
      (output "code-with-comments")
-     (indexOwner "asp-structural-index"))
+     (indexOwner "asp-server"))
     (sourceExamples
      ((sourceExample
        (id "std-sugar-defrule")
@@ -116,13 +116,14 @@
       (failureCase
        (id "unindexed-source-checkout")
        (risk "agent-clones-source-but-searches-it-with-raw-grep")
-       (correction "index-checkout-through-asp-before-agent-facing-search"))))
+       (correction "defer-runtime-source-index-lookup-to-asp-server-ipc"))))
     (qualitySignals ("no-memory"
                      "version-matched-source"
                      "asp-state-managed-checkout"
-	                     "source-index-required"
+                     "source-index-required"
+                     "source-index-owned-by-asp-server"
 	                     "code-with-comments-output"
-	                     "selector-resolver-owned-by-asp"
+                     "selector-resolver-owned-by-gerbil-scheme"
 	                     "source-ranking-prefers-runtime-source"
 	                     "bootstrap-stubs-labelled")))))
  (missing ())

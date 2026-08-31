@@ -13,7 +13,7 @@
 ;; String
 (def +language-id+ "gerbil-scheme")
 ;; String
-(def +cli-id+ "gslph")
+(def +cli-id+ "asp-gerbil-scheme")
 ;; String
 (def +provider-id+ "asp-gerbil-scheme")
 ;; String

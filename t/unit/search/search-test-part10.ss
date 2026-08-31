@@ -107,11 +107,11 @@
               "repository=https://git.cons.io/mighty-gerbils/gerbil"
               "checkoutPolicy=exact-tag-from-active-runtime"
               "statePathPolicy=asp-state-managed"
-              "|acquisition owner=asp"
-              "operation=clone-or-fetch-checkout-index"
+              "|acquisition owner=asp-server"
+              "operation=clone-or-fetch-checkout"
               "stateNamespace=runtime-source/gerbil-scheme"
-              "indexOwner=asp-structural-index"
-              "|selectorResolver scheme=gerbil-runtime-source owner=asp stateNamespace=runtime-source/gerbil-scheme"
+              "indexOwner=asp-server"
+              "|selectorResolver scheme=gerbil-runtime-source owner=gerbil-scheme stateNamespace=runtime-source/gerbil-scheme"
               "selectorFormat=gerbil-runtime-source://<source-path>#<symbol> output=code-with-comments"
               "|sourceExample id=std-sugar-defrule role=macro-rule symbol=defrule selector=gerbil-runtime-source://src/std/sugar.ss#defrule"
               "head=defrule operands=(<name> arg ...),body ... keywords=-"
@@ -129,7 +129,7 @@
               "|qualitySignal id=version-matched-source"
               "|qualitySignal id=asp-state-managed-checkout"
               "|qualitySignal id=code-with-comments-output"
-              "|qualitySignal id=selector-resolver-owned-by-asp"
+              "|qualitySignal id=selector-resolver-owned-by-gerbil-scheme"
               "|qualitySignal id=source-ranking-prefers-runtime-source"
               "|qualitySignal id=bootstrap-stubs-labelled"
               "next=search runtime-source macro sugar module-sugar"])
@@ -143,6 +143,7 @@
               "|fact id=gerbil-runtime-source"
               "repository=https://git.cons.io/mighty-gerbils/gerbil"
               "|qualitySignal id=source-index-required"
+              "|qualitySignal id=source-index-owned-by-asp-server"
               "next=search runtime-source macro sugar module-sugar"])
             (check (not (contains? output "pending")) => #t)))
     (test-case "guide code runtime-source positional query resolves versioned std source"

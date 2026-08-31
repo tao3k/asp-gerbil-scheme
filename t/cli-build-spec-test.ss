@@ -35,13 +35,13 @@
         (check (member "cli-launcher.ss" spec) ? true)
         (check (ormap (lambda (entry)
                         (match entry
-                          ([optimized-exe: "cli-release-linker" bin: "gslph" . _] #t)
+                          ([optimized-exe: "cli-release-linker" bin: "asp-gerbil-scheme" . _] #t)
                           (_ #f)))
                       spec)
                => #t)
         (check (ormap (lambda (entry)
                         (match entry
-                          ([optimized-exe: "cli-dev-linker" bin: "gslph" . _] #t)
+                          ([optimized-exe: "cli-dev-linker" bin: "asp-gerbil-scheme" . _] #t)
                           (_ #f)))
                       spec)
                => #f)))
@@ -51,7 +51,7 @@
         (check (member "cli-launcher.ss" spec) ? true)
         (check (ormap (lambda (entry)
                         (match entry
-                          ([optimized-exe: "cli-release-linker" bin: "gslph" . _] #t)
+                          ([optimized-exe: "cli-release-linker" bin: "asp-gerbil-scheme" . _] #t)
                           (_ #f)))
                       spec)
                => #t)
@@ -75,13 +75,13 @@
         (check (member "cli-dev-linker.ss" spec) => #f)
         (check (ormap (lambda (entry)
                         (match entry
-                          ([optimized-exe: "cli-dev-linker" bin: "gslph" . _] #t)
+                          ([optimized-exe: "cli-dev-linker" bin: "asp-gerbil-scheme" . _] #t)
                           (_ #f)))
                       spec)
                => #t)
         (check (ormap (lambda (entry)
                         (match entry
-                          ([optimized-exe: "cli-release-linker" bin: "gslph" . _] #t)
+                          ([optimized-exe: "cli-release-linker" bin: "asp-gerbil-scheme" . _] #t)
                           (_ #f)))
                       spec)
                => #f)

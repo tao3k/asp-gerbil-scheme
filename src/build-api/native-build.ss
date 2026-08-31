@@ -747,11 +747,6 @@
   (cli-binary-spec release? #t))
 
 
-;; : (-> HomeDirectoryPath)
-(def (user-home-directory)
-  (or (getenv "HOME" #f)
-      (error "HOME is required to install gslph into $HOME/.local/bin")))
-
 ;; : (-> Path Void)
 (def (ensure-directory! path)
   (unless (file-exists? path)

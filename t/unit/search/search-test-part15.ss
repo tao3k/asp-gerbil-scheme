@@ -82,7 +82,7 @@
             (check (contains? poo-output "missingLocalAction=install-package-before-repository-fallback") => #t)
             (check (contains? poo-output "localRootHint=~/.gerbil") => #t)
             (check (contains? poo-output "installHint=\"gxpkg install git.cons.io/mighty-gerbils/gerbil-poo\"") => #t)
-            (check (contains? poo-output "repositoryUrl=https://git.cons.io/mighty-gerbils/gerbil-poo indexOwner=asp-client indexBackend=rust-sql") => #t)
+            (check (contains? poo-output "repositoryUrl=https://git.cons.io/mighty-gerbils/gerbil-poo indexOwner=asp-server indexBackend=rust-sql") => #t)
             (check (contains? poo-output "selector=gerbil-poo://object.ss#defclass") => #t)
             (check (contains? poo-output "witness=dependency-backed-poo-mapping") => #t)
             (check (contains? poo-output "missing=-") => #t)
@@ -156,7 +156,7 @@
               "missingLocalAction=install-package-before-repository-fallback"
               "localRootHint=~/.gerbil"
               "installHint=\"gxpkg install git.cons.io/mighty-gerbils/gerbil-poo\""
-              "repositoryUrl=https://git.cons.io/mighty-gerbils/gerbil-poo indexOwner=asp-client indexBackend=rust-sql"
+              "repositoryUrl=https://git.cons.io/mighty-gerbils/gerbil-poo indexOwner=asp-server indexBackend=rust-sql"
               "|selector role=class-definition symbol=defclass selector=gerbil-poo://object.ss#defclass"
               "|selector role=generic-definition symbol=.defgeneric selector=gerbil-poo://mop.ss#.defgeneric"
               "|selector role=method-dispatch symbol=defmethod selector=gerbil-poo://mop.ss#defmethod"

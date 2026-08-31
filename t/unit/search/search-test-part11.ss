@@ -86,7 +86,7 @@
               "|fact id=gerbil-runtime-writeenv-source"
               "active-runtime-version-to-writeenv-source-acquisition-plan"
               "agent-needs-runtime-printer-hook-facts-before-poo-writeenv-roundtrip-claims"
-              "|selectorResolver scheme=gerbil-runtime-source owner=asp stateNamespace=runtime-source/gerbil-scheme"
+              "|selectorResolver scheme=gerbil-runtime-source owner=gerbil-scheme stateNamespace=runtime-source/gerbil-scheme"
               "|sourceExample id=runtime-writeenv-binding role=runtime-binding symbol=writeenv selector=gerbil-runtime-source://src/bootstrap/gerbil/builtin.ssxi.ss#writeenv"
               "head=system: operands=writeenv::t,(t::t) keywords=-"
               "|sourceExample id=runtime-write-object-owner role=runtime-printer-owner symbol=write-object selector=gerbil-runtime-source://src/bootstrap/gerbil/core/runtime.ssi#write-object"

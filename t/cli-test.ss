@@ -30,11 +30,11 @@
              => ["query" "src/main.ss"]))
     (test-case "provider argv strips generated binary frames"
       (check (provider-command-line-args
-              ["gslph" "fmt" "--check" "/tmp/project"])
+              ["asp-gerbil-scheme" "fmt" "--check" "/tmp/project"])
              => ["fmt" "--check" "/tmp/project"]))
     (test-case "provider argv preserves help requests"
       (check (provider-command-line-args
-              ["gslph" "--help"])
+              ["asp-gerbil-scheme" "--help"])
              => ["--help"]))
     (test-case "provider argv strips no-argument launcher frames"
       (check (provider-command-line-args
@@ -46,7 +46,7 @@
              => ["bogus"]))
     (test-case "provider argv keeps formatter command"
       (check (provider-command-line-args
-              ["gslph" "fmt" "--check" "."])
+              ["asp-gerbil-scheme" "fmt" "--check" "."])
              => ["fmt" "--check" "."]))
     (test-case "command catalog owns dynamic and release command names"
       (check (member "serve" provider-command-names) => #f)

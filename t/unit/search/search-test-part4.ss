@@ -89,12 +89,12 @@
             (check (contains? json-output "commentQualityFacts") => #t)
             (check (contains? json-output "dependencyAdapterQualityFacts") => #t)
             (check (contains? json-output "closureCommands") => #t)))
-    (test-case "guide exposes source-index and runtime-source cache commands"
+    (test-case "guide exposes server-owned source-index boundary"
           (let (output (guide-output []))
-            (check (contains? output "|cmd cache-source-index-refresh=asp cache source-index refresh --root .") => #t)
-            (check (contains? output "|cmd cache-source-index-lookup=asp gerbil-scheme cache source-index lookup --query <term> --index-root . --limit 8") => #t)
+            (check (contains? output "|policy source-index-owner=asp-server; structural-index-owner=gerbil-scheme; Source Index lookup/cache is ASP Server IPC, while Gerbil search only renders provider parser facts and never invokes an asp subprocess") => #t)
             (check (contains? output "|cmd runtime-source-acquire=asp cache runtime-source acquire --language-id gerbil-scheme") => #t)
-            (check (contains? output "|cmd runtime-source-lookup=asp gerbil-scheme cache source-index lookup --query <symbol>") => #t)))
+            (check (contains? output "|cmd runtime-source-lookup=asp gerbil-scheme cache source-index lookup --query <symbol> --index-root . --limit 8") => #t)
+            (check (contains? output "cache source-index lookup") => #f)))
     (test-case "guide code defaults to one source-backed pure excerpt"
           (let (output (guide-output ["--code"]))
             (check (contains? output ";;; Entry boundary: emit at most one typed-combinator finding per owner") => #t)

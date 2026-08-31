@@ -55,31 +55,6 @@
                 (hash-get version-node "id"))
   (displayln "[pass] search dependency-topology"))
 
-(let* ((binary (path-expand "~/.local/bin/gslph"))
-       (process
-        (open-process
-         (list path: binary
-               arguments:
-               (list "search"
-                     "dependency-topology"
-                     "--json"
-                     "--workspace"
-                     ".")
-               stdout-redirection: #t)))
-       (output (read-line process))
-       (status (process-status process))
-       (packet (call-with-input-string output read-json))
-       (graph (hash-get packet "graph"))
-       (nodes (hash-get graph "nodes"))
-       (edges (hash-get graph "edges")))
-  (assert-equal 'binary-exit status 0)
-  (assert-equal 'binary-packet-kind
-                (hash-get packet "packetKind")
-                "dependency-topology")
-  (assert-equal 'binary-node-count (length nodes) 2)
-  (assert-equal 'binary-edge-count (length edges) 1)
-  (displayln "[pass] gslph dependency-topology E2E"))
-
 (let* ((manifest
         (call-with-input-file
          "schemas/asp-provider.json"

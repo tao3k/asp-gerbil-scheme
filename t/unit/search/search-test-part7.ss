@@ -79,10 +79,7 @@
              ["[gerbil-search-structural]"
               "mode=interface"
               "|factInterface mode=lightweight-provider-interface"
-              "heavyIndexOwner=asp-rust"
-              "graphTurboOwner=asp-graph-turbo"
               "|projectionVocabulary facts=macroFacts,bindingFacts,pooFormFacts,higherOrderFacts,controlFlowFacts,predicateFamilyFacts,fieldAccessPatternFacts,booleanConditionFacts,loopDriverFacts,dependencyAdapterQualityFacts,functionQualityProfiles,typedContractFacts,commentQualityFacts,dependencyUsageFacts"
-              "consumer=asp-rust-structural-index"
               "|owner path=src/commands/search-structural.ss kind=source authority=native-parser sourceClass=runtime-source"
               "|ownerFactSummary path="
               "nextCommand=gerbil-scheme-harness search structural --owner <path> --json ."])))))

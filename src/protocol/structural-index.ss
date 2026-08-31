@@ -33,8 +33,8 @@
 (def +structural-interface-summary-preview-limit+ 20)
 
 ;;; Interface packet is the hot path: stable handles, counts, and commands.
-;;; It avoids workspace syntaxFacts materialization so ASP Rust can own the
-;;; full index, graph topology, cache, and graph-turbo ranking layers.
+;;; It avoids workspace syntaxFacts materialization because this provider
+;;; exposes parser/interface facts, not a graph or ranking service.
 ;; : (-> ProjectIndex Json )
 (def (structural-index-packet-json index)
   (let* ((files (project-index-files index))
@@ -64,9 +64,6 @@
      (sourceArtifactId artifact-id)
      (rawSourceStored #f)
      (indexMode "interface")
-     (indexOwner "asp-structural-index")
-     (heavyIndexOwner "asp-rust")
-     (graphTurboOwner "asp-graph-turbo")
      (fileHashes (map structural-interface-summary-file-hash-json summaries))
      (owners (map structural-owner-json files))
      (symbols [])
@@ -113,8 +110,9 @@
      (dependencyUsages (append-map structural-dependency-json files)))))
 
 ;;; Owner fact packet is the ASP fan-out unit.
-;;; One owner keeps projection cost bounded and lets the Rust side decide
-;;; parallelism, cache invalidation, and topology construction.
+;;; One owner keeps projection cost bounded and leaves any server-side
+;;; aggregation, cache invalidation, and topology decisions outside this
+;;; provider-local packet.
 ;; : (-> ProjectIndex SourceFile Json )
 (def (native-syntax-owner-facts-packet-json index file)
   (let* ((package (project-index-package index))
@@ -135,7 +133,7 @@
            (notes
             [(hash
               (kind "ownership-boundary")
-              (message "This packet is owner-bounded parser evidence; ASP Rust builds the workspace structural index and graph topology."))]))))
+              (message "This packet is owner-bounded parser evidence emitted by the Gerbil Scheme provider."))]))))
     (when package
       (hash-put! packet 'packageName (project-package-name package)))
     packet))
@@ -146,15 +144,14 @@
          (factKinds ["import" "export" "macro" "binding" "function"
                      "method" "class" "interface" "call" "custom" "comment"])
          (queryKeys ["ownerPath" "name" "languageKind"])
-         (fields (hash (granularity "owner-bounded")
-                       (consumer "asp-rust-structural-index"))))
+         (fields (hash (granularity "owner-bounded"))))
    (hash (name "quality")
          (factKinds ["function" "call" "custom" "comment"])
          (queryKeys ["typed-combinator-style"
                      "engineering-comment-quality"
                      "gerbil-utils-combinator-style"
                      "dependency-protocol-adapter"])
-         (fields (hash (consumer "asp-graph-turbo"))))])
+         (fields (hash (granularity "provider-local"))))])
 
 ;; : (-> ProjectIndex GenerationId Json )
 (def (structural-fact-interface-json index generation-id)
@@ -162,9 +159,6 @@
    (mode "lightweight-provider-interface")
    (granularity "workspace-manifest-plus-owner-facts")
    (producer +provider-id+)
-   (indexOwner "asp-structural-index")
-   (heavyIndexOwner "asp-rust")
-   (graphTurboOwner "asp-graph-turbo")
    (factSchemaId +semantic-native-syntax-fact-index-schema-id+)
    (generationId generation-id)
    (manifestCommand "gerbil-scheme-harness search structural --json .")
@@ -173,7 +167,7 @@
    (artifactCommand
     "gerbil-scheme-harness search structural --json --artifact .")
    (performanceContract
-    "Packet rendering and owner fact projection should stay millisecond-level after native parsing; full graph/index construction belongs to ASP Rust/graph-turbo.")
+    "Packet rendering and owner fact projection should stay millisecond-level after native parsing; full graph/index construction belongs to ASP Rust.")
    (projectRoot (project-index-root index))))
 
 ;;; Total facts is a cheap fold over already parsed owner structures.
