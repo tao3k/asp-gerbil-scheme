@@ -61,7 +61,7 @@
 
 (def +provider-runtime-build-spec+
   (framework-executable-build-spec
-   "src/provider-server"
+   "src/cli"
    "asp-gerbil-scheme"
    +provider-runtime-modules+
    +provider-library-modules+
