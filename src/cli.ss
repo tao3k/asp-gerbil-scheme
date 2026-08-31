@@ -11,7 +11,7 @@
         provider-command-line-args)
 
 ;; : (-> Args Integer)
-(def (main args)
+(def (main . args)
   (apply launcher-main args))
 
 ;; : (-> (List String))
