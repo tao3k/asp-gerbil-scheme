@@ -1,10 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Public resident provider entrypoint.
 
-(import (only-in ./commands/provider-runtime provider-runtime-main))
+(import (only-in ./commands/provider-runtime provider-runtime-main)
+        (rename-in :gslph/src/cli-launcher (main cli-main)))
 (export main)
 
-(def (main command)
-  (unless (string=? command "serve")
-    (error "usage: asp-gerbil-scheme serve" command))
-  (provider-runtime-main '()))
+(def (main . args)
+  (if (and (pair? args) (string=? (car args) "serve"))
+    (provider-runtime-main (cdr args))
+    (apply cli-main args)))
