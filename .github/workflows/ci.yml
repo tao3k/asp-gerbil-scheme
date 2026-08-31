@@ -221,9 +221,9 @@ jobs:
           mkdir -p .bin
           install -m 755 build/workspace-provider/bin/asp-gerbil-scheme .bin/asp-gerbil-scheme
           run_smoke .bin/asp-gerbil-scheme search prime --view seeds --workspace .
-          run_smoke .bin/asp-gerbil-scheme check --full .
-          run_smoke .bin/asp-gerbil-scheme bench --json
-          run_smoke .bin/asp-gerbil-scheme search prime --json .
+          run_smoke .bin/asp-gerbil-scheme search rg-query framework --workspace .
+          run_smoke .bin/asp-gerbil-scheme query --from-hook direct-source-read \
+            --selector src/cli.ss:1-2 --workspace .
 
       - name: Run canonical provider and semantic contract tests
         shell: bash
