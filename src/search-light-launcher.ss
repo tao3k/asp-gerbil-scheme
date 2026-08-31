@@ -11,7 +11,7 @@
         try-search-light-main)
 
 (def +search-help+
-  "asp-gerbil-scheme search - Gerbil Scheme native fast search\n\nUsage:\n  asp-gerbil-scheme search prime [--view seeds] [--workspace PROJECT_ROOT]\n")
+  "gslph search - Gerbil Scheme native fast search\n\nUsage:\n  gslph search prime [--view seeds] [--workspace PROJECT_ROOT]\n")
 
 (def +query-light-limit+ 40)
 
@@ -226,6 +226,6 @@
 
 ;; : (-> (List String) Integer)
 (def (emit-unsupported-native-search args)
-  (display "asp-gerbil-scheme search supports native fast seed views only; use `asp-gerbil-scheme search prime --view seeds --workspace .`.\n"
+  (display "gslph search supports native fast seed views only; use `gslph search prime --view seeds --workspace .`.\n"
            (current-error-port))
   64)

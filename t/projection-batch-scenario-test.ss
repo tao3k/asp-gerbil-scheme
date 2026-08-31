@@ -10,7 +10,6 @@
   (hash
    ("ownerPath" (string-append "src/owner-" (number->string index) ".ss"))
    ("sourceLeafDigest" (string-append "blake3-256:owner-" (number->string index)))
-   ("sourceEncoding" "utf8")
    ("sourceText" (string-append "(def owner-" (number->string index) " "
                                 (number->string index) ")\n"))))
 

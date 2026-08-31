@@ -78,14 +78,20 @@
 
 (def +operations+
   [(hash ("operation" "projection-batch")
-         ("requestSchema" (hash ("schemaId" "agent.semantic-protocols.provider-language-projection-batch-request") ("schemaVersion" "1")))
-         ("responseSchema" (hash ("schemaId" "agent.semantic-protocols.provider-language-projection-batch-response") ("schemaVersion" "1"))))
+         ("requestSchemaId"
+          "https://schemas.agent-semantic-protocols.dev/provider-language-projection-batch-request.schema.json")
+         ("responseSchemaId"
+          "https://schemas.agent-semantic-protocols.dev/provider-language-projection-batch-response.schema.json"))
    (hash ("operation" "project-resolution")
-         ("requestSchema" (hash ("schemaId" "agent.semantic-protocols.provider-project-resolution-request") ("schemaVersion" "1")))
-         ("responseSchema" (hash ("schemaId" "agent.semantic-protocols.provider-project-resolution-response") ("schemaVersion" "1"))))
+         ("requestSchemaId"
+          "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-request.schema.json")
+         ("responseSchemaId"
+          "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-response.schema.json"))
    (hash ("operation" "query")
-         ("requestSchema" (hash ("schemaId" "agent.semantic-protocols.provider-native-exact-request") ("schemaVersion" "1")))
-         ("responseSchema" (hash ("schemaId" "agent.semantic-protocols.provider-native-exact-projection") ("schemaVersion" "1"))))])
+         ("requestSchemaId"
+          "https://agent-semantic-protocols.dev/schemas/provider-native-exact-request.v1.schema.json")
+         ("responseSchemaId"
+          "https://agent-semantic-protocols.dev/schemas/provider-native-exact-response.v1.schema.json"))])
 
 (def (required-environment name)
   (let (value (getenv name #f))

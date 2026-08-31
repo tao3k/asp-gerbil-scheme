@@ -191,7 +191,7 @@
   "moduleExtensions": {
     "@@gerbil_bazel+//gerbil:extensions.bzl%gerbil": {
       "os:osx,arch:aarch64": {
-        "bzlTransitiveDigest": "NpLQrEMl3JJmQfmun+2znNbrMxffrVt95hJPTGAI8PQ=",
+        "bzlTransitiveDigest": "syK1vkgy74JTqVFQ+OZjMzo0XraQ682l5TBodh1nX9g=",
         "usagesDigest": "NrwpJyFLjVtOXRtqF0V1G0K1Z3RYyzEtp18LJAu84es=",
         "recordedInputs": [],
         "generatedRepoSpecs": {
@@ -241,41 +241,6 @@
               "urls": [
                 "https://github.com/mighty-gerbils/gerbil-poo/archive/1c3225637525400341a09e958296962c10184ead.tar.gz"
               ]
-            }
-          }
-        }
-      }
-    },
-    "@@gerbil_bazel+//tests/smoke:source_resolution_replay_extension.bzl%source_resolution_replay": {
-      "general": {
-        "bzlTransitiveDigest": "vCK6zEjK2aEQgq5vfiTjAY9qkPIFOMj2/h+HHke0ZOM=",
-        "usagesDigest": "AeWAx7IciPoMdqjgnnmfTLRfva0CUEekjyhAkHKCACo=",
-        "recordedInputs": [],
-        "generatedRepoSpecs": {
-          "source_resolution_replay_fixture": {
-            "repoRuleId": "@@gerbil_bazel+//tests/smoke:source_resolution_replay_extension.bzl%source_resolution_fixture_repository",
-            "attributes": {}
-          },
-          "source_resolution_replay_a": {
-            "repoRuleId": "@@gerbil_bazel+//gerbil:project_dependency_sources_repository.bzl%project_dependency_sources_repository",
-            "attributes": {
-              "package": "gerbil-bazel-self",
-              "project_root_marker": "@@+source_resolution_replay+source_resolution_replay_fixture//:project-root.marker",
-              "project_library_relative_path": "project-library",
-              "canonical_package_path": ".gerbil/pkg/clan",
-              "canonical_uri": "https://example.invalid/gerbil-bazel-source-resolution-fixture",
-              "expected_revision": "eaf43dc92bfeeb9abeb348137a7cca449843936f"
-            }
-          },
-          "source_resolution_replay_b": {
-            "repoRuleId": "@@gerbil_bazel+//gerbil:project_dependency_sources_repository.bzl%project_dependency_sources_repository",
-            "attributes": {
-              "package": "gerbil-bazel-self",
-              "project_root_marker": "@@+source_resolution_replay+source_resolution_replay_fixture//:project-root.marker",
-              "project_library_relative_path": "project-library",
-              "canonical_package_path": ".gerbil/pkg/clan",
-              "canonical_uri": "https://example.invalid/gerbil-bazel-source-resolution-fixture",
-              "expected_revision": "eaf43dc92bfeeb9abeb348137a7cca449843936f"
             }
           }
         }

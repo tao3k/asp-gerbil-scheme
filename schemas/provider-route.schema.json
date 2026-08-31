@@ -38,8 +38,8 @@
     "target": {
       "$ref": "#/$defs/target"
     },
-    "requestSchema": {
-      "$ref": "#/$defs/schemaReference"
+    "requestSchemaId": {
+      "$ref": "#/$defs/schemaId"
     },
     "inputs": {
       "type": "array",
@@ -89,15 +89,6 @@
       "type": "string",
       "minLength": 1,
       "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$"
-    },
-    "schemaReference": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["schemaId", "schemaVersion"],
-      "properties": {
-        "schemaId": { "$ref": "#/$defs/schemaId" },
-        "schemaVersion": { "const": "1" }
-      }
     },
     "target": {
       "type": "object",
@@ -205,10 +196,10 @@
     "output": {
       "type": "object",
       "additionalProperties": false,
-        "required": ["schema", "mediaType"],
+      "required": ["schemaId", "mediaType"],
       "properties": {
-        "schema": {
-          "$ref": "#/$defs/schemaReference"
+        "schemaId": {
+          "$ref": "#/$defs/schemaId"
         },
         "mediaType": {
           "const": "application/json"
