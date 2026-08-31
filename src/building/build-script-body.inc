@@ -214,6 +214,8 @@
 
 (def (framework-build-main arguments build-spec keys source-file)
   (def (parse-options options)
+    (def (present? keyword parsed)
+      (and (memq keyword parsed) #t))
     (let loop ((rest options) (parsed []))
       (match rest
         ([] parsed)
@@ -225,11 +227,17 @@
          ;; executable target has the same platform-correct meaning.
          (cond-expand
           (darwin
-           (loop rest (cons* build-optimized: #t parsed)))
+           (loop rest
+                 (if (present? build-optimized: parsed)
+                     parsed
+                     (cons* build-optimized: #t parsed))))
           (else
            (loop rest (cons* build-release: #t parsed)))))
         (["--optimized" . rest]
-         (loop rest (cons* build-optimized: #t parsed)))
+         (loop rest
+               (if (present? build-optimized: parsed)
+                   parsed
+                   (cons* build-optimized: #t parsed))))
         (["--debug" . rest]
          (loop rest (cons* debug: #t parsed)))
         (else
