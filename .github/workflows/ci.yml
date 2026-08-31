@@ -199,12 +199,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          run_smoke() {
+            local receipt
+            receipt="$(mktemp)"
+            if ! "$@" >"$receipt" 2>&1; then
+              cat "$receipt"
+              rm -f "$receipt"
+              return 1
+            fi
+            rm -f "$receipt"
+          }
           mkdir -p .bin
           install -m 755 build/workspace-provider/bin/asp-gerbil-scheme .bin/asp-gerbil-scheme
-          .bin/asp-gerbil-scheme search prime --view seeds --workspace . >/dev/null
-          .bin/asp-gerbil-scheme check --full . >/dev/null
-          .bin/asp-gerbil-scheme bench --json >/dev/null
-          .bin/asp-gerbil-scheme search prime --json . >/dev/null
+          run_smoke .bin/asp-gerbil-scheme search prime --view seeds --workspace .
+          run_smoke .bin/asp-gerbil-scheme check --full .
+          run_smoke .bin/asp-gerbil-scheme bench --json
+          run_smoke .bin/asp-gerbil-scheme search prime --json .
 
       - name: Run canonical provider and semantic contract tests
         shell: bash
