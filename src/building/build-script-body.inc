@@ -68,8 +68,9 @@
             (case capability
               ((tls)
                (cond-expand
-                 (darwin
-                  '("-ld-options" "-lssl -lcrypto"))
+                      (darwin
+                       '("-cc-options" "-include openssl/kdf.h"
+                         "-ld-options" "-lssl -lcrypto"))
                  (linux
                   '("-ld-options" "-lssl -lcrypto"))
                  (else
