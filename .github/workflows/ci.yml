@@ -80,6 +80,8 @@ jobs:
           test -n "$gcc_bin"
           test -x "$gcc_bin"
           echo "GERBIL_GCC=$gcc_bin" >> "$GITHUB_ENV"
+          openssl_prefix="$(brew --prefix openssl@3 2>/dev/null || brew --prefix openssl)"
+          echo "LIBRARY_PATH=$openssl_prefix/lib${LIBRARY_PATH:+:$LIBRARY_PATH}" >> "$GITHUB_ENV"
           "$gcc_bin" --version
 
       - name: Save Homebrew cache
