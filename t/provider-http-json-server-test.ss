@@ -145,7 +145,7 @@
       ("operation" "query")
       ("payload"
        (hash
-        ("schemaId" "https://agent-semantic-protocols.dev/schemas/provider-native-exact-request.v1.schema.json")
+        ("schemaId" "agent.semantic-protocols.provider-native-exact-request")
         ("schemaVersion" "1")
         ("languageId" "gerbil-scheme")
         ("providerId" "asp-gerbil-scheme")
@@ -455,7 +455,7 @@
            (artifact (provider-test-artifact package-root))
            (project-request
             (hash
-             ("schemaId" "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-request.schema.json")
+             ("schemaId" "agent.semantic-protocols.provider-project-resolution-request")
              ("schemaVersion" "1")
              ("languageId" "gerbil-scheme")
              ("providerId" "asp-gerbil-scheme")
@@ -495,7 +495,7 @@
                    ("operation" "project-resolution")
                    ("payload"
                     (hash
-                     ("schemaId" "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-request.schema.json")
+                     ("schemaId" "agent.semantic-protocols.provider-project-resolution-request")
                      ("schemaVersion" "1")
                      ("languageId" "gerbil-scheme")
                      ("providerId" "asp-gerbil-scheme")
