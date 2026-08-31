@@ -59,29 +59,13 @@
     '("src/commands/query"
       "src/commands/projection"))))
 
-;; The resident HTTP runtime pulls in Gerbil's TLS bindings.  Release builds
-;; link a static executable, so retain the transitive OpenSSL closure here
-;; instead of relying on a dynamically loaded host library.  Keep the native
-;; libraries platform-owned, following the Standard Library's OS split.
-(def +provider-native-link-modules+
-  (cond-expand
-    (darwin
-     '((gxc: ":std/net/ssl/libssl"
-             "-ld-options" "-lssl"
-             "-ld-options" "-lcrypto")))
-    (linux
-     '((gxc: ":std/net/ssl/libssl"
-             "-ld-options" "-lssl"
-             "-ld-options" "-lcrypto")))
-    (else
-     (error "unsupported native TLS linker platform"))))
-
 (def +provider-runtime-build-spec+
-  (append
+  (framework-executable-build-spec
+   "src/provider-server"
+   "asp-gerbil-scheme"
    +provider-runtime-modules+
-   +provider-native-link-modules+
-   `((exe: "src/provider-server" bin: "asp-gerbil-scheme"))
-   +provider-library-modules+))
+   +provider-library-modules+
+   '(tls)))
 
 (defbuild-script
  +provider-runtime-build-spec+

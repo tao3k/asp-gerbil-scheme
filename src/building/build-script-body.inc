@@ -61,10 +61,31 @@
      ((string? (car rest)) (loop (cdr rest) (cons (car rest) modules)))
      (else (loop (cdr rest) modules)))))
 
-(def (framework-executable-build-spec module binary
-                                      (runtime-modules [])
-                                      (library-modules []))
+(def (framework-native-link-specs native-capabilities)
+  (apply append
+         (map
+          (lambda (capability)
+            (case capability
+              ((tls)
+               (cond-expand
+                 (darwin
+                 '((gxc: "src/building/native-tls-linker"
+                          "-ld-options" "-lssl"
+                          "-ld-options" "-lcrypto")))
+                 (linux
+                 '((gxc: "src/building/native-tls-linker"
+                          "-ld-options" "-lssl"
+                          "-ld-options" "-lcrypto")))
+                 (else
+                  (error "unsupported native TLS linker platform"))))
+              (else
+               (error "unsupported native build capability" capability))))
+          native-capabilities)))
+
+(def (framework-executable-build-spec module binary runtime-modules
+                                      library-modules native-capabilities)
   (append runtime-modules
+          (framework-native-link-specs native-capabilities)
           `((exe: ,module bin: ,binary))
           library-modules))
 

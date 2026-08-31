@@ -28,7 +28,7 @@
 (def +package-graph-schema-id+
   "agent.semantic-protocols.language-package-graph")
 (def +parser-id+ "gerbil.package-spec")
-(def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld"))
+(def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld" ".inc"))
 (def +hex-digits+ "0123456789abcdef")
 
 (defstruct project-resolution-not-applicable ())

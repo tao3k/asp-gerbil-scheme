@@ -30,7 +30,7 @@
         read-source-lines)
 
 ;; ConfigConstant
-(def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld"))
+(def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld" ".inc"))
 ;; ConfigConstant
 (def +config-files+ '("gerbil.pkg" "build.ss"))
 ;; Boolean

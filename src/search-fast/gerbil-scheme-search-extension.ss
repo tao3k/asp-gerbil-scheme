@@ -46,7 +46,8 @@
 ;; : (-> MaybePathString Boolean )
 (def (source-script-path? value)
   (and (string? value)
-       (string-suffix? ".ss" value)))
+       (or (string-suffix? ".ss" value)
+           (string-suffix? ".inc" value))))
 
 ;; : (-> Unit (List String) )
 (def (entry-args)

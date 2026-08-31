@@ -41,7 +41,7 @@
   "agent.semantic-protocols.semantic-language")
 
 ;; : (List String)
-(def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld"))
+(def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld" ".inc"))
 ;; : (List String)
 (def +config-files+ '("gerbil.pkg" "build.ss"))
 ;; : (List String)

@@ -18,6 +18,7 @@
         (check (member "t/policy-test.ss" files) ? true)
         (check (member "t/policy/agent-source-scope-test.ss" files) ? true)
         (check (member "src/policy/gxtest.ss" files) ? true)
+        (check (member "src/building/build-script-body.inc" files) ? true)
         (check (member "src/build-api/native-build.ss" files) ? true)))
     (test-case "explicit include roots do not widen the build graph"
       (let (files

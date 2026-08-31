@@ -91,7 +91,8 @@
 
 ;; : (-> String Boolean)
 (def (source-coverage-gerbil-source? path)
-  (string-suffix? ".ss" path))
+  (or (string-suffix? ".ss" path)
+      (string-suffix? ".inc" path)))
 
 ;; : (-> Path Boolean)
 (def (source-coverage-skipped-entry? entry)

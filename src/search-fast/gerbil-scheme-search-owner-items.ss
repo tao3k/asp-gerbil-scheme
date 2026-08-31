@@ -14,7 +14,8 @@
 ;; : (-> ArgValue Boolean )
 (def (source-script-path? value)
   (and (string? value)
-       (string-suffix? ".ss" value)))
+       (or (string-suffix? ".ss" value)
+           (string-suffix? ".inc" value))))
 
 ;;; Arg normalization:
 ;;; - Fast-path binaries accept both full `search owner` and owner-local forms.
