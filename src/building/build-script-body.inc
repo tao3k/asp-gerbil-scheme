@@ -79,7 +79,7 @@
           native-capabilities)))
 
 (def (framework-static-runtime-build-spec runtime-modules)
-  (map (lambda (module) `(gxc: ,module "-static")) runtime-modules))
+  (map (lambda (module) `(gxc: ,module (static: #t))) runtime-modules))
 
 (def (framework-executable-build-spec module binary runtime-modules
                                           library-modules native-capabilities)
