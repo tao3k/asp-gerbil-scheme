@@ -78,12 +78,15 @@
                (error "unsupported native build capability" capability))))
           native-capabilities)))
 
+(def (framework-static-runtime-build-spec runtime-modules)
+  (map (lambda (module) `(gxc: ,module "-static")) runtime-modules))
+
 (def (framework-executable-build-spec module binary runtime-modules
-                                      library-modules native-capabilities)
-  (append runtime-modules
-          `((exe: ,module bin: ,binary
-                  ,@(framework-native-link-options native-capabilities)))
-          library-modules))
+                                          library-modules native-capabilities)
+  (append (framework-static-runtime-build-spec runtime-modules)
+               `((exe: ,module bin: ,binary
+                       ,@(framework-native-link-options native-capabilities)))
+               library-modules))
 
 (def (framework-validate-runtime-closure! build-spec)
   (def (module-name id)
