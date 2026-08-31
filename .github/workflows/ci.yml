@@ -191,7 +191,7 @@ jobs:
           }
           GERBIL_BUILD_CORES="$(build_cores)" \
             gxpkg env gxi ./build.ss clean
-          GERBIL_BUILD_CORES="$(build_cores)" \
+          GERBIL_BUILD_CORES=0 \
             gxpkg env gxi ./build.ss compile --release --optimized
           test -x build/workspace-provider/bin/asp-gerbil-scheme
 
