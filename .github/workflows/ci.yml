@@ -192,12 +192,12 @@ jobs:
           GERBIL_BUILD_CORES="$(build_cores)" \
             gxpkg env gxi ./build.ss clean
           for static_module in \
-            src/constants \
-            src/commands/search-prime-light-list \
-            src/commands/search-prime-light \
-            src/search-light-launcher \
-            src/protocol/command-catalog \
-            src/cli-launcher; do
+            src/constants.ss \
+            src/commands/search-prime-light-list.ss \
+            src/commands/search-prime-light.ss \
+            src/search-light-launcher.ss \
+            src/protocol/command-catalog.ss \
+            src/cli-launcher.ss; do
             gxpkg env gxc -static "$static_module"
           done
           GERBIL_BUILD_CORES=0 \
