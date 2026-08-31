@@ -218,7 +218,16 @@
       (match rest
         ([] parsed)
         (["--release" . rest]
-         (loop rest (cons* build-release: #t parsed)))
+         ;; Gerbil implements build-release: by forwarding -static to the
+         ;; final native linker. Darwin has no static C runtime startup object
+         ;; (crt0.o), so a release build there is optimized but dynamically
+         ;; linked. Keep this policy in the Building Framework so every
+         ;; executable target has the same platform-correct meaning.
+         (cond-expand
+          (darwin
+           (loop rest (cons* build-optimized: #t parsed)))
+          (else
+           (loop rest (cons* build-release: #t parsed)))))
         (["--optimized" . rest]
          (loop rest (cons* build-optimized: #t parsed)))
         (["--debug" . rest]
@@ -281,6 +290,8 @@
     (compilerCoreCapture . "pre-import-child-process")
     (dependencyEnvironmentOwner . "gxpkg-env")
     (nativeLinkWorkingDirectory . "declared-bindir")
+    (releaseLinkageOwner . "Building-Framework-platform-policy")
+    (darwinReleaseLinkage . "optimized-dynamic")
     (buildGraphProjection . "declared-compiler-runtime-closure-to-std/make")
     (libraryBuildProjection . "post-executable-package-modules-to-std/make")
     (runtimeClosureDriftOracle . "gerbil-executable-stub")
