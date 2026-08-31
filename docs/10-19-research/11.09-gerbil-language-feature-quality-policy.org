@@ -1,7 +1,7 @@
 * 11.09 Gerbil Language Feature Quality Policy
 :PROPERTIES:
 :STATUS: active
-:OWNER: gerbil-scheme-language-project-harness
+:OWNER: asp-gerbil-scheme
 :EVIDENCE: gerbil://, .data/gerbil-utils, .data/gerbil-poo, src/parser/higher-order.ss
 :END:
 ** 11.09.1 Scope
@@ -33,7 +33,7 @@ Evidence came from ASP search-first and bounded selectors:
 #+begin_src sh
 asp gerbil-scheme search pipe \
   'language feature quality policy macro hygiene syntax-case syntax-rules lambda-match compose scenario benchmark gerbil-utils gerbil-poo' \
-  --workspace languages/gerbil-scheme-language-project-harness \
+  --workspace languages/asp-gerbil-scheme \
   --view seeds
 asp rg -query 'lambda-match|lambda-ematch|defsyntax|syntax-case|syntax-rules|match|case-lambda' \
   -query 'cut|curry|rcurry|compose|rcompose|!>|!!>|for/fold|foldl|filter-map' \

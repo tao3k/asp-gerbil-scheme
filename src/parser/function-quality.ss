@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned function quality profiles composed from native facts.
 
-(import :gslph/src/parser/model
-        :gslph/src/parser/higher-order
+(import :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/higher-order
         (only-in :clan/base fun)
         (only-in :std/misc/list unique)
         (only-in :std/srfi/13 string-prefix? string-suffix?)

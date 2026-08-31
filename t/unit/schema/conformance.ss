@@ -2,10 +2,10 @@
 ;;; Boundary:
 ;;; - test owner records policy expectations.
 ;;; - Keep typed contracts and fixture intent explicit.
-(import :gslph/src/commands/info
-        :gslph/src/commands/search
-        :gslph/src/parser/facade
-        :gslph/src/protocol/json
+(import :asp-gerbil-scheme/src/commands/info
+        :asp-gerbil-scheme/src/commands/search
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/json
         :std/misc/ports
         :std/srfi/13
         :std/test
@@ -73,7 +73,7 @@
          (commands (json-get packet "closureCommands")))
     (check-packet-conforms-to-schema!
       packet
-      "semantic-gerbil-scheme-harness-info.v1.schema.json")
+      "semantic-asp-gerbil-scheme-info.v1.schema.json")
     (check (json-get packet "files") => 0)
     (check (json-get packet "definitions") => 0)
     (check (not (not (member "macroFacts" (json-get steering "facts")))) => #t)

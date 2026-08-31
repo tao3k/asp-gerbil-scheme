@@ -2,7 +2,7 @@
 ;;; Compatibility wrapper for the full search command entrypoint.
 
 (import :gerbil/gambit
-        :gslph/src/commands/search)
+        :asp-gerbil-scheme/src/commands/search)
 
 (def args (cddr (command-line)))
 (def search-args

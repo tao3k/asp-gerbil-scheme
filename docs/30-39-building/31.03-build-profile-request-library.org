@@ -37,7 +37,7 @@ flowchart LR
 
 ** Public API
 
-Downstream packages import =:gslph/src/building/facade=.  The facade exports
+Downstream packages import =:asp-gerbil-scheme/src/building/facade=.  The facade exports
 the constructors, predicates, and slot accessors for both profile and request,
 as well as the POO-native construction helpers:
 
@@ -52,7 +52,7 @@ same objects instead of copying an internal alist shape or reaching through a
 package script.
 
 #+begin_src scheme
-(import :gslph/src/building/facade)
+(import :asp-gerbil-scheme/src/building/facade)
 
 (def profile
   (make-std-builder-profile (default-std-builder "src")))

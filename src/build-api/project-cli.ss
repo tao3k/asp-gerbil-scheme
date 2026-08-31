@@ -3,16 +3,16 @@
 (import :gerbil/tools/env
         :std/cli/getopt
  :std/cli/multicall
-  :gslph/src/build-api/project-build
-  :gslph/src/testing/project-build
-  :gslph/src/build-api/source-coverage)
+  :asp-gerbil-scheme/src/build-api/project-build
+  :asp-gerbil-scheme/src/testing/project-build
+  :asp-gerbil-scheme/src/build-api/source-coverage)
 
-(import :gslph/src/build-api/component-closure)
+(import :asp-gerbil-scheme/src/build-api/component-closure)
 
 (def +package-root+ (current-directory))
 
 (configure-project-build-root! +package-root+)
-(gslph-source-coverage
+(asp-gerbil-scheme-source-coverage
  roots: ["src"]
  runtime-roots: ["src"])
 
@@ -77,7 +77,7 @@
         (release #f)
         (flag #f)
         (full #f))
-  (help: "Install standalone gslph; use --flag asp for ASP State Home runtime"
+  (help: "Install standalone asp-gerbil-scheme; use --flag asp for ASP State Home runtime"
    getopt: install-getopt)
   (project-install-target
    verbose debug no-optimize optimized release full flag))
@@ -106,7 +106,7 @@
   (help: "Write a checked component source-closure receipt"
    getopt: component-spec-getopt)
   (match components
-    ([component] (write-gslph-component-receipt component))
+    ([component] (write-asp-gerbil-scheme-component-receipt component))
     (else (error "component-spec requires exactly one component" components))))
 
 (define-multicall-main)

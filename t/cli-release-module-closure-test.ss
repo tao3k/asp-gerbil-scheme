@@ -2,7 +2,7 @@
 ;;; Parser-owned exact-set gate for the standalone CLI release projection.
 
 (import :gerbil/gambit
-        :gslph/src/parser/facade
+        :asp-gerbil-scheme/src/parser/facade
         :std/sort
         :std/test
         (only-in :std/misc/path path-directory path-expand path-normalize)
@@ -53,10 +53,10 @@
 ;; : (-> ModulePath String (Or False ModulePath))
 (def (release-local-module-reference importer-path reference)
   (cond
-   ((string-prefix? ":gslph/src/" reference)
+   ((string-prefix? ":asp-gerbil-scheme/src/" reference)
     (ensure-source-suffix
      (substring reference
-                (string-length ":gslph/src/")
+                (string-length ":asp-gerbil-scheme/src/")
                 (string-length reference))))
    ((string-prefix? ":" reference)
     (let* ((candidate

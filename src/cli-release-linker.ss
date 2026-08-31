@@ -1,22 +1,22 @@
 ;;; -*- Gerbil -*-
-;;; Release-only static linker root for the native gslph executable.
+;;; Release-only static linker root for the native asp-gerbil-scheme executable.
 
-(import (only-in :gslph/src/commands/search-structural
+(import (only-in :asp-gerbil-scheme/src/commands/search-structural
                  emit-structural-artifact)
-        (rename-in :gslph/src/cli-launcher (main cli-main))
-        (only-in :gslph/src/commands/agent agent-main)
-        (only-in :gslph/src/commands/evidence evidence-main)
-        (only-in :gslph/src/commands/fmt fmt-main)
-        (only-in :gslph/src/commands/guide guide-main)
-        (only-in :gslph/src/commands/info info-main)
-        (only-in :gslph/src/commands/projection projection-main)
-        (only-in :gslph/src/commands/query query-main)
-        (only-in :gslph/src/commands/search search-main)
-        (only-in :gslph/src/protocol/command-catalog
+        (rename-in :asp-gerbil-scheme/src/cli-launcher (main cli-main))
+        (only-in :asp-gerbil-scheme/src/commands/agent agent-main)
+        (only-in :asp-gerbil-scheme/src/commands/evidence evidence-main)
+        (only-in :asp-gerbil-scheme/src/commands/fmt fmt-main)
+        (only-in :asp-gerbil-scheme/src/commands/guide guide-main)
+        (only-in :asp-gerbil-scheme/src/commands/info info-main)
+        (only-in :asp-gerbil-scheme/src/commands/projection projection-main)
+        (only-in :asp-gerbil-scheme/src/commands/query query-main)
+        (only-in :asp-gerbil-scheme/src/commands/search search-main)
+        (only-in :asp-gerbil-scheme/src/protocol/command-catalog
                  provider-command-descriptor-name
                  provider-command-descriptor-static-main
                  provider-command-descriptors)
-        (only-in :gslph/src/support/args executable-argv))
+        (only-in :asp-gerbil-scheme/src/support/args executable-argv))
 (export main
         release-command-dispatch
         release-command-mains)

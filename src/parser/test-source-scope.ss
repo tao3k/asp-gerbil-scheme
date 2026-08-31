@@ -2,11 +2,11 @@
 ;;; Test source-scope expansion and package-local import resolution.
 
 (import :gerbil/gambit
-        :gslph/src/parser/model
-        :gslph/src/parser/package
-        :gslph/src/parser/parse-workers
-        :gslph/src/parser/source-file
-        :gslph/src/parser/source-scope
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/package
+        :asp-gerbil-scheme/src/parser/parse-workers
+        :asp-gerbil-scheme/src/parser/source-file
+        :asp-gerbil-scheme/src/parser/source-scope
         (only-in :std/sort sort)
         (only-in :std/srfi/13
                  string-index-right

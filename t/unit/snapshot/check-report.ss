@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-(import :gslph/src/snapshot/facade
+(import :asp-gerbil-scheme/src/snapshot/facade
         :std/test)
 (export check-empty-check-report-snapshot)
 ;; Snapshot
@@ -7,6 +7,6 @@
   (check (check-report-snapshot #f '())
          => '(checkReport
               (languageId "gerbil-scheme")
-              (providerId "gerbil-scheme-harness")
+              (providerId "asp-gerbil-scheme")
               (status "pass")
               (findings ()))))

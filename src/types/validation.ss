@@ -6,8 +6,8 @@
 
 (import :gerbil/gambit
         (only-in :std/sugar cut)
-        :gslph/src/types/model
-        :gslph/src/types/subtyping)
+        :asp-gerbil-scheme/src/types/model
+        :asp-gerbil-scheme/src/types/subtyping)
 
 (export make-type-alias-env
         type-alias-env-bind

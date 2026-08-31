@@ -81,8 +81,8 @@ that a real stale compilation is inherently faster than upstream.
 ** Downstream Surface
 
 #+begin_src scheme
-(import :gslph/src/building/facade
-        :gslph/src/building/testing)
+(import :asp-gerbil-scheme/src/building/facade
+        :asp-gerbil-scheme/src/building/testing)
 
 (def suite
   (make-build-request-performance-suite

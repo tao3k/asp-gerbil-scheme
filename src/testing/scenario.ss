@@ -3,8 +3,8 @@
 
 (import :gerbil/gambit
         (only-in :std/srfi/1 find)
-        :gslph/src/testing/model
-        :gslph/src/testing/scope)
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/scope)
 
 (export #t)
 

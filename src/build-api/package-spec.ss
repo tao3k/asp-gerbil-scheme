@@ -8,14 +8,14 @@
         (only-in :std/srfi/1 append-map)
         (only-in :std/srfi/13 string-suffix?))
 
-(export gslph-package-api-spec
-        gslph-package-api-stage-specs)
+(export asp-gerbil-scheme-package-api-spec
+        asp-gerbil-scheme-package-api-stage-specs)
 
 ;; : (List (List Path))
 ;;; Package API prologue stages keep native parser, type, and policy
 ;;; owners materialized before report modules so cold CI cannot build a report
 ;;; facade without the transitive library graph it imports.
-(def +gslph-package-api-prologue-stages+
+(def +asp-gerbil-scheme-package-api-prologue-stages+
   '(("build-api/package-build.ss")
     ("build-api/source-coverage.ss"
      "constants.ss")
@@ -91,7 +91,7 @@
 ;; Policy stages follow the internal import DAG. A facade must never expand
 ;; against a concurrently generated model SSI.
 ;; : (List (List Path))
-(def +gslph-package-api-policy-stages+
+(def +asp-gerbil-scheme-package-api-policy-stages+
   '(("policy/model.ss"
      "policy/agent-support.ss"
      "policy/agent-import.ss"
@@ -140,7 +140,7 @@
     ("policy/gxtest-report.ss")))
 
 ;; : (List (List Path))
-(def +gslph-package-api-epilogue-stages+
+(def +asp-gerbil-scheme-package-api-epilogue-stages+
   '(("testing/build-paths.ss"
      "testing/gxtest-smoke.ss"
      "testing/gxtest-context.ss"
@@ -169,12 +169,12 @@
     ("build-api/project-cli.ss")))
 
 ;; : (List (List Path))
-(def +gslph-package-api-command-prologue-stages+
+(def +asp-gerbil-scheme-package-api-command-prologue-stages+
   '(("support/args.ss"
      "support/io.ss")))
 
 ;; : (List String)
-(def +gslph-package-api-building-stages+
+(def +asp-gerbil-scheme-package-api-building-stages+
   '(("building/model.ss"
      "building/native-toolchain.ss")
     ("building/build-script.ss")
@@ -187,64 +187,64 @@
 
 ;; Native build interfaces must precede directory-wide parallel compilation.
 ;; : (List (List Path))
-(def +gslph-package-api-build-api-stages+
+(def +asp-gerbil-scheme-package-api-build-api-stages+
   '(("build-api/artifact-cleanup.ss"
      "build-api/component-closure.ss")
     ("build-api/native-build.ss")
     ("build-api/framework.ss")))
 
-(def +gslph-package-api-directories+
+(def +asp-gerbil-scheme-package-api-directories+
   '("utilities" "types" "parser" "policy" "protocol" "extensions" "language" "format" "commands"))
 
 ;; : (List (List Path))
-(def +gslph-package-api-launcher-stages+
+(def +asp-gerbil-scheme-package-api-launcher-stages+
   '(("search-light-launcher.ss")
     ("cli-launcher.ss")))
 
 ;; : (-> String Boolean)
-(def (gslph-ss-file? file)
+(def (asp-gerbil-scheme-ss-file? file)
   (and (string? file)
        (string-suffix? ".ss" file)))
 
 ;; : (-> String (List Path))
-(def (gslph-package-api-directory-spec dir)
+(def (asp-gerbil-scheme-package-api-directory-spec dir)
   (let (source-dir (string-append "src/" dir))
     (if (file-exists? source-dir)
       (map (lambda (file) (string-append dir "/" file))
-           (sort (filter gslph-ss-file? (directory-files source-dir))
+           (sort (filter asp-gerbil-scheme-ss-file? (directory-files source-dir))
                  string<?))
       [])))
 
 ;; : (-> (List (List Path)) (List Path))
-(def (gslph-package-api-flatten-stages stages)
+(def (asp-gerbil-scheme-package-api-flatten-stages stages)
   (append-map (lambda (stage) stage) stages))
 
-(def gslph-package-api-stage-specs-cache #f)
-(def gslph-package-api-spec-cache #f)
+(def asp-gerbil-scheme-package-api-stage-specs-cache #f)
+(def asp-gerbil-scheme-package-api-spec-cache #f)
 
 ;; : (-> (List (List Path)))
-(def (gslph-package-api-stage-specs/fresh)
-  (append +gslph-package-api-prologue-stages+
-          +gslph-package-api-policy-stages+
-          +gslph-package-api-building-stages+
-          +gslph-package-api-build-api-stages+
-          +gslph-package-api-command-prologue-stages+
-          (map gslph-package-api-directory-spec
-                +gslph-package-api-directories+)
-          +gslph-package-api-launcher-stages+
-          +gslph-package-api-epilogue-stages+))
+(def (asp-gerbil-scheme-package-api-stage-specs/fresh)
+  (append +asp-gerbil-scheme-package-api-prologue-stages+
+          +asp-gerbil-scheme-package-api-policy-stages+
+          +asp-gerbil-scheme-package-api-building-stages+
+          +asp-gerbil-scheme-package-api-build-api-stages+
+          +asp-gerbil-scheme-package-api-command-prologue-stages+
+          (map asp-gerbil-scheme-package-api-directory-spec
+                +asp-gerbil-scheme-package-api-directories+)
+          +asp-gerbil-scheme-package-api-launcher-stages+
+          +asp-gerbil-scheme-package-api-epilogue-stages+))
 
 ;; : (-> (List (List Path)))
-(def (gslph-package-api-stage-specs)
-  (or gslph-package-api-stage-specs-cache
-      (let (stages (gslph-package-api-stage-specs/fresh))
-        (set! gslph-package-api-stage-specs-cache stages)
+(def (asp-gerbil-scheme-package-api-stage-specs)
+  (or asp-gerbil-scheme-package-api-stage-specs-cache
+      (let (stages (asp-gerbil-scheme-package-api-stage-specs/fresh))
+        (set! asp-gerbil-scheme-package-api-stage-specs-cache stages)
         stages)))
 
 ;; : (-> (List Path))
-(def (gslph-package-api-spec)
-  (or gslph-package-api-spec-cache
-      (let (spec (gslph-package-api-flatten-stages
-                  (gslph-package-api-stage-specs)))
-        (set! gslph-package-api-spec-cache spec)
+(def (asp-gerbil-scheme-package-api-spec)
+  (or asp-gerbil-scheme-package-api-spec-cache
+      (let (spec (asp-gerbil-scheme-package-api-flatten-stages
+                  (asp-gerbil-scheme-package-api-stage-specs)))
+        (set! asp-gerbil-scheme-package-api-spec-cache spec)
         spec)))

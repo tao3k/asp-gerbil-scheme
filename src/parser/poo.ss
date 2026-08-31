@@ -2,8 +2,8 @@
 ;;; POO-specific parser-owned syntax facts.
 
 (import :gerbil/expander
-        :gslph/src/parser/model
-        :gslph/src/parser/support
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/support
         (only-in :std/misc/list unique)
         (only-in :std/misc/string string-trim-suffix)
         (only-in :std/srfi/13 string-prefix? string-suffix?))

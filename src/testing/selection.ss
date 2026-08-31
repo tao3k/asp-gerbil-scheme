@@ -4,10 +4,10 @@
 (import :gerbil/gambit
         (only-in :std/srfi/1 find)
         (only-in :std/sugar cut foldl)
-        :gslph/src/testing/model
-        :gslph/src/testing/scope
-        :gslph/src/testing/scenario
-        :gslph/src/testing/performance)
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/scope
+        :asp-gerbil-scheme/src/testing/scenario
+        :asp-gerbil-scheme/src/testing/performance)
 
 (export #t)
 

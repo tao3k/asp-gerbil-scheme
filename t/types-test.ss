@@ -2,7 +2,7 @@
 ;;; Fast smoke for TypeSpec model APIs.
 
 (import :std/test
-        :gslph/src/types/model)
+        :asp-gerbil-scheme/src/types/model)
 
 (export types-test)
 

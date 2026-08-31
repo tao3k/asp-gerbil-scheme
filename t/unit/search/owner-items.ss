@@ -3,9 +3,9 @@
 ;;; These tests guard launcher shape and parser-owned owner item limits.
 
 (import :gerbil/gambit
-        :gslph/src/commands/guide-sections
-        :gslph/src/commands/search-owner-items
-        :gslph/src/parser/owner-items
+        :asp-gerbil-scheme/src/commands/guide-sections
+        :asp-gerbil-scheme/src/commands/search-owner-items
+        :asp-gerbil-scheme/src/parser/owner-items
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/srfi/1 find)
         (only-in :std/srfi/13 string-contains string-index string-prefix?)
@@ -85,7 +85,7 @@
                 facts)))
     (check (not (not package-fact)) => #t)
     (check (hash-get package-fact 'name)
-           => "gerbil-scheme-language-project-harness")
+           => "asp-gerbil-scheme")
     (check (not (not (member "git.cons.io/mighty-gerbils/gerbil-poo"
                               (hash-get package-fact 'queryKeys))))
            => #t)
@@ -99,38 +99,38 @@
         (call-with-input-file
             "src/search-fast/gerbil-scheme-search-owner-items.ss"
           read-all-as-string))
-    (check (source-contains? source ":gslph/src/commands/search-owner-items") => #t)
-    (check (source-contains? source ":gslph/src/parser/owner-items") => #f)
-    (check (source-contains? source ":gslph/src/parser/facade") => #f)
-    (check (source-contains? source ":gslph/src/commands/search\n") => #f)
-    (check (source-contains? source ":gslph/src/commands/search ") => #f)
-    (check (source-contains? source ":gslph/src/commands/search)") => #f)
-    (check (source-contains? source ":gslph/src/cli") => #f)))
+    (check (source-contains? source ":asp-gerbil-scheme/src/commands/search-owner-items") => #t)
+    (check (source-contains? source ":asp-gerbil-scheme/src/parser/owner-items") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/parser/facade") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/commands/search\n") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/commands/search ") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/commands/search)") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/cli") => #f)))
 
 ;; : (-> Unit )
 (def (check-cli-launcher-search-fast-path-stays-canonical)
   (let (source
         (call-with-input-file "src/cli-launcher.ss" read-all-as-string))
-    (check (source-contains? source ":gslph/src/search-light-launcher") => #t)
-    (check (source-contains? source "(only-in :gslph/src/cli") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/search-light-launcher") => #t)
+    (check (source-contains? source "(only-in :asp-gerbil-scheme/src/cli") => #f)
     (check (source-contains? source "try-search-light-main") => #t)
     (check (source-contains? source "(def (command-line-args argv)") => #t)
     (check (source-contains? source "\"search\"") => #t)
     (check (source-contains? source "dispatch-native-command") => #t)
     (check (source-contains? source "emit-missing-command-binary") => #t)
     (check (source-contains? source "try-sibling-command-binary") => #t)
-    (check (source-contains? source ":gslph/src/commands/search-owner-items") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/commands/search-owner-items") => #f)
     (check (source-contains? source "native-search-owner-items-argv?") => #f)
-    (check (source-contains? source "gslph search requires sibling binary") => #f)
+    (check (source-contains? source "asp-gerbil-scheme search requires sibling binary") => #f)
     (check (source-contains? source "src/cli.ss") => #f)
-    (check (source-contains? source "gerbil-scheme-harness") => #f)))
+    (check (source-contains? source "asp-gerbil-scheme") => #f)))
 
 ;; : (-> Unit )
 (def (check-search-fast-path-build-boundary)
   (let (source
         (call-with-input-file "build.ss" read-all-as-string))
     (check (source-contains? source ":std/make") => #t)
-    (check (source-contains? source "(def cli-spec\n  '((exe: \"cli-launcher\" bin: \"gslph\")))") => #t)
+    (check (source-contains? source "(def cli-spec\n  '((exe: \"cli-launcher\" bin: \"asp-gerbil-scheme\")))") => #t)
     (check (source-contains? source "(def cli-bootstrap-modules") => #t)
     (check (source-contains? source "\"search-light-launcher.ss\"") => #t)
     (check (source-contains? source "\"cli-launcher.ss\"") => #t)
@@ -159,10 +159,10 @@
         (call-with-input-file "src/commands/search-prime-light.ss" read-all-as-string))
     (check (source-contains? source "collect-source-files-preview") => #t)
     (check (source-contains? source "filePreview=") => #t)
-    (check (source-contains? source ":gslph/src/parser/package") => #f)
-    (check (source-contains? source ":gslph/src/parser/source-scope") => #f)
-    (check (source-contains? source ":gslph/src/parser/source-class") => #f)
-    (check (source-contains? source ":gslph/src/support/args") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/parser/package") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/parser/source-scope") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/parser/source-class") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/support/args") => #f)
     (check (source-contains? source ":std/sugar") => #f)
     (check (source-contains? source "(hash") => #f)))
 
@@ -215,17 +215,17 @@
         (call-with-input-file
             "src/search-fast/gerbil-scheme-search-guide.ss"
           read-all-as-string))
-    (check (source-contains? source ":gslph/src/commands/guide-sections") => #t)
-    (check (source-contains? source ":gslph/src/commands/search\n") => #f)
-    (check (source-contains? source ":gslph/src/commands/search ") => #f)
-    (check (source-contains? source ":gslph/src/commands/search)") => #f)
-    (check (source-contains? source ":gslph/src/cli") => #f)))
+    (check (source-contains? source ":asp-gerbil-scheme/src/commands/guide-sections") => #t)
+    (check (source-contains? source ":asp-gerbil-scheme/src/commands/search\n") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/commands/search ") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/commands/search)") => #f)
+    (check (source-contains? source ":asp-gerbil-scheme/src/cli") => #f)))
 
 ;; : (-> Unit )
 (def (check-guide-sections-static-data-loads)
   (let (lines (guide-section-lines-for ["--poo"]))
-    (check (car lines) => "gerbil-scheme-harness guide")
-    (check (not (not (member "|cmd pattern-poo=gerbil-scheme-harness search pattern poo [term ...] --view seeds"
+    (check (car lines) => "asp-gerbil-scheme guide")
+    (check (not (not (member "|cmd pattern-poo=asp-gerbil-scheme search pattern poo [term ...] --view seeds"
                               lines)))
            => #t)
     (check (not (not (member "|policy poo-structural-facts=search structural --owner <path> --json exposes parser-owned POO forms as custom/generic/method owner facts with role,supers,slots,options,specializers,specializerTypes,dispatchArity; query owner facts before editing POO object/type/method forms"

@@ -20,7 +20,7 @@
 
 This note audits the version-matched =gerbil://= source corpus and selected
 =.data/gerbil-utils= files for advanced Gerbil/Scheme engineering features.
-The goal is to give =gerbil-scheme-language-project-harness= a source-backed
+The goal is to give =asp-gerbil-scheme= a source-backed
 quality baseline for policy guidance, code examples, and future guide output.
 
 This is not a request to copy upstream implementation into the harness. The
@@ -41,17 +41,17 @@ runtime-source path before direct selector reads.
 
 #+begin_src sh
 asp gerbil-scheme search prime \
-  --workspace languages/gerbil-scheme-language-project-harness \
+  --workspace languages/asp-gerbil-scheme \
   --view seeds
 
 asp gerbil-scheme search runtime-source \
   macro syntax hygiene datum syntax-case \
-  --workspace languages/gerbil-scheme-language-project-harness \
+  --workspace languages/asp-gerbil-scheme \
   --view seeds
 
 asp gerbil-scheme search runtime-source \
   macro sugar module-sugar \
-  --workspace languages/gerbil-scheme-language-project-harness \
+  --workspace languages/asp-gerbil-scheme \
   --view seeds
 #+end_src
 

@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 
 (import :std/test
-        :gslph/src/parser/model
-        :gslph/src/scenario/benchmark-contract
-        :gslph/src/scenario/policy)
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/scenario/benchmark-contract
+        :asp-gerbil-scheme/src/scenario/policy)
 
 (def +composition-hygiene-scenario+
   "t/scenarios/policy/macro-hygiene-context-preservation")

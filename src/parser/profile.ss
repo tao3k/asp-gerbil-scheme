@@ -2,7 +2,7 @@
 ;;; Parser profile helpers.
 
 (import :gerbil/gambit
-        :gslph/src/support/time
+        :asp-gerbil-scheme/src/support/time
         (only-in :std/sort sort)
         (only-in :std/srfi/1 take))
 
@@ -87,10 +87,10 @@
 ;;   | doc m%
 ;;       `collect-project-worker-count file-count` caps default parser workers
 ;;       by file count, host CPU count, and a memory-safe ceiling. An explicit
-;;       `GSLPH_COLLECT_CORES` override remains available for controlled hosts.
+;;       `ASP_GERBIL_SCHEME_COLLECT_CORES` override remains available for controlled hosts.
 ;;     %
 (def (collect-project-worker-count file-count)
-  (let* ((raw (optional-environment-variable "GSLPH_COLLECT_CORES"))
+  (let* ((raw (optional-environment-variable "ASP_GERBIL_SCHEME_COLLECT_CORES"))
          (configured (and raw (string->number raw)))
          (configured? (and configured
                            (integer? configured)

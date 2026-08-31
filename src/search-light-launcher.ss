@@ -2,7 +2,7 @@
 ;;; Native search launcher with fast package/topology seed paths.
 
 (import :gerbil/gambit
-        (only-in :gslph/src/commands/search-prime-light
+        (only-in :asp-gerbil-scheme/src/commands/search-prime-light
                  search-prime-light-main)
         (only-in :std/misc/process run-process)
         (only-in :std/srfi/13 string-index))
@@ -11,7 +11,7 @@
         try-search-light-main)
 
 (def +search-help+
-  "gslph search - Gerbil Scheme native fast search\n\nUsage:\n  gslph search prime [--view seeds] [--workspace PROJECT_ROOT]\n")
+  "asp-gerbil-scheme search - Gerbil Scheme native fast search\n\nUsage:\n  asp-gerbil-scheme search prime [--view seeds] [--workspace PROJECT_ROOT]\n")
 
 (def +query-light-limit+ 40)
 
@@ -226,6 +226,6 @@
 
 ;; : (-> (List String) Integer)
 (def (emit-unsupported-native-search args)
-  (display "gslph search supports native fast seed views only; use `gslph search prime --view seeds --workspace .`.\n"
+  (display "asp-gerbil-scheme search supports native fast seed views only; use `asp-gerbil-scheme search prime --view seeds --workspace .`.\n"
            (current-error-port))
   64)

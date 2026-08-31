@@ -2,7 +2,7 @@
 ;;; Public resident provider entrypoint.
 
 (import (only-in ./commands/provider-runtime provider-runtime-main)
-        (rename-in :gslph/src/cli-launcher (main cli-main)))
+        (rename-in :asp-gerbil-scheme/src/cli-launcher (main cli-main)))
 (export main)
 
 (def (main . args)

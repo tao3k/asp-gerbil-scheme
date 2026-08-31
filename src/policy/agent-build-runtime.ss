@@ -1,15 +1,15 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing build/runtime support quality policy.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-package-build-system
-        :gslph/src/policy/detection
-        :gslph/src/policy/model
-        :gslph/src/policy/poo-source
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-package-build-system
+        :asp-gerbil-scheme/src/policy/detection
+        :asp-gerbil-scheme/src/policy/model
+        :asp-gerbil-scheme/src/policy/poo-source
         (only-in :std/srfi/1 count)
         (only-in :std/srfi/13 string-contains string-prefix? string-suffix?)
         (only-in :std/sugar cut filter filter-map hash ormap)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export build-runtime-quality-findings
         build-runtime-quality-finding)
@@ -163,7 +163,7 @@
          (requiredEvidence "parser-owned top-level cache-version binding with string value type")
          (allowedShape "runtime cache version constants derive from +release-version+; cache format/schema constants may remain literal")
          (disallowedShape "top-level cache-version constants whose value type is a string literal")
-         (next "import +release-version+ from :gslph/src/constants and define the runtime cache version from it; keep formatVersion as the separate cache schema literal"))))
+         (next "import +release-version+ from :asp-gerbil-scheme/src/constants and define the runtime cache version from it; keep formatVersion as the separate cache schema literal"))))
 
 ;; : (-> BindingFact Boolean )
 (def (cache-version-literal-binding? binding)

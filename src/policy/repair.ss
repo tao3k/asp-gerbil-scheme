@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Agent repair metadata derived from policy findings.
 
-(import :gslph/src/policy/catalog
+(import :asp-gerbil-scheme/src/policy/catalog
         (only-in :std/misc/list unique)
         (only-in :std/srfi/1 take)
         (only-in :std/srfi/13 string-join)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export repairable-finding?
         repairable-findings

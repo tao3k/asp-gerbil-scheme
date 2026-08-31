@@ -6,19 +6,19 @@
 ;;; - unsupported or incomplete routes fail before project collection.
 ;;; Search command adapter.
 
-(import :gslph/src/commands/guide
-        :gslph/src/commands/search-evidence
-        :gslph/src/commands/search-extension
-        :gslph/src/commands/search-owner-items
-        (only-in :gslph/src/commands/search-prime-light
+(import :asp-gerbil-scheme/src/commands/guide
+        :asp-gerbil-scheme/src/commands/search-evidence
+        :asp-gerbil-scheme/src/commands/search-extension
+        :asp-gerbil-scheme/src/commands/search-owner-items
+        (only-in :asp-gerbil-scheme/src/commands/search-prime-light
                  emit-prime-light
                  source-path-class)
-        :gslph/src/commands/search-proof
-        :gslph/src/parser/facade
-        :gslph/src/parser/query
-        :gslph/src/protocol/json
-        :gslph/src/support/args
-        :gslph/src/support/io
+        :asp-gerbil-scheme/src/commands/search-proof
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/parser/query
+        :asp-gerbil-scheme/src/protocol/json
+        :asp-gerbil-scheme/src/support/args
+        :asp-gerbil-scheme/src/support/io
         (only-in :std/srfi/1 take)
         (only-in :std/srfi/13 string-join)
         (only-in :std/sugar cut filter match ormap))

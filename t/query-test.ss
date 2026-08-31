@@ -3,8 +3,8 @@
 
 (import :gerbil/gambit
         :std/test
-        :gslph/src/commands/query
-        (only-in :gslph/src/testing/execution-profile
+        :asp-gerbil-scheme/src/commands/query
+        (only-in :asp-gerbil-scheme/src/testing/execution-profile
                  declare-gxtest-serial))
 (export query-test)
 

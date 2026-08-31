@@ -6,10 +6,10 @@
         :std/misc/ports
         :std/misc/process
         (only-in :std/text/json read-json)
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios
         :policy/fixtures)
 (export modularity-policy-test)
@@ -60,7 +60,7 @@
             (write-text (string-append root "/gerbil.pkg")
                         "(package: sample/build-scope)\n")
             (write-text (string-append root "/build.ss")
-                        ";;; -*- Gerbil -*-\n(gslph-source-coverage roots: '(\"lib\") runtime-roots: '(\"lib\") explanation: \"Runtime modules live under lib for this package.\")\n")
+                        ";;; -*- Gerbil -*-\n(asp-gerbil-scheme-source-coverage roots: '(\"lib\") runtime-roots: '(\"lib\") explanation: \"Runtime modules live under lib for this package.\")\n")
             (write-text (string-append owner "/facade.ss")
                         ";;; -*- Gerbil -*-\n;;; Foo facade.\n(export answer)\n(def answer 42)\n")
             (write-text (string-append owner "/core.ss")

@@ -2,10 +2,10 @@
 ;;; Parser-owned typed-combinator contract facts.
 
 (import :gerbil/gambit
-        :gslph/src/parser/model
-        :gslph/src/parser/typed-comment-metadata
-        :gslph/src/parser/typed-contract-diagnostics
-        :gslph/src/parser/typed-contract-scheme
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/typed-comment-metadata
+        :asp-gerbil-scheme/src/parser/typed-contract-diagnostics
+        :asp-gerbil-scheme/src/parser/typed-contract-scheme
         (only-in :std/misc/ports read-file-lines)
         (only-in :std/srfi/13
                  string-join

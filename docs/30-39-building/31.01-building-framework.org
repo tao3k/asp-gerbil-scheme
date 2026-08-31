@@ -76,7 +76,7 @@ That model now has:
 - =std-builder= for adapting a stage spec to =std/make=.
 - =default-std-builder= for the ordinary Gerbil =std/make= runner.
 
-The harness package build now uses =gslph-package-api-stage-specs= instead of a
+The harness package build now uses =asp-gerbil-scheme-package-api-stage-specs= instead of a
 single flat list for the package API. The new =building/model.ss=,
 =building/std-builder.ss=, and =building/facade.ss= files are explicit ordered
 stages. This fixes the dependency race where a facade could compile before the
@@ -199,7 +199,7 @@ The current landed evidence is:
 The primary downstream =build.ss= shape is compact:
 
 #+begin_src scheme
-(import :gslph/src/building/build-script)
+(import :asp-gerbil-scheme/src/building/build-script)
 
 (defbuild-script
   (framework-executable-build-spec
@@ -246,12 +246,12 @@ does not reproduce the Scheme module graph or compiler scheduler in Starlark.
 The former generated 122-entry =components/poo-flow.bzl= projection is removed.
 
 The Bazel action graph contains the topological package boundary
-=gerbil-utils -> gerbil-poo -> gslph=.  Each package action receives
+=gerbil-utils -> gerbil-poo -> asp-gerbil-scheme=.  Each package action receives
 =GERBIL_BUILD_CORES=12= from the resolved toolchain on the measured host, while
 the project =build.ss= remains the owner of its internal =std/make= scheduling.
 The first complete dependency build took 539.754 seconds because all three
 package roots were cold.  With dependency actions cached, a clean isolated
-GSLPH action took 132.337 seconds; the final unchanged warm
+ASP_GERBIL_SCHEME action took 132.337 seconds; the final unchanged warm
 =bazel build //:compile= took 0.980 seconds (1.04 seconds wall clock).  Package
 topology is intentionally
 serial where a real dependency edge exists; this is distinct from compiler

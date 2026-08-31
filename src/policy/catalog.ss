@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Central agent-facing policy rule catalog.
 
-(import :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/policy/model
         (only-in :std/srfi/13 string-join string-prefix?))
 
 (export agent-steering-facts

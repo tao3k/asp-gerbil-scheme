@@ -123,7 +123,7 @@
        (.has? controller .observe-run!)
        (.has? controller .next-state)
        (eq? (.ref controller 'kind)
-            'gslph.execution-window-controller.v1)))
+            'asp-gerbil-scheme.execution-window-controller.v1)))
 
 (def (execution-window-controller-slot controller slot)
   (unless (execution-window-controller? controller)
@@ -158,7 +158,7 @@
       max-rss-bytes
       elapsed-ms)
   (object<-alist
-   `((kind . gslph.execution-window-observation.v1)
+   `((kind . asp-gerbil-scheme.execution-window-observation.v1)
      (result . ,result)
      (outcome . ,outcome)
      (baseline-rss-bytes . ,baseline-rss-bytes)
@@ -176,7 +176,7 @@
        (.has? observation max-rss-bytes)
        (.has? observation elapsed-ms)
        (eq? (.ref observation 'kind)
-            'gslph.execution-window-observation.v1)))
+            'asp-gerbil-scheme.execution-window-observation.v1)))
 
 (def (execution-window-observation-slot observation slot)
   (unless (execution-window-observation? observation)
@@ -205,7 +205,7 @@
   (unless (execution-window-controller? controller)
     (error "invalid adaptive execution-window controller" controller))
   (object<-alist
-   `((kind . gslph.adaptive-execution-window-plan.v1)
+   `((kind . asp-gerbil-scheme.adaptive-execution-window-plan.v1)
      (topology-groups . ,topology-groups)
      (controller . ,controller))))
 
@@ -213,7 +213,7 @@
   (and (object? plan)
        (.has? plan kind)
        (eq? (.ref plan 'kind)
-            'gslph.adaptive-execution-window-plan.v1)))
+            'asp-gerbil-scheme.adaptive-execution-window-plan.v1)))
 
 (def (adaptive-execution-window-plan-topology-groups plan)
   (.ref plan 'topology-groups))
@@ -234,7 +234,7 @@
       window-observations
       controller)
   (object<-alist
-   `((kind . gslph.adaptive-execution-window-result.v1)
+   `((kind . asp-gerbil-scheme.adaptive-execution-window-result.v1)
      (topology-groups . ,topology-groups)
      (execution-windows . ,execution-windows)
      (window-observations . ,window-observations)
@@ -244,7 +244,7 @@
   (and (object? result)
        (.has? result kind)
        (eq? (.ref result 'kind)
-            'gslph.adaptive-execution-window-result.v1)))
+            'asp-gerbil-scheme.adaptive-execution-window-result.v1)))
 
 (def (adaptive-execution-window-result-topology-groups result)
   (.ref result 'topology-groups))

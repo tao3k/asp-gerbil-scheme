@@ -2,14 +2,14 @@
 ;;; Search evidence packet rendering for pattern, compare, runtime-source, and ingest views.
 
 (import :gerbil/gambit
-        :gslph/src/constants
-        :gslph/src/commands/search-render
-        :gslph/src/extensions/facade
-        :gslph/src/language/facade
-        :gslph/src/parser/facade
-        :gslph/src/protocol/json
-        :gslph/src/support/args
-        :gslph/src/support/io
+        :asp-gerbil-scheme/src/constants
+        :asp-gerbil-scheme/src/commands/search-render
+        :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/language/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/json
+        :asp-gerbil-scheme/src/support/args
+        :asp-gerbil-scheme/src/support/io
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/srfi/13 string-contains string-join)
         (only-in :std/sugar cut filter hash ormap))

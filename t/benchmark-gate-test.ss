@@ -3,11 +3,11 @@
 
 (import :gerbil/gambit
         :std/test
-        (only-in :gslph/src/support/time
+        (only-in :asp-gerbil-scheme/src/support/time
                  duration-literal->nanos)
-        :gslph/src/benchmark/gate
-        :gslph/src/benchmark/framework
-        :gslph/src/testing/memory-profile)
+        :asp-gerbil-scheme/src/benchmark/gate
+        :asp-gerbil-scheme/src/benchmark/framework
+        :asp-gerbil-scheme/src/testing/memory-profile)
 
 (export benchmark-gate-test)
 

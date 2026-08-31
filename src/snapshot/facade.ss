@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Stable facade for provider snapshot projections.
 
-(import :gslph/src/snapshot/core
-        (only-in :gslph/src/snapshot/bench bench-report-snapshot)
-        (only-in :gslph/src/snapshot/parser parser-source-file-snapshot)
-        (only-in :gslph/src/snapshot/graph extension-packet-snapshot
+(import :asp-gerbil-scheme/src/snapshot/core
+        (only-in :asp-gerbil-scheme/src/snapshot/bench bench-report-snapshot)
+        (only-in :asp-gerbil-scheme/src/snapshot/parser parser-source-file-snapshot)
+        (only-in :asp-gerbil-scheme/src/snapshot/graph extension-packet-snapshot
                                  search-prime-snapshot))
 
 (export snapshot-load

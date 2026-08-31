@@ -1,5 +1,5 @@
 #!/usr/bin/env gxi
-(import :gslph/src/building/build-script)
+(import :asp-gerbil-scheme/src/building/build-script)
 
 (defbuild-script
   (framework-executable-build-spec

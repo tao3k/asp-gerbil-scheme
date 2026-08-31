@@ -42,8 +42,8 @@ asp gerbil-scheme query --selector .data/gerbil-poo/rationaldict.ss:42:48 --work
 Harness comparison selectors:
 
 #+begin_src text
-asp gerbil-scheme query --selector languages/gerbil-scheme-language-project-harness/src/parser/poo.ss:180-330 --workspace . --code
-asp gerbil-scheme query --selector languages/gerbil-scheme-language-project-harness/t/unit/search/structural-index.ss:48-193 --workspace . --code
+asp gerbil-scheme query --selector languages/asp-gerbil-scheme/src/parser/poo.ss:180-330 --workspace . --code
+asp gerbil-scheme query --selector languages/asp-gerbil-scheme/t/unit/search/structural-index.ss:48-193 --workspace . --code
 #+end_src
 
 The =io.ss= file showed these source-level domains:

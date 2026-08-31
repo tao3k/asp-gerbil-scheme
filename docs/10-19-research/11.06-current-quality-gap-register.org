@@ -1,4 +1,4 @@
-#+TITLE: 11.06 Gerbil Scheme Harness Current Quality Gap Register
+#+TITLE: 11.06 ASP Gerbil Scheme Current Quality Gap Register
 #+DATE: 2026-06-14
 #+PROPERTY: JD_ID 11.06
 #+PROPERTY: ASP_STATUS current-gap-register
@@ -23,11 +23,11 @@ The status terms are:
 Observed during the 2026-06-14 quality loop:
 
 #+begin_src shell
-asp gerbil-scheme search prime --workspace languages/gerbil-scheme-language-project-harness --view seeds
-./bin/gerbil-scheme-harness check --json .
-./bin/gerbil-scheme-harness info --json .
-./bin/gerbil-scheme-harness search capability posture --workspace . --view seeds
-./bin/gerbil-scheme-harness search runtime-source gxi version macro bootstrap ranking --workspace . --view seeds
+asp gerbil-scheme search prime --workspace languages/asp-gerbil-scheme --view seeds
+./bin/asp-gerbil-scheme check --json .
+./bin/asp-gerbil-scheme info --json .
+./bin/asp-gerbil-scheme search capability posture --workspace . --view seeds
+./bin/asp-gerbil-scheme search runtime-source gxi version macro bootstrap ranking --workspace . --view seeds
 #+end_src
 
 Current baseline:
@@ -209,8 +209,8 @@ Use this set before claiming the quality loop is closed:
 
 #+begin_src shell
 gxi build.ss test
-./bin/gerbil-scheme-harness check --json .
-./bin/gerbil-scheme-harness bench --iterations 1 --max-total-ms 60000 .
-./bin/gerbil-scheme-harness search capability posture --workspace . --view seeds
-./bin/gerbil-scheme-harness search runtime-source gxi version macro bootstrap ranking --workspace . --view seeds
+./bin/asp-gerbil-scheme check --json .
+./bin/asp-gerbil-scheme bench --iterations 1 --max-total-ms 60000 .
+./bin/asp-gerbil-scheme search capability posture --workspace . --view seeds
+./bin/asp-gerbil-scheme search runtime-source gxi version macro bootstrap ranking --workspace . --view seeds
 #+end_src

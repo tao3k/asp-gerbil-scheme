@@ -5,26 +5,26 @@
         (only-in :std/srfi/1 list-index)
         (only-in :std/sugar hash-get with-catch)
         (only-in :std/text/json read-json)
-        :gslph/src/build-api/component-closure)
+        :asp-gerbil-scheme/src/build-api/component-closure)
 
 (export component-closure-test)
 
 (def component-closure-test
   (test-suite
-   "GSLPH component source closure"
+   "ASP_GERBIL_SCHEME component source closure"
 
    (test-case "poo-flow closure is deterministic and strict"
-     (let* ((entries (gslph-component-entry-files 'poo-flow))
-            (sources (gslph-component-source-files 'poo-flow))
-            (receipt (gslph-component-receipt 'poo-flow)))
-    (check (gslph-component-source-files "poo-flow") => sources)
+     (let* ((entries (asp-gerbil-scheme-component-entry-files 'poo-flow))
+            (sources (asp-gerbil-scheme-component-source-files 'poo-flow))
+            (receipt (asp-gerbil-scheme-component-receipt 'poo-flow)))
+    (check (asp-gerbil-scheme-component-source-files "poo-flow") => sources)
     (check (andmap (lambda (entry) (member entry sources)) entries) => #t)
     (check (andmap (lambda (required) (member required entries))
                    '("src/extensions/poo-object-validation.ss"
                      "src/testing/build.ss"))
            => #t)
     (check (hash-get receipt 'schema)
-              => "gslph.component-source-closure.v1")
+              => "asp-gerbil-scheme.component-source-closure.v1")
        (check (hash-get receipt 'outcome) => "valid")
        (check (hash-get receipt 'strictSubset) => #t)
        (check (hash-get receipt 'sourceCount) => (length sources))
@@ -36,14 +36,14 @@
      (check (with-catch
              (lambda (_) #t)
              (lambda ()
-               (gslph-component-entry-files 'missing-component)
+               (asp-gerbil-scheme-component-entry-files 'missing-component)
                #f))
             => #t))
 
    (test-case "workspace source order emits dependencies before importers"
      (let* ((observability "src/building/observability.ss")
             (facade "src/building/facade.ss")
-            (ordered (gslph-source-dependency-order
+            (ordered (asp-gerbil-scheme-source-dependency-order
                       (current-directory)
                       (list facade))))
        (check (< (list-index (lambda (source)
@@ -55,7 +55,7 @@
               => #t)))
 
    (test-case "checked poo-flow manifest matches the generated closure"
-     (let ((generated (gslph-component-receipt 'poo-flow))
+     (let ((generated (asp-gerbil-scheme-component-receipt 'poo-flow))
            (checked (call-with-input-file "components/poo-flow.json" read-json)))
        (check (member "src/building/build-script-body.inc"
                       (hash-get generated 'supportFiles))

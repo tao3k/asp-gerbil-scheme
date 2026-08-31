@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 
 (import :std/test
-        :gslph/src/testing/project-build)
+        :asp-gerbil-scheme/src/testing/project-build)
 
 (def testing-project-build-interface-test
   (test-suite "testing project-build public interface"

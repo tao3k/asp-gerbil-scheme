@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Shared helpers for agent-facing policy rule families.
 
-(import :gslph/src/parser/facade
+(import :asp-gerbil-scheme/src/parser/facade
         (only-in :std/srfi/13 string-contains string-empty? string-prefix? string-suffix?)
         (only-in :std/sugar ormap))
 

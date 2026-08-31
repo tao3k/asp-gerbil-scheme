@@ -1,5 +1,5 @@
 ;;; Single implementation shared by the root build.ss bootstrap and the public
-;;; :gslph/src/building/build-script module.
+;;; :asp-gerbil-scheme/src/building/build-script module.
 (import :gerbil/gambit
         :std/make
         (only-in :std/misc/path path-directory path-expand path-normalize)
@@ -202,7 +202,7 @@
 
 (def (call-with-framework-build-lease thunk)
   (let* ((cache-root (framework-build-cache-root))
-         (lease-path (path-expand ".gslph-build.lease" cache-root)))
+         (lease-path (path-expand ".asp-gerbil-scheme-build.lease" cache-root)))
     (create-directory* cache-root)
     (let (lease (open-output-file/lock lease-path op: LOCK_EX))
       (unwind-protect
@@ -271,7 +271,7 @@
                  arguments build-spec [keys ...] source-file)))))))))
 
 (def (framework-build-contract)
-  '((schemaId . "gslph.build-script-contract")
+  '((schemaId . "asp-gerbil-scheme.build-script-contract")
     (schemaVersion . "1")
     (commandSurfaceOwner . "Building-Framework")
     (executor . "std/make")

@@ -8,7 +8,7 @@
     (and entry (cdr entry))))
 
 (def build-api-framework-test
-  (test-suite "gslph build api framework"
+  (test-suite "asp-gerbil-scheme build api framework"
     (test-case "skips current stage"
       (let* ((events [])
              (stage

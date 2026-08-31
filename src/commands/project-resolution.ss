@@ -2,8 +2,8 @@
 ;;; Typed Gerbil package scope from ASP-admitted candidates.
 
 (import :gerbil/gambit
-        (only-in :gslph/src/constants +language-id+ +provider-id+)
-        (only-in :gslph/src/parser/package
+        (only-in :asp-gerbil-scheme/src/constants +language-id+ +provider-id+)
+        (only-in :asp-gerbil-scheme/src/parser/package
                  project-package-dependencies
                  project-package-name
                  project-package-source-scope-policy

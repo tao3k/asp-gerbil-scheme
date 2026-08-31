@@ -2,10 +2,10 @@
 ;;; Formatter file discovery and write application.
 
 (import :gerbil/gambit
-        :gslph/src/format/core
+        :asp-gerbil-scheme/src/format/core
         (only-in :std/misc/path path-expand)
         (only-in :std/sort sort)
-        :gslph/src/support/io)
+        :asp-gerbil-scheme/src/support/io)
 
 (export fmt-target-files
         fmt-file

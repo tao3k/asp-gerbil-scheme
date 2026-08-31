@@ -3,9 +3,9 @@
 
 (import :gerbil/gambit
         :std/test
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/types/facade
         :policy/fixtures)
 (export agent-build-policy-test)
 
@@ -167,7 +167,7 @@
                         "(package: sample/build-runtime-cache-version-literal)\n")
             (write-text
              (string-append commands "/check-cache.ss")
-             ";;; -*- Gerbil -*-\n(import :gslph/src/constants)\n(def +check-cache-format-version+ \"cache-format.v1\")\n(def +check-cache-version+ \"provider-cache.v1\")\n(def (check-cache-state)\n  [version: +check-cache-version+\n   formatVersion: +check-cache-format-version+\n   releaseVersion: +release-version+])\n")
+             ";;; -*- Gerbil -*-\n(import :asp-gerbil-scheme/src/constants)\n(def +check-cache-format-version+ \"cache-format.v1\")\n(def +check-cache-version+ \"provider-cache.v1\")\n(def (check-cache-state)\n  [version: +check-cache-version+\n   formatVersion: +check-cache-format-version+\n   releaseVersion: +release-version+])\n")
             (let* ((index (collect-project root))
                    (findings (run-agent-policy index))
                    (matching
@@ -200,7 +200,7 @@
                         "(package: sample/build-runtime-cache-version-derived)\n")
             (write-text
              (string-append commands "/check-cache.ss")
-             ";;; -*- Gerbil -*-\n(import :gslph/src/constants)\n(def +check-cache-format-version+ \"cache-format.v1\")\n(def +check-cache-version+ +release-version+)\n(def (check-cache-state)\n  [version: +check-cache-version+\n   formatVersion: +check-cache-format-version+\n   releaseVersion: +release-version+])\n")
+             ";;; -*- Gerbil -*-\n(import :asp-gerbil-scheme/src/constants)\n(def +check-cache-format-version+ \"cache-format.v1\")\n(def +check-cache-version+ +release-version+)\n(def (check-cache-state)\n  [version: +check-cache-version+\n   formatVersion: +check-cache-format-version+\n   releaseVersion: +release-version+])\n")
             (let* ((index (collect-project root))
                    (findings (run-agent-policy index))
                    (matching

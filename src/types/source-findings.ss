@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Reader diagnostics for parser-owned source files.
 
-(import :gslph/src/parser/model
+(import :asp-gerbil-scheme/src/parser/model
         (only-in :std/sugar hash)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export source-file-type-findings)
 

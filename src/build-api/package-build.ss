@@ -5,10 +5,10 @@
          (only-in :std/srfi/13 string-prefix?)
          (only-in :gerbil/tools/env setup-local-pkg-env!)
         :gerbil/gambit)
-(export gslph-package-configure-build-root!
-         gslph-package-build-package-name
-         gslph-package-build-active-gerbil-path
-         gslph-package-build-active-gerbil-lib-path)
+(export asp-gerbil-scheme-package-configure-build-root!
+         asp-gerbil-scheme-package-build-package-name
+         asp-gerbil-scheme-package-build-active-gerbil-path
+         asp-gerbil-scheme-package-build-active-gerbil-lib-path)
 
 ;; package-root
 ;;   : (Maybe Path)
@@ -33,18 +33,18 @@
        (> (string-length value) 0)))
 
 ;; : (-> Path (Maybe String))
-;; gslph-package-build-package-name
+;; asp-gerbil-scheme-package-build-package-name
 ;;   : (-> Path (Maybe String))
 ;;   | doc m%
 ;;       Reads the package name declared by the package-local `gerbil.pkg` file.
 ;;
 ;;       # Examples
 ;;       ```scheme
-;;       (gslph-package-build-package-name ".")
-;;       ;; => "gslph"
+;;       (asp-gerbil-scheme-package-build-package-name ".")
+;;       ;; => "asp-gerbil-scheme"
 ;;       ```
 ;;     %
-(def (gslph-package-build-package-name root)
+(def (asp-gerbil-scheme-package-build-package-name root)
   (let* ((package-file (path-expand "gerbil.pkg" root))
          (plist (with-catch
                  (lambda (_) #f)
@@ -61,7 +61,7 @@
         #f))))
 
 ;; : (-> Path Path)
-(def (gslph-package-build-active-gerbil-path root)
+(def (asp-gerbil-scheme-package-build-active-gerbil-path root)
   (path-expand
    (let (path (getenv "GERBIL_PATH" #f))
      (if (package-build-non-empty-string? path)
@@ -69,12 +69,12 @@
        (package-local-gerbil-path root)))))
 
 ;; : (-> Path Path)
-(def (gslph-package-build-active-gerbil-lib-path root)
-  (path-expand "lib" (gslph-package-build-active-gerbil-path root)))
+(def (asp-gerbil-scheme-package-build-active-gerbil-lib-path root)
+  (path-expand "lib" (asp-gerbil-scheme-package-build-active-gerbil-path root)))
 
 ;; : (-> Path Void)
-(def (gslph-package-configure-build-root! root)
-  (let (active-gerbil-path (gslph-package-build-active-gerbil-path root))
+(def (asp-gerbil-scheme-package-configure-build-root! root)
+  (let (active-gerbil-path (asp-gerbil-scheme-package-build-active-gerbil-path root))
     (set! package-root (path-normalize root))
     (current-directory package-root)
      (setup-local-pkg-env! #t)
@@ -95,6 +95,6 @@
 ;;     %
 (def (ensure-package-build-root!)
   (unless package-root
-    (gslph-package-configure-build-root! (current-directory))))
+    (asp-gerbil-scheme-package-configure-build-root! (current-directory))))
 
 ;; : (-> Path MaybeString)

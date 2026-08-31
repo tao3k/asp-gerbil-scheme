@@ -4,11 +4,11 @@
 (import :gerbil/gambit
         :std/test
         (only-in :std/srfi/13 string-contains)
-        (only-in :gslph/src/cli-launcher provider-command-line-args main)
-        (only-in :gslph/src/commands/project-resolution
+        (only-in :asp-gerbil-scheme/src/cli-launcher provider-command-line-args main)
+        (only-in :asp-gerbil-scheme/src/commands/project-resolution
                  project-resolution-request->response)
-        (only-in :gslph/src/cli-release-linker release-command-dispatch)
-        (only-in :gslph/src/protocol/command-catalog
+        (only-in :asp-gerbil-scheme/src/cli-release-linker release-command-dispatch)
+        (only-in :asp-gerbil-scheme/src/protocol/command-catalog
                  provider-command-names
                  provider-dynamic-command-dispatch)
         (only-in :std/sugar hash hash-key?)

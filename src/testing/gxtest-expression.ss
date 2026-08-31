@@ -57,7 +57,7 @@
      " (unless (run-test-suite! "
      (datum-string (gxtest-file-exported-suite file))
      ") (set! ok #f))"
-     " (display \"[gslph-test-file] name="
+     " (display \"[asp-gerbil-scheme-test-file] name="
      file
      " elapsedMs=\")"
      " (display (quotient (* (- (current-jiffy) start) 1000)"

@@ -2,10 +2,10 @@
 ;;; Parallel source-file parse scheduling.
 
 (import :gerbil/gambit
-        :gslph/src/parser/model
-        :gslph/src/parser/profile
-        :gslph/src/parser/source-file
-        :gslph/src/support/time
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/profile
+        :asp-gerbil-scheme/src/parser/source-file
+        :asp-gerbil-scheme/src/support/time
         (only-in :std/srfi/1 iota)
         (only-in :std/sugar cut while))
 
@@ -14,8 +14,8 @@
         parse-source-files/profile)
 
 (def (parse-worker-trace event path)
-  (when (getenv "GSLPH_PARSE_TRACE" #f)
-    (display (string-append "[gslph-parse-worker] event=" event
+  (when (getenv "ASP_GERBIL_SCHEME_PARSE_TRACE" #f)
+    (display (string-append "[asp-gerbil-scheme-parse-worker] event=" event
                             " path=" path "\n"))
     (force-output)))
 

@@ -2,10 +2,10 @@
 ;;; Bounded streaming prototype for file-local policy rules.
 
 (import :gerbil/gambit
-        :gslph/src/parser/package
-        :gslph/src/parser/parse-workers
-        :gslph/src/parser/source-scope
-        :gslph/src/policy/agent-basic
+        :asp-gerbil-scheme/src/parser/package
+        :asp-gerbil-scheme/src/parser/parse-workers
+        :asp-gerbil-scheme/src/parser/source-scope
+        :asp-gerbil-scheme/src/policy/agent-basic
         (only-in :std/sort sort)
         (only-in :std/srfi/1 drop take))
 

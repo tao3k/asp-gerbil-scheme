@@ -2,14 +2,14 @@
 ;;; gerbil scheme harness parser part 8 package scope.
 
 (import :std/test
-        :gslph/src/extensions/facade
-        :gslph/src/parser/facade
-        (only-in :gslph/src/parser/source-scope minimal-scan-roots)
-        :gslph/src/parser/typed-contract-scheme
-        :gslph/src/protocol/json
-        :gslph/src/protocol/structural-facts
+        :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/parser/source-scope minimal-scan-roots)
+        :asp-gerbil-scheme/src/parser/typed-contract-scheme
+        :asp-gerbil-scheme/src/protocol/json
+        :asp-gerbil-scheme/src/protocol/structural-facts
         :std/srfi/13)
-(import :gslph/t/unit/parser/parser-test-part8-support)
+(import :asp-gerbil-scheme/t/unit/parser/parser-test-part8-support)
 (export parser-test-part-8-package-scope)
 
 ;; PolicyTest

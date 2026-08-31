@@ -2,8 +2,8 @@
 
 (import :gerbil/gambit
         :std/test
-        :gslph/src/parser/facade
-        :gslph/src/testing/memory-profile)
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/testing/memory-profile)
 
 (export memory-profile-collect-project-exception-test)
 

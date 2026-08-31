@@ -101,7 +101,7 @@
         (check (member "format/facade.ss" spec) ? true)
         (check (member "commands/fmt.ss" spec) ? true)))
     (test-case "policy stages preserve generated SSI dependency order"
-      (let (stages (gslph-package-api-stage-specs))
+      (let (stages (asp-gerbil-scheme-package-api-stage-specs))
         (check (module-stage-before? stages
                                      "policy/model.ss"
                                      "policy/agent-poo-loop-performance.ss")
@@ -135,7 +135,7 @@
                                      "policy/gxtest-report.ss")
                => #t)))
     (test-case "project CLI stages follow Build and Testing interfaces"
-      (let (stages (gslph-package-api-stage-specs))
+      (let (stages (asp-gerbil-scheme-package-api-stage-specs))
         (check (module-stage-before? stages
                                      "build-api/native-build.ss"
                                      "build-api/project-build.ss")
@@ -145,7 +145,7 @@
                                      "build-api/project-build.ss")
                => #t)))
     (test-case "policy stages preserve style and repair dependency order"
-      (let (stages (gslph-package-api-stage-specs))
+      (let (stages (asp-gerbil-scheme-package-api-stage-specs))
         (check (module-stage-before? stages
                                      "policy/agent-style-gerbil-signal-support.ss"
                                      "policy/agent-style-gerbil-signals.ss")

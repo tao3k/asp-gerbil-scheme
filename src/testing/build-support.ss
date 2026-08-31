@@ -8,23 +8,23 @@
         (only-in :std/sort sort)
         (only-in :std/srfi/1 append-map)
         (only-in :std/sugar filter)
-        :gslph/src/testing/model
-        :gslph/src/testing/framework
-        :gslph/src/testing/build-paths
-        :gslph/src/testing/build-process)
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/framework
+        :asp-gerbil-scheme/src/testing/build-paths
+        :asp-gerbil-scheme/src/testing/build-process)
 
 (export #t)
 
 ;; : (List Path)
 (def +testing-build-framework-dependency-stamps+
-  '("gslph/src/benchmark/gate.ssi"
-    "gslph/src/testing/model.ssi"
-    "gslph/src/testing/scope.ssi"
-    "gslph/src/testing/scenario.ssi"
-    "gslph/src/testing/performance.ssi"
-    "gslph/src/testing/selection.ssi"
-    "gslph/src/testing/batch.ssi"
-    "gslph/src/testing/framework.ssi"))
+  '("asp-gerbil-scheme/src/benchmark/gate.ssi"
+    "asp-gerbil-scheme/src/testing/model.ssi"
+    "asp-gerbil-scheme/src/testing/scope.ssi"
+    "asp-gerbil-scheme/src/testing/scenario.ssi"
+    "asp-gerbil-scheme/src/testing/performance.ssi"
+    "asp-gerbil-scheme/src/testing/selection.ssi"
+    "asp-gerbil-scheme/src/testing/batch.ssi"
+    "asp-gerbil-scheme/src/testing/framework.ssi"))
 
 ;; : (-> TestingBuild Path [String])
 (def (testing-build-support-command build file)

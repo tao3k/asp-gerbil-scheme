@@ -2,7 +2,7 @@
 ;;; Fast-path entrypoint for search guide output.
 
 (import :gerbil/gambit
-        :gslph/src/commands/guide-sections)
+        :asp-gerbil-scheme/src/commands/guide-sections)
 
 (export main)
 

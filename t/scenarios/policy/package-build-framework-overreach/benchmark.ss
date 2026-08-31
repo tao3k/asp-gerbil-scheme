@@ -28,19 +28,19 @@
  (rule . "GERBIL-SCHEME-AGENT-POLICY-020")
  (optimizationFocus . "keep std/make and clan/building as build owners; expose acceleration and receipts as harness APIs")
  (inputShape . "build.ss imports std/make and clan/building, then defines local cache freshness, stamp writing, phase receipt control, and worker queue dispatch")
- (expectedOutcome . "delete local phase/cache/stamp/worker ownership, keep the native build call path, and use a thin gslph API declaration for project coverage")
+ (expectedOutcome . "delete local phase/cache/stamp/worker ownership, keep the native build call path, and use a thin asp-gerbil-scheme API declaration for project coverage")
  (misuseGuard . "do not move build-system scheduling, dependency graph, worker queue, or phase ownership into downstream build.ss")
  (expectedReferencePattern . "package-build-framework-overreach")
  (expectedReferenceExamples
   "gerbil://std/make#make"
   "gerbil://clan/building#all-gerbil-modules"
-  "gslph://build-api/source-coverage#gslph-source-coverage")
+  "asp-gerbil-scheme://build-api/source-coverage#asp-gerbil-scheme-source-coverage")
  (expectedQualitySignals
   "native-build-surface"
   "local-build-state-owner"
   "thin-harness-build-api"
   "upstream-build-system-boundary")
- (learnedStyleSources "gerbil://" "gslph")
+ (learnedStyleSources "gerbil://" "asp-gerbil-scheme")
  (antiAiScaffoldIntent
   .
   "reject agent scaffolding that recreates build phase state locally after already choosing the Gerbil build framework")

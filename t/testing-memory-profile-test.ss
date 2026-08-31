@@ -3,7 +3,7 @@
 ;;; - Malformed metadata must fail closed rather than silently use unrestricted heap.
 (import :gerbil/gambit
         (only-in :std/test test-suite test-case check)
-        :gslph/src/testing/memory-profile)
+        :asp-gerbil-scheme/src/testing/memory-profile)
 
 (export testing-memory-profile-test)
 

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
-(import :gslph/src/commands/evidence
-        :gslph/src/commands/guide
-        :gslph/src/protocol/registry
+(import :asp-gerbil-scheme/src/commands/evidence
+        :asp-gerbil-scheme/src/commands/guide
+        :asp-gerbil-scheme/src/protocol/registry
         :std/srfi/13
         :std/test)
 
@@ -20,8 +20,8 @@
            => "agent.semantic-protocols.evidence-graph")
     (check (hash-get packet 'graphId) => "gerbil-scheme.evidence.graph")
     (check (hash-get producer 'languageId) => "gerbil-scheme")
-    (check (hash-get producer 'providerId) => "gerbil-scheme-harness")
-    (check (hash-get project 'package) => "gerbil-scheme-language-project-harness")
+    (check (hash-get producer 'providerId) => "asp-gerbil-scheme")
+    (check (hash-get project 'package) => "asp-gerbil-scheme")
     (check (hash-get summary 'nodes) => 4)
     (check (hash-get summary 'edges) => 3)
     (check (hash-get summary 'owners) => 1)

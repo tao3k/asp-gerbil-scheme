@@ -5,9 +5,9 @@
         (only-in :std/sort sort)
         (only-in :std/srfi/13 string-prefix? string-suffix?)
         (only-in "../build-api/package-receipt"
-                 gslph-package-build-receipt-status-ref)
+                 asp-gerbil-scheme-package-build-receipt-status-ref)
         (only-in "./gxtest-smoke"
-                 gslph-default-gxtest-smoke-files)
+                 asp-gerbil-scheme-default-gxtest-smoke-files)
         (only-in "./gxtest-context"
                  package-root
                  test-root
@@ -97,7 +97,7 @@
         gxtest-top-line
         gxtest-failure-line
         install-launcher-binpath
-        gslph-package-build-receipt-status-ref
+        asp-gerbil-scheme-package-build-receipt-status-ref
         package-api-build-current?
         package-api-build-output-files
         package-api-build-receipt-path
@@ -130,7 +130,7 @@
 
 ;; : (-> (List Path))
 (def (default-gxtest-test-files)
-  (gslph-default-gxtest-smoke-files))
+  (asp-gerbil-scheme-default-gxtest-smoke-files))
 
 ;; : (-> (List ModulePath))
 (def (gxtest-test-spec)

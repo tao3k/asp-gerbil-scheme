@@ -2,8 +2,8 @@
 ;;; Parser-owned export DSL fact extraction.
 
 (import :gerbil/expander
-        :gslph/src/parser/model
-        :gslph/src/parser/support
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/support
         (only-in :std/misc/list unique)
         (only-in :std/srfi/13 string-prefix?))
 

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 (import :gerbil/gambit
-        :gslph/src/testing/build
-        :gslph/src/testing/build-runner)
+        :asp-gerbil-scheme/src/testing/build
+        :asp-gerbil-scheme/src/testing/build-runner)
 
 (export upstream-gxtest-project
         upstream-gxtest-main)

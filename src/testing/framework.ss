@@ -3,17 +3,17 @@
 
 (import :gerbil/gambit
         :gerbil/expander
-        :gslph/src/benchmark/framework
-        (only-in :gslph/src/support/time
+        :asp-gerbil-scheme/src/benchmark/framework
+        (only-in :asp-gerbil-scheme/src/support/time
                  monotonic-micros
                  duration-micros)
-        :gslph/src/testing/model
-        :gslph/src/testing/scope
-        :gslph/src/testing/scenario
-        :gslph/src/testing/selection
-        :gslph/src/testing/batch
-        :gslph/src/testing/performance
-        :gslph/src/testing/commands)
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/scope
+        :asp-gerbil-scheme/src/testing/scenario
+        :asp-gerbil-scheme/src/testing/selection
+        :asp-gerbil-scheme/src/testing/batch
+        :asp-gerbil-scheme/src/testing/performance
+        :asp-gerbil-scheme/src/testing/commands)
 
 (export #t
         testing-member?
@@ -67,10 +67,10 @@
         testing-gxtest-suite-hot-path-diagnostics
         testing-gxtest-suite-hot-path?
         testing-gxtest-suite-hot-path-receipt
-        (import: :gslph/src/testing/commands))
+        (import: :asp-gerbil-scheme/src/testing/commands))
 
 ;; : (-> Symbol Symbol MaybeString List List TestingReceipt)
-(import :gslph/src/build-api/source-coverage
+(import :asp-gerbil-scheme/src/build-api/source-coverage
         )
 
 (def (testing-phase-receipt phase status: (status 'ok)
@@ -112,15 +112,15 @@
      (add-load-path! "src")
      (add-load-path! "t")
      (add-load-path! ".gerbil/lib")
-     (import-module ':gslph/src/policy/gxtest-report #f #t)
-     (gslph-load-source-coverage ".")
+     (import-module ':asp-gerbil-scheme/src/policy/gxtest-report #f #t)
+     (asp-gerbil-scheme-load-source-coverage ".")
      (let* ((policy-source-report
-             (eval 'gslph/src/policy/gxtest-report#policy-source-report))
+             (eval 'asp-gerbil-scheme/src/policy/gxtest-report#policy-source-report))
             (display-project-policy-report
-             (eval 'gslph/src/policy/gxtest-report#display-project-policy-report))
+             (eval 'asp-gerbil-scheme/src/policy/gxtest-report#display-project-policy-report))
             (report (policy-source-report
                      "."
-                     (gslph-source-coverage-files "."))))
+                     (asp-gerbil-scheme-source-coverage-files "."))))
        (when (pair? (or (hash-get report 'findings) []))
          (display-project-policy-report report))))))
 

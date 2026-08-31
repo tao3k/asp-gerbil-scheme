@@ -1,12 +1,12 @@
 (export building-gxtest-stage-boundary-test)
 
 (import :std/test
-        (only-in :gslph/src/testing/execution-profile
+        (only-in :asp-gerbil-scheme/src/testing/execution-profile
                  declare-gxtest-serial)
-        (only-in :gslph/src/testing/gxtest-context configure-build-root!)
-        (only-in :gslph/src/testing/gxtest-build
+        (only-in :asp-gerbil-scheme/src/testing/gxtest-context configure-build-root!)
+        (only-in :asp-gerbil-scheme/src/testing/gxtest-build
                  compile-selected-gxtest-if-stale)
-        (only-in :gslph/src/testing/gxtest-receipts
+        (only-in :asp-gerbil-scheme/src/testing/gxtest-receipts
                  selected-gxtest-build-receipt-path))
 
 (declare-gxtest-serial shared-package-artifacts)
@@ -19,7 +19,7 @@
     (and entry (cdr entry))))
 
 (def building-gxtest-stage-boundary-test
-  (test-suite "gslph selected GxTest Building boundary"
+  (test-suite "asp-gerbil-scheme selected GxTest Building boundary"
     (test-case "selected target projects Building stages into its receipt"
       (let (files '("t/building-gxtest-stage-boundary-test.ss"))
         (configure-build-root! ".")

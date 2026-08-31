@@ -29,7 +29,7 @@
  (optimizationFocus . "stream framed owners one at a time through the native definition parser")
  (inputShape . "64 framed owners sharing one small representative Gerbil source body")
  (expectedOutcome . "Return canonical item identities without parser/core, policy, quality, or whole-package test compilation")
- (adapterBoundary . "ASP owns workspace collection and framing; GSLPH parses only the owner bytes present in the request")
+ (adapterBoundary . "ASP owns workspace collection and framing; ASP_GERBIL_SCHEME parses only the owner bytes present in the request")
  (expectedQualitySignals
   "bounded-framed-input"
   "single-owner-native-parse"

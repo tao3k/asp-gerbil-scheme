@@ -534,7 +534,7 @@
           (policyRules ["GERBIL-SCHEME-MOD-R006"
                         "GERBIL-SCHEME-AGENT-POLICY-004"
                         "GERBIL-SCHEME-AGENT-POLICY-005"])
-          (styleDoc "languages/gerbil-scheme-language-project-harness/docs/50-59-policy/51.05-current-project-programming-style.org"))
+          (styleDoc "languages/asp-gerbil-scheme/docs/50-59-policy/51.05-current-project-programming-style.org"))
     [(hash (role "style-reference")
            (symbol "generating<-list")
            (selector "gerbil-utils://generator.ss#generating<-list"))
@@ -676,9 +676,9 @@
              (sourceRef
               (hash (kind "provider-pattern-registry")
                     (manager "native-provider")
-                    (package "gerbil-scheme-language-project-harness")
+                    (package "asp-gerbil-scheme")
                     (dependency "project-contract-patterns")
-                    (repository "agent-semantic-protocols/languages/gerbil-scheme-language-project-harness")
+                    (repository "agent-semantic-protocols/languages/asp-gerbil-scheme")
                     (pathPolicy "workspace-logical-selector")
                     (selectorScheme "project-contract-logical-symbol")))
              (sourceOwners ["src/utilities/contracts.ss"
@@ -788,9 +788,9 @@
              (origin "provider")
              (sourceRef (hash (kind "provider-source")
                               (manager "native-provider")
-                              (package "gerbil-scheme-language-project-harness")
-                              (dependency "gerbil-scheme-language-project-harness")
-                              (repository "agent-semantic-protocols/languages/gerbil-scheme-language-project-harness")
+                              (package "asp-gerbil-scheme")
+                              (dependency "asp-gerbil-scheme")
+                              (repository "agent-semantic-protocols/languages/asp-gerbil-scheme")
                               (pathPolicy "repository-relative")
                               (selectorScheme "provider-owner-selector")))
              (sourceOwners ["src/checker/forms.ss"

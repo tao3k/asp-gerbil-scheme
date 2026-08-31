@@ -3,10 +3,10 @@
 
 (import :std/make
         :clan/building
-        (only-in :gslph/src/build-api/source-coverage
-                 gslph-source-coverage))
+        (only-in :asp-gerbil-scheme/src/build-api/source-coverage
+                 asp-gerbil-scheme-source-coverage))
 
-(gslph-source-coverage
+(asp-gerbil-scheme-source-coverage
  roots: '("src" "t")
  runtime-roots: '("src")
  explanation: "build.ss declares source coverage; acceleration and receipts stay in reusable harness APIs.")
@@ -17,7 +17,7 @@
 (%set-build-environment!
  "build.ss"
  name: "sample"
- deps: '("gslph")
+ deps: '("asp-gerbil-scheme")
  spec: spec)
 
 (def (compile-package! options)

@@ -59,7 +59,7 @@
 
 ;; : (-> ProjectIndex (List Any) String (Maybe (List Path)) HashTable)
 (def (project-policy-report-json index findings scope requested-files)
-  (hash (schemaId "agent.semantic-protocols.gerbil-scheme-harness-gxtest-report")
+  (hash (schemaId "agent.semantic-protocols.asp-gerbil-scheme-gxtest-report")
         (schemaVersion "1")
         (languageId +language-id+)
         (providerId +provider-id+)

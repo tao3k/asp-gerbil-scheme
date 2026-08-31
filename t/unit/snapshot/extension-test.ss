@@ -2,9 +2,9 @@
 ;;; Boundary:
 ;;; - test owner records policy expectations.
 ;;; - Keep typed contracts and fixture intent explicit.
-(import :gslph/src/extensions/facade
-        :gslph/src/parser/facade
-        :gslph/src/snapshot/facade
+(import :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/snapshot/facade
         :std/sugar
         :std/test
         :unit/snapshot/extension/source-gaps)

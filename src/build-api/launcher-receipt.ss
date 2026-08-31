@@ -1,77 +1,77 @@
 ;;; -*- Gerbil -*-
-;;; Receipt helpers for native gslph launcher binaries.
+;;; Receipt helpers for native asp-gerbil-scheme launcher binaries.
 
 (import (only-in :std/misc/path path-directory path-expand)
         (only-in :std/srfi/13 string-suffix?)
         (only-in "./package-receipt"
-                 gslph-package-build-receipt-status
-                 gslph-package-build-receipt-status-ref
-                 gslph-package-build-receipt-write)
+                 asp-gerbil-scheme-package-build-receipt-status
+                 asp-gerbil-scheme-package-build-receipt-status-ref
+                 asp-gerbil-scheme-package-build-receipt-write)
         :gerbil/gambit)
-(export gslph-build-module-source-file
-        gslph-build-module-output-file
-        gslph-build-module-artifact-files
-        gslph-build-module-artifact-file
-        gslph-cli-launcher-build-current?
-        gslph-cli-launcher-build-receipt-status
-        gslph-ensure-cli-launcher-inputs!
-        gslph-ensure-install-launcher-inputs!
-        gslph-install-launcher-build-current?
-        gslph-install-launcher-build-receipt-status
-        gslph-write-cli-launcher-build-receipt!
-        gslph-write-install-launcher-build-receipt!)
+(export asp-gerbil-scheme-build-module-source-file
+        asp-gerbil-scheme-build-module-output-file
+        asp-gerbil-scheme-build-module-artifact-files
+        asp-gerbil-scheme-build-module-artifact-file
+        asp-gerbil-scheme-cli-launcher-build-current?
+        asp-gerbil-scheme-cli-launcher-build-receipt-status
+        asp-gerbil-scheme-ensure-cli-launcher-inputs!
+        asp-gerbil-scheme-ensure-install-launcher-inputs!
+        asp-gerbil-scheme-install-launcher-build-current?
+        asp-gerbil-scheme-install-launcher-build-receipt-status
+        asp-gerbil-scheme-write-cli-launcher-build-receipt!
+        asp-gerbil-scheme-write-install-launcher-build-receipt!)
 
 (def +cli-launcher-build-receipt-version+
-  'gslph-cli-launcher-build.v1)
+  'asp-gerbil-scheme-cli-launcher-build.v1)
 
 (def +cli-launcher-inputs-version+
-  'gslph-cli-launcher-inputs.v1)
+  'asp-gerbil-scheme-cli-launcher-inputs.v1)
 
 (def +install-launcher-build-receipt-version+
-  'gslph-install-launcher-build.v1)
+  'asp-gerbil-scheme-install-launcher-build.v1)
 
 (def +install-launcher-inputs-version+
-  'gslph-install-launcher-inputs.v1)
+  'asp-gerbil-scheme-install-launcher-inputs.v1)
 
 ;; : (-> Path ModulePath Path)
-(def (gslph-build-module-source-file source-root module)
+(def (asp-gerbil-scheme-build-module-source-file source-root module)
   (path-expand module source-root))
 
 ;; : (-> ModulePath String)
-(def (gslph-module-path-stem module)
+(def (asp-gerbil-scheme-module-path-stem module)
   (if (string-suffix? ".ss" module)
     (substring module 0 (- (string-length module) 3))
     module))
 
 ;; : (-> Path ModulePath Path)
-(def (gslph-build-module-output-file output-root module)
+(def (asp-gerbil-scheme-build-module-output-file output-root module)
   (path-expand
-   (string-append (gslph-module-path-stem module) ".scm")
+   (string-append (asp-gerbil-scheme-module-path-stem module) ".scm")
    output-root))
 
 ;; : (-> Path ModulePath [Path])
-(def (gslph-build-module-artifact-files output-root module)
-  (let (scm-file (gslph-build-module-output-file output-root module))
+(def (asp-gerbil-scheme-build-module-artifact-files output-root module)
+  (let (scm-file (asp-gerbil-scheme-build-module-output-file output-root module))
     (let (stem (substring scm-file 0 (- (string-length scm-file) 4)))
       [(string-append stem ".ssi")
        (string-append stem "~0.scm")
        scm-file])))
 
-;;; gslph-build-module-artifact-file
+;;; asp-gerbil-scheme-build-module-artifact-file
 ;; : (-> Path ModulePath Path)
 ;;; | doc m%
 ;;; Selects the first existing compiled artifact for a module while preserving
 ;;; the canonical output path as the deterministic fallback.
 ;;; # Examples
 ;;; ```scheme
-;;; (gslph-build-module-artifact-file output-root "parser/core.ss")
+;;; (asp-gerbil-scheme-build-module-artifact-file output-root "parser/core.ss")
 ;;; ;; => an existing artifact path or the canonical module output path
 ;;; ```
-(def (gslph-build-module-artifact-file output-root module)
-  (let loop ((candidates (gslph-build-module-artifact-files output-root module)))
+(def (asp-gerbil-scheme-build-module-artifact-file output-root module)
+  (let loop ((candidates (asp-gerbil-scheme-build-module-artifact-files output-root module)))
     (cond
      ((null? candidates)
-      (gslph-build-module-output-file output-root module))
+      (asp-gerbil-scheme-build-module-output-file output-root module))
      ((file-exists? (car candidates))
       (car candidates))
      (else
@@ -161,7 +161,7 @@
    gsc-options])
 
 ;; : (-> Path Boolean Boolean Boolean Boolean Datum Datum Path)
-(def (gslph-ensure-cli-launcher-inputs!
+(def (asp-gerbil-scheme-ensure-cli-launcher-inputs!
       package-root
       release?
       build-optimize?
@@ -181,7 +181,7 @@
     path))
 
 ;; : (-> Path Boolean Boolean Boolean Datum Datum Path)
-(def (gslph-ensure-install-launcher-inputs!
+(def (asp-gerbil-scheme-ensure-install-launcher-inputs!
       package-root
       build-optimize?
       effective-release?
@@ -202,18 +202,18 @@
 (def (launcher-build-source-files source-root inputs-path source-modules)
   (cons inputs-path
         (map (lambda (module)
-               (gslph-build-module-source-file source-root module))
+               (asp-gerbil-scheme-build-module-source-file source-root module))
              source-modules)))
 
 ;; : (-> Path Path [ModulePath] [Path])
 (def (launcher-build-output-files output-root binpath output-modules)
   (cons binpath
         (map (lambda (module)
-               (gslph-build-module-artifact-file output-root module))
+               (asp-gerbil-scheme-build-module-artifact-file output-root module))
              output-modules)))
 
 ;; : (-> Path Path Path Path Path [ModulePath] [ModulePath] BuildReceiptStatus)
-(def (gslph-install-launcher-build-receipt-status
+(def (asp-gerbil-scheme-install-launcher-build-receipt-status
       package-root
       source-root
       output-root
@@ -221,7 +221,7 @@
       inputs-path
       output-modules
       source-modules)
-  (gslph-package-build-receipt-status
+  (asp-gerbil-scheme-package-build-receipt-status
    (install-launcher-build-receipt-path package-root)
    version: +install-launcher-build-receipt-version+
    expected-sources: (launcher-build-source-files
@@ -230,7 +230,7 @@
                       output-root binpath output-modules)))
 
 ;; : (-> Path Path Path Path Path [ModulePath] [ModulePath] Void)
-(def (gslph-write-install-launcher-build-receipt!
+(def (asp-gerbil-scheme-write-install-launcher-build-receipt!
       package-root
       source-root
       output-root
@@ -240,14 +240,14 @@
       source-modules)
   (let (stamp (install-launcher-build-receipt-path package-root))
     (ensure-directory! (path-directory stamp))
-    (gslph-package-build-receipt-write
+    (asp-gerbil-scheme-package-build-receipt-write
      stamp
      (launcher-build-source-files source-root inputs-path source-modules)
      (launcher-build-output-files output-root binpath output-modules)
      version: +install-launcher-build-receipt-version+)))
 
 ;; : (-> Path Path Path Boolean Path Path [ModulePath] [ModulePath] BuildReceiptStatus)
-(def (gslph-cli-launcher-build-receipt-status
+(def (asp-gerbil-scheme-cli-launcher-build-receipt-status
       package-root
       source-root
       output-root
@@ -256,7 +256,7 @@
       inputs-path
       output-modules
       source-modules)
-  (gslph-package-build-receipt-status
+  (asp-gerbil-scheme-package-build-receipt-status
    (cli-launcher-build-receipt-path package-root release?)
    version: +cli-launcher-build-receipt-version+
    expected-sources: (launcher-build-source-files
@@ -265,7 +265,7 @@
                       output-root binpath output-modules)))
 
 ;; : (-> Path Path Path Boolean Path Path [ModulePath] [ModulePath] Void)
-(def (gslph-write-cli-launcher-build-receipt!
+(def (asp-gerbil-scheme-write-cli-launcher-build-receipt!
       package-root
       source-root
       output-root
@@ -276,18 +276,18 @@
       source-modules)
   (let (stamp (cli-launcher-build-receipt-path package-root release?))
     (ensure-directory! (path-directory stamp))
-    (gslph-package-build-receipt-write
+    (asp-gerbil-scheme-package-build-receipt-write
      stamp
      (launcher-build-source-files source-root inputs-path source-modules)
      (launcher-build-output-files output-root binpath output-modules)
      version: +cli-launcher-build-receipt-version+)))
 
 ;; : (-> BuildReceiptStatus Boolean)
-(def (gslph-cli-launcher-build-current? status)
-  (eq? (gslph-package-build-receipt-status-ref status 'status 'unknown)
+(def (asp-gerbil-scheme-cli-launcher-build-current? status)
+  (eq? (asp-gerbil-scheme-package-build-receipt-status-ref status 'status 'unknown)
        'current))
 
 ;; : (-> BuildReceiptStatus Boolean)
-(def (gslph-install-launcher-build-current? status)
-  (eq? (gslph-package-build-receipt-status-ref status 'status 'unknown)
+(def (asp-gerbil-scheme-install-launcher-build-current? status)
+  (eq? (asp-gerbil-scheme-package-build-receipt-status-ref status 'status 'unknown)
        'current))

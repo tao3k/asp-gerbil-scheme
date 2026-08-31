@@ -4,9 +4,9 @@
 ;;; - The runner reads its declaration before execution and applies the heap cap.
 (import (only-in :std/test test-suite test-case check)
         (only-in :std/srfi/1 iota)
-        :gslph/src/parser/core
-        :gslph/src/parser/profile
-        (only-in :gslph/src/testing/memory-profile
+        :asp-gerbil-scheme/src/parser/core
+        :asp-gerbil-scheme/src/parser/profile
+        (only-in :asp-gerbil-scheme/src/testing/memory-profile
                  declare-gxtest-memory-exception))
 
 (export parser-memory-stability-test)

@@ -1,6 +1,6 @@
 ;;; -*- Gerbil -*-
-(import :gslph/src/parser/facade
-        :gslph/src/protocol/json
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/json
         :std/test)
 (export check-search-prime-required-envelope
         check-search-prime-semantic-fact-graph)
@@ -16,8 +16,8 @@
            => "agent.semantic-protocols.semantic-language")
     (check (hash-get packet 'protocolVersion) => "1")
     (check (hash-get packet 'languageId) => "gerbil-scheme")
-    (check (hash-get packet 'providerId) => "gerbil-scheme-harness")
-    (check (hash-get packet 'binary) => "gerbil-scheme-harness")
+    (check (hash-get packet 'providerId) => "asp-gerbil-scheme")
+    (check (hash-get packet 'binary) => "asp-gerbil-scheme")
     (check (hash-get packet 'namespace)
            => "agent.semantic-protocols.gerbil-scheme")
     (check (hash-get packet 'method) => "search/prime")

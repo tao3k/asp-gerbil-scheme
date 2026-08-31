@@ -1,4 +1,4 @@
-(import :gslph/src/testing/memory-profile)
+(import :asp-gerbil-scheme/src/testing/memory-profile)
 
 (declare-gxtest-memory-exception
  '((maxHeapMiB . 96)))

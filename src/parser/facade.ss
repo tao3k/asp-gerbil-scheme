@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Stable parser facade for the Gerbil Scheme project harness.
 
-(import :gslph/src/parser/core
-        :gslph/src/parser/package
-        :gslph/src/parser/source-class
-        :gslph/src/parser/source-scope)
+(import :asp-gerbil-scheme/src/parser/core
+        :asp-gerbil-scheme/src/parser/package
+        :asp-gerbil-scheme/src/parser/source-class
+        :asp-gerbil-scheme/src/parser/source-scope)
 
 (export +source-extensions+
         +config-files+

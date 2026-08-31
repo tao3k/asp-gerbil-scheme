@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Boundary: reusable benchmark fixtures and performance gate receipts.
 
-(import :gslph/src/support/time
+(import :asp-gerbil-scheme/src/support/time
         (only-in :std/sugar andmap ormap foldl))
 
 (export benchmark-default-max-total

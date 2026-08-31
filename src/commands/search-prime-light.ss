@@ -2,8 +2,8 @@
 ;;; Lightweight prime-seeds renderer for the Gerbil search command.
 
 (import :gerbil/gambit
-        :gslph/src/constants
-        :gslph/src/commands/search-prime-light-list
+        :asp-gerbil-scheme/src/constants
+        :asp-gerbil-scheme/src/commands/search-prime-light-list
         (only-in :std/misc/path directory-files path-expand path-normalize)
         (only-in :std/srfi/13
                  string-contains

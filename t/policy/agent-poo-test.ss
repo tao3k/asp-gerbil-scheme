@@ -6,8 +6,8 @@
 ;;; batch them instead of serializing every scenario through this aggregator.
 
 (import :std/test
-        :gslph/src/policy/catalog
-        :gslph/src/policy/model)
+        :asp-gerbil-scheme/src/policy/catalog
+        :asp-gerbil-scheme/src/policy/model)
 
 (export agent-poo-policy-test)
 

@@ -2,11 +2,11 @@
 ;;; Gerbil contract projection helpers for typed comments.
 
 (import :gerbil/gambit
-        (only-in :gslph/src/parser/typed-contract-token
+        (only-in :asp-gerbil-scheme/src/parser/typed-contract-token
                  typed-contract-token-char?
                  typed-contract-arrow-count
                  typed-contract-group-count)
-        (only-in :gslph/src/types/model
+        (only-in :asp-gerbil-scheme/src/types/model
                  parse-type-sexpr
                  type->string
                  type-kind
@@ -14,7 +14,7 @@
                  type-params
                  type-result
                  type-record-required)
-        (only-in :gslph/src/types/validation
+        (only-in :asp-gerbil-scheme/src/types/validation
                  type-validation-diagnostic-facts
                  type-validation-diagnostic-code
                  type-validation-diagnostic-path

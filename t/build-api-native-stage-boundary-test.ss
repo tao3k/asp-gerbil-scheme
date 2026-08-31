@@ -1,9 +1,9 @@
 (export build-api-native-stage-boundary-test)
 
 (import :std/test
-        (only-in :gslph/src/testing/execution-profile
+        (only-in :asp-gerbil-scheme/src/testing/execution-profile
                  declare-gxtest-serial)
-        :gslph/src/build-api/native-build)
+        :asp-gerbil-scheme/src/build-api/native-build)
 
 (declare-gxtest-serial shared-package-artifacts)
 
@@ -17,7 +17,7 @@
     (and entry (cdr entry))))
 
 (def build-api-native-stage-boundary-test
-  (test-suite "gslph build api native stage boundary"
+  (test-suite "asp-gerbil-scheme build api native stage boundary"
     (test-case "ordinary target projects a package build plan"
       (configure-build-root! ".")
       (compile-target #f #f #t #f #f #f #f #f)
@@ -28,7 +28,7 @@
              (first-stage (car stages))
              (status (alist-value first-stage 'status)))
         (check (alist-value receipt 'version)
-               => 'gslph-package-build-receipt.v1)
+               => 'asp-gerbil-scheme-package-build-receipt.v1)
         (check (and plan #t) => #t)
         (check (alist-value plan 'version) => 1)
         (check (> (length stages) 0) => #t)

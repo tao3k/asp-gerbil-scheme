@@ -2,7 +2,7 @@
 ;;; Policy-owned combinators for parser-owned evidence groups.
 
 (import :gerbil/gambit
-        :gslph/src/policy/prototype
+        :asp-gerbil-scheme/src/policy/prototype
         (only-in :std/sugar filter filter-map hash ormap))
 
 (export evidence-group

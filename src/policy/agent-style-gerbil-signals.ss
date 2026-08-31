@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil-specific style signals for R013 typed-combinator guidance.
 
-(import :gslph/src/parser/facade
-        (only-in :gslph/src/policy/agent-style-gerbil-boundary-signals
+(import :asp-gerbil-scheme/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/policy/agent-style-gerbil-boundary-signals
                  typed-combinator-style-concurrency-control-quality-facets
                  typed-combinator-style-concurrency-control-signals
                  typed-combinator-style-concurrency-control-targets
@@ -28,8 +28,8 @@
                  typed-combinator-style-slot-lens-boundary-quality-facets
                  typed-combinator-style-slot-lens-boundary-signals
                  typed-combinator-style-slot-lens-boundary-targets)
-        :gslph/src/policy/agent-style-gerbil-macro-signals
-        (only-in :gslph/src/policy/agent-style-gerbil-signal-support
+        :asp-gerbil-scheme/src/policy/agent-style-gerbil-macro-signals
+        (only-in :asp-gerbil-scheme/src/policy/agent-style-gerbil-signal-support
                  typed-combinator-style-facts->quality-facet
                  typed-combinator-style-facts->signals
                  typed-combinator-style-facts->targets

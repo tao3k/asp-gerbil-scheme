@@ -4,22 +4,22 @@
 (import :gerbil/gambit
         :std/misc/process
         (only-in :std/srfi/13 string-prefix? string-tokenize)
-        (only-in :gslph/src/constants +language-id+ +provider-id+)
-        (only-in :gslph/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/constants +language-id+ +provider-id+)
+        (only-in :asp-gerbil-scheme/src/parser/facade
                  collect-project
                  collect-source-scope
                  project-definitions
                  project-index-files)
-        (only-in :gslph/src/policy/core run-policy-checks)
-        (only-in :gslph/src/policy/facade
+        (only-in :asp-gerbil-scheme/src/policy/core run-policy-checks)
+        (only-in :asp-gerbil-scheme/src/policy/facade
                  agent-repair-report-json
                  agent-repair-summary-parts
                  finding-agent-repair-json
                  finding-agent-repair-parts
                  finding-guide-detail-parts)
-        (only-in :gslph/src/protocol/json write-json-line)
-        (only-in :gslph/src/types/core type-status)
-        :gslph/src/types/facade)
+        (only-in :asp-gerbil-scheme/src/protocol/json write-json-line)
+        (only-in :asp-gerbil-scheme/src/types/core type-status)
+        :asp-gerbil-scheme/src/types/facade)
 (export filter-rule
         json-finding-by-rule
         policy-check-output
@@ -87,7 +87,7 @@
          (findings (run-policy-checks index))
          (status (type-status findings))
          (report
-          (hash (schemaId "agent.semantic-protocols.gerbil-scheme-harness-report")
+          (hash (schemaId "agent.semantic-protocols.asp-gerbil-scheme-report")
                 (schemaVersion "1")
                 (languageId +language-id+)
                 (providerId +provider-id+)

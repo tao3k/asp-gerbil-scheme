@@ -3,10 +3,10 @@
 ;;; - test owner records policy expectations.
 ;;; - Keep typed contracts and fixture intent explicit.
 (import :std/test
-        :gslph/src/commands/guide
-        :gslph/src/commands/info
-        :gslph/src/commands/search
-        :gslph/src/support/args
+        :asp-gerbil-scheme/src/commands/guide
+        :asp-gerbil-scheme/src/commands/info
+        :asp-gerbil-scheme/src/commands/search
+        :asp-gerbil-scheme/src/support/args
         :std/misc/ports
         (only-in :std/text/json read-json)
         "../poo/runtime-witness"
@@ -80,8 +80,8 @@
                  (more-output
                   (guide-output ["--code" "--topic" "higher-order-control" "--more"])))
             (check (contains? guide "|guideExemplar id=gerbil.higher-order-control.filter-map topic=higher-order-control intent=study rule=GERBIL-SCHEME-AGENT-POLICY-009") => #t)
-            (check (contains? guide "nextCommand=\"gerbil-scheme-harness guide --code --topic higher-order-control\"") => #t)
-            (check (contains? guide "moreCommand=\"gerbil-scheme-harness guide --code --topic higher-order-control --more\"") => #t)
+            (check (contains? guide "nextCommand=\"asp-gerbil-scheme guide --code --topic higher-order-control\"") => #t)
+            (check (contains? guide "moreCommand=\"asp-gerbil-scheme guide --code --topic higher-order-control --more\"") => #t)
             (check (guide-code-render-metadata-free? default-output) => #t)
             (check (guide-code-render-metadata-free? more-output) => #t)
             (check (contains? default-output ";;; Arity checks over parser-owned call facts") => #t)

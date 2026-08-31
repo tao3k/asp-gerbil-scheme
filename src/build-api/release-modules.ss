@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-;;; Declarative static runtime projection for the standalone gslph CLI.
+;;; Declarative static runtime projection for the standalone asp-gerbil-scheme CLI.
 
 (export cli-release-modules
         cli-release-module-count

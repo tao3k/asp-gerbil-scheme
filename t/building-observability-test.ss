@@ -21,7 +21,7 @@
      "topology execution windows schema is stable"
      (equal?
       (hash-get object "schema")
-      "gslph.build-topology-execution-windows.v1"))
+      "asp-gerbil-scheme.build-topology-execution-windows.v1"))
     (assert-true
      "topology execution windows version is stable"
      (= (hash-get object "version") 1))
@@ -71,7 +71,7 @@
   (letrec
       ((controller
         (object<-alist
-         `((kind . gslph.execution-window-controller.v1)
+         `((kind . asp-gerbil-scheme.execution-window-controller.v1)
            (hard-max-rss-bytes . 4096)
            (headroom-bytes . 256)
            (window-size . 2)
@@ -108,7 +108,7 @@
     (assert-true
      "adaptive execution windows schema is distinct"
      (equal? (hash-get object "schema")
-             "gslph.build-adaptive-execution-windows.v1"))
+             "asp-gerbil-scheme.build-adaptive-execution-windows.v1"))
     (assert-true
      "adaptive execution reports only attempted windows"
      (and (= (hash-get object "attempted-window-count") 3)
@@ -166,7 +166,7 @@
      "adaptive diagnostics schema is distinct"
      (equal?
       (hash-get object "schema")
-      "gslph.build-adaptive-execution-window-diagnostics.v1"))
+      "asp-gerbil-scheme.build-adaptive-execution-window-diagnostics.v1"))
     (assert-true
      "adaptive diagnostics select a logarithmic candidate frontier"
      (and
@@ -264,7 +264,7 @@
        (stages (hash-get object "stages"))
        (stage (car stages)))
   (assert-true 'json-schema
-               (equal? "gslph.build-observations.v1"
+               (equal? "asp-gerbil-scheme.build-observations.v1"
                        (hash-get object "schema")))
   (assert-true 'json-stage-label
                (equal? "json-stage" (hash-get stage "label")))

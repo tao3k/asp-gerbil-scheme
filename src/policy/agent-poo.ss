@@ -1,15 +1,15 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing POO policy checks.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-poo-callees
-        :gslph/src/policy/agent-poo-object-literal
-        :gslph/src/policy/agent-poo-loop-performance
-        :gslph/src/policy/agent-support
-        :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-poo-callees
+        :asp-gerbil-scheme/src/policy/agent-poo-object-literal
+        :asp-gerbil-scheme/src/policy/agent-poo-loop-performance
+        :asp-gerbil-scheme/src/policy/agent-support
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/srfi/13 string-contains string-join string-prefix?)
         (only-in :std/sugar filter filter-map hash hash-get ormap)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export poo-direct-writeenv-findings
         poo-direct-writeenv-finding
@@ -241,7 +241,7 @@
          (docsPath "docs/50-59-policy/51.02-gerbil-poo-programming-guidelines.org")
          (source "gerbil-poo doc/poo.md:299-319, t/object-test.ss, and t/mop-test.ss")
          (preferredSyntax "{(:: @ super) slot: ...}, =>, =>.+, ?, .mix")
-         (next "read docs/50-59-policy/51.02-gerbil-poo-programming-guidelines.org; gerbil-scheme-harness agent guide . --poo"))))
+         (next "read docs/50-59-policy/51.02-gerbil-poo-programming-guidelines.org; asp-gerbil-scheme agent guide . --poo"))))
 ;;; Boundary:
 ;;; - This is a POO performance policy, not a build policy.
 ;;; - Large data-shaped `.o` calls can create avoidable macro-expansion work.

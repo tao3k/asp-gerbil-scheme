@@ -3,9 +3,9 @@
 (export provider-http-json-server-test)
 
 (import :gerbil/gambit
-        :gslph/src/commands/projection-batch
-        :gslph/src/runtime/provider-http-json-server
-        :gslph/src/runtime/provider-operation
+        :asp-gerbil-scheme/src/commands/projection-batch
+        :asp-gerbil-scheme/src/runtime/provider-http-json-server
+        :asp-gerbil-scheme/src/runtime/provider-operation
         (only-in :std/format format)
         (only-in :std/misc/path path-expand)
         (only-in :std/misc/ports read-all-as-string)
@@ -13,7 +13,7 @@
         (only-in :std/sugar hash hash-key?)
         (only-in :std/text/base64 base64-encode)
         (only-in :std/text/json read-json write-json)
-        (only-in :gslph/src/support/time
+        (only-in :asp-gerbil-scheme/src/support/time
                  duration-micros
                  monotonic-micros)
         :std/test)
@@ -367,7 +367,7 @@
            (service-sorted (sort-latencies service-samples))
            (service-maximum (apply max service-samples))
            (memo-stats
-            (gslph/src/runtime/provider-operation#provider-runtime-projection-memo-stats)))
+            (asp-gerbil-scheme/src/runtime/provider-operation#provider-runtime-projection-memo-stats)))
       (check (hash-ref direct-response "outcome") => "ready")
       (displayln
         (format "[provider-projection-memo-input] requestBytes=~a responsePayloadBytes=~a entries=~a hits=~a misses=~a"
@@ -420,7 +420,7 @@
     "projection memo is bounded and evicts old content identities"
     (let* ((package-root (current-directory))
            (before
-            (gslph/src/runtime/provider-operation#provider-runtime-projection-memo-stats))
+            (asp-gerbil-scheme/src/runtime/provider-operation#provider-runtime-projection-memo-stats))
            (first-body
             (live-corpus-request package-root "memo-0" "memo-generation-0")))
       (let populate ((index 0))
@@ -434,7 +434,7 @@
               (format "memo-generation-~a" index)))))
           (populate (+ index 1))))
       (let (after
-            (gslph/src/runtime/provider-operation#provider-runtime-projection-memo-stats))
+            (asp-gerbil-scheme/src/runtime/provider-operation#provider-runtime-projection-memo-stats))
         (check (hash-ref after "entries") => 4)
         (check (>= (- (hash-ref after "misses")
                       (hash-ref before "misses"))
@@ -445,7 +445,7 @@
            (read-json (open-input-string first-body)))
           (check
            (> (hash-ref
-               (gslph/src/runtime/provider-operation#provider-runtime-projection-memo-stats)
+               (asp-gerbil-scheme/src/runtime/provider-operation#provider-runtime-projection-memo-stats)
                "misses")
               misses-before-replay)
            => #t))))
@@ -536,7 +536,7 @@
      (with-catch
       (lambda (_) #t)
       (lambda ()
-     (gslph/src/runtime/provider-http-json-server#validate-provider-http-json-environment!
+     (asp-gerbil-scheme/src/runtime/provider-http-json-server#validate-provider-http-json-environment!
       (lambda (_) #f))
         #f))
      => #t)))))

@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-(import :gslph/src/protocol/registry
+(import :asp-gerbil-scheme/src/protocol/registry
         :std/test)
 
 (export provider-owned-schema-registry-test)
@@ -13,7 +13,7 @@
              (schema (car schemas)))
         (check (length schemas) => 1)
         (check (hash-get schema 'schemaId)
-               => "agent.semantic-protocols.gerbil-scheme-harness-info")
+               => "agent.semantic-protocols.asp-gerbil-scheme-info")
         (check (hash-get schema 'schemaVersion) => "1")
         (check (hash-get schema 'path)
-               => "schemas/semantic-gerbil-scheme-harness-info.v1.schema.json")))))
+               => "schemas/semantic-asp-gerbil-scheme-info.v1.schema.json")))))

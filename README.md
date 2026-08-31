@@ -1,4 +1,4 @@
-# Gerbil Scheme Language Project Harness
+# ASP Gerbil Scheme
 This repository is the Gerbil Scheme language provider for `agent-semantic-protocols`.
 The implementation is pure Gerbil/Scheme. Parser authority comes from Gerbil's native reader and expander data:
 - `read-syntax-from-file` reads source with the Gerbil readtable.
@@ -37,13 +37,13 @@ gxi build.ss compile
 Downstream packages should depend on the installed harness package in `gerbil.pkg`:
 ```scheme
 (package: your/package
- depend: ("github.com/tao3k/gerbil-scheme-language-project-harness"))
+ depend: ("github.com/tao3k/asp-gerbil-scheme"))
 ```
 Add a small `gxtest` fixture, for example `t/project-policy-test.ss`:
 ```scheme
 ;;; -*- Gerbil -*-
 (import :std/test
-        :gslph/src/policy/gxtest)
+        :asp-gerbil-scheme/src/policy/gxtest)
 (export project-policy-test)
 (def project-policy-test
   (make-project-policy-test "."))

@@ -1,16 +1,16 @@
 ;;; -*- Gerbil -*-
 ;;; Explicit slow self-apply policy gate for this harness.
 
-(import :gslph/src/build-api/source-coverage
+(import :asp-gerbil-scheme/src/build-api/source-coverage
         :std/test
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
         :policy/fixtures
-        :gslph/src/policy/gxtest
-        :gslph/src/policy/repair-calibration
-        :gslph/src/snapshot/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/policy/repair-calibration
+        :asp-gerbil-scheme/src/snapshot/facade
         :std/sugar
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/types/facade)
 (export self-apply-full-test)
 
 ;; ConfigConstant
@@ -53,10 +53,10 @@
   (or +self-apply-index-cache+
       (begin
         (reset-fixture-root +self-apply-agent-repair-probe-root+)
-        (gslph-load-source-coverage ".")
+        (asp-gerbil-scheme-load-source-coverage ".")
         (let (index (collect-source-scope
                      "."
-                     (gslph-source-coverage-files ".")))
+                     (asp-gerbil-scheme-source-coverage-files ".")))
         (set! +self-apply-index-cache+ index)
           index))))
 ;; : (-> (List PolicyFinding) )

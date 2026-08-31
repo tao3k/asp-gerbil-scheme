@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned quality facet aggregation for typed-combinator style policy.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-style-gerbil-signals
-        :gslph/src/policy/agent-style-destructuring-signals
-        :gslph/src/policy/agent-style-performance-signals
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-style-gerbil-signals
+        :asp-gerbil-scheme/src/policy/agent-style-destructuring-signals
+        :asp-gerbil-scheme/src/policy/agent-style-performance-signals
         (only-in :std/misc/list unique)
         (only-in :std/srfi/13 string-prefix?)
         (only-in :std/sugar cut filter ormap))

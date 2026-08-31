@@ -5,7 +5,7 @@
  configure-project-build-root!
  project-install-target)
 
-(import :gslph/src/build-api/native-build)
+(import :asp-gerbil-scheme/src/build-api/native-build)
 
 (def (project-clean-target)
   (clean-target))

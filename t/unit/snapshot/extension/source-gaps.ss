@@ -2,9 +2,9 @@
 ;;; Boundary:
 ;;; - source-gap snapshot fixtures exercise real pattern registry evidence.
 ;;; - Keep this owner separate from schema-shape snapshots so R007 stays useful.
-(import :gslph/src/extensions/facade
-        :gslph/src/parser/facade
-        :gslph/src/snapshot/facade
+(import :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/snapshot/facade
         :std/test)
 (export check-pattern-search-snapshot-source-gap-fixtures)
 ;; Snapshot

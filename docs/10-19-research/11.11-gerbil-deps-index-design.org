@@ -57,7 +57,7 @@ the module includes implementation files, the index follows bounded local
 * Performance Boundary
 
 The index is a Rust hot path and runs before provider activation. It does not
-start =gslph=, does not require a hook activation file, and does not scan the
+start =asp-gerbil-scheme=, does not require a hook activation file, and does not scan the
 workspace. Broad input is rejected with a concrete next command so agents refine
 the module and query instead of launching wide searches.
 

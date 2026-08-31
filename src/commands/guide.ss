@@ -2,14 +2,14 @@
 ;;; topics and selectors; it does not implement search or policy decisions.
 
 (import :gerbil/gambit
-        :gslph/src/commands/guide-sections
-        :gslph/src/language/evidence
-        :gslph/src/parser/facade
-        (only-in :gslph/src/parser/owner-items
+        :asp-gerbil-scheme/src/commands/guide-sections
+        :asp-gerbil-scheme/src/language/evidence
+        :asp-gerbil-scheme/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/parser/owner-items
                  parse-owner-items-source-file)
-        :gslph/src/policy/catalog
-        :gslph/src/support/args
-        :gslph/src/support/io
+        :asp-gerbil-scheme/src/policy/catalog
+        :asp-gerbil-scheme/src/support/args
+        :asp-gerbil-scheme/src/support/io
         (only-in :std/misc/list length<=n? unique)
         (only-in :std/srfi/1 drop take)
         (only-in :std/srfi/13
@@ -441,8 +441,8 @@
      (cond ((option "--workspace" args) => values)
            ((file-directory? "src") ".")
            ((file-directory?
-             "languages/gerbil-scheme-language-project-harness/src")
-            "languages/gerbil-scheme-language-project-harness")
+             "languages/asp-gerbil-scheme/src")
+            "languages/asp-gerbil-scheme")
            (else (project-root args))))
 (def (guide-code-lines args)
      (let* ((topic (guide-topic args))

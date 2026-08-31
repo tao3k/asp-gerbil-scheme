@@ -3,7 +3,7 @@
 
 (import :gerbil/gambit
         (only-in :std/test test-suite test-case check-equal?)
-        :gslph/src/extensions/poo-source-ref-validation)
+        :asp-gerbil-scheme/src/extensions/poo-source-ref-validation)
 
 (export poo-object-validation-test)
 

@@ -4,8 +4,8 @@
 ;;; - Keep individual policy test files under modularity limits.
 
 (import :std/test
-        :gslph/src/policy/gxtest
-        :gslph/src/testing/memory-profile
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/testing/memory-profile
   "./policy/modularity-test"
   "./policy/agent-basic-test"
   "./policy/agent-list-growth-test"

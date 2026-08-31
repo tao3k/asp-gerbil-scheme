@@ -28,7 +28,7 @@
                 forms))))
 
 (def building-framework-test
-  (test-suite "gslph building framework"
+  (test-suite "asp-gerbil-scheme building framework"
     (test-case "exposes default std/make builder"
       (let (builder (default-std-builder "src"))
         (check (std-builder-name builder) => "std/make")
@@ -40,13 +40,13 @@
               (make-package-source-stage
                "native-concurrency"
                "src"
-               "gslph"
+               "asp-gerbil-scheme"
                ["core.ss"]
                #f))
              (request (package-source-stage->request stage []))
              (builder (build-profile-builder (build-request-profile request))))
         (check (std-builder-make-options builder)
-               => [prefix: "gslph"])))
+               => [prefix: "asp-gerbil-scheme"])))
     (test-case "projects stage receipts for agents"
       (let* ((receipt (make-build-stage-receipt
                        "core"
@@ -233,24 +233,24 @@
               (path-expand dependency (current-directory)))
              (output
               (path-expand
-               "gslph/package-source-stage-current-fixture.ssi"
+               "asp-gerbil-scheme/package-source-stage-current-fixture.ssi"
                (path-expand "lib" (or (getenv "GERBIL_PATH") ".gerbil"))))
              (dependency-output
               (path-expand
-               "gslph/package-source-stage-dependency-fixture.ssi"
+               "asp-gerbil-scheme/package-source-stage-dependency-fixture.ssi"
                (path-expand "lib" (or (getenv "GERBIL_PATH") ".gerbil"))))
              (stage
               (make-package-source-stage
                "fixture"
                (current-directory)
-               "gslph"
+               "asp-gerbil-scheme"
                (list (list 'ssi: module) dependency)
                'topology)))
         (dynamic-wind
           (lambda ()
             (write-fixture
              source
-             '(import :gslph/package-source-stage-dependency-fixture))
+             '(import :asp-gerbil-scheme/package-source-stage-dependency-fixture))
             (write-fixture dependency-source '(source))
             (write-fixture output '(output))
             (thread-sleep! 1.1)
@@ -305,7 +305,7 @@
                          [core policy api]))
              (stage
               (make-package-source-stage
-               "topology-fixture" root "gslph" [[ssi: core] policy api] 'topology)))
+               "topology-fixture" root "asp-gerbil-scheme" [[ssi: core] policy api] 'topology)))
         (dynamic-wind
           (lambda ()
             (write-fixture (car paths) '(export core))
@@ -314,7 +314,7 @@
              '((export policy) (import "./topology-core") (def policy #t)))
             (write-fixture
              (caddr paths)
-             '(export (import: :gslph/topology-policy))))
+             '(export (import: :asp-gerbil-scheme/topology-policy))))
           (lambda ()
             (check (package-source-stage-dependencies stage policy)
                    => '("topology-core.ss"))

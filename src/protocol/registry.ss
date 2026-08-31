@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Provider registry projection.
 
-(import :gslph/src/constants
-        :gslph/src/parser/facade
-        (only-in :gslph/src/protocol/command-catalog provider-registry-methods)
+(import :asp-gerbil-scheme/src/constants
+        :asp-gerbil-scheme/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/protocol/command-catalog provider-registry-methods)
         (only-in :std/sugar hash))
 
 (export language-registry)
@@ -23,16 +23,16 @@
       (providerId +provider-id+)
       (binary "asp-gerbil-scheme")
       (execution "external-process")
-      (namespace "agent.semantic-protocols.languages.gerbil-scheme.gerbil-scheme-harness")
+      (namespace "agent.semantic-protocols.languages.gerbil-scheme.asp-gerbil-scheme")
       (displayName +display-name+)
       (packageRoots [root])
       (methods (provider-registry-methods))
       (schemas [(hash (schemaId "agent.semantic-protocols.semantic-extension-pattern-mapping")
                       (schemaVersion "1")
                       (path "schemas/semantic-extension-pattern-mapping.v1.schema.json"))
-                (hash (schemaId "agent.semantic-protocols.gerbil-scheme-harness-info")
+                (hash (schemaId "agent.semantic-protocols.asp-gerbil-scheme-info")
                       (schemaVersion "1")
-                      (path "schemas/semantic-gerbil-scheme-harness-info.v1.schema.json"))
+                      (path "schemas/semantic-asp-gerbil-scheme-info.v1.schema.json"))
                 (hash (schemaId "agent.semantic-protocols.semantic-runtime-source-acquisition")
                       (schemaVersion "1")
                       (path "schemas/semantic-runtime-source-acquisition.v1.schema.json"))
@@ -61,7 +61,7 @@
        [(hash (method "info")
               (command "info")
               (summary "Emit provider-local Gerbil package, configurable interface, agent steering, and closure command facts.")
-              (outputSchemaIds ["agent.semantic-protocols.gerbil-scheme-harness-info"]))
+              (outputSchemaIds ["agent.semantic-protocols.asp-gerbil-scheme-info"]))
         (hash (method "search/pattern")
               (command "search pattern")
               (summary "Emit extension-backed executable pattern mappings for agent-facing framework or language usage guidance.")
@@ -105,7 +105,7 @@
                 "provider-native-exact-response.v1"])
               (invocation
                (hash (argv
-                      ["gslph"
+                      ["asp-gerbil-scheme"
                        "query"
                        "--asp-exact-request-stdin"]))))
         (hash (method "evidence/graph")

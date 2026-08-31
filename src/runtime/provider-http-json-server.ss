@@ -1,5 +1,5 @@
 (import :gerbil/gambit
-        (only-in :gslph/src/runtime/provider-operation
+        (only-in :asp-gerbil-scheme/src/runtime/provider-operation
                  provider-runtime-contract-receipt
                  provider-runtime-request->response)
         :std/format

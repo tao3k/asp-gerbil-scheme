@@ -1,6 +1,6 @@
 ;;; -*- Gerbil -*-
-(import :gslph/src/parser/facade
-        :gslph/src/protocol/json
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/json
         :std/misc/process
         :std/sort
         :std/test)
@@ -40,7 +40,7 @@
            => "agent.semantic-protocols.semantic-language")
     (check (hash-get packet 'protocolVersion) => "1")
     (check (hash-get packet 'languageId) => "gerbil-scheme")
-    (check (hash-get packet 'providerId) => "gerbil-scheme-harness")
+    (check (hash-get packet 'providerId) => "asp-gerbil-scheme")
     (check (hash-get packet 'exportMethod) => "index/structural")
     (check (hash-get packet 'projectRoot) => (project-index-root index))
     (check (hash-get packet 'packageRoot) => ".")
@@ -63,7 +63,7 @@
            => #t)
     (check (summary-family-detail-present? summaries) => #f)
     (check (hash-get (hash-get packet 'factInterface) 'ownerFactsCommand)
-           => "gerbil-scheme-harness search structural --owner <path> --json .")
+           => "asp-gerbil-scheme search structural --owner <path> --json .")
     (check (length (hash-get packet 'dependencyUsages)) => 0)
     (check (>= (hash-get packet 'dependencyUsageTotal) 0) => #t)))
 

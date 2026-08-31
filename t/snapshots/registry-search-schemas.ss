@@ -2,7 +2,7 @@
  (registryId "agent.semantic-protocols.semantic-language-registry")
  (registryVersion "1")
  (languageId "gerbil-scheme")
- (providerId "gerbil-scheme-harness")
+ (providerId "asp-gerbil-scheme")
  (methods ("search/prime"
            "search/owner"
            "search/lexical"
@@ -25,9 +25,9 @@
     (schemaVersion "1")
     (path "schemas/semantic-extension-pattern-mapping.v1.schema.json"))
    (schema
-    (schemaId "agent.semantic-protocols.gerbil-scheme-harness-info")
+    (schemaId "agent.semantic-protocols.asp-gerbil-scheme-info")
     (schemaVersion "2")
-    (path "schemas/semantic-gerbil-scheme-harness-info.v2.schema.json"))
+    (path "schemas/semantic-asp-gerbil-scheme-info.v2.schema.json"))
    (schema
     (schemaId "agent.semantic-protocols.semantic-runtime-source-acquisition")
     (schemaVersion "1")
@@ -64,7 +64,7 @@
   ((methodDescriptor
     (method "info")
     (command "info")
-    (outputSchemaIds ("agent.semantic-protocols.gerbil-scheme-harness-info")))
+    (outputSchemaIds ("agent.semantic-protocols.asp-gerbil-scheme-info")))
    (methodDescriptor
     (method "search/pattern")
     (command "search pattern")

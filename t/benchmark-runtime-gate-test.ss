@@ -3,13 +3,13 @@
 
 (import :gerbil/gambit
         :std/test
-        (only-in :gslph/src/support/time monotonic-ms duration-ms)
-        (only-in :gslph/src/testing/gxtest-build compile-package-api-if-stale)
-        (only-in :gslph/src/testing/gxtest-context configure-build-root!)
-        (only-in :gslph/src/testing/gxtest-policy
+        (only-in :asp-gerbil-scheme/src/support/time monotonic-ms duration-ms)
+        (only-in :asp-gerbil-scheme/src/testing/gxtest-build compile-package-api-if-stale)
+        (only-in :asp-gerbil-scheme/src/testing/gxtest-context configure-build-root!)
+        (only-in :asp-gerbil-scheme/src/testing/gxtest-policy
                  scoped-policy-target-files
                  run-scoped-policy-if-stale)
-        :gslph/src/benchmark/gate)
+        :asp-gerbil-scheme/src/benchmark/gate)
 
 (export benchmark-runtime-gate-test)
 

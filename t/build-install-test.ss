@@ -15,7 +15,7 @@
                  cli-binary-module-spec
                  package-api-build-output-files)
         (only-in "../src/build-api/package-spec"
-                 gslph-package-api-stage-specs)
+                 asp-gerbil-scheme-package-api-stage-specs)
         (only-in "../src/commands/guide-sections" guide-section-lines-for)
         (only-in "../src/constants" +help+))
 (export build-install-test)
@@ -77,12 +77,12 @@
                       (guide-section-lines-for '()))
                => #f))
     (test-case "package test driver dependencies remain materialized"
-      (let (modules (apply append (gslph-package-api-stage-specs)))
+      (let (modules (apply append (asp-gerbil-scheme-package-api-stage-specs)))
         (check (not (not (member "testing/commands.ss" modules))) => #t)
         (check (not (not (member "testing/project-build.ss" modules))) => #t)
         (check (not (not (member "build-api/project-build.ss" modules))) => #t)))
     (test-case "package bootstrap compiles native-build dependencies first"
-      (let loop ((stages (gslph-package-api-stage-specs))
+      (let loop ((stages (asp-gerbil-scheme-package-api-stage-specs))
                  (index 0)
                  (package-build-index #f)
                  (native-build-index #f))
@@ -98,7 +98,7 @@
                   (or native-build-index
                       (and (member "build-api/native-build.ss" stage) index))))))))
     (test-case "package runtime stage does not rewrite bootstrap controls"
-      (let (modules (apply append (gslph-package-api-stage-specs)))
+      (let (modules (apply append (asp-gerbil-scheme-package-api-stage-specs)))
         (for-each
          (lambda (module)
            (check (member module modules) => #f))

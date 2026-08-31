@@ -2,11 +2,11 @@
 ;;; Baseline agent policy checks for ownership, entrypoints, and functional idioms.
 
 (import :gerbil/gambit
-        :gslph/src/parser/facade
-        :gslph/src/policy/agent-poo
-        :gslph/src/policy/agent-support
-        :gslph/src/policy/model
-        :gslph/src/policy/modularity
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-poo
+        :asp-gerbil-scheme/src/policy/agent-support
+        :asp-gerbil-scheme/src/policy/model
+        :asp-gerbil-scheme/src/policy/modularity
         (only-in :std/misc/ports read-file-lines)
         (only-in :std/srfi/1 take)
         (only-in :std/srfi/13
@@ -15,7 +15,7 @@
                  string-suffix?
                  string-trim)
         (only-in :std/sugar cut filter filter-map find hash ormap with-catch)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export facade-intent-findings
         facade-intent-finding

@@ -1,12 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; Structural search interface renderer.
 
-(import :gslph/src/commands/search-render
-        :gslph/src/parser/facade
-        :gslph/src/parser/source-class
-        :gslph/src/protocol/json
-        :gslph/src/support/args
-        :gslph/src/support/io
+(import :asp-gerbil-scheme/src/commands/search-render
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/parser/source-class
+        :asp-gerbil-scheme/src/protocol/json
+        :asp-gerbil-scheme/src/support/args
+        :asp-gerbil-scheme/src/support/io
         (only-in :std/srfi/1 take))
 
 (export emit-structural-index)
@@ -89,7 +89,7 @@
                                           "\""))]))
 	         (structural-interface-preview summaries))
 	        (emit-text-line
-           "nextCommand=gerbil-scheme-harness search structural --owner <path> --json ."))))
+           "nextCommand=asp-gerbil-scheme search structural --owner <path> --json ."))))
 	  0)
 
 ;;; Boundary:
@@ -177,5 +177,5 @@
                    " schemaId=" (hash-get packet 'schemaId)
                    " rawSourceStored=false")
         (emit-structural-syntax-fact-lines syntax-facts)
-        (displayln "nextCommand=gerbil-scheme-harness search structural --owner <path> --json ."))))
+        (displayln "nextCommand=asp-gerbil-scheme search structural --owner <path> --json ."))))
   0)

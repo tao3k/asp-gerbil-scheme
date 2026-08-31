@@ -6,7 +6,7 @@
 :PROPERTIES:
 :JD_ID: 11.13
 :STATUS: active
-:OWNER: gerbil-scheme-language-project-harness
+:OWNER: asp-gerbil-scheme
 :EVIDENCE: gerbil://src/gerbil/runtime, gerbil://src/gerbil/core, gerbil://src/gerbil/compiler, gerbil://src/std
 :END:
 

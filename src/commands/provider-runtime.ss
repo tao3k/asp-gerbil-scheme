@@ -1,4 +1,4 @@
-(import (only-in :gslph/src/runtime/provider-http-json-server
+(import (only-in :asp-gerbil-scheme/src/runtime/provider-http-json-server
                  serve-provider-http-json-runtime!))
 
 (export provider-runtime-main)

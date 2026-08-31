@@ -1,7 +1,7 @@
 #!/usr/bin/env gxi
 
 (import :std/text/json
-        :gslph/src/commands/search)
+        :asp-gerbil-scheme/src/commands/search)
 
 (def (assert-equal label actual expected)
   (unless (equal? actual expected)
@@ -55,7 +55,7 @@
                 (hash-get version-node "id"))
   (displayln "[pass] search dependency-topology"))
 
-(let* ((binary (path-expand "~/.local/bin/gslph"))
+(let* ((binary (path-expand "~/.local/bin/asp-gerbil-scheme"))
        (process
         (open-process
          (list path: binary
@@ -78,7 +78,7 @@
                 "dependency-topology")
   (assert-equal 'binary-node-count (length nodes) 2)
   (assert-equal 'binary-edge-count (length edges) 1)
-  (displayln "[pass] gslph dependency-topology E2E"))
+  (displayln "[pass] asp-gerbil-scheme dependency-topology E2E"))
 
 (let* ((manifest
         (call-with-input-file

@@ -4,9 +4,9 @@
 (import :gerbil/gambit
         :std/test
         (only-in :std/srfi/13 string-contains)
-        (only-in :gslph/src/testing/execution-profile
+        (only-in :asp-gerbil-scheme/src/testing/execution-profile
                  declare-gxtest-serial)
-        (only-in :gslph/src/cli-dev-linker dev-linker-run))
+        (only-in :asp-gerbil-scheme/src/cli-dev-linker dev-linker-run))
 (export cli-dev-linker-test)
 
 (declare-gxtest-serial shared-cli-runtime)

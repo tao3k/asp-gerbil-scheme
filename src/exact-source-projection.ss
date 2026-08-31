@@ -3,12 +3,12 @@
 
 (import :gerbil/expander
         :gerbil/gambit
-        (only-in :gslph/src/parser/control-flow
+        (only-in :asp-gerbil-scheme/src/parser/control-flow
                  control-flow-facts-from-form)
-        (only-in :gslph/src/parser/exact-owner
+        (only-in :asp-gerbil-scheme/src/parser/exact-owner
                  parse-exact-owner-definitions
                  read-exact-owner-forms)
-        (only-in :gslph/src/parser/model
+        (only-in :asp-gerbil-scheme/src/parser/model
                  binding-fact-end
                  binding-fact-kind
                  binding-fact-name
@@ -28,7 +28,7 @@
                  definition-kind
                  definition-name
                  definition-start)
-        (only-in :gslph/src/parser/syntax
+        (only-in :asp-gerbil-scheme/src/parser/syntax
                  binding-facts-from-form
                  calls-from-form)
         (only-in :std/srfi/1 find foldl)
@@ -130,7 +130,7 @@
     (equal? selector-kind definition-kind))))
 
 (def (temporary-source-name)
-  (string-append "gslph-exact-" (symbol->string (gensym)) ".ss"))
+  (string-append "asp-gerbil-scheme-exact-" (symbol->string (gensym)) ".ss"))
 
 (def (with-parsed-source source-text proc)
   (let* ((name (temporary-source-name))

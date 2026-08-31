@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing package build responsibility policy.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/srfi/13 string-contains string-prefix? string-suffix?)
         (only-in :std/sugar cut filter filter-map find ormap)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export package-build-responsibility-findings
         package-build-responsibility-finding

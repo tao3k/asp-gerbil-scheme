@@ -2,11 +2,11 @@
 ;;; Downstream build.ss integration tests for the POO-shaped testing framework.
 
 (import :std/test
-        :gslph/src/benchmark/framework
-        :gslph/src/testing/model
-        :gslph/src/testing/build
-        :gslph/src/testing/build-runner
-        :gslph/src/testing/gxtest-runner)
+        :asp-gerbil-scheme/src/benchmark/framework
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/build
+        :asp-gerbil-scheme/src/testing/build-runner
+        :asp-gerbil-scheme/src/testing/gxtest-runner)
 
 (export testing-framework-downstream-test)
 

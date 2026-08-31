@@ -55,16 +55,16 @@ turn that into manual compiler or process dispatch.
 
 ** Package Module Identity
 
-The source package declares =gslph/src=.  Every package-local runtime import
-must therefore use =:gslph/src/<module>=.  A source-relative import such as
+The source package declares =asp-gerbil-scheme/src=.  Every package-local runtime import
+must therefore use =:asp-gerbil-scheme/src/<module>=.  A source-relative import such as
 =:support/time= is not a valid package identity: it only works when a caller
 adds =src/= to =GERBIL_LOADPATH=, and native =std/make= correctly rejects it.
 
 The migration is parser-first.  Native module import facts identify imports;
 the source-owner map decides whether a module is local.  Only an import whose
 unprefixed module corresponds to =src/<module>.ss= is rewritten to
-=:gslph/src/<module>=.  Upstream namespaces such as =:std/=, =:gerbil/=,
-=:clan/=, and =:wr/= remain unchanged.  Existing =:gslph/src/= imports and
+=:asp-gerbil-scheme/src/<module>=.  Upstream namespaces such as =:std/=, =:gerbil/=,
+=:clan/=, and =:wr/= remain unchanged.  Existing =:asp-gerbil-scheme/src/= imports and
 dynamic module names are already canonical.
 
 ** Test Contract

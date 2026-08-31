@@ -6,7 +6,7 @@
         project-test-file-target
         project-test-full-target)
 
-(import :gslph/src/testing/gxtest-runner
+(import :asp-gerbil-scheme/src/testing/gxtest-runner
         (only-in :std/sugar cut))
 
 ;; configure-project-testing-root!

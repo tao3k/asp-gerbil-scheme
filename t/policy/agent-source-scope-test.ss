@@ -3,11 +3,11 @@
 
 (import :gerbil/gambit
         :std/test
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
         :policy/fixtures
-        :gslph/src/policy/gxtest
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/types/facade)
 
 (export agent-source-scope-policy-test)
 
@@ -48,7 +48,7 @@
                     "(package: sample/policy-scope)\n")
         (write-text
          (string-append source-dir "/good.ss")
-         ";;; -*- Gerbil -*-\n(import :gslph/src/parser/facade)\n(def (policy-file? path)\n  (not (equal? (source-path-class path) \"policy-scenario\")))\n")
+         ";;; -*- Gerbil -*-\n(import :asp-gerbil-scheme/src/parser/facade)\n(def (policy-file? path)\n  (not (equal? (source-path-class path) \"policy-scenario\")))\n")
         (let* ((index (collect-project root))
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-021" findings)))
@@ -65,7 +65,7 @@
         (write-text (string-append root "/gerbil.pkg")
                     "(package: sample/build-api-scope)\n")
         (write-text (string-append root "/build.ss")
-                    ";;; -*- Gerbil -*-\n(import :gslph/src/build-api/source-coverage)\n(gslph-source-coverage\n roots: '(\"src\")\n runtime-roots: '(\"src\"))\n")
+                    ";;; -*- Gerbil -*-\n(import :asp-gerbil-scheme/src/build-api/source-coverage)\n(asp-gerbil-scheme-source-coverage\n roots: '(\"src\")\n runtime-roots: '(\"src\"))\n")
         (write-text (string-append src-dir "/core.ss")
                     ";;; -*- Gerbil -*-\n(def core-value 1)\n")
         (write-text (string-append test-dir "/root-test.ss")
@@ -117,7 +117,7 @@
         (write-text (string-append root "/gerbil.pkg")
                     "(package: sample/gxtest-file-scope)\n")
         (write-text (string-append root "/build.ss")
-                    ";;; -*- Gerbil -*-\n(import :gslph/src/build-api/source-coverage)\n(gslph-source-coverage roots: '(\"src\") runtime-roots: '(\"src\"))\n")
+                    ";;; -*- Gerbil -*-\n(import :asp-gerbil-scheme/src/build-api/source-coverage)\n(asp-gerbil-scheme-source-coverage roots: '(\"src\") runtime-roots: '(\"src\"))\n")
         (write-text (string-append src-dir "/target.ss")
                     ";;; -*- Gerbil -*-\n(def target-value 1)\n")
         (write-text (string-append src-dir "/other.ss")

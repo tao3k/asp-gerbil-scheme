@@ -2,12 +2,12 @@
 ;;; Medium-weight TypeSpec proof search surface.
 
 (import :gerbil/gambit
-        :gslph/src/constants
-        :gslph/src/commands/search-render
-        :gslph/src/protocol/json
-        :gslph/src/support/args
-        :gslph/src/support/io
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/constants
+        :asp-gerbil-scheme/src/commands/search-render
+        :asp-gerbil-scheme/src/protocol/json
+        :asp-gerbil-scheme/src/support/args
+        :asp-gerbil-scheme/src/support/io
+        :asp-gerbil-scheme/src/types/facade
         (only-in :std/srfi/13 string-contains string-join)
         (only-in :std/sugar cut filter filter-map hash ormap))
 

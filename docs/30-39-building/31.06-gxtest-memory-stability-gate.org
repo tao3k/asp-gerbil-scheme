@@ -4,7 +4,7 @@
 * Purpose
 
 Memory stability is a property of a library operation exercised by an ordinary
-=gxtest= test.  It is not a =gslph= product command, a benchmark subcommand,
+=gxtest= test.  It is not a =asp-gerbil-scheme= product command, a benchmark subcommand,
 or a second test runner.
 
 * Contract
@@ -84,7 +84,7 @@ The exception test repeats this exact receipt four times under its declared
 result. It therefore protects the allocation invariant rather than merely
 checking that a command returns.
 * CLI Boundary
-There is no =gslph bench= or =bench --full= product command. Memory stability
+There is no =asp-gerbil-scheme bench= or =bench --full= product command. Memory stability
 is exercised only through the ordinary =gxtest= discovery and subprocess path.
 The library-level test owns its workload and heap limit; the CLI does not own a
 second benchmark loop.

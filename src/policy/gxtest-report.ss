@@ -3,8 +3,8 @@
 
 (import :gerbil/gambit
         (only-in "../build-api/source-coverage"
-                 gslph-load-source-coverage
-                 gslph-source-coverage-files)
+                 asp-gerbil-scheme-load-source-coverage
+                 asp-gerbil-scheme-source-coverage-files)
         (only-in "../constants" +language-id+ +provider-id+)
         (only-in "../parser/facade"
                  collect-source-scope
@@ -157,12 +157,12 @@
 ;; : (-> Root ProjectIndex)
 (def (project-policy-index root)
   (let (policy-root (project-policy-root root))
-    (gslph-load-source-coverage policy-root)
-    (collect-source-scope policy-root (gslph-source-coverage-files policy-root))))
+    (asp-gerbil-scheme-load-source-coverage policy-root)
+    (collect-source-scope policy-root (asp-gerbil-scheme-source-coverage-files policy-root))))
 
 ;; : (-> ProjectIndex (List TypeFinding) String MaybePaths Json )
 (def (project-policy-report-json index findings scope requested-files)
-  (hash (schemaId "agent.semantic-protocols.gerbil-scheme-harness-gxtest-report")
+  (hash (schemaId "agent.semantic-protocols.asp-gerbil-scheme-gxtest-report")
         (schemaVersion "1")
         (languageId +language-id+)
         (providerId +provider-id+)
@@ -267,7 +267,7 @@
 ;; : (-> Boolean)
 (def (project-policy-detail-output?)
   (let (value (with-catch (lambda (_) #f)
-               (lambda () (getenv "GSLPH_POLICY_DETAIL"))))
+               (lambda () (getenv "ASP_GERBIL_SCHEME_POLICY_DETAIL"))))
     (or (equal? value "1")
         (equal? value "true")
         (equal? value "full"))))

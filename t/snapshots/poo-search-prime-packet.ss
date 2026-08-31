@@ -4,8 +4,8 @@
  (protocolId "agent.semantic-protocols.semantic-language")
  (protocolVersion "1")
  (languageId "gerbil-scheme")
- (providerId "gerbil-scheme-harness")
- (binary "gerbil-scheme-harness")
+ (providerId "asp-gerbil-scheme")
+ (binary "asp-gerbil-scheme")
  (namespace "agent.semantic-protocols.gerbil-scheme")
  (method "search/prime")
  (projectRoot ".run/extensions-poo-search-prime")
@@ -143,7 +143,7 @@
     (target "lexical")
     (scope ".run/extensions-poo-search-prime")
     (fields
-     (command "gerbil-scheme-harness search lexical '<term>' owner tests --workspace . --view seeds")))))
+     (command "asp-gerbil-scheme search lexical '<term>' owner tests --workspace . --view seeds")))))
  (notes
   ((note
     (kind "parser")

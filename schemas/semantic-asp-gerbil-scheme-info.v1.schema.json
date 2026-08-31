@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://agent-semantic-protocols.local/schemas/semantic-gerbil-scheme-harness-info.v1.schema.json",
+  "$id": "https://agent-semantic-protocols.local/schemas/semantic-asp-gerbil-scheme-info.v1.schema.json",
   "title": "Gerbil Scheme harness info packet",
   "type": "object",
   "additionalProperties": true,
@@ -18,7 +18,7 @@
   ],
   "properties": {
     "schemaId": {
-      "const": "agent.semantic-protocols.gerbil-scheme-harness-info"
+      "const": "agent.semantic-protocols.asp-gerbil-scheme-info"
     },
     "schemaVersion": {
       "const": "1"

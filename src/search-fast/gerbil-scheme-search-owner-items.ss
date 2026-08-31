@@ -2,7 +2,7 @@
 ;;; Fast-path entrypoint for owner item materialization.
 
 (import :gerbil/gambit
-        :gslph/src/commands/search-owner-items
+        :asp-gerbil-scheme/src/commands/search-owner-items
         (only-in :std/srfi/13 string-suffix?)
         (only-in :std/sugar match))
 

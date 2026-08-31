@@ -3,9 +3,9 @@
 ;;; - test owner records explicit owner-path parsing expectations.
 ;;; - Keep fixture ownership outside indexed roots.
 (import :std/test
-        (only-in :gslph/src/commands/guide guide-code-lines)
-        :gslph/src/commands/search
-        (only-in :gslph/src/commands/search-prime-light
+        (only-in :asp-gerbil-scheme/src/commands/guide guide-code-lines)
+        :asp-gerbil-scheme/src/commands/search
+        (only-in :asp-gerbil-scheme/src/commands/search-prime-light
                  search-prime-light-main)
         (only-in :std/srfi/13 string-contains))
 (export search-test-part-23)

@@ -1,5 +1,5 @@
 (package:
- gslph
+ asp-gerbil-scheme
 depend:
 ("github.com/mighty-gerbils/gerbil-poo@1c3225637525400341a09e958296962c10184ead")
  policy:

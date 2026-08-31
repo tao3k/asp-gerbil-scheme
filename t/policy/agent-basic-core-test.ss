@@ -6,14 +6,14 @@
         :std/misc/ports
         :std/misc/process
         (only-in :std/text/json read-json)
-        :gslph/src/parser/facade
-        (only-in :gslph/src/policy/agent-basic
+        :asp-gerbil-scheme/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/policy/agent-basic
                  generic-owner-findings
                  vague-definition-findings)
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/policy/streaming
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/policy/streaming
+        :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios
         :policy/fixtures)
 (export agent-basic-core-policy-test)

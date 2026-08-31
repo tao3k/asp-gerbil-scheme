@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Owner-items rendering over definitions plus parser-owned owner facts.
 
-(import :gslph/src/parser/owner-items
-        (only-in :gslph/src/parser/selectors item-structural-selector)
-        :gslph/src/protocol/json
-        :gslph/src/support/args
+(import :asp-gerbil-scheme/src/parser/owner-items
+        (only-in :asp-gerbil-scheme/src/parser/selectors item-structural-selector)
+        :asp-gerbil-scheme/src/protocol/json
+        :asp-gerbil-scheme/src/support/args
         (only-in :std/srfi/1 take)
         (only-in :std/srfi/13
                  string-contains

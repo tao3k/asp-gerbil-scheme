@@ -2,7 +2,7 @@
 ;;; Parser-owned package metadata facts.
 
 (import :gerbil/gambit
-        (only-in :gslph/src/parser/support datum-list-items safe-cadr)
+        (only-in :asp-gerbil-scheme/src/parser/support datum-list-items safe-cadr)
         (only-in :std/misc/list unique))
 
 (export read-project-package
@@ -388,7 +388,7 @@
 ;; : (-> Datum Boolean )
 (def (build-source-coverage-form? datum)
   (and (pair? datum)
-       (eq? (car datum) 'gslph-source-coverage)))
+       (eq? (car datum) 'asp-gerbil-scheme-source-coverage)))
 
 ;; : (-> Datum SourceScopePolicy )
 (def (build-source-coverage-policy entry)
@@ -408,7 +408,7 @@
               (policy-string-list-field entry 'ignore-directories:)
               '())
           (or (policy-string-field entry 'explanation:)
-              "Declared by build.ss gslph-source-coverage.")))))
+              "Declared by build.ss asp-gerbil-scheme-source-coverage.")))))
 ;; : (-> Datum PackageAgentPolicy )
 (def (package-agent-policy datum)
   (let (policy (package-field-value datum 'policy:))

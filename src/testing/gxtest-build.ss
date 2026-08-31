@@ -9,11 +9,11 @@
         (only-in "../build-api/native-build"
                  compile-selected-gxtest-target)
         (only-in "../build-api/package-receipt"
-                 gslph-package-build-receipt-status
-                 gslph-package-build-receipt-status-ref
-                 gslph-package-build-receipt-write)
+                 asp-gerbil-scheme-package-build-receipt-status
+                 asp-gerbil-scheme-package-build-receipt-status-ref
+                 asp-gerbil-scheme-package-build-receipt-write)
         (only-in "../build-api/package-spec"
-                 gslph-package-api-spec)
+                 asp-gerbil-scheme-package-api-spec)
         (only-in "./gxtest-context"
                  package-root
                  ensure-build-root!)
@@ -64,7 +64,7 @@
    ((or full? release?)
     (error "full and release compile specs are owned by native-build"))
    (binary? cli-bootstrap-modules)
-   (else (gslph-package-api-spec))))
+   (else (asp-gerbil-scheme-package-api-spec))))
 
 ;; : (-> BuildReceiptStatus)
 (def (compile-package-api-if-stale)
@@ -93,18 +93,18 @@
         (selected-gxtest-build-receipt-status files)))))
 
 (def +scoped-policy-engine-build-receipt-version+
-  'gslph-scoped-policy-engine-build.v1)
+  'asp-gerbil-scheme-scoped-policy-engine-build.v1)
 
 (def (write-scoped-policy-engine-build-receipt! receipt-path source-files output-files)
   (ensure-directory! (path-directory receipt-path))
-  (gslph-package-build-receipt-write
+  (asp-gerbil-scheme-package-build-receipt-write
    receipt-path
    source-files
    output-files
    version: +scoped-policy-engine-build-receipt-version+))
 
 (def (scoped-policy-engine-build-receipt-status receipt-path source-files output-files)
-  (gslph-package-build-receipt-status
+  (asp-gerbil-scheme-package-build-receipt-status
    receipt-path
    version: +scoped-policy-engine-build-receipt-version+
    expected-sources: source-files
@@ -116,7 +116,7 @@
                 source-files
                 output-files))
     (display-package-api-build-receipt-status status)
-    (if (eq? (gslph-package-build-receipt-status-ref status 'status #f) 'current)
+    (if (eq? (asp-gerbil-scheme-package-build-receipt-status-ref status 'status #f) 'current)
       status
       (begin
         (compile-package-api-if-stale)

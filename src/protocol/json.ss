@@ -2,18 +2,18 @@
 ;;; JSON projections for Gerbil parser-owned facts.
 
 (import :gerbil/gambit
-        :gslph/src/constants
-        :gslph/src/extensions/facade
-        :gslph/src/parser/facade
-        :gslph/src/parser/query
-        :gslph/src/policy/repair
-        (only-in :gslph/src/protocol/json-output write-json-line)
-        :gslph/src/protocol/structural-index
-        :gslph/src/protocol/structural-facts
+        :asp-gerbil-scheme/src/constants
+        :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/parser/query
+        :asp-gerbil-scheme/src/policy/repair
+        (only-in :asp-gerbil-scheme/src/protocol/json-output write-json-line)
+        :asp-gerbil-scheme/src/protocol/structural-index
+        :asp-gerbil-scheme/src/protocol/structural-facts
         (only-in :std/sort sort)
         (only-in :std/srfi/1 iota take)
         (only-in :std/sugar hash hash-key? hash-put!)
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/types/facade)
 
 (export source-file-json
         project-package-json
@@ -289,7 +289,7 @@
                                     (target "lexical")
                                     (scope (project-index-root index))
                                     (fields (hash (command
-                                                   "gerbil-scheme-harness search lexical '<term>' owner tests --workspace . --view seeds"))))))
+                                                   "asp-gerbil-scheme search lexical '<term>' owner tests --workspace . --view seeds"))))))
            (notes (list (hash (kind "parser")
                               (message "core-read-module native Scheme reader facts")))))))
     (when package

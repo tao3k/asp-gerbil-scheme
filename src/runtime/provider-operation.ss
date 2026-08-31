@@ -1,7 +1,7 @@
 (import :gerbil/gambit
-        (only-in :gslph/src/commands/project-resolution project-resolution-request->response)
-        (only-in :gslph/src/commands/projection-batch project-provider-projection-batch)
-        (only-in :gslph/src/exact-source-projection project-provider-native-exact-request)
+        (only-in :asp-gerbil-scheme/src/commands/project-resolution project-resolution-request->response)
+        (only-in :asp-gerbil-scheme/src/commands/projection-batch project-provider-projection-batch)
+        (only-in :asp-gerbil-scheme/src/exact-source-projection project-provider-native-exact-request)
         (only-in :std/sugar hash)
         (only-in :std/text/json write-json))
 

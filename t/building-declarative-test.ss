@@ -1,8 +1,8 @@
 (import :std/test
-        :gslph/src/building/facade
-        :gslph/src/building/declarative
-        :gslph/src/testing/model
-        :gslph/src/testing/building)
+        :asp-gerbil-scheme/src/building/facade
+        :asp-gerbil-scheme/src/building/declarative
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/building)
 
 (export building-declarative-test)
 

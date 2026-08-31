@@ -3,10 +3,10 @@
 ;;; - test owner records policy expectations.
 ;;; - Keep typed contracts and fixture intent explicit.
 (import :std/test
-        :gslph/src/commands/guide
-        :gslph/src/commands/info
-        :gslph/src/commands/search
-        :gslph/src/support/args
+        :asp-gerbil-scheme/src/commands/guide
+        :asp-gerbil-scheme/src/commands/info
+        :asp-gerbil-scheme/src/commands/search
+        :asp-gerbil-scheme/src/support/args
         :std/misc/ports
         (only-in :std/text/json read-json)
         "../poo/runtime-witness"
@@ -91,9 +91,9 @@
       (let (output (guide-output []))
         (check-output-contains
          output
-         ["|cmd prime=gerbil-scheme-harness search prime --workspace . --view seeds"
-          "|cmd pipe=gerbil-scheme-harness search pipe '<term>' --workspace . --view seeds"
-          "|more guide-detail=gerbil-scheme-harness guide --policy | --extensions | --poo | --exemplars | --all"])
+         ["|cmd prime=asp-gerbil-scheme search prime --workspace . --view seeds"
+          "|cmd pipe=asp-gerbil-scheme search pipe '<term>' --workspace . --view seeds"
+          "|more guide-detail=asp-gerbil-scheme guide --policy | --extensions | --poo | --exemplars | --all"])
         (check (contains? output "|policy poo-thin-macro-bridge=") => #f)
         (check (contains? output "|guideExemplar id=") => #f)))
     (test-case "guide exposes heavy policy extension and POO details behind flags"
@@ -105,8 +105,8 @@
         "|policy reusable-contract-tests=prefer small t/ owners that apply generic contract tests to type descriptors"])
       (check-output-contains
        (guide-output ["--extensions"])
-       ["|cmd extension=gerbil-scheme-harness search extension <extension> [term ...] --view seeds"
-        "|cmd pattern=gerbil-scheme-harness search pattern <feature-or-extension> [term ...] --view seeds"])
+       ["|cmd extension=asp-gerbil-scheme search extension <extension> [term ...] --view seeds"
+        "|cmd pattern=asp-gerbil-scheme search pattern <feature-or-extension> [term ...] --view seeds"])
       (check-output-contains
        (guide-output ["--poo"])
        ["|policy poo-thin-macro-bridge=POO syntax macros such as brace/@method should stay thin syntax bridges"

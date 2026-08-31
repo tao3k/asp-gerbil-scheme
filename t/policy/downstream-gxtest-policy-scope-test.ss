@@ -4,9 +4,9 @@
 (import :std/test
         (only-in :std/srfi/13 string-contains)
         :policy/agent-style-support
-        :gslph/src/policy/gxtest
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade)
 
 (export downstream-gxtest-policy-scope-test)
 

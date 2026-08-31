@@ -2,8 +2,8 @@
 ;;; Direct tests for policy detection combinators.
 
 (import :std/test
-        :gslph/src/policy/detection
-        :gslph/src/policy/prototype)
+        :asp-gerbil-scheme/src/policy/detection
+        :asp-gerbil-scheme/src/policy/prototype)
 
 (export detection-policy-test)
 

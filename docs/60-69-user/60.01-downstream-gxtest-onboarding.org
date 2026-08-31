@@ -21,7 +21,7 @@ gxpkg build
 The expected installed command is:
 
 #+begin_src shell
-gerbil-scheme-harness guide --downstream
+asp-gerbil-scheme guide --downstream
 #+end_src
 
 Gerbil package-manager state belongs under =~/.gerbil=. Do not create, depend
@@ -34,7 +34,7 @@ Downstream packages should declare the harness dependency in =gerbil.pkg=:
 
 #+begin_src scheme
 (package: your/package
- depend: ("github.com/tao3k/gerbil-scheme-language-project-harness"))
+ depend: ("github.com/tao3k/asp-gerbil-scheme"))
 #+end_src
 
 Project-specific policy remains package-owned. A downstream package can keep
@@ -42,7 +42,7 @@ its own policy stanza, for example:
 
 #+begin_src scheme
 (package: your/package
- depend: ("github.com/tao3k/gerbil-scheme-language-project-harness")
+ depend: ("github.com/tao3k/asp-gerbil-scheme")
  policy: ((source-scope
            roots: (".")
            runtime-roots: ("src")
@@ -57,7 +57,7 @@ Create a small test owner such as =t/project-policy-test.ss=:
 #+begin_src scheme
 ;;; -*- Gerbil -*-
 (import :std/test
-        :gslph/src/policy/gxtest)
+        :asp-gerbil-scheme/src/policy/gxtest)
 
 (export project-policy-test)
 
@@ -137,7 +137,7 @@ Agents integrating the harness downstream should follow this order:
    harness checkout or an equivalent global package install.
 2. Add the =gerbil.pkg= dependency without creating a repository-local
    =.gerbil= directory.
-3. Add =t/project-policy-test.ss= using =:gslph/src/policy/gxtest=.
+3. Add =t/project-policy-test.ss= using =:asp-gerbil-scheme/src/policy/gxtest=.
 4. Run =gxtest t/project-policy-test.ss=.
 5. If policy fails, follow the primary =|agent-repair= next command before
    editing downstream source.
@@ -145,6 +145,6 @@ Agents integrating the harness downstream should follow this order:
 The harness CLI remains available for direct checks:
 
 #+begin_src shell
-gerbil-scheme-harness check --full .
-gerbil-scheme-harness guide --downstream
+asp-gerbil-scheme check --full .
+asp-gerbil-scheme guide --downstream
 #+end_src

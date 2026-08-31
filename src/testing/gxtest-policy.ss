@@ -8,12 +8,12 @@
         (only-in :std/sugar foldl hash-get hash-put!)
         (only-in "../support/time" monotonic-micros duration-micros)
         (only-in "../build-api/package-receipt"
-                 gslph-package-build-receipt-status
-                 gslph-package-build-receipt-status-ref
-                 gslph-package-build-receipt-write)
+                 asp-gerbil-scheme-package-build-receipt-status
+                 asp-gerbil-scheme-package-build-receipt-status-ref
+                 asp-gerbil-scheme-package-build-receipt-write)
         (only-in "../build-api/source-coverage"
-                 gslph-load-source-coverage
-                 gslph-source-coverage-files)
+                 asp-gerbil-scheme-load-source-coverage
+                 asp-gerbil-scheme-source-coverage-files)
         (only-in "./gxtest-context"
                  module-path-stem
                  package-root
@@ -38,7 +38,7 @@
         run-scoped-policy-if-stale)
 
 ;; : (-> (List Path) String)
-(def +scoped-policy-receipt-version+ 'gslph-scoped-policy-receipt.v2)
+(def +scoped-policy-receipt-version+ 'asp-gerbil-scheme-scoped-policy-receipt.v2)
 
 (def (scoped-policy-cache-key files)
   (file-set-cache-key
@@ -56,14 +56,14 @@
    "."))
 
 ;; : (-> Path Boolean)
-(def (gslph-source-directory? path)
+(def (asp-gerbil-scheme-source-directory? path)
   (with-catch
    (lambda (_) #f)
    (lambda ()
      (eq? (file-info-type (file-info path)) 'directory))))
 
 ;; : (-> Path Boolean)
-(def (gslph-gerbil-source-file? path)
+(def (asp-gerbil-scheme-gerbil-source-file? path)
   (string-suffix? ".ss" path))
 
 ;; : (-> Path Path (List Path))
@@ -77,9 +77,9 @@
                           (string-append prefix "/" entry))))
                   (cond
                    ((member entry '("." "..")) [])
-                   ((gslph-source-directory? path)
+                   ((asp-gerbil-scheme-source-directory? path)
                     (scoped-policy-directory-source-files path relative))
-                   ((gslph-gerbil-source-file? entry) [path])
+                   ((asp-gerbil-scheme-gerbil-source-file? entry) [path])
                    (else []))))
               (sort (directory-files directory) string<?))))
 
@@ -172,7 +172,7 @@
 (def (write-scoped-policy-receipt! files)
   (let (stamp (scoped-policy-receipt-path files))
     (ensure-directory! (path-directory stamp))
-    (gslph-package-build-receipt-write
+    (asp-gerbil-scheme-package-build-receipt-write
      stamp
      (scoped-policy-source-files files)
      [stamp]
@@ -181,7 +181,7 @@
 ;; : (-> (List Path) BuildReceiptStatus)
 (def (scoped-policy-receipt-status files)
   (let (stamp (scoped-policy-receipt-path files))
-    (gslph-package-build-receipt-status
+    (asp-gerbil-scheme-package-build-receipt-status
      stamp
      version: +scoped-policy-receipt-version+
      expected-sources: (scoped-policy-source-files files)
@@ -189,25 +189,25 @@
 
 ;; : (-> BuildReceiptStatus Boolean)
 (def (scoped-policy-current? status)
-  (eq? (gslph-package-build-receipt-status-ref status 'status 'unknown)
+  (eq? (asp-gerbil-scheme-package-build-receipt-status-ref status 'status 'unknown)
        'current))
 
 ;; : (-> BuildReceiptStatus String)
 (def (scoped-policy-status-line status)
   (string-append
-   "[gslph-scoped-policy] status="
-   (symbol->string (gslph-package-build-receipt-status-ref status
+   "[asp-gerbil-scheme-scoped-policy] status="
+   (symbol->string (asp-gerbil-scheme-package-build-receipt-status-ref status
                                                            'status
                                                            'unknown))
    " reason="
-   (let (reason (gslph-package-build-receipt-status-ref status 'reason #f))
+   (let (reason (asp-gerbil-scheme-package-build-receipt-status-ref status 'reason #f))
      (if reason (symbol->string reason) "none"))
    " sources="
    (number->string
-    (gslph-package-build-receipt-status-ref status 'sources 0))
+    (asp-gerbil-scheme-package-build-receipt-status-ref status 'sources 0))
    " outputs="
    (number->string
-    (gslph-package-build-receipt-status-ref status 'outputs 0))
+    (asp-gerbil-scheme-package-build-receipt-status-ref status 'outputs 0))
    "\n"))
 
 ;; : (-> BuildReceiptStatus Void)
@@ -217,7 +217,7 @@
 
 ;; : (-> String Integer String)
 (def (scoped-policy-phase-line name elapsed-micros)
-  (string-append "[gslph-scoped-policy-phase] name=" name
+  (string-append "[asp-gerbil-scheme-scoped-policy-phase] name=" name
                  " elapsedMicros=" (number->string elapsed-micros)
                  " elapsedMs=" (number->string (quotient elapsed-micros 1000))
                  "\n"))
@@ -242,14 +242,14 @@
   (add-load-path! "src")
   (add-load-path! "t")
   (add-load-path! (path-expand ".gerbil/lib" package-root))
-  (import-module ':gslph/src/policy/gxtest-runtime #f #t))
+  (import-module ':asp-gerbil-scheme/src/policy/gxtest-runtime #f #t))
 
 ;; : (-> (List Path) Void)
 (def (run-scoped-policy! files)
   (run-scoped-policy-phase "load-policy"
                            load-compiled-gxtest-policy!)
   (let* ((policy-report
-          (eval 'gslph/src/policy/gxtest-runtime#policy-report))
+          (eval 'asp-gerbil-scheme/src/policy/gxtest-runtime#policy-report))
          (report
           (run-scoped-policy-phase "policy-report"
                                    (lambda ()
@@ -261,8 +261,8 @@
       (run-scoped-policy-phase
        "load-policy-display"
        (lambda ()
-         (import-module ':gslph/src/policy/gxtest-report #f #t)))
-      ((eval 'gslph/src/policy/gxtest-report#display-project-policy-report)
+         (import-module ':asp-gerbil-scheme/src/policy/gxtest-report #f #t)))
+      ((eval 'asp-gerbil-scheme/src/policy/gxtest-report#display-project-policy-report)
        report))
     (when (not (equal? (hash-get report 'status) "pass"))
       (exit 1))))

@@ -6,11 +6,11 @@
         :std/misc/ports
         :std/misc/process
         (only-in :std/text/json read-json)
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios
         :policy/fixtures)
 (import :policy/agent-poo-support)
@@ -117,7 +117,7 @@
             (check (project-policy-status root) => "pass")
             (check (project-policy-findings root) => [])
             (check (hash-get report 'schemaId)
-                   => "agent.semantic-protocols.gerbil-scheme-harness-gxtest-report")
+                   => "agent.semantic-protocols.asp-gerbil-scheme-gxtest-report")
             (check (hash-get report 'status) => "pass")
             (check (> (hash-get report 'files) 0) => #t)
             (check (> (hash-get report 'definitions) 0) => #t)

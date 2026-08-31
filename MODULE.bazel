@@ -1,5 +1,5 @@
 module(
-    name = "gerbil_scheme_language_project_harness",
+    name = "asp_gerbil_scheme",
     version = "0.1.0",
 )
 

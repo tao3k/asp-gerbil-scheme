@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 (import :gerbil/gambit
         :std/test
-        :gslph/src/types/model
-        :gslph/src/types/signatures
-        :gslph/src/types/validation)
+        :asp-gerbil-scheme/src/types/model
+        :asp-gerbil-scheme/src/types/signatures
+        :asp-gerbil-scheme/src/types/validation)
 (export types-full-test)
 
 ;; : TestSuite

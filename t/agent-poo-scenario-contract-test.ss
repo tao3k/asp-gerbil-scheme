@@ -6,7 +6,7 @@
  (only-in :std/test test-suite test-case check)
  (only-in :std/misc/path path-expand)
  (only-in :std/sugar filter-map)
- :gslph/t/policy/agent-poo-scenario-registry)
+ :asp-gerbil-scheme/t/policy/agent-poo-scenario-registry)
 
 (export agent-poo-scenario-contract-test)
 

@@ -2,12 +2,12 @@
 ;;; Native launcher for per-command Gerbil Scheme harness executables.
 
 (import :gerbil/gambit
-  :gslph/src/protocol/command-catalog
-        (only-in :gslph/src/constants +help+)
-        (only-in :gslph/src/protocol/command-catalog
+  :asp-gerbil-scheme/src/protocol/command-catalog
+        (only-in :asp-gerbil-scheme/src/constants +help+)
+        (only-in :asp-gerbil-scheme/src/protocol/command-catalog
                  provider-dynamic-command-dispatch
                  provider-recognized-command-names)
-        (only-in :gslph/src/search-light-launcher try-search-light-main)
+        (only-in :asp-gerbil-scheme/src/search-light-launcher try-search-light-main)
         (only-in :std/misc/path path-expand)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/srfi/13 string-contains string-index string-index-right string-prefix?)
@@ -141,7 +141,7 @@
 
 ;;; Direct query boundary:
 ;;; - Hook selector reads must be a native launcher fast path.
-;;; - Do not import `:gslph/src/cli`; that pulls in parser/checker
+;;; - Do not import `:asp-gerbil-scheme/src/cli`; that pulls in parser/checker
 ;;;   modules before reading a small line range.
 ;; : (-> String (List String) (U Integer #f))
 (def (try-native-direct-source-query command rest)
@@ -301,7 +301,7 @@
   ;; Installed artifacts are hermetic: cli-install-linker already mounted the
   ;; sibling artifact lib directory. Global/development paths are allowed
   ;; only for the developer launcher.
-  (unless (equal? (getenv "GSLPH_ARTIFACT_ONLY" #f) "1")
+  (unless (equal? (getenv "ASP_GERBIL_SCHEME_ARTIFACT_ONLY" #f) "1")
     (launcher-add-load-path! (path-expand ".gerbil/lib" (current-directory)))
     (launcher-add-load-path! (path-expand "lib" (gerbil-home)))
     (launcher-add-load-path! (path-expand "lib" (gerbil-path)))))

@@ -1,6 +1,6 @@
 (import :std/test
         :std/srfi/13
-        :gslph/src/commands/search)
+        :asp-gerbil-scheme/src/commands/search)
 
 (export search-test-part-24)
 

@@ -4,7 +4,7 @@
 (import :gerbil/gambit
         (only-in :std/srfi/1 iota split-at)
         (only-in :std/sugar cut foldl)
-        :gslph/src/testing/model)
+        :asp-gerbil-scheme/src/testing/model)
 
 (export #t)
 

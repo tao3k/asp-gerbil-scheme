@@ -33,9 +33,9 @@
         (with-gerbil-path
          consumer-gerbil-path
          (lambda ()
-           (check (gslph-package-build-active-gerbil-path package-root)
+           (check (asp-gerbil-scheme-package-build-active-gerbil-path package-root)
                   => expected)
-           (check (gslph-package-build-active-gerbil-lib-path package-root)
+           (check (asp-gerbil-scheme-package-build-active-gerbil-lib-path package-root)
                   => (path-expand "lib" expected))))))
     (test-case "falls back to package local GERBIL_PATH when caller path is absent"
       (let* ((package-root (path-expand "standalone-package"
@@ -44,7 +44,7 @@
         (with-gerbil-path
          ""
          (lambda ()
-           (check (gslph-package-build-active-gerbil-path package-root)
+           (check (asp-gerbil-scheme-package-build-active-gerbil-path package-root)
                   => expected)
-           (check (gslph-package-build-active-gerbil-lib-path package-root)
+           (check (asp-gerbil-scheme-package-build-active-gerbil-lib-path package-root)
                   => (path-expand "lib" expected))))))))

@@ -2,9 +2,9 @@
 ;;; Shared syntax constants, body projection, macro-family, and top-form helpers.
 
 (import :gerbil/expander
-        :gslph/src/parser/formals
-        :gslph/src/parser/model
-        :gslph/src/parser/support
+        :asp-gerbil-scheme/src/parser/formals
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/support
         (only-in :std/misc/list unique)
         (only-in :std/srfi/1 drop)
         (only-in :std/srfi/13 string-index-right string-prefix?)

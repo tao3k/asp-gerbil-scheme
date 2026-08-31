@@ -26,7 +26,7 @@
 
 ;; : (-> String Integer String)
 (def (test-phase-receipt-line name elapsed-micros)
-  (string-append "[gslph-test-phase] name=" name
+  (string-append "[asp-gerbil-scheme-test-phase] name=" name
                  " elapsedMicros=" (number->string elapsed-micros)
                  " elapsedMs=" (number->string (quotient elapsed-micros 1000))
                  "\n"))
@@ -128,7 +128,7 @@
 
 ;; : (-> String Integer Integer Integer String)
 (def (gxtest-summary-line kind count sum-micros wall-micros)
-  (string-append "[gslph-test-summary] kind=" kind
+  (string-append "[asp-gerbil-scheme-test-summary] kind=" kind
                  " count=" (number->string count)
                  " sumMs="
                  (number->string (gxtest-micros->ms sum-micros))
@@ -144,7 +144,7 @@
 
 ;; : (-> Integer String Integer String)
 (def (gxtest-top-line rank name elapsed-micros)
-  (string-append "[gslph-test-top] rank=" (number->string rank)
+  (string-append "[asp-gerbil-scheme-test-top] rank=" (number->string rank)
                  " name=" name
                  " elapsedMs="
                  (number->string (gxtest-micros->ms elapsed-micros))
@@ -152,7 +152,7 @@
 
 ;; : (-> String Integer String)
 (def (gxtest-failure-line name status)
-  (string-append "[gslph-test-failure] name=" name
+  (string-append "[asp-gerbil-scheme-test-failure] name=" name
                  " status=" (number->string status)
                  "\n"))
 

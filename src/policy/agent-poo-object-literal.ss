@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; POO object literal shape helpers shared by policy modules.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-poo-callees)
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-poo-callees)
 
 (export poo-large-data-object-literal-call?
         poo-object-literal-slot-spec-count>=?

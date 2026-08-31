@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Lightweight structural index interface packets.
 
-(import :gslph/src/constants
-        :gslph/src/parser/facade
-        :gslph/src/protocol/structural-facts
+(import :asp-gerbil-scheme/src/constants
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/structural-facts
         (only-in :std/misc/list unique)
         (only-in :std/misc/ports read-file-lines)
         (only-in :std/sort sort)
@@ -161,11 +161,11 @@
    (producer +provider-id+)
    (factSchemaId +semantic-native-syntax-fact-index-schema-id+)
    (generationId generation-id)
-   (manifestCommand "gerbil-scheme-harness search structural --json .")
+   (manifestCommand "asp-gerbil-scheme search structural --json .")
    (ownerFactsCommand
-    "gerbil-scheme-harness search structural --owner <path> --json .")
+    "asp-gerbil-scheme search structural --owner <path> --json .")
    (artifactCommand
-    "gerbil-scheme-harness search structural --json --artifact .")
+    "asp-gerbil-scheme search structural --json --artifact .")
    (performanceContract
     "Packet rendering and owner fact projection should stay millisecond-level after native parsing; full graph/index construction belongs to ASP Rust.")
    (projectRoot (project-index-root index))))
@@ -208,7 +208,7 @@
    (ownerPath (source-file-path file))
    (facts (source-file-native-syntax-fact-count file))
    (ownerFactsCommand
-    (string-append "gerbil-scheme-harness search structural --owner "
+    (string-append "asp-gerbil-scheme search structural --owner "
                    (source-file-path file)
                    " --json ."))))
 
@@ -238,7 +238,7 @@
      (dependencyCount dependency-count)
      (fingerprint fingerprint)
      (ownerFactsCommand
-      (string-append "gerbil-scheme-harness search structural --owner "
+      (string-append "asp-gerbil-scheme search structural --owner "
                      (source-file-path file)
                      " --json .")))))
 

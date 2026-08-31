@@ -3,10 +3,10 @@
 ;;; - test owner records policy expectations.
 ;;; - Keep typed contracts and fixture intent explicit.
 (import :std/test
-        :gslph/src/commands/guide
-        :gslph/src/commands/info
-        :gslph/src/commands/search
-        :gslph/src/support/args
+        :asp-gerbil-scheme/src/commands/guide
+        :asp-gerbil-scheme/src/commands/info
+        :asp-gerbil-scheme/src/commands/search
+        :asp-gerbil-scheme/src/support/args
         :std/misc/ports
         (only-in :std/text/json read-json)
         "../poo/runtime-witness"
@@ -70,15 +70,15 @@
     (test-case "info command exposes configurable interface closure"
           (let ((text-output (info-output ["."]))
                 (json-output (info-output ["--json" "."])))
-            (check (contains? text-output "[gerbil-info] language=gerbil-scheme provider=gerbil-scheme-harness") => #t)
+            (check (contains? text-output "[gerbil-info] language=gerbil-scheme provider=asp-gerbil-scheme") => #t)
             (check (contains? text-output "|interface source-scope=gerbil.pkg-policy") => #t)
             (check (contains? text-output "|interface build-scope=build.ss defbuild-script targets -> runtime-roots") => #t)
             (check (contains? text-output "|agent-steering facts=macroFacts,bindingFacts,pooFormFacts,higherOrderFacts,controlFlowFacts,predicateFamilyFacts,fieldAccessPatternFacts,booleanConditionFacts,loopDriverFacts,dependencyAdapterQualityFacts,functionQualityProfiles,typedContractFacts,commentQualityFacts,dependencyUsageFacts") => #t)
             (check (contains? text-output "|agent-steering rules=GERBIL-SCHEME-AGENT-POLICY-006,R007,R008,R009,R010,R011,R012,R013,R014,R015,R016,R017") => #t)
             (check (contains? text-output "|closure self-apply=gxi build.ss test") => #t)
-            (check (contains? text-output "|closure check=gerbil-scheme-harness check .") => #t)
-            (check (contains? text-output "|closure bench=gerbil-scheme-harness bench --iterations 1 --max-interface-ms 50 .") => #t)
-            (check (contains? json-output "agent.semantic-protocols.gerbil-scheme-harness-info") => #t)
+            (check (contains? text-output "|closure check=asp-gerbil-scheme check .") => #t)
+            (check (contains? text-output "|closure bench=asp-gerbil-scheme bench --iterations 1 --max-interface-ms 50 .") => #t)
+            (check (contains? json-output "agent.semantic-protocols.asp-gerbil-scheme-info") => #t)
             (check (contains? json-output "configurableInterface") => #t)
             (check (contains? json-output "agentSteering") => #t)
             (check (contains? json-output "macro-runtime-source-witness") => #t)

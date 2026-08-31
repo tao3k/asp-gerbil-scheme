@@ -6,7 +6,7 @@
 ;;; Invariant:
 ;;; - Definition and formal recovery must stay deterministic across value, list, method, and macro-style heads.
 
-(import :gslph/src/parser/support
+(import :asp-gerbil-scheme/src/parser/support
         (only-in :std/misc/list unique))
 
 (export definition-name-datums

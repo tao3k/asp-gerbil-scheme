@@ -40,7 +40,7 @@ must remain machine-relative.
 ** Phase Receipt Contract
 
 Every build or test phase that can dominate runtime must emit a machine-readable
-=[gslph-test-phase]= receipt with its phase name, status, and elapsed
+=[asp-gerbil-scheme-test-phase]= receipt with its phase name, status, and elapsed
 microseconds. Per-file =gxtest= receipts should be recorded as each subprocess
 finishes so slow files are visible even when a later file stalls or fails.
 
@@ -103,7 +103,7 @@ otherwise the host CPU count.
 
 * Performance Gate
 
-Changes to =build.ss= or =build-support/gslph-build.ss= should preserve two
+Changes to =build.ss= or =build-support/asp-gerbil-scheme-build.ss= should preserve two
 separate receipts:
 
 - dirty/cold target time, which includes compilation;
@@ -132,7 +132,7 @@ API:
 - The implementation must not key behavior on a downstream project name, fixed
   binary name, fixed worker count, fixed source directory beyond a declared
   root, or a local shell wrapper.
-- The scenario must use a neutral fixture package, not =gslph=, =poo-flow=, or
+- The scenario must use a neutral fixture package, not =asp-gerbil-scheme=, =poo-flow=, or
   another real downstream package as the only proof.
 - The repair message must give one concrete package-general rewrite or command,
   so an agent can map its own package intent onto the native build surface.
@@ -231,10 +231,10 @@ local experiment, not in the harness policy.
   concrete rewrite example, without hardcoding a downstream project name.
 
 #+begin_example
-[gslph-test-phase] name=compile-library elapsedMicros=... elapsedMs=...
-[gslph-test-phase] name=compile-build-support elapsedMicros=... elapsedMs=...
-[gslph-test-phase] name=compile-test-entry elapsedMicros=... elapsedMs=...
-[gslph-test-runner] files=... jobs=...
-[gslph-test-phase] name=run:t/schema-test.ss elapsedMicros=... elapsedMs=...
-[gslph-test-phase] name=run-gxtest elapsedMicros=... elapsedMs=...
+[asp-gerbil-scheme-test-phase] name=compile-library elapsedMicros=... elapsedMs=...
+[asp-gerbil-scheme-test-phase] name=compile-build-support elapsedMicros=... elapsedMs=...
+[asp-gerbil-scheme-test-phase] name=compile-test-entry elapsedMicros=... elapsedMs=...
+[asp-gerbil-scheme-test-runner] files=... jobs=...
+[asp-gerbil-scheme-test-phase] name=run:t/schema-test.ss elapsedMicros=... elapsedMs=...
+[asp-gerbil-scheme-test-phase] name=run-gxtest elapsedMicros=... elapsedMs=...
 #+end_example

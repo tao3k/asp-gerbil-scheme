@@ -3,7 +3,7 @@
 
 (import :gerbil/expander
         :gerbil/gambit
-        (only-in :gslph/src/parser/definition-syntax
+        (only-in :asp-gerbil-scheme/src/parser/definition-syntax
                  +definition-heads+
                  definitions-from-form))
 

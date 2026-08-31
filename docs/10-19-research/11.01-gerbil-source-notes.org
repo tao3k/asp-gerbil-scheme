@@ -83,8 +83,8 @@ The harness now exposes this upstream compiler boundary through an explicit
 =compiler-evidence= search namespace:
 
 #+begin_src sh
-gerbil-scheme-harness search compiler-evidence optimizer subtype assertion --workspace . --view seeds
-gerbil-scheme-harness search proof subtype record alias --workspace . --view seeds
+asp-gerbil-scheme search compiler-evidence optimizer subtype assertion --workspace . --view seeds
+asp-gerbil-scheme search proof subtype record alias --workspace . --view seeds
 #+end_src
 
 The =compiler-evidence= packet is intentionally ordinary language evidence,

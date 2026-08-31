@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil package-manager facts derived from gerbil.pkg.
 
-(import :gslph/src/parser/facade)
+(import :asp-gerbil-scheme/src/parser/facade)
 
 (export +gerbil-package-manager-id+
         +gerbil-local-package-root-hint+
@@ -52,7 +52,7 @@
         (installHint
          (string-append +gerbil-package-manager-id+ " install " package-name))
         (globalBuildHint "run gxpkg build from the package checkout when developing locally")
-        (gxtestImportHint "(import :gslph/src/policy/gxtest)")
+        (gxtestImportHint "(import :asp-gerbil-scheme/src/policy/gxtest)")
         (testEntrypointHint "(make-project-policy-test \".\")")
         (owner "asp-server")))
 ;; : (-> Repository Json )
@@ -73,6 +73,6 @@
         (missingLocalAction "install-package-before-repository-fallback")
         (localStateWarning
          "do not create repository-local .gerbil state; gxpkg state belongs under ~/.gerbil")
-        (gxtestImportHint "(import :gslph/src/policy/gxtest)")
+        (gxtestImportHint "(import :asp-gerbil-scheme/src/policy/gxtest)")
         (testEntrypointHint "(make-project-policy-test \".\")")
         (fallbackPolicy "repository-source-after-install-check")))

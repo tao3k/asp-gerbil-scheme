@@ -17,7 +17,7 @@
           (car observed-rss-values)
           0))
     (object<-alist
-     `((kind . gslph.execution-window-controller.v1)
+     `((kind . asp-gerbil-scheme.execution-window-controller.v1)
        (hard-max-rss-bytes . ,hard-max-rss-bytes)
        (headroom-bytes . ,headroom-bytes)
        (window-size . ,window-size)

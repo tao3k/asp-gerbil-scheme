@@ -2,7 +2,7 @@
 ;;; Parser selector and project aggregation helpers.
 
 (import :gerbil/gambit
-        :gslph/src/parser/model
+        :asp-gerbil-scheme/src/parser/model
         (only-in :std/srfi/13 string-prefix? string-suffix?)
         (only-in :std/sugar hash-get hash-key? hash-put!))
 

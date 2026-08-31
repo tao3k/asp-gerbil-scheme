@@ -42,7 +42,7 @@
   "gerbil://gerbil/runtime/control.ss#with-unwind-protect"
   "gerbil://gerbil/runtime/control.ss#call-with-parameters"
   "poo-flow/build.ss#poo-flow-with-directory"
-  "gerbil-scheme-harness/src/build-api/source-coverage.ss#with-directory")
+  "asp-gerbil-scheme/src/build-api/source-coverage.ss#with-directory")
  (expectedQualitySignals
   "dynamic-scope-cleanup-boundary"
   "manual-dynamic-scope-restore"
@@ -52,7 +52,7 @@
  (learnedStyleSources
   "gerbil://gerbil/runtime/control.ss"
   "poo-flow/build.ss"
-  "gerbil-scheme-harness/src/build-api/source-coverage.ss")
+  "asp-gerbil-scheme/src/build-api/source-coverage.ss")
  (antiAiScaffoldIntent
   .
   "reject AI-style post-thunk manual dynamic state restoration when Gerbil dynamic-wind or parameterize can encode the cleanup boundary")

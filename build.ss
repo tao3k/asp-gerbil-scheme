@@ -4,7 +4,7 @@
 (include "src/build-api/source-coverage.ss")
 (include "src/building/build-script-body.inc")
 
-(gslph-source-coverage
+(asp-gerbil-scheme-source-coverage
  roots: ["src"]
  runtime-roots: ["src"])
 
@@ -57,7 +57,7 @@
       "src/testing/gxtest-syntax"
       "src/testing/execution-profile")
     (map provider-source-file->module
-         (gslph-source-coverage-files-for-roots
+         (asp-gerbil-scheme-source-coverage-files-for-roots
           "." +provider-library-source-roots+))
     '("src/commands/query"
       "src/commands/projection"))))

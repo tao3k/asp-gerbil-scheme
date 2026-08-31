@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Provider-native exact projection transport.
 
-(import :gslph/src/exact-source-projection
-        (only-in :gslph/src/protocol/json-output write-json-line)
+(import :asp-gerbil-scheme/src/exact-source-projection
+        (only-in :asp-gerbil-scheme/src/protocol/json-output write-json-line)
         (only-in :std/text/json read-json)
-        :gslph/src/support/args)
+        :asp-gerbil-scheme/src/support/args)
 
 (export query-main)
 

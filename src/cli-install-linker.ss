@@ -25,18 +25,18 @@
   ;; Installed artifacts must resolve only against their sibling lib tree.
   ;; Development launchers intentionally retain the broader GERBIL_PATH
   ;; search behavior; this marker is set only by the installed boundary.
-  (setenv "GSLPH_ARTIFACT_ONLY" "1")
+  (setenv "ASP_GERBIL_SCHEME_ARTIFACT_ONLY" "1")
   ;; Keep Gambit's module resolver aligned with the mounted sibling tree even
   ;; when the caller deliberately supplies a polluted GERBIL_PATH.
   (setenv "GERBIL_PATH" (path-directory (artifact-library-directory)))
   (add-load-path! (artifact-library-directory))
   (##global-var-set! (##make-global-var 'load-module) load-module)
-  (load-module "gslph/src/cli-launcher")
-  (let (launcher-main (eval 'gslph/src/cli-launcher#main))
+  (load-module "asp-gerbil-scheme/src/cli-launcher")
+  (let (launcher-main (eval 'asp-gerbil-scheme/src/cli-launcher#main))
     (unless (procedure? launcher-main)
       (error "provider-runtime-source-mismatch"
-             "gslph/src/cli-launcher"
-             'gslph/src/cli-launcher#main
+             "asp-gerbil-scheme/src/cli-launcher"
+             'asp-gerbil-scheme/src/cli-launcher#main
              launcher-main))
     (exit (apply launcher-main (executable-argv args)))))
 

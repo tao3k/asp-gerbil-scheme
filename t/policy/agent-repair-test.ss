@@ -3,10 +3,10 @@
 
 (import :std/test
         (only-in :std/text/json read-json)
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/policy/repair-calibration
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/policy/repair-calibration
         :policy/fixtures)
 
 (export agent-repair-policy-test)

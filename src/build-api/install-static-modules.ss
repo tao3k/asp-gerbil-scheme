@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
-;;; Static module surface for the installed gslph binary.
+;;; Static module surface for the installed asp-gerbil-scheme binary.
 
 (export cli-install-static-modules)
 
-(import :gslph/src/build-api/release-modules)
+(import :asp-gerbil-scheme/src/build-api/release-modules)
 
 (def (unique-module-paths module-paths)
   (let loop ((rest module-paths) (result []))

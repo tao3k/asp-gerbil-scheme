@@ -29,7 +29,7 @@
 
 ;; : (-> Path)
 (def (dev-launcher-binpath)
-  (path-expand ".bin/gslph" package-root))
+  (path-expand ".bin/asp-gerbil-scheme" package-root))
 
 ;; : (-> Path)
 (def (asp-state-home-directory)
@@ -43,9 +43,9 @@
 (def (install-launcher-binpath (flag #f))
   (case flag
     ((#f)
-     (path-expand ".local/bin/gslph" (user-home-directory)))
+     (path-expand ".local/bin/asp-gerbil-scheme" (user-home-directory)))
     ((asp)
-     (path-expand "gslph" (asp-install-launcher-directory)))
+     (path-expand "asp-gerbil-scheme" (asp-install-launcher-directory)))
     (else
      (error "unsupported gerbil-scheme install flag" flag))))
 

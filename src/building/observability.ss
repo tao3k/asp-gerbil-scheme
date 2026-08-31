@@ -139,7 +139,7 @@
 ;; the in-process receipt for Scheme callers only.
 (def (build-stage-observation->json-object observation)
   (let ((receipt (build-stage-observation-receipt observation)))
-    (hash ("schema" "gslph.build-stage-observation.v1")
+    (hash ("schema" "asp-gerbil-scheme.build-stage-observation.v1")
           ("version" 1)
           ("label" (build-stage-receipt-label receipt))
           ("kind" (json-name (build-stage-receipt-kind receipt)))
@@ -170,7 +170,7 @@
            (build-stage-observation-control-plane-allocated-bytes observation)))))
 
 (def (build-plan-observations->json-object observations)
-  (hash ("schema" "gslph.build-observations.v1")
+  (hash ("schema" "asp-gerbil-scheme.build-observations.v1")
         ("version" 1)
         ("metric-scope" "gerbil-control-plane")
         ("native-child-cpu-included" #f)
@@ -194,7 +194,7 @@
          (topology-group-count (length topology-groups))
          (upstream-session-count (length execution-windows)))
     (hash
-     ("schema" "gslph.build-topology-execution-windows.v1")
+     ("schema" "asp-gerbil-scheme.build-topology-execution-windows.v1")
      ("version" 1)
      ("metric-scope" "build-topology-execution-windows")
      ("upstream-executor" "std/make")
@@ -277,7 +277,7 @@
        (length execution-windows)
        (length observations)))
     (hash
-     ("schema" "gslph.build-adaptive-execution-windows.v1")
+     ("schema" "asp-gerbil-scheme.build-adaptive-execution-windows.v1")
      ("version" 1)
      ("metric-scope" "build-adaptive-execution-windows")
      ("upstream-executor" "std/make")
@@ -383,7 +383,7 @@
              ranked
              selection-limit)))
       (hash
-       ("schema" "gslph.build-adaptive-execution-window-diagnostics.v1")
+       ("schema" "asp-gerbil-scheme.build-adaptive-execution-window-diagnostics.v1")
        ("version" 1)
        ("metric-scope" "build-adaptive-execution-window-diagnostics")
        ("selection-policy" "ceil-log2-window-count")
@@ -406,7 +406,7 @@
          (cpu-seconds
           (sum-observation-field build-stage-observation-control-plane-cpu-seconds
                                  observations)))
-    (hash ("schema" "gslph.build-observations-summary.v1")
+    (hash ("schema" "asp-gerbil-scheme.build-observations-summary.v1")
           ("version" 1)
           ("metric-scope" "gerbil-control-plane")
           ("native-child-cpu-included" #f)

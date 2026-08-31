@@ -7,13 +7,13 @@
         (only-in :std/srfi/13 string-suffix?)
         (only-in :std/sugar with-catch))
 
-(export gslph-source-coverage
-        gslph-load-source-coverage
-        gslph-source-coverage-roots
-        gslph-source-coverage-runtime-roots
-        gslph-source-coverage-exclude-directories
-        gslph-source-coverage-files-for-roots
-        gslph-source-coverage-files)
+(export asp-gerbil-scheme-source-coverage
+        asp-gerbil-scheme-load-source-coverage
+        asp-gerbil-scheme-source-coverage-roots
+        asp-gerbil-scheme-source-coverage-runtime-roots
+        asp-gerbil-scheme-source-coverage-exclude-directories
+        asp-gerbil-scheme-source-coverage-files-for-roots
+        asp-gerbil-scheme-source-coverage-files)
 
 ;; : (List Path)
 (def current-source-coverage-roots '("src"))
@@ -26,7 +26,7 @@
 ;; coverage universe. Build support also consumes the same declaration so policy
 ;; gates and std/make coverage stay tied to the package's build entrypoint.
 ;; : (forall (A) (-> roots: (List Path) runtime-roots: (Maybe (List Path)) exclude-directories: (List Path) explanation: (Maybe A) Unit))
-(def (gslph-source-coverage roots: (roots '())
+(def (asp-gerbil-scheme-source-coverage roots: (roots '())
                             runtime-roots: (runtime-roots #f)
                             exclude-directories: (exclude-directories '())
                             explanation: (explanation #f))
@@ -36,7 +36,7 @@
   #!void)
 
 ;; : (-> Root Unit)
-(def (gslph-load-source-coverage root)
+(def (asp-gerbil-scheme-load-source-coverage root)
   (let (build-file (path-expand "build.ss" root))
     (when (file-exists? build-file)
       (with-directory root
@@ -44,29 +44,29 @@
           (load build-file))))))
 
 ;; : (-> (List Path))
-(def (gslph-source-coverage-roots)
+(def (asp-gerbil-scheme-source-coverage-roots)
   current-source-coverage-roots)
 
 ;; : (-> (List Path))
-(def (gslph-source-coverage-runtime-roots)
+(def (asp-gerbil-scheme-source-coverage-runtime-roots)
   (or current-source-coverage-runtime-roots
       current-source-coverage-roots))
 
 ;; : (-> (List Path))
-(def (gslph-source-coverage-exclude-directories)
+(def (asp-gerbil-scheme-source-coverage-exclude-directories)
   current-source-coverage-exclude-directories)
 
 ;; : (-> Root (List Path))
-(def (gslph-source-coverage-files root)
-  (gslph-source-coverage-files-for-roots
+(def (asp-gerbil-scheme-source-coverage-files root)
+  (asp-gerbil-scheme-source-coverage-files-for-roots
    root
-   (gslph-source-coverage-roots)))
+   (asp-gerbil-scheme-source-coverage-roots)))
 
 ;; Explicit include roots are the source of truth for downstream build graphs.
 ;; This keeps library materialization on the same declared source universe
 ;; without widening it to unrelated command or compatibility directories.
 ;; : (-> Root (List Path) (List Path))
-(def (gslph-source-coverage-files-for-roots root roots)
+(def (asp-gerbil-scheme-source-coverage-files-for-roots root roots)
   (sort (apply append
                (map (lambda (coverage-root)
                       (source-coverage-root-files root coverage-root))
@@ -97,7 +97,7 @@
 ;; : (-> Path Boolean)
 (def (source-coverage-skipped-entry? entry)
   (or (member entry '("." ".."))
-      (member entry (gslph-source-coverage-exclude-directories))))
+      (member entry (asp-gerbil-scheme-source-coverage-exclude-directories))))
 
 ;; : (-> Path Path)
 (def (source-coverage-child-path directory entry)

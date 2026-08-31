@@ -2,15 +2,15 @@
 ;;; Shared ASP projection-batch adapter backed by the native Gerbil parser.
 
 (import :gerbil/gambit
-        (only-in :gslph/src/parser/exact-owner
+        (only-in :asp-gerbil-scheme/src/parser/exact-owner
                  parse-exact-owner-definitions)
-        (only-in :gslph/src/parser/selectors item-structural-selector)
-        (only-in :gslph/src/parser/model
+        (only-in :asp-gerbil-scheme/src/parser/selectors item-structural-selector)
+        (only-in :asp-gerbil-scheme/src/parser/model
                  definition-name
                  definition-kind
                  definition-start
                  definition-end)
-        (only-in :gslph/src/parser/selectors definition-selector)
+        (only-in :asp-gerbil-scheme/src/parser/selectors definition-selector)
         (only-in :std/srfi/13 string-contains)
         (only-in :std/sugar hash))
 
@@ -179,7 +179,7 @@
    (else kind)))
 
 (def (with-parsed-definitions source-text owner-path proc)
-  (let* ((name (string-append "gslph-projection-"
+  (let* ((name (string-append "asp-gerbil-scheme-projection-"
                               (symbol->string (gensym)) ".ss"))
          (path (string-append "/tmp/" name)))
     (with-catch
