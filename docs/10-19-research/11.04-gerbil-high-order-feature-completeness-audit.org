@@ -574,7 +574,7 @@ Validation command:
 
 #+begin_src sh
 gxi build.ss test
-./bin/asp-gerbil-scheme check ../../.data/gerbil-utils
+gxtest t/project-policy-test.ss
 #+end_src
 
 Observed parser coverage:

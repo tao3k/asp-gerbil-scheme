@@ -128,18 +128,10 @@
       "type": "object",
       "additionalProperties": true,
       "required": [
-        "selfApply",
-        "check",
-        "bench"
+        "selfApply"
       ],
       "properties": {
         "selfApply": {
-          "type": "string"
-        },
-        "check": {
-          "type": "string"
-        },
-        "bench": {
           "type": "string"
         }
       }

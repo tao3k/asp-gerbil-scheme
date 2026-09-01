@@ -142,9 +142,10 @@ Agents integrating the harness downstream should follow this order:
 5. If policy fails, follow the primary =|agent-repair= next command before
    editing downstream source.
 
-The harness CLI remains available for direct checks:
+The provider CLI remains available for agent guidance; policy runs through the
+dependency-owned gxtest API:
 
 #+begin_src shell
-asp-gerbil-scheme check .
+gxtest t/project-policy-test.ss
 asp-gerbil-scheme guide --downstream
 #+end_src

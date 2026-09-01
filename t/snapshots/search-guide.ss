@@ -29,6 +29,6 @@
                "|cmd evidence-graph=asp gerbil-scheme evidence graph --json ."
                "|cmd evidence-analyze=asp gerbil-scheme evidence analyze --json ."
                "|cmd info=asp gerbil-scheme info --json ."
-               "|cmd check=asp gerbil-scheme check --changed ."
+               "|policy authority=asp-gerbil-scheme-build-api trigger=gxi-build"
                "|cmd bench=asp gerbil-scheme bench --json --iterations 1 --max-interface-ms 50 ."
                "|more guide-detail=asp gerbil-scheme guide --downstream | --policy | --extensions | --poo | --exemplars | --all")))

@@ -1,6 +1,7 @@
 ;;; Boundary: the package-facing Build API re-exports the Building Framework POO model.
 ;;; Invariant: this facade preserves pure stage planning; package receipt persistence stays in Build API owners.
 (import ../building/facade
+        ../building/package-spec
         :asp-gerbil-scheme/src/building/commands)
 
 (export build-stage
@@ -63,4 +64,5 @@
         package-source-stages-spec
         package-source-stages-run!
         package-source-stages-clean!
+        (import: ../building/package-spec)
         (import: :asp-gerbil-scheme/src/building/commands))

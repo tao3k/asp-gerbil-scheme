@@ -24,7 +24,7 @@ Observed during the 2026-06-14 quality loop:
 
 #+begin_src shell
 asp gerbil-scheme search prime --workspace languages/asp-gerbil-scheme --view seeds
-./bin/asp-gerbil-scheme check --json .
+gxtest t/project-policy-test.ss
 ./bin/asp-gerbil-scheme info --json .
 ./bin/asp-gerbil-scheme search capability posture --workspace . --view seeds
 ./bin/asp-gerbil-scheme search runtime-source gxi version macro bootstrap ranking --workspace . --view seeds
@@ -209,7 +209,7 @@ Use this set before claiming the quality loop is closed:
 
 #+begin_src shell
 gxi build.ss test
-./bin/asp-gerbil-scheme check --json .
+gxtest t/project-policy-test.ss
 ./bin/asp-gerbil-scheme bench --iterations 1 --max-total-ms 60000 .
 ./bin/asp-gerbil-scheme search capability posture --workspace . --view seeds
 ./bin/asp-gerbil-scheme search runtime-source gxi version macro bootstrap ranking --workspace . --view seeds

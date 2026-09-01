@@ -53,7 +53,7 @@ Commands and observed receipts:
   - Extension capabilities: object system, metaobject protocol, protocols,
     policy protocol, macro governance, user override witness.
 
-- =./bin/asp-gerbil-scheme check .=
+- dependency-owned Gerbil policy API receipt
   - =status=pass files=119 definitions=1066 findings=0=.
 
 - =./bin/asp-gerbil-scheme info --json .=
@@ -620,7 +620,7 @@ Run these after implementing the next improvements:
 
 #+begin_src shell
 gxi build.ss test
-./bin/asp-gerbil-scheme check .
+gxtest t/project-policy-test.ss
 ./bin/asp-gerbil-scheme bench --iterations 1 --max-total-ms 60000 .
 asp gerbil-scheme search structural --workspace . --view seeds
 asp gerbil-scheme search lexical 'configurable interface' owner tests --workspace . --view seeds

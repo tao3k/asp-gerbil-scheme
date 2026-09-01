@@ -76,7 +76,6 @@
             (check (contains? text-output "|agent-steering facts=macroFacts,bindingFacts,pooFormFacts,higherOrderFacts,controlFlowFacts,predicateFamilyFacts,fieldAccessPatternFacts,booleanConditionFacts,loopDriverFacts,dependencyAdapterQualityFacts,functionQualityProfiles,typedContractFacts,commentQualityFacts,dependencyUsageFacts") => #t)
             (check (contains? text-output "|agent-steering rules=GERBIL-SCHEME-AGENT-POLICY-006,R007,R008,R009,R010,R011,R012,R013,R014,R015,R016,R017") => #t)
             (check (contains? text-output "|closure self-apply=gxi build.ss test") => #t)
-            (check (contains? text-output "|closure check=asp-gerbil-scheme check .") => #t)
             (check (contains? text-output "|closure bench=asp-gerbil-scheme bench --iterations 1 --max-interface-ms 50 .") => #t)
             (check (contains? json-output "agent.semantic-protocols.asp-gerbil-scheme-info") => #t)
             (check (contains? json-output "configurableInterface") => #t)

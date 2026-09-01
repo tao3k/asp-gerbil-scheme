@@ -59,4 +59,4 @@
            "read errors block parser facts; repair this syntax issue before semantic checks")
           (nextAction "open selector and fix reader syntax")
           (successCriteria ["parse-source-file returns no parse-error"
-                            "asp gerbil-scheme check reports no GERBIL-SCHEME-READ-R001"]))))
+                            "the dependency-owned policy receipt reports no GERBIL-SCHEME-READ-R001"]))))

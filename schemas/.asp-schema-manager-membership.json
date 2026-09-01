@@ -1,7 +1,7 @@
 {
   "languageId": "gerbil-scheme",
   "profileDigest": "blake3-256:0f6db61e73904d5a06d4b603189679e8def7346997b41ea2d26f5137ee082d2c",
-  "bundleDigest": "blake3-256:bb11bb1b3eeae9c0437bfbd78d47bd646444be7dcac8d04985e015e6d548dac7",
+  "bundleDigest": "blake3-256:70a1fb46f5f0f79d3e4c1272fb9cb1f37173c712b14d1a806fe18b5ae4320eea",
   "schemas": [
     {
       "name": "asp-client-cancellation-probe-request.schema.json",
@@ -341,7 +341,7 @@
     },
     {
       "name": "semantic-language-registry.v1.schema.json",
-      "digest": "blake3-256:5d440b89b13de434b5fdc6144f0e41678bb5dd89569e28cccd13db73ff37fff7"
+      "digest": "blake3-256:aae3bc85720d89730cf5374e793384226ce1996bb1299f8d51580fcca8e23c2f"
     },
     {
       "name": "semantic-native-syntax-fact-index.v1.schema.json",

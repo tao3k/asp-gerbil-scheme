@@ -194,6 +194,8 @@ jobs:
             gxpkg env gxi ./build.ss clean
           GERBIL_BUILD_CORES=0 \
             gxpkg env gxi ./build.ss compile --release --optimized
+          GERBIL_BUILD_CORES=0 \
+            gxpkg env gxi ./build-provider.ss compile --release --optimized
           test -x build/workspace-provider/bin/asp-gerbil-scheme
 
       - name: Run canonical provider and semantic contract tests

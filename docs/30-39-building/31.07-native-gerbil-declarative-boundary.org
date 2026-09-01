@@ -39,6 +39,78 @@ Native binding options follow one ordered resolution path in Scheme:
 
 This resolution is data used by the build spec.  It is not CI-only behavior and
 must not be duplicated in Bazel rules or shell launchers.
+
+ASP exposes one downstream declaration macro:
+=asp-gerbil-scheme-package-spec!=.  It hygienically expands to native Gerbil
+POO =.def= syntax.  The =native-spec= slot holds an ordinary Gerbil build-spec
+value; derived package specs use POO =@= inheritance and =previous= to compose
+that value.  The macro introduces no replacement keywords for module strings,
+=[ssi: ...]=, =[gxc: ...]=, =[gsc: ...]=, or =[exe: ...]=; discovery and
+composition continue to use Scheme functions from =std/make= and
+=clan/building=.  =asp-gerbil-scheme-package-native-spec= projects the final
+list into upstream =init-build-environment!= or =defbuild-script=.
+
+The v1 macro surface deliberately rejects a parallel option vocabulary:
+
+| Candidate option | v1 decision | Native Gerbil form retained |
+|------------------+-------------+-----------------------------|
+| =roots:=         | omit        | =all-gerbil-modules= plus ordinary Scheme filtering |
+| =modules:=       | omit        | module strings in the build spec |
+| =interfaces:=    | omit        | =[ssi: ...]= |
+| =before:=        | omit        | list order and =append= |
+| =after:=         | omit        | list order and =append= |
+
+#+begin_src mermaid
+flowchart LR
+    Package[gerbil.pkg] --> Build[build.ss]
+    Native[Native Gerbil build-spec expression] --> Macro[asp-gerbil-scheme-package-spec!]
+    Macro --> Spec[POO package-spec object]
+    Build --> Macro
+    Spec --> Projection[native-spec slot projection]
+    Projection --> Upstream{Upstream entrypoint}
+    Upstream --> DefBuild[defbuild-script]
+    Upstream --> InitBuild[init-build-environment!]
+    DefBuild --> StdMake[std/make execution]
+    InitBuild --> StdMake
+#+end_src
+
+** Library-default and explicit provider target
+
+Gerbil package installation selects one build script per package through the
+=build:= field in =gerbil.pkg= and invokes that script's =compile= command.
+=gxpkg= does not propagate consumer-selected feature names; its forwarded build
+options are release, optimized, and debug modes.  Therefore the root
+=asp-gerbil-scheme= package keeps =build.ss= library-only.  The ASP provider,
+HTTP server, and TLS-linked executable are owned by the explicit
+=build-provider.ss= entrypoint and the corresponding Bazel target.
+
+The Bazel projection preserves the same boundary in its action inputs:
+=//:compile= consumes =library_sources=, while =//:provider_compile= consumes
+the full project sources and declares =//:compile= as a dependency.  Provider,
+HTTP, or CLI product-entry edits therefore do not invalidate the default
+library compile cache.
+
+This is the feature-equivalent boundary for same-repository development:
+ordinary =depend:= consumers build only the library package, while the ASP
+Server release and CI paths request the provider target explicitly.  If the
+provider later needs independent =gxpkg= installation, it requires a distinct
+published package identity; =gxpkg= does not resolve a repository subdirectory
+as a second package.
+
+#+begin_src mermaid
+flowchart TD
+    Consumer[Ordinary Scheme consumer] --> Manifest[asp-gerbil-scheme gerbil.pkg]
+    Manifest --> LibraryBuild[build.ss]
+    LibraryObject[Library package-spec POO object] --> LibraryBuild
+    LibraryObject -->|POO @ inheritance| ProviderObject[Provider package-spec POO object]
+    LibraryBuild --> Libraries[Library modules only]
+    ServerRelease[ASP Server release or CI] --> ProviderBuild[build-provider.ss]
+    ProviderObject --> ProviderBuild
+    ProviderBuild --> Libraries
+    ProviderBuild --> Provider[Provider and HTTP executable]
+    Provider --> TLS[TLS native link flags]
+    Libraries -. no provider edge .-> ConsumerRuntime[Minimal consumer closure]
+#+end_src
 :PROPERTIES:
 :JD_ID: 31.07
 :STATUS: active-design

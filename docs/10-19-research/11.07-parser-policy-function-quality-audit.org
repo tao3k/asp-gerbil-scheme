@@ -419,7 +419,7 @@ The loop is closed only when:
 
 #+begin_src shell
 gxi build.ss test
-./bin/asp-gerbil-scheme check --json .
+gxtest t/project-policy-test.ss
 ./bin/asp-gerbil-scheme self-apply --json .
 ./bin/asp-gerbil-scheme bench --iterations 1 --max-total-ms 60000 .
 #+end_src

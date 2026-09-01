@@ -6,7 +6,23 @@ load(
 
 package(default_visibility = ["//visibility:private"])
 
+PROVIDER_ENTRY_SOURCES = [
+    "src/cli-dev-linker.ss",
+    "src/cli-install-linker.ss",
+    "src/cli-launcher.ss",
+    "src/cli-query.ss",
+    "src/cli-release-linker.ss",
+    "src/cli.ss",
+    "src/commands/provider-runtime.ss",
+    "src/building/provider-package-spec.ss",
+    "src/provider-server.ss",
+    "src/runtime/provider-http-json-server.ss",
+    "src/runtime/provider-operation.ss",
+    "src/search-light-launcher.ss",
+]
+
 exports_files([
+    "build-provider.ss",
     "build.ss",
     "gerbil.pkg",
 ])
@@ -17,6 +33,17 @@ filegroup(
         "src/**/*.inc",
         "src/**/*.ss",
     ]),
+)
+
+filegroup(
+    name = "library_sources",
+    srcs = ["gerbil.pkg"] + glob(
+        [
+            "src/**/*.inc",
+            "src/**/*.ss",
+        ],
+        exclude = PROVIDER_ENTRY_SOURCES,
+    ),
 )
 
 gerbil_project_compile(
@@ -44,10 +71,19 @@ gerbil_project_compile(
 
 gerbil_project_compile(
     name = "compile",
-    srcs = [":project_sources"],
+    srcs = [":library_sources"],
     args = ["compile"],
     build_script = ":build.ss",
     deps = [":gerbil_poo_package"],
+    visibility = ["//visibility:public"],
+)
+
+gerbil_project_compile(
+    name = "provider_compile",
+    srcs = [":project_sources"],
+    args = ["compile"],
+    build_script = ":build-provider.ss",
+    deps = [":compile"],
     visibility = ["//visibility:public"],
 )
 
@@ -56,4 +92,18 @@ gerbil_project_test(
     size = "small",
     project = ":compile",
     tests = ["//:t/build-script-bridge-test.ss"],
+)
+
+gerbil_project_test(
+    name = "library_provider_boundary_test",
+    size = "small",
+    project = ":compile",
+    tests = ["//:t/scenarios/building/library-provider-boundary/test.ss"],
+)
+
+gerbil_project_test(
+    name = "explicit_provider_boundary_test",
+    size = "small",
+    project = ":provider_compile",
+    tests = ["//:t/scenarios/building/library-provider-boundary/provider-test.ss"],
 )
