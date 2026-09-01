@@ -32,7 +32,7 @@ Current assessment:
 | Area | Status | Assessment |
 |------+--------+------------|
 | Parser-owned facts | Strong | Structural feed reports 119 owners, 1066 symbols, 17730 syntax facts, and 376 dependency usages with =rawSourceStored=false=. |
-| Agent policy | Strong foundation | =check --full .= passes with findings=0 and =info.agentSteering= exposes R008/R009/R011/R012. |
+| Agent policy | Strong foundation | =check .= passes with findings=0 and =info.agentSteering= exposes R008/R009/R011/R012. |
 | Gerbil-specific steering | Good but incomplete | POO, macro witness, higher-order, runtime-source, and package-module guidance exist; usage-quality scoring is still shallow. |
 | Code elegance enforcement | Partial | The harness can warn about manual loops and vague shapes, but it does not yet produce an architectural "capability posture" score. |
 | Macro governance | Correct direction | Runtime-source witness policy exists; expansion-level witness coverage and version vocabulary can be improved. |
@@ -53,7 +53,7 @@ Commands and observed receipts:
   - Extension capabilities: object system, metaobject protocol, protocols,
     policy protocol, macro governance, user override witness.
 
-- =./bin/asp-gerbil-scheme check --full .=
+- =./bin/asp-gerbil-scheme check .=
   - =status=pass files=119 definitions=1066 findings=0=.
 
 - =./bin/asp-gerbil-scheme info --json .=
@@ -236,7 +236,7 @@ Gap:
 ** Architecture and ownership
 
 The module layout is generally healthy.  There are clear owners for parser,
-policy, commands, protocol, snapshots, and tests.  =check --full .= passes with
+policy, commands, protocol, snapshots, and tests.  =check .= passes with
 zero findings, which means the current policy suite does not see facade bloat,
 retired test layout, vague names, or known generated-code policy drift.
 
@@ -620,7 +620,7 @@ Run these after implementing the next improvements:
 
 #+begin_src shell
 gxi build.ss test
-./bin/asp-gerbil-scheme check --full .
+./bin/asp-gerbil-scheme check .
 ./bin/asp-gerbil-scheme bench --iterations 1 --max-total-ms 60000 .
 asp gerbil-scheme search structural --workspace . --view seeds
 asp gerbil-scheme search lexical 'configurable interface' owner tests --workspace . --view seeds

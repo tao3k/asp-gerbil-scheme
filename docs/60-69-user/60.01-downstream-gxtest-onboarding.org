@@ -145,6 +145,6 @@ Agents integrating the harness downstream should follow this order:
 The harness CLI remains available for direct checks:
 
 #+begin_src shell
-asp-gerbil-scheme check --full .
+asp-gerbil-scheme check .
 asp-gerbil-scheme guide --downstream
 #+end_src

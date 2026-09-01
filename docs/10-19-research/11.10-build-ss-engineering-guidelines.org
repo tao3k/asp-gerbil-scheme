@@ -168,7 +168,7 @@ local experiment, not in the harness policy.
 - Keep downstream =build.ss= as a declaration surface: package name, module
   roots, top-level test files, and optional harness policy attachment.
 - Replace any downstream broad source collection API with an API that reads the
-  same build/test roots the native build already uses. =asp check --full= may
+  same build/test roots the native build already uses. =asp check= may
   still run full-project policy, but ordinary =gxi build.ss test= must stay
   scoped to the files and import closure that =gxtest= is executing.
 - Add a scenario where a package has =src= modules, =t= top-level tests, helper

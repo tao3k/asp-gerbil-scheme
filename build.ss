@@ -5,6 +5,7 @@
         :std/make
         :clan/building
         (only-in :std/srfi/1 fold)
+        (only-in :std/srfi/13 string-prefix?)
         (only-in "./src/building/build-script"
                  framework-build-bindir
                  framework-executable-build-spec))
@@ -44,7 +45,9 @@
 (def (public-library-modules)
   (fold (lambda (module specs)
           (remove-build-file specs module))
-        (all-gerbil-modules)
+        (filter (lambda (module)
+                  (string-prefix? "src/" module))
+                (all-gerbil-modules))
         (cons "src/provider-server" +provider-runtime-modules+)))
 
 (def (spec)
