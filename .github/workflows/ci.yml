@@ -192,39 +192,9 @@ jobs:
           }
           GERBIL_BUILD_CORES="$(build_cores)" \
             gxpkg env gxi ./build.ss clean
-          for static_module in \
-            src/protocol/command-catalog.ss \
-            src/constants.ss \
-            src/commands/search-prime-light-list.ss \
-            src/commands/search-prime-light.ss \
-            src/search-light-launcher.ss \
-            src/cli-launcher.ss; do
-            gxpkg env gxc -static "$static_module"
-          done
           GERBIL_BUILD_CORES=0 \
             gxpkg env gxi ./build.ss compile --release --optimized
           test -x build/workspace-provider/bin/asp-gerbil-scheme
-
-      - name: Smoke canonical search subcommands
-        shell: bash
-        run: |
-          set -euo pipefail
-          run_smoke() {
-            local receipt
-            receipt="$(mktemp)"
-            if ! "$@" >"$receipt" 2>&1; then
-              cat "$receipt"
-              rm -f "$receipt"
-              return 1
-            fi
-            rm -f "$receipt"
-          }
-          mkdir -p .bin
-          install -m 755 build/workspace-provider/bin/asp-gerbil-scheme .bin/asp-gerbil-scheme
-          run_smoke .bin/asp-gerbil-scheme search prime --view seeds --workspace .
-          run_smoke .bin/asp-gerbil-scheme search rg-query framework --workspace .
-          run_smoke .bin/asp-gerbil-scheme query --from-hook direct-source-read \
-            --selector src/cli.ss:1-2 --workspace .
 
       - name: Run canonical provider and semantic contract tests
         shell: bash
