@@ -1,12 +1,13 @@
 #!/usr/bin/env gxi
 ;;; -*- Gerbil -*-
 
-(include "src/build-api/source-coverage.ss")
-(include "src/building/build-script-body.inc")
-
-(asp-gerbil-scheme-source-coverage
- roots: ["src"]
- runtime-roots: ["src"])
+(import :std/build-script
+        :std/make
+        :clan/building
+        (only-in :std/srfi/1 fold)
+        (only-in "./src/building/build-script"
+                 framework-build-bindir
+                 framework-executable-build-spec))
 
 ;; std/make owns compiler scheduling.  Homebrew Gerbil 0.18.2 requires the
 ;; provider's compiler-derived runtime closure to be materialized before the
@@ -37,38 +38,23 @@
     "src/runtime/provider-http-json-server"
     "src/commands/provider-runtime"))
 
-;; The package library is built from the Owner's complete Scheme source tree.
-;; It remains separate from the resident provider executable closure: downstream
-;; packages import these modules normally through gerbil.pkg package identity.
-(def +public-library-source-roots+
-  '("src"))
+;; gerbil.pkg owns package identity and dependencies.  clan/building owns
+;; canonical src/ discovery.  This build.ss only declares the package's build
+;; spec; std/build-script and std/make retain execution and scheduling authority.
+(def (public-library-modules)
+  (fold (lambda (module specs)
+          (remove-build-file specs module))
+        (all-gerbil-modules)
+        (cons "src/provider-server" +provider-runtime-modules+)))
 
-(def (provider-source-file->module path)
-  (substring path 0 (- (string-length path) 3)))
-
-(def (scheme-source-file? path)
-  (let (length (string-length path))
-    (and (>= length 3)
-         (string=? (substring path (- length 3) length) ".ss"))))
-
-(def +public-library-modules+
-  (filter
-   (lambda (module)
-     (and (not (equal? module "src/provider-server"))
-          (not (member module +provider-runtime-modules+))))
-   (map provider-source-file->module
-        (filter scheme-source-file?
-                (asp-gerbil-scheme-source-coverage-files-for-roots
-                 "." +public-library-source-roots+)))))
-
-(def +provider-runtime-build-spec+
+(def (spec)
   (framework-executable-build-spec
    "src/provider-server"
    "asp-gerbil-scheme"
    +provider-runtime-modules+
-   +public-library-modules+
+   (public-library-modules)
    '(tls)))
 
 (defbuild-script
- +provider-runtime-build-spec+
+ (spec)
  bindir: (framework-build-bindir))

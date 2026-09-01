@@ -3,11 +3,12 @@
 (import :gerbil/gambit
         :std/make
         (only-in :std/misc/path path-directory path-expand path-normalize)
-        (only-in :std/misc/process run-process/batch)
+        (only-in :std/misc/ports read-all-as-string)
+        (only-in :std/misc/process run-process run-process/batch)
         (only-in :std/os/flock open-output-file/lock LOCK_EX)
         (only-in :std/source gerbil-home)
         (only-in :std/sort sort)
-        (only-in :std/srfi/13 string-prefix? string-suffix?)
+        (only-in :std/srfi/13 string-prefix? string-suffix? string-trim-both)
         (only-in :gerbil/gambit getenv))
 
 (def (framework-build-artifact-root)
@@ -61,20 +62,54 @@
      ((string? (car rest)) (loop (cdr rest) (cons (car rest) modules)))
      (else (loop (cdr rest) modules)))))
 
+(def (framework-option resolver package fallback)
+  (or (try
+        (resolver package #f)
+        (catch _ #f))
+      fallback))
+
+(def (framework-homebrew-prefix packages)
+  (let loop ((rest packages))
+    (and (pair? rest)
+         (or (try
+              (string-trim-both
+               (run-process ["brew" "--prefix" (car rest)]
+                            coprocess: read-all-as-string
+                            stderr-redirection: #t))
+              (catch _ #f))
+             (loop (cdr rest))))))
+
+(def (framework-tls-cc-options)
+  (let (native (framework-option cppflags "openssl" #f))
+    (string-append
+     (or native
+         (cond-expand
+           (darwin
+            (let (prefix (framework-homebrew-prefix '("openssl@3" "openssl")))
+              (if prefix (string-append "-I" prefix "/include") "")))
+           (else "")))
+     " -include openssl/kdf.h")))
+
+(def (framework-tls-ld-options)
+  (framework-option
+   ldflags
+   "openssl"
+   (cond-expand
+     (darwin
+      (let (prefix (framework-homebrew-prefix '("openssl@3" "openssl")))
+        (if prefix
+          (string-append "-L" prefix "/lib -lssl -lcrypto")
+          "-lssl -lcrypto")))
+     (else "-lssl -lcrypto"))))
+
 (def (framework-native-link-options native-capabilities)
   (apply append
          (map
           (lambda (capability)
             (case capability
               ((tls)
-               (cond-expand
-                      (darwin
-                       '("-cc-options" "-include openssl/kdf.h"
-                         "-ld-options" "-lssl -lcrypto"))
-                 (linux
-                  '("-ld-options" "-lssl -lcrypto"))
-                 (else
-                  (error "unsupported native TLS linker platform"))))
+               (list "-cc-options" (framework-tls-cc-options)
+                     "-ld-options" (framework-tls-ld-options)))
               (else
                (error "unsupported native build capability" capability))))
           native-capabilities)))

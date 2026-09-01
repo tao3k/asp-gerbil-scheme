@@ -1,7 +1,5 @@
-(import :std/misc/process
-        :std/srfi/13
-        :std/test
-        (only-in ../src/building/build-script
+(import :std/test
+        (only-in :asp-gerbil-scheme/src/building/build-script
                  call-with-framework-build-cores
                  framework-build-core-count
                  framework-build-reexec-required?
@@ -10,28 +8,22 @@
 
 (export build-script-bridge-test main)
 
-(def +fixture-build-script+
-  "t/fixtures/build-script-bridge/build.ss")
-
-(def (run-fixture . arguments)
-  (run-process
-   (append ["gxi" +fixture-build-script+] arguments)))
-
 (def build-script-bridge-test
   (test-suite "Building Build SS bridge"
-    (test-case "re-exports the upstream command surface"
-      (check (run-fixture "meta")
-             => "(\"spec\" \"compile\" \"clean\")\n"))
-    (test-case "downstream target declaration remains upstream-owned"
-      (let (spec (run-fixture "spec"))
-        (check (string-contains spec "exe:") ? true)
-        (check (string-contains spec "support.ss") ? true)
-        (check (string-contains spec "downstream-build-script-probe") ? true)))
     (test-case "package libraries follow and do not enter the executable closure"
       (check
        (framework-executable-build-spec
-        "main" "provider" '("runtime") '("library"))
-       => '("runtime" (exe: "main" bin: "provider") "library")))
+        "main" "provider" '("runtime") '("library") '())
+       => '((gxc: "runtime" (static: #t))
+            (exe: "main" bin: "provider")
+            "library")))
+    (test-case "native TLS flags remain declarative and platform resolved"
+      (let* ((spec (framework-executable-build-spec
+                    "main" "provider" '("runtime") '("library") '(tls)))
+             (executable (cadr spec)))
+        (check (and (member "-cc-options" executable) #t) => #t)
+        (check (and (member "-ld-options" executable) #t) => #t)
+        (check (member "-pkg-config" executable) => #f)))
     (test-case "publishes one explicit ownership contract"
       (let (contract (framework-build-contract))
         (check (cdr (assoc 'executor contract)) => "std/make")

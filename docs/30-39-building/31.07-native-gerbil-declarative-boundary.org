@@ -1,4 +1,44 @@
 * 31.07 Native Gerbil Declarative Build and Test Boundary
+
+** Authoritative Entry Points And Responsibilities
+
+Gerbil package projects expose exactly two native project entry points:
+
+- =gerbil.pkg= owns package identity, dependency identity, and package policy
+  metadata.
+- =build.ss= owns an executable, declarative Gerbil build specification.
+
+Neither entry point delegates package semantics to a component manifest, a
+shell pipeline, or a Bazel-specific metadata format.  ASP extends the native
+path with policy validation, typed receipts, observability, and test helpers;
+it does not replace Gerbil source discovery, compiler scheduling, dependency
+installation, or platform flag resolution.  Bazel consumes the two native
+entry points as a hermetic cached action and owns only the outer resource guard.
+
+#+begin_src mermaid
+flowchart LR
+  Package["gerbil.pkg<br/>identity + dependencies"] --> Gxpkg["gxpkg package lifecycle"]
+  Build["build.ss<br/>pure executable spec"] --> Native["std/build-script + std/make"]
+  Discovery["clan/building<br/>src discovery"] --> Build
+  Flags["cppflags / ldflags<br/>Homebrew fallback on Darwin"] --> Build
+  Gxpkg --> Native
+  Native --> Artifacts["Gerbil library + explicit executables"]
+  ASP["ASP extensions<br/>policy + receipt + observability + gxtest"] -. observes .-> Native
+  Bazel["gerbil-bazel<br/>cache + sandbox + outer RSS guard"] --> Package
+  Bazel --> Build
+  Downstream["Downstream package<br/>package-specific spec only"] --> Package
+  Downstream --> Build
+#+end_src
+
+Native binding options follow one ordered resolution path in Scheme:
+
+1. Ask =std/make= =cppflags= or =ldflags= for the package.
+2. On Darwin, fall back to =brew --prefix= for the requested formula when
+   pkg-config metadata is unavailable.
+3. Fall back to portable compiler or linker flags that remain valid on Linux.
+
+This resolution is data used by the build spec.  It is not CI-only behavior and
+must not be duplicated in Bazel rules or shell launchers.
 :PROPERTIES:
 :JD_ID: 31.07
 :STATUS: active-design

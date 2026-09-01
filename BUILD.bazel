@@ -1,4 +1,8 @@
-load("@gerbil_bazel//gerbil:defs.bzl", "gerbil_project_compile")
+load(
+    "@gerbil_bazel//gerbil:defs.bzl",
+    "gerbil_project_compile",
+    "gerbil_project_test",
+)
 
 package(default_visibility = ["//visibility:private"])
 
@@ -45,4 +49,11 @@ gerbil_project_compile(
     build_script = ":build.ss",
     deps = [":gerbil_poo_package"],
     visibility = ["//visibility:public"],
+)
+
+gerbil_project_test(
+    name = "build_script_bridge_test",
+    size = "small",
+    project = ":compile",
+    tests = ["//:t/build-script-bridge-test.ss"],
 )
