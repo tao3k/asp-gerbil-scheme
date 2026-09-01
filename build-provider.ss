@@ -1,9 +1,9 @@
 (import :std/build-script
         (only-in "./src/building/build-script"
                  framework-build-bindir)
-        (only-in "./src/building/package-spec"
+        (only-in "./src/build-api/package-spec"
                  asp-gerbil-scheme-package-native-spec)
-        (only-in "./src/building/provider-package-spec"
+        (only-in "./provider-package-spec"
                  asp-gerbil-scheme-provider-package-spec))
 
 (defbuild-script

@@ -14,7 +14,6 @@ PROVIDER_ENTRY_SOURCES = [
     "src/cli-release-linker.ss",
     "src/cli.ss",
     "src/commands/provider-runtime.ss",
-    "src/building/provider-package-spec.ss",
     "src/provider-server.ss",
     "src/runtime/provider-http-json-server.ss",
     "src/runtime/provider-operation.ss",
@@ -25,11 +24,15 @@ exports_files([
     "build-provider.ss",
     "build.ss",
     "gerbil.pkg",
+    "provider-package-spec.ss",
 ])
 
 filegroup(
     name = "project_sources",
-    srcs = ["gerbil.pkg"] + glob([
+    srcs = [
+        "gerbil.pkg",
+        "provider-package-spec.ss",
+    ] + glob([
         "src/**/*.inc",
         "src/**/*.ss",
     ]),

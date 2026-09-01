@@ -90,6 +90,22 @@ the full project sources and declares =//:compile= as a dependency.  Provider,
 HTTP, or CLI product-entry edits therefore do not invalidate the default
 library compile cache.
 
+The reusable POO parent lives in =src/build-api/package-spec.ss=, which is an
+ordinary import-safe Gerbil module.  Root =build.ss= and top-level
+=provider-package-spec.ss= each declare a concrete object derived from that
+library prototype.  The provider must not import =build.ss=: upstream
+=defbuild-script= expands through the script-context =this-source-file=
+binding, so a build entrypoint is not a library module.  Bazel's explicit
+=//:provider_compile -> //:compile= dependency is the execution dependency;
+POO inheritance supplies the shared semantic contract.
+
+A fresh Darwin provider receipt after this split completed in 33 seconds
+(40.4 seconds Bazel wall time), with 23 plain compile entries, one executable
+entry, and 47 execute-job records.  This is a provider delta, not a second
+projection of the 232-module library.  The current receipt does not yet record
+resolved logical/available cores or worker/job capacity, so it proves removal
+of duplicate work but does not by itself prove the exact scheduler concurrency.
+
 This is the feature-equivalent boundary for same-repository development:
 ordinary =depend:= consumers build only the library package, while the ASP
 Server release and CI paths request the provider target explicitly.  If the
@@ -101,13 +117,16 @@ as a second package.
 flowchart TD
     Consumer[Ordinary Scheme consumer] --> Manifest[asp-gerbil-scheme gerbil.pkg]
     Manifest --> LibraryBuild[build.ss]
-    LibraryObject[Library package-spec POO object] --> LibraryBuild
-    LibraryObject -->|POO @ inheritance| ProviderObject[Provider package-spec POO object]
+    Prototype[Import-safe library package-spec POO prototype<br/>src/build-api/package-spec.ss]
+    Prototype -->|POO @ inheritance| LibraryObject[Concrete library package-spec<br/>declared in build.ss]
+    Prototype -->|POO @ inheritance| ProviderObject[Concrete provider package-spec<br/>declared in provider-package-spec.ss]
+    LibraryObject --> LibraryBuild
     LibraryBuild --> Libraries[Library modules only]
     ServerRelease[ASP Server release or CI] --> ProviderBuild[build-provider.ss]
     ProviderObject --> ProviderBuild
-    ProviderBuild --> Libraries
-    ProviderBuild --> Provider[Provider and HTTP executable]
+    LibraryBuild -->|Bazel dependency and cached artifact| ProviderBuild
+    ProviderBuild --> ProviderDelta[Provider-only delta<br/>23 modules plus 1 executable]
+    ProviderDelta --> Provider[Provider and HTTP executable]
     Provider --> TLS[TLS native link flags]
     Libraries -. no provider edge .-> ConsumerRuntime[Minimal consumer closure]
 #+end_src

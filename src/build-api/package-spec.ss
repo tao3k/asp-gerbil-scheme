@@ -1,24 +1,37 @@
-;;; -*- Gerbil -*-
-;;; Lightweight package API build surface for downstream dependency installs.
+(export asp-gerbil-scheme-package-spec!
+        asp-gerbil-scheme-library-package-prototype
+        asp-gerbil-scheme-package-native-spec
+        asp-gerbil-scheme-package-api-spec
+        asp-gerbil-scheme-package-api-stage-specs)
 
-(import (only-in :gerbil/gambit
-                 directory-files
-                 file-exists?)
+(import :clan/poo/object
+        (only-in :gerbil/gambit directory-files file-exists?)
         (only-in :std/sort sort)
         (only-in :std/srfi/1 append-map)
         (only-in :std/srfi/13 string-suffix?))
 
-(export asp-gerbil-scheme-package-api-spec
-        asp-gerbil-scheme-package-api-stage-specs)
+;; Package specs are POO objects whose native-spec slot remains an ordinary
+;; Gerbil std/make value.  The macro adds no second build option language.
+(defrules asp-gerbil-scheme-package-spec! ()
+  ((_ declaration slot ...)
+   (.def declaration slot ...)))
 
-;; : (List (List Path))
-;;; Package API prologue stages keep native parser, type, and policy
-;;; owners materialized before report modules so cold CI cannot build a report
-;;; facade without the transitive library graph it imports.
-(def +asp-gerbil-scheme-package-api-prologue-stages+
+(def (asp-gerbil-scheme-package-native-spec package-spec)
+  (.get package-spec native-spec))
+
+;; Import-safe semantic base for concrete project library and provider specs.
+;; Script entrypoints remain in top-level build.ss files; this module owns only
+;; reusable POO values and projections.
+(asp-gerbil-scheme-package-spec!
+ asp-gerbil-scheme-library-package-prototype
+ (role 'library)
+ (native-spec []))
+
+;; Cold package builds retain an explicit stage order for owners whose imports
+;; cannot safely be widened into one directory-parallel batch.
+(def +package-api-prologue-stages+
   '(("build-api/package-build.ss")
-    ("build-api/source-coverage.ss"
-     "constants.ss")
+    ("build-api/source-coverage.ss" "constants.ss")
     ("build-api/package-receipt.ss"
      "build-api/cli-gsc-options.ss"
      "build-api/launcher-receipt.ss"
@@ -30,9 +43,7 @@
     ("benchmark/framework.ss")
     ("testing/model.ss")
     ("testing/scope.ss")
-    ("testing/scenario.ss"
-     "testing/performance.ss"
-     "testing/batch.ss")
+    ("testing/scenario.ss" "testing/performance.ss" "testing/batch.ss")
     ("testing/selection.ss")
     ("utilities/functional.ss")
     ("utilities/contracts.ss")
@@ -88,10 +99,7 @@
     ("testing/commands.ss")
     ("testing/framework.ss")))
 
-;; Policy stages follow the internal import DAG. A facade must never expand
-;; against a concurrently generated model SSI.
-;; : (List (List Path))
-(def +asp-gerbil-scheme-package-api-policy-stages+
+(def +package-api-policy-stages+
   '(("policy/model.ss"
      "policy/agent-support.ss"
      "policy/agent-import.ss"
@@ -139,26 +147,22 @@
     ("policy/facade.ss")
     ("policy/gxtest-report.ss")))
 
-;; : (List (List Path))
-(def +asp-gerbil-scheme-package-api-epilogue-stages+
+(def +package-api-epilogue-stages+
   '(("testing/build-paths.ss"
      "testing/gxtest-smoke.ss"
      "testing/gxtest-context.ss"
      "testing/gxtest-report.ss")
     ("testing/build-process.ss")
     ("testing/gxtest-syntax.ss")
-    ("testing/memory-profile.ss"
-     "testing/execution-profile.ss")
+    ("testing/memory-profile.ss" "testing/execution-profile.ss")
     ("testing/gxtest-imports.ss")
     ("testing/gxtest-sources.ss")
     ("testing/gxtest-discovery.ss")
-    ("testing/build-support.ss"
-     "testing/build.ss")
+    ("testing/build-support.ss" "testing/build.ss")
     ("testing/gxtest-delegate.ss")
     ("testing/gxtest-expression.ss")
     ("testing/gxtest-receipts.ss")
-    ("testing/gxtest-policy.ss"
-     "testing/gxtest-build.ss")
+    ("testing/gxtest-policy.ss" "testing/gxtest-build.ss")
     ("testing/gxtest-execution.ss")
     ("testing/gxtest-run.ss")
     ("testing/build-runtime.ss")
@@ -168,83 +172,65 @@
     ("build-api/project-build.ss")
     ("build-api/project-cli.ss")))
 
-;; : (List (List Path))
-(def +asp-gerbil-scheme-package-api-command-prologue-stages+
-  '(("support/args.ss"
-     "support/io.ss")))
+(def +package-api-command-prologue-stages+
+  '(("support/args.ss" "support/io.ss")))
 
-;; : (List String)
-(def +asp-gerbil-scheme-package-api-building-stages+
-  '(("building/model.ss"
-     "building/native-toolchain.ss")
+(def +package-api-building-stages+
+  '(("building/model.ss" "building/native-toolchain.ss")
     ("building/build-script.ss")
     ("building/std-builder.ss")
     ("building/observability.ss")
     ("building/facade.ss")
-    ("building/declarative.ss"
-     "building/commands.ss")
+    ("building/declarative.ss" "building/commands.ss")
     ("testing/building.ss")))
 
-;; Native build interfaces must precede directory-wide parallel compilation.
-;; : (List (List Path))
-(def +asp-gerbil-scheme-package-api-build-api-stages+
-  '(("build-api/artifact-cleanup.ss"
-     "build-api/component-closure.ss")
+(def +package-api-build-api-stages+
+  '(("build-api/artifact-cleanup.ss" "build-api/component-closure.ss")
     ("build-api/native-build.ss")
     ("build-api/framework.ss")))
 
-(def +asp-gerbil-scheme-package-api-directories+
-  '("utilities" "types" "parser" "policy" "protocol" "extensions" "language" "format" "commands"))
+(def +package-api-directories+
+  '("utilities" "types" "parser" "policy" "protocol" "extensions"
+    "language" "format" "commands"))
 
-;; : (List (List Path))
-(def +asp-gerbil-scheme-package-api-launcher-stages+
-  '(("search-light-launcher.ss")
-    ("cli-launcher.ss")))
+(def +package-api-launcher-stages+
+  '(("search-light-launcher.ss") ("cli-launcher.ss")))
 
-;; : (-> String Boolean)
-(def (asp-gerbil-scheme-ss-file? file)
-  (and (string? file)
-       (string-suffix? ".ss" file)))
+(def (ss-file? file)
+  (and (string? file) (string-suffix? ".ss" file)))
 
-;; : (-> String (List Path))
-(def (asp-gerbil-scheme-package-api-directory-spec dir)
+(def (package-api-directory-spec dir)
   (let (source-dir (string-append "src/" dir))
     (if (file-exists? source-dir)
       (map (lambda (file) (string-append dir "/" file))
-           (sort (filter asp-gerbil-scheme-ss-file? (directory-files source-dir))
-                 string<?))
+           (sort (filter ss-file? (directory-files source-dir)) string<?))
       [])))
 
-;; : (-> (List (List Path)) (List Path))
-(def (asp-gerbil-scheme-package-api-flatten-stages stages)
+(def (flatten-stages stages)
   (append-map (lambda (stage) stage) stages))
 
-(def asp-gerbil-scheme-package-api-stage-specs-cache #f)
-(def asp-gerbil-scheme-package-api-spec-cache #f)
+(def package-api-stage-specs-cache #f)
+(def package-api-spec-cache #f)
 
-;; : (-> (List (List Path)))
-(def (asp-gerbil-scheme-package-api-stage-specs/fresh)
-  (append +asp-gerbil-scheme-package-api-prologue-stages+
-          +asp-gerbil-scheme-package-api-policy-stages+
-          +asp-gerbil-scheme-package-api-building-stages+
-          +asp-gerbil-scheme-package-api-build-api-stages+
-          +asp-gerbil-scheme-package-api-command-prologue-stages+
-          (map asp-gerbil-scheme-package-api-directory-spec
-                +asp-gerbil-scheme-package-api-directories+)
-          +asp-gerbil-scheme-package-api-launcher-stages+
-          +asp-gerbil-scheme-package-api-epilogue-stages+))
+(def (package-api-stage-specs/fresh)
+  (append +package-api-prologue-stages+
+          +package-api-policy-stages+
+          +package-api-building-stages+
+          +package-api-build-api-stages+
+          +package-api-command-prologue-stages+
+          (map package-api-directory-spec +package-api-directories+)
+          +package-api-launcher-stages+
+          +package-api-epilogue-stages+))
 
-;; : (-> (List (List Path)))
 (def (asp-gerbil-scheme-package-api-stage-specs)
-  (or asp-gerbil-scheme-package-api-stage-specs-cache
-      (let (stages (asp-gerbil-scheme-package-api-stage-specs/fresh))
-        (set! asp-gerbil-scheme-package-api-stage-specs-cache stages)
+  (or package-api-stage-specs-cache
+      (let (stages (package-api-stage-specs/fresh))
+        (set! package-api-stage-specs-cache stages)
         stages)))
 
-;; : (-> (List Path))
 (def (asp-gerbil-scheme-package-api-spec)
-  (or asp-gerbil-scheme-package-api-spec-cache
-      (let (spec (asp-gerbil-scheme-package-api-flatten-stages
+  (or package-api-spec-cache
+      (let (spec (flatten-stages
                   (asp-gerbil-scheme-package-api-stage-specs)))
-        (set! asp-gerbil-scheme-package-api-spec-cache spec)
+        (set! package-api-spec-cache spec)
         spec)))
