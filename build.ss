@@ -3,11 +3,11 @@
 
 (export asp-gerbil-scheme-library-package-spec)
 
-(import :std/build-script
-        :clan/building
+(import :clan/building
         (only-in :std/srfi/1 fold)
         (only-in :std/srfi/13 string-prefix?)
         (only-in "./src/building/build-script"
+                 defbuild-script
                  framework-build-bindir)
         (only-in "./src/build-api/package-spec"
                  asp-gerbil-scheme-package-spec!

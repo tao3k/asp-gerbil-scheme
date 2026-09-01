@@ -106,6 +106,22 @@ projection of the 232-module library.  The current receipt does not yet record
 resolved logical/available cores or worker/job capacity, so it proves removal
 of duplicate work but does not by itself prove the exact scheduler concurrency.
 
+The canonical scripts must import =defbuild-script= from
+=src/building/build-script.ss=, not directly from upstream
+=:std/build-script=.  The bridge still delegates compilation and linking to
+upstream =std/make=; its extra responsibility is to select the host core count,
+publish it as =GERBIL_BUILD_CORES=, and re-exec the script before
+=:gerbil/compiler/base= initializes =__available-cores=.  Importing the
+upstream macro directly bypasses that re-exec boundary and leaves
+=__available-cores= at its default value of 1.
+
+A same-machine, same-command cold-build control established the impact after
+=gxpkg clean=: the direct upstream-macro path took 357.62 seconds, while the
+bridge macro path took 92.89 seconds.  The canonical repair is therefore 3.85x
+faster and reduces wall time by about 74.0 percent locally.  This A/B receipt,
+not a warm incremental build, is the acceptance evidence for the concurrency
+repair.
+
 This is the feature-equivalent boundary for same-repository development:
 ordinary =depend:= consumers build only the library package, while the ASP
 Server release and CI paths request the provider target explicitly.  If the
@@ -121,7 +137,12 @@ flowchart TD
     Prototype -->|POO @ inheritance| LibraryObject[Concrete library package-spec<br/>declared in build.ss]
     Prototype -->|POO @ inheritance| ProviderObject[Concrete provider package-spec<br/>declared in provider-package-spec.ss]
     LibraryObject --> LibraryBuild
-    LibraryBuild --> Libraries[Library modules only]
+    LibraryBuild --> CoreProbe[Host core probe]
+    CoreProbe --> CoreEnv[GERBIL_BUILD_CORES]
+    CoreEnv --> Reexec[Re-exec canonical script]
+    Reexec --> Available[compiler/base __available-cores]
+    Available --> StdMake[Upstream std/make]
+    StdMake --> Libraries[Library modules only]
     ServerRelease[ASP Server release or CI] --> ProviderBuild[build-provider.ss]
     ProviderObject --> ProviderBuild
     LibraryBuild -->|Bazel dependency and cached artifact| ProviderBuild

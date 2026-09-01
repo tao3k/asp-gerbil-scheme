@@ -3,10 +3,10 @@
 (import :clan/building
         (only-in :asp-gerbil-scheme/src/build-api/component-closure
                  asp-gerbil-scheme-source-dependency-order)
-        (only-in :asp-gerbil-scheme/src/build-api/package-spec
+        (only-in "./src/build-api/package-spec"
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype)
-        (only-in :asp-gerbil-scheme/src/building/build-script
+        (only-in "./src/building/build-script"
                  framework-executable-build-spec)
 
 )
