@@ -37,37 +37,36 @@
     "src/runtime/provider-http-json-server"
     "src/commands/provider-runtime"))
 
-;; Package modules required by provider contract and acceptance tests are built
-;; after the executable target. They share the same std/make graph without
-;; becoming part of the resident executable closure.
-(def +provider-library-source-roots+
-  '("src/parser" "src/types" "src/utilities"))
+;; The package library is built from the Owner's complete Scheme source tree.
+;; It remains separate from the resident provider executable closure: downstream
+;; packages import these modules normally through gerbil.pkg package identity.
+(def +public-library-source-roots+
+  '("src"))
 
 (def (provider-source-file->module path)
   (substring path 0 (- (string-length path) 3)))
 
-(def +provider-library-modules+
+(def (scheme-source-file? path)
+  (let (length (string-length path))
+    (and (>= length 3)
+         (string=? (substring path (- length 3) length) ".ss"))))
+
+(def +public-library-modules+
   (filter
-   (lambda (module) (not (member module +provider-runtime-modules+)))
-   (append
-    '("src/support/time"
-      "src/support/args"
-      "src/protocol/json-output"
-      "src/testing/gxtest-context"
-      "src/testing/gxtest-syntax"
-      "src/testing/execution-profile")
-    (map provider-source-file->module
-         (asp-gerbil-scheme-source-coverage-files-for-roots
-          "." +provider-library-source-roots+))
-    '("src/commands/query"
-      "src/commands/projection"))))
+   (lambda (module)
+     (and (not (equal? module "src/provider-server"))
+          (not (member module +provider-runtime-modules+))))
+   (map provider-source-file->module
+        (filter scheme-source-file?
+                (asp-gerbil-scheme-source-coverage-files-for-roots
+                 "." +public-library-source-roots+)))))
 
 (def +provider-runtime-build-spec+
   (framework-executable-build-spec
    "src/provider-server"
    "asp-gerbil-scheme"
    +provider-runtime-modules+
-   +provider-library-modules+
+   +public-library-modules+
    '(tls)))
 
 (defbuild-script
