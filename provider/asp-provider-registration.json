@@ -64,18 +64,36 @@
     "operations": [
       {
         "operation": "projection-batch",
-        "requestSchemaId": "https://schemas.agent-semantic-protocols.dev/provider-language-projection-batch-request.schema.json",
-        "responseSchemaId": "https://schemas.agent-semantic-protocols.dev/provider-language-projection-batch-response.schema.json"
+        "requestSchema": {
+          "schemaId": "agent.semantic-protocols.provider-language-projection-batch-request",
+          "schemaVersion": "1"
+        },
+        "responseSchema": {
+          "schemaId": "agent.semantic-protocols.provider-language-projection-batch-response",
+          "schemaVersion": "1"
+        }
       },
       {
         "operation": "project-resolution",
-        "requestSchemaId": "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-request.schema.json",
-        "responseSchemaId": "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-response.schema.json"
+        "requestSchema": {
+          "schemaId": "agent.semantic-protocols.provider-project-resolution-request",
+          "schemaVersion": "1"
+        },
+        "responseSchema": {
+          "schemaId": "agent.semantic-protocols.provider-project-resolution-response",
+          "schemaVersion": "1"
+        }
       },
       {
         "operation": "query",
-        "requestSchemaId": "https://agent-semantic-protocols.dev/schemas/provider-native-exact-request.v1.schema.json",
-        "responseSchemaId": "https://agent-semantic-protocols.dev/schemas/provider-native-exact-response.v1.schema.json"
+        "requestSchema": {
+          "schemaId": "agent.semantic-protocols.provider-native-exact-request",
+          "schemaVersion": "1"
+        },
+        "responseSchema": {
+          "schemaId": "agent.semantic-protocols.provider-native-exact-projection",
+          "schemaVersion": "1"
+        }
       }
     ]
   },
@@ -105,7 +123,10 @@
         "streaming": false
       },
       "output": {
-        "schemaId": "agent.semantic-protocols.source-index-projection",
+        "schema": {
+          "schemaId": "agent.semantic-protocols.source-index-projection",
+          "schemaVersion": "1"
+        },
         "mediaType": "application/json"
       },
       "failureSchemaIds": [
@@ -126,7 +147,10 @@
       "schemaVersion": "1",
       "routeId": "gerbil-scheme.search",
       "operation": "search",
-      "requestSchemaId": "agent.semantic-protocols.asp-client-search-request",
+      "requestSchema": {
+        "schemaId": "agent.semantic-protocols.asp-client-search-request",
+        "schemaVersion": "1"
+      },
       "authority": "asp-server",
       "target": {
         "languageId": "gerbil-scheme",
@@ -152,7 +176,10 @@
         "streaming": false
       },
       "output": {
-        "schemaId": "agent.semantic-protocols.search-packet",
+        "schema": {
+          "schemaId": "agent.semantic-protocols.search-packet",
+          "schemaVersion": "1"
+        },
         "mediaType": "application/json"
       },
       "failureSchemaIds": [
@@ -173,7 +200,10 @@
       "schemaVersion": "1",
       "routeId": "gerbil-scheme.query",
       "operation": "query",
-      "requestSchemaId": "agent.semantic-protocols.asp-client-exact-query-request",
+      "requestSchema": {
+        "schemaId": "agent.semantic-protocols.asp-client-exact-query-request",
+        "schemaVersion": "1"
+      },
       "authority": "asp-server",
       "target": {
         "languageId": "gerbil-scheme",
@@ -199,7 +229,10 @@
         "streaming": false
       },
       "output": {
-        "schemaId": "agent.semantic-protocols.query-result",
+        "schema": {
+          "schemaId": "agent.semantic-protocols.query-result",
+          "schemaVersion": "1"
+        },
         "mediaType": "application/json"
       },
       "failureSchemaIds": [
@@ -220,7 +253,10 @@
       "schemaVersion": "1",
       "routeId": "gerbil-scheme.search.owner",
       "operation": "search.owner",
-      "requestSchemaId": "agent.semantic-protocols.asp-client-owner-search-request",
+      "requestSchema": {
+        "schemaId": "agent.semantic-protocols.asp-client-owner-search-request",
+        "schemaVersion": "1"
+      },
       "authority": "asp-server",
       "target": {
         "languageId": "gerbil-scheme",
@@ -247,7 +283,10 @@
         "streaming": false
       },
       "output": {
-        "schemaId": "agent.semantic-protocols.search-packet",
+        "schema": {
+          "schemaId": "agent.semantic-protocols.search-packet",
+          "schemaVersion": "1"
+        },
         "mediaType": "application/json"
       },
       "failureSchemaIds": [
