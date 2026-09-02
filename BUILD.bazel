@@ -49,6 +49,11 @@ filegroup(
     ),
 )
 
+filegroup(
+    name = "test_sources",
+    srcs = glob(["t/**/*.ss"]),
+)
+
 gerbil_project_compile(
     name = "gerbil_utils_package",
     srcs = ["@gerbil_utils_sources//:sources"],
@@ -109,4 +114,12 @@ gerbil_project_test(
     size = "small",
     project = ":provider_compile",
     tests = ["//:t/scenarios/building/library-provider-boundary/provider-test.ss"],
+)
+
+gerbil_project_test(
+    name = "policy_string_growth_test",
+    size = "small",
+    srcs = ":test_sources",
+    project = ":compile",
+    tests = ["//:t/policy/agent-string-growth-test.ss"],
 )
