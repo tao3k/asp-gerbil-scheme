@@ -126,20 +126,22 @@
   (let* ((status 0)
          (output
           (run-process
-           ["ps" "-axo" "pid=,ppid=,rss=,comm="]
+           ["ps" "-axo" "pid=,ppid=,rss=,%cpu=,comm="]
            stderr-redirection: #t
            check-status: (lambda (value _settings) (set! status value)))))
     (if (= (framework-memory-guard-exit-code status) 0)
       (filter-map
        (lambda (line)
          (let (tokens (string-tokenize line))
-           (and (= (length tokens) 4)
+           (and (= (length tokens) 5)
                 (let ((pid (string->number (car tokens)))
                       (ppid (string->number (cadr tokens)))
                       (rss-kib (string->number (caddr tokens)))
-                      (command (cadddr tokens)))
-                  (and pid ppid rss-kib
-                       (list pid ppid (* rss-kib 1024) command))))))
+                      (cpu-percent (string->number (cadddr tokens)))
+                      (command (list-ref tokens 4)))
+                  (and pid ppid rss-kib cpu-percent
+                       (list pid ppid (* rss-kib 1024)
+                             cpu-percent command))))))
        (string-split output #\newline))
       [])))
 
@@ -163,6 +165,13 @@
            0
            rows)))
 
+(def (framework-memory-guard-process-tree-cpu-percent root-pid rows)
+  (let (pids (framework-memory-guard-process-tree-pids root-pid rows))
+    (foldl (lambda (row total)
+             (if (member (car row) pids) (+ total (cadddr row)) total))
+           0
+           rows)))
+
 (def (framework-memory-guard-compiler-front-end? command)
   (or (string=? command "gsc")
       (string=? command "gxi")
@@ -176,7 +185,7 @@
   (foldl (lambda (row count)
            (if (and (= (cadr row) root-pid)
                     (framework-memory-guard-compiler-front-end?
-                     (cadddr row)))
+                     (list-ref row 4)))
              (+ count 1)
              count))
          0
@@ -186,7 +195,8 @@
                                        peak-rss growth-bytes growth-rate
                                        elapsed-seconds maximum-active-jobs
                                        active-job-sum compiler-samples
-                                       saturated-samples)
+                                       saturated-samples maximum-cpu-percent
+                                       cpu-percent-sum)
   (let ((average-active-jobs
          (if (zero? compiler-samples)
            0
@@ -194,7 +204,12 @@
         (saturation-ratio
          (if (zero? compiler-samples)
            0
-           (/ (exact->inexact saturated-samples) compiler-samples))))
+           (/ (exact->inexact saturated-samples) compiler-samples)))
+        (average-cpu-percent
+         (if (zero? compiler-samples)
+           0
+           (/ cpu-percent-sum compiler-samples)))
+        (configured-cpu-capacity-percent (* worker-count 100)))
   (hash ("schema" "asp-gerbil-scheme.memory-anomaly-guard.v1")
         ("version" 1)
         ("label" label)
@@ -213,6 +228,13 @@
         ("compiler-active-samples" compiler-samples)
         ("compiler-saturated-samples" saturated-samples)
         ("compiler-saturation-ratio" saturation-ratio)
+        ("configured-cpu-capacity-percent" configured-cpu-capacity-percent)
+        ("maximum-process-tree-cpu-percent" maximum-cpu-percent)
+        ("average-process-tree-cpu-percent" average-cpu-percent)
+        ("average-configured-cpu-utilization-ratio"
+         (if (zero? configured-cpu-capacity-percent)
+           0
+           (/ average-cpu-percent configured-cpu-capacity-percent)))
         ("elapsed-ms" (inexact->exact (round (* elapsed-seconds 1000)))))))
 
 (def (framework-memory-anomaly-emit! receipt)
@@ -232,8 +254,9 @@
          (started (time->seconds (current-time)))
          ;; stop?, anomaly-state, confirmations, memory samples, peak, growth,
          ;; rate, completion, max active jobs, active-job sum, compiler sample
-         ;; count, and saturated sample count are watcher-owned state.
-         (state (vector #f 'normal 0 [] 0 0 0 #f 0 0 0 0))
+         ;; count, saturated sample count, and process-tree CPU trajectory are
+         ;; watcher-owned state.
+         (state (vector #f 'normal 0 [] 0 0 0 #f 0 0 0 0 0 0))
          (watcher
           (spawn
            (lambda ()
@@ -251,6 +274,9 @@
                                     total))
                                 0
                                 rows))
+                        (cpu-percent
+                         (framework-memory-guard-process-tree-cpu-percent
+                          root-pid rows))
                         (active-jobs
                          (framework-memory-guard-active-compiler-jobs
                           root-pid rows))
@@ -288,6 +314,10 @@
                       (vector-set! state 10 (+ 1 (vector-ref state 10)))
                       (when (>= active-jobs worker-count)
                         (vector-set! state 11 (+ 1 (vector-ref state 11))))
+                      (vector-set! state 12
+                                   (max cpu-percent (vector-ref state 12)))
+                      (vector-set! state 13
+                                   (+ cpu-percent (vector-ref state 13)))
                       (if (eq? next-state 'tripped)
                         (begin
                           (framework-memory-anomaly-emit!
@@ -297,7 +327,9 @@
                             (vector-ref state 8)
                             (vector-ref state 9)
                             (vector-ref state 10)
-                            (vector-ref state 11)))
+                            (vector-ref state 11)
+                            (vector-ref state 12)
+                            (vector-ref state 13)))
                           (exit 70))
                         (begin
                           (thread-sleep! (.ref policy 'sample-seconds))
@@ -333,4 +365,6 @@
               (vector-ref state 8)
               (vector-ref state 9)
               (vector-ref state 10)
-              (vector-ref state 11)))))))))
+              (vector-ref state 11)
+              (vector-ref state 12)
+              (vector-ref state 13)))))))))

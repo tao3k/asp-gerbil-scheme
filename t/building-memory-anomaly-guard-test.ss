@@ -9,7 +9,8 @@
                  framework-memory-anomaly-policy
                  framework-memory-anomaly-sample
                  framework-memory-anomaly-transition
-                 framework-memory-guard-active-compiler-jobs))
+                 framework-memory-guard-active-compiler-jobs
+                 framework-memory-guard-process-tree-cpu-percent))
 
 (export building-memory-anomaly-guard-test)
 
@@ -62,9 +63,18 @@
       (check
        (framework-memory-guard-active-compiler-jobs
         100
-        '((101 100 1024 "/usr/local/bin/gsc")
-          (102 101 2048 "gcc")
-          (103 102 4096 "cc1")
-          (104 100 1024 "gxi")
-          (105 100 1024 "ps")))
-       => 2))))
+        '((101 100 1024 50.0 "gsc")
+          (102 101 2048 50.0 "gcc")
+          (103 102 4096 25.0 "cc1")
+          (104 100 1024 10.0 "gxi")
+          (105 100 1024 1.0 "ps")))
+       => 2)
+      (check
+       (framework-memory-guard-process-tree-cpu-percent
+        100
+        '((101 100 1024 50.0 "gsc")
+          (102 101 2048 50.0 "gcc")
+          (103 102 4096 25.0 "cc1")
+          (104 100 1024 10.0 "gxi")
+          (105 999 1024 80.0 "other")))
+       => 135.0))))

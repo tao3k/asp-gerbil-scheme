@@ -18,4 +18,5 @@
         framework-memory-anomaly-growth-rate-bytes-per-second
         framework-memory-anomaly-transition
         framework-memory-guard-active-compiler-jobs
+        framework-memory-guard-process-tree-cpu-percent
         call-with-framework-memory-anomaly-guard)
