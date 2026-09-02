@@ -16,7 +16,6 @@
         framework-merge-build-options
         framework-build-reexec-required?
         framework-reexec-build-script
-        call-with-framework-build-cores
         framework-recover-object-locks!
         call-with-framework-native-toolchain-environment
         call-with-framework-build-lease

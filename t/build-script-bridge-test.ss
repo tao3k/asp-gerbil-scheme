@@ -1,6 +1,5 @@
 (import :std/test
         (only-in :asp-gerbil-scheme/src/building/build-script
-                 call-with-framework-build-cores
                  framework-build-core-count
                  framework-build-profile-options
                  framework-resolve-build-keys
@@ -92,21 +91,14 @@
                => "kernel-flock-per-GERBIL_PATH")
         (check (cdr (assoc 'objectLockRecovery contract))
                => "static-and-binary-under-exclusive-build-lease")))
-    (test-case "injects host cores while preserving an explicit override"
+    (test-case "resolves host cores while preserving an explicit override"
       (let (previous (getenv "GERBIL_BUILD_CORES" #f))
         (dynamic-wind
           (lambda () (setenv "GERBIL_BUILD_CORES" ""))
           (lambda ()
             (check (framework-build-core-count) => (max 1 (##cpu-count)))
-            (check (call-with-framework-build-cores
-                    (lambda ()
-                      (string->number (getenv "GERBIL_BUILD_CORES"))))
-                   => (max 1 (##cpu-count)))
             (setenv "GERBIL_BUILD_CORES" "3")
-            (check (framework-build-core-count) => 3)
-            (check (call-with-framework-build-cores
-                    (lambda () (getenv "GERBIL_BUILD_CORES")))
-                   => "3"))
+            (check (framework-build-core-count) => 3))
           (lambda ()
             (setenv "GERBIL_BUILD_CORES" (or previous ""))))))
     (test-case "isolates Homebrew GCC from Nix Darwin SDK selection"

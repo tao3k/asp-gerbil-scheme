@@ -220,14 +220,6 @@
       (lambda ()
         (setenv "GERBIL_BUILD_CORES" (or previous-cores ""))))))
 
-(def (call-with-framework-build-cores thunk)
-  (let ((previous (getenv "GERBIL_BUILD_CORES" #f))
-        (selected (number->string (framework-build-core-count))))
-    (dynamic-wind
-      (lambda () (setenv "GERBIL_BUILD_CORES" selected))
-      thunk
-      (lambda () (setenv "GERBIL_BUILD_CORES" (or previous ""))))))
-
 (def (framework-recover-object-locks!)
   (def (recover-directory directory)
     (if (file-exists? directory)
@@ -275,10 +267,8 @@
       (unwind-protect
         (call-with-framework-native-toolchain-environment
          (lambda ()
-           (call-with-framework-build-cores
-            (lambda ()
-              (framework-recover-object-locks!)
-              (thunk)))))
+           (framework-recover-object-locks!)
+           (thunk)))
         (close-port lease)))))
 
 (def (framework-build-profile-options profile)

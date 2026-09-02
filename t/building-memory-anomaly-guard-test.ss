@@ -9,6 +9,7 @@
                  framework-memory-anomaly-policy
                  framework-memory-anomaly-sample
                  framework-memory-anomaly-transition
+                 framework-memory-guard-load-average
                  framework-memory-guard-active-compiler-jobs
                  framework-memory-guard-process-tree-cpu-percent))
 
@@ -18,6 +19,13 @@
 ;; : TestSuite
 (def building-memory-anomaly-guard-test
   (test-suite "building memory anomaly guard"
+    (test-case "host runnable pressure is represented without fixed cores"
+      (let (load-average (framework-memory-guard-load-average))
+        (check (list? load-average) => #t)
+        (check (andmap (lambda (value)
+                         (and (real? value) (>= value 0)))
+                       load-average)
+               => #t)))
     (test-case "stable high RSS remains normal and never limits workers"
       (let* ((policy (framework-memory-anomaly-policy))
              (gib (* 1024 1024 1024))

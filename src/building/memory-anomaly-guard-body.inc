@@ -145,6 +145,24 @@
        (string-split output #\newline))
       [])))
 
+(def (framework-memory-guard-load-average)
+  (let (text
+        (try
+         (cond-expand
+          (darwin
+           (run-process ["sysctl" "-n" "vm.loadavg"]
+                        stderr-redirection: #t))
+          (linux
+           (call-with-input-file "/proc/loadavg" read-line))
+          (else ""))
+         (catch _ "")))
+    (let loop ((tokens (string-tokenize text)) (values []))
+      (cond
+       ((or (null? tokens) (= (length values) 3)) (reverse values))
+       ((string->number (car tokens))
+        => (lambda (value) (loop (cdr tokens) (cons value values))))
+       (else (loop (cdr tokens) values))))))
+
 (def (framework-memory-guard-process-tree-pids root-pid rows)
   (let expand ((known [root-pid]))
     (let loop ((remaining rows) (next known) (changed? #f))
@@ -196,7 +214,9 @@
                                        elapsed-seconds maximum-active-jobs
                                        active-job-sum compiler-samples
                                        saturated-samples maximum-cpu-percent
-                                       cpu-percent-sum)
+                                       cpu-percent-sum first-active-seconds
+                                       last-active-seconds load-average-start
+                                       load-average-end)
   (let ((average-active-jobs
          (if (zero? compiler-samples)
            0
@@ -209,7 +229,13 @@
          (if (zero? compiler-samples)
            0
            (/ cpu-percent-sum compiler-samples)))
-        (configured-cpu-capacity-percent (* worker-count 100)))
+        (configured-cpu-capacity-percent (* worker-count 100))
+        (logical-cpu-count (max 1 (##cpu-count)))
+        (expected-samples
+         (max 1
+              (inexact->exact
+               (ceiling (/ elapsed-seconds
+                           (.ref policy 'sample-seconds)))))))
   (hash ("schema" "asp-gerbil-scheme.memory-anomaly-guard.v1")
         ("version" 1)
         ("label" label)
@@ -218,6 +244,16 @@
         ("configured-worker-count" worker-count)
         ("worker-count" worker-count)
         ("worker-count-limited-by-memory" #f)
+        ("host-logical-cpu-count" logical-cpu-count)
+        ("host-load-average-start" load-average-start)
+        ("host-load-average-end" load-average-end)
+        ("host-runnable-pressure-ratio"
+         (and (pair? load-average-start)
+              (/ (exact->inexact (car load-average-start))
+                 logical-cpu-count)))
+        ("host-contention-observed"
+         (and (pair? load-average-start)
+              (> (car load-average-start) logical-cpu-count)))
         ("window-seconds" (.ref policy 'window-seconds))
         ("peak-rss-bytes" peak-rss)
         ("hard-limit-bytes" (.ref policy 'hard-limit-bytes))
@@ -228,6 +264,25 @@
         ("compiler-active-samples" compiler-samples)
         ("compiler-saturated-samples" saturated-samples)
         ("compiler-saturation-ratio" saturation-ratio)
+        ("observer-expected-samples" expected-samples)
+        ("observer-sample-coverage-ratio"
+         (/ (exact->inexact compiler-samples) expected-samples))
+        ("observer-average-interval-ms"
+         (if (zero? compiler-samples)
+           0
+           (/ (* elapsed-seconds 1000) compiler-samples)))
+        ("scheme-to-native-first-job-ms"
+         (and first-active-seconds
+              (inexact->exact (round (* first-active-seconds 1000)))))
+        ("native-compiler-observed-window-ms"
+         (and first-active-seconds last-active-seconds
+              (inexact->exact
+               (round (* (- last-active-seconds first-active-seconds)
+                         1000)))))
+        ("post-native-observed-ms"
+         (and last-active-seconds
+              (inexact->exact
+               (round (* (- elapsed-seconds last-active-seconds) 1000)))))
         ("configured-cpu-capacity-percent" configured-cpu-capacity-percent)
         ("maximum-process-tree-cpu-percent" maximum-cpu-percent)
         ("average-process-tree-cpu-percent" average-cpu-percent)
@@ -252,11 +307,12 @@
 (def (call-with-framework-memory-anomaly-guard label worker-count thunk)
   (let* ((policy (framework-memory-anomaly-policy))
          (started (time->seconds (current-time)))
+         (load-average-start (framework-memory-guard-load-average))
          ;; stop?, anomaly-state, confirmations, memory samples, peak, growth,
          ;; rate, completion, max active jobs, active-job sum, compiler sample
-         ;; count, saturated sample count, and process-tree CPU trajectory are
-         ;; watcher-owned state.
-         (state (vector #f 'normal 0 [] 0 0 0 #f 0 0 0 0 0 0))
+         ;; count, saturated sample count, process-tree CPU trajectory, and
+         ;; first/last observed compiler activity are watcher-owned state.
+         (state (vector #f 'normal 0 [] 0 0 0 #f 0 0 0 0 0 0 #f #f))
          (watcher
           (spawn
            (lambda ()
@@ -318,6 +374,10 @@
                                    (max cpu-percent (vector-ref state 12)))
                       (vector-set! state 13
                                    (+ cpu-percent (vector-ref state 13)))
+                      (when (> active-jobs 0)
+                        (unless (vector-ref state 14)
+                          (vector-set! state 14 now))
+                        (vector-set! state 15 now))
                       (if (eq? next-state 'tripped)
                         (begin
                           (framework-memory-anomaly-emit!
@@ -329,7 +389,11 @@
                             (vector-ref state 10)
                             (vector-ref state 11)
                             (vector-ref state 12)
-                            (vector-ref state 13)))
+                            (vector-ref state 13)
+                            (vector-ref state 14)
+                            (vector-ref state 15)
+                            load-average-start
+                            (framework-memory-guard-load-average)))
                           (exit 70))
                         (begin
                           (thread-sleep! (.ref policy 'sample-seconds))
@@ -367,4 +431,8 @@
               (vector-ref state 10)
               (vector-ref state 11)
               (vector-ref state 12)
-              (vector-ref state 13)))))))))
+              (vector-ref state 13)
+              (vector-ref state 14)
+              (vector-ref state 15)
+              load-average-start
+              (framework-memory-guard-load-average)))))))))
