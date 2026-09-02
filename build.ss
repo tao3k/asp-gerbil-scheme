@@ -12,6 +12,7 @@
         (only-in "./src/build-api/package-spec"
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype
+                 asp-gerbil-scheme-package-build-profile
                  asp-gerbil-scheme-package-native-spec))
 
 (def +product-entry-modules+
@@ -34,6 +35,7 @@
  (asp-gerbil-scheme-library-package-spec
   @ asp-gerbil-scheme-library-package-prototype)
   (role 'library)
+  (profile 'development)
   (native-spec
    (fold (lambda (module spec)
            (remove-build-file spec module))
@@ -43,4 +45,6 @@
 (defbuild-script
  (asp-gerbil-scheme-package-native-spec
   asp-gerbil-scheme-library-package-spec)
+ profile: (asp-gerbil-scheme-package-build-profile
+           asp-gerbil-scheme-library-package-spec)
  bindir: (framework-build-bindir))

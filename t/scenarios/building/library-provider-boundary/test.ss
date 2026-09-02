@@ -7,6 +7,7 @@
 
 (asp-gerbil-scheme-package-spec! library-package-spec-fixture
   (role 'library)
+  (profile 'production)
   (native-spec '("src/parser/model")))
 
 (def library-provider-boundary-test
@@ -15,4 +16,10 @@
       (check (.get library-package-spec-fixture role) => 'library)
       (check (asp-gerbil-scheme-package-native-spec
               library-package-spec-fixture)
-             => '("src/parser/model")))))
+             => '("src/parser/model"))
+      (check (asp-gerbil-scheme-package-build-profile
+              library-package-spec-fixture)
+             => 'production)
+      (check (asp-gerbil-scheme-package-build-profile
+              asp-gerbil-scheme-library-package-prototype)
+             => 'development))))

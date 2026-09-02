@@ -2,8 +2,6 @@
 (import :asp-gerbil-scheme/src/building/build-script)
 
 (defbuild-script
-  (framework-executable-build-spec
-   "main"
-   "downstream-build-script-probe"
-   '("support.ss"))
+  []
+  profile: 'development
   bindir: (framework-build-bindir))

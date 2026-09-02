@@ -2,8 +2,13 @@
         (only-in :asp-gerbil-scheme/src/building/build-script
                  call-with-framework-build-cores
                  framework-build-core-count
+                 framework-build-profile-options
+                 framework-resolve-build-keys
+                 framework-normalize-build-options
+                 framework-merge-build-options
                  framework-build-reexec-required?
                  framework-executable-build-spec
+                 call-with-framework-native-toolchain-environment
                  framework-build-contract))
 
 (export build-script-bridge-test main)
@@ -24,10 +29,41 @@
         (check (and (member "-cc-options" executable) #t) => #t)
         (check (and (member "-ld-options" executable) #t) => #t)
         (check (member "-pkg-config" executable) => #f)))
+    (test-case "package profiles lower directly to std/make options"
+      (check (framework-build-profile-options 'development)
+             => [optimize: #f])
+      (cond-expand
+       (darwin
+        (check (framework-build-profile-options 'production)
+               => [optimize: #t build-optimized: #t]))
+       (else
+        (check (framework-build-profile-options 'production)
+               => [optimize: #t build-release: #t])))
+      (check (framework-resolve-build-keys
+              [profile: 'development bindir: "/tmp/profile-bin"])
+             => [optimize: #f bindir: "/tmp/profile-bin"])
+      (check (framework-merge-build-options
+              [optimize: #f bindir: "/tmp/profile-bin"]
+              [optimize: #t debug: #t])
+             => [optimize: #t debug: #t bindir: "/tmp/profile-bin"])
+      (check (framework-normalize-build-options
+              [optimize: #t
+               build-optimized: #t
+               optimize: #t
+               build-release: #t])
+             => [optimize: #t
+                 build-optimized: #t
+                 build-release: #t]))
     (test-case "publishes one explicit ownership contract"
       (let (contract (framework-build-contract))
         (check (cdr (assoc 'executor contract)) => "std/make")
         (check (cdr (assoc 'dependencyGraphOwner contract)) => "std/make")
+        (check (cdr (assoc 'buildProfileOwner contract))
+               => "POO-package-spec")
+        (check (cdr (assoc 'buildProfileProjection contract))
+               => "native-std/make-options")
+        (check (cdr (assoc 'buildDepsOwner contract))
+               => "std/make-srcdir-default")
         (check (cdr (assoc 'parallelismOwner contract))
                => "GERBIL_BUILD_CORES")
         (check (cdr (assoc 'defaultCoreSelection contract))
@@ -38,6 +74,10 @@
                => "gxpkg-env")
         (check (cdr (assoc 'nativeLinkWorkingDirectory contract))
                => "declared-bindir")
+        (check (cdr (assoc 'darwinNativeEnvironmentOwner contract))
+               => "Building-Framework")
+        (check (cdr (assoc 'darwinNativeEnvironmentExclusions contract))
+               => "SDKROOT-and-DEVELOPER_DIR")
         (check (cdr (assoc 'buildGraphProjection contract))
                => "declared-compiler-runtime-closure-to-std/make")
         (check (cdr (assoc 'libraryBuildProjection contract))
@@ -67,6 +107,37 @@
                    => "3"))
           (lambda ()
             (setenv "GERBIL_BUILD_CORES" (or previous ""))))))
+    (test-case "isolates Homebrew GCC from Nix Darwin SDK selection"
+      (cond-expand
+       (darwin
+        (let ((previous-sdk (getenv "SDKROOT" #f))
+              (previous-developer (getenv "DEVELOPER_DIR" #f)))
+          (dynamic-wind
+            (lambda ()
+              (setenv "SDKROOT" "/nix/test-sdk")
+              (setenv "DEVELOPER_DIR" "/nix/test-developer"))
+            (lambda ()
+              (check
+               (call-with-framework-native-toolchain-environment
+                (lambda ()
+                  (list (getenv "SDKROOT" #f)
+                        (getenv "DEVELOPER_DIR" #f))))
+               => '(#f #f))
+              (check (getenv "SDKROOT" #f) => "/nix/test-sdk")
+              (check (getenv "DEVELOPER_DIR" #f)
+                     => "/nix/test-developer"))
+            (lambda ()
+              (if previous-sdk
+                (setenv "SDKROOT" previous-sdk)
+                (setenv "SDKROOT"))
+              (if previous-developer
+                (setenv "DEVELOPER_DIR" previous-developer)
+                (setenv "DEVELOPER_DIR"))))))
+       (else
+        (check
+         (call-with-framework-native-toolchain-environment
+          (lambda () 'unchanged))
+         => 'unchanged))))
     (test-case "re-enters compile before compiler modules capture core count"
       (let (previous-cores (getenv "GERBIL_BUILD_CORES" #f))
         (dynamic-wind

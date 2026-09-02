@@ -1,6 +1,7 @@
 (export asp-gerbil-scheme-package-spec!
         asp-gerbil-scheme-library-package-prototype
         asp-gerbil-scheme-package-native-spec
+        asp-gerbil-scheme-package-build-profile
         asp-gerbil-scheme-package-api-spec
         asp-gerbil-scheme-package-api-stage-specs)
 
@@ -19,12 +20,16 @@
 (def (asp-gerbil-scheme-package-native-spec package-spec)
   (.get package-spec native-spec))
 
+(def (asp-gerbil-scheme-package-build-profile package-spec)
+  (.get package-spec profile))
+
 ;; Import-safe semantic base for concrete project library and provider specs.
 ;; Script entrypoints remain in top-level build.ss files; this module owns only
 ;; reusable POO values and projections.
 (asp-gerbil-scheme-package-spec!
  asp-gerbil-scheme-library-package-prototype
  (role 'library)
+ (profile 'development)
  (native-spec []))
 
 ;; Cold package builds retain an explicit stage order for owners whose imports

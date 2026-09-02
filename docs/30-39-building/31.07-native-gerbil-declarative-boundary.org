@@ -49,6 +49,10 @@ that value.  The macro introduces no replacement keywords for module strings,
 composition continue to use Scheme functions from =std/make= and
 =clan/building=.  =asp-gerbil-scheme-package-native-spec= projects the final
 list into upstream =init-build-environment!= or =defbuild-script=.
+=asp-gerbil-scheme-package-build-profile= projects the package's required
+=development= or =production= profile into the same entrypoint; the Building
+Framework lowers that semantic value to ordinary =std/make= optimization and
+release keys.
 
 The v1 macro surface deliberately rejects a parallel option vocabulary:
 
@@ -67,7 +71,9 @@ flowchart LR
     Macro --> Spec[POO package-spec object]
     Build --> Macro
     Spec --> Projection[native-spec slot projection]
+    Spec --> Profile[profile slot projection]
     Projection --> Upstream{Upstream entrypoint}
+    Profile --> Upstream
     Upstream --> DefBuild[defbuild-script]
     Upstream --> InitBuild[init-build-environment!]
     DefBuild --> StdMake[std/make execution]
@@ -113,7 +119,9 @@ upstream =std/make=; its extra responsibility is to select the host core count,
 publish it as =GERBIL_BUILD_CORES=, and re-exec the script before
 =:gerbil/compiler/base= initializes =__available-cores=.  Importing the
 upstream macro directly bypasses that re-exec boundary and leaves
-=__available-cores= at its default value of 1.
+=__available-cores= at its default value of 1.  The re-exec enters the directory
+that owns the declaring =build.ss= before invoking =gxpkg env=, preserving the
+local package context even when a profile launcher starts at a monorepo root.
 
 A same-machine, same-command cold-build control established the impact after
 =gxpkg clean=: the direct upstream-macro path took 357.62 seconds, while the
@@ -250,14 +258,13 @@ an upstream command directly. A build recipe uses =gxpkg env gxi=; a test
 recipe uses =gxpkg env gxtest=. It does not rewrite source paths or command
 behavior.
 
-On Darwin, a repository environment can inject a Nix SDK while the installed
-Gerbil runtime invokes the host C compiler. The installer may therefore make
-one command-local host-toolchain selection: clear inherited =SDKROOT= and
-resolve =CC= with =xcrun --find clang= for the native =gxi= invocation. This
-is not a compiler dispatcher, SDK path, or persistent environment mutation:
-the values are not stored, no path is hard-coded, and =gxi= still owns
-compilation. Other platforms invoke the same upstream command without an
-adaptation.
+On Darwin, a repository environment can inject =SDKROOT= or =DEVELOPER_DIR=
+from a Nix Apple SDK while the installed Homebrew Gerbil runtime invokes its
+configured GCC toolchain.  The Scheme build bridge therefore removes only
+those two foreign SDK selectors for the dynamic extent of native =std/make=
+execution and restores their exact prior values afterward.  It does not choose
+a compiler, store an SDK path, mutate the caller permanently, or add a shell
+launcher.  Other platforms pass through the caller environment unchanged.
 
 ** Required Deletions
 
@@ -267,9 +274,8 @@ The migration removes:
 - bootstrap stage lists, source-interface materialization, and dynamic loading;
 - handwritten getopt, =compile= / =install= dispatch, and test subcommands;
 - SDK paths, compiler paths, load-path rewriting, and package-manager-specific
-  shell dispatch; a command-local Darwin host-toolchain selection is permitted
-  only to prevent an externally injected SDK from being mixed with the
-  installed Gerbil runtime;
+  shell dispatch; the Scheme bridge may dynamically exclude only foreign
+  Darwin SDK selectors while native =std/make= runs;
 - package-local wrappers which only forward to gxtest or std/make.
 
 =native-build.ss= and =gxtest-runner.ss= are retained only where they expose a

@@ -17,8 +17,11 @@ Building, while =std/make= owns the dependency graph and consumes
 
 #+begin_mermaid
 flowchart LR
-  Script["Downstream build.ss"] --> Bridge["building/build-script"]
+  Package["POO package spec<br/>profile: development | production"] --> Script["Downstream build.ss"]
+  Script --> Bridge["building/build-script"]
+  Bridge --> Profile["native std/make options"]
   Bridge --> Make["std/make"]
+  Profile --> Make
   Decl["typed plan and receipt"] --> Build["building/facade"]
   TestDecl["testing/building"] --> TestModel["testing/model"]
   TestDecl --> Build
@@ -39,8 +42,27 @@ strictly =Testing -> Building=.
    "src/main"
    "example-provider"
    '("src/core" "src/workflow"))
+  profile: 'development
   bindir: (framework-build-bindir))
 #+end_src
+
+Every executable build declaration supplies one package profile.  The public
+profile vocabulary is deliberately limited to =development= and =production=:
+
+| Profile | Native lowering |
+|---------+-----------------|
+| =development= | =std/make= with optimization disabled |
+| =production= | optimized release policy selected by the host platform |
+
+The profile is package policy stored in the POO package spec and projected by
+the top-level =build.ss=.  It is not a replacement compiler, scheduler, cache,
+or platform detector.  Downstream scripts must not also declare
+=optimize:=, =build-release:=, or =build-optimized:=; the bridge rejects those
+duplicate owners before delegating to =std/make=.  A command-line release or
+optimized request remains an explicit upstream-compatible override of the
+declared default.  Before delegation, the bridge normalizes every keyword to
+one value, so combined =--release --optimized= requests cannot produce duplicate
+=std/make= keyword arguments.
 
 For typed plan inspection and Testing projection, downstream libraries may also
 compose the declarative API:
@@ -83,6 +105,12 @@ composition when a named binding is not appropriate.
   supplies =##cpu-count= before compiler import to the single upstream
   scheduler. The declared runtime-module closure is target data, not another
   scheduler; Gerbil's emitted executable stub is its conformance oracle.
+- When core selection requires a pre-import child, the Scheme bridge starts
+  =gxpkg env= from the declaring =build.ss= package directory.  Invocation from
+  a monorepo root therefore cannot change package identity.
+- Build profile ownership is singular: the POO package spec declares the
+  semantic profile, the bridge lowers it to native =std/make= keys, and
+  =std/make= remains the executor.
 - The Testing projection produces plan-only runners.  Stage execution remains
   an explicit Building operation.
 - Multiple suite and case names are mapped functionally, so matrix coverage is

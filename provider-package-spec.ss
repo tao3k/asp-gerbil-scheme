@@ -20,8 +20,9 @@
 
 (asp-gerbil-scheme-package-spec!
  (asp-gerbil-scheme-provider-package-spec
-  @ asp-gerbil-scheme-library-package-prototype)
+ @ asp-gerbil-scheme-library-package-prototype)
  (role 'provider)
+ (profile 'production)
  (entry "src/provider-server")
  (native-spec
   (let (runtime-modules (provider-runtime-modules))

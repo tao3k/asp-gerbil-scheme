@@ -205,8 +205,10 @@
         (unless (framework-positive-core-count previous-cores)
           (setenv "GERBIL_BUILD_CORES" selected)))
       (lambda ()
-        (run-process/batch
-         (append ["gxpkg" "env" "gxi" absolute-source-file] arguments)))
+        (parameterize
+         ((current-directory (path-directory absolute-source-file)))
+         (run-process/batch
+          (append ["gxpkg" "env" "gxi" absolute-source-file] arguments))))
       (lambda ()
         (setenv "GERBIL_BUILD_CORES" (or previous-cores ""))))))
 
@@ -235,17 +237,113 @@
   (append (recover-directory (framework-static-directory))
           (recover-directory (framework-build-bindir))))
 
+(def +framework-darwin-native-environment-exclusions+
+  '("SDKROOT" "DEVELOPER_DIR"))
+
+(def (call-with-framework-native-toolchain-environment thunk)
+  (cond-expand
+   (darwin
+    (let (previous
+          (map (lambda (name) (cons name (getenv name #f)))
+               +framework-darwin-native-environment-exclusions+))
+      (dynamic-wind
+        (lambda ()
+          (for-each (lambda (entry) (setenv (car entry))) previous))
+        thunk
+        (lambda ()
+          (for-each
+           (lambda (entry)
+             (if (cdr entry)
+               (setenv (car entry) (cdr entry))
+               (setenv (car entry))))
+           previous)))))
+   (else (thunk))))
+
 (def (call-with-framework-build-lease thunk)
   (let* ((cache-root (framework-build-cache-root))
          (lease-path (path-expand ".asp-gerbil-scheme-build.lease" cache-root)))
     (create-directory* cache-root)
     (let (lease (open-output-file/lock lease-path op: LOCK_EX))
       (unwind-protect
-        (call-with-framework-build-cores
+        (call-with-framework-native-toolchain-environment
          (lambda ()
-           (framework-recover-object-locks!)
-           (thunk)))
+           (call-with-framework-build-cores
+            (lambda ()
+              (framework-recover-object-locks!)
+              (thunk)))))
         (close-port lease)))))
+
+(def (framework-build-profile-options profile)
+  (case profile
+    ((development)
+     [optimize: #f])
+    ((production)
+     (cond-expand
+      (darwin [optimize: #t build-optimized: #t])
+      (else [optimize: #t build-release: #t])))
+    (else
+     (error "unsupported Scheme build profile" profile))))
+
+(def (framework-profile-controlled-option? option)
+  (memq option '(optimize: build-release: build-optimized:)))
+
+(def (framework-resolve-build-keys keys)
+  (let loop ((rest keys) (profile #f) (native-options []))
+    (match rest
+      ([]
+       (unless profile
+         (error "defbuild-script requires profile: development or production"))
+       (append (framework-build-profile-options profile)
+               (reverse native-options)))
+      ([profile: value . tail]
+       (when profile
+         (error "defbuild-script declares more than one build profile"))
+       (loop tail value native-options))
+      ([option value . tail]
+       (when (framework-profile-controlled-option? option)
+         (error "build profile owns std/make optimization options" option))
+       (loop tail profile (cons value (cons option native-options))))
+      (else
+       (error "malformed defbuild-script options" keys)))))
+
+(def (framework-build-option-keys options)
+  (let loop ((rest options) (keys []))
+    (match rest
+      ([] keys)
+      ([key _value . tail]
+       (loop tail (cons key keys)))
+      (else
+       (error "malformed std/make options" options)))))
+
+(def (framework-remove-build-options options removed-keys)
+  (let loop ((rest options) (kept []))
+    (match rest
+      ([] (reverse kept))
+      ([key value . tail]
+       (if (memq key removed-keys)
+         (loop tail kept)
+         (loop tail (cons value (cons key kept)))))
+      (else
+       (error "malformed std/make options" options)))))
+
+(def (framework-normalize-build-options options)
+  (match options
+    ([] [])
+    ([key value . tail]
+     (cons* key
+            value
+            (framework-normalize-build-options
+             (framework-remove-build-options tail [key]))))
+    (else
+     (error "malformed std/make options" options))))
+
+(def (framework-merge-build-options base overrides)
+  (let (normalized-overrides
+        (framework-normalize-build-options overrides))
+    (append normalized-overrides
+            (framework-remove-build-options
+             (framework-normalize-build-options base)
+             (framework-build-option-keys normalized-overrides)))))
 
 (def (framework-build-main arguments build-spec keys source-file)
   (def (parse-options options)
@@ -265,14 +363,14 @@
            (loop rest
                  (if (present? build-optimized: parsed)
                      parsed
-                     (cons* build-optimized: #t parsed))))
+                     (cons* optimize: #t build-optimized: #t parsed))))
           (else
-           (loop rest (cons* build-release: #t parsed)))))
+           (loop rest (cons* optimize: #t build-release: #t parsed)))))
         (["--optimized" . rest]
          (loop rest
                (if (present? build-optimized: parsed)
                    parsed
-                   (cons* build-optimized: #t parsed))))
+                   (cons* optimize: #t build-optimized: #t parsed))))
         (["--debug" . rest]
          (loop rest (cons* debug: #t parsed)))
         (else
@@ -280,7 +378,8 @@
   (def source-directory
     (path-normalize (path-directory source-file)))
   (def (build options)
-    (let (bindir (framework-build-bindir))
+    (let ((bindir (framework-build-bindir))
+          (build-keys (framework-resolve-build-keys keys)))
       (create-directory* bindir)
       (call-with-framework-build-lease
        (lambda ()
@@ -295,10 +394,13 @@
            (apply make
                   build-spec
                   srcdir: source-directory
-                  (append options keys))
+                  (framework-merge-build-options build-keys options))
            (framework-validate-runtime-closure! build-spec))))))
   (def (clean)
-    (apply make-clean build-spec srcdir: source-directory keys))
+    (apply make-clean
+           build-spec
+           srcdir: source-directory
+           (framework-resolve-build-keys keys)))
   (match arguments
     (["meta"] (write '("spec" "compile" "clean")) (newline))
     (["spec"] (pretty-print build-spec))
@@ -328,11 +430,18 @@
     (commandSurfaceOwner . "Building-Framework")
     (executor . "std/make")
     (dependencyGraphOwner . "std/make")
+    (buildProfileOwner . "POO-package-spec")
+    (buildProfileProjection . "native-std/make-options")
+    (developmentProfile . "gcc-optimize-disabled")
+    (productionProfile . "gcc-platform-release-policy")
+    (buildDepsOwner . "std/make-srcdir-default")
     (parallelismOwner . "GERBIL_BUILD_CORES")
     (defaultCoreSelection . "host-cpu-count")
     (compilerCoreCapture . "pre-import-child-process")
     (dependencyEnvironmentOwner . "gxpkg-env")
     (nativeLinkWorkingDirectory . "declared-bindir")
+    (darwinNativeEnvironmentOwner . "Building-Framework")
+    (darwinNativeEnvironmentExclusions . "SDKROOT-and-DEVELOPER_DIR")
     (releaseLinkageOwner . "Building-Framework-platform-policy")
     (darwinReleaseLinkage . "optimized-dynamic")
     (buildGraphProjection . "declared-compiler-runtime-closure-to-std/make")
