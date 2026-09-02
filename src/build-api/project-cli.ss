@@ -4,15 +4,7 @@
         :std/cli/getopt
  :std/cli/multicall
   :asp-gerbil-scheme/src/build-api/project-build
-  :asp-gerbil-scheme/src/testing/project-build
-  :asp-gerbil-scheme/src/build-api/source-coverage)
-
-(def +package-root+ (current-directory))
-
-(configure-project-build-root! +package-root+)
-(asp-gerbil-scheme-source-coverage
- roots: ["src"]
- runtime-roots: ["src"])
+  :asp-gerbil-scheme/src/testing/project-build)
 
 (def (native-build-getopt . options)
   (append

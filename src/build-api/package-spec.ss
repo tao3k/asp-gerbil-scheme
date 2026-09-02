@@ -2,26 +2,56 @@
         asp-gerbil-scheme-library-package-prototype
         asp-gerbil-scheme-package-native-spec
         asp-gerbil-scheme-package-build-profile
+        asp-gerbil-scheme-package-source-roots
+        asp-gerbil-scheme-package-runtime-roots
+        asp-gerbil-scheme-package-exclude-directories
         asp-gerbil-scheme-package-api-spec
         asp-gerbil-scheme-package-api-stage-specs)
 
 (import :clan/poo/object
+        (only-in "./source-coverage"
+                 asp-gerbil-scheme-source-coverage)
         (only-in :gerbil/gambit directory-files file-exists?)
         (only-in :std/sort sort)
         (only-in :std/srfi/1 append-map)
         (only-in :std/srfi/13 string-suffix?))
 
 ;; Package specs are POO objects whose native-spec slot remains an ordinary
-;; Gerbil std/make value.  The macro adds no second build option language.
+;; Gerbil std/make value.  Source coverage is another projection of the same
+;; object, so builds and project policy cannot drift onto different owner sets.
 (defrules asp-gerbil-scheme-package-spec! ()
-  ((_ declaration slot ...)
-   (.def declaration slot ...)))
+  ((_ (name @ prototype) slot ...)
+   (begin
+     (.def (name @ prototype) slot ...)
+     (asp-gerbil-scheme-apply-package-source-coverage! name)))
+  ((_ name slot ...)
+   (begin
+     (.def name slot ...)
+     (asp-gerbil-scheme-apply-package-source-coverage! name))))
 
 (def (asp-gerbil-scheme-package-native-spec package-spec)
   (.get package-spec native-spec))
 
 (def (asp-gerbil-scheme-package-build-profile package-spec)
   (.get package-spec profile))
+
+(def (asp-gerbil-scheme-package-source-roots package-spec)
+  (.get package-spec roots))
+
+(def (asp-gerbil-scheme-package-runtime-roots package-spec)
+  (.get package-spec runtime-roots))
+
+(def (asp-gerbil-scheme-package-exclude-directories package-spec)
+  (.get package-spec exclude-directories))
+
+;; The macro calls this once while loading build.ss.  Keeping the projection
+;; behind a named function leaves the public syntax purely declarative.
+(def (asp-gerbil-scheme-apply-package-source-coverage! package-spec)
+  (asp-gerbil-scheme-source-coverage
+   roots: (asp-gerbil-scheme-package-source-roots package-spec)
+   runtime-roots: (asp-gerbil-scheme-package-runtime-roots package-spec)
+   exclude-directories:
+   (asp-gerbil-scheme-package-exclude-directories package-spec)))
 
 ;; Import-safe semantic base for concrete project library and provider specs.
 ;; Script entrypoints remain in top-level build.ss files; this module owns only
@@ -30,6 +60,9 @@
  asp-gerbil-scheme-library-package-prototype
  (role 'library)
  (profile 'development)
+ (roots ["src"])
+ (runtime-roots ["src"])
+ (exclude-directories [])
  (native-spec []))
 
 ;; Cold package builds retain an explicit stage order for owners whose imports

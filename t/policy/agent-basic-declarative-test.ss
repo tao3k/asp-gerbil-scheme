@@ -91,4 +91,21 @@
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
           (check matching => []))))
+(test-case "agent policy treats native multicall macros as declarative entrypoints"
+      (let* ((root ".run/policy-native-multicall-declarative")
+             (src (string-append root "/src")))
+        (reset-fixture-root root)
+        (ensure-dir ".run")
+        (ensure-dir root)
+        (ensure-dir src)
+        (write-text
+         (string-append root "/gerbil.pkg")
+         "(package: sample/native-multicall-declarative)\n")
+        (write-text
+         (string-append src "/cli.ss")
+         ";;; -*- Gerbil -*-\n(import :std/cli/getopt :std/cli/multicall)\n(define-entry-point (compile verbose: (verbose #f))\n  (help: \"Compile the package\" getopt: [])\n  (displayln verbose))\n(define-multicall-main)\n")
+        (let* ((index (collect-project root))
+               (findings (run-agent-policy index))
+               (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
+          (check matching => []))))
   ))

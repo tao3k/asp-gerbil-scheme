@@ -239,8 +239,7 @@
 
 ;; : (-> SourceFile CallFact Boolean )
 (def (top-level-entrypoint-exempt-call? file call)
-  (or (explicit-runtime-entrypoint-path? (call-fact-path call))
-      (explicit-main-entrypoint-call? file call)
+  (or (explicit-main-entrypoint-call? file call)
       (explicit-test-entrypoint-call? file call)
       (declarative-top-level-call? file call)))
 
@@ -259,6 +258,8 @@
     "use-module"
     "use-live-case"
     "declare-gxtest-memory-exception"
+    "define-entry-point"
+    "define-multicall-main"
     "modularity-policy"
     "poo-flow-module-object"
     "poo-flow-module-field-contract"))
