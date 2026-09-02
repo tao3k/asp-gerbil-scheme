@@ -35,7 +35,7 @@
       (cond-expand
        (darwin
         (check (framework-build-profile-options 'production)
-               => [optimize: #t build-optimized: #t]))
+               => [optimize: #t]))
        (else
         (check (framework-build-profile-options 'production)
                => [optimize: #t build-release: #t])))
@@ -78,6 +78,8 @@
                => "Building-Framework")
         (check (cdr (assoc 'darwinNativeEnvironmentExclusions contract))
                => "SDKROOT-and-DEVELOPER_DIR")
+        (check (cdr (assoc 'darwinExecutableTopology contract))
+               => "optimized-multi-unit")
         (check (cdr (assoc 'buildGraphProjection contract))
                => "declared-compiler-runtime-closure-to-std/make")
         (check (cdr (assoc 'libraryBuildProjection contract))

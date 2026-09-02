@@ -96,6 +96,31 @@ the full project sources and declares =//:compile= as a dependency.  Provider,
 HTTP, or CLI product-entry edits therefore do not invalidate the default
 library compile cache.
 
+Native CI preserves the same ownership boundary with two independent targets.
+The library target uses the =development= profile and owns semantic library
+tests.  The provider target uses the =production= profile and owns the provider
+binary and HTTP process test.  They run in separate jobs and therefore never
+reuse native outputs across profiles; Gerbil =std/make= freshness is based on
+source/output state and is not an options-identity cache.
+
+The measured declaration contains 224 library entries, while the provider
+transitive closure contains only 20 static runtime modules and one executable.
+Serially optimizing the full library before building that provider is therefore
+not a cache optimization: it compiles policy, testing, build tooling, and other
+modules outside the provider owner graph.  CI shares only dependency-package
+caches and gives each project-target build a ten-minute hard wall-time gate.
+
+#+begin_src mermaid
+flowchart LR
+    Source[ASP source checkout] --> Library[Library development target<br/>224 declared modules]
+    Source --> Provider[Provider production target<br/>20 static modules + 1 executable]
+    Deps[Gerbil dependency package cache] --> Library
+    Deps --> Provider
+    Library --> LibraryTests[Semantic library tests]
+    Provider --> ProviderTest[Provider HTTP binary test]
+    Library -. isolated native outputs .-> Provider
+#+end_src
+
 The reusable POO parent lives in =src/build-api/package-spec.ss=, which is an
 ordinary import-safe Gerbil module.  Root =build.ss= and top-level
 =provider-package-spec.ss= each declare a concrete object derived from that
@@ -105,12 +130,35 @@ binding, so a build entrypoint is not a library module.  Bazel's explicit
 =//:provider_compile -> //:compile= dependency is the execution dependency;
 POO inheritance supplies the shared semantic contract.
 
-A fresh Darwin provider receipt after this split completed in 33 seconds
-(40.4 seconds Bazel wall time), with 23 plain compile entries, one executable
-entry, and 47 execute-job records.  This is a provider delta, not a second
-projection of the 232-module library.  The current receipt does not yet record
-resolved logical/available cores or worker/job capacity, so it proves removal
-of duplicate work but does not by itself prove the exact scheduler concurrency.
+The split-target CI receipt supersedes the earlier 33-second provider estimate.
+In the final green run, the complete library jobs took 1 minute 50 seconds on
+Linux and 7 minutes 3 seconds on Darwin; the complete provider jobs took 57
+seconds on Linux and 3 minutes 21 seconds on Darwin.  All four jobs include
+their owned tests and remain below their platform performance gates.
+
+The failed predecessor receipt is still useful root-cause evidence.  Its Darwin
+provider expanded and scheduled the 20-module graph in about one minute, but
+upstream =build-optimized:= then lowered the
+whole executable to one =SINGLE_HOST= C translation unit.  GCC 16 was still
+compiling that unit when the ten-minute gate fired; the matching local process
+used 1,552,400 KiB RSS (about 1.48 GiB).  The bottleneck is therefore executable C topology,
+not module discovery or missing std/make parallelism.
+
+Darwin =production= now keeps native Scheme optimization but does not request
+=build-optimized:=.  This retains std/make's multi-unit executable topology and
+platform-dynamic linkage.  Linux keeps =build-release:=.  Runtime closure
+validation remains unchanged: only the 20 declared static modules may enter the
+provider executable; integration support modules follow the executable target
+and are compiled as ordinary library units.
+
+#+begin_src mermaid
+flowchart LR
+    Graph[20-module provider graph<br/>about 1 minute on Darwin] --> Choice{Darwin production topology}
+    Choice -->|build-optimized| Single[One SINGLE_HOST executable C unit]
+    Single --> Timeout[More than 10 minutes<br/>1,552,400 KiB local RSS]
+    Choice -->|optimize only| Multi[std/make multi-unit executable]
+    Multi --> Gate[Target: below 10 minutes<br/>same 20-module closure oracle]
+#+end_src
 
 The canonical scripts must import =defbuild-script= from
 =src/building/build-script.ss=, not directly from upstream

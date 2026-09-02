@@ -1,4 +1,6 @@
-;;; Public module wrapper for the source-bootstrapped Build SS bridge.
+;;; Public module wrapper for the source-bootstrapped Build SS bridge.  The
+;;; implementation owns platform-specific production topology as part of the
+;;; exported profile contract.
 (include "build-script-body.inc")
 
 (export defbuild-script

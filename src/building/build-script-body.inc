@@ -279,7 +279,12 @@
      [optimize: #f])
     ((production)
      (cond-expand
-      (darwin [optimize: #t build-optimized: #t])
+      ;; Gerbil's build-optimized path emits one SINGLE_HOST executable C
+      ;; translation unit.  GCC 16 needs more than ten minutes and about
+      ;; 1.55 GiB RSS for the provider unit on Darwin, while the preceding
+      ;; module graph finishes in about one minute.  Keep Scheme optimization
+      ;; enabled but retain std/make's multi-unit executable topology there.
+      (darwin [optimize: #t])
       (else [optimize: #t build-release: #t])))
     (else
      (error "unsupported Scheme build profile" profile))))
@@ -444,6 +449,7 @@
     (darwinNativeEnvironmentExclusions . "SDKROOT-and-DEVELOPER_DIR")
     (releaseLinkageOwner . "Building-Framework-platform-policy")
     (darwinReleaseLinkage . "optimized-dynamic")
+    (darwinExecutableTopology . "optimized-multi-unit")
     (buildGraphProjection . "declared-compiler-runtime-closure-to-std/make")
     (libraryBuildProjection . "post-executable-package-modules-to-std/make")
     (runtimeClosureDriftOracle . "gerbil-executable-stub")
