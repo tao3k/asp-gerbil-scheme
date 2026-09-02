@@ -3,7 +3,7 @@
         :std/test
         (only-in "../provider-package-spec"
                  asp-gerbil-scheme-provider-package-spec)
-        (only-in "../src/build-api/component-closure"
+        (only-in "../src/build-api/source-closure"
                  asp-gerbil-scheme-source-dependency-order))
 
 (export provider-package-spec-test main)

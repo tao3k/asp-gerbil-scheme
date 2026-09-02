@@ -181,7 +181,9 @@
   '(("support/args.ss" "support/io.ss")))
 
 (def +package-api-building-stages+
-  '(("building/model.ss" "building/native-toolchain.ss")
+  '(("building/model.ss"
+     "building/native-toolchain.ss"
+     "building/memory-anomaly-guard.ss")
     ("building/build-script.ss")
     ("building/std-builder.ss")
     ("building/observability.ss")
@@ -190,7 +192,7 @@
     ("testing/building.ss")))
 
 (def +package-api-build-api-stages+
-  '(("build-api/artifact-cleanup.ss" "build-api/component-closure.ss")
+  '(("build-api/artifact-cleanup.ss" "build-api/source-closure.ss")
     ("build-api/native-build.ss")
     ("build-api/framework.ss")))
 
@@ -199,7 +201,7 @@
     "language" "format" "commands"))
 
 (def +package-api-launcher-stages+
-  '(("search-light-launcher.ss") ("cli-launcher.ss")))
+  '(("cli-launcher.ss")))
 
 (def (ss-file? file)
   (and (string? file) (string-suffix? ".ss" file)))

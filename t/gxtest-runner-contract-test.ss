@@ -52,7 +52,7 @@
         (check (length files) => 8)
         (check (member "t/agent-poo-scenario-contract-test.ss" files) ? true)
         (check (member "t/build-install-test.ss" files) ? true)
-        (check (member "t/component-closure-test.ss" files) ? true)
+        (check (member "t/source-closure-test.ss" files) ? true)
         (check (member "t/parser-memory-stability-test.ss" files) ? true)
         (check (member "t/self-apply-full-gate.ss" files) => #f)
         (check (member "t/package-build-receipt-test.ss" files) => #f)

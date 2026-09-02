@@ -98,8 +98,10 @@
         package-source-stages-run!
         package-source-stages-clean!)
 ;; Building facade owns public stage plans and receipt projections; native policy remains upstream.
-(import ./observability)
+(import ./observability
+        ./memory-anomaly-guard)
 (export (import: ./observability))
+(export (import: ./memory-anomaly-guard))
 
 (export
         execution-window-controller?

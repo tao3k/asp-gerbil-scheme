@@ -1,10 +1,9 @@
-;;; Component closures are ASP_GERBIL_SCHEME-owned build metadata: declared public entry
-;;; modules expand to a deterministic, checked internal import/include graph.
-;;; Downstream build systems consume the receipt and never reimplement parsing.
+;;; Gerbil package source closures expand declared entry modules into one
+;;; deterministic internal import/include order. Package identity comes only
+;;; from gerbil.pkg; this owner has no downstream project or component catalog.
 
 (import :gerbil/expander
         (only-in :std/misc/path path-directory path-expand path-normalize)
-        (only-in :std/sort sort)
         (only-in :std/srfi/1 filter-map fold)
         (only-in :std/srfi/13 string-index string-prefix? string-suffix?)
         (only-in :std/sugar
@@ -13,49 +12,12 @@
                  hash-key?
                  hash-put!
                  hash-remove!)
-        (only-in :std/text/json write-json)
         (only-in :asp-gerbil-scheme/src/parser/imports module-import-facts-from-form)
         (only-in :asp-gerbil-scheme/src/parser/model module-import-fact-module)
-        (only-in :asp-gerbil-scheme/src/build-api/source-coverage
-                 asp-gerbil-scheme-source-coverage-files))
+        (only-in :asp-gerbil-scheme/src/build-api/package-build
+                 asp-gerbil-scheme-package-build-package-name))
 
-(export asp-gerbil-scheme-component-names
-        asp-gerbil-scheme-component-entry-files
-        asp-gerbil-scheme-source-dependency-order
-        asp-gerbil-scheme-component-source-files
-        asp-gerbil-scheme-component-receipt
-        write-asp-gerbil-scheme-component-receipt)
-
-(def +asp-gerbil-scheme-package-module-prefix+ ":asp-gerbil-scheme/")
-(def +asp-gerbil-scheme-component-support-files+
-  '("build.ss" "gerbil.pkg" "src/building/build-script-body.inc"))
-(def +asp-gerbil-scheme-component-entry-files+
-  '((poo-flow
-     "src/build-api/framework.ss"
-     "src/build-api/source-coverage.ss"
-     "src/building/observability.ss"
-     "src/building/std-builder.ss"
-     "src/extensions/poo-object-validation.ss"
-     "src/policy/gxtest.ss"
-     "src/testing/build.ss")))
-
-;; : (-> (U Symbol String) ComponentName)
-(def (component-name->symbol name)
-  (cond
-   ((symbol? name) name)
-   ((string? name) (string->symbol name))
-   (else (error "invalid ASP_GERBIL_SCHEME component name" name))))
-
-;; : (-> (List ComponentName))
-(def (asp-gerbil-scheme-component-names)
-  (map car +asp-gerbil-scheme-component-entry-files+))
-
-;; : (-> ComponentName (List SourcePath))
-(def (asp-gerbil-scheme-component-entry-files name)
-  (let* ((component (component-name->symbol name))
-         (entry (assq component +asp-gerbil-scheme-component-entry-files+)))
-    (or (and entry (cdr entry))
-        (error "unknown ASP_GERBIL_SCHEME component" component))))
+(export asp-gerbil-scheme-source-dependency-order)
 
 ;; : (-> ModuleReference ModuleReference)
 (def (module-ref-without-fragment module-ref)
@@ -95,16 +57,24 @@
                        (path-directory (path-expand importer root)))))
     (root-relative-path root resolved-path)))
 
-;;; Boundary: package-qualified ASP_GERBIL_SCHEME and relative imports enter the component
-;;; graph; external modules remain declared Gerbil package dependencies.
-;; : (-> PackageRoot SourcePath ModuleReference (Maybe SourcePath))
-(def (asp-gerbil-scheme-internal-module-source-file root importer module-ref)
+;; : (-> PackageRoot ModulePrefix)
+(def (package-module-prefix root)
+  (let (package-name (asp-gerbil-scheme-package-build-package-name root))
+    (unless (and (string? package-name) (> (string-length package-name) 0))
+      (error "Gerbil package closure requires package: in gerbil.pkg" root))
+    (string-append ":" package-name "/")))
+
+;;; Boundary: imports qualified by the package-local gerbil.pkg identity and
+;;; relative imports enter the closure; external package modules remain Gerbil
+;;; package dependencies.
+;; : (-> ModulePrefix PackageRoot SourcePath ModuleReference (Maybe SourcePath))
+(def (internal-module-source-file package-prefix root importer module-ref)
   (let (module-path (module-ref-without-fragment module-ref))
     (cond
-     ((string-prefix? +asp-gerbil-scheme-package-module-prefix+ module-path)
+     ((string-prefix? package-prefix module-path)
       (source-path-with-extension
        (substring module-path
-                  (string-length +asp-gerbil-scheme-package-module-prefix+)
+                  (string-length package-prefix)
                   (string-length module-path))))
      ((string-prefix? ":" module-path) #f)
      (else (relative-source-path root importer module-path)))))
@@ -121,22 +91,22 @@
            (cdr datum))
       '())))
 
-;; : (forall (form) (-> PackageRoot SourcePath form (List SourcePath)))
-;; : (-> PackageRoot SourcePath Syntax (List SourcePath))
-(def (source-form-dependencies root source form)
+;; : (forall (form) (-> ModulePrefix PackageRoot SourcePath form (List SourcePath)))
+;; : (-> ModulePrefix PackageRoot SourcePath Syntax (List SourcePath))
+(def (source-form-dependencies package-prefix root source form)
   (cond
    ((and (stx-pair? form) (eq? (stx-e (stx-car form)) 'import))
     (filter-map
      (lambda (fact)
-       (asp-gerbil-scheme-internal-module-source-file
-        root source (module-import-fact-module fact)))
+       (internal-module-source-file
+        package-prefix root source (module-import-fact-module fact)))
      (module-import-facts-from-form source form)))
    ((and (stx-pair? form) (eq? (stx-e (stx-car form)) 'include))
     (include-source-files root source form))
    (else '())))
 
-;; : (-> PackageRoot SourcePath (List SourcePath))
-(def (source-dependencies root source)
+;; : (-> ModulePrefix PackageRoot SourcePath (List SourcePath))
+(def (source-dependencies package-prefix root source)
   (call-with-input-file
    (path-expand source root)
    (lambda (port)
@@ -145,7 +115,8 @@
          (if (eof-object? form)
            dependencies
            (loop (fold cons dependencies
-                       (source-form-dependencies root source form)))))))))
+                       (source-form-dependencies
+                        package-prefix root source form)))))))))
 
 ;;; Invariant: a source is emitted once, every dependency is visited first, and
 ;;; a back-edge is rejected with its cycle path instead of being silently cut.
@@ -155,25 +126,27 @@
 ;; : (forall (path) (-> path (List path) (List path)))
 ;; : (-> PackageRoot (List SourcePath) (List SourcePath))
 (def (asp-gerbil-scheme-source-dependency-order root entries)
-  (let ((visited (make-hash-table))
+  (let ((package-prefix (package-module-prefix root))
+        (visited (make-hash-table))
         (visiting (make-hash-table))
         (dependency-cache (make-hash-table))
         (ordered '()))
     (def (cached-source-dependencies source)
       (if (hash-key? dependency-cache source)
         (hash-get dependency-cache source)
-        (let (dependencies (source-dependencies root source))
+        (let (dependencies
+              (source-dependencies package-prefix root source))
           (hash-put! dependency-cache source dependencies)
           dependencies)))
     (def (visit source stack)
       (cond
        ((hash-key? visited source) (void))
        ((hash-key? visiting source)
-        (error "cyclic ASP_GERBIL_SCHEME component source dependency"
+        (error "cyclic Gerbil package source dependency"
                (reverse (cons source stack))))
        (else
         (unless (file-exists? (path-expand source root))
-          (error "missing ASP_GERBIL_SCHEME component source dependency" source stack))
+          (error "missing Gerbil package source dependency" source stack))
         (hash-put! visiting source #t)
         (for-each (lambda (dependency)
                     (visit dependency (cons source stack)))
@@ -183,38 +156,3 @@
         (set! ordered (cons source ordered)))))
     (for-each (lambda (entry) (visit entry '())) entries)
     (reverse ordered)))
-
-;; : (-> ComponentName PackageRoot (List SourcePath))
-(def (asp-gerbil-scheme-component-source-files name root: (root (current-directory)))
-  (sort (asp-gerbil-scheme-source-dependency-order root (asp-gerbil-scheme-component-entry-files name))
-        string<?))
-
-;;; Intent: the sorted receipt is the deterministic analysis boundary consumed
-;;; by downstream build systems; declared entry roots remain separately visible.
-;; : (-> ComponentName PackageRoot ComponentClosureReceipt)
-(def (asp-gerbil-scheme-component-receipt name root: (root (current-directory)))
-  (let* ((component (component-name->symbol name))
-         (entries (asp-gerbil-scheme-component-entry-files component))
-         (sources (asp-gerbil-scheme-component-source-files component root: root))
-         (module-sources
-          (filter (lambda (path) (string-suffix? ".ss" path)) sources))
-         (full-sources (asp-gerbil-scheme-source-coverage-files root))
-         (strict-subset? (< (length module-sources) (length full-sources))))
-    (unless strict-subset?
-      (error "ASP_GERBIL_SCHEME component closure is not a strict package subset"
-             component (length module-sources) (length full-sources)))
-    (hash
-     (schema "asp-gerbil-scheme.component-source-closure.v1")
-     (outcome "valid")
-     (component (symbol->string component))
-     (entryFiles entries)
-     (sourceFiles sources)
-     (sourceCount (length sources))
-     (fullSourceCount (length full-sources))
-     (strictSubset strict-subset?)
-     (supportFiles +asp-gerbil-scheme-component-support-files+))))
-
-;; : (-> ComponentName PackageRoot Void)
-(def (write-asp-gerbil-scheme-component-receipt name root: (root (current-directory)))
-  (write-json (asp-gerbil-scheme-component-receipt name root: root))
-  (newline))

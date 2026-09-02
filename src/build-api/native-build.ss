@@ -23,7 +23,7 @@
                  asp-gerbil-scheme-source-coverage-files
                  asp-gerbil-scheme-source-coverage-runtime-roots
                  asp-gerbil-scheme-source-coverage-exclude-directories)
-        (only-in "./component-closure"
+        (only-in "./source-closure"
                  asp-gerbil-scheme-source-dependency-order)
         (only-in "./package-receipt"
                  asp-gerbil-scheme-package-build-receipt-status
@@ -175,14 +175,11 @@
 ;; : (List ModulePath)
 (def cli-bootstrap-modules
   '("constants.ss"
-    "commands/search-prime-light-list.ss"
-    "commands/search-prime-light.ss"
-    "search-light-launcher.ss"
     "support/time.ss"))
 
 ;; : (List String)
 (def +library-excluded-dirs+
-  '("search-fast" "testing"))
+  '("testing"))
 
 ;; : (List String)
 (def +default-excluded-dirs+

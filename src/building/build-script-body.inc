@@ -11,6 +11,9 @@
         (only-in :std/srfi/13 string-prefix? string-suffix? string-trim-both)
         (only-in :gerbil/gambit getenv))
 
+(import (only-in ./memory-anomaly-guard
+                 call-with-framework-memory-anomaly-guard))
+
 (def (framework-build-artifact-root)
   (getenv "ASP_PROVIDER_ARTIFACT_ROOT"
           (getenv "GERBIL_PATH" (gerbil-home))))
@@ -395,12 +398,16 @@
          ;; executable linker emits __exe.c relative to that cwd, so the
          ;; caller must be the declared bindir for generation and consumption
          ;; to share one path.
-         (parameterize ((current-directory bindir))
-           (apply make
-                  build-spec
-                  srcdir: source-directory
-                  (framework-merge-build-options build-keys options))
-           (framework-validate-runtime-closure! build-spec))))))
+         (call-with-framework-memory-anomaly-guard
+          "std/make package build"
+          (framework-build-core-count)
+          (lambda ()
+            (parameterize ((current-directory bindir))
+              (apply make
+                     build-spec
+                     srcdir: source-directory
+                     (framework-merge-build-options build-keys options))
+              (framework-validate-runtime-closure! build-spec))))))))
   (def (clean)
     (apply make-clean
            build-spec
