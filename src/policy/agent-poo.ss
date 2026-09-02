@@ -539,5 +539,6 @@
            (source "gerbil-poo doc/poo.md:30-50, 655-720")
            (next
             (string-append
-             "asp gerbil-scheme search owner " (source-file-path file)
-             " items --query 'poo putdefault setslots typed doc result example' --workspace . --view seeds"))))))
+             "asp-gerbil-scheme projection --native-index --owner "
+             (source-file-path file)
+             " --json --workspace ."))))))

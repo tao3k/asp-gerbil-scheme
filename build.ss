@@ -25,7 +25,6 @@
     "src/runtime/provider-operation"
     "src/runtime/provider-http-json-server"
     "src/commands/provider-runtime"
-    "src/search-light-launcher"
     "src/cli-launcher"))
 
 (def (source-modules)

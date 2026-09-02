@@ -363,8 +363,6 @@
         (check (member "support/args.ss" stage) ? true)
         (check (member "support/io.ss" stage) ? true)
         (check (member "commands/query.ss" stage) ? true)
-        (check (member "commands/search-owner-items.ss" stage) ? true)
-        (check (member "search-light-launcher.ss" stage) ? true)
         (check (member "cli-launcher.ss" stage) ? true)))
     (test-case "package api stages keep clean-ci dependency order"
       (let* ((stages (asp-gerbil-scheme-package-api-stage-specs))

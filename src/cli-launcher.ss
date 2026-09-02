@@ -7,7 +7,6 @@
         (only-in :asp-gerbil-scheme/src/protocol/command-catalog
                  provider-dynamic-command-dispatch
                  provider-recognized-command-names)
-        (only-in :asp-gerbil-scheme/src/search-light-launcher try-search-light-main)
         (only-in :std/misc/path path-expand)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/srfi/13 string-contains string-index string-index-right string-prefix?)
@@ -110,27 +109,8 @@
 
 ;; : (-> String (List String) Integer)
 (def (dispatch-command command rest)
-  (or (try-native-search-command command rest)
-      (try-native-direct-source-query command rest)
+  (or (try-native-direct-source-query command rest)
       (dispatch-native-command command rest)))
-
-;; : (-> String (List String) (U Integer #f))
-(def (try-native-search-command command rest)
-  (and (equal? command "search")
-       (begin
-         (guard-native-owner-search! rest)
-         (try-search-light-main rest))))
-
-;; : (-> Args Unit )
-(def (guard-native-owner-search! args)
-  (when (and (pair? args)
-             (equal? (car args) "owner")
-             (pair? (cdr args)))
-    (let* ((owner (cadr args))
-           (root (or (launcher-option "--workspace" args) "."))
-           (path (path-expand owner (path-expand root))))
-      (when (file-exists? path)
-        (guard-native-source-path! path)))))
 
 ;; : (-> Path Unit )
 (def (guard-native-source-path! path)

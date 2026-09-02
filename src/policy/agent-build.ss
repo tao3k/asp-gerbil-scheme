@@ -386,8 +386,8 @@
           (hash (evidence evidence)
                 (kind "package-build-responsibility")
                 (allowedBuildRole "build spec, dependency setup, compile orchestration, gxtest execution")
-                (disallowedRole "CLI/search/pattern routing policy or generated command semantics")
-                (next "move routing to src/cli or src/commands/search"))))))
+                (disallowedRole "CLI routing policy or generated command semantics")
+                (next "move provider routing to src/cli-launcher.ss or a native command owner"))))))
 
 ;;; Finding contract:
 ;;; - Evidence comes from parser-owned definition names.

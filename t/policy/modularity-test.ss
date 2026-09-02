@@ -183,7 +183,7 @@
                  (finding (car matching))
                  (details (type-finding-details finding)))
             (check (length matching) => 1)
-            (check (type-finding-path finding) => "t/search-test.ss")
+            (check (type-finding-path finding) => "t/native-syntax-test.ss")
             (check (hash-get details 'sourceClass) => "test")
             (check (hash-get details 'lineCountLimit) => 650)
             (check (hash-get details 'hardLineCountLimit) => 1000)

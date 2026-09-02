@@ -12,7 +12,6 @@
         poo-capability-dependency?
         source-runtime-file-path?
         index-source-runtime-file-path?
-        explicit-runtime-entrypoint-path?
         configured-runtime-roots
         source-path-under-root?
         project-poo-forms
@@ -58,10 +57,6 @@
 ;; : (-> String Boolean )
 (def (source-runtime-file-path? path)
   (and (string-prefix? "src/" path)
-       (string-suffix? ".ss" path)))
-;; : (-> String Boolean )
-(def (explicit-runtime-entrypoint-path? path)
-  (and (string-prefix? "src/search-fast/" path)
        (string-suffix? ".ss" path)))
 ;;; Boundary:
 ;;; - index-source-runtime-file-path? composes first-class procedures.

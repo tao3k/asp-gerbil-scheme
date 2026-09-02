@@ -1,9 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Release-only static linker root for the native asp-gerbil-scheme executable.
 
-(import (only-in :asp-gerbil-scheme/src/commands/search-structural
-                 emit-structural-artifact)
-        (rename-in :asp-gerbil-scheme/src/cli-launcher (main cli-main))
+(import (rename-in :asp-gerbil-scheme/src/cli-launcher (main cli-main))
         (only-in :asp-gerbil-scheme/src/commands/agent agent-main)
         (only-in :asp-gerbil-scheme/src/commands/evidence evidence-main)
         (only-in :asp-gerbil-scheme/src/commands/fmt fmt-main)
@@ -11,7 +9,6 @@
         (only-in :asp-gerbil-scheme/src/commands/info info-main)
         (only-in :asp-gerbil-scheme/src/commands/projection projection-main)
         (only-in :asp-gerbil-scheme/src/commands/query query-main)
-        (only-in :asp-gerbil-scheme/src/commands/search search-main)
         (only-in :asp-gerbil-scheme/src/protocol/command-catalog
                  provider-command-descriptor-name
                  provider-command-descriptor-static-main
@@ -28,7 +25,6 @@
 ;; : (-> ProviderCommandDescriptor CommandMain)
 (def (release-command-main descriptor)
   (case (provider-command-descriptor-static-main descriptor)
-    ((search-main) search-main)
     ((query-main) query-main)
     ((projection-main) projection-main)
     ((fmt-main) fmt-main)

@@ -6,7 +6,7 @@
   "required": [
     "schemaId", "schemaVersion", "protocolId", "protocolVersion",
     "packetKind", "state", "surface", "workspaceIdentity",
-    "generationDigest", "rootDigest", "profile", "seedIds",
+    "generationDigest", "rootDigest", "profile", "entryNodeIds",
     "rankedNodes", "edges", "workCounters"
   ],
   "properties": {
@@ -23,7 +23,7 @@
     "generationDigest": {"type": "string", "pattern": "^blake3-256:[0-9a-f]{64}$"},
     "rootDigest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "profile": {"enum": ["balanced", "structural", "dependency"]},
-    "seedIds": {
+    "entryNodeIds": {
       "type": "array", "maxItems": 128, "uniqueItems": true,
       "items": {"type": "string", "minLength": 1}
     },

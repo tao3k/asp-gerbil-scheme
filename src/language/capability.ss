@@ -109,7 +109,7 @@
       (active-or-available higher-order-facts)
       "Pure data transforms should prefer Gerbil higher-order and functional combinators before introducing manual loops."
       "parser-owned-higher-order-facts"
-      "search structural --workspace . --view seeds"
+      "projection --native-index --json --workspace ."
       ["capability" "posture" "higher-order" "map" "filter" "fold" "for/fold" "cut" "functional"]
       (hash (higherOrderForms (length higher-order-facts))
             (higherOrderSelectors
@@ -125,7 +125,7 @@
       (active-or-available control-flow-facts)
       "Named control-flow facts identify where loops are IO/state/generator drivers rather than pure data transforms."
       "parser-owned-control-flow-facts"
-      "search structural --workspace . --view seeds"
+      "projection --native-index --json --workspace ."
       ["capability" "posture" "control-flow" "named-let" "loop" "generator" "state" "driver"]
       (hash (controlFlowForms (length control-flow-facts))
             (controlFlowSelectors

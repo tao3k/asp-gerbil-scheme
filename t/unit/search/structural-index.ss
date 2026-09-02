@@ -11,7 +11,7 @@
 ;; Integer
 (def +structural-interface-summary-preview-limit+ 20)
 ;; String
-(def +structural-interface-owner-path+ "src/commands/search-structural.ss")
+(def +structural-interface-owner-path+ "src/commands/projection.ss")
 
 ;; : (-> (List Json) OwnerPath Boolean)
 (def (summary-owner-present? summaries owner-path)
@@ -63,7 +63,7 @@
            => #t)
     (check (summary-family-detail-present? summaries) => #f)
     (check (hash-get (hash-get packet 'factInterface) 'ownerFactsCommand)
-           => "asp-gerbil-scheme search structural --owner <path> --json .")
+           => "asp-gerbil-scheme projection --native-index --owner <path> --json --workspace .")
     (check (length (hash-get packet 'dependencyUsages)) => 0)
     (check (>= (hash-get packet 'dependencyUsageTotal) 0) => #t)))
 
@@ -212,7 +212,7 @@
                    +poo-structural-fixture-owners+
                    ["t/fixtures/parser/higher-order.ss"
                     "t/fixtures/parser/control-flow.ss"]))))
-    (check (packet-has-owner? packet "src/commands/search.ss") => #t)
+    (check (packet-has-owner? packet "src/commands/projection.ss") => #t)
     (check (> (hash-get packet 'symbolTotal) 0) => #t)
     (check (packet-has-syntax-fact? facts-packet "macro" "capture-safe") => #t)
     (check (packet-has-syntax-fact? facts-packet "import" ":std/text/json") => #t)

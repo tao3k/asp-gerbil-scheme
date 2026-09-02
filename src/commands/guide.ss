@@ -158,8 +158,8 @@
              #t))
       (cons 'controlled-branch-shape
             (make-guide-exemplar-spec
-             "src/commands/search-render.ss"
-             ["ranked-syntax-facts" "select-ranked-syntax-facts"]
+             "src/parser/control-flow.ss"
+             ["control-flow-facts-from-form"]
              #t))
       (cons 'engineering-comment-quality
             (make-guide-exemplar-spec

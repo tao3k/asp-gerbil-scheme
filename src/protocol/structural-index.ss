@@ -28,7 +28,7 @@
   "agent.semantic-protocols.semantic-language")
 ;; String
 (def +structural-interface-required-owner-path+
-  "src/commands/search-structural.ss")
+  "src/commands/projection.ss")
 ;; Integer
 (def +structural-interface-summary-preview-limit+ 20)
 
@@ -161,11 +161,11 @@
    (producer +provider-id+)
    (factSchemaId +semantic-native-syntax-fact-index-schema-id+)
    (generationId generation-id)
-   (manifestCommand "asp-gerbil-scheme search structural --json .")
+   (manifestCommand "asp-gerbil-scheme projection --native-index --json --workspace .")
    (ownerFactsCommand
-    "asp-gerbil-scheme search structural --owner <path> --json .")
+    "asp-gerbil-scheme projection --native-index --owner <path> --json --workspace .")
    (artifactCommand
-    "asp-gerbil-scheme search structural --json --artifact .")
+    "asp-gerbil-scheme projection --native-index --artifact --json --workspace .")
    (performanceContract
     "Packet rendering and owner fact projection should stay millisecond-level after native parsing; full graph/index construction belongs to ASP Rust.")
    (projectRoot (project-index-root index))))
@@ -208,9 +208,9 @@
    (ownerPath (source-file-path file))
    (facts (source-file-native-syntax-fact-count file))
    (ownerFactsCommand
-    (string-append "asp-gerbil-scheme search structural --owner "
+    (string-append "asp-gerbil-scheme projection --native-index --owner "
                    (source-file-path file)
-                   " --json ."))))
+                   " --json --workspace ."))))
 
 ;;; Interface summaries are the single owner pass used by the hot packet path.
 ;;; Counts, dependency totals, and fingerprints reuse this row so benchmarked
@@ -238,9 +238,9 @@
      (dependencyCount dependency-count)
      (fingerprint fingerprint)
      (ownerFactsCommand
-      (string-append "asp-gerbil-scheme search structural --owner "
+      (string-append "asp-gerbil-scheme projection --native-index --owner "
                      (source-file-path file)
-                     " --json .")))))
+                     " --json --workspace .")))))
 
 ;; : (-> (List Json) Symbol Integer)
 (def (structural-interface-summary-total summaries key)

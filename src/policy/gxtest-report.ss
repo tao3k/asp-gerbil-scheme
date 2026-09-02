@@ -292,7 +292,7 @@
     typedDocMissingCount typedDocMissingTargets
     invalidTypedContractCount invalidTypedContractReasons
     invalidTypedContractExamples
-    repairAction guideCodeFlag searchExampleCommand repairCodeCommand
+    repairAction guideCodeFlag factProjectionCommand repairCodeCommand
     codeShapeExemplar adapterRepairShape agentRepairStandard
     qualityFacets qualityFacetSteering requiredWitness rewriteScope
     evidence kind name selector))

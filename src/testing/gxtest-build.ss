@@ -39,9 +39,6 @@
 ;; : (-> (List String))
 (def cli-bootstrap-modules
   '("constants.ss"
-    "commands/search-prime-light-list.ss"
-    "commands/search-prime-light.ss"
-    "commands/search.ss"
     "commands/query.ss"
     "commands/check-cache.ss"
     "commands/check.ss"
@@ -49,7 +46,6 @@
     "commands/agent.ss"
     "commands/guide.ss"
     "commands/info.ss"
-    "search-light-launcher.ss"
     "build-api/source-coverage.ss"
     "build-api/package-receipt.ss"
     "policy/gxtest-report.ss"

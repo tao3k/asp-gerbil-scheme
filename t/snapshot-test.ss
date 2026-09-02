@@ -5,8 +5,7 @@
 (import :std/test
   "./snapshot/evidence-test"
   "./snapshot/policy-parser-test"
-  "./snapshot/protocol-test"
-  "./snapshot/search-test")
+  "./snapshot/protocol-test")
 
 (export snapshot-test)
 
@@ -15,5 +14,4 @@
   (test-suite "gerbil scheme harness snapshots"
     snapshot-protocol-test
     snapshot-policy-parser-test
-    snapshot-search-test
     snapshot-evidence-test))

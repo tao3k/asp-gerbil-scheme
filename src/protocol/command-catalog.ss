@@ -31,17 +31,6 @@
 ;; : (List ProviderCommandDescriptor)
 (def provider-command-descriptors
   [(make-provider-command-descriptor
-    "search"
-    "asp-gerbil-scheme/src/commands/search"
-    'asp-gerbil-scheme/src/commands/search#search-main
-    'search-main
-    ["search <view> ... [--json] [--code] [PROJECT_ROOT]"]
-    10
-    ["search/prime" "search/owner" "search/lexical" "search/ingest"
-     "search/pattern" "search/runtime-source" "search/compare"
-     "search/proof" "search/compiler-evidence"
-     "index/structural" "index/native-syntax-owner-facts"])
-   (make-provider-command-descriptor
     "query"
     "asp-gerbil-scheme/src/commands/query"
     'asp-gerbil-scheme/src/commands/query#query-main
@@ -57,7 +46,7 @@
     'projection-main
     ["projection <owner-path> --workspace PROJECT_ROOT --json"]
     0
-    [])
+    ["index/structural" "index/native-syntax-owner-facts"])
    (make-provider-command-descriptor
     "fmt"
     "asp-gerbil-scheme/src/commands/fmt"
