@@ -2,6 +2,7 @@
         asp-gerbil-scheme-library-package-prototype
         asp-gerbil-scheme-package-native-spec
         asp-gerbil-scheme-package-build-profile
+        asp-gerbil-scheme-package-modules
         asp-gerbil-scheme-package-source-roots
         asp-gerbil-scheme-package-runtime-roots
         asp-gerbil-scheme-package-exclude-directories
@@ -10,30 +11,52 @@
 
 (import :clan/poo/object
         (only-in "./source-coverage"
-                 asp-gerbil-scheme-source-coverage)
-        (only-in :gerbil/gambit directory-files file-exists?)
-        (only-in :std/sort sort)
-        (only-in :std/srfi/1 append-map)
-        (only-in :std/srfi/13 string-suffix?))
+                 asp-gerbil-scheme-source-coverage
+                 asp-gerbil-scheme-source-coverage-declared-files)
+        (only-in :std/srfi/1 append-map find fold)
+        (only-in :std/srfi/13 string-prefix? string-suffix?))
 
 ;; Package specs are POO objects whose native-spec slot remains an ordinary
 ;; Gerbil std/make value.  Source coverage is another projection of the same
 ;; object, so builds and project policy cannot drift onto different owner sets.
-(defrules asp-gerbil-scheme-package-spec! ()
-  ((_ (name @ prototype) slot ...)
+(defrules asp-gerbil-scheme-package-spec! (modules source-catalog-authority)
+  ((_ (name @ prototype) (modules source-modules)
+      (source-catalog-authority authority) slot ...)
    (begin
-     (.def (name @ prototype) slot ...)
+     (.def (name @ prototype)
+       (modules source-modules)
+       (source-catalog-authority authority)
+       slot ...)
      (asp-gerbil-scheme-apply-package-source-coverage! name)))
-  ((_ name slot ...)
+  ((_ (name @ prototype) (modules source-modules) slot ...)
+   (asp-gerbil-scheme-package-spec!
+    (name @ prototype)
+    (modules source-modules)
+    (source-catalog-authority #f)
+    slot ...))
+  ((_ name (modules source-modules)
+      (source-catalog-authority authority) slot ...)
    (begin
-     (.def name slot ...)
-     (asp-gerbil-scheme-apply-package-source-coverage! name))))
+     (.def name
+       (modules source-modules)
+       (source-catalog-authority authority)
+       slot ...)
+     (asp-gerbil-scheme-apply-package-source-coverage! name)))
+  ((_ name (modules source-modules) slot ...)
+   (asp-gerbil-scheme-package-spec!
+    name
+    (modules source-modules)
+    (source-catalog-authority #f)
+    slot ...)))
 
 (def (asp-gerbil-scheme-package-native-spec package-spec)
   (.get package-spec native-spec))
 
 (def (asp-gerbil-scheme-package-build-profile package-spec)
   (.get package-spec profile))
+
+(def (asp-gerbil-scheme-package-modules package-spec)
+  (.get package-spec modules))
 
 (def (asp-gerbil-scheme-package-source-roots package-spec)
   (.get package-spec roots))
@@ -47,19 +70,22 @@
 ;; The macro calls this once while loading build.ss.  Keeping the projection
 ;; behind a named function leaves the public syntax purely declarative.
 (def (asp-gerbil-scheme-apply-package-source-coverage! package-spec)
-  (asp-gerbil-scheme-source-coverage
-   roots: (asp-gerbil-scheme-package-source-roots package-spec)
-   runtime-roots: (asp-gerbil-scheme-package-runtime-roots package-spec)
-   exclude-directories:
-   (asp-gerbil-scheme-package-exclude-directories package-spec)))
+  (when (.get package-spec source-catalog-authority)
+    (asp-gerbil-scheme-source-coverage
+     roots: (asp-gerbil-scheme-package-source-roots package-spec)
+     runtime-roots: (asp-gerbil-scheme-package-runtime-roots package-spec)
+     exclude-directories:
+     (asp-gerbil-scheme-package-exclude-directories package-spec)
+     files: (asp-gerbil-scheme-package-modules package-spec))))
 
 ;; Import-safe semantic base for concrete project library and provider specs.
 ;; Script entrypoints remain in top-level build.ss files; this module owns only
 ;; reusable POO values and projections.
-(asp-gerbil-scheme-package-spec!
- asp-gerbil-scheme-library-package-prototype
+(.def asp-gerbil-scheme-library-package-prototype
  (role 'library)
  (profile 'development)
+ (source-catalog-authority #f)
+ (modules [])
  (roots ["src"])
  (runtime-roots ["src"])
  (exclude-directories [])
@@ -239,12 +265,36 @@
 (def (ss-file? file)
   (and (string? file) (string-suffix? ".ss" file)))
 
-(def (package-api-directory-spec dir)
-  (let (source-dir (string-append "src/" dir))
-    (if (file-exists? source-dir)
-      (map (lambda (file) (string-append dir "/" file))
-           (sort (filter ss-file? (directory-files source-dir)) string<?))
-      [])))
+(def (package-api-source-directory path)
+  (and (ss-file? path)
+       (find (lambda (dir)
+               (string-prefix? (string-append "src/" dir "/") path))
+             +package-api-directories+)))
+
+(def (package-api-empty-directory-buckets)
+  (map list +package-api-directories+))
+
+(def (package-api-add-directory-source path buckets)
+  (let (directory (package-api-source-directory path))
+    (if directory
+      (map (lambda (bucket)
+             (if (string=? (car bucket) directory)
+               (cons directory
+                     (cons (substring path 4 (string-length path))
+                           (cdr bucket)))
+               bucket))
+           buckets)
+      buckets)))
+
+(def (package-api-directory-specs)
+  (let* ((source-files
+          (or (asp-gerbil-scheme-source-coverage-declared-files)
+              (error "package API requires the Build API module catalog")))
+         (buckets
+          (fold package-api-add-directory-source
+                (package-api-empty-directory-buckets)
+                source-files)))
+    (map (lambda (bucket) (reverse (cdr bucket))) buckets)))
 
 (def (flatten-stages stages)
   (append-map (lambda (stage) stage) stages))
@@ -258,7 +308,7 @@
           +package-api-building-stages+
           +package-api-build-api-stages+
           +package-api-command-prologue-stages+
-          (map package-api-directory-spec +package-api-directories+)
+          (package-api-directory-specs)
           +package-api-launcher-stages+
           +package-api-epilogue-stages+))
 

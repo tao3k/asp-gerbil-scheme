@@ -2,17 +2,15 @@
 ;;; Build-time ASP source coverage declarations.
 
 (import :gerbil/gambit
-        (only-in :std/misc/path directory-files path-expand)
-        (only-in :std/sort sort)
-        (only-in :std/srfi/13 string-suffix?)
-        (only-in :std/sugar with-catch))
+        (only-in :std/misc/path path-expand path-normalize)
+        (only-in :std/sort sort))
 
 (export asp-gerbil-scheme-source-coverage
         asp-gerbil-scheme-load-source-coverage
         asp-gerbil-scheme-source-coverage-roots
         asp-gerbil-scheme-source-coverage-runtime-roots
         asp-gerbil-scheme-source-coverage-exclude-directories
-        asp-gerbil-scheme-source-coverage-files-for-roots
+        asp-gerbil-scheme-source-coverage-declared-files
         asp-gerbil-scheme-source-coverage-files)
 
 ;; : (List Path)
@@ -21,27 +19,46 @@
 (def current-source-coverage-runtime-roots #f)
 ;; : (List Path)
 (def current-source-coverage-exclude-directories '())
+;; : (Maybe (List Path))
+(def current-source-coverage-declared-files #f)
+;; : (Maybe Root)
+(def current-source-coverage-owner-root #f)
 
 ;; `build.ss` files call this declaration so ASP can parse the project source
 ;; coverage universe. Build support also consumes the same declaration so policy
 ;; gates and std/make coverage stay tied to the package's build entrypoint.
-;; : (forall (A) (-> roots: (List Path) runtime-roots: (Maybe (List Path)) exclude-directories: (List Path) explanation: (Maybe A) Unit))
+;; : (forall (A) (-> roots: (List Path) runtime-roots: (Maybe (List Path)) exclude-directories: (List Path) files: (Maybe (List Path)) explanation: (Maybe A) Unit))
 (def (asp-gerbil-scheme-source-coverage roots: (roots '())
                             runtime-roots: (runtime-roots #f)
                             exclude-directories: (exclude-directories '())
+                            files: (files #f)
                             explanation: (explanation #f))
   (set! current-source-coverage-roots roots)
   (set! current-source-coverage-runtime-roots runtime-roots)
   (set! current-source-coverage-exclude-directories exclude-directories)
+  (set! current-source-coverage-declared-files
+        (and files (sort files string<?)))
+  (set! current-source-coverage-owner-root
+        (path-normalize (current-directory)))
   #!void)
 
 ;; : (-> Root Unit)
 (def (asp-gerbil-scheme-load-source-coverage root)
-  (let (build-file (path-expand "build.ss" root))
-    (when (file-exists? build-file)
-      (with-directory root
+  (let* ((owner-root (path-normalize (path-expand root)))
+         (build-file (path-expand "build.ss" owner-root)))
+    (unless (and current-source-coverage-declared-files
+                 (equal? owner-root current-source-coverage-owner-root))
+      (unless (file-exists? build-file)
+        (error "Build API source coverage requires build.ss" owner-root))
+      (set! current-source-coverage-declared-files #f)
+      (set! current-source-coverage-owner-root #f)
+      (with-directory owner-root
         (lambda ()
-          (load build-file))))))
+          (load build-file)))
+      (unless (and current-source-coverage-declared-files
+                   (equal? owner-root current-source-coverage-owner-root))
+        (error "build.ss did not declare a Build API module catalog"
+               owner-root)))))
 
 ;; : (-> (List Path))
 (def (asp-gerbil-scheme-source-coverage-roots)
@@ -56,77 +73,15 @@
 (def (asp-gerbil-scheme-source-coverage-exclude-directories)
   current-source-coverage-exclude-directories)
 
+;; : (-> (Maybe (List Path)))
+(def (asp-gerbil-scheme-source-coverage-declared-files)
+  current-source-coverage-declared-files)
+
 ;; : (-> Root (List Path))
 (def (asp-gerbil-scheme-source-coverage-files root)
-  (asp-gerbil-scheme-source-coverage-files-for-roots
-   root
-   (asp-gerbil-scheme-source-coverage-roots)))
-
-;; Explicit include roots are the source of truth for downstream build graphs.
-;; This keeps library materialization on the same declared source universe
-;; without widening it to unrelated command or compatibility directories.
-;; : (-> Root (List Path) (List Path))
-(def (asp-gerbil-scheme-source-coverage-files-for-roots root roots)
-  (sort (apply append
-               (map (lambda (coverage-root)
-                      (source-coverage-root-files root coverage-root))
-                    roots))
-        string<?))
-
-;; : (-> Root Path (List Path))
-(def (source-coverage-root-files root coverage-root)
-  (let (directory (path-expand coverage-root root))
-    (if (source-coverage-directory? directory)
-      (map (lambda (path)
-             (string-append coverage-root "/" path))
-           (source-coverage-directory-files directory ""))
-      [])))
-
-;; : (-> Path Boolean)
-(def (source-coverage-directory? path)
-  (with-catch
-   (lambda (_) #f)
-   (lambda ()
-     (eq? (file-info-type (file-info path)) 'directory))))
-
-;; : (-> String Boolean)
-(def (source-coverage-gerbil-source? path)
-  (or (string-suffix? ".ss" path)
-      (string-suffix? ".inc" path)))
-
-;; : (-> Path Boolean)
-(def (source-coverage-skipped-entry? entry)
-  (or (member entry '("." ".."))
-      (member entry (asp-gerbil-scheme-source-coverage-exclude-directories))))
-
-;; : (-> Path Path)
-(def (source-coverage-child-path directory entry)
-  (path-expand entry directory))
-
-;; : (-> Path Path)
-(def (source-coverage-relative-path prefix entry)
-  (if (string=? prefix "")
-    entry
-    (string-append prefix "/" entry)))
-
-;; : (-> Path Path (List Path))
-(def (source-coverage-entry-files directory prefix entry)
-  (let* ((path (source-coverage-child-path directory entry))
-         (relative-path (source-coverage-relative-path prefix entry)))
-    (cond
-     ((source-coverage-skipped-entry? entry) [])
-     ((source-coverage-directory? path)
-      (source-coverage-directory-files path relative-path))
-     ((source-coverage-gerbil-source? entry)
-      [relative-path])
-     (else []))))
-
-;; : (-> Path Path (List Path))
-(def (source-coverage-directory-files directory prefix)
-  (apply append
-         (map (lambda (entry)
-                (source-coverage-entry-files directory prefix entry))
-              (sort (directory-files directory) string<?))))
+  (asp-gerbil-scheme-load-source-coverage root)
+  (or (asp-gerbil-scheme-source-coverage-declared-files)
+      (error "source coverage requires the Build API module catalog")))
 
 ;; : (forall (A) (-> Path (-> A) A))
 (def (with-directory directory thunk)

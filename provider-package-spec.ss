@@ -37,9 +37,15 @@
 (def +provider-library-modules+
   '("src/support/time"))
 
+(def +provider-source-modules+
+  (append +provider-runtime-modules+
+          '("src/support/time.ss"
+            "src/provider-server.ss")))
+
 (asp-gerbil-scheme-package-spec!
  (asp-gerbil-scheme-provider-package-spec
  @ asp-gerbil-scheme-library-package-prototype)
+ (modules +provider-source-modules+)
  (role 'provider)
  (profile 'production)
  (entry "src/provider-server")

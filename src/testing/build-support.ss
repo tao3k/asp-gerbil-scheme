@@ -2,12 +2,13 @@
 ;;; Support module compilation and cache checks for downstream testing builds.
 
 (import :gerbil/gambit
-        (only-in :gerbil/gambit directory-files getenv)
+        (only-in :gerbil/gambit getenv)
         (only-in :std/misc/path path-directory)
         (only-in :std/misc/process run-process)
-        (only-in :std/sort sort)
         (only-in :std/srfi/1 append-map)
         (only-in :std/sugar filter)
+        (only-in :asp-gerbil-scheme/src/build-api/source-coverage
+                 asp-gerbil-scheme-source-coverage-files)
         :asp-gerbil-scheme/src/testing/model
         :asp-gerbil-scheme/src/testing/framework
         :asp-gerbil-scheme/src/testing/build-paths
@@ -153,19 +154,24 @@
   (and (string? file)
        (testing-string-suffix? ".ss" file)))
 
-;; : (-> Path [Path])
-(def (testing-build-support-directory-files directory)
-  (if (file-exists? directory)
-    (map (lambda (file) (string-append directory "/" file))
-         (sort (filter testing-build-support-source-file?
-                       (directory-files directory))
-               string<?))
-    []))
+;; : (-> TestingBuild Path [Path])
+(def (testing-build-support-catalog-files build directory)
+  (let* ((normalized-directory (testing-normalize-path directory))
+         (directory-path
+          (if (testing-string-suffix? "/" normalized-directory)
+            normalized-directory
+            (string-append normalized-directory "/"))))
+    (filter (lambda (file)
+              (and (testing-build-support-source-file? file)
+                   (equal? (path-directory file) directory-path)))
+            (asp-gerbil-scheme-source-coverage-files
+             (testing-object-ref build 'root ".")))))
 
 ;; : (-> TestingBuild [Path])
 (def (testing-build-support-files build)
   (append (testing-object-ref build 'supportFiles [])
-          (append-map testing-build-support-directory-files
+          (append-map (lambda (directory)
+                        (testing-build-support-catalog-files build directory))
                       (testing-object-ref build 'supportDirectories []))))
 
 ;; : (-> TestingBuild String [Path])
@@ -179,9 +185,11 @@
                      (testing-object-ref build 'suiteSupportDirectories [])))
     (if entry (cdr entry) [])))
 
-;; : (-> [Path] [Path])
-(def (testing-build-support-files-from-directories directories)
-  (append-map testing-build-support-directory-files directories))
+;; : (-> TestingBuild [Path] [Path])
+(def (testing-build-support-files-from-directories build directories)
+  (append-map (lambda (directory)
+                (testing-build-support-catalog-files build directory))
+              directories))
 
 ;; : (-> TestingBuild [String] [Path])
 (def (testing-build-support-files-for-suites build suite-names)
@@ -190,6 +198,7 @@
                         (testing-build-suite-support-files build suite-name))
                       suite-names)
           (testing-build-support-files-from-directories
+           build
            (append-map (lambda (suite-name)
                          (testing-build-suite-support-directories
                           build

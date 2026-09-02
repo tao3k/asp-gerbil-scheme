@@ -1,14 +1,12 @@
 (import :std/test
         :clan/poo/object
-        (only-in :asp-gerbil-scheme/src/build-api/source-coverage
-                 asp-gerbil-scheme-source-coverage-roots
-                 asp-gerbil-scheme-source-coverage-runtime-roots)
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/build-api/package-spec)
 
 (export library-provider-boundary-test)
 
 (asp-gerbil-scheme-package-spec! library-package-spec-fixture
+  (modules ["src/parser/model.ss"])
   (role 'library)
   (profile 'production)
   (roots ["src"])
@@ -26,14 +24,17 @@
       (check (asp-gerbil-scheme-package-build-profile
               library-package-spec-fixture)
              => 'production)
+      (check (asp-gerbil-scheme-package-modules
+              library-package-spec-fixture)
+             => ["src/parser/model.ss"])
+      (check (.get library-package-spec-fixture source-catalog-authority)
+             => #f)
       (check (asp-gerbil-scheme-package-source-roots
               library-package-spec-fixture)
              => ["src"])
       (check (asp-gerbil-scheme-package-runtime-roots
               library-package-spec-fixture)
              => ["src"])
-      (check (asp-gerbil-scheme-source-coverage-roots) => ["src"])
-      (check (asp-gerbil-scheme-source-coverage-runtime-roots) => ["src"])
       (check (asp-gerbil-scheme-package-build-profile
               asp-gerbil-scheme-library-package-prototype)
              => 'development))))

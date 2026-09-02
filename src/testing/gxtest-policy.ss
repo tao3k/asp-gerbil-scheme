@@ -2,7 +2,7 @@
 ;;; Scoped policy gate support for gxtest targets.
 
 (import (only-in :gerbil/expander import-module)
-        (only-in :std/misc/path directory-files path-directory path-expand)
+        (only-in :std/misc/path path-directory path-expand)
         (only-in :std/sort sort)
         (only-in :std/srfi/13 string-prefix? string-suffix?)
         (only-in :std/sugar foldl hash-get hash-put!)
@@ -12,7 +12,6 @@
                  asp-gerbil-scheme-package-build-receipt-status-ref
                  asp-gerbil-scheme-package-build-receipt-write)
         (only-in "../build-api/source-coverage"
-                 asp-gerbil-scheme-load-source-coverage
                  asp-gerbil-scheme-source-coverage-files)
         (only-in "./gxtest-context"
                  module-path-stem
@@ -56,42 +55,21 @@
    "."))
 
 ;; : (-> Path Boolean)
-(def (asp-gerbil-scheme-source-directory? path)
-  (with-catch
-   (lambda (_) #f)
-   (lambda ()
-     (eq? (file-info-type (file-info path)) 'directory))))
-
-;; : (-> Path Boolean)
 (def (asp-gerbil-scheme-gerbil-source-file? path)
   (string-suffix? ".ss" path))
 
-;; : (-> Path Path (List Path))
-(def (scoped-policy-directory-source-files directory prefix)
-  (apply append
-         (map (lambda (entry)
-                (let* ((path (path-expand entry directory))
-                       (relative
-                        (if (string=? prefix "")
-                          entry
-                          (string-append prefix "/" entry))))
-                  (cond
-                   ((member entry '("." "..")) [])
-                   ((asp-gerbil-scheme-source-directory? path)
-                    (scoped-policy-directory-source-files path relative))
-                   ((asp-gerbil-scheme-gerbil-source-file? entry) [path])
-                   (else []))))
-              (sort (directory-files directory) string<?))))
+;; : (-> Path Boolean)
+(def (scoped-policy-engine-source-file? path)
+  (and (asp-gerbil-scheme-gerbil-source-file? path)
+       (or (string-prefix? "src/policy/" path)
+           (string-prefix? "src/parser/" path)
+           (string-prefix? "src/types/" path))))
 
 ;; : (-> (List Path))
 (def (scoped-policy-engine-source-files)
-  (append
-   (scoped-policy-directory-source-files (path-expand "policy" source-root)
-                                         "policy")
-   (scoped-policy-directory-source-files (path-expand "parser" source-root)
-                                         "parser")
-   (scoped-policy-directory-source-files (path-expand "types" source-root)
-                                         "types")))
+  (map (lambda (path) (path-expand path package-root))
+       (filter scoped-policy-engine-source-file?
+               (asp-gerbil-scheme-source-coverage-files package-root))))
 
 (def (scoped-policy-engine-source-module-file path)
   (let (prefix (string-append source-root "/"))

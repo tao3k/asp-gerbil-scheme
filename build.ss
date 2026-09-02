@@ -27,18 +27,31 @@
     "src/commands/provider-runtime"
     "src/cli-launcher"))
 
-(def (source-modules)
-  (filter (cut string-prefix? "src/" <>) (all-gerbil-modules)))
+(def +project-discovery-exclude-directories+
+  '("run" ".git" "_darcs" ".gerbil" "scenarios" "snapshots"))
+
+(def (discover-project-modules)
+  (all-gerbil-modules
+   exclude-dirs: +project-discovery-exclude-directories+))
+
+(def +project-modules+ (discover-project-modules))
+(def +source-modules+
+  (filter (cut string-prefix? "src/" <>) +project-modules+))
 
 (asp-gerbil-scheme-package-spec!
  (asp-gerbil-scheme-library-package-spec
   @ asp-gerbil-scheme-library-package-prototype)
+  (modules +project-modules+)
+  (source-catalog-authority 'project)
   (role 'library)
   (profile 'development)
+  (roots ["src" "t"])
+  (runtime-roots ["src"])
+  (exclude-directories +project-discovery-exclude-directories+)
   (native-spec
    (fold (lambda (module spec)
            (remove-build-file spec module))
-         (source-modules)
+         +source-modules+
          +product-entry-modules+)))
 
 (defbuild-script

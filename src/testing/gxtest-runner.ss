@@ -1,16 +1,17 @@
 ;;; -*- Gerbil -*-
 ;;; Gxtest framework runner for package test targets.
 
-(import (only-in :std/misc/path directory-files path-expand)
-        (only-in :std/sort sort)
+(import (only-in :std/misc/path path-directory path-expand)
+        (only-in :std/srfi/1 fold)
         (only-in :std/srfi/13 string-prefix? string-suffix?)
+        (only-in "../build-api/source-coverage"
+                 asp-gerbil-scheme-source-coverage-files)
         (only-in "../build-api/package-receipt"
                  asp-gerbil-scheme-package-build-receipt-status-ref)
         (only-in "./gxtest-smoke"
                  asp-gerbil-scheme-default-gxtest-smoke-files)
         (only-in "./gxtest-context"
                  package-root
-                 test-root
                  configure-build-root!
                  ensure-build-root!
                  gxtest-test-module-path)
@@ -125,8 +126,13 @@
 
 ;; : (-> (List Path))
 (def (gxtest-test-files)
-  (append (top-level-test-files)
-          (policy-subdir-test-files)))
+  (ensure-build-root!)
+  (let (buckets
+        (fold gxtest-catalog-test-file-step
+              (list [] [])
+              (asp-gerbil-scheme-source-coverage-files package-root)))
+    (append (reverse (car buckets))
+            (reverse (cadr buckets)))))
 
 ;; : (-> (List Path))
 (def (default-gxtest-test-files)
@@ -145,21 +151,17 @@
   (string=? entry "project-policy-test.ss"))
 
 ;; : (-> Path Boolean)
-(def (top-level-test-file? entry)
-  (test-file-entry? entry))
-
-;; : (-> (List Path))
-(def (top-level-test-files)
-  (ensure-build-root!)
-  (map (lambda (path)
-         (string-append "t/" path))
-       (filter top-level-test-file?
-               (sort (directory-files test-root) string<?))))
+(def (top-level-test-file? path)
+  (and (equal? (path-directory path) "t")
+       (test-file-entry?
+        (substring path 2 (string-length path)))))
 
 ;; : (-> Path Boolean)
-(def (policy-subdir-test-file? entry)
-  (and (test-file-entry? entry)
-       (policy-agent-poo-test-file? entry)))
+(def (policy-subdir-test-file? path)
+  (and (equal? (path-directory path) "t/policy")
+       (let (entry (substring path 9 (string-length path)))
+         (and (test-file-entry? entry)
+              (policy-agent-poo-test-file? entry)))))
 
 ;; : (-> Path Boolean)
 (def (test-file-entry? entry)
@@ -171,16 +173,14 @@
 (def (policy-agent-poo-test-file? entry)
   (string-prefix? "agent-poo-" entry))
 
-;; : (-> (List Path))
-(def (policy-subdir-test-files)
-  (ensure-build-root!)
-  (let (policy-root (path-expand "policy" test-root))
-    (if (file-exists? policy-root)
-      (map (lambda (path)
-             (string-append "t/policy/" path))
-           (filter policy-subdir-test-file?
-                   (sort (directory-files policy-root) string<?)))
-      [])))
+;; : (-> Path (List (List Path)) (List (List Path)))
+(def (gxtest-catalog-test-file-step path buckets)
+  (cond
+   ((top-level-test-file? path)
+    (list (cons path (car buckets)) (cadr buckets)))
+   ((policy-subdir-test-file? path)
+    (list (car buckets) (cons path (cadr buckets))))
+   (else buckets)))
 
 ;; : (-> (List Path) Void)
 (def (run-test-target tests)
