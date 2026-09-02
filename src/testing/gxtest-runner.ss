@@ -152,13 +152,13 @@
 
 ;; : (-> Path Boolean)
 (def (top-level-test-file? path)
-  (and (equal? (path-directory path) "t")
+  (and (equal? (path-directory path) "t/")
        (test-file-entry?
         (substring path 2 (string-length path)))))
 
 ;; : (-> Path Boolean)
 (def (policy-subdir-test-file? path)
-  (and (equal? (path-directory path) "t/policy")
+  (and (equal? (path-directory path) "t/policy/")
        (let (entry (substring path 9 (string-length path)))
          (and (test-file-entry? entry)
               (policy-agent-poo-test-file? entry)))))

@@ -14,7 +14,9 @@
         (only-in "../build-api/source-coverage"
                  asp-gerbil-scheme-source-coverage-files)
         (only-in "./gxtest-context"
+                 ensure-build-root!
                  module-path-stem
+                 package-name
                  package-root
                  source-output-prefix
                  source-root)
@@ -29,6 +31,7 @@
         scoped-policy-phase-line
         scoped-policy-status-line
         scoped-policy-source-files
+        scoped-policy-engine-owned-by-project?
         scoped-policy-target-files
         scoped-policy-engine-source-files
         scoped-policy-engine-source-module-files
@@ -65,11 +68,19 @@
            (string-prefix? "src/parser/" path)
            (string-prefix? "src/types/" path))))
 
+;; : (-> MaybeString Boolean)
+(def (scoped-policy-engine-owned-by-project? owner)
+  (and (string? owner)
+       (string=? owner "asp-gerbil-scheme")))
+
 ;; : (-> (List Path))
 (def (scoped-policy-engine-source-files)
-  (map (lambda (path) (path-expand path package-root))
-       (filter scoped-policy-engine-source-file?
-               (asp-gerbil-scheme-source-coverage-files package-root))))
+  (ensure-build-root!)
+  (if (scoped-policy-engine-owned-by-project? package-name)
+    (map (lambda (path) (path-expand path package-root))
+         (filter scoped-policy-engine-source-file?
+                 (asp-gerbil-scheme-source-coverage-files package-root)))
+    []))
 
 (def (scoped-policy-engine-source-module-file path)
   (let (prefix (string-append source-root "/"))

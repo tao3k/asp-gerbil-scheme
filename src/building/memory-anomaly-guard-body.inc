@@ -122,28 +122,38 @@
         ((> status 255) (quotient status 256))
         (else status)))
 
+(def (framework-memory-guard-process-table-observation)
+  (try
+   (let* ((status 0)
+          (output
+           (run-process
+            ["ps" "-axo" "pid=,ppid=,rss=,%cpu=,comm="]
+            stderr-redirection: #t
+            check-status: (lambda (value _settings) (set! status value)))))
+     (if (= (framework-memory-guard-exit-code status) 0)
+       (cons
+        #t
+        (filter-map
+         (lambda (line)
+           (let (tokens (string-tokenize line))
+             (and (= (length tokens) 5)
+                  (let ((pid (string->number (car tokens)))
+                        (ppid (string->number (cadr tokens)))
+                        (rss-kib (string->number (caddr tokens)))
+                        (cpu-percent (string->number (cadddr tokens)))
+                        (command (list-ref tokens 4)))
+                    (and pid ppid rss-kib cpu-percent
+                         (list pid ppid (* rss-kib 1024)
+                               cpu-percent command))))))
+         (string-split output #\newline)))
+       (cons #f [])))
+   ;; Process-table access can be denied in a sandbox even though the build is
+   ;; valid. Preserve the guard and report degraded observability; an observer
+   ;; transport failure is not evidence of an RSS anomaly.
+   (catch _ (cons #f []))))
+
 (def (framework-memory-guard-process-table)
-  (let* ((status 0)
-         (output
-          (run-process
-           ["ps" "-axo" "pid=,ppid=,rss=,%cpu=,comm="]
-           stderr-redirection: #t
-           check-status: (lambda (value _settings) (set! status value)))))
-    (if (= (framework-memory-guard-exit-code status) 0)
-      (filter-map
-       (lambda (line)
-         (let (tokens (string-tokenize line))
-           (and (= (length tokens) 5)
-                (let ((pid (string->number (car tokens)))
-                      (ppid (string->number (cadr tokens)))
-                      (rss-kib (string->number (caddr tokens)))
-                      (cpu-percent (string->number (cadddr tokens)))
-                      (command (list-ref tokens 4)))
-                  (and pid ppid rss-kib cpu-percent
-                       (list pid ppid (* rss-kib 1024)
-                             cpu-percent command))))))
-       (string-split output #\newline))
-      [])))
+  (cdr (framework-memory-guard-process-table-observation)))
 
 (def (framework-memory-guard-load-average)
   (let (text
@@ -216,7 +226,7 @@
                                        saturated-samples maximum-cpu-percent
                                        cpu-percent-sum first-active-seconds
                                        last-active-seconds load-average-start
-                                       load-average-end)
+                                       load-average-end observer-failure-count)
   (let ((average-active-jobs
          (if (zero? compiler-samples)
            0
@@ -265,6 +275,9 @@
         ("compiler-saturated-samples" saturated-samples)
         ("compiler-saturation-ratio" saturation-ratio)
         ("observer-expected-samples" expected-samples)
+        ("process-table-observer-status"
+         (if (zero? observer-failure-count) "available" "degraded"))
+        ("process-table-observer-failure-count" observer-failure-count)
         ("observer-sample-coverage-ratio"
          (/ (exact->inexact compiler-samples) expected-samples))
         ("observer-average-interval-ms"
@@ -311,15 +324,19 @@
          ;; stop?, anomaly-state, confirmations, memory samples, peak, growth,
          ;; rate, completion, max active jobs, active-job sum, compiler sample
          ;; count, saturated sample count, process-tree CPU trajectory, and
-         ;; first/last observed compiler activity are watcher-owned state.
-         (state (vector #f 'normal 0 [] 0 0 0 #f 0 0 0 0 0 0 #f #f))
+         ;; first/last observed compiler activity and process-table observer
+         ;; failures are watcher-owned state.
+         (state (vector #f 'normal 0 [] 0 0 0 #f 0 0 0 0 0 0 #f #f 0))
          (watcher
           (spawn
            (lambda ()
              (let loop ()
                (unless (vector-ref state 0)
                  (let* ((now (- (time->seconds (current-time)) started))
-                        (rows (framework-memory-guard-process-table))
+                        (observation
+                         (framework-memory-guard-process-table-observation))
+                        (observer-available? (car observation))
+                        (rows (cdr observation))
                         (root-pid (##os-getpid))
                         (pids (framework-memory-guard-process-tree-pids
                                root-pid rows))
@@ -347,6 +364,8 @@
                         (rate
                          (framework-memory-anomaly-growth-rate-bytes-per-second
                           samples now rss)))
+                   (unless observer-available?
+                     (vector-set! state 16 (+ 1 (vector-ref state 16))))
                    (call-with-values
                     (lambda ()
                       (framework-memory-anomaly-transition
@@ -393,7 +412,8 @@
                             (vector-ref state 14)
                             (vector-ref state 15)
                             load-average-start
-                            (framework-memory-guard-load-average)))
+                            (framework-memory-guard-load-average)
+                            (vector-ref state 16)))
                           (exit 70))
                         (begin
                           (thread-sleep! (.ref policy 'sample-seconds))
@@ -417,6 +437,8 @@
                    ((not completed?) 'build-failed)
                    ((eq? (vector-ref state 1) 'suspect)
                     'completed-after-unconfirmed-growth)
+                   ((positive? (vector-ref state 16))
+                    'completed-with-degraded-observability)
                    (else 'within-envelope))))
             (framework-memory-anomaly-emit!
              (framework-memory-anomaly-receipt
@@ -435,4 +457,5 @@
               (vector-ref state 14)
               (vector-ref state 15)
               load-average-start
-              (framework-memory-guard-load-average)))))))))
+              (framework-memory-guard-load-average)
+              (vector-ref state 16)))))))))

@@ -31,6 +31,7 @@
 (export clean-target
         compile-package-api-if-stale
         compile-scoped-policy-engine-if-stale
+        scoped-policy-engine-needs-source-build?
         compile-selected-gxtest-if-stale
         compile-spec
         dev-launcher-binpath
@@ -106,6 +107,12 @@
    expected-sources: source-files
    expected-outputs: output-files))
 
+;; The dependency manager owns installed ASP modules for downstream projects.
+;; Only the ASP source workspace itself has a local policy-engine source set
+;; that can legitimately be rebuilt by this package API.
+(def (scoped-policy-engine-needs-source-build? source-files)
+  (pair? source-files))
+
 (def (compile-scoped-policy-engine-if-stale source-files output-files receipt-path)
   (let (status (scoped-policy-engine-build-receipt-status
                 receipt-path
@@ -115,7 +122,8 @@
     (if (eq? (asp-gerbil-scheme-package-build-receipt-status-ref status 'status #f) 'current)
       status
       (begin
-        (compile-package-api-if-stale)
+        (when (scoped-policy-engine-needs-source-build? source-files)
+          (compile-package-api-if-stale))
         (write-scoped-policy-engine-build-receipt! receipt-path source-files output-files)
         (scoped-policy-engine-build-receipt-status
          receipt-path

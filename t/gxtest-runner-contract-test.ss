@@ -16,6 +16,10 @@
         (only-in "../src/testing/gxtest-execution"
                  gxtest-native-parallelism
                  gxtest-serial-resource-groups)
+        (only-in "../src/testing/gxtest-build"
+                 scoped-policy-engine-needs-source-build?)
+        (only-in "../src/testing/gxtest-policy"
+                 scoped-policy-engine-owned-by-project?)
         :asp-gerbil-scheme/src/testing/memory-profile)
 (export gxtest-runner-contract-test)
 
@@ -36,7 +40,7 @@
 
 (def gxtest-runner-contract-test
   (test-suite "asp-gerbil-scheme gxtest runner contract"
-    (test-case "gxtest entry files are discovered from default test root"
+    (test-case "gxtest entry files honor path-directory trailing separators"
       (configure-build-root! (current-directory))
       (let (files (gxtest-test-files))
         (check (member "t/policy-test.ss" files) ? true)
@@ -145,6 +149,14 @@
     (test-case "scoped policy phase receipts are machine parseable"
       (check (scoped-policy-phase-line "policy-report" 9876)
              => "[asp-gerbil-scheme-scoped-policy-phase] name=policy-report elapsedMicros=9876 elapsedMs=9\n"))
+    (test-case "downstream policy uses the installed ASP engine"
+      (check (scoped-policy-engine-owned-by-project? "asp-gerbil-scheme")
+             => #t)
+      (check (scoped-policy-engine-owned-by-project? "poo-flow") => #f)
+      (check (scoped-policy-engine-needs-source-build? []) => #f)
+      (check (scoped-policy-engine-needs-source-build?
+              ["src/policy/gxtest-runtime.ss"])
+             => #t))
     (test-case "gxtest timing summaries are machine parseable"
       (check (gxtest-summary-line "serial" 13 29643000 3624000)
              => "[asp-gerbil-scheme-test-summary] kind=serial count=13 sumMs=29643 wallMs=3624\n")

@@ -9,6 +9,7 @@
                  framework-memory-anomaly-policy
                  framework-memory-anomaly-sample
                  framework-memory-anomaly-transition
+                 framework-memory-guard-process-table
                  framework-memory-guard-load-average
                  framework-memory-guard-active-compiler-jobs
                  framework-memory-guard-process-tree-cpu-percent))
@@ -19,6 +20,8 @@
 ;; : TestSuite
 (def building-memory-anomaly-guard-test
   (test-suite "building memory anomaly guard"
+    (test-case "denied process-table observation degrades to an empty sample"
+      (check (list? (framework-memory-guard-process-table)) => #t))
     (test-case "host runnable pressure is represented without fixed cores"
       (let (load-average (framework-memory-guard-load-average))
         (check (list? load-average) => #t)
