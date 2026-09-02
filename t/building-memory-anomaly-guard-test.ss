@@ -8,7 +8,8 @@
         (only-in ../src/building/memory-anomaly-guard
                  framework-memory-anomaly-policy
                  framework-memory-anomaly-sample
-                 framework-memory-anomaly-transition))
+                 framework-memory-anomaly-transition
+                 framework-memory-guard-active-compiler-jobs))
 
 (export building-memory-anomaly-guard-test)
 
@@ -56,4 +57,14 @@
                   (framework-memory-anomaly-transition
                    policy 'normal 0 [] 1 (* 5 gib)))
                 list)
-               => '(tripped 0 hard-limit-exceeded))))))
+               => '(tripped 0 hard-limit-exceeded))))
+    (test-case "compiler pipelines are counted once at the scheduler frontier"
+      (check
+       (framework-memory-guard-active-compiler-jobs
+        100
+        '((101 100 1024 "/usr/local/bin/gsc")
+          (102 101 2048 "gcc")
+          (103 102 4096 "cc1")
+          (104 100 1024 "gxi")
+          (105 100 1024 "ps")))
+       => 2))))

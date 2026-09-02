@@ -1,6 +1,7 @@
 ;;; Single implementation shared by the root build.ss bootstrap and the public
 ;;; :asp-gerbil-scheme/src/building/build-script module.
 (import :gerbil/gambit
+        :clan/poo/object
         :std/make
         (only-in :std/misc/path path-directory path-expand path-normalize)
         (only-in :std/misc/ports read-all-as-string)
@@ -8,11 +9,15 @@
         (only-in :std/os/flock open-output-file/lock LOCK_EX)
         (only-in :std/source gerbil-home)
         (only-in :std/sort sort)
-        (only-in :std/srfi/13 string-prefix? string-suffix? string-trim-both)
+        (only-in :std/srfi/13
+                 string-prefix?
+                 string-suffix?
+                 string-tokenize
+                 string-trim-both)
+        (only-in :std/text/json json-object->string write-json-sort-keys?)
         (only-in :gerbil/gambit getenv))
 
-(import (only-in ./memory-anomaly-guard
-                 call-with-framework-memory-anomaly-guard))
+(include "memory-anomaly-guard-body.inc")
 
 (def (framework-build-artifact-root)
   (getenv "ASP_PROVIDER_ARTIFACT_ROOT"
