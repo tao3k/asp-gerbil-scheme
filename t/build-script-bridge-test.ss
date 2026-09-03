@@ -55,12 +55,10 @@
                  build-optimized: #t
                  build-release: #t]))
     (test-case "build verbosity lowers to the native std/make option"
-      (check (framework-parse-build-options '("-v"))
-             => [verbose: #t])
-      (check (framework-parse-build-options '("-vv"))
-             => [verbose: #t])
-      (check (framework-parse-build-options '("-vvv"))
-             => [verbose: #t])
+      ;; gxi reserves -v for version output and gxc owns -V. The package
+      ;; bridge exposes one unambiguous long option and lowers it to the
+      ;; native std/make keyword rather than inventing verbosity levels.
+      (check-exception (framework-parse-build-options '("-v")) true)
       (check (framework-parse-build-options '("--verbose" "--debug"))
              => [debug: #t verbose: #t]))
     (test-case "publishes one explicit ownership contract"
