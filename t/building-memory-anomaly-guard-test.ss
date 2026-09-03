@@ -97,9 +97,21 @@
              "test" 'completed 'within-envelope 2
              1024 0 0 10
              1 1 1 0 100.0 100.0
-             9 9 '() '() 0))
+             9 9 '() '() 0 9 9))
         (check (hash-get receipt "ready-queue-observed") => #f)
         (check (hash-get receipt "scheduler-starvation-verdict")
                => "not-provable-with-current-std-make-public-api")
         (check (hash-get receipt "observer-sample-sequence-complete") => #f)
-        (check (hash-get receipt "performance-baseline-valid") => #f)))))
+        (check (hash-get receipt "performance-baseline-valid") => #f)))
+    (test-case "real observer cadence establishes a valid baseline"
+      (let (receipt
+            (framework-memory-anomaly-receipt
+             (framework-memory-anomaly-policy)
+             "test" 'completed 'within-envelope 2
+             1024 0 0 10
+             2 10 7 2 180.0 700.0
+             1 9 '() '() 0 9.5 1.5))
+        (check (hash-get receipt "observer-expected-samples") => 5)
+        (check (hash-get receipt "observer-sample-sequence-complete") => #t)
+        (check (hash-get receipt "performance-baseline-valid") => #t)
+        (check (hash-get receipt "observer-maximum-interval-ms") => 1500)))))

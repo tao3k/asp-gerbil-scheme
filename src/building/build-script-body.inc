@@ -451,7 +451,7 @@
          (error "Unexpected " rest)))))
   (def source-directory
     (path-normalize (path-directory source-file)))
-  (def (build options)
+  (def (build options (require-current? #f))
     (let ((bindir (framework-build-bindir))
           (build-keys (framework-resolve-build-keys keys)))
       (create-directory* bindir)
@@ -463,6 +463,8 @@
                (framework-build-graph-admission
                 build-spec source-directory))
            (framework-build-graph-admission-emit! build-spec admitted)
+           (when (and require-current? (pair? admitted))
+             (error "Build Graph current-state verification failed" admitted))
            (unless (null? admitted)
              ;; std/make can retain an imported dependency timestamp while an
              ;; earlier module in the same invocation updates its SSI.  Remove
@@ -495,9 +497,10 @@
            srcdir: source-directory
            (framework-resolve-build-keys keys)))
   (match arguments
-    (["meta"] (write '("spec" "compile" "clean")) (newline))
+    (["meta"] (write '("spec" "compile" "verify-current" "clean")) (newline))
     (["spec"] (pretty-print build-spec))
     (["compile" . options] (build (parse-options options)))
+    (["verify-current"] (build [] #t))
     (["clean"] (clean))
     ([] (build []))))
 

@@ -226,7 +226,9 @@
                                        saturated-samples maximum-cpu-percent
                                        cpu-percent-sum first-active-seconds
                                        last-active-seconds load-average-start
-                                       load-average-end observer-failure-count)
+                                       load-average-end observer-failure-count
+                                       last-observer-seconds
+                                       maximum-observer-interval-seconds)
   (let* ((average-active-jobs
          (if (zero? compiler-samples)
            0
@@ -241,11 +243,23 @@
            (/ cpu-percent-sum compiler-samples)))
         (configured-cpu-capacity-percent (* worker-count 100))
         (logical-cpu-count (max 1 (##cpu-count)))
+        (maximum-allowed-observer-interval-seconds
+         (* 2 (.ref policy 'sample-seconds)))
+        (terminal-observer-gap-seconds
+         (max 0 (- elapsed-seconds last-observer-seconds)))
+        (observed-maximum-interval-seconds
+         (max maximum-observer-interval-seconds
+              terminal-observer-gap-seconds))
         (expected-samples
          (max 1
               (inexact->exact
                (ceiling (/ elapsed-seconds
-                           (.ref policy 'sample-seconds))))))
+                           maximum-allowed-observer-interval-seconds)))))
+        (observer-sample-sequence-complete?
+         (and (zero? observer-failure-count)
+              (positive? compiler-samples)
+              (<= observed-maximum-interval-seconds
+                  maximum-allowed-observer-interval-seconds)))
         (host-contention?
          (and (pair? load-average-start)
               (> (car load-average-start) logical-cpu-count))))
@@ -282,8 +296,13 @@
         ("observer-sample-coverage-ratio"
          (/ (exact->inexact compiler-samples) expected-samples))
         ("observer-sample-sequence-complete"
-         (and (zero? observer-failure-count)
-              (>= compiler-samples expected-samples)))
+         observer-sample-sequence-complete?)
+        ("observer-maximum-interval-ms"
+         (inexact->exact
+          (round (* observed-maximum-interval-seconds 1000))))
+        ("observer-maximum-allowed-interval-ms"
+         (inexact->exact
+          (round (* maximum-allowed-observer-interval-seconds 1000))))
         ;; std/make 0.18.2 keeps workch/completions/import-mx lexical inside
         ;; make-build. Process inspection can observe compiler children but
         ;; cannot prove the scheduler's instantaneous ready frontier.
@@ -292,8 +311,7 @@
          "not-provable-with-current-std-make-public-api")
         ("performance-baseline-valid"
          (and (not host-contention?)
-              (zero? observer-failure-count)
-              (>= compiler-samples expected-samples)))
+              observer-sample-sequence-complete?))
         ("observer-average-interval-ms"
          (if (zero? compiler-samples)
            0
@@ -339,8 +357,8 @@
          ;; rate, completion, max active jobs, active-job sum, compiler sample
          ;; count, saturated sample count, process-tree CPU trajectory, and
          ;; first/last observed compiler activity and process-table observer
-         ;; failures are watcher-owned state.
-         (state (vector #f 'normal 0 [] 0 0 0 #f 0 0 0 0 0 0 #f #f 0))
+         ;; failures and real observation cadence are watcher-owned state.
+         (state (vector #f 'normal 0 [] 0 0 0 #f 0 0 0 0 0 0 #f #f 0 0 0))
          (watcher
           (spawn
            (lambda ()
@@ -407,6 +425,10 @@
                                    (max cpu-percent (vector-ref state 12)))
                       (vector-set! state 13
                                    (+ cpu-percent (vector-ref state 13)))
+                      (vector-set! state 18
+                                   (max (vector-ref state 18)
+                                        (- now (vector-ref state 17))))
+                      (vector-set! state 17 now)
                       (when (> active-jobs 0)
                         (unless (vector-ref state 14)
                           (vector-set! state 14 now))
@@ -427,7 +449,9 @@
                             (vector-ref state 15)
                             load-average-start
                             (framework-memory-guard-load-average)
-                            (vector-ref state 16)))
+                            (vector-ref state 16)
+                            (vector-ref state 17)
+                            (vector-ref state 18)))
                           (exit 70))
                         (begin
                           (thread-sleep! (.ref policy 'sample-seconds))
@@ -472,4 +496,6 @@
               (vector-ref state 15)
               load-average-start
               (framework-memory-guard-load-average)
-              (vector-ref state 16)))))))))
+              (vector-ref state 16)
+              (vector-ref state 17)
+              (vector-ref state 18)))))))))

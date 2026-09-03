@@ -203,6 +203,7 @@ jobs:
         run: |
           gxpkg env gxi ./build.ss clean
           gxpkg env gxi ./build.ss
+          gxpkg env gxi ./build.ss verify-current
 
       - name: Build canonical provider production target
         if: matrix.target == 'provider-production'

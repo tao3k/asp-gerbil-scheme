@@ -60,6 +60,13 @@ must not import =building/std-builder= or another compiled ASP runtime module:
 CI removes the package's installed library before invoking =build.ss clean=.
 Two consecutive clean invocations in fresh processes are the executable
 bootstrap oracle; both must succeed before a revision can be published.
+After every canonical ordinary-module library build, a fresh CI process invokes
+=verify-current=.  This command emits the normal admission receipt but fails
+before compilation when any affected module remains.  It therefore proves the
+build reached a fixed point without allowing the verification step to repair
+the evidence it checks.  Executable, FFI, and mixed production specs retain
+their explicit artifact/closure gates until the upstream executor exposes an
+equivalent current-state query for those target kinds.
 
 The rules use composite parser-owned call facts.  A mutex, completion, channel,
 or compiler call by itself is insufficient evidence and must not produce a
@@ -78,6 +85,12 @@ contention.  Exact ready-worker starvation becomes a hard runtime decision only
 when an upstream scheduler event surface provides ready, active, and completion
 events.  Until then, the source policy prevents downstream shadow schedulers and
 the receipt keeps upstream scheduler limitations explicit.
+
+Observer completeness follows measured cadence, not an impossible theoretical
+sample count.  The receipt tracks the maximum interval between samples,
+including the terminal gap; the sequence is complete only when every interval
+is at most twice the declared sampling period and process-table observation had
+no failures.  =observer-expected-samples= is the corresponding lower bound.
 
 The receipt therefore publishes =ready-queue-observed=false= and
 =scheduler-starvation-verdict=not-provable-with-current-std-make-public-api=.
