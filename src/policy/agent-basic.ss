@@ -241,7 +241,24 @@
 (def (top-level-entrypoint-exempt-call? file call)
   (or (explicit-main-entrypoint-call? file call)
       (explicit-test-entrypoint-call? file call)
+      (definition-lowering-macro-call? file call)
       (declarative-top-level-call? file call)))
+
+;;; Parser-owned macro facets prove this exact local invocation lowers only to
+;;; a definition.  Name equality, source ownership, and top-form containment
+;;; keep the exemption narrower than a macro-name allowlist.
+;; : (-> SourceFile CallFact Boolean)
+(def (definition-lowering-macro-call? file call)
+  (ormap
+   (lambda (form)
+     (and (call-within-top-form-range? call form)
+          (ormap
+           (lambda (macro)
+             (and (equal? (macro-fact-name macro) (top-form-head form))
+                  (member "definition-lowering-macro"
+                          (macro-fact-quality-facets macro))))
+           (source-file-macros file))))
+   (source-file-forms file)))
 
 ;; (List TopFormHead)
 (def +explicit-main-entrypoint-heads+
