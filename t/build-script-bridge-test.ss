@@ -3,6 +3,7 @@
                  framework-build-core-count
                  framework-apply-build-core-policy!
                  framework-build-profile-options
+                 framework-parse-build-options
                  framework-resolve-build-keys
                  framework-normalize-build-options
                  framework-merge-build-options
@@ -53,6 +54,11 @@
              => [optimize: #t
                  build-optimized: #t
                  build-release: #t]))
+    (test-case "build verbosity lowers to the native std/make option"
+      (check (framework-parse-build-options '("-v"))
+             => [verbose: #t])
+      (check (framework-parse-build-options '("--verbose" "--debug"))
+             => [debug: #t verbose: #t]))
     (test-case "publishes one explicit ownership contract"
       (let (contract (framework-build-contract))
         (check (cdr (assoc 'executor contract)) => "std/make")
@@ -65,6 +71,8 @@
                => "std/make-srcdir-default")
         (check (cdr (assoc 'parallelismOwner contract))
                => "GERBIL_BUILD_CORES")
+        (check (cdr (assoc 'verbosityOwner contract))
+               => "build-script-cli-to-std-make")
         (check (cdr (assoc 'defaultCoreSelection contract))
                => "host-cpu-count")
         (check (cdr (assoc 'compilerCoreCapture contract))

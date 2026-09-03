@@ -14,6 +14,7 @@
         framework-build-core-count
         framework-apply-build-core-policy!
         framework-build-profile-options
+        framework-parse-build-options
         framework-resolve-build-keys
         framework-normalize-build-options
         framework-merge-build-options

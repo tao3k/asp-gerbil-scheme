@@ -309,14 +309,15 @@
              (framework-normalize-build-options base)
              (framework-build-option-keys normalized-overrides)))))
 
-(def (framework-build-main arguments build-spec keys source-file)
-  (def (parse-options options)
-    (def (present? keyword parsed)
-      (and (memq keyword parsed) #t))
-    (let loop ((rest options) (parsed []))
-      (match rest
-        ([] parsed)
-        (["--release" . rest]
+(def (framework-parse-build-options options)
+  (def (present? keyword parsed)
+    (and (memq keyword parsed) #t))
+  (let loop ((rest options) (parsed []))
+    (match rest
+      ([] parsed)
+      ([(or "-v" "--verbose") . rest]
+       (loop rest (cons* verbose: #t parsed)))
+      (["--release" . rest]
          ;; Gerbil implements build-release: by forwarding -static to the
          ;; final native linker. Darwin has no static C runtime startup object
          ;; (crt0.o), so a release build there is optimized but dynamically
@@ -330,15 +331,17 @@
                      (cons* optimize: #t build-optimized: #t parsed))))
           (else
            (loop rest (cons* optimize: #t build-release: #t parsed)))))
-        (["--optimized" . rest]
-         (loop rest
-               (if (present? build-optimized: parsed)
-                   parsed
-                   (cons* optimize: #t build-optimized: #t parsed))))
-        (["--debug" . rest]
-         (loop rest (cons* debug: #t parsed)))
-        (else
-         (error "Unexpected " rest)))))
+      (["--optimized" . rest]
+       (loop rest
+             (if (present? build-optimized: parsed)
+               parsed
+               (cons* optimize: #t build-optimized: #t parsed))))
+      (["--debug" . rest]
+       (loop rest (cons* debug: #t parsed)))
+      (else
+       (error "Unexpected " rest)))))
+
+(def (framework-build-main arguments build-spec keys source-file)
   (def source-directory
     (path-normalize (path-directory source-file)))
   (def (build options)
@@ -369,7 +372,8 @@
   (match arguments
     (["meta"] (write '("spec" "compile" "clean")) (newline))
     (["spec"] (pretty-print build-spec))
-    (["compile" . options] (build (parse-options options)))
+    (["compile" . options]
+     (build (framework-parse-build-options options)))
     (["clean"] (clean))
     ([] (build []))))
 
@@ -408,6 +412,7 @@
     (productionProfile . "gcc-platform-release-policy")
     (buildDepsOwner . "std/make-srcdir-default")
     (parallelismOwner . "GERBIL_BUILD_CORES")
+    (verbosityOwner . "build-script-cli-to-std-make")
     (defaultCoreSelection . "host-cpu-count")
     (compilerCoreCapture . "environment-and-compiler-counter")
     (dependencyEnvironmentOwner . "gxpkg-env")
