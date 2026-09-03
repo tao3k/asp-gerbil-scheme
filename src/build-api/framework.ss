@@ -54,12 +54,6 @@
         package-source-stage-prefix
         package-source-stage-specs
         package-source-stage-batched?
-        package-source-stage-current?
-        source-topology-layers
-        source-topology-affected
-        package-source-stage-dependencies
-        package-source-stage-include-paths
-        package-source-stage-topology-layers
         package-source-stage->request
         package-source-stages->requests
         package-source-stages-spec

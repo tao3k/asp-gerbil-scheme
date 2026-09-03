@@ -1,10 +1,4 @@
-(import (only-in :gerbil/gambit
-                 call-with-output-file
-                 delete-file
-                 file-exists?
-                 getenv)
-        (only-in :std/misc/path path-expand)
-        :std/test
+(import :std/test
         "../src/building/facade")
 
 (export building-framework-test)
@@ -12,20 +6,6 @@
 (def (alist-ref alist key)
   (let (entry (assq key alist))
     (and entry (cdr entry))))
-
-(def (write-fixture path datum)
-  (call-with-output-file path
-    (lambda (port)
-      (write datum port)
-      (newline port))))
-
-(def (write-fixture-forms path forms)
-  (call-with-output-file path
-    (lambda (port)
-      (for-each (lambda (form)
-                  (write form port)
-                  (newline port))
-                forms))))
 
 (def building-framework-test
   (test-suite "asp-gerbil-scheme building framework"
@@ -225,120 +205,4 @@
           (check (build-stage-receipt-result receipt) => 'made)
           (check calls => '((("stale-a.ss" "stale-b.ss"))))
           (check after-events => '(made)))))
-    (test-case "package source stages keep copied SSI artifacts current"
-      (let* ((module "package-source-stage-current-fixture.ss")
-             (dependency "package-source-stage-dependency-fixture.ss")
-             (source (path-expand module (current-directory)))
-             (dependency-source
-              (path-expand dependency (current-directory)))
-             (output
-              (path-expand
-               "asp-gerbil-scheme/package-source-stage-current-fixture.ssi"
-               (path-expand "lib" (or (getenv "GERBIL_PATH") ".gerbil"))))
-             (dependency-output
-              (path-expand
-               "asp-gerbil-scheme/package-source-stage-dependency-fixture.ssi"
-               (path-expand "lib" (or (getenv "GERBIL_PATH") ".gerbil"))))
-             (stage
-              (make-package-source-stage
-               "fixture"
-               (current-directory)
-               "asp-gerbil-scheme"
-               (list (list 'ssi: module) dependency)
-               'topology)))
-        (dynamic-wind
-          (lambda ()
-            (write-fixture
-             source
-             '(import :asp-gerbil-scheme/package-source-stage-dependency-fixture))
-            (write-fixture dependency-source '(source))
-            (write-fixture output '(output))
-            (thread-sleep! 1.1)
-            (write-fixture dependency-output '(output)))
-          (lambda ()
-            (check
-             (build-request-stage-specs
-              (package-source-stage->request stage []))
-             => '())
-            (delete-file output)
-            (check
-             (build-request-stage-specs
-              (package-source-stage->request stage []))
-             => (list (list (list 'ssi: module)))))
-          (lambda ()
-            (when (file-exists? source) (delete-file source))
-            (when (file-exists? dependency-source)
-              (delete-file dependency-source))
-            (when (file-exists? output) (delete-file output))
-            (when (file-exists? dependency-output)
-              (delete-file dependency-output))))))
-    (test-case "layers source topology while preserving declaration order"
-      (let (dependencies
-            '((core)
-              (policy core)
-              (runtime core)
-              (api policy runtime)))
-        (check
-         (source-topology-layers
-          '(core policy runtime api)
-          (lambda (node) (alist-ref dependencies node)))
-         => '((core) (policy runtime) (api)))))
-    (test-case "expands stale sources through reverse dependencies"
-      (let (dependencies
-            '((core)
-              (policy core)
-              (runtime core)
-              (api policy runtime)
-              (docs)))
-        (check
-         (source-topology-affected
-          '(core policy runtime api docs)
-          '(core)
-          (lambda (node) (alist-ref dependencies node)))
-         => '(core policy runtime api))))
-    (test-case "reads package imports into topology layers"
-      (let* ((root (current-directory))
-             (core "topology-core.ss")
-             (policy "topology-policy.ss")
-             (api "topology-api.ss")
-             (policy-include "topology-policy.inc")
-             (paths (map (lambda (module) (path-expand module root))
-                         [core policy api policy-include]))
-             (stage
-              (make-package-source-stage
-               "topology-fixture" root "asp-gerbil-scheme" [[ssi: core] policy api] 'topology)))
-        (dynamic-wind
-          (lambda ()
-            (write-fixture (car paths) '(export core))
-            (write-fixture-forms
-             (cadr paths)
-             '((export policy)
-               (import (only-in ./topology-core core))
-               (include "topology-policy.inc")
-               (def policy #t)))
-            (write-fixture
-             (caddr paths)
-             '(export (import: :asp-gerbil-scheme/topology-policy)))
-            (write-fixture (cadddr paths) '(def policy-body #t)))
-          (lambda ()
-            (check (package-source-stage-dependencies stage policy)
-                   => '("topology-core.ss"))
-            (check (package-source-stage-include-paths stage policy)
-                   => (list (path-expand policy-include root)))
-            (check (package-source-stage-topology-layers stage)
-                   => '(("topology-core.ss")
-                        ("topology-policy.ss")
-                        ("topology-api.ss")))
-            (let (request (package-source-stage->request stage []))
-              (check
-               (build-request-stage-specs request)
-               => '(((ssi: "topology-core.ss")
-                    "topology-policy.ss"
-                    "topology-api.ss")))
-              (check
-               (map build-stage-label (build-request-stage-plan request))
-               => '("topology-fixture modules=3"))))
-          (lambda ()
-            (for-each (lambda (path)
-                        (when (file-exists? path) (delete-file path)))
-                      paths)))))))
+  ))

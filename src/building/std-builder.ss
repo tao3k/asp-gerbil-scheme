@@ -1,23 +1,6 @@
-(import (only-in :gerbil/gambit
-                 ##gc
-                 file-exists?
-                 file-info
-                 file-info-last-modification-time
-                 getenv
-                 read
-                 string-length
-                 substring
-                 time->seconds)
-        (only-in :clan/poo/object object? object<-alist .ref .has?)
-        (only-in :clan/poo/mop .defgeneric)
-        (only-in :std/make make make-clean)
-        :std/misc/path
-        (only-in :std/srfi/1 drop filter filter-map take)
-        (only-in :std/srfi/13 string-prefix? string-suffix?)
+(import (only-in :std/make make make-clean)
         ./model
         ./native-toolchain)
-
-(include "build-graph-admission-body.inc")
 
 ;;; Keep the full public surface in one declaration so dependent facades receive
 ;;; the complete module interface during incremental compilation.
@@ -34,31 +17,6 @@
         default-std-builder
         std-builder-effective-options
         std-builder-run-spec!
-        execution-window-controller?
-        execution-window-controller-hard-max-rss-bytes
-        execution-window-controller-headroom-bytes
-        execution-window-controller-window-size
-        execution-window-controller-observe-run!
-        execution-window-controller-next-state
-        make-execution-window-observation
-        execution-window-observation?
-        execution-window-observation-result
-        execution-window-observation-outcome
-        execution-window-observation-baseline-rss-bytes
-        execution-window-observation-peak-rss-bytes
-        execution-window-observation-max-rss-bytes
-        execution-window-observation-elapsed-ms
-        make-adaptive-execution-window-plan
-        adaptive-execution-window-plan?
-        adaptive-execution-window-plan-topology-groups
-        adaptive-execution-window-plan-controller
-        make-adaptive-execution-window-result
-        adaptive-execution-window-result?
-        adaptive-execution-window-result-topology-groups
-        adaptive-execution-window-result-execution-windows
-        adaptive-execution-window-result-window-observations
-        adaptive-execution-window-result-controller
-        std-builder-run-adaptive-plan!
         std-builder-clean-spec!
         std-builder-stage
         std-builder-stage-plan
@@ -77,12 +35,6 @@
         package-source-stage-prefix
         package-source-stage-specs
         package-source-stage-batched?
-        package-source-stage-current?
-        source-topology-layers
-        source-topology-affected
-        package-source-stage-dependencies
-        package-source-stage-include-paths
-        package-source-stage-topology-layers
         package-source-stage->request
         package-source-stages->requests
         package-source-stages-spec
@@ -93,9 +45,8 @@
 (defstruct std-builder
   (name make-proc stage-kind description srcdir make-options toolchain))
 
-;;; Boundary: projects declare source topology and phase ordering.  std/make
-;;; owns compiler scheduling and GERBIL_BUILD_CORES; this layer owns only
-;;; stage admission, receipts, toolchain scope, and clean delegation.
+;;; Boundary: projects declare source groups. std/make alone owns dependency
+;;; topology, freshness, scheduling, and GERBIL_BUILD_CORES.
 (defstruct package-source-stage
   (label source prefix specs batched?))
 
@@ -117,297 +68,8 @@
 (def (std-builder-spec-list spec)
   (if (list? spec) spec [spec]))
 
-(def (execution-window-controller? controller)
-  (and (object? controller)
-       (.has? controller kind)
-       (.has? controller hard-max-rss-bytes)
-       (.has? controller headroom-bytes)
-       (.has? controller window-size)
-       (.has? controller .observe-run!)
-       (.has? controller .next-state)
-       (eq? (.ref controller 'kind)
-            'asp-gerbil-scheme.execution-window-controller.v1)))
-
-(def (execution-window-controller-slot controller slot)
-  (unless (execution-window-controller? controller)
-    (error "invalid execution-window controller" controller))
-  (.ref controller slot))
-
-(def (execution-window-controller-hard-max-rss-bytes controller)
-  (execution-window-controller-slot controller 'hard-max-rss-bytes))
-
-(def (execution-window-controller-headroom-bytes controller)
-  (execution-window-controller-slot controller 'headroom-bytes))
-
-(def (execution-window-controller-window-size controller)
-  (execution-window-controller-slot controller 'window-size))
-
-(.defgeneric
- (execution-window-controller-observe-run! controller label thunk)
- slot: .observe-run!)
-
-(.defgeneric
- (execution-window-controller-next-state
-  controller
-  observation
-  spec-count)
- slot: .next-state)
-
-(def (make-execution-window-observation
-      result
-      outcome
-      baseline-rss-bytes
-      peak-rss-bytes
-      max-rss-bytes
-      elapsed-ms)
-  (object<-alist
-   `((kind . asp-gerbil-scheme.execution-window-observation.v1)
-     (result . ,result)
-     (outcome . ,outcome)
-     (baseline-rss-bytes . ,baseline-rss-bytes)
-     (peak-rss-bytes . ,peak-rss-bytes)
-     (max-rss-bytes . ,max-rss-bytes)
-     (elapsed-ms . ,elapsed-ms))))
-
-(def (execution-window-observation? observation)
-  (and (object? observation)
-       (.has? observation kind)
-       (.has? observation result)
-       (.has? observation outcome)
-       (.has? observation baseline-rss-bytes)
-       (.has? observation peak-rss-bytes)
-       (.has? observation max-rss-bytes)
-       (.has? observation elapsed-ms)
-       (eq? (.ref observation 'kind)
-            'asp-gerbil-scheme.execution-window-observation.v1)))
-
-(def (execution-window-observation-slot observation slot)
-  (unless (execution-window-observation? observation)
-    (error "invalid execution-window observation" observation))
-  (.ref observation slot))
-
-(def (execution-window-observation-result observation)
-  (execution-window-observation-slot observation 'result))
-
-(def (execution-window-observation-outcome observation)
-  (execution-window-observation-slot observation 'outcome))
-
-(def (execution-window-observation-baseline-rss-bytes observation)
-  (execution-window-observation-slot observation 'baseline-rss-bytes))
-
-(def (execution-window-observation-peak-rss-bytes observation)
-  (execution-window-observation-slot observation 'peak-rss-bytes))
-
-(def (execution-window-observation-max-rss-bytes observation)
-  (execution-window-observation-slot observation 'max-rss-bytes))
-
-(def (execution-window-observation-elapsed-ms observation)
-  (execution-window-observation-slot observation 'elapsed-ms))
-
-(def (make-adaptive-execution-window-plan topology-groups controller)
-  (unless (execution-window-controller? controller)
-    (error "invalid adaptive execution-window controller" controller))
-  (object<-alist
-   `((kind . asp-gerbil-scheme.adaptive-execution-window-plan.v1)
-     (topology-groups . ,topology-groups)
-     (controller . ,controller))))
-
-(def (adaptive-execution-window-plan? plan)
-  (and (object? plan)
-       (.has? plan kind)
-       (eq? (.ref plan 'kind)
-            'asp-gerbil-scheme.adaptive-execution-window-plan.v1)))
-
-(def (adaptive-execution-window-plan-topology-groups plan)
-  (.ref plan 'topology-groups))
-
-(def (adaptive-execution-window-plan-controller plan)
-  (.ref plan 'controller))
-
-(def (std-builder-request-spec-count spec)
-  (if (adaptive-execution-window-plan? spec)
-    (length
-     (apply append
-            (adaptive-execution-window-plan-topology-groups spec)))
-    (length spec)))
-
-(def (make-adaptive-execution-window-result
-      topology-groups
-      execution-windows
-      window-observations
-      controller)
-  (object<-alist
-   `((kind . asp-gerbil-scheme.adaptive-execution-window-result.v1)
-     (topology-groups . ,topology-groups)
-     (execution-windows . ,execution-windows)
-     (window-observations . ,window-observations)
-     (controller . ,controller))))
-
-(def (adaptive-execution-window-result? result)
-  (and (object? result)
-       (.has? result kind)
-       (eq? (.ref result 'kind)
-            'asp-gerbil-scheme.adaptive-execution-window-result.v1)))
-
-(def (adaptive-execution-window-result-topology-groups result)
-  (.ref result 'topology-groups))
-
-(def (adaptive-execution-window-result-execution-windows result)
-  (.ref result 'execution-windows))
-
-(def (adaptive-execution-window-result-window-observations result)
-  (.ref result 'window-observations))
-
-(def (adaptive-execution-window-result-controller result)
-  (.ref result 'controller))
-
-(def (execution-window-positive-integer value label)
-  (unless (and (integer? value) (> value 0))
-    (error "invalid adaptive execution-window value" label value))
-  value)
-
-(def (std-builder-run-adaptive-plan/sequential! builder plan (extra-options []))
-  (let* ((topology-groups
-          (adaptive-execution-window-plan-topology-groups plan))
-         (specs (apply append topology-groups))
-         (initial-controller
-          (adaptive-execution-window-plan-controller plan)))
-    (let loop ((remaining specs)
-               (controller initial-controller)
-               (execution-windows [])
-               (window-observations []))
-      (if (null? remaining)
-        (make-adaptive-execution-window-result
-         topology-groups
-         (reverse execution-windows)
-         (reverse window-observations)
-         controller)
-        (let* ((requested-window-size
-                (execution-window-positive-integer
-                 (execution-window-controller-window-size controller)
-                 'window-size))
-               (window-size (min requested-window-size (length remaining)))
-               (window (take remaining window-size)))
-          (let (observation
-                (execution-window-controller-observe-run!
-                 controller
-                 "std/make adaptive execution window"
-                 (lambda ()
-                   (std-builder-run-spec/raw!
-                    builder
-                    window
-                    extra-options))))
-            (unless (execution-window-observation? observation)
-              (error
-               "adaptive controller returned an invalid observation"
-               observation))
-            (let* ((outcome
-                    (execution-window-observation-outcome observation))
-                   (observed-rss-bytes
-                    (execution-window-observation-peak-rss-bytes observation))
-                   (observation-max-rss-bytes
-                    (execution-window-observation-max-rss-bytes observation))
-                   (elapsed-ms
-                    (execution-window-observation-elapsed-ms observation))
-                   (hard-max-rss-bytes
-                  (execution-window-positive-integer
-                   (execution-window-controller-hard-max-rss-bytes controller)
-                   'hard-max-rss-bytes)))
-              (unless (memq outcome '(completed ok))
-                (error
-                 "adaptive execution-window observation failed closed"
-                 outcome
-                 observed-rss-bytes
-                 hard-max-rss-bytes))
-              (unless (and (integer? observed-rss-bytes)
-                           (>= observed-rss-bytes 0))
-                (error
-                 "invalid adaptive execution-window RSS observation"
-                 observed-rss-bytes))
-              (unless (and (integer? observation-max-rss-bytes)
-                           (> observation-max-rss-bytes 0)
-                           (= observation-max-rss-bytes
-                              hard-max-rss-bytes))
-                (error
-                 "adaptive observation RSS limit does not match controller"
-                 observation-max-rss-bytes
-                 hard-max-rss-bytes))
-              (unless (and (integer? elapsed-ms) (>= elapsed-ms 0))
-                (error
-                 "invalid adaptive execution-window elapsed observation"
-                 elapsed-ms))
-              (when (> observed-rss-bytes hard-max-rss-bytes)
-                (error
-                 (if (= window-size 1)
-                   "one build spec cannot fit the adaptive RSS budget"
-                   "adaptive execution window exceeded the RSS budget")
-                 observed-rss-bytes
-                 hard-max-rss-bytes))
-              (let (next-controller
-                    (execution-window-controller-next-state
-                     controller
-                     observation
-                     window-size))
-                (unless (execution-window-controller? next-controller)
-                  (error
-                   "adaptive controller returned an invalid next state"
-                   next-controller))
-                (loop
-                 (drop remaining window-size)
-                 next-controller
-                 (cons window execution-windows)
-                 (cons observation window-observations))))))))))
-
-(def (adaptive-execution-window-next-controller
-      controller observation window-size)
-  (unless (execution-window-observation? observation)
-    (error "adaptive controller returned an invalid observation" observation))
-  (let* ((outcome (execution-window-observation-outcome observation))
-         (observed-rss-bytes
-          (execution-window-observation-peak-rss-bytes observation))
-         (observation-max-rss-bytes
-          (execution-window-observation-max-rss-bytes observation))
-         (elapsed-ms (execution-window-observation-elapsed-ms observation))
-         (hard-max-rss-bytes
-          (execution-window-positive-integer
-           (execution-window-controller-hard-max-rss-bytes controller)
-           'hard-max-rss-bytes)))
-    (unless (memq outcome '(completed ok))
-      (error "adaptive execution-window observation failed closed"
-             outcome observed-rss-bytes hard-max-rss-bytes))
-    (unless (and (integer? observed-rss-bytes)
-                 (>= observed-rss-bytes 0))
-      (error "invalid adaptive execution-window RSS observation"
-             observed-rss-bytes))
-    (unless (and (integer? observation-max-rss-bytes)
-                 (> observation-max-rss-bytes 0)
-                 (= observation-max-rss-bytes hard-max-rss-bytes))
-      (error "adaptive observation RSS limit does not match controller"
-             observation-max-rss-bytes hard-max-rss-bytes))
-    (unless (and (integer? elapsed-ms) (>= elapsed-ms 0))
-      (error "invalid adaptive execution-window elapsed observation"
-             elapsed-ms))
-    (when (> observed-rss-bytes hard-max-rss-bytes)
-      (error
-       (if (= window-size 1)
-         "one build spec cannot fit the adaptive RSS budget"
-         "adaptive execution window exceeded the RSS budget")
-       observed-rss-bytes hard-max-rss-bytes))
-    (let (next-controller
-          (execution-window-controller-next-state
-           controller observation window-size))
-      (unless (execution-window-controller? next-controller)
-        (error "adaptive controller returned an invalid next state"
-               next-controller))
-      next-controller)))
-
-(def (std-builder-run-adaptive-plan! builder plan (extra-options []))
-  (std-builder-run-adaptive-plan/sequential! builder plan extra-options))
-
 (def (std-builder-run-spec! builder spec (extra-options []))
-  (if (adaptive-execution-window-plan? spec)
-    (std-builder-run-adaptive-plan! builder spec extra-options)
-    (std-builder-run-spec/raw! builder spec extra-options)))
+  (std-builder-run-spec/raw! builder spec extra-options))
 
 (def (std-builder-run-spec/raw! builder spec (extra-options []))
   (let ((stage (std-builder-spec-list spec))
@@ -544,183 +206,10 @@
 
 ;; : (-> PackageSourceStage [[BuildSpec]])
 (def (package-source-stage-request-specs stage)
-  (let (batching (package-source-stage-batched? stage))
-    (if (execution-window-controller? batching)
-      (let (topology-groups
-            (package-source-stage-topology-request-spec-groups stage))
-        (if (and (pair? topology-groups)
-                 (null? (cdr topology-groups)))
-          (list
-           (make-adaptive-execution-window-plan
-            topology-groups
-            batching))
-          (topology-groups->upstream-execution-windows topology-groups)))
-      (package-source-stage-request-specs/default stage))))
-
-;; : (-> PackageSourceStage [[BuildSpec]])
-(def (package-source-stage-request-specs/default stage)
   (let (specs (package-source-stage-specs stage))
-    (cond
-      ((eq? (package-source-stage-batched? stage) 'topology)
-       (package-source-stage-topology-request-specs stage))
-     ((package-source-stage-batched? stage)
-      (list specs))
-     (else
-      (map list specs)))))
-
-;; : (-> BuildSpec ModulePath)
-(def (package-source-spec-module spec)
-  (cond
-   ((string? spec) spec)
-   ((and (pair? spec)
-         (pair? (cdr spec))
-         (string? (cadr spec)))
-    (cadr spec))
-   (else
-    (error "package source stage requires a module source spec" spec))))
-
-(def (package-source-spec-ssi? spec)
-  (and (pair? spec)
-       (eq? (car spec) 'ssi:)))
-
-;; : (-> PackageSourceStage BuildSpec [ModulePath] Boolean)
-(def (package-source-spec-artifact-current? stage spec dependencies)
-  (framework-build-graph-artifact-current?
-   (package-source-stage-source stage)
-   (package-source-stage-prefix stage)
-   (package-source-spec-module spec)
-   dependencies
-   (not (package-source-spec-ssi? spec))))
-
-;; : (-> PackageSourceStage BuildSpec Boolean)
-(def (package-source-spec-current? stage spec)
-  (package-source-spec-artifact-current?
-   stage
-   spec
-   (if (eq? (package-source-stage-batched? stage) 'topology)
-     (package-source-stage-dependencies
-      stage (package-source-spec-module spec))
-     [])))
-
-;; : (-> PackageSourceStage [BuildSpec] Boolean)
-(def (package-source-stage-current? stage specs)
-  (if (adaptive-execution-window-plan? specs)
-    (null?
-     (apply append
-            (adaptive-execution-window-plan-topology-groups specs)))
-    (and (pair? specs)
-         (andmap (lambda (spec)
-                   (package-source-spec-current? stage spec))
-                 specs))))
-
-;; : (forall (n) (-> n [n] (-> n [n]) Boolean))
-(def (source-topology-ready? node remaining dependencies-of)
-  (not (ormap (lambda (dependency)
-                (member dependency remaining))
-              (dependencies-of node))))
-
-;; : (forall (n) (-> [n] [n] [n]))
-(def (source-topology-without nodes removed)
-  (filter (lambda (node)
-            (not (member node removed)))
-          nodes))
-
-;; : (forall (n) (-> [n] (-> n [n]) [[n]]))
-(def (source-topology-layers nodes dependencies-of)
-  (let loop ((remaining nodes) (layers []))
-    (if (null? remaining)
-      (reverse layers)
-      (let (ready
-            (filter (lambda (node)
-                      (source-topology-ready?
-                       node remaining dependencies-of))
-                    remaining))
-        (if (null? ready)
-          (error "source topology contains a dependency cycle" remaining)
-          (loop (source-topology-without remaining ready)
-                (cons ready layers)))))))
-
-;; : (forall (n) (-> [n] [n] (-> n [n]) [n]))
-(def (source-topology-affected nodes stale dependencies-of)
-  (framework-build-graph-affected nodes stale dependencies-of))
-
-;; : (-> PackageSourceStage ModulePath [ModulePath])
-(def (package-source-stage-dependencies stage module)
-  (framework-build-graph-dependencies
-   (package-source-stage-source stage)
-   (package-source-stage-prefix stage)
-   (map package-source-spec-module (package-source-stage-specs stage))
-   module))
-
-;; : (-> PackageSourceStage ModulePath [Path])
-;;; Includes are freshness edges owned by the source module, not module graph
-;;; nodes.  Resolve them relative to the including source so one affected-closure
-;;; pass observes generated/body changes before delegating compilation.
-(def (package-source-stage-include-paths stage module)
-  (framework-build-graph-includes
-   (package-source-stage-source stage)
-   module))
-
-;; : (-> PackageSourceStage [[ModulePath]])
-(def (package-source-stage-topology-layers stage)
-  (let (modules (map package-source-spec-module
-                      (package-source-stage-specs stage)))
-    (source-topology-layers
-     modules
-     (lambda (module)
-       (package-source-stage-dependencies stage module)))))
-
-(export topology-groups->upstream-execution-windows
-        package-source-stage-topology-request-spec-groups
-        package-source-stage-topology-request-specs)
-
-;; : (-> [[ModulePath]] [[ModulePath]])
-(def (topology-groups->upstream-execution-windows groups)
-  (let (specs (apply append groups))
-    (if (null? specs)
-        []
-        (list specs))))
-
-;; : (-> PackageSourceStage [[ModulePath]])
-(def (package-source-stage-topology-request-specs stage)
-  (topology-groups->upstream-execution-windows
-   (package-source-stage-topology-request-spec-groups stage)))
-
-;; : (-> PackageSourceStage [[ModulePath]])
-(def (package-source-stage-topology-request-spec-groups stage)
-  (let* ((specs (package-source-stage-specs stage))
-         (modules (map package-source-spec-module specs))
-         (specs-by-module
-          (map (lambda (spec)
-                 (cons (package-source-spec-module spec) spec))
-               specs))
-         (dependencies
-          (map (lambda (module)
-                 (cons module
-                       (package-source-stage-dependencies stage module)))
-               modules))
-         (dependencies-of
-          (lambda (module) (cdr (assoc module dependencies))))
-         (layers (source-topology-layers modules dependencies-of))
-         (stale
-         (filter
-           (lambda (module)
-             (not (package-source-spec-artifact-current?
-                   stage
-                   (cdr (assoc module specs-by-module))
-                   (dependencies-of module))))
-           modules))
-         (affected
-          (source-topology-affected modules stale dependencies-of)))
-    (filter-map
-     (lambda (layer)
-       (let (selected
-             (filter (lambda (module) (member module affected)) layer))
-         (and (pair? selected)
-              (map (lambda (module)
-                     (cdr (assoc module specs-by-module)))
-                   selected))))
-     layers)))
+    (if (package-source-stage-batched? stage)
+      (list specs)
+      (map list specs))))
 
 ;; : (-> PackageSourceStage [BuildOption] BuildRequest)
 (def (package-source-stage->request stage options)
@@ -738,13 +227,14 @@
              (string-append
               label
               " modules="
-              (number->string (std-builder-request-spec-count spec)))))))
+              (number->string (length spec)))))))
     (make-std-builder-request
      label
      profile
      (package-source-stage-request-specs stage)
-     (lambda (specs context)
-       (package-source-stage-current? context specs))
+     ;; The framework does not predict Gerbil currentness. Each declared group
+     ;; reaches std/make, which performs the authoritative incremental check.
+     (lambda (_specs _context) #f)
      stage)))
 
 ;; : (-> [PackageSourceStage] [BuildOption] [BuildRequest])

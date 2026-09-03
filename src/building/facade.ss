@@ -1,6 +1,7 @@
 ;;; Boundary: this facade is the only downstream import surface for Building values.
 ;;; It keeps profile/request composition independent of package scripts and loaders.
-;;; Invariant: package-specific currentness and receipt persistence remain in Build API.
+;;; Invariant: std/make owns dependency topology, currentness, and scheduling;
+;;; package receipt persistence remains in Build API.
 (import ./model
         ./std-builder
         ./native-toolchain)
@@ -87,12 +88,6 @@
         package-source-stage-prefix
         package-source-stage-specs
         package-source-stage-batched?
-        package-source-stage-current?
-        source-topology-layers
-        source-topology-affected
-        package-source-stage-dependencies
-        package-source-stage-include-paths
-        package-source-stage-topology-layers
         package-source-stage->request
         package-source-stages->requests
         package-source-stages-spec
@@ -103,30 +98,3 @@
         ./memory-anomaly-guard)
 (export (import: ./observability))
 (export (import: ./memory-anomaly-guard))
-
-(export
-        execution-window-controller?
-        execution-window-controller-hard-max-rss-bytes
-        execution-window-controller-headroom-bytes
-        execution-window-controller-window-size
-        execution-window-controller-observe-run!
-        execution-window-controller-next-state
-        make-execution-window-observation
-        execution-window-observation?
-        execution-window-observation-result
-        execution-window-observation-outcome
-        execution-window-observation-baseline-rss-bytes
-        execution-window-observation-peak-rss-bytes
-        execution-window-observation-max-rss-bytes
-        execution-window-observation-elapsed-ms
-        make-adaptive-execution-window-plan
-        adaptive-execution-window-plan?
-        adaptive-execution-window-plan-topology-groups
-        adaptive-execution-window-plan-controller
-        make-adaptive-execution-window-result
-        adaptive-execution-window-result?
-        adaptive-execution-window-result-topology-groups
-        adaptive-execution-window-result-execution-windows
-        adaptive-execution-window-result-window-observations
-        adaptive-execution-window-result-controller
-        std-builder-run-adaptive-plan!)

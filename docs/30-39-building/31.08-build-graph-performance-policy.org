@@ -67,6 +67,46 @@ The rules use composite parser-owned call facts.  A mutex, completion, channel,
 or compiler call by itself is insufficient evidence and must not produce a
 finding.
 
+* Removed Downstream Execution APIs
+
+The former source-topology, source-currentness, topology execution-window, and
+adaptive execution-window APIs have no production owner and are removed.  They
+attempted to predict or partition work that belongs to =std/make= and therefore
+could not be retained as compatibility surfaces.  Package declarations now
+provide source groups only; the complete native spec reaches the upstream
+executor without an ASP-derived dependency graph or freshness filter.
+
+=:clan/building= and =:std/make= are not peer schedulers.  Clan owns the
+package-level discovery and build-environment projection, while =std/make= owns
+execution.  ASP package macros may specialize the declaration syntax, but must
+lower into that upstream path rather than introducing another builder loop.
+
+#+begin_src mermaid
+flowchart LR
+  Macro["ASP package macro\nroots · features · profile"]
+  Clan[":clan/building\ndiscovery · environment · options"]
+  Make[":std/make\ndependency · incremental · parallel execution"]
+  Observe["passive receipt\nelapsed · CPU · RSS · compiler jobs"]
+
+  Macro --> Clan --> Make
+  Make -. "observed, never rescheduled" .-> Observe
+#+end_src
+
+** Native removal receipt (2026-09-03)
+
+After removing the downstream topology/currentness/adaptive window subsystem,
+the focused Building tests and the native build completed successfully.  The
+first changed-source =std/make= phase took =5,647 ms=, used all =12= configured
+workers without a memory-derived worker cap, reached =5= active compiler jobs,
+and peaked at =859,881,472 bytes= RSS.
+
+Two immediately repeated native invocations took =4,215 ms= and =3,692 ms= in
+the observed =std/make= phase.  They still compiled three and then two downstream
+modules as upstream dependency propagation converged.  Both receipts retained
+=configured-worker-count=12= and =worker-count=12=.  This is recorded as native
+upstream behavior; ASP does not add an mtime filter, affected-module parser, or
+alternate scheduler to hide it.
+
 * Runtime Evidence Boundary
 
 Gerbil 0.18.2 keeps =workch=, =completions=, and =import-mx= lexical inside
