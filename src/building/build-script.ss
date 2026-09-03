@@ -1,6 +1,7 @@
 ;;; Public module wrapper for the source-bootstrapped Build SS bridge.  The
-;;; implementation owns platform-specific production topology as part of the
-;;; exported profile contract.
+;;; implementation projects declarations, profiles, host capabilities, and
+;;; observations onto one upstream std/make session; it does not own Gerbil's
+;;; dependency graph, freshness decisions, or compiler scheduling.
 (include "build-script-body.inc")
 
 (export defbuild-script

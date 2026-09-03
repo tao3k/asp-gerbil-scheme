@@ -20,7 +20,6 @@
         (only-in :gerbil/gambit getenv))
 
 (include "memory-anomaly-guard-body.inc")
-(include "build-graph-admission-body.inc")
 
 (def (framework-build-artifact-root)
   (getenv "ASP_PROVIDER_ARTIFACT_ROOT"
@@ -28,42 +27,6 @@
 
 (def (framework-build-bindir)
   (path-expand "bin" (framework-build-artifact-root)))
-
-(def (framework-file-modification-seconds path)
-  (time->seconds (file-info-last-modification-time (file-info path))))
-
-(def (framework-runtime-source-path source-directory module)
-  (path-expand (string-append module ".ss") source-directory))
-
-(def (framework-runtime-source-newer-than-executable? source-directory module
-                                                       executable)
-  (let (source (framework-runtime-source-path source-directory module))
-    (and (file-exists? source)
-         (> (framework-file-modification-seconds source)
-            (framework-file-modification-seconds executable)))))
-
-;; std/make owns compilation and linking, but its executable target does not
-;; model the explicitly embedded runtime-module closure as dependencies. Make
-;; that missing edge visible by invalidating only a stale generated executable;
-;; the same std/make invocation remains the sole builder and linker.
-(def (framework-invalidate-stale-executables! build-spec source-directory bindir)
-  (for-each
-   (lambda (spec)
-     (match spec
-       ([exe: module bin: binary]
-        (let ((executable (path-expand binary bindir))
-              (sources
-               (cons module
-                     (framework-modules-before-target build-spec spec))))
-          (when (and (file-exists? executable)
-                     (ormap
-                      (lambda (source)
-                        (framework-runtime-source-newer-than-executable?
-                         source-directory source executable))
-                      sources))
-            (delete-file executable))))
-       (else (void))))
-   build-spec))
 
 (def (framework-modules-before-target build-spec target)
   (let loop ((rest build-spec) (modules []))
@@ -125,21 +88,6 @@
                (error "unsupported native build capability" capability))))
           native-capabilities)))
 
-(def (framework-package-prefix source-directory)
-  (let (package-file (path-expand "gerbil.pkg" source-directory))
-    (and (file-exists? package-file)
-         (let (declaration (call-with-input-file package-file read))
-           (let loop ((rest declaration))
-             (cond
-              ((or (null? rest) (null? (cdr rest))) #f)
-              ((eq? (car rest) 'package:)
-               (let (name (cadr rest))
-                 (cond
-                  ((symbol? name) (symbol->string name))
-                  ((string? name) name)
-                  (else #f))))
-              (else (loop (cdr rest)))))))))
-
 (def (framework-duplicate-module-owners modules)
   (let loop ((remaining modules) (seen []) (duplicates []))
     (if (null? remaining)
@@ -150,48 +98,6 @@
           (loop (cdr remaining) seen (cons module duplicates)))
          (else
           (loop (cdr remaining) (cons module seen) duplicates)))))))
-
-(def (framework-build-graph-admission-supported? build-spec source-directory)
-  (and (pair? build-spec)
-       (andmap string? build-spec)
-       (framework-package-prefix source-directory)))
-
-;;; Pre-admission computes only the stale reverse-dependency closure.  It never
-;;; executes modules or schedules workers; one std/make invocation retains
-;;; dependency, compiler, and GERBIL_BUILD_CORES authority.
-(def (framework-build-graph-admission build-spec source-directory)
-  (if (framework-build-graph-admission-supported?
-       build-spec source-directory)
-    (let* ((duplicates (framework-duplicate-module-owners build-spec))
-           (prefix (framework-package-prefix source-directory)))
-      (when (pair? duplicates)
-        (error "Build Graph Policy: duplicate module owners" duplicates))
-      (if prefix
-        (framework-build-graph-affected-specs
-         source-directory prefix build-spec)
-        build-spec))
-    build-spec))
-
-(def (framework-build-graph-admission-emit! declared admitted)
-  (let (receipt
-        (hash
-         ("schema" "asp-gerbil-scheme.build-graph-admission.v1")
-         ("version" 1)
-         ("upstream-executor" "std/make")
-         ("declared-module-count" (length declared))
-         ("affected-module-count" (length admitted))
-         ("affected-modules" admitted)
-         ("upstream-session-count" (if (null? admitted) 0 1))
-         ("module-owner-policy" "unique")
-         ("source-scan-count" 1)
-         ("affected-output-invalidation"
-          (if (null? admitted) "none" "upstream-make-clean"))
-         ("outcome" (if (null? admitted) "current" "compile"))))
-    (parameterize ((write-json-sort-keys? #t))
-      (display "ASP_GERBIL_SCHEME_BUILD_GRAPH " (current-error-port))
-      (display (json-object->string receipt) (current-error-port))
-      (newline (current-error-port))
-      (force-output (current-error-port)))))
 
 (def (framework-static-runtime-build-spec runtime-modules)
   (map (lambda (module) `(gxc: ,module (static: #t))) runtime-modules))
@@ -451,56 +357,35 @@
          (error "Unexpected " rest)))))
   (def source-directory
     (path-normalize (path-directory source-file)))
-  (def (build options (require-current? #f))
+  (def (build options)
     (let ((bindir (framework-build-bindir))
           (build-keys (framework-resolve-build-keys keys)))
       (create-directory* bindir)
       (call-with-framework-build-lease
        (lambda ()
-         (framework-invalidate-stale-executables!
-          build-spec source-directory bindir)
-         (let (admitted
-               (framework-build-graph-admission
-                build-spec source-directory))
-           (framework-build-graph-admission-emit! build-spec admitted)
-           (when (and require-current? (pair? admitted))
-             (error "Build Graph current-state verification failed" admitted))
-           (unless (null? admitted)
-             ;; std/make can retain an imported dependency timestamp while an
-             ;; earlier module in the same invocation updates its SSI.  Remove
-             ;; outputs for the already-proven affected closure through the
-             ;; upstream cleaner so the closure reaches a fixed point once.
-             (when (framework-build-graph-admission-supported?
-                    build-spec source-directory)
-               (apply make-clean
-                      admitted
-                      srcdir: source-directory
-                      (framework-merge-build-options build-keys options)))
-             ;; std/make compiles sources under its absolute srcdir, then drains
-             ;; Gambit native jobs in the caller cwd.  Gerbil 0.18.2's macOS
-             ;; executable linker emits __exe.c relative to that cwd, so the
-             ;; caller must be the declared bindir for generation and consumption
-             ;; to share one path.
-             (call-with-framework-memory-anomaly-guard
-              "std/make package build"
-              (framework-build-core-count)
-              (lambda ()
-                (parameterize ((current-directory bindir))
-                  (apply make
-                         admitted
-                         srcdir: source-directory
-                         (framework-merge-build-options build-keys options))))))
-           (framework-validate-runtime-closure! build-spec))))))
+         ;; std/make receives the complete declared spec and remains the only
+         ;; dependency, freshness, scheduling, compiler, and linker authority.
+         ;; ASP observes this one native session without pre-cleaning or
+         ;; filtering its module graph.
+         (call-with-framework-memory-anomaly-guard
+          "std/make package build"
+          (framework-build-core-count)
+          (lambda ()
+            (parameterize ((current-directory bindir))
+              (apply make
+                     build-spec
+                     srcdir: source-directory
+                     (framework-merge-build-options build-keys options)))))
+         (framework-validate-runtime-closure! build-spec)))))
   (def (clean)
     (apply make-clean
            build-spec
            srcdir: source-directory
            (framework-resolve-build-keys keys)))
   (match arguments
-    (["meta"] (write '("spec" "compile" "verify-current" "clean")) (newline))
+    (["meta"] (write '("spec" "compile" "clean")) (newline))
     (["spec"] (pretty-print build-spec))
     (["compile" . options] (build (parse-options options)))
-    (["verify-current"] (build [] #t))
     (["clean"] (clean))
     ([] (build []))))
 
@@ -550,9 +435,9 @@
     (darwinReleaseLinkage . "optimized-dynamic")
     (darwinExecutableTopology . "optimized-multi-unit")
     (buildGraphProjection . "declared-compiler-runtime-closure-to-std/make")
-    (buildGraphAdmission . "single-scan-reverse-dependency-fixed-point")
-    (affectedOutputInvalidation . "upstream-make-clean")
-    (upstreamBuildSessionCount . "zero-when-current-otherwise-one")
+    (buildGraphAdmission . "none-full-declared-spec-to-std/make")
+    (affectedOutputInvalidation . "none")
+    (upstreamBuildSessionCount . "one-native-std/make-session")
     (libraryBuildProjection . "post-executable-package-modules-to-std/make")
     (runtimeClosureDriftOracle . "gerbil-executable-stub")
     (executableFreshnessOwner . "declared-runtime-closure-to-std-make")

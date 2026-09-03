@@ -16,16 +16,18 @@ supposed to schedule.
 flowchart LR
   Spec["asp-gerbil-scheme-package-spec!\none module catalog"]
   Bootstrap["source-loaded bootstrap\nno compiled ASP runtime dependency"]
-  Admission["Build runtime policy\ncomposite parser evidence"]
+  Validation["ASP declaration validation\nprofile and owner constraints"]
   Make["Gerbil std/make\none upstream session"]
   Workers["GERBIL_BUILD_CORES\navailable cores or override"]
   Receipt["Scheme observability receipt\nCPU, compiler jobs, RSS, contention"]
 
-  Spec --> Bootstrap --> Admission --> Make --> Workers --> Receipt
+  Spec --> Bootstrap --> Validation --> Make --> Workers --> Receipt
   Shadow["global import lock +\ndependency wait + private channel"]
   LockedCompile["global lock + compiler call\nin the same caller"]
-  Shadow -. "blocked" .-> Admission
-  LockedCompile -. "blocked" .-> Admission
+  Parser["source-header graph parser\nmtime freshness oracle + pre-clean"]
+  Shadow -. "blocked" .-> Validation
+  LockedCompile -. "blocked" .-> Validation
+  Parser -. "blocked" .-> Validation
 #+end_src
 
 * Executable Rules
@@ -37,36 +39,29 @@ flowchart LR
 | A short state-table lock and compilation live in different callers | Accepted |
 | One declarative module catalog reaches one =std/make= invocation | Accepted |
 
-Before invoking =std/make=, the Build API computes the stale seeds and complete
-reverse-dependency closure from the declared catalog.  Relative imports are
-canonicalized identically whether Gerbil reads them as symbols or strings, and
-=include= files are freshness edges owned by their including module.  For an
-ordinary Scheme-module catalog, the Framework delegates exact affected-output
-removal to upstream =make-clean= and submits the same closure to one =make= call.
-This prevents dependency SSI timestamps from propagating one layer per separate
-warm invocation.  FFI, executable, and other nonordinary specs conservatively
-retain the unmodified upstream path.
+Before invoking =std/make=, the Build API validates only declaration-level
+properties and resolves the profile/toolchain environment.  It passes the
+complete declared spec to one =make= call.  It does not parse imports, infer
+reverse dependencies, compare source/output mtimes, pre-clean an affected
+closure, or decide that a build is current.  Those operations require Gerbil
+expander and =std/make= semantics.
 
-Every invocation emits =asp-gerbil-scheme.build-graph-admission.v1= with the
-declared count, exact affected module identities, source scan count, output
-invalidation owner, and upstream session count.  A stable warm build must report
-=affected-module-count=0= and =upstream-session-count=0=; a nonempty second warm
-affected set is a fixed-point regression.
+Every invocation emits the memory/CPU/compiler observation for the one upstream
+session.  The receipt describes what ran; it is not a freshness oracle.  A warm
+regression is established by repeated native =std/make= execution and upstream
+compiler activity, not by an ASP-predicted affected-module set.
 
-The root build script is also the cold bootstrap entrypoint.  Its admission
-implementation is loaded from =build-graph-admission-body.inc= and may depend
-only on Gerbil/std bindings already owned by the source-loaded build script.  It
-must not import =building/std-builder= or another compiled ASP runtime module:
-CI removes the package's installed library before invoking =build.ss clean=.
-Two consecutive clean invocations in fresh processes are the executable
-bootstrap oracle; both must succeed before a revision can be published.
-After every canonical ordinary-module library build, a fresh CI process invokes
-=verify-current=.  This command emits the normal admission receipt but fails
-before compilation when any affected module remains.  It therefore proves the
-build reached a fixed point without allowing the verification step to repair
-the evidence it checks.  Executable, FFI, and mixed production specs retain
-their explicit artifact/closure gates until the upstream executor exposes an
-equivalent current-state query for those target kinds.
+The root build script is also the cold bootstrap entrypoint and may depend only
+on Gerbil/std bindings already owned by the source-loaded script.  It must not
+import =building/std-builder= or another compiled ASP runtime module.  CI may
+remove the package's installed library before invoking =build.ss clean=; clean
+and compile still delegate directly to upstream =make-clean= and =make=.
+
+There is deliberately no =verify-current= command.  ASP cannot prove Gerbil
+currentness without duplicating the upstream executor.  Native repeated-build
+scenarios retain elapsed, CPU, RSS, compiler-job, source, profile, and toolchain
+identities so regressions remain measurable without inventing a second build
+graph.
 
 The rules use composite parser-owned call facts.  A mutex, completion, channel,
 or compiler call by itself is insufficient evidence and must not produce a
@@ -103,10 +98,11 @@ incomplete.  A raw maximum child count remains evidence, not a pass/fail verdict
 #+begin_src mermaid
 flowchart TD
   A["Linear dependency chain"] --> A1["No shadow scheduler finding"]
-  B["Wide module catalog"] --> B1["One std/make session"]
+  B["Wide module catalog"] --> B1["Full spec reaches one std/make session"]
   C["Lock only state mutation"] --> C1["Accepted"]
   D["Compile while caller owns global lock"] --> D1["Policy finding"]
   E["Import lock + completion wait + private channel"] --> E1["Policy finding"]
+  F["Source parser + mtime pre-clean"] --> F1["Rejected second authority"]
 #+end_src
 
 The focused tests live in =t/policy/agent-build-test.ss=.  The declaration-only
