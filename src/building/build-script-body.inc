@@ -1,12 +1,15 @@
 ;;; Single implementation shared by the root build.ss bootstrap and the public
 ;;; :asp-gerbil-scheme/src/building/build-script module.
 (import :gerbil/gambit
+        (only-in :gerbil/expander import-module current-expander-compiling?)
         (only-in :gerbil/compiler/base __available-cores)
         :clan/poo/object
         :std/make
         (only-in "../build-api/source-coverage-query"
                  asp-gerbil-scheme-consume-source-coverage-query!)
-        (only-in :std/misc/path path-directory path-expand path-normalize)
+        (only-in :std/misc/path
+                 path-default-extension path-directory path-expand
+                 path-normalize)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
         (only-in :std/os/flock open-output-file/lock LOCK_EX)
@@ -359,6 +362,38 @@
       (else
        (error "Unexpected " rest)))))
 
+;; std/make resolves every module id with import-module before it creates the
+;; named coordinator threads or emits compiler messages.  A verbose build
+;; performs that same import once at this observable boundary; std/make then
+;; reuses the expander context and remains the sole build decision authority.
+(def (framework-build-spec-import-source spec source-directory)
+  (def (source module extension)
+    (path-expand (path-default-extension module extension) source-directory))
+  (match spec
+    ((? string? module) (source module ".ss"))
+    ([gxc: (? string? module) . _] (source module ".ss"))
+    ([ssi: (? string? module) . _] (source module ".ssi"))
+    ([(or exe: static-exe: optimized-exe: optimized-static-exe:)
+      (? string? module) . _]
+     (source module ".ss"))
+    (else #f)))
+
+(def (framework-build-trace-imports! build-spec source-directory)
+  (parameterize ((current-directory source-directory)
+                 (current-expander-compiling? #t))
+    (add-load-path! source-directory)
+    (for-each
+     (lambda (spec)
+       (alet (source
+              (framework-build-spec-import-source spec source-directory))
+         (display "[asp-gerbil-scheme-build] phase=module-import source="
+                  (current-error-port))
+         (display source (current-error-port))
+         (newline (current-error-port))
+         (force-output (current-error-port))
+         (import-module source #f #f)))
+     build-spec)))
+
 (def (framework-build-main arguments build-spec keys source-file)
   (def source-directory
     (path-normalize (path-directory source-file)))
@@ -373,9 +408,12 @@
          ;; ASP observes this one native session without pre-cleaning or
          ;; filtering its module graph.
          (call-with-framework-memory-anomaly-guard
-          "std/make package build"
+         "std/make package build"
           (framework-build-core-count)
           (lambda ()
+            (when (memq verbose: options)
+              (framework-build-trace-imports!
+               build-spec source-directory))
             (parameterize ((current-directory bindir))
               (apply make
                      build-spec

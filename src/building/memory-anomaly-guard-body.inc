@@ -34,11 +34,16 @@
         ("activeCompilerJobs" active-compiler-jobs)))
 
 (def (framework-build-trace-emit! receipt)
-  (parameterize ((write-json-sort-keys? #t))
-    (display "ASP_GERBIL_SCHEME_BUILD_TRACE " (current-error-port))
-    (display (json-object->string receipt) (current-error-port))
-    (newline (current-error-port))
-    (force-output (current-error-port))))
+  ;; Verbose output is a human-facing compiler progress stream.  Keep the
+  ;; structured receipt in memory for contracts/tests, but do not interleave
+  ;; JSON telemetry with std/make and gxc diagnostics.
+  (let (port (current-error-port))
+    (display "[asp-gerbil-scheme-build] phase=" port)
+    (display (hash-get receipt "activityKind") port)
+    (display " elapsed-ms=" port)
+    (display (hash-get receipt "elapsedMs") port)
+    (newline port)
+    (force-output port)))
 
 ;; framework-memory-anomaly-policy
 ;; : (-> MemoryAnomalyPolicy)
@@ -429,14 +434,14 @@
                               (not (vector-ref state 20)))
                      (vector-set! state 20 #t)
                      (framework-build-trace-emit!
-                      (framework-build-trace-receipt
+                     (framework-build-trace-receipt
                        label 'active now rss cpu-percent active-jobs)))
                    (when (and trace? (zero? active-jobs)
                               (>= now +framework-build-trace-interval-seconds+)
                               (not (vector-ref state 19)))
                      (vector-set! state 19 #t)
                      (framework-build-trace-emit!
-                      (framework-build-trace-receipt
+                     (framework-build-trace-receipt
                        label 'active now rss cpu-percent active-jobs)))
                    (unless observer-available?
                      (vector-set! state 16 (+ 1 (vector-ref state 16))))

@@ -15,6 +15,7 @@
         framework-build-trace-receipt
         framework-apply-build-core-policy!
         framework-build-profile-options
+        framework-build-spec-import-source
         framework-parse-build-options
         framework-resolve-build-keys
         framework-normalize-build-options

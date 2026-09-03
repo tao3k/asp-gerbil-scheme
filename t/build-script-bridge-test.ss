@@ -4,6 +4,7 @@
                  framework-build-trace-receipt
                  framework-apply-build-core-policy!
                  framework-build-profile-options
+                 framework-build-spec-import-source
                  framework-parse-build-options
                  framework-resolve-build-keys
                  framework-normalize-build-options
@@ -65,6 +66,19 @@
              => [debug: #t verbose: #t])
       (check (framework-std-make-options [debug: #t verbose: #t])
              => [debug: #t verbose: 9]))
+    (test-case "verbose import tracing resolves native build item sources"
+      (check (framework-build-spec-import-source
+              "src/runtime/parser" "/workspace")
+             => "/workspace/src/runtime/parser.ss")
+      (check (framework-build-spec-import-source
+              [exe: "src/main" bin: "gparse"] "/workspace")
+             => "/workspace/src/main.ss")
+      (check (framework-build-spec-import-source
+              [ssi: "src/native"] "/workspace")
+             => "/workspace/src/native.ssi")
+      (check (framework-build-spec-import-source
+              [static-include: "src/native.c"] "/workspace")
+             => #f))
     (test-case "verbose builds expose a typed live phase trace"
       (let (receipt
             (framework-build-trace-receipt
