@@ -24,6 +24,7 @@
         ("phase" (symbol->string phase))
         ("activityKind"
          (cond
+          ((eq? phase 'lease-wait) "build-lease")
           ((eq? phase 'started) "std-make-admission")
           ((positive? active-compiler-jobs) "native-compiler")
           (else "scheme-expansion-or-dependency-analysis")))
@@ -383,7 +384,10 @@
          ;; count, saturated sample count, process-tree CPU trajectory, and
          ;; first/last observed compiler activity and process-table observer
          ;; failures and real observation cadence are watcher-owned state.
-         (state (vector #f 'normal 0 [] 0 0 0 #f 0 0 0 0 0 0 #f #f 0 0 0 0))
+         ;; The last two flags make verbose phase observations exactly once:
+         ;; one silent Scheme-expansion signal and one native-compiler signal.
+         (state (vector #f 'normal 0 [] 0 0 0 #f 0 0 0 0 0 0 #f #f 0 0 0
+                        #f #f))
          (watcher
           (spawn
            (lambda ()
@@ -421,10 +425,16 @@
                         (rate
                          (framework-memory-anomaly-growth-rate-bytes-per-second
                           samples now rss)))
-                   (when (and trace?
-                              (>= (- now (vector-ref state 19))
-                                  +framework-build-trace-interval-seconds+))
-                     (vector-set! state 19 now)
+                   (when (and trace? (positive? active-jobs)
+                              (not (vector-ref state 20)))
+                     (vector-set! state 20 #t)
+                     (framework-build-trace-emit!
+                      (framework-build-trace-receipt
+                       label 'active now rss cpu-percent active-jobs)))
+                   (when (and trace? (zero? active-jobs)
+                              (>= now +framework-build-trace-interval-seconds+)
+                              (not (vector-ref state 19)))
+                     (vector-set! state 19 #t)
                      (framework-build-trace-emit!
                       (framework-build-trace-receipt
                        label 'active now rss cpu-percent active-jobs)))

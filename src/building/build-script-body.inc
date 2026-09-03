@@ -220,10 +220,14 @@
            previous)))))
    (else (thunk))))
 
-(def (call-with-framework-build-lease thunk)
+(def (call-with-framework-build-lease thunk (trace? #f))
   (let* ((cache-root (framework-build-cache-root))
          (lease-path (path-expand ".asp-gerbil-scheme-build.lease" cache-root)))
     (create-directory* cache-root)
+    (when trace?
+      (framework-build-trace-emit!
+       (framework-build-trace-receipt
+        "std/make package build" 'lease-wait 0 0 0 0)))
     (let (lease (open-output-file/lock lease-path op: LOCK_EX))
       (unwind-protect
         (call-with-framework-native-toolchain-environment
@@ -380,7 +384,8 @@
                       (framework-merge-build-options
                        build-keys options)))))
           (and (memq verbose: options) #t))
-         (framework-validate-runtime-closure! build-spec)))))
+         (framework-validate-runtime-closure! build-spec))
+       (and (memq verbose: options) #t))))
   (def (clean)
     (apply make-clean
            build-spec
