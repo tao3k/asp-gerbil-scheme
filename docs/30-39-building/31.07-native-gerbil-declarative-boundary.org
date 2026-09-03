@@ -64,6 +64,43 @@ The v1 macro surface deliberately rejects a parallel option vocabulary:
 | =before:=        | omit        | list order and =append= |
 | =after:=         | omit        | list order and =append= |
 
+The installed =:asp-gerbil-scheme/src/build-api= module is the single public
+import surface for package declarations, source discovery, and profile
+application.  The same repository has an executable top-level =build-api.ss=
+source-bootstrap facade because a clean package cannot import its own installed
+module before the first build.  Both facades project the same owner modules; a
+downstream =build.ss= must not import those internal modules one symbol at a
+time.
+
+=all-gerbil-modules= retains the native downstream call shape and
+=clan/building= remains the only source-catalog owner.  After that single
+upstream scan, the Build API proves the root is inside a Git worktree with =git
+rev-parse=; only then does one =git check-ignore --stdin= invocation filter the
+already-discovered candidates.  Untracked and unstaged Scheme files therefore
+remain immediate build inputs, while ignored untracked files follow nested
+=.gitignore=, =.git/info/exclude=, and standard user excludes.  Tracked files
+remain inputs even when an ignore rule later matches their path.  The Build API
+does not parse =.gitignore=, make Git own source discovery, or translate Git
+patterns into an =exclude-dirs= approximation.  Its initialized default
+=exclude-dirs= value is inherited by the POO package prototype, while each
+downstream package only appends its domain-specific exclusions.  In a source
+archive, the same upstream catalog is used without Git filtering, so Git does
+not become a package-build dependency.
+
+#+begin_src mermaid
+flowchart TD
+    Build["build.ss<br/>one bootstrap Build API import"] --> Discover["all-gerbil-modules<br/>native call shape"]
+    Discover --> UpstreamCatalog["clan/building<br/>one complete candidate scan"]
+    UpstreamCatalog --> GitProject{"git rev-parse<br/>inside worktree?"}
+    GitProject -->|yes| IgnoreQuery["git check-ignore --stdin<br/>one ignore query"]
+    GitProject -->|no| Modules["candidate catalog unchanged"]
+    IgnoreQuery --> Filter["O(n) ignored-path filter<br/>Git owns ignore semantics only"]
+    Filter --> Modules["one sorted module catalog"]
+    Modules --> PackageSpec["asp-gerbil-scheme-package-spec!"]
+    PackageSpec --> Native["native-spec / std/make"]
+    PackageSpec --> Policy["source coverage / policy"]
+#+end_src
+
 #+begin_src mermaid
 flowchart LR
     Package[gerbil.pkg] --> Build[build.ss]

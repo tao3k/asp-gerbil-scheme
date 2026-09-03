@@ -3,15 +3,10 @@
 
 (export asp-gerbil-scheme-library-package-spec)
 
-(import :clan/building
-        (only-in :std/srfi/1 fold)
-        (only-in :std/srfi/13 string-prefix?)
-        (only-in "./src/building/build-script"
-                 framework-apply-build-core-policy!)
-        (only-in "./src/build-api/package-spec"
-                 asp-gerbil-scheme-package-spec!
-                 asp-gerbil-scheme-library-package-prototype
-                 asp-gerbil-scheme-package-native-spec))
+(import (except-in :clan/building all-gerbil-modules)
+        :std/srfi/1
+        :std/srfi/13
+        "./build-api")
 
 (def +product-entry-modules+
   '("src/provider-server"
@@ -26,7 +21,13 @@
     "src/cli-launcher"))
 
 (def +project-discovery-exclude-directories+
-  '("run" ".git" "_darcs" ".gerbil" "scenarios" "snapshots"))
+  '("scenarios" "snapshots"))
+
+(def +source-exclude-directories+
+  (append
+   (asp-gerbil-scheme-package-exclude-directories
+    asp-gerbil-scheme-library-package-prototype)
+   +project-discovery-exclude-directories+))
 
 (def (discover-project-modules)
   (all-gerbil-modules
@@ -45,7 +46,7 @@
   (profile 'development)
   (roots ["src" "t"])
   (runtime-roots ["src"])
-  (exclude-directories +project-discovery-exclude-directories+)
+  (exclude-directories +source-exclude-directories+)
   (native-spec
    (fold (lambda (module spec)
            (remove-build-file spec module))

@@ -10,6 +10,8 @@
         asp-gerbil-scheme-package-api-stage-specs)
 
 (import :clan/poo/object
+        (only-in "./source-discovery"
+                 +default-project-exclude-directories+)
         (only-in "./source-coverage"
                  asp-gerbil-scheme-source-coverage
                  asp-gerbil-scheme-source-coverage-declared-files)
@@ -88,7 +90,7 @@
  (modules [])
  (roots ["src"])
  (runtime-roots ["src"])
- (exclude-directories [])
+ (exclude-directories +default-project-exclude-directories+)
  (native-spec []))
 
 ;; Cold package builds retain an explicit stage order for owners whose imports
@@ -97,6 +99,7 @@
   '(("build-api/package-build.ss")
     ("build-api/source-coverage-query.ss"
      "build-api/source-coverage.ss"
+     "build-api/source-discovery.ss"
      "constants.ss")
     ("build-api/package-receipt.ss"
      "build-api/cli-gsc-options.ss"

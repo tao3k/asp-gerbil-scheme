@@ -218,6 +218,7 @@ jobs:
         run: |
           gxpkg env gxc -O -d .gerbil/lib src/protocol/registry.ss
           gxpkg env gxtest \
+            t/source-discovery-test.ss \
             t/provider-package-spec-test.ss \
             t/provider-owned-schema-registry-test.ss \
             t/exact-source-projection-test.ss \
