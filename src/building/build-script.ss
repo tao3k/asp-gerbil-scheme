@@ -19,6 +19,7 @@
         framework-resolve-build-keys
         framework-normalize-build-options
         framework-merge-build-options
+        framework-std-make-options
         framework-recover-object-locks!
         call-with-framework-native-toolchain-environment
         call-with-framework-build-lease

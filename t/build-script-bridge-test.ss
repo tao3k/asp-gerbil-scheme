@@ -8,6 +8,7 @@
                  framework-resolve-build-keys
                  framework-normalize-build-options
                  framework-merge-build-options
+                 framework-std-make-options
                  framework-executable-build-spec
                  call-with-framework-native-toolchain-environment
                  framework-build-contract))
@@ -61,7 +62,9 @@
       ;; native std/make keyword rather than inventing verbosity levels.
       (check-exception (framework-parse-build-options '("-v")) true)
       (check (framework-parse-build-options '("--verbose" "--debug"))
-             => [debug: #t verbose: #t]))
+             => [debug: #t verbose: #t])
+      (check (framework-std-make-options [debug: #t verbose: #t])
+             => [debug: #t verbose: 9]))
     (test-case "verbose builds expose a typed live phase trace"
       (let (receipt
             (framework-build-trace-receipt
@@ -87,6 +90,7 @@
                => "GERBIL_BUILD_CORES")
         (check (cdr (assoc 'verbosityOwner contract))
                => "build-script-cli-to-std-make")
+        (check (cdr (assoc 'nativeVerboseLevel contract)) => 9)
         (check (cdr (assoc 'defaultCoreSelection contract))
                => "host-cpu-count")
         (check (cdr (assoc 'compilerCoreCapture contract))

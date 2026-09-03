@@ -309,6 +309,20 @@
              (framework-normalize-build-options base)
              (framework-build-option-keys normalized-overrides)))))
 
+;; std/make stores verbose as a level and enables gxc's underlying expansion
+;; trace only at level 9. Keep the public CLI projection boolean, then lower it
+;; at the executor boundary so verbose output includes compiler source context.
+(def (framework-std-make-options options)
+  (let loop ((rest options) (lowered []))
+    (match rest
+      ([] (reverse lowered))
+      ([verbose: #t . tail]
+       (loop tail (cons 9 (cons verbose: lowered))))
+      ([key value . tail]
+       (loop tail (cons value (cons key lowered))))
+      (else
+       (error "malformed std/make options" options)))))
+
 (def (framework-parse-build-options options)
   (def (present? keyword parsed)
     (and (memq keyword parsed) #t))
@@ -362,7 +376,9 @@
               (apply make
                      build-spec
                      srcdir: source-directory
-                     (framework-merge-build-options build-keys options))))
+                     (framework-std-make-options
+                      (framework-merge-build-options
+                       build-keys options)))))
           (and (memq verbose: options) #t))
          (framework-validate-runtime-closure! build-spec)))))
   (def (clean)
@@ -414,6 +430,7 @@
     (buildDepsOwner . "std/make-srcdir-default")
     (parallelismOwner . "GERBIL_BUILD_CORES")
     (verbosityOwner . "build-script-cli-to-std-make")
+    (nativeVerboseLevel . 9)
     (defaultCoreSelection . "host-cpu-count")
     (compilerCoreCapture . "environment-and-compiler-counter")
     (dependencyEnvironmentOwner . "gxpkg-env")
