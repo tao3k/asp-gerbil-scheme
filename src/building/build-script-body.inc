@@ -362,10 +362,9 @@
       (else
        (error "Unexpected " rest)))))
 
-;; std/make resolves every module id with import-module before it creates the
-;; named coordinator threads or emits compiler messages.  A verbose build
-;; performs that same import once at this observable boundary; std/make then
-;; reuses the expander context and remains the sole build decision authority.
+;; std/make resolves every module id before it emits compiler messages.  These
+;; traces announce that native scheduling frontier without importing anything:
+;; std/make remains the sole expander, scheduler, and build decision authority.
 (def (framework-build-spec-import-source spec source-directory)
   (def (source module extension)
     (path-expand (path-default-extension module extension) source-directory))
@@ -378,21 +377,33 @@
      (source module ".ss"))
     (else #f)))
 
-(def (framework-build-trace-imports! build-spec source-directory)
-  (parameterize ((current-directory source-directory)
-                 (current-expander-compiling? #t))
-    (add-load-path! source-directory)
-    (for-each
-     (lambda (spec)
-       (alet (source
-              (framework-build-spec-import-source spec source-directory))
-         (display "[asp-gerbil-scheme-build] phase=module-import source="
-                  (current-error-port))
-         (display source (current-error-port))
-         (newline (current-error-port))
-         (force-output (current-error-port))
-         (import-module source #f #f)))
-     build-spec)))
+(def (framework-build-module-schedule-line source)
+  (string-append
+   "[asp-gerbil-scheme-build] phase=module-scheduled source=" source))
+
+(def (framework-build-module-schedule-emit! source)
+  (display (framework-build-module-schedule-line source)
+           (current-error-port))
+  (newline (current-error-port))
+  (force-output (current-error-port)))
+
+(def (framework-build-announce-modules! build-spec source-directory)
+  (for-each
+   (lambda (spec)
+     (alet (source
+            (framework-build-spec-import-source spec source-directory))
+       (framework-build-module-schedule-emit! source)))
+   build-spec))
+
+(def (framework-build-announce-first-module! build-spec source-directory)
+  (let loop ((remaining build-spec))
+    (when (pair? remaining)
+      (let (source
+            (framework-build-spec-import-source
+             (car remaining) source-directory))
+        (if source
+          (framework-build-module-schedule-emit! source)
+          (loop (cdr remaining)))))))
 
 (def (framework-build-main arguments build-spec keys source-file)
   (def source-directory
@@ -411,8 +422,9 @@
          "std/make package build"
           (framework-build-core-count)
           (lambda ()
-            (when (memq verbose: options)
-              (framework-build-trace-imports!
+            (if (memq verbose: options)
+              (framework-build-announce-modules! build-spec source-directory)
+              (framework-build-announce-first-module!
                build-spec source-directory))
             (parameterize ((current-directory bindir))
               (apply make

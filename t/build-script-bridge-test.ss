@@ -5,6 +5,7 @@
                  framework-apply-build-core-policy!
                  framework-build-profile-options
                  framework-build-spec-import-source
+                 framework-build-module-schedule-line
                  framework-parse-build-options
                  framework-resolve-build-keys
                  framework-normalize-build-options
@@ -66,7 +67,7 @@
              => [debug: #t verbose: #t])
       (check (framework-std-make-options [debug: #t verbose: #t])
              => [debug: #t verbose: 9]))
-    (test-case "verbose import tracing resolves native build item sources"
+    (test-case "module scheduling resolves native build item sources"
       (check (framework-build-spec-import-source
               "src/runtime/parser" "/workspace")
              => "/workspace/src/runtime/parser.ss")
@@ -78,7 +79,11 @@
              => "/workspace/src/native.ssi")
       (check (framework-build-spec-import-source
               [static-include: "src/native.c"] "/workspace")
-             => #f))
+             => #f)
+      (check (framework-build-module-schedule-line "/workspace/src/main.ss")
+             => (string-append
+                 "[asp-gerbil-scheme-build] phase=module-scheduled source="
+                 "/workspace/src/main.ss")))
     (test-case "verbose builds expose a typed live phase trace"
       (let (receipt
             (framework-build-trace-receipt

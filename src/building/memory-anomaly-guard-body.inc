@@ -374,6 +374,20 @@
     (newline (current-error-port))
     (force-output (current-error-port))))
 
+;; : (-> Integer String)
+(def (framework-build-start-line worker-count)
+  (call-with-output-string
+   (lambda (port)
+     (display "[asp-gerbil-scheme-build] phase=std-make-start worker-count="
+              port)
+     (display worker-count port))))
+
+;; : (-> Integer Void)
+(def (framework-build-start-emit! worker-count)
+  (display (framework-build-start-line worker-count) (current-error-port))
+  (newline (current-error-port))
+  (force-output (current-error-port)))
+
 ;; call-with-framework-memory-anomaly-guard
 ;; : (-> String Integer (-> Any) Any)
 ;;; The std/make scheduler has no supported mid-flight worker-resize hook.
@@ -503,6 +517,7 @@
                         (begin
                           (thread-sleep! (.ref policy 'sample-seconds))
                           (loop))))))))))))
+    (framework-build-start-emit! worker-count)
     (when trace?
       (framework-build-trace-emit!
        (framework-build-trace-receipt label 'started 0 0 0 0)))
@@ -528,24 +543,29 @@
                    ((positive? (vector-ref state 16))
                     'completed-with-degraded-observability)
                    (else 'within-envelope))))
-            (framework-memory-anomaly-emit!
-             (framework-memory-anomaly-receipt
-              policy label (if completed? 'completed 'failed) reason
-              worker-count
-              (vector-ref state 4)
-              (vector-ref state 5)
-              (vector-ref state 6)
-              elapsed
-              (vector-ref state 8)
-              (vector-ref state 9)
-              (vector-ref state 10)
-              (vector-ref state 11)
-              (vector-ref state 12)
-              (vector-ref state 13)
-              (vector-ref state 14)
-              (vector-ref state 15)
-              load-average-start
-              (framework-memory-guard-load-average)
-              (vector-ref state 16)
-              (vector-ref state 17)
-              (vector-ref state 18)))))))))
+            ;; A healthy completion is intentionally silent: the one start
+            ;; line already established liveness. Emit the large diagnostic
+            ;; receipt only when it carries actionable failure or anomaly
+            ;; evidence.
+            (unless (and completed? (eq? reason 'within-envelope))
+              (framework-memory-anomaly-emit!
+               (framework-memory-anomaly-receipt
+                policy label (if completed? 'completed 'failed) reason
+                worker-count
+                (vector-ref state 4)
+                (vector-ref state 5)
+                (vector-ref state 6)
+                elapsed
+                (vector-ref state 8)
+                (vector-ref state 9)
+                (vector-ref state 10)
+                (vector-ref state 11)
+                (vector-ref state 12)
+                (vector-ref state 13)
+                (vector-ref state 14)
+                (vector-ref state 15)
+                load-average-start
+                (framework-memory-guard-load-average)
+                (vector-ref state 16)
+                (vector-ref state 17)
+                (vector-ref state 18))))))))))

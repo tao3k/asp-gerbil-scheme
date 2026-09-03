@@ -22,4 +22,5 @@
         framework-memory-guard-active-compiler-jobs
         framework-memory-guard-process-tree-cpu-percent
         framework-memory-anomaly-receipt
+        framework-build-start-line
         call-with-framework-memory-anomaly-guard)

@@ -13,7 +13,9 @@
                  framework-memory-guard-load-average
                  framework-memory-guard-active-compiler-jobs
                  framework-memory-guard-process-tree-cpu-percent
-                 framework-memory-anomaly-receipt))
+                 framework-memory-anomaly-receipt
+                 framework-build-start-line
+                 call-with-framework-memory-anomaly-guard))
 
 (export building-memory-anomaly-guard-test)
 
@@ -21,6 +23,24 @@
 ;; : TestSuite
 (def building-memory-anomaly-guard-test
   (test-suite "building memory anomaly guard"
+    (test-case "build start is visible before std/make IO waits"
+      (check (framework-build-start-line 8)
+             => (string-append
+                 "[asp-gerbil-scheme-build] phase=std-make-start"
+                 " worker-count=8")))
+    (test-case "healthy completion emits no periodic or terminal RSS receipt"
+      (let (result #f)
+        (check
+         (with-output-to-string
+           (lambda ()
+             (parameterize ((current-error-port (current-output-port)))
+               (set! result
+                     (call-with-framework-memory-anomaly-guard
+                      "test build" 1 (lambda () 'done))))))
+         => (string-append
+             "[asp-gerbil-scheme-build] phase=std-make-start"
+             " worker-count=1\n"))
+        (check result => 'done)))
     (test-case "denied process-table observation degrades to an empty sample"
       (check (list? (framework-memory-guard-process-table)) => #t))
     (test-case "host runnable pressure is represented without fixed cores"
