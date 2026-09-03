@@ -2,6 +2,7 @@
 ;;; Invariant: this facade preserves pure stage planning; package receipt persistence stays in Build API owners.
 (import ../building/facade
         ./package-spec
+        ./profile-build-spec
         :asp-gerbil-scheme/src/building/commands)
 
 (export build-stage
@@ -59,5 +60,6 @@
         package-source-stages-spec
         package-source-stages-run!
         package-source-stages-clean!
+        asp-gerbil-scheme-package-profiled-build-spec
         (import: ./package-spec)
         (import: :asp-gerbil-scheme/src/building/commands))

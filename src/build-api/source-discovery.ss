@@ -3,6 +3,7 @@
 
 (export all-gerbil-modules
         git-project?
+        +default-excluded-module-files+
         +default-project-exclude-directories+)
 
 (import (rename-in :clan/building
@@ -82,12 +83,17 @@
 (def (all-gerbil-modules
       root: (root ".")
       exclude: (exclude +default-excluded-module-files+)
-      exclude-dirs: (exclude-dirs '()))
+      exclude-dirs: (exclude-dirs '())
+      default-project-excludes?: (default-project-excludes? #t)
+      respect-gitignore?: (respect-gitignore? #t))
   (let (effective-exclude-dirs
-        (append +default-project-exclude-directories+ exclude-dirs))
+        (append (if default-project-excludes?
+                  +default-project-exclude-directories+
+                  [])
+                exclude-dirs))
     (let (modules
           (upstream-project-modules root exclude effective-exclude-dirs))
-      (if (git-project? root)
+      (if (and respect-gitignore? (git-project? root))
         (without-ignored-modules
          modules
          (git-ignored-modules root modules))

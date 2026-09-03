@@ -1,6 +1,7 @@
 (export asp-gerbil-scheme-package-spec!
         asp-gerbil-scheme-library-package-prototype
         asp-gerbil-scheme-package-native-spec
+        asp-gerbil-scheme-package-builder-profile
         asp-gerbil-scheme-package-build-profile
         asp-gerbil-scheme-package-modules
         asp-gerbil-scheme-package-source-roots
@@ -10,6 +11,9 @@
         asp-gerbil-scheme-package-api-stage-specs)
 
 (import :clan/poo/object
+        (only-in "./builder-profile"
+                 asp-gerbil-scheme-development-builder-profile
+                 asp-gerbil-scheme-builder-profile-native-profile)
         (only-in "./source-discovery"
                  +default-project-exclude-directories+)
         (only-in "./source-coverage"
@@ -54,8 +58,12 @@
 (def (asp-gerbil-scheme-package-native-spec package-spec)
   (.get package-spec native-spec))
 
-(def (asp-gerbil-scheme-package-build-profile package-spec)
+(def (asp-gerbil-scheme-package-builder-profile package-spec)
   (.get package-spec profile))
+
+(def (asp-gerbil-scheme-package-build-profile package-spec)
+  (asp-gerbil-scheme-builder-profile-native-profile
+   (asp-gerbil-scheme-package-builder-profile package-spec)))
 
 (def (asp-gerbil-scheme-package-modules package-spec)
   (.get package-spec modules))
@@ -85,7 +93,7 @@
 ;; reusable POO values and projections.
 (.def asp-gerbil-scheme-library-package-prototype
  (role 'library)
- (profile 'development)
+ (profile asp-gerbil-scheme-development-builder-profile)
  (source-catalog-authority #f)
  (modules [])
  (roots ["src"])
@@ -106,8 +114,9 @@
      "build-api/launcher-receipt.ss"
      "build-api/release-modules.ss"
      "build-api/build-path-contract.ss"
-     "build-api/package-spec.ss"
+     "build-api/builder-profile.ss"
      "support/time.ss")
+    ("build-api/package-spec.ss")
     ("benchmark/gate.ss")
     ("benchmark/framework.ss")
     ("testing/model.ss")
@@ -258,6 +267,7 @@
 (def +package-api-build-api-stages+
   '(("build-api/artifact-cleanup.ss" "build-api/source-closure.ss")
     ("build-api/native-build.ss")
+    ("build-api/profile-build-spec.ss")
     ("build-api/framework.ss")))
 
 (def +package-api-directories+

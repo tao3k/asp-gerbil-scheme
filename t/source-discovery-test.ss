@@ -4,6 +4,9 @@
         :std/test
         (only-in :std/misc/path path-directory path-expand)
         (only-in :std/misc/process run-process/batch)
+        (only-in :asp-gerbil-scheme/src/build-api/builder-profile
+                 asp-gerbil-scheme-development-builder-profile
+                 asp-gerbil-scheme-builder-profile-modules)
         :asp-gerbil-scheme/src/build-api/source-discovery)
 
 (export source-discovery-test)
@@ -64,7 +67,13 @@
                            directory: root)
         (check (all-gerbil-modules root: root)
                => '("src/kept.ss" "src/unstaged.ss" "src/visible.ss"
-                    "tracked-ignored.ss"))))
+                    "tracked-ignored.ss"))
+        (check
+         (asp-gerbil-scheme-builder-profile-modules
+          asp-gerbil-scheme-development-builder-profile
+          root: root)
+         => '("src/kept.ss" "src/unstaged.ss" "src/visible.ss"
+              "tracked-ignored.ss"))))
 
     (test-case "source archives retain upstream discovery without Git"
       (let (root (fixture-path +source-discovery-test-root+ "archive"))
