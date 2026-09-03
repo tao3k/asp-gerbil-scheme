@@ -5,9 +5,6 @@
         :std/make
         (only-in "../build-api/source-coverage-query"
                  asp-gerbil-scheme-consume-source-coverage-query!)
-        (only-in "./std-builder"
-                 make-package-source-stage
-                 package-source-stage-topology-request-spec-groups)
         (only-in :std/misc/path path-directory path-expand path-normalize)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process run-process/batch)
@@ -23,6 +20,7 @@
         (only-in :gerbil/gambit getenv))
 
 (include "memory-anomaly-guard-body.inc")
+(include "build-graph-admission-body.inc")
 
 (def (framework-build-artifact-root)
   (getenv "ASP_PROVIDER_ARTIFACT_ROOT"
@@ -169,10 +167,8 @@
       (when (pair? duplicates)
         (error "Build Graph Policy: duplicate module owners" duplicates))
       (if prefix
-        (apply append
-               (package-source-stage-topology-request-spec-groups
-                (make-package-source-stage
-                 "package" source-directory prefix build-spec 'topology)))
+        (framework-build-graph-affected-specs
+         source-directory prefix build-spec)
         build-spec))
     build-spec))
 

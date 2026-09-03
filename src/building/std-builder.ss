@@ -17,6 +17,8 @@
         ./model
         ./native-toolchain)
 
+(include "build-graph-admission-body.inc")
+
 ;;; Keep the full public surface in one declaration so dependent facades receive
 ;;; the complete module interface during incremental compilation.
 (export std-builder
@@ -581,60 +583,14 @@
   (and (pair? spec)
        (eq? (car spec) 'ssi:)))
 
-;; : (-> ModulePath ModulePath)
-(def (package-source-module-stem module)
-  (let (length (string-length module))
-    (if (and (>= length 3)
-             (equal? (substring module (- length 3) length) ".ss"))
-      (substring module 0 (- length 3))
-      module)))
-
-;; : (-> PackageSourceStage BuildSpec Path)
-(def (package-source-stage-source-path stage spec)
-  (path-expand
-   (package-source-spec-module spec)
-   (package-source-stage-source stage)))
-
-;; : (-> PackageSourceStage BuildSpec Path)
-(def (package-source-stage-output-path stage spec)
-  (path-expand
-   (string-append
-    (package-source-stage-prefix stage)
-    "/"
-    (package-source-module-stem (package-source-spec-module spec))
-    ".ssi")
-   (path-expand "lib" (or (getenv "GERBIL_PATH") ".gerbil"))))
-
-;; : (-> Path Integer)
-(def (package-source-file-seconds path)
-  (time->seconds (file-info-last-modification-time (file-info path))))
-
 ;; : (-> PackageSourceStage BuildSpec [ModulePath] Boolean)
 (def (package-source-spec-artifact-current? stage spec dependencies)
-  (let ((source (package-source-stage-source-path stage spec))
-        (output (package-source-stage-output-path stage spec))
-        (includes
-         (package-source-stage-include-paths
-          stage (package-source-spec-module spec))))
-    (and (file-exists? source)
-         (file-exists? output)
-         (<= (package-source-file-seconds source)
-             (package-source-file-seconds output))
-         (andmap
-          (lambda (include)
-            (and (file-exists? include)
-                 (<= (package-source-file-seconds include)
-                     (package-source-file-seconds output))))
-          includes)
-         (or (package-source-spec-ssi? spec)
-             (andmap
-              (lambda (dependency)
-                (let (dependency-output
-                      (package-source-stage-output-path stage dependency))
-                  (and (file-exists? dependency-output)
-                       (<= (package-source-file-seconds dependency-output)
-                           (package-source-file-seconds output)))))
-              dependencies)))))
+  (framework-build-graph-artifact-current?
+   (package-source-stage-source stage)
+   (package-source-stage-prefix stage)
+   (package-source-spec-module spec)
+   dependencies
+   (not (package-source-spec-ssi? spec))))
 
 ;; : (-> PackageSourceStage BuildSpec Boolean)
 (def (package-source-spec-current? stage spec)
@@ -686,113 +642,24 @@
 
 ;; : (forall (n) (-> [n] [n] (-> n [n]) [n]))
 (def (source-topology-affected nodes stale dependencies-of)
-  (let loop ((affected stale))
-    (let (dependents
-          (filter
-           (lambda (node)
-             (and (not (member node affected))
-                  (ormap (lambda (dependency)
-                           (member dependency affected))
-                         (dependencies-of node))))
-           nodes))
-      (if (null? dependents)
-        (filter (lambda (node) (member node affected)) nodes)
-        (loop (append affected dependents))))))
-
-;; : (-> String String)
-(def (package-source-module-path module)
-  (if (string-suffix? ".ss" module)
-    module
-    (string-append module ".ss")))
-
-;; : (-> PackageSourceStage ModulePath Datum (Maybe ModulePath))
-(def (package-source-import-reference stage owner reference)
-  (let* ((name (cond ((symbol? reference) (symbol->string reference))
-                     ((string? reference) reference)
-                     (else #f)))
-         (prefix (string-append ":" (package-source-stage-prefix stage) "/")))
-    (cond
-     ((not name) #f)
-     ((string-prefix? prefix name)
-      (package-source-module-path
-       (substring name (string-length prefix) (string-length name))))
-     ((string-prefix? "." name)
-      (let* ((root (path-normalize (package-source-stage-source stage)))
-             (directory (path-expand (path-directory owner) root))
-             (absolute
-              (path-normalize
-               (path-expand (package-source-module-path name) directory))))
-        (package-source-module-path
-         (substring absolute
-                    (+ (string-length root)
-                       (if (string-suffix? "/" root) 0 1))
-                    (string-length absolute)))))
-     (else #f))))
-
-;; : (-> PackageSourceStage ModulePath Datum [ModulePath])
-(def (package-source-import-references stage owner datum)
-  (cond
-   ((pair? datum)
-    (apply append
-           (map (lambda (item)
-                  (package-source-import-references stage owner item))
-                datum)))
-   (else
-    (let (module (package-source-import-reference stage owner datum))
-      (if module [module] [])))))
-
-;; : (-> Datum Boolean)
-(def (package-source-module-header-form? form)
-  (and (pair? form)
-       (memq (car form)
-             '(import export include package: namespace declare prelude:))))
-
-;; : (-> Path [Datum])
-(def (package-source-read-import-forms path)
-  (call-with-input-file path
-    (lambda (port)
-      (let loop ((forms []))
-        (let (form (read port))
-          (cond
-           ((eof-object? form) (reverse forms))
-           ((and (pair? form) (memq (car form) '(import export include)))
-            (loop (cons form forms)))
-           ((package-source-module-header-form? form)
-            (loop forms))
-           (else (reverse forms))))))))
+  (framework-build-graph-affected nodes stale dependencies-of))
 
 ;; : (-> PackageSourceStage ModulePath [ModulePath])
 (def (package-source-stage-dependencies stage module)
-  (let* ((modules (map package-source-spec-module
-                       (package-source-stage-specs stage)))
-         (forms
-          (package-source-read-import-forms
-           (package-source-stage-source-path stage module))))
-    (filter
-     (lambda (dependency) (member dependency modules))
-     (apply append
-            (filter-map
-             (lambda (form)
-               (and (pair? form)
-                    (memq (car form) '(import export))
-                    (package-source-import-references stage module (cdr form))))
-             forms)))))
+  (framework-build-graph-dependencies
+   (package-source-stage-source stage)
+   (package-source-stage-prefix stage)
+   (map package-source-spec-module (package-source-stage-specs stage))
+   module))
 
 ;; : (-> PackageSourceStage ModulePath [Path])
 ;;; Includes are freshness edges owned by the source module, not module graph
 ;;; nodes.  Resolve them relative to the including source so one affected-closure
 ;;; pass observes generated/body changes before delegating compilation.
 (def (package-source-stage-include-paths stage module)
-  (let* ((source-path (package-source-stage-source-path stage module))
-         (source-directory (path-directory source-path)))
-    (filter-map
-     (lambda (form)
-       (and (pair? form)
-            (eq? (car form) 'include)
-            (pair? (cdr form))
-            (string? (cadr form))
-            (path-normalize (path-expand (cadr form) source-directory))))
-     (package-source-read-import-forms source-path))))
+  (framework-build-graph-includes
+   (package-source-stage-source stage)
+   module))
 
 ;; : (-> PackageSourceStage [[ModulePath]])
 (def (package-source-stage-topology-layers stage)
