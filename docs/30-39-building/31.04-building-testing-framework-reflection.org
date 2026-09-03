@@ -113,10 +113,12 @@ flowchart LR
 The bootstrap is intentionally staged: each module publishes an SSI consumed by
 the next module. This is an interface-order constraint, not a machine-capacity
 decision. The Framework does not set a second worker budget. It preserves a
-positive =GERBIL_BUILD_CORES= override or re-enters before compiler imports
-with Gambit's =##cpu-count= when Homebrew Gerbil 0.18.2 would otherwise select
-one worker, then performs one =std/make= invocation. =GERBIL_BUILD_PREFIX= pins
-that child to the active runtime cohort instead of the implicit user cache.
+positive =GERBIL_BUILD_CORES= override or selects Gambit's =##cpu-count= when
+Homebrew Gerbil 0.18.2 would otherwise select one worker.  It applies that
+value to both the environment and the already
+initialized compiler counter, then performs one =std/make= invocation.
+=GERBIL_BUILD_PREFIX= pins
+the build to the active runtime cohort instead of the implicit user cache.
 
 The public =building/build-script= bridge adds one kernel lease per
 =GERBIL_PATH=. This is cache isolation, not compiler scheduling: after an

@@ -119,8 +119,8 @@ Developer UX improvements:
 - The harness supplies the selected native linker as =GERBIL_GCC= only for the
   scoped Builder call; Gerbil's static executable driver owns the actual final
   link. A valid caller =GERBIL_BUILD_CORES= remains authoritative; when it is
-  absent, the Scheme Framework re-enters the Build SS once with Gambit's
-  =##cpu-count= set before Gerbil imports =compiler/base=. It also fixes
+  absent, the Scheme Framework selects Gambit's =##cpu-count= and applies it to
+  both the environment and Gerbil 0.18.2's captured compiler counter. It fixes
   =GERBIL_BUILD_PREFIX= to the active runtime cohort so a project build cannot
   drift into the user-global cache. It never creates a second Farm scheduler.
 - Performance gates can measure framework overhead separately from full compiler
@@ -216,11 +216,12 @@ compiler scheduling, and =GERBIL_BUILD_CORES=.
 
 Homebrew Gerbil 0.18.2 does not default =GERBIL_BUILD_CORES= to available host
 cores: an unset value becomes zero and =std/make= falls back to one worker.
-Moreover, =compiler/base= captures the value at module import, so setting it
-around =make= is too late. The Framework therefore re-enters before compiler
-imports only when the caller has not supplied a positive value. A project
-harness should inject the value before =gxi build.ss= and avoid that fallback
-startup. =std/make= remains the only worker scheduler.
+Moreover, =compiler/base= captures the value at module import, so changing only
+the environment around =make= is too late.  The Framework applies the selected
+value to both =GERBIL_BUILD_CORES= and =__available-cores= before handing the
+spec to =std/make=.  A positive caller value remains authoritative; otherwise
+=##cpu-count= supplies the host value.  =std/make= remains the only worker
+scheduler.
 
 ** 31.01.6 Acceptance receipts
 

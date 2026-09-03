@@ -7,12 +7,10 @@
         (only-in :std/srfi/1 fold)
         (only-in :std/srfi/13 string-prefix?)
         (only-in "./src/building/build-script"
-                 defbuild-script
-                 framework-build-bindir)
+                 framework-apply-build-core-policy!)
         (only-in "./src/build-api/package-spec"
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype
-                 asp-gerbil-scheme-package-build-profile
                  asp-gerbil-scheme-package-native-spec))
 
 (def +product-entry-modules+
@@ -54,9 +52,15 @@
          +source-modules+
          +product-entry-modules+)))
 
-(defbuild-script
- (asp-gerbil-scheme-package-native-spec
-  asp-gerbil-scheme-library-package-spec)
- profile: (asp-gerbil-scheme-package-build-profile
-           asp-gerbil-scheme-library-package-spec)
- bindir: (framework-build-bindir))
+(def (spec)
+  (framework-apply-build-core-policy!)
+  (asp-gerbil-scheme-package-native-spec
+   asp-gerbil-scheme-library-package-spec))
+
+;; gerbil.pkg owns physical acquisition.  These are the logical package names
+;; used by the already-installed upstream libraries while clan/building owns
+;; the ordinary library build lifecycle, freshness, and std/make scheduling.
+(init-build-environment!
+ name: "asp-gerbil-scheme"
+ deps: '("clan" "clan/poo")
+ spec: spec)

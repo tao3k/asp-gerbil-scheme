@@ -18,7 +18,7 @@ entry points as a hermetic cached action and owns only the outer resource guard.
 #+begin_src mermaid
 flowchart LR
   Package["gerbil.pkg<br/>identity + dependencies"] --> Gxpkg["gxpkg package lifecycle"]
-  Build["build.ss<br/>pure executable spec"] --> Native["std/build-script + std/make"]
+  Build["build.ss<br/>pure executable spec"] --> Native["clan/building + std/make"]
   Discovery["clan/building<br/>src discovery"] --> Build
   Flags["cppflags / ldflags<br/>Homebrew fallback on Darwin"] --> Build
   Gxpkg --> Native
@@ -97,11 +97,14 @@ HTTP, or CLI product-entry edits therefore do not invalidate the default
 library compile cache.
 
 Native CI preserves the same ownership boundary with two independent targets.
-The library target uses the =development= profile and owns semantic library
-tests.  The provider target uses the =production= profile and owns the provider
-binary and HTTP process test.  They run in separate jobs and therefore never
-reuse native outputs across profiles; Gerbil =std/make= freshness is based on
-source/output state and is not an options-identity cache.
+The ordinary library target declares logical package dependencies
+=("clan" "clan/poo")= to =init-build-environment!= and uses its upstream
+default optimized compilation.  Physical acquisition remains solely in
+=gerbil.pkg=, whose direct =gerbil-poo= locator transitively owns
+=gerbil-utils=.  The provider target uses the =production= profile and owns the
+provider binary and HTTP process test.  They run in separate jobs and therefore
+never reuse native outputs across profiles; Gerbil =std/make= freshness is
+based on source/output state and is not an options-identity cache.
 
 The measured declaration contains 224 library entries, while the provider
 transitive closure contains only 20 static runtime modules and one executable.
@@ -112,9 +115,13 @@ caches and gives each project-target build a ten-minute hard wall-time gate.
 
 #+begin_src mermaid
 flowchart LR
+    Manifest["gerbil.pkg<br/>physical gerbil-poo locator"] --> Gxpkg[gxpkg dependency installation]
+    Gxpkg --> Clan[clan]
+    Gxpkg --> POO[clan/poo]
     Source[ASP source checkout] --> Library[Library development target<br/>224 declared modules]
     Source --> Provider[Provider production target<br/>20 static modules + 1 executable]
-    Deps[Gerbil dependency package cache] --> Library
+    Clan --> Library
+    POO --> Library
     Deps --> Provider
     Library --> LibraryTests[Semantic library tests]
     Provider --> ProviderTest[Provider HTTP binary test]
@@ -160,23 +167,23 @@ flowchart LR
     Multi --> Gate[Target: below 10 minutes<br/>same 20-module closure oracle]
 #+end_src
 
-The canonical scripts must import =defbuild-script= from
-=src/building/build-script.ss=, not directly from upstream
-=:std/build-script=.  The bridge still delegates compilation and linking to
-upstream =std/make=; its extra responsibility is to select the host core count,
-publish it as =GERBIL_BUILD_CORES=, and re-exec the script before
-=:gerbil/compiler/base= initializes =__available-cores=.  Importing the
-upstream macro directly bypasses that re-exec boundary and leaves
-=__available-cores= at its default value of 1.  The re-exec enters the directory
-that owns the declaring =build.ss= before invoking =gxpkg env=, preserving the
-local package context even when a profile launcher starts at a monorepo root.
+The ordinary library script uses upstream =init-build-environment!=.  The
+provider script uses =defbuild-script= from =src/building/build-script.ss=
+because it additionally owns a production artifact directory and native link
+policy.  Both paths still delegate compilation and linking to upstream
+=std/make=.  Before either passes its complete spec to =std/make=, the ASP
+Build API applies one core value to both =GERBIL_BUILD_CORES= and Gerbil
+0.18.2's already initialized =__available-cores=.  A positive caller override
+wins; otherwise Gambit's =##cpu-count= is used.  No shell probe, fixed machine
+count, child-process marker, or second scheduler is involved.
 
-A same-machine, same-command cold-build control established the impact after
-=gxpkg clean=: the direct upstream-macro path took 357.62 seconds, while the
-bridge macro path took 92.89 seconds.  The canonical repair is therefore 3.85x
-faster and reduces wall time by about 74.0 percent locally.  This A/B receipt,
-not a warm incremental build, is the acceptance evidence for the concurrency
-repair.
+A local Gerbil 0.18.2 receipt reproduced the captured values exactly.  With no
+environment override, =GERBIL_BUILD_CORES= resolved to zero while
+=__available-cores= was one on a 12-logical-CPU host.  Applying the Build API
+policy produced =(12 12 12)=; an explicit override produced =(3 3 12)=.  The
+following native build emitted multiple pending =execute compile job= units.
+CI remains the cold-build acceptance evidence because its checkout does not
+reuse the local package output tree.
 
 This is the feature-equivalent boundary for same-repository development:
 ordinary =depend:= consumers build only the library package, while the ASP
@@ -193,10 +200,9 @@ flowchart TD
     Prototype -->|POO @ inheritance| LibraryObject[Concrete library package-spec<br/>declared in build.ss]
     Prototype -->|POO @ inheritance| ProviderObject[Concrete provider package-spec<br/>declared in provider-package-spec.ss]
     LibraryObject --> LibraryBuild
-    LibraryBuild --> CoreProbe[Host core probe]
-    CoreProbe --> CoreEnv[GERBIL_BUILD_CORES]
-    CoreEnv --> Reexec[Re-exec canonical script]
-    Reexec --> Available[compiler/base __available-cores]
+    LibraryBuild --> CorePolicy[Build API core policy]
+    CorePolicy --> CoreEnv[GERBIL_BUILD_CORES]
+    CorePolicy --> Available[compiler/base __available-cores]
     Available --> StdMake[Upstream std/make]
     StdMake --> Libraries[Library modules only]
     ServerRelease[ASP Server release or CI] --> ProviderBuild[build-provider.ss]

@@ -1,11 +1,11 @@
 (import :std/test
         (only-in :asp-gerbil-scheme/src/building/build-script
                  framework-build-core-count
+                 framework-apply-build-core-policy!
                  framework-build-profile-options
                  framework-resolve-build-keys
                  framework-normalize-build-options
                  framework-merge-build-options
-                 framework-build-reexec-required?
                  framework-executable-build-spec
                  call-with-framework-native-toolchain-environment
                  framework-build-contract))
@@ -68,7 +68,7 @@
         (check (cdr (assoc 'defaultCoreSelection contract))
                => "host-cpu-count")
         (check (cdr (assoc 'compilerCoreCapture contract))
-               => "pre-import-child-process")
+               => "environment-and-compiler-counter")
         (check (cdr (assoc 'dependencyEnvironmentOwner contract))
                => "gxpkg-env")
         (check (cdr (assoc 'nativeLinkWorkingDirectory contract))
@@ -138,20 +138,19 @@
          (call-with-framework-native-toolchain-environment
           (lambda () 'unchanged))
          => 'unchanged))))
-    (test-case "re-enters compile before compiler modules capture core count"
+    (test-case "applies one adaptive core value to the native build"
       (let (previous-cores (getenv "GERBIL_BUILD_CORES" #f))
         (dynamic-wind
           (lambda ()
             (setenv "GERBIL_BUILD_CORES" ""))
           (lambda ()
-            (check (framework-build-reexec-required? []) => #t)
-            (check (framework-build-reexec-required? ["compile"]) => #t)
-            (check (framework-build-reexec-required? ["meta"]) => #f)
-            (check (framework-build-reexec-required? ["spec"]) => #f)
-            (check (framework-build-reexec-required? ["clean"]) => #f)
+            (check (framework-apply-build-core-policy!)
+                   => (max 1 (##cpu-count)))
+            (check (getenv "GERBIL_BUILD_CORES")
+                   => (number->string (max 1 (##cpu-count))))
             (setenv "GERBIL_BUILD_CORES" "3")
-            (check (framework-build-reexec-required? []) => #f)
-            (check (framework-build-reexec-required? ["compile"]) => #f))
+            (check (framework-apply-build-core-policy!) => 3)
+            (check (getenv "GERBIL_BUILD_CORES") => "3"))
           (lambda ()
             (setenv "GERBIL_BUILD_CORES" (or previous-cores ""))))))))
 

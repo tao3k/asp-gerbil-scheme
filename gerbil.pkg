@@ -1,13 +1,4 @@
 (package:
  asp-gerbil-scheme
 depend:
-("github.com/mighty-gerbils/gerbil-poo@1c3225637525400341a09e958296962c10184ead")
- policy:
- ((macro-governance
-   allow-generated:
-   #t
-   explanation:
-   "Harness macro edits must cite runtime-source and macro-expansion evidence before changing transformers."
-   witness:
-   "search runtime-source macro sugar module-sugar")
-  (modularity-policy config: "policy/modularity.ss")))
+("github.com/mighty-gerbils/gerbil-poo@1c3225637525400341a09e958296962c10184ead"))

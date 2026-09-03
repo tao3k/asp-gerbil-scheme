@@ -201,8 +201,7 @@ jobs:
         if: matrix.target == 'library-development'
         timeout-minutes: 10
         run: |
-          gxpkg env gxi ./build.ss clean
-          gxpkg env gxi ./build.ss
+          gxpkg env gxi ./build.ss compile
 
       - name: Build canonical provider production target
         if: matrix.target == 'provider-production'

@@ -1,13 +1,14 @@
 ;;; Single implementation shared by the root build.ss bootstrap and the public
 ;;; :asp-gerbil-scheme/src/building/build-script module.
 (import :gerbil/gambit
+        (only-in :gerbil/compiler/base __available-cores)
         :clan/poo/object
         :std/make
         (only-in "../build-api/source-coverage-query"
                  asp-gerbil-scheme-consume-source-coverage-query!)
         (only-in :std/misc/path path-directory path-expand path-normalize)
         (only-in :std/misc/ports read-all-as-string)
-        (only-in :std/misc/process run-process run-process/batch)
+        (only-in :std/misc/process run-process)
         (only-in :std/os/flock open-output-file/lock LOCK_EX)
         (only-in :std/source gerbil-home)
         (only-in :std/sort sort)
@@ -171,31 +172,14 @@
        (getenv "GERBIL_BUILD_CORES" #f))
       (max 1 (##cpu-count))))
 
-;; Gerbil 0.18.2 captures GERBIL_BUILD_CORES while compiler/base is imported.
-;; A build script therefore has to enter a child process with the variable set;
-;; setting it around std/make after module loading cannot change worker count.
-(def (framework-build-reexec-required? arguments)
-  (and (or (null? arguments)
-           (and (pair? arguments)
-                (string=? (car arguments) "compile")))
-       (not (framework-positive-core-count
-             (getenv "GERBIL_BUILD_CORES" #f)))))
-
-(def (framework-reexec-build-script source-file arguments)
-  (let ((absolute-source-file (path-expand source-file))
-        (previous-cores (getenv "GERBIL_BUILD_CORES" #f))
-        (selected (number->string (max 1 (##cpu-count)))))
-    (dynamic-wind
-      (lambda ()
-        (unless (framework-positive-core-count previous-cores)
-          (setenv "GERBIL_BUILD_CORES" selected)))
-      (lambda ()
-        (parameterize
-         ((current-directory (path-directory absolute-source-file)))
-         (run-process/batch
-          (append ["gxpkg" "env" "gxi" absolute-source-file] arguments))))
-      (lambda ()
-        (setenv "GERBIL_BUILD_CORES" (or previous-cores ""))))))
+;; Gerbil 0.18.2 reads GERBIL_BUILD_CORES in std/make and captures it in
+;; compiler/base. Apply one value to both owners before std/make receives the
+;; package spec. An explicit override wins; otherwise use the logical CPU count.
+(def (framework-apply-build-core-policy!)
+  (let (selected (framework-build-core-count))
+    (setenv "GERBIL_BUILD_CORES" (number->string selected))
+    (set! __available-cores selected)
+    selected))
 
 (def (framework-recover-object-locks!)
   (def (recover-directory directory)
@@ -396,12 +380,11 @@
 ;; : (-> (List String) BuildSpec (List BuildOption) Path Void)
 (def (framework-build-dispatch arguments build-spec keys source-file)
   (unless (asp-gerbil-scheme-consume-source-coverage-query! source-file)
-    (if (framework-build-reexec-required? arguments)
-      (framework-reexec-build-script source-file arguments)
-      (parameterize
-       ((current-directory
-         (path-normalize (path-directory source-file))))
-       (framework-build-main arguments build-spec keys source-file)))))
+    (framework-apply-build-core-policy!)
+    (parameterize
+     ((current-directory
+       (path-normalize (path-directory source-file))))
+     (framework-build-main arguments build-spec keys source-file))))
 
 (defsyntax (defbuild-script stx)
   (syntax-case stx ()
@@ -426,7 +409,7 @@
     (buildDepsOwner . "std/make-srcdir-default")
     (parallelismOwner . "GERBIL_BUILD_CORES")
     (defaultCoreSelection . "host-cpu-count")
-    (compilerCoreCapture . "pre-import-child-process")
+    (compilerCoreCapture . "environment-and-compiler-counter")
     (dependencyEnvironmentOwner . "gxpkg-env")
     (nativeLinkWorkingDirectory . "declared-bindir")
     (darwinNativeEnvironmentOwner . "Building-Framework")
