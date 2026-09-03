@@ -315,7 +315,7 @@
   (let loop ((rest options) (parsed []))
     (match rest
       ([] parsed)
-      ([(or "-v" "--verbose") . rest]
+      ([(or "-v" "-vv" "-vvv" "--verbose") . rest]
        (loop rest (cons* verbose: #t parsed)))
       (["--release" . rest]
          ;; Gerbil implements build-release: by forwarding -static to the

@@ -57,6 +57,10 @@
     (test-case "build verbosity lowers to the native std/make option"
       (check (framework-parse-build-options '("-v"))
              => [verbose: #t])
+      (check (framework-parse-build-options '("-vv"))
+             => [verbose: #t])
+      (check (framework-parse-build-options '("-vvv"))
+             => [verbose: #t])
       (check (framework-parse-build-options '("--verbose" "--debug"))
              => [debug: #t verbose: #t]))
     (test-case "publishes one explicit ownership contract"
