@@ -41,6 +41,7 @@
         collect-project
         collect-project/profile
         collect-source-scope
+        collect-source-scope/coverage
         collect-selected-source-scope
         collect-test-source-scope
         collect-project-package-only

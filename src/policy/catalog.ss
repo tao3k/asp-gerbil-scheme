@@ -149,7 +149,7 @@
          (guideTopic "build-runtime-quality")
          (guideIntent "repair")
          (nextCommand "asp-gerbil-scheme projection --native-index --owner src/policy/agent-build-runtime.ss --json --workspace .")
-         (requires "build/runtime quality warnings require at least two independent parser-owned evidence groups, such as shell helper definitions plus shell control literals or sh -c dispatch plus pipeline literals; keep behavior in Gerbil runtime sources with list command arguments"))
+         (requires "build/runtime quality warnings require composite parser-owned evidence: shell helpers plus shell controls, sh -c plus pipeline literals, or a global-lock call plus a compiler/scheduler call in the same owner; locks may protect state transitions but never dependency waits or compilation"))
    (hash (id (policy-rule-id +agent-package-build-canonical-shape-rule+))
          (severity (policy-rule-severity +agent-package-build-canonical-shape-rule+))
          (topic "package-build-canonical-shape")

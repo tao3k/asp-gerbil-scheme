@@ -58,6 +58,7 @@
         source-topology-layers
         source-topology-affected
         package-source-stage-dependencies
+        package-source-stage-include-paths
         package-source-stage-topology-layers
         package-source-stage->request
         package-source-stages->requests

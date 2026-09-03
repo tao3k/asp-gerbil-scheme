@@ -2,6 +2,8 @@
 ;;; Build-time ASP source coverage declarations.
 
 (import :gerbil/gambit
+        (only-in "./source-coverage-query"
+                 asp-gerbil-scheme-register-source-coverage-query!)
         (only-in :std/misc/path path-expand path-normalize)
         (only-in :std/sort sort))
 
@@ -23,7 +25,6 @@
 (def current-source-coverage-declared-files #f)
 ;; : (Maybe Root)
 (def current-source-coverage-owner-root #f)
-
 ;; `build.ss` files call this declaration so ASP can parse the project source
 ;; coverage universe. Build support also consumes the same declaration so policy
 ;; gates and std/make coverage stay tied to the package's build entrypoint.
@@ -52,6 +53,9 @@
         (error "Build API source coverage requires build.ss" owner-root))
       (set! current-source-coverage-declared-files #f)
       (set! current-source-coverage-owner-root #f)
+      ;; Gerbil may invoke a loaded script's main after `load` returns.  Keep a
+      ;; process-local path receipt instead of relying on dynamic extent.
+      (asp-gerbil-scheme-register-source-coverage-query! build-file)
       (with-directory owner-root
         (lambda ()
           (load build-file)))

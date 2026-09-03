@@ -21,4 +21,5 @@
         framework-memory-guard-load-average
         framework-memory-guard-active-compiler-jobs
         framework-memory-guard-process-tree-cpu-percent
+        framework-memory-anomaly-receipt
         call-with-framework-memory-anomaly-guard)

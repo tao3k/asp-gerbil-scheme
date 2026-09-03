@@ -79,6 +79,7 @@
         source-topology-layers
         source-topology-affected
         package-source-stage-dependencies
+        package-source-stage-include-paths
         package-source-stage-topology-layers
         package-source-stage->request
         package-source-stages->requests
@@ -611,11 +612,20 @@
 ;; : (-> PackageSourceStage BuildSpec [ModulePath] Boolean)
 (def (package-source-spec-artifact-current? stage spec dependencies)
   (let ((source (package-source-stage-source-path stage spec))
-        (output (package-source-stage-output-path stage spec)))
+        (output (package-source-stage-output-path stage spec))
+        (includes
+         (package-source-stage-include-paths
+          stage (package-source-spec-module spec))))
     (and (file-exists? source)
          (file-exists? output)
          (<= (package-source-file-seconds source)
              (package-source-file-seconds output))
+         (andmap
+          (lambda (include)
+            (and (file-exists? include)
+                 (<= (package-source-file-seconds include)
+                     (package-source-file-seconds output))))
+          includes)
          (or (package-source-spec-ssi? spec)
              (andmap
               (lambda (dependency)
@@ -697,25 +707,27 @@
 
 ;; : (-> PackageSourceStage ModulePath Datum (Maybe ModulePath))
 (def (package-source-import-reference stage owner reference)
-  (cond
-   ((symbol? reference)
-    (let* ((name (symbol->string reference))
-           (prefix (string-append ":" (package-source-stage-prefix stage) "/")))
-      (and (string-prefix? prefix name)
-           (package-source-module-path
-            (substring name (string-length prefix) (string-length name))))))
-   ((and (string? reference) (string-prefix? "." reference))
-    (let* ((root (path-normalize (package-source-stage-source stage)))
-           (directory (path-expand (path-directory owner) root))
-             (absolute (path-normalize
-                         (path-expand (package-source-module-path reference)
-                                      directory))))
+  (let* ((name (cond ((symbol? reference) (symbol->string reference))
+                     ((string? reference) reference)
+                     (else #f)))
+         (prefix (string-append ":" (package-source-stage-prefix stage) "/")))
+    (cond
+     ((not name) #f)
+     ((string-prefix? prefix name)
       (package-source-module-path
-       (substring absolute
-                  (+ (string-length root)
-                     (if (string-suffix? "/" root) 0 1))
-                  (string-length absolute)))))
-   (else #f)))
+       (substring name (string-length prefix) (string-length name))))
+     ((string-prefix? "." name)
+      (let* ((root (path-normalize (package-source-stage-source stage)))
+             (directory (path-expand (path-directory owner) root))
+             (absolute
+              (path-normalize
+               (path-expand (package-source-module-path name) directory))))
+        (package-source-module-path
+         (substring absolute
+                    (+ (string-length root)
+                       (if (string-suffix? "/" root) 0 1))
+                    (string-length absolute)))))
+     (else #f))))
 
 ;; : (-> PackageSourceStage ModulePath Datum [ModulePath])
 (def (package-source-import-references stage owner datum)
@@ -733,7 +745,7 @@
 (def (package-source-module-header-form? form)
   (and (pair? form)
        (memq (car form)
-             '(import export package: namespace declare prelude:))))
+             '(import export include package: namespace declare prelude:))))
 
 ;; : (-> Path [Datum])
 (def (package-source-read-import-forms path)
@@ -743,7 +755,7 @@
         (let (form (read port))
           (cond
            ((eof-object? form) (reverse forms))
-           ((and (pair? form) (memq (car form) '(import export)))
+           ((and (pair? form) (memq (car form) '(import export include)))
             (loop (cons form forms)))
            ((package-source-module-header-form? form)
             (loop forms))
@@ -765,6 +777,22 @@
                     (memq (car form) '(import export))
                     (package-source-import-references stage module (cdr form))))
              forms)))))
+
+;; : (-> PackageSourceStage ModulePath [Path])
+;;; Includes are freshness edges owned by the source module, not module graph
+;;; nodes.  Resolve them relative to the including source so one affected-closure
+;;; pass observes generated/body changes before delegating compilation.
+(def (package-source-stage-include-paths stage module)
+  (let* ((source-path (package-source-stage-source-path stage module))
+         (source-directory (path-directory source-path)))
+    (filter-map
+     (lambda (form)
+       (and (pair? form)
+            (eq? (car form) 'include)
+            (pair? (cdr form))
+            (string? (cadr form))
+            (path-normalize (path-expand (cadr form) source-directory))))
+     (package-source-read-import-forms source-path))))
 
 ;; : (-> PackageSourceStage [[ModulePath]])
 (def (package-source-stage-topology-layers stage)

@@ -12,7 +12,8 @@
                  framework-memory-guard-process-table
                  framework-memory-guard-load-average
                  framework-memory-guard-active-compiler-jobs
-                 framework-memory-guard-process-tree-cpu-percent))
+                 framework-memory-guard-process-tree-cpu-percent
+                 framework-memory-anomaly-receipt))
 
 (export building-memory-anomaly-guard-test)
 
@@ -74,7 +75,7 @@
       (check
        (framework-memory-guard-active-compiler-jobs
         100
-        '((101 100 1024 50.0 "gsc")
+       '((101 100 1024 50.0 "gsc")
           (102 101 2048 50.0 "gcc")
           (103 102 4096 25.0 "cc1")
           (104 100 1024 10.0 "gxi")
@@ -88,4 +89,17 @@
           (103 102 4096 25.0 "cc1")
           (104 100 1024 10.0 "gxi")
           (105 999 1024 80.0 "other")))
-       => 135.0))))
+       => 135.0))
+    (test-case "incomplete process sampling cannot claim scheduler starvation"
+      (let (receipt
+            (framework-memory-anomaly-receipt
+             (framework-memory-anomaly-policy)
+             "test" 'completed 'within-envelope 2
+             1024 0 0 10
+             1 1 1 0 100.0 100.0
+             9 9 '() '() 0))
+        (check (hash-get receipt "ready-queue-observed") => #f)
+        (check (hash-get receipt "scheduler-starvation-verdict")
+               => "not-provable-with-current-std-make-public-api")
+        (check (hash-get receipt "observer-sample-sequence-complete") => #f)
+        (check (hash-get receipt "performance-baseline-valid") => #f)))))

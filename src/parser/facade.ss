@@ -12,6 +12,7 @@
         collect-project
         collect-project/profile
         collect-source-scope
+        collect-source-scope/coverage
         collect-selected-source-scope
         collect-test-source-scope
         collect-project-package-only
@@ -342,6 +343,7 @@
         project-package-source-scope-policy
         project-package-modularity-policy
         project-package-agent-policy
+        project-package-with-source-scope
         test-directory-policy-allowed-directories
         test-directory-policy-explanation
         macro-governance-policy-allow-generated

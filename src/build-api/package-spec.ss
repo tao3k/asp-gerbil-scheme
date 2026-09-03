@@ -95,7 +95,9 @@
 ;; cannot safely be widened into one directory-parallel batch.
 (def +package-api-prologue-stages+
   '(("build-api/package-build.ss")
-    ("build-api/source-coverage.ss" "constants.ss")
+    ("build-api/source-coverage-query.ss"
+     "build-api/source-coverage.ss"
+     "constants.ss")
     ("build-api/package-receipt.ss"
      "build-api/cli-gsc-options.ss"
      "build-api/launcher-receipt.ss"

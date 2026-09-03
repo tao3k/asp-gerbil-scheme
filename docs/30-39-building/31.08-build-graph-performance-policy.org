@@ -1,0 +1,93 @@
+#+title: Build Graph Performance Policy
+#+startup: overview
+
+* Decision
+
+ASP Build API delegates one complete module catalog to one Gerbil =std/make=
+session.  Downstream projects must not reproduce =std/make='s coordinator,
+completion, channel, or worker scheduler.  A lock may protect a short state
+transition, but it may not own dependency waiting or compilation.
+
+This policy preserves the upstream execution owner while preventing downstream
+code from reintroducing the serialization pattern that the upstream graph is
+supposed to schedule.
+
+#+begin_src mermaid
+flowchart LR
+  Spec["asp-gerbil-scheme-package-spec!\none module catalog"]
+  Admission["Build runtime policy\ncomposite parser evidence"]
+  Make["Gerbil std/make\none upstream session"]
+  Workers["GERBIL_BUILD_CORES\navailable cores or override"]
+  Receipt["Scheme observability receipt\nCPU, compiler jobs, RSS, contention"]
+
+  Spec --> Admission --> Make --> Workers --> Receipt
+  Shadow["global import lock +\ndependency wait + private channel"]
+  LockedCompile["global lock + compiler call\nin the same caller"]
+  Shadow -. "blocked" .-> Admission
+  LockedCompile -. "blocked" .-> Admission
+#+end_src
+
+* Executable Rules
+
+| Evidence | Outcome |
+|----------+---------|
+| Global-lock call and compiler or scheduler call share one caller | =GERBIL-SCHEME-AGENT-POLICY-020= emits =build-runtime-global-lock-compile= |
+| Global-lock, dependency-completion wait, and work-channel calls occur in one build/runtime owner | =GERBIL-SCHEME-AGENT-POLICY-020= emits =build-runtime-shadow-scheduler= |
+| A short state-table lock and compilation live in different callers | Accepted |
+| One declarative module catalog reaches one =std/make= invocation | Accepted |
+
+Before invoking =std/make=, the Build API computes the stale seeds and complete
+reverse-dependency closure from the declared catalog.  Relative imports are
+canonicalized identically whether Gerbil reads them as symbols or strings, and
+=include= files are freshness edges owned by their including module.  For an
+ordinary Scheme-module catalog, the Framework delegates exact affected-output
+removal to upstream =make-clean= and submits the same closure to one =make= call.
+This prevents dependency SSI timestamps from propagating one layer per separate
+warm invocation.  FFI, executable, and other nonordinary specs conservatively
+retain the unmodified upstream path.
+
+Every invocation emits =asp-gerbil-scheme.build-graph-admission.v1= with the
+declared count, exact affected module identities, source scan count, output
+invalidation owner, and upstream session count.  A stable warm build must report
+=affected-module-count=0= and =upstream-session-count=0=; a nonempty second warm
+affected set is a fixed-point regression.
+
+The rules use composite parser-owned call facts.  A mutex, completion, channel,
+or compiler call by itself is insufficient evidence and must not produce a
+finding.
+
+* Runtime Evidence Boundary
+
+Gerbil 0.18.2 keeps =workch=, =completions=, and =import-mx= lexical inside
+=std/make#make-build=.  The public API does not expose an exact ready-queue
+count.  ASP therefore does not infer =ready-module-count= from static topology
+width or child process counts.
+
+The Scheme observer records what it can prove: configured cores, active compiler
+front ends, process-tree CPU, first native job latency, RSS trajectory, and host
+contention.  Exact ready-worker starvation becomes a hard runtime decision only
+when an upstream scheduler event surface provides ready, active, and completion
+events.  Until then, the source policy prevents downstream shadow schedulers and
+the receipt keeps upstream scheduler limitations explicit.
+
+The receipt therefore publishes =ready-queue-observed=false= and
+=scheduler-starvation-verdict=not-provable-with-current-std-make-public-api=.
+It also marks a performance baseline invalid when the host is already contended,
+the process-table observer degraded, or the expected sample sequence is
+incomplete.  A raw maximum child count remains evidence, not a pass/fail verdict.
+
+* Regression Scenarios
+
+#+begin_src mermaid
+flowchart TD
+  A["Linear dependency chain"] --> A1["No shadow scheduler finding"]
+  B["Wide module catalog"] --> B1["One std/make session"]
+  C["Lock only state mutation"] --> C1["Accepted"]
+  D["Compile while caller owns global lock"] --> D1["Policy finding"]
+  E["Import lock + completion wait + private channel"] --> E1["Policy finding"]
+#+end_src
+
+The focused tests live in =t/policy/agent-build-test.ss=.  The declaration-only
+build lifecycle is separately covered by =t/source-coverage-query-test.ss= so a
+policy query cannot accidentally start a native build or suppress a later real
+build in the same process.

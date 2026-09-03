@@ -3,6 +3,11 @@
 (import :gerbil/gambit
         :clan/poo/object
         :std/make
+        (only-in "../build-api/source-coverage-query"
+                 asp-gerbil-scheme-consume-source-coverage-query!)
+        (only-in "./std-builder"
+                 make-package-source-stage
+                 package-source-stage-topology-request-spec-groups)
         (only-in :std/misc/path path-directory path-expand path-normalize)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process run-process/batch)
@@ -121,6 +126,76 @@
               (else
                (error "unsupported native build capability" capability))))
           native-capabilities)))
+
+(def (framework-package-prefix source-directory)
+  (let (package-file (path-expand "gerbil.pkg" source-directory))
+    (and (file-exists? package-file)
+         (let (declaration (call-with-input-file package-file read))
+           (let loop ((rest declaration))
+             (cond
+              ((or (null? rest) (null? (cdr rest))) #f)
+              ((eq? (car rest) 'package:)
+               (let (name (cadr rest))
+                 (cond
+                  ((symbol? name) (symbol->string name))
+                  ((string? name) name)
+                  (else #f))))
+              (else (loop (cdr rest)))))))))
+
+(def (framework-duplicate-module-owners modules)
+  (let loop ((remaining modules) (seen []) (duplicates []))
+    (if (null? remaining)
+      (reverse duplicates)
+      (let (module (car remaining))
+        (cond
+         ((and (member module seen) (not (member module duplicates)))
+          (loop (cdr remaining) seen (cons module duplicates)))
+         (else
+          (loop (cdr remaining) (cons module seen) duplicates)))))))
+
+(def (framework-build-graph-admission-supported? build-spec source-directory)
+  (and (pair? build-spec)
+       (andmap string? build-spec)
+       (framework-package-prefix source-directory)))
+
+;;; Pre-admission computes only the stale reverse-dependency closure.  It never
+;;; executes modules or schedules workers; one std/make invocation retains
+;;; dependency, compiler, and GERBIL_BUILD_CORES authority.
+(def (framework-build-graph-admission build-spec source-directory)
+  (if (framework-build-graph-admission-supported?
+       build-spec source-directory)
+    (let* ((duplicates (framework-duplicate-module-owners build-spec))
+           (prefix (framework-package-prefix source-directory)))
+      (when (pair? duplicates)
+        (error "Build Graph Policy: duplicate module owners" duplicates))
+      (if prefix
+        (apply append
+               (package-source-stage-topology-request-spec-groups
+                (make-package-source-stage
+                 "package" source-directory prefix build-spec 'topology)))
+        build-spec))
+    build-spec))
+
+(def (framework-build-graph-admission-emit! declared admitted)
+  (let (receipt
+        (hash
+         ("schema" "asp-gerbil-scheme.build-graph-admission.v1")
+         ("version" 1)
+         ("upstream-executor" "std/make")
+         ("declared-module-count" (length declared))
+         ("affected-module-count" (length admitted))
+         ("affected-modules" admitted)
+         ("upstream-session-count" (if (null? admitted) 0 1))
+         ("module-owner-policy" "unique")
+         ("source-scan-count" 1)
+         ("affected-output-invalidation"
+          (if (null? admitted) "none" "upstream-make-clean"))
+         ("outcome" (if (null? admitted) "current" "compile"))))
+    (parameterize ((write-json-sort-keys? #t))
+      (display "ASP_GERBIL_SCHEME_BUILD_GRAPH " (current-error-port))
+      (display (json-object->string receipt) (current-error-port))
+      (newline (current-error-port))
+      (force-output (current-error-port)))))
 
 (def (framework-static-runtime-build-spec runtime-modules)
   (map (lambda (module) `(gxc: ,module (static: #t))) runtime-modules))
@@ -388,21 +463,36 @@
        (lambda ()
          (framework-invalidate-stale-executables!
           build-spec source-directory bindir)
-         ;; std/make compiles sources under its absolute srcdir, then drains
-         ;; Gambit native jobs in the caller cwd.  Gerbil 0.18.2's macOS
-         ;; executable linker emits __exe.c relative to that cwd, so the
-         ;; caller must be the declared bindir for generation and consumption
-         ;; to share one path.
-         (call-with-framework-memory-anomaly-guard
-          "std/make package build"
-          (framework-build-core-count)
-          (lambda ()
-            (parameterize ((current-directory bindir))
-              (apply make
-                     build-spec
-                     srcdir: source-directory
-                     (framework-merge-build-options build-keys options))
-              (framework-validate-runtime-closure! build-spec))))))))
+         (let (admitted
+               (framework-build-graph-admission
+                build-spec source-directory))
+           (framework-build-graph-admission-emit! build-spec admitted)
+           (unless (null? admitted)
+             ;; std/make can retain an imported dependency timestamp while an
+             ;; earlier module in the same invocation updates its SSI.  Remove
+             ;; outputs for the already-proven affected closure through the
+             ;; upstream cleaner so the closure reaches a fixed point once.
+             (when (framework-build-graph-admission-supported?
+                    build-spec source-directory)
+               (apply make-clean
+                      admitted
+                      srcdir: source-directory
+                      (framework-merge-build-options build-keys options)))
+             ;; std/make compiles sources under its absolute srcdir, then drains
+             ;; Gambit native jobs in the caller cwd.  Gerbil 0.18.2's macOS
+             ;; executable linker emits __exe.c relative to that cwd, so the
+             ;; caller must be the declared bindir for generation and consumption
+             ;; to share one path.
+             (call-with-framework-memory-anomaly-guard
+              "std/make package build"
+              (framework-build-core-count)
+              (lambda ()
+                (parameterize ((current-directory bindir))
+                  (apply make
+                         admitted
+                         srcdir: source-directory
+                         (framework-merge-build-options build-keys options))))))
+           (framework-validate-runtime-closure! build-spec))))))
   (def (clean)
     (apply make-clean
            build-spec
@@ -415,6 +505,20 @@
     (["clean"] (clean))
     ([] (build []))))
 
+;;; Script lifecycle boundary: declaration queries execute the package-spec
+;;; projection but never enter re-exec, locking, compilation, or cleaning.
+;;; Keeping this decision inside the Building Framework prevents an internal
+;;; query binding from leaking into downstream macro expansions.
+;; : (-> (List String) BuildSpec (List BuildOption) Path Void)
+(def (framework-build-dispatch arguments build-spec keys source-file)
+  (unless (asp-gerbil-scheme-consume-source-coverage-query! source-file)
+    (if (framework-build-reexec-required? arguments)
+      (framework-reexec-build-script source-file arguments)
+      (parameterize
+       ((current-directory
+         (path-normalize (path-directory source-file))))
+       (framework-build-main arguments build-spec keys source-file)))))
+
 (defsyntax (defbuild-script stx)
   (syntax-case stx ()
     ((macro build-spec keys ...)
@@ -422,14 +526,8 @@
                     (+this-source-file+ (syntax/loc stx (@this-script)))
                     (@main (stx-identifier #'macro 'main)))
        #'(def (@main . arguments)
-           (let (source-file +this-source-file+)
-             (if (framework-build-reexec-required? arguments)
-               (framework-reexec-build-script source-file arguments)
-               (parameterize
-                ((current-directory
-                  (path-normalize (path-directory source-file))))
-                (framework-build-main
-                 arguments build-spec [keys ...] source-file)))))))))
+           (framework-build-dispatch
+            arguments build-spec [keys ...] +this-source-file+))))))
 
 (def (framework-build-contract)
   '((schemaId . "asp-gerbil-scheme.build-script-contract")
@@ -453,6 +551,9 @@
     (darwinReleaseLinkage . "optimized-dynamic")
     (darwinExecutableTopology . "optimized-multi-unit")
     (buildGraphProjection . "declared-compiler-runtime-closure-to-std/make")
+    (buildGraphAdmission . "single-scan-reverse-dependency-fixed-point")
+    (affectedOutputInvalidation . "upstream-make-clean")
+    (upstreamBuildSessionCount . "zero-when-current-otherwise-one")
     (libraryBuildProjection . "post-executable-package-modules-to-std/make")
     (runtimeClosureDriftOracle . "gerbil-executable-stub")
     (executableFreshnessOwner . "declared-runtime-closure-to-std-make")

@@ -99,6 +99,87 @@
                    (findings (run-agent-policy index))
                    (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-020" findings)))
               (check matching => []))))
+    (test-case "agent policy rejects compiler execution under a global lock"
+          (let* ((root ".run/policy-build-runtime-global-lock-compile")
+                 (src (string-append root "/src"))
+                 (support (string-append src "/building")))
+            (reset-fixture-root root)
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src)
+            (ensure-dir support)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/build-runtime-lock)\n")
+            (write-text
+             (string-append support "/scheduler.ss")
+             ";;; -*- Gerbil -*-\n(def (compile-package! lock spec)\n  (with-lock lock\n    (lambda ()\n      (make spec))))\n")
+            (let* ((index (collect-project root))
+                   (findings (run-agent-policy index))
+                   (matching
+                    (filter
+                     (lambda (finding)
+                       (equal? (hash-get (type-finding-details finding) 'kind)
+                               "build-runtime-global-lock-compile"))
+                     (filter-rule "GERBIL-SCHEME-AGENT-POLICY-020"
+                                  findings)))
+                   (finding (car matching))
+                   (details (type-finding-details finding)))
+              (check (length matching) => 1)
+              (check (hash-get details 'caller) => "compile-package!")
+              (check (hash-get details 'lockCallee) => "with-lock")
+              (check (hash-get details 'compileCallee) => "make"))))
+    (test-case "agent policy accepts a short state lock before compilation"
+          (let* ((root ".run/policy-build-runtime-short-lock")
+                 (src (string-append root "/src"))
+                 (support (string-append src "/building")))
+            (reset-fixture-root root)
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src)
+            (ensure-dir support)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/build-runtime-short-lock)\n")
+            (write-text
+             (string-append support "/scheduler.ss")
+             ";;; -*- Gerbil -*-\n(def (transition-ready! lock table)\n  (with-lock lock (lambda () (hash-put! table 'ready #t))))\n(def (compile-package! spec)\n  (make spec))\n")
+            (let* ((index (collect-project root))
+                   (findings (run-agent-policy index))
+                   (matching
+                    (filter
+                     (lambda (finding)
+                       (equal? (hash-get (type-finding-details finding) 'kind)
+                               "build-runtime-global-lock-compile"))
+                     (filter-rule "GERBIL-SCHEME-AGENT-POLICY-020"
+                                  findings))))
+              (check matching => []))))
+    (test-case "agent policy rejects a serializing shadow module scheduler"
+          (let* ((root ".run/policy-build-runtime-shadow-scheduler")
+                 (src (string-append root "/src"))
+                 (support (string-append src "/building")))
+            (reset-fixture-root root)
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src)
+            (ensure-dir support)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/build-runtime-shadow-scheduler)\n")
+            (write-text
+             (string-append support "/scheduler.ss")
+             ";;; -*- Gerbil -*-\n(def (import/mx lock module)\n  (with-lock lock (lambda () (import-module module))))\n(def (wait-for dependency)\n  (completion-wait! dependency))\n(def (coordinate! lock module dependency work)\n  (wait-for dependency)\n  (channel-put work (import/mx lock module)))\n(def (run-scheduler!)\n  (let (work (make-channel))\n    (channel-close work)))\n")
+            (let* ((index (collect-project root))
+                   (findings (run-agent-policy index))
+                   (matching
+                    (filter
+                     (lambda (finding)
+                       (equal? (hash-get (type-finding-details finding) 'kind)
+                               "build-runtime-shadow-scheduler"))
+                     (filter-rule "GERBIL-SCHEME-AGENT-POLICY-020"
+                                  findings)))
+                   (details (type-finding-details (car matching))))
+              (check (length matching) => 1)
+              (check (string? (hash-get details 'lockSelector)) => #t)
+              (check (string? (hash-get details 'dependencyWaitSelector)) => #t)
+              (check (string? (hash-get details 'workChannelSelector)) => #t))))
     (test-case "agent policy rejects direct native provider gxc executable compile"
           (let* ((root ".run/policy-build-runtime-direct-native-gxc")
                  (src (string-append root "/src"))

@@ -227,7 +227,7 @@
                                        cpu-percent-sum first-active-seconds
                                        last-active-seconds load-average-start
                                        load-average-end observer-failure-count)
-  (let ((average-active-jobs
+  (let* ((average-active-jobs
          (if (zero? compiler-samples)
            0
            (/ (exact->inexact active-job-sum) compiler-samples)))
@@ -245,7 +245,10 @@
          (max 1
               (inexact->exact
                (ceiling (/ elapsed-seconds
-                           (.ref policy 'sample-seconds)))))))
+                           (.ref policy 'sample-seconds))))))
+        (host-contention?
+         (and (pair? load-average-start)
+              (> (car load-average-start) logical-cpu-count))))
   (hash ("schema" "asp-gerbil-scheme.memory-anomaly-guard.v1")
         ("version" 1)
         ("label" label)
@@ -261,9 +264,7 @@
          (and (pair? load-average-start)
               (/ (exact->inexact (car load-average-start))
                  logical-cpu-count)))
-        ("host-contention-observed"
-         (and (pair? load-average-start)
-              (> (car load-average-start) logical-cpu-count)))
+        ("host-contention-observed" host-contention?)
         ("window-seconds" (.ref policy 'window-seconds))
         ("peak-rss-bytes" peak-rss)
         ("hard-limit-bytes" (.ref policy 'hard-limit-bytes))
@@ -280,6 +281,19 @@
         ("process-table-observer-failure-count" observer-failure-count)
         ("observer-sample-coverage-ratio"
          (/ (exact->inexact compiler-samples) expected-samples))
+        ("observer-sample-sequence-complete"
+         (and (zero? observer-failure-count)
+              (>= compiler-samples expected-samples)))
+        ;; std/make 0.18.2 keeps workch/completions/import-mx lexical inside
+        ;; make-build. Process inspection can observe compiler children but
+        ;; cannot prove the scheduler's instantaneous ready frontier.
+        ("ready-queue-observed" #f)
+        ("scheduler-starvation-verdict"
+         "not-provable-with-current-std-make-public-api")
+        ("performance-baseline-valid"
+         (and (not host-contention?)
+              (zero? observer-failure-count)
+              (>= compiler-samples expected-samples)))
         ("observer-average-interval-ms"
          (if (zero? compiler-samples)
            0

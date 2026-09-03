@@ -301,8 +301,9 @@
              (core "topology-core.ss")
              (policy "topology-policy.ss")
              (api "topology-api.ss")
+             (policy-include "topology-policy.inc")
              (paths (map (lambda (module) (path-expand module root))
-                         [core policy api]))
+                         [core policy api policy-include]))
              (stage
               (make-package-source-stage
                "topology-fixture" root "asp-gerbil-scheme" [[ssi: core] policy api] 'topology)))
@@ -311,13 +312,19 @@
             (write-fixture (car paths) '(export core))
             (write-fixture-forms
              (cadr paths)
-             '((export policy) (import "./topology-core") (def policy #t)))
+             '((export policy)
+               (import (only-in ./topology-core core))
+               (include "topology-policy.inc")
+               (def policy #t)))
             (write-fixture
              (caddr paths)
-             '(export (import: :asp-gerbil-scheme/topology-policy))))
+             '(export (import: :asp-gerbil-scheme/topology-policy)))
+            (write-fixture (cadddr paths) '(def policy-body #t)))
           (lambda ()
             (check (package-source-stage-dependencies stage policy)
                    => '("topology-core.ss"))
+            (check (package-source-stage-include-paths stage policy)
+                   => (list (path-expand policy-include root)))
             (check (package-source-stage-topology-layers stage)
                    => '(("topology-core.ss")
                         ("topology-policy.ss")
