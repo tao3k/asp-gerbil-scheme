@@ -362,7 +362,8 @@
               (apply make
                      build-spec
                      srcdir: source-directory
-                     (framework-merge-build-options build-keys options)))))
+                     (framework-merge-build-options build-keys options))))
+          (and (memq verbose: options) #t))
          (framework-validate-runtime-closure! build-spec)))))
   (def (clean)
     (apply make-clean

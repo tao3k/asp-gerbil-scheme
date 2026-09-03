@@ -12,6 +12,7 @@
         framework-validate-runtime-closure!
         framework-build-cache-root
         framework-build-core-count
+        framework-build-trace-receipt
         framework-apply-build-core-policy!
         framework-build-profile-options
         framework-parse-build-options

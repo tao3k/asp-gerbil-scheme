@@ -14,6 +14,30 @@
 (def +framework-memory-anomaly-growth-ratio-denominator+ 5)
 (def +framework-memory-anomaly-confirmations+ 2)
 (def +framework-memory-anomaly-sample-seconds+ 1)
+(def +framework-build-trace-interval-seconds+ 10)
+
+(def (framework-build-trace-receipt label phase elapsed-seconds rss-bytes
+                                    cpu-percent active-compiler-jobs)
+  (hash ("schema" "asp-gerbil-scheme.build-trace.v1")
+        ("version" 1)
+        ("label" label)
+        ("phase" (symbol->string phase))
+        ("activityKind"
+         (cond
+          ((eq? phase 'started) "std-make-admission")
+          ((positive? active-compiler-jobs) "native-compiler")
+          (else "scheme-expansion-or-dependency-analysis")))
+        ("elapsedMs" (inexact->exact (round (* elapsed-seconds 1000))))
+        ("rssBytes" rss-bytes)
+        ("cpuPercent" cpu-percent)
+        ("activeCompilerJobs" active-compiler-jobs)))
+
+(def (framework-build-trace-emit! receipt)
+  (parameterize ((write-json-sort-keys? #t))
+    (display "ASP_GERBIL_SCHEME_BUILD_TRACE " (current-error-port))
+    (display (json-object->string receipt) (current-error-port))
+    (newline (current-error-port))
+    (force-output (current-error-port))))
 
 ;; framework-memory-anomaly-policy
 ;; : (-> MemoryAnomalyPolicy)
@@ -349,7 +373,8 @@
 ;;; The std/make scheduler has no supported mid-flight worker-resize hook.
 ;;; Therefore a confirmed anomaly fails closed with a receipt; the Framework
 ;;; never pretends it can pause or shrink already admitted native compiler jobs.
-(def (call-with-framework-memory-anomaly-guard label worker-count thunk)
+(def (call-with-framework-memory-anomaly-guard label worker-count thunk
+                                               (trace? #f))
   (let* ((policy (framework-memory-anomaly-policy))
          (started (time->seconds (current-time)))
          (load-average-start (framework-memory-guard-load-average))
@@ -358,7 +383,7 @@
          ;; count, saturated sample count, process-tree CPU trajectory, and
          ;; first/last observed compiler activity and process-table observer
          ;; failures and real observation cadence are watcher-owned state.
-         (state (vector #f 'normal 0 [] 0 0 0 #f 0 0 0 0 0 0 #f #f 0 0 0))
+         (state (vector #f 'normal 0 [] 0 0 0 #f 0 0 0 0 0 0 #f #f 0 0 0 0))
          (watcher
           (spawn
            (lambda ()
@@ -396,6 +421,13 @@
                         (rate
                          (framework-memory-anomaly-growth-rate-bytes-per-second
                           samples now rss)))
+                   (when (and trace?
+                              (>= (- now (vector-ref state 19))
+                                  +framework-build-trace-interval-seconds+))
+                     (vector-set! state 19 now)
+                     (framework-build-trace-emit!
+                      (framework-build-trace-receipt
+                       label 'active now rss cpu-percent active-jobs)))
                    (unless observer-available?
                      (vector-set! state 16 (+ 1 (vector-ref state 16))))
                    (call-with-values
@@ -456,6 +488,9 @@
                         (begin
                           (thread-sleep! (.ref policy 'sample-seconds))
                           (loop))))))))))))
+    (when trace?
+      (framework-build-trace-emit!
+       (framework-build-trace-receipt label 'started 0 0 0 0)))
     (dynamic-wind
       (lambda () #!void)
       (lambda ()

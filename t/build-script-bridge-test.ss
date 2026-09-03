@@ -1,6 +1,7 @@
 (import :std/test
         (only-in :asp-gerbil-scheme/src/building/build-script
                  framework-build-core-count
+                 framework-build-trace-receipt
                  framework-apply-build-core-policy!
                  framework-build-profile-options
                  framework-parse-build-options
@@ -61,6 +62,17 @@
       (check-exception (framework-parse-build-options '("-v")) true)
       (check (framework-parse-build-options '("--verbose" "--debug"))
              => [debug: #t verbose: #t]))
+    (test-case "verbose builds expose a typed live phase trace"
+      (let (receipt
+            (framework-build-trace-receipt
+             "std/make package build" 'active 12 4096 87.5 0))
+        (check (hash-get receipt "schema")
+               => "asp-gerbil-scheme.build-trace.v1")
+        (check (hash-get receipt "phase") => "active")
+        (check (hash-get receipt "activityKind")
+               => "scheme-expansion-or-dependency-analysis")
+        (check (hash-get receipt "elapsedMs") => 12000)
+        (check (hash-get receipt "activeCompilerJobs") => 0)))
     (test-case "publishes one explicit ownership contract"
       (let (contract (framework-build-contract))
         (check (cdr (assoc 'executor contract)) => "std/make")
