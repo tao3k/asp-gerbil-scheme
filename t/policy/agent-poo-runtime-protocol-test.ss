@@ -56,20 +56,22 @@
                                                'referenceExamples))))
                    => #t)
             (check (hash-get details 'agentEscapeConstraint)
-                   => "do not weaken macro-governance from a source macro edit; update gerbil.pkg only with a clear explanation and witness")))
-(test-case "agent policy accepts macro runtime-source witness policy"
+                   => "do not weaken macro-governance or replace executable evidence with package metadata")
+            (check (hash-get details 'requiredWitness)
+                   => "one collected source owner with a parser-visible macro call and test assertion")))
+(test-case "agent policy accepts executable macro source witness"
           (let* ((root ".run/policy-macro-runtime-source-allowed")
                  (_ (write-macro-runtime-source-project root #t))
                  (index (collect-project root))
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
             (check matching => [])))
-(test-case "agent policy rejects a macro witness owner without the macro call"
+(test-case "agent policy rejects an assertion owner without the macro call"
           (let* ((root ".run/policy-macro-runtime-source-wrong-owner")
                  (_ (write-macro-runtime-source-project root #t))
                  (_ (write-text
-                     (string-append root "/gerbil.pkg")
-                     "(package: sample/macros\n  policy: ((macro-governance explanation: \"Macro transformer edits are allowed only with runtime-source and expansion evidence.\" witnesses: ((\"with-order\" \"src/macros/core.ss\")))))\n"))
+                     (string-append root "/t/macro-witness-test.ss")
+                     ";;; -*- Gerbil -*-\n(import :std/test)\n(def macro-witness-test (test-suite \"macro witness\" (test-case \"no macro call\" (check #t => #t))))\n"))
                  (index (collect-project root))
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))

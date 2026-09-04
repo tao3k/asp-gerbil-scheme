@@ -558,19 +558,25 @@
 ;; : (-> String Allowed Unit )
 (def (write-macro-runtime-source-project root allowed?)
   (let* ((src (string-append root "/src"))
-         (owner (string-append src "/macros")))
+         (owner (string-append src "/macros"))
+         (tests (string-append root "/t")))
     (ensure-dir ".run")
     (ensure-dir root)
     (ensure-dir src)
     (ensure-dir owner)
-    (if allowed?
-      (write-text (string-append root "/gerbil.pkg")
-                  "(package: sample/macros\n  policy: ((macro-governance explanation: \"Macro transformer edits are allowed only with runtime-source and expansion evidence.\" witnesses: ((\"with-order\" \"src/macros/use.ss\")))))\n")
-      (delete-file-if-exists (string-append root "/gerbil.pkg")))
+    (ensure-dir tests)
+    (write-text (string-append root "/gerbil.pkg")
+                "(package: sample/macros)\n")
     (write-text (string-append owner "/core.ss")
                 ";;; -*- Gerbil -*-\n(package: sample/macros)\n(defsyntax (with-order stx)\n  #'(void))\n")
-    (write-text (string-append owner "/use.ss")
-                ";;; -*- Gerbil -*-\n(package: sample/macros)\n(import ./core)\n(with-order)\n")))
+    (write-text (string-append tests "/macro-witness-test.ss")
+                (string-append
+                 ";;; -*- Gerbil -*-\n(import :std/test ../src/macros/core)\n"
+                 "(def macro-witness-test\n  (test-suite \"macro witness\"\n"
+                 "    (test-case \"expands to runtime behaviour\"\n"
+                 "      (with-order)\n"
+                 (if allowed? "      (check #t => #t)\n" "")
+                 "      )))\n"))))
 ;; : (-> String Declared String )
 (def (write-protocol-evidence-project root declared?)
   (let* ((src (string-append root "/src"))

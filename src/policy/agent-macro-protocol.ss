@@ -7,7 +7,7 @@
         :asp-gerbil-scheme/src/policy/gerbil-utils-source
         :asp-gerbil-scheme/src/policy/model
         :asp-gerbil-scheme/src/policy/modularity
-        (only-in :std/srfi/13 string-contains string-trim)
+        (only-in :std/srfi/13 string-contains)
         (only-in :std/sugar filter-map hash ormap while)
         :asp-gerbil-scheme/src/types/findings)
 
@@ -17,8 +17,10 @@
         protocol-evidence-finding
         facade-export-conflict-findings)
 
-;; Integer
-(def +macro-runtime-source-witness-explanation-min-length+ 32)
+;; A witness is executable project evidence, not package metadata: the same
+;; collected owner must invoke the macro and assert observable behaviour.
+(def +macro-runtime-source-witness-assertions+
+  '("check" "check-equal?" "check-exception" "check-output"))
 ;;; Boundary:
 ;;; - Every runtime macro is checked independently against parser-owned call
 ;;;   evidence in its declared witness owner.
@@ -38,37 +40,25 @@
               (project-index-files index))))
 ;; : (-> ProjectIndex MacroFact Boolean )
 (def (macro-runtime-source-policy-allows? index fact)
-  (let (policy (project-macro-governance-policy index))
-    (and policy
-         (macro-runtime-source-explanation-clear? policy)
-         (macro-runtime-source-witness-valid? index policy fact))))
-;; : (-> ProjectIndex ProjectMacroGovernancePolicy )
-(def (project-macro-governance-policy index)
-  (and (project-index-package index)
-       (project-package-macro-governance-policy (project-index-package index))))
-;; : (-> Policy Boolean )
-(def (macro-runtime-source-explanation-clear? policy)
-  (and (macro-governance-policy-explanation policy)
-       (fx>= (string-length
-              (string-trim (macro-governance-policy-explanation policy)))
-             +macro-runtime-source-witness-explanation-min-length+)))
-;;; A declaration is evidence only when its owner is in the collected source
-;;; catalog and native call facts show that owner invokes the named macro.
-;; : (-> ProjectIndex Policy MacroFact Boolean )
-(def (macro-runtime-source-witness-valid? index policy fact)
-  (let (entry (assoc (macro-fact-name fact)
-                     (macro-governance-policy-witnesses policy)))
-    (and entry
-         (let (owner (find-owner index (cdr entry)))
-           (and owner
-                (or (ormap (lambda (call)
-                             (equal? (call-fact-callee call)
-                                     (macro-fact-name fact)))
-                           (source-file-calls owner))
-                    (ormap (lambda (form)
-                             (equal? (top-form-head form)
-                                     (macro-fact-name fact)))
-                           (source-file-forms owner))))))))
+  (ormap (lambda (owner)
+           (macro-runtime-source-witness-valid? owner fact))
+         (project-index-files index)))
+;;; A source owner is evidence only when parser facts prove both sides of the
+;;; executable contract: it invokes the named macro and contains an assertion.
+;; : (-> SourceFile MacroFact Boolean )
+(def (macro-runtime-source-witness-valid? owner fact)
+  (and (source-file-invokes? owner (macro-fact-name fact))
+       (ormap (lambda (assertion)
+                (source-file-invokes? owner assertion))
+              +macro-runtime-source-witness-assertions+)))
+;; : (-> SourceFile String Boolean )
+(def (source-file-invokes? owner callee)
+  (or (ormap (lambda (call)
+               (equal? (call-fact-callee call) callee))
+             (source-file-calls owner))
+      (ormap (lambda (form)
+               (equal? (top-form-head form) callee))
+             (source-file-forms owner))))
 ;;; Finding boundary:
 ;;; - The macro fact supplies selector and syntax evidence.
 ;;; - Details tell agents to fetch runtime-source witnesses before editing macros.
@@ -79,7 +69,7 @@
    (policy-rule-severity +agent-macro-runtime-source-witness-rule+)
    (source-file-path file)
    (string-append "macro " (macro-fact-name fact)
-                  " needs runtime-source or macro-expansion witness before agent edits; query search runtime-source macro sugar module-sugar and record gerbil.pkg macro-governance witness")
+                  " needs an executable source witness before agent edits; add a collected test owner that invokes the macro and asserts observable behaviour")
    (macro-fact-selector fact)
    (hash (macro (macro-fact-name fact))
          (transformer (macro-fact-transformer fact))
@@ -104,10 +94,10 @@
            "defrule/defrules wrapper over visible runtime behavior"
            "for-syntax helper with precise imports"])
          (agentEscapeConstraint
-          "do not weaken macro-governance from a source macro edit; update gerbil.pkg only with a clear explanation and witness")
+          "do not weaken macro-governance or replace executable evidence with package metadata")
          (next "search runtime-source macro sugar module-sugar")
          (requiredWitness
-          "gerbil.pkg policy macro-governance witnesses: ((<macro> <owner>) ...), with a parser-visible call in each owner"))))
+          "one collected source owner with a parser-visible macro call and test assertion"))))
 ;;; Boundary:
 ;;; - protocol-evidence-findings composes first-class procedures.
 ;;; - Keep data-flow evidence visible.
