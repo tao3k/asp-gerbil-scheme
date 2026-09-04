@@ -40,7 +40,8 @@
 ;;       # Examples
 ;;
 ;;       ```scheme
-;;       (asp-gerbil-scheme-package-spec! example-package
+;;       (asp-gerbil-scheme-package-spec!
+;;         (example-package @ asp-gerbil-scheme-library-package-prototype)
 ;;         (spec spec)
 ;;         (profile asp-gerbil-scheme-development-builder-profile))
 ;;       (spec)
@@ -58,25 +59,6 @@
         (path-expand (source-location-path (stx-source stx)))))))
      #'(begin
         (.def (name @ prototype)
-          slot ...)
-        (set! name
-              (asp-gerbil-scheme-resolve-package-modules
-               name +this-source-file+))
-        (asp-gerbil-scheme-apply-package-source-coverage!
-         name +this-source-file+)
-        (def (spec-name)
-          (framework-apply-native-toolchain-environment!)
-          (framework-apply-build-core-policy!)
-          (asp-gerbil-scheme-package-build-spec name)))))
-  ((macro name (spec spec-name) slot ...)
-   (with-syntax
-    ((+this-source-file+
-      (datum->syntax
-       #'macro
-       (path-normalize
-        (path-expand (source-location-path (stx-source stx)))))))
-     #'(begin
-        (.def name
           slot ...)
         (set! name
               (asp-gerbil-scheme-resolve-package-modules

@@ -13,7 +13,7 @@
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
         (only-in :std/os/flock open-output-file/lock LOCK_EX)
-        (only-in :std/source gerbil-home this-source-file)
+        (only-in :std/source gerbil-home)
         (only-in :std/sort sort)
         (only-in :std/srfi/13
                  string-prefix?
@@ -476,7 +476,11 @@
   (syntax-case stx ()
     ((macro build-spec keys ...)
      (with-syntax* ((+this-source-file+
-                    (syntax/loc stx (this-source-file)))
+                    (datum->syntax
+                     #'macro
+                     (path-normalize
+                      (path-expand
+                       (source-location-path (stx-source stx))))))
                     (@main (stx-identifier #'macro 'main)))
        #'(def (@main . arguments)
            (framework-build-dispatch

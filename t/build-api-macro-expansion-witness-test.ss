@@ -14,6 +14,7 @@
                  build-profile?)
         (only-in :asp-gerbil-scheme/src/build-api/package-spec
                  asp-gerbil-scheme-package-spec!
+                 asp-gerbil-scheme-library-package-prototype
                  asp-gerbil-scheme-package-modules
                  asp-gerbil-scheme-package-source-roots)
         (only-in :asp-gerbil-scheme/src/build-api/source-coverage
@@ -45,7 +46,8 @@
   run: (lambda (_project files) files)
   ok?: pair?)
 
-(asp-gerbil-scheme-package-spec! witness-package-spec
+(asp-gerbil-scheme-package-spec!
+  (witness-package-spec @ asp-gerbil-scheme-library-package-prototype)
   (spec witness-package-build-spec)
   (modules ["src/parser/model.ss"])
   (role 'library)

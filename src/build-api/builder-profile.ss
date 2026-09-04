@@ -2,9 +2,7 @@
 ;;; Declarative Builder Profile shared by discovery and native build.
 
 (import (only-in :clan/poo/object .def .get)
-        (only-in "./source-discovery"
-                 +default-excluded-module-files+
-                 all-gerbil-modules)
+        "./source-discovery"
         (only-in :std/srfi/13 string-prefix?))
 
 (export asp-gerbil-scheme-builder-profile-prototype
@@ -26,7 +24,9 @@
   ;; Scenario fixtures and generated snapshots are policy/test inputs owned by
   ;; their harnesses, not package modules discovered by std/make.
   (exclude-directories ["scenarios" "snapshots"])
-  (test-roots ["t"])
+  ;; Gerbil projects conventionally use either t/ or test/; neither directory
+  ;; is part of the package's native library projection by default.
+  (test-roots ["t" "test"])
   (gitignore? #t)
   (default-project-excludes? #t))
 
