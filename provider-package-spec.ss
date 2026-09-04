@@ -20,6 +20,7 @@
     "src/parser/syntax-support.ss"
     "src/parser/syntax-calls.ss"
     "src/parser/syntax.ss"
+    "src/utilities/functional.ss"
     "src/parser/definition-syntax.ss"
     "src/parser/exact-owner.ss"
     "src/parser/control-flow.ss"
