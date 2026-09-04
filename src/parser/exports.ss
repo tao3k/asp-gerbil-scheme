@@ -71,9 +71,18 @@
        (let (found
              (find (lambda (item)
                      (and (symbol? item)
-                          (string-prefix? ":" (symbol->string item))))
+                          (module-reference-text?
+                           (symbol->string item))))
                    (flatten datum)))
          (and found (symbol->string found)))))
+
+;;; Re-export module references use the same absolute or owner-relative forms
+;;; as imports; recognizing both keeps facade facts joined without text scans.
+;; : (-> String Boolean)
+(def (module-reference-text? text)
+  (or (string-prefix? ":" text)
+      (string-prefix? "./" text)
+      (string-prefix? "../" text)))
 
 ;;; Symbol projection: filter-map keeps only public names and leaves modifier
 ;;; tokens behind, preserving deterministic export facts for search packets.
