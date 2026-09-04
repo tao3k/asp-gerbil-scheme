@@ -3,6 +3,7 @@
 
 (import :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/higher-order
+        :asp-gerbil-scheme/src/parser/function-quality-signals
         (only-in :clan/base fun)
         (only-in :std/misc/list unique)
         (only-in :std/srfi/13 string-prefix? string-suffix?)
@@ -11,15 +12,6 @@
 (export function-quality-profiles-from-source)
 
 ;; (List Callee)
-(def +function-quality-dynamic-state-callees+
-  '("current-directory" "current-input-port" "current-output-port"
-    "current-error-port"))
-
-;; (List Callee)
-(def +function-quality-dynamic-cleanup-callees+
-  '("dynamic-wind" "with-unwind-protect" "parameterize"
-    "call-with-parameters"))
-
 ;;; Profile fan-out is a pure definition-to-profile transform.
 ;;; The cut captures shared owner evidence once, then map keeps each function
 ;;; profile independent so policy can repair one function boundary at a time.
@@ -510,184 +502,6 @@
   (cond
    ((string-prefix? "methodBodyQuality:" option) option)
    (else #f)))
-
-;;; Dynamic scope cleanup boundary:
-;;; - A same-owner save/set/restore shape calls current dynamic state more than
-;;;   once but lacks dynamic-wind, with-unwind-protect, or parameterize.
-;;; - The detector uses parser-owned call facts, not source text.
-;; : (-> CallFacts (List QualityFacet) )
-(def (function-quality-dynamic-scope-cleanup-facets calls)
-  (if (and (>= (function-quality-call-count-any
-                calls
-                +function-quality-dynamic-state-callees+)
-               2)
-           (not (function-quality-call-any?
-                 calls
-                 +function-quality-dynamic-cleanup-callees+)))
-    ["dynamic-scope-cleanup-boundary"
-     "manual-dynamic-scope-restore"
-     "anti-ai-dynamic-state-restore"]
-    []))
-
-;; : (-> CallFacts (List Callee) Integer )
-(def (function-quality-call-count-any calls callees)
-  (foldl (lambda (call count)
-           (if (member (call-fact-callee call) callees)
-             (+ count 1)
-             count))
-         0
-         calls))
-
-;; : (-> CallFacts (List Callee) Boolean )
-(def (function-quality-call-any? calls callees)
-  (ormap (lambda (call)
-           (member (call-fact-callee call) callees))
-         calls))
-
-;;; Typed-contract profile facets forward parser-owned contract quality.
-;;; Keeping this as a helper makes the aggregate facet pipeline uniform.
-;; : (-> TypedContractFact (List QualityFacet) )
-(def (typed-contract-profile-facets fact)
-  (typed-contract-fact-quality-facets fact))
-
-;;; Higher-order profile facets distinguish good gerbil-utils/base.ss-style
-;;; constructor abstraction from anonymous wrapper drift.  The drift facet is
-;;; intentionally conjunctive: repeated lambdas alone are not enough. Sequence,
-;;; arity, generator, or combinator witnesses suppress the warning.
-;;; This keeps policy free to warn on real function factory opportunities
-;;; without treating callback-heavy code as low-quality Scheme.
-;; : (-> (List HigherOrderFact) (List QualityFacet) )
-(def (function-quality-higher-order-profile-facets higher-order-forms)
-  (let* ((roles (map higher-order-fact-role higher-order-forms))
-         (anonymous-formals
-          (function-quality-anonymous-formal-groups higher-order-forms))
-         (anonymous-count (length anonymous-formals))
-         (multi-arity?
-          (member "multi-arity-function" roles))
-         (specializer?
-          (function-quality-role-list-any?
-           roles
-           ["partial-application" "function-curry"]))
-         (pipeline?
-          (function-quality-role-list-any?
-           roles
-           ["function-composition" "pipeline-composition"]))
-         (sequence?
-          (function-quality-role-list-any?
-           roles
-           ["sequence-map" "sequence-filter" "sequence-filter-map"
-            "sequence-append-map" "sequence-predicate" "sequence-search"
-            "sequence-fold"]))
-         (driver?
-          (function-quality-role-list-any?
-           roles
-           ["generator-transform" "generator-control-inversion"
-            "stateful-protocol-wrapper" "loop-fold" "list-builder"]))
-         (constructor?
-          (and multi-arity?
-               (or (> anonymous-count 0) specializer? pipeline?)))
-         (wrapper-drift?
-          (and (>= anonymous-count 3)
-               (function-quality-repeated-formals? anonymous-formals 3)
-               (not multi-arity?)
-               (not specializer?)
-               (not pipeline?)
-               (not sequence?)
-               (not driver?))))
-    (filter identity
-            [(and (or specializer? pipeline?)
-                  "base-style-combinator-composition")
-             (and constructor?
-                  "higher-order-constructor-abstraction")
-             (and (and constructor? (> anonymous-count 0))
-                  "arity-specialized-function-factory")
-             (and wrapper-drift?
-                  "wrapper-lambda-drift")
-             (and wrapper-drift?
-                  "function-specialization-opportunity")])))
-
-;; : (-> (List HigherOrderFact) (List (List FormalName)) )
-(def (function-quality-anonymous-formal-groups higher-order-forms)
-  (filter function-quality-informative-formals?
-          (map higher-order-fact-formals
-               (filter (lambda (fact)
-                         (equal? (higher-order-fact-role fact)
-                                 "anonymous-function"))
-                       higher-order-forms))))
-
-;; : (-> (List Role) (List Role) Boolean )
-(def (function-quality-role-list-any? roles expected-roles)
-  (ormap (lambda (role)
-           (member role roles))
-         expected-roles))
-
-;; : (-> (List (List FormalName)) Nat Boolean )
-(def (function-quality-repeated-formals? formal-groups minimum-count)
-  (ormap (lambda (formals)
-           (>= (function-quality-formals-count formal-groups formals)
-               minimum-count))
-         formal-groups))
-
-;; : (-> (List (List FormalName)) (List FormalName) Integer )
-(def (function-quality-formals-count formal-groups formals)
-  (length
-   (filter (cut equal? <> formals) formal-groups)))
-
-;;; Role counts stay local to one function profile so repeated syntax in another
-;;; definition cannot accidentally raise a repair signal.
-;; : (-> (List HigherOrderFact) Role Integer )
-(def (function-quality-higher-order-role-count higher-order-forms role)
-  (length
-   (filter (lambda (fact)
-             (equal? (higher-order-fact-role fact) role))
-           higher-order-forms)))
-
-;;; A profile-level role predicate keeps the constructor/drift combinator easy
-;;; to read without duplicating the fact role lookup at each gate.
-;; : (-> (List HigherOrderFact) Role Boolean )
-(def (function-quality-higher-order-role? higher-order-forms role)
-  (> (function-quality-higher-order-role-count higher-order-forms role) 0))
-
-;;; Any-role checks encode the positive witnesses that suppress wrapper drift:
-;;; sequence transforms, case-lambda factories, generators, and combinators.
-;; : (-> (List HigherOrderFact) (List Role) Boolean )
-(def (function-quality-higher-order-any-role? higher-order-forms roles)
-  (ormap (lambda (fact)
-           (member (higher-order-fact-role fact) roles))
-         higher-order-forms))
-
-;;; Repeated anonymous formals are the parser-owned approximation for function
-;;; factory drift. Empty thunks and placeholder callbacks are filtered out below.
-;;; The repeated shape must occur inside one caller profile, which prevents
-;;; unrelated lambdas elsewhere in the owner from combining into a warning.
-;; : (-> (List HigherOrderFact) Nat Boolean )
-(def (function-quality-repeated-anonymous-formals? higher-order-forms minimum-count)
-  (ormap (lambda (fact)
-           (and (equal? (higher-order-fact-role fact) "anonymous-function")
-                (function-quality-informative-formals?
-                 (higher-order-fact-formals fact))
-                (>= (function-quality-anonymous-formals-count
-                     higher-order-forms
-                     (higher-order-fact-formals fact))
-                    minimum-count)))
-         higher-order-forms))
-
-;;; The duplicate count is shape-based rather than name-based in source text:
-;;; the native lambda formal list must repeat inside the same caller profile.
-;; : (-> (List HigherOrderFact) (List FormalName) Integer )
-(def (function-quality-anonymous-formals-count higher-order-forms formals)
-  (length
-   (filter (lambda (fact)
-             (and (equal? (higher-order-fact-role fact) "anonymous-function")
-                  (equal? (higher-order-fact-formals fact) formals)))
-           higher-order-forms)))
-
-;;; Empty thunk lambdas and `_` placeholders are common test/runtime callbacks,
-;;; so they cannot by themselves prove a reusable function factory opportunity.
-;; : (-> (List FormalName) Boolean )
-(def (function-quality-informative-formals? formals)
-  (and (pair? formals)
-       (not (member "_" formals))))
 
 ;;; Preservation reasons are guardrails for automated repair.
 ;;; Public API, macro, POO, and driver evidence become explicit constraints
