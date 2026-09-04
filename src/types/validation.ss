@@ -7,6 +7,10 @@
 (import :gerbil/gambit
         (only-in :std/sugar cut)
         :asp-gerbil-scheme/src/types/model
+        (only-in :asp-gerbil-scheme/src/types/validation-union
+                 flatten-union-members
+                 unique-types
+                 validation-name)
         :asp-gerbil-scheme/src/types/subtyping)
 
 (export make-type-alias-env
@@ -629,54 +633,3 @@
            (type-record-fields type))
       (type-record-required type)))
     (else type)))
-
-;; flatten-union-members
-;;   : (-> UnionMembers UnionMembers)
-;;   | type UnionMembers = (List TypeSpec)
-;;   | doc m%
-;;       `flatten-union-members members` removes only nested union shells.  It
-;;       preserves source-order member evidence for the duplicate-removal pass.
-;;     %
-(def (flatten-union-members members)
-  (cond
-   ((null? members) [])
-   ((eq? (type-kind (car members)) 'union)
-    (append (flatten-union-members (type-union-members (car members)))
-            (flatten-union-members (cdr members))))
-   (else
-    (cons (car members) (flatten-union-members (cdr members))))))
-
-;; unique-types
-;;   : (-> UnionMembers UnionMembers UnionMembers)
-;;   | type UnionMembers = (List TypeSpec)
-;;   | doc m%
-;;       `unique-types members out` keeps the first structural occurrence of
-;;       each type while preserving the caller-facing order after reversal.
-;;     %
-(def (unique-types members out)
-  (cond
-   ((null? members) (reverse out))
-   ((contains-type? (car members) out)
-    (unique-types (cdr members) out))
-   (else
-    (unique-types (cdr members) (cons (car members) out)))))
-
-;; contains-type?
-;;   : (-> TypeSpec UnionMembers Boolean)
-;;   | type UnionMembers = (List TypeSpec)
-;;   | doc m%
-;;       `contains-type? target members` uses TypeSpec equality, not string
-;;       display text, when deciding whether union normalization has a duplicate.
-;;     %
-(def (contains-type? target members)
-  (cond
-   ((null? members) #f)
-   ((type=? target (car members)) #t)
-   (else (contains-type? target (cdr members)))))
-
-;; : (-> TypeName TypeName)
-(def (validation-name name)
-  (cond
-   ((symbol? name) (symbol->string name))
-   ((string? name) name)
-   (else "unknown")))
