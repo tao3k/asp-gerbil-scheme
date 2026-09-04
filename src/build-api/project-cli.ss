@@ -1,11 +1,17 @@
+;;; The project CLI only decodes user intent and delegates to Build API library
+;;; operations.  Compilation policy stays in package/profile declarations so
+;;; CLI invocation cannot create a second platform or concurrency authority.
 (export #t)
 
 (import :gerbil/tools/env
-        :std/cli/getopt
- :std/cli/multicall
+        (only-in :std/cli/getopt flag option rest-arguments)
+        (only-in :std/cli/multicall
+                 define-entry-point
+                 define-multicall-main)
   :asp-gerbil-scheme/src/build-api/project-build
   :asp-gerbil-scheme/src/testing/project-build)
 
+;; : (-> GetoptOption ... (List GetoptOption))
 (def (native-build-getopt . options)
   (append
    [(flag 'verbose "-V" "--verbose"
@@ -20,6 +26,7 @@
           help: "Build optimized release executables")]
    options))
 
+;; : (List GetoptOption)
 (def compile-getopt
   (native-build-getopt
    (flag 'binary "--binary"
@@ -27,6 +34,7 @@
    (flag 'full "--full"
          help: "Compile every library module instead of the CLI launcher")))
 
+;; : (List GetoptOption)
 (def install-getopt
   (native-build-getopt
    (option 'flag "--flag"
@@ -35,6 +43,7 @@
    (flag 'full "--full"
          help: "Compile every library module before installing the CLI launcher")))
 
+;; : (List GetoptOption)
 (def test-file-getopt
   [(rest-arguments 'files
                    help: "Selected gxtest files")])

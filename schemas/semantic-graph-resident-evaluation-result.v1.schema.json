@@ -17,7 +17,7 @@
     "packetKind": {"const": "resident-graph-evaluation-result"},
     "state": {"const": "Ready"},
     "surface": {
-      "enum": ["search-pipe", "search-rg", "search-lexical", "search-owner", "query"]
+      "enum": ["search-playbook", "query"]
     },
     "workspaceIdentity": {"type": "string", "minLength": 1},
     "generationDigest": {"type": "string", "pattern": "^blake3-256:[0-9a-f]{64}$"},

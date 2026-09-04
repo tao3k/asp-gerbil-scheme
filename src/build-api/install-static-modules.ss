@@ -3,17 +3,9 @@
 
 (export cli-install-static-modules)
 
-(import :asp-gerbil-scheme/src/build-api/release-modules)
+(import :asp-gerbil-scheme/src/build-api/release-modules
+        (only-in :std/misc/list unique))
 
-(def (unique-module-paths module-paths)
-  (let loop ((rest module-paths) (result []))
-    (match rest
-      ([] (reverse result))
-      ([module-path . tail]
-       (if (member module-path result)
-         (loop tail result)
-         (loop tail (cons module-path result)))))))
-
+;; : (List Path)
 (def cli-install-static-modules
-  (unique-module-paths
-   (cons "cli-launcher.ss" cli-release-modules)))
+  (unique (cons "cli-launcher.ss" cli-release-modules)))

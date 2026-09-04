@@ -19,29 +19,29 @@
 
 ;; Integer
 (def +macro-runtime-source-witness-explanation-min-length+ 32)
-;; Integer
-(def +macro-runtime-source-witness-min-length+ 8)
 ;;; Boundary:
-;;; - macro-runtime-source-witness-findings composes first-class procedures.
-;;; - Keep data-flow evidence visible.
+;;; - Every runtime macro is checked independently against parser-owned call
+;;;   evidence in its declared witness owner.
 ;; : (-> ProjectIndex (List TypeFinding) )
 (def (macro-runtime-source-witness-findings index)
-  (if (macro-runtime-source-policy-allows? index)
-    '()
-    (filter-map
-     (lambda (file)
-       (and (index-source-runtime-file-path? index (source-file-path file))
-            (pair? (source-file-macros file))
-            (macro-runtime-source-witness-finding
-             file
-             (car (source-file-macros file)))))
-     (project-index-files index))))
-;; : (-> ProjectIndex Boolean )
-(def (macro-runtime-source-policy-allows? index)
+  (apply append
+         (map (lambda (file)
+                (if (index-source-runtime-file-path? index
+                                                     (source-file-path file))
+                  (filter-map
+                   (lambda (fact)
+                     (and (not (macro-runtime-source-policy-allows?
+                                index fact))
+                          (macro-runtime-source-witness-finding file fact)))
+                   (source-file-macros file))
+                  '()))
+              (project-index-files index))))
+;; : (-> ProjectIndex MacroFact Boolean )
+(def (macro-runtime-source-policy-allows? index fact)
   (let (policy (project-macro-governance-policy index))
     (and policy
          (macro-runtime-source-explanation-clear? policy)
-         (macro-runtime-source-witness-clear? policy))))
+         (macro-runtime-source-witness-valid? index policy fact))))
 ;; : (-> ProjectIndex ProjectMacroGovernancePolicy )
 (def (project-macro-governance-policy index)
   (and (project-index-package index)
@@ -52,12 +52,23 @@
        (fx>= (string-length
               (string-trim (macro-governance-policy-explanation policy)))
              +macro-runtime-source-witness-explanation-min-length+)))
-;; : (-> Policy Boolean )
-(def (macro-runtime-source-witness-clear? policy)
-  (and (macro-governance-policy-witness policy)
-       (fx>= (string-length
-              (string-trim (macro-governance-policy-witness policy)))
-             +macro-runtime-source-witness-min-length+)))
+;;; A declaration is evidence only when its owner is in the collected source
+;;; catalog and native call facts show that owner invokes the named macro.
+;; : (-> ProjectIndex Policy MacroFact Boolean )
+(def (macro-runtime-source-witness-valid? index policy fact)
+  (let (entry (assoc (macro-fact-name fact)
+                     (macro-governance-policy-witnesses policy)))
+    (and entry
+         (let (owner (find-owner index (cdr entry)))
+           (and owner
+                (or (ormap (lambda (call)
+                             (equal? (call-fact-callee call)
+                                     (macro-fact-name fact)))
+                           (source-file-calls owner))
+                    (ormap (lambda (form)
+                             (equal? (top-form-head form)
+                                     (macro-fact-name fact)))
+                           (source-file-forms owner))))))))
 ;;; Finding boundary:
 ;;; - The macro fact supplies selector and syntax evidence.
 ;;; - Details tell agents to fetch runtime-source witnesses before editing macros.
@@ -95,7 +106,8 @@
          (agentEscapeConstraint
           "do not weaken macro-governance from a source macro edit; update gerbil.pkg only with a clear explanation and witness")
          (next "search runtime-source macro sugar module-sugar")
-         (requiredWitness "gerbil.pkg policy macro-governance witness"))))
+         (requiredWitness
+          "gerbil.pkg policy macro-governance witnesses: ((<macro> <owner>) ...), with a parser-visible call in each owner"))))
 ;;; Boundary:
 ;;; - protocol-evidence-findings composes first-class procedures.
 ;;; - Keep data-flow evidence visible.

@@ -1,4 +1,22 @@
 (package:
  asp-gerbil-scheme
 depend:
-("github.com/mighty-gerbils/gerbil-poo@1c3225637525400341a09e958296962c10184ead"))
+("github.com/mighty-gerbils/gerbil-poo@1c3225637525400341a09e958296962c10184ead")
+policy:
+((macro-governance
+  explanation: "Public macros are hygienic declaration bridges whose expansion families are exercised by parser-visible source or test owners."
+  witnesses:
+  (("asp-gerbil-scheme-package-spec!" "t/build-api-macro-expansion-witness-test.ss")
+   ("define-build-options" "t/build-api-macro-expansion-witness-test.ss")
+   ("define-build-commands" "t/build-api-macro-expansion-witness-test.ss")
+   ("define-build-profile" "t/build-api-macro-expansion-witness-test.ss")
+   ("define-build-request" "t/building-declarative-test.ss")
+   ("std-build" "t/building-declarative-test.ss")
+   ("define-std-build" "t/building-declarative-test.ss")
+   ("make-gxtest-policy-test" "t/gxtest-runner-contract-test.ss")
+   ("build-performance-project" "t/building-declarative-test.ss")
+   ("define-build-performance-project" "t/building-declarative-test.ss")
+   ("define-project-test" "t/build-api-macro-expansion-witness-test.ss")
+   ("declare-gxtest-serial" "t/build-api-native-stage-boundary-test.ss")
+   ("declare-gxtest-memory-exception" "t/parser-memory-stability-test.ss")
+   ("defobject-contract" "src/types/model.ss")))))

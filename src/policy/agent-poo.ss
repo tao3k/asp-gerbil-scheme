@@ -138,13 +138,48 @@
     '()))
 ;; : (-> ProjectIndex SourceFile CallFact Boolean )
 (def (manual-object-model-call? index file call)
+  (let (caller (call-fact-caller call))
+    (and (manual-object-model-owner? index file)
+         (manual-object-model-callee? call)
+         caller
+         (manual-object-domain-constructor-caller? file caller))))
+
+;; : (-> ProjectIndex SourceFile Boolean)
+(def (manual-object-model-owner? index file)
   (and (index-source-runtime-file-path? index (source-file-path file))
-       (null? (source-file-poo-forms file))
-       (member (call-fact-callee call) +manual-object-model-callees+)
-       (call-fact-caller call)
-       (or (string-prefix? "make-" (call-fact-caller call))
-           (string-prefix? "new-" (call-fact-caller call))
-           (string-prefix? "build-" (call-fact-caller call)))))
+       (null? (source-file-poo-forms file))))
+
+;; : (-> CallFact Boolean)
+(def (manual-object-model-callee? call)
+  (member (call-fact-callee call) +manual-object-model-callees+))
+
+;; : (-> SourceFile Caller Boolean)
+(def (manual-object-domain-constructor-caller? file caller)
+  (and (not (caller-builds-type-finding? file caller))
+       (or (string-prefix? "make-" caller)
+           (string-prefix? "new-" caller)
+           (string-prefix? "build-" caller))))
+
+;;; A hash nested in make-type-finding is typed diagnostic evidence, not an
+;;; alternative domain object model. Require both calls in the same caller so
+;;; ordinary build-/make-/new- constructors remain covered by POLICY-010.
+;; caller-builds-type-finding?
+;; : (-> SourceFile Caller Boolean)
+;; | doc m%
+;; Recognizes a typed diagnostic constructor in the same lexical caller.
+;; # Examples
+;; ```scheme
+;; (caller-builds-type-finding? file "build-policy-findings")
+;; => #t when that caller invokes make-type-finding
+;; ```
+;; Result: true only for parser-owned call evidence in one caller boundary.
+(def (caller-builds-type-finding? file caller)
+  (and (find (lambda (candidate)
+               (and (equal? (call-fact-caller candidate) caller)
+                    (equal? (call-fact-callee candidate)
+                            "make-type-finding")))
+             (source-file-calls file))
+       #t))
 ;; : (-> SourceFile CallFact TypeFinding )
 (def (poo-object-model-finding file call)
   (make-type-finding

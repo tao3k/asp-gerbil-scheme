@@ -2,7 +2,7 @@
 ;;; Public module wrapper for the source-bootstrapped memory anomaly guard.
 
 (import :gerbil/gambit
-        :clan/poo/object
+        (only-in :clan/poo/object .has? .o .ref object?)
         (only-in :std/misc/process run-process)
         (only-in :std/srfi/13 string-suffix? string-tokenize)
         (only-in :std/text/json json-object->string write-json-sort-keys?))
@@ -18,6 +18,7 @@
         framework-memory-anomaly-growth-rate-bytes-per-second
         framework-memory-anomaly-transition
         framework-memory-guard-process-table
+        framework-memory-guard-runtime-heap-bytes
         framework-memory-guard-load-average
         framework-memory-guard-active-compiler-jobs
         framework-memory-guard-process-tree-cpu-percent

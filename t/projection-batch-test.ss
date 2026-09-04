@@ -35,4 +35,21 @@
       (check (hash-ref response "schemaId")
              => "agent.semantic-protocols.provider-language-projection-batch-response")
       (check (hash-ref owner "ownerPath") => "src/projected.ss")
-      (check (> (vector-length items) 0) => #t)))))
+      (check (hash-ref owner "projectionState") => "ready")
+      (check (void? (hash-ref owner "diagnostic")) => #t)
+      (check (> (vector-length items) 0) => #t)))
+   (test-case
+    "syntax failure is isolated to its immutable owner"
+    (let* ((response
+            (project-provider-projection-batch
+             (projection-request
+              [(hash
+                ("ownerPath" "src/broken.ss")
+                ("sourceLeafDigest" "blake3-256:broken")
+                ("sourceText" "(def (broken"))])))
+           (owner (vector-ref (hash-ref response "owners") 0))
+           (diagnostic (hash-ref owner "diagnostic")))
+      (check (hash-ref owner "projectionState") => "syntax-unavailable")
+      (check (hash-ref diagnostic "reasonKind") => "source-syntax-unavailable")
+      (check (vector-length (hash-ref owner "items")) => 0)
+      (check (vector-length (hash-ref owner "relations")) => 0)))))

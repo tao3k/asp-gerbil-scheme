@@ -1,6 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; One-shot source discovery for declarative package specs.
 
+;; This public catalog function is the single upstream std/make discovery
+;; boundary consumed by Builder Profile; keep it exported with the profile API.
 (export all-gerbil-modules
         git-project?
         +default-excluded-module-files+
@@ -21,7 +23,7 @@
   '("main.ss" "manifest.ss"))
 
 (def +default-project-exclude-directories+
-  '("run" "t" ".git" "_darcs" ".gerbil"))
+  '("run" ".git" "_darcs" ".gerbil"))
 
 (def (path-under-excluded-directory? path directory)
   (string-prefix? (string-append directory "/") path))

@@ -27,6 +27,8 @@
       "enum": [
         "hello",
         "generation-graph",
+        "evaluate-resident",
+        "release-generation",
         "timeline",
         "cancel",
         "health",
@@ -53,6 +55,16 @@
     {
       "if": {"properties": {"messageKind": {"const": "cancel"}}},
       "then": {"required": ["cancellationId"]}
+    },
+    {
+      "if": {
+        "properties": {
+          "messageKind": {
+            "enum": ["generation-graph", "evaluate-resident", "release-generation"]
+          }
+        }
+      },
+      "then": {"required": ["workspaceIdentity", "generationDigest"]}
     }
   ],
   "$defs": {

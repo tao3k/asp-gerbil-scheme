@@ -9,7 +9,7 @@
                  asp-gerbil-scheme-package-build-receipt-status-line
                  asp-gerbil-scheme-package-build-receipt-status-ref
                  asp-gerbil-scheme-package-build-receipt-write)
-        (only-in "../build-api/package-spec"
+        (only-in "../build-api/package-native-plan"
                  asp-gerbil-scheme-package-api-spec)
         (only-in "./gxtest-context"
                  package-root

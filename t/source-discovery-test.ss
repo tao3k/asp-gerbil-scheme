@@ -71,7 +71,8 @@
         (check
          (asp-gerbil-scheme-builder-profile-modules
           asp-gerbil-scheme-development-builder-profile
-          root: root)
+          root: root
+          roots: ["."])
          => '("src/kept.ss" "src/unstaged.ss" "src/visible.ss"
               "tracked-ignored.ss"))))
 

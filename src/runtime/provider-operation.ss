@@ -1,3 +1,6 @@
+;;; Provider operations validate protocol requests and dispatch to parser-owned
+;;; resolution/projection functions.  This is the semantic operation boundary;
+;;; transport, process lifecycle, and build policy remain outside it.
 (import :gerbil/gambit
         (only-in :asp-gerbil-scheme/src/commands/project-resolution project-resolution-request->response)
         (only-in :asp-gerbil-scheme/src/commands/projection-batch project-provider-projection-batch)

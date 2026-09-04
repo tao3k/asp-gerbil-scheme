@@ -1,6 +1,27 @@
+;;; The standard Builder adapts declared BuildRequest values to upstream
+;;; std/make and returns deterministic stage receipts.  Dependency ordering and
+;;; parallel compilation remain upstream responsibilities.
 (import (only-in :std/make make make-clean)
-        ./model
-        ./native-toolchain)
+        (only-in ./model
+                 build-profile-after
+                 build-profile-builder
+                 build-profile-description
+                 build-profile-extra-options
+                 build-profile-label-of
+                 build-profile-name
+                 build-plan-run!
+                 build-request-context
+                 build-request-current-pred
+                 build-request-label
+                 build-request-profile
+                 build-request-stage-specs
+                 build-stage-spec
+                 make-build-profile
+                 make-build-request
+                 make-build-stage)
+        (only-in ./native-toolchain
+                 native-toolchain-default
+                 with-native-toolchain))
 
 ;;; Keep the full public surface in one declaration so dependent facades receive
 ;;; the complete module interface during incremental compilation.

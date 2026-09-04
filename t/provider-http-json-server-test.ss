@@ -10,6 +10,7 @@
         (only-in :std/misc/path path-expand)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
+        (only-in :std/srfi/1 append-map iota)
         (only-in :std/sugar hash hash-key?)
         (only-in :std/text/base64 base64-encode)
         (only-in :std/text/json read-json write-json)
@@ -189,13 +190,11 @@
   (let* ((url (string-append endpoint "v1/provider-runtime"))
          (total (+ warm-count sample-count))
          (arguments
-          (let build ((remaining total) (first? #t) (result '("curl")))
-            (if (zero? remaining)
-                result
-                (build (- remaining 1)
-                       #f
-                       (append result
-                               (curl-transfer-arguments url body first?))))))
+          (cons "curl"
+                (append-map
+                 (lambda (index)
+                   (curl-transfer-arguments url body (zero? index)))
+                 (iota total))))
          (output
           (run-process arguments
                        coprocess: read-all-as-string

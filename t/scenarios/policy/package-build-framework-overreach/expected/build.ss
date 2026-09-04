@@ -8,7 +8,6 @@
 
 (asp-gerbil-scheme-source-coverage
  roots: '("src" "t")
- runtime-roots: '("src")
  explanation: "build.ss declares source coverage; acceleration and receipts stay in reusable harness APIs.")
 
 (def (spec)

@@ -3,7 +3,8 @@
 
 (import :gerbil/gambit
         (only-in :asp-gerbil-scheme/src/parser/support datum-list-items safe-cadr)
-        (only-in :std/misc/list unique))
+        (only-in :std/misc/list unique)
+        (only-in :std/sugar filter-map))
 
 (export read-project-package
         project-package-path
@@ -18,9 +19,8 @@
         project-package-with-source-scope
         test-directory-policy-allowed-directories
         test-directory-policy-explanation
-        macro-governance-policy-allow-generated
         macro-governance-policy-explanation
-        macro-governance-policy-witness
+        macro-governance-policy-witnesses
         source-scope-policy-roots
         source-scope-policy-runtime-roots
         source-scope-policy-exclude-directories
@@ -49,7 +49,7 @@
 ;; TestDirectoryPolicyStruct
 (defstruct test-directory-policy (allowed-directories explanation))
 ;; MacroGovernancePolicyStruct
-(defstruct macro-governance-policy (allow-generated explanation witness))
+(defstruct macro-governance-policy (explanation witnesses))
 ;; SourceScopePolicyStruct
 (defstruct source-scope-policy (roots runtime-roots exclude-directories explanation))
 ;; ModularityPolicyStruct
@@ -164,9 +164,22 @@
          (let (entry (policy-macro-governance-entry policy))
            (and entry
                 (make-macro-governance-policy
-                 (policy-boolean-field entry 'allow-generated:)
                  (policy-string-field entry 'explanation:)
-                 (policy-string-field entry 'witness:)))))))
+                 (policy-macro-witness-list-field entry 'witnesses:)))))))
+;;; A macro witness is admitted only as an exact macro-name/owner pair.  The
+;;; policy layer still verifies that the owner exists and contains the named
+;;; macro call, so package metadata cannot substitute prose for parser evidence.
+;; : (-> Datum Symbol (List (Pair String String)))
+(def (policy-macro-witness-list-field datum field)
+  (filter-map
+   (lambda (entry)
+     (and (pair? entry)
+          (pair? (cdr entry))
+          (null? (cddr entry))
+          (string? (car entry))
+          (string? (cadr entry))
+          (cons (car entry) (cadr entry))))
+   (datum-list-items (package-field-value datum field))))
 ;;; Boundary:
 ;;; - policy-macro-governance-entry composes first-class procedures.
 ;;; - Keep data-flow evidence visible.

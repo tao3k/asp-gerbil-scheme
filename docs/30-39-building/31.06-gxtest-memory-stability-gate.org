@@ -83,6 +83,99 @@ The exception test repeats this exact receipt four times under its declared
 =512 MiB= budget and asserts both the scalar definition count and bounded Top-K
 result. It therefore protects the allocation invariant rather than merely
 checking that a command returns.
+
+* Policy Scan Concurrency
+
+One project policy invocation discovers its declared coverage once, parses each
+owner into one =SourceFile= packet, and reuses that =ProjectIndex= for every
+policy projection.  =asp-gerbil-scheme-package-spec!= captures the lexical
+source path of the calling =build.ss= during hygienic macro expansion; this
+owner root, rather than the launcher's current directory, anchors both graph
+projections.  The parser worker count defaults to the smaller of the
+declared file count and the host's available CPU count.  It has no fixed
+four-worker ceiling; the single =GERBIL_BUILD_CORES= override governs both
+policy parsing and =std/make=.  The Scheme rapid-growth guard starts before
+profile admission constructs the single =ProjectIndex= and emits a terminal
+JSON receipt for that profiled phase.  The native build receives a separate
+=std/make= phase receipt; neither guard performs another source scan or
+suppresses normal parser parallelism.  When host policy denies process-table
+inspection, Gambit's native =##process-statistics= supplies the managed-heap
+trajectory, so a sandboxed =gxi= can no longer degrade to a zero-byte sample.
+Process-tree RSS remains the wider measurement whenever it is available.
+
+#+begin_src mermaid
+flowchart LR
+  Macro["package-spec!\nbuild.ss source root"]
+  Guard["Scheme RSS trajectory guard"]
+  Coverage["build.ss coverage\nsrc + t + project roots"]
+  Parse["one bounded parse pool\navailable CPU workers"]
+  Index["one ProjectIndex\none SourceFile per owner"]
+  Rules["all policy projections\nreuse parsed facts"]
+
+  Macro --> Coverage
+  Guard --> Parse
+  Coverage --> Parse --> Index --> Rules
+#+end_src
+
+The Build API owns two projections of that single source catalog.  Policy
+admission consumes every declared project owner under =src=, =t=, and any
+project-specific roots.  Native package compilation consumes only the runtime
+module projection.  Tests therefore remain visible to contract and witness
+rules without becoming production compilation units, and neither projection
+performs a second repository scan.  Policy's one syntax parse cannot replace
+the Gerbil compiler's own parse without replacing upstream =std/make=; the
+shared artifact is the discovered owner graph, while compilation semantics
+remain upstream-owned.
+
+#+begin_src mermaid
+flowchart TD
+  Build["build.ss declarative roots"]
+  Catalog["one source catalog\nsrc + t + project roots"]
+  Policy["policy projection\nall declared owners"]
+  Native["native projection\nruntime modules only"]
+  Index["one ProjectIndex"]
+  Compile["upstream std/make"]
+
+  Build --> Catalog
+  Catalog --> Policy --> Index
+  Catalog --> Native --> Compile
+#+end_src
+
+Loading the absolute ASP =build.ss= path while the process current directory
+was the POO Flow repository returned the ASP repository path from
+=asp-gerbil-scheme-source-coverage-owner-root=.  This regression proves that
+the launcher cwd is no longer source-catalog authority and requires no =cd=
+contract from downstream projects.
+
+The 2026-09-03 native admission receipt scanned =406= Scheme files and =5,149=
+definitions in =24.79 s= with a maximum resident set of =1,128,316,928 bytes=
+(about =1.05 GiB=).  Expanding policy coverage from the earlier runtime-only
+projection did not add another parse pass: wall time remained about 25 seconds.
+The receipt also proved that the test-owned =SlotPrototypeTable.= contract
+witness became visible to policy, clearing the former false missing-witness
+finding while leaving tests outside the native package spec.
+
+The executable regression in =t/parser-memory-stability-test.ss= captures the
+native parser trace for one =policy-source-report= invocation and requires
+exactly one =event=start= row for every selected owner.  On the 12-core POO Flow
+corpus, the former four-worker default measured =policy-collect= at
+=11,202,079 us=.  Using the available 12 cores measured =7,716,923 us= in the
+controlled A/B run, a 31.1 percent reduction without changing coverage.  A
+second no-override run against the patched local ASP library reported the
+default worker count as =12= and =policy-collect= at =8,605,124 us=; host load
+remains a separately observed source of timing variance.
+
+The 2026-09-04 regression run exercised the actual =gxi build.ss spec=
+admission boundary after the guard was moved ahead of =ProjectIndex=
+construction.  It scanned =407= files and =5,152= definitions with
+=configured-worker-count=12=.  The guarded phase completed in =36,829 ms=;
+because the sandbox denied =ps=, the receipt explicitly selected
+=runtime-managed-heap-fallback= and still reported a nonzero peak of
+=1,106,903,632 bytes=, maximum ten-second growth of =324,246,792 bytes=, and
+maximum growth rate of about =61.35 MB/s=.  The run remained inside the
+envelope.  The subsequent nonzero command status came from the expected
+35 outstanding policy findings, not from the memory guard.
+
 * CLI Boundary
 There is no =asp-gerbil-scheme bench= or =bench --full= product command. Memory stability
 is exercised only through the ordinary =gxtest= discovery and subprocess path.

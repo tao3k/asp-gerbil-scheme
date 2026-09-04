@@ -14,7 +14,7 @@
         (only-in "../src/build-api/native-build"
                  cli-binary-module-spec
                  package-api-build-output-files)
-        (only-in "../src/build-api/package-spec"
+        (only-in "../src/build-api/package-native-plan"
                  asp-gerbil-scheme-package-api-stage-specs)
         (only-in "../src/commands/guide-sections" guide-section-lines-for)
         (only-in "../src/constants" +help+))

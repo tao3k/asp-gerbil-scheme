@@ -13,7 +13,7 @@
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
         (only-in :std/os/flock open-output-file/lock LOCK_EX)
-        (only-in :std/source gerbil-home)
+        (only-in :std/source gerbil-home this-source-file)
         (only-in :std/sort sort)
         (only-in :std/srfi/13
                  string-prefix?
@@ -204,6 +204,17 @@
 (def +framework-darwin-native-environment-exclusions+
   '("SDKROOT" "DEVELOPER_DIR"))
 
+;; Upstream clan/building evaluates the package spec before it enters
+;; std/make.  Normalize the current build process once at that declaration
+;; boundary so the later upstream compiler processes inherit the same Darwin
+;; toolchain environment as Framework-owned builds.
+(def (framework-apply-native-toolchain-environment!)
+  (cond-expand
+   (darwin
+    (for-each (lambda (name) (setenv name))
+              +framework-darwin-native-environment-exclusions+))
+   (else #!void)))
+
 (def (call-with-framework-native-toolchain-environment thunk)
   (cond-expand
    (darwin
@@ -211,8 +222,7 @@
           (map (lambda (name) (cons name (getenv name #f)))
                +framework-darwin-native-environment-exclusions+))
       (dynamic-wind
-        (lambda ()
-          (for-each (lambda (entry) (setenv (car entry))) previous))
+        framework-apply-native-toolchain-environment!
         thunk
         (lambda ()
           (for-each
@@ -465,8 +475,8 @@
 (defsyntax (defbuild-script stx)
   (syntax-case stx ()
     ((macro build-spec keys ...)
-     (with-syntax* ((@this-script (stx-identifier #'macro 'this-source-file))
-                    (+this-source-file+ (syntax/loc stx (@this-script)))
+     (with-syntax* ((+this-source-file+
+                    (syntax/loc stx (this-source-file)))
                     (@main (stx-identifier #'macro 'main)))
        #'(def (@main . arguments)
            (framework-build-dispatch

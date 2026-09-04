@@ -96,12 +96,13 @@
 ;; : (-> Policy Json )
 (def (macro-governance-policy-json policy)
   (and policy
-       (hash (allowGenerated
-              (macro-governance-policy-allow-generated policy))
-             (explanation
+       (hash (explanation
               (macro-governance-policy-explanation policy))
-             (witness
-              (macro-governance-policy-witness policy)))))
+             (witnesses
+              (map (lambda (entry)
+                     (hash (macro (car entry))
+                           (owner (cdr entry))))
+                   (macro-governance-policy-witnesses policy))))))
 ;; : (-> Policy String )
 (def (source-scope-policy-json policy)
   (and policy

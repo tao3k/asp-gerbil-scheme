@@ -6,7 +6,7 @@
         (only-in :std/misc/path path-expand)
         (only-in :std/srfi/1 append-map)
         (only-in :std/srfi/13 string-contains)
-        (only-in "../src/build-api/package-spec"
+        (only-in "../src/build-api/package-native-plan"
                  asp-gerbil-scheme-package-api-spec
                  asp-gerbil-scheme-package-api-stage-specs)
         (only-in "../src/policy/gxtest"

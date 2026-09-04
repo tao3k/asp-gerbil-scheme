@@ -133,6 +133,10 @@
 (defstruct guide-exemplar-spec
   (owner symbols include-file-comment?)
   transparent: #t)
+;;; The exemplar catalog binds each guide topic to a small, reviewed owner and
+;;; symbol set.  Keeping this data declarative prevents guide rendering from
+;;; embedding source-selection branches and makes missing exemplars fail at the
+;;; existing guide-definition boundary.
 (def +guide-exemplar-specs+
      [(cons 'higher-order
             (make-guide-exemplar-spec

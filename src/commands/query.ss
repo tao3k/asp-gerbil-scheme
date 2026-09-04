@@ -10,6 +10,7 @@
 
 ;; Public query discovery and source-rendering flags were removed. ASP owns the
 ;; public exact-query contract and invokes the provider with one typed request.
+;; : (-> (List String) Integer)
 (def (query-main args)
   (unless (flag? "--asp-exact-request-stdin" args)
     (error

@@ -1,11 +1,10 @@
 #!/usr/bin/env gxi
+
 ;;; -*- Gerbil -*-
 
 (export asp-gerbil-scheme-library-package-spec)
 
-(import (except-in :clan/building all-gerbil-modules)
-        :std/srfi/1
-        :std/srfi/13
+(import (only-in :clan/building init-build-environment!)
         "./build-api")
 
 (def +product-entry-modules+
@@ -20,43 +19,13 @@
     "src/commands/provider-runtime"
     "src/cli-launcher"))
 
-(def +project-discovery-exclude-directories+
-  '("scenarios" "snapshots"))
-
-(def +source-exclude-directories+
-  (append
-   (asp-gerbil-scheme-package-exclude-directories
-    asp-gerbil-scheme-library-package-prototype)
-   +project-discovery-exclude-directories+))
-
-(def (discover-project-modules)
-  (all-gerbil-modules
-   exclude-dirs: +project-discovery-exclude-directories+))
-
-(def +project-modules+ (discover-project-modules))
-(def +source-modules+
-  (filter (cut string-prefix? "src/" <>) +project-modules+))
-
 (asp-gerbil-scheme-package-spec!
  (asp-gerbil-scheme-library-package-spec
   @ asp-gerbil-scheme-library-package-prototype)
-  (modules +project-modules+)
-  (source-catalog-authority 'project)
+  (spec spec)
   (role 'library)
   (profile asp-gerbil-scheme-development-builder-profile)
-  (roots ["src" "t"])
-  (runtime-roots ["src"])
-  (exclude-directories +source-exclude-directories+)
-  (native-spec
-   (fold (lambda (module spec)
-           (remove-build-file spec module))
-         +source-modules+
-         +product-entry-modules+)))
-
-(def (spec)
-  (framework-apply-build-core-policy!)
-  (asp-gerbil-scheme-package-profiled-build-spec
-   asp-gerbil-scheme-library-package-spec))
+  (exclude-modules +product-entry-modules+))
 
 ;; gerbil.pkg owns physical acquisition.  These are the logical package names
 ;; used by the already-installed upstream libraries while clan/building owns

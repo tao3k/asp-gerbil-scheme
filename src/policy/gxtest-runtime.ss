@@ -1,11 +1,14 @@
+;;; Gxtest policy runtime converts one already-collected ProjectIndex into the
+;;; stable report/status API consumed by Build API admission and test tooling.
+;;; It must not rediscover sources or rescan owners for individual projections.
 (import :gerbil/gambit
-        ../constants
-        ../parser/model
-        ../parser/selectors
-        ../parser/test-source-scope
-        ../support/time
-        ../types/core
-        ./core)
+        (only-in ../constants +language-id+ +provider-id+)
+        (only-in ../parser/model project-index-files)
+        (only-in ../parser/selectors project-definitions)
+        (only-in ../parser/test-source-scope collect-test-source-scope)
+        (only-in ../support/time monotonic-micros duration-micros)
+        (only-in ../types/core type-status)
+        (only-in ./core run-policy-checks))
 
 (export policy-findings
         policy-status
@@ -20,15 +23,16 @@
         gxtest-report-summary
         project-policy-report-json)
 
-;; : (-> Path (List Path) (List Any))
+;; : (-> Root (List Path) (List TypeFinding))
 (def (policy-findings root files)
   (run-policy-checks (collect-test-source-scope root files)))
 
-;; : (-> Path (List Path) String)
+;; : (-> Root (List Path) Status)
 (def (policy-status root files)
   (type-status (policy-findings root files)))
 
 ;; : (forall (A) (-> (Maybe (-> String Integer A)) String (-> Any) Any))
+;; : (-> (Maybe PolicyPhaseObserver) String (-> Result) Result)
 (def (policy-report-phase phase! name thunk)
   (if phase!
     (let (start-micros (monotonic-micros))
@@ -37,7 +41,7 @@
         result))
     (thunk)))
 
-;; : (-> Path (List Path) (Maybe (-> String Integer Any)) HashTable)
+;; : (-> Root (List Path) (Maybe PolicyPhaseObserver) PolicyReport)
 (def (policy-report root files (phase! #f))
   (let* ((index
           (policy-report-phase
@@ -57,7 +61,7 @@
      (lambda ()
        (project-policy-report-json index findings "files" files)))))
 
-;; : (-> ProjectIndex (List Any) String (Maybe (List Path)) HashTable)
+;; : (-> ProjectIndex (List TypeFinding) String (Maybe (List Path)) PolicyReport)
 (def (project-policy-report-json index findings scope requested-files)
   (hash (schemaId "agent.semantic-protocols.asp-gerbil-scheme-gxtest-report")
         (schemaVersion "1")
@@ -71,35 +75,35 @@
         (agentRepair (hash (available #f)))
         (findings findings)))
 
-;; : (-> HashTable Symbol Any)
+;; : (-> PolicyReport Symbol JsonValue)
 (def (gxtest-report-ref report key)
   (hash-get report key))
 
-;; : (-> HashTable String)
+;; : (-> PolicyReport Status)
 (def (gxtest-report-status report)
   (gxtest-report-ref report 'status))
 
-;; : (-> HashTable Integer)
+;; : (-> PolicyReport Integer)
 (def (gxtest-report-files report)
   (gxtest-report-ref report 'files))
 
-;; : (-> HashTable Integer)
+;; : (-> PolicyReport Integer)
 (def (gxtest-report-definitions report)
   (gxtest-report-ref report 'definitions))
 
-;; : (-> HashTable Any)
+;; : (-> PolicyReport AgentRepairReceipt)
 (def (gxtest-report-agent-repair report)
   (gxtest-report-ref report 'agentRepair))
 
-;; : (-> HashTable (List Any))
+;; : (-> PolicyReport (List TypeFinding))
 (def (gxtest-report-findings report)
   (gxtest-report-ref report 'findings))
 
-;; : (-> HashTable Integer)
+;; : (-> PolicyReport Integer)
 (def (gxtest-report-finding-count report)
   (length (gxtest-report-findings report)))
 
-;; : (-> HashTable HashTable)
+;; : (-> PolicyReport PolicySummary)
 (def (gxtest-report-summary report)
   (hash (status (gxtest-report-status report))
         (files (gxtest-report-files report))

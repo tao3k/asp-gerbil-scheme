@@ -16,6 +16,13 @@
   current?: (lambda (_spec _context) #t)
   context: '((environment . caller-owned)))
 
+(define-build-request expression-declared-request
+  label: "expression-declared"
+  profile: (build-request-profile declared-build-request)
+  stage-specs: []
+  current?: (lambda (_spec _context) #t)
+  context: 'expression-declared-context)
+
 (define-build-performance-project declared-performance-project
   request: declared-build-request
   fixture-path: "t"
@@ -36,6 +43,17 @@
   roots: ["t"]
   gates: [])
 
+(def expression-performance-project
+  (build-performance-project
+   request: declared-build-request
+   fixture-path: "t"
+   name: "expression-building-project"
+   suite-name: "expression-building-suite"
+   suite-names: #f
+   case-names: #f
+   roots: ["t"]
+   gates: []))
+
 (def building-declarative-test
   (test-suite "asp gerbil-scheme declarative building API"
     (test-case "defines a caller-configured std build request"
@@ -47,6 +65,10 @@
       (check (length (build-request-stage-specs declared-build-request)) => 2)
       (check (build-request-context declared-build-request)
              => '((environment . caller-owned))))
+    (test-case "defines a request through the generic declaration macro"
+      (check (build-request? expression-declared-request) => #t)
+      (check (build-request-label expression-declared-request)
+             => "expression-declared"))
     (test-case "uses the expression macro inside a caller scope"
       (let (request
             (std-build
@@ -72,6 +94,9 @@
         (check (testing-performance-case-fixture-path case) => "t")
         (check (build-request-stage-plan-valid? plan) => #t)
         (check (length plan) => 2)))
+    (test-case "projects a build through the expression macro"
+      (check (testing-object-kind expression-performance-project)
+             => 'testing-project))
     (test-case "configures a suite and case matrix without hardcoded framework state"
       (let (suites (testing-project-suites declared-matrix-project))
         (check (length suites) => 2)

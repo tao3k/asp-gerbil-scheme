@@ -1,4 +1,5 @@
-(export asp-gerbil-scheme-provider-package-spec)
+(export asp-gerbil-scheme-provider-package-spec
+        asp-gerbil-scheme-provider-spec)
 
 (import (only-in "./src/build-api/package-spec"
                  asp-gerbil-scheme-package-spec!
@@ -47,6 +48,7 @@
 (asp-gerbil-scheme-package-spec!
  (asp-gerbil-scheme-provider-package-spec
  @ asp-gerbil-scheme-library-package-prototype)
+ (spec asp-gerbil-scheme-provider-spec)
  (modules +provider-source-modules+)
  (role 'provider)
  (profile asp-gerbil-scheme-production-builder-profile)

@@ -1,7 +1,7 @@
 (import :std/test
         :gerbil/gambit
         "../src/building/facade"
-        (only-in "../src/build-api/package-spec"
+        (only-in "../src/build-api/package-native-plan"
                  asp-gerbil-scheme-package-api-stage-specs))
 
 (export building-performance-test)

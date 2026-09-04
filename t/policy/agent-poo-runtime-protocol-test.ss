@@ -64,6 +64,16 @@
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
             (check matching => [])))
+(test-case "agent policy rejects a macro witness owner without the macro call"
+          (let* ((root ".run/policy-macro-runtime-source-wrong-owner")
+                 (_ (write-macro-runtime-source-project root #t))
+                 (_ (write-text
+                     (string-append root "/gerbil.pkg")
+                     "(package: sample/macros\n  policy: ((macro-governance explanation: \"Macro transformer edits are allowed only with runtime-source and expansion evidence.\" witnesses: ((\"with-order\" \"src/macros/core.ss\")))))\n"))
+                 (index (collect-project root))
+                 (findings (run-agent-policy index))
+                 (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
+            (check (length matching) => 1)))
 (test-case "agent policy requires declared protocol evidence"
           (let* ((root ".run/policy-protocol-evidence")
                  (_ (write-protocol-evidence-project root #f))

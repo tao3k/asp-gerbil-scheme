@@ -21,7 +21,7 @@
                  asp-gerbil-scheme-cli-gsc-options-cache-key)
         (only-in "./source-coverage"
                  asp-gerbil-scheme-source-coverage-files
-                 asp-gerbil-scheme-source-coverage-runtime-roots
+                 asp-gerbil-scheme-source-coverage-roots
                  asp-gerbil-scheme-source-coverage-exclude-directories)
         (only-in "./source-closure"
                  asp-gerbil-scheme-source-dependency-order)
@@ -53,7 +53,7 @@
                  configure-build-path-root!
                  dev-launcher-binpath
                  install-launcher-binpath)
-        (only-in "./package-spec"
+        (only-in "./package-native-plan"
                  asp-gerbil-scheme-package-api-spec
                  asp-gerbil-scheme-package-api-stage-specs)
         (only-in "./release-modules" cli-release-modules)
@@ -283,14 +283,12 @@
 ;; : (-> [Path (List Path) (List String)])
 (def (package-gerbil-modules-cache-key)
   (list package-root
-        (asp-gerbil-scheme-source-coverage-runtime-roots)
+        (asp-gerbil-scheme-source-coverage-roots)
         (coverage-excluded-directories)))
 
 ;; : (-> (List ModulePath))
 (def (uncached-package-gerbil-modules)
-  (apply append
-         (map runtime-root-gerbil-modules
-              (asp-gerbil-scheme-source-coverage-runtime-roots))))
+  (source-runtime-modules))
 
 ;; : (-> (List ModulePath))
 (def (all-package-gerbil-modules)
@@ -316,14 +314,6 @@
   (filter (lambda (module) module)
           (map source-runtime-module-path
                (asp-gerbil-scheme-source-coverage-files package-root))))
-
-;; : (-> Path (List ModulePath))
-(def (runtime-root-gerbil-modules root)
-  (cond
-   ((string=? root "src")
-    (source-runtime-modules))
-   (else
-    [])))
 
 ;; : (-> (List String))
 (def (coverage-excluded-directories)

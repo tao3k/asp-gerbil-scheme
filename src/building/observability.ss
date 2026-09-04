@@ -1,9 +1,21 @@
+;;; Build observability projects already-executed stage receipts and guard
+;;; samples into evidence.  It may detect rapid memory anomalies, but it must
+;;; not reduce configured concurrency or become a second scheduler.
 (import :gerbil/gambit
+        (only-in :clan/poo/object defclass object)
         (only-in :std/text/json
                  json-object->string
                  write-json-sort-keys?)
-        ./model
-        ./std-builder)
+        (only-in :std/srfi/1 fold)
+        (only-in ./model
+                 build-stage-receipt-description
+                 build-stage-receipt-elapsed-jiffies
+                 build-stage-receipt-kind
+                 build-stage-receipt-label
+                 build-stage-receipt-status
+                 build-stage-run!
+                 build-stage-spec)
+        (only-in ./std-builder build-request-stage-plan))
 
 (export build-stage-observation?
         make-build-stage-observation
@@ -42,7 +54,7 @@
 ;; These counters intentionally describe only the long-lived Gerbil control
 ;; process.  Native compiler children are outside ##process-statistics and must
 ;; never be presented as control-plane CPU time.
-(defstruct build-stage-observation
+(defclass (build-stage-observation object)
   (receipt
    work-item-count
    wall-seconds
@@ -98,35 +110,38 @@
 ;; duration of the currently executing item.  Callers own the budget policy;
 ;; this layer deliberately has no machine-independent time constant.
 (def (build-observe-sequence/guard! items observer guard on-observation)
-  (let ((start-jiffy (current-jiffy)))
-    (let loop ((remaining items) (completed-reverse '()) (completed-count 0))
-      (if (null? remaining)
-          (reverse completed-reverse)
-          (let* ((item (car remaining))
-                 (before-seconds
-                  (elapsed-seconds start-jiffy (current-jiffy))))
-            (unless (guard 'before-item
-                           before-seconds
-                           completed-count
-                           item)
-              (error "build observation guard blocked before item"
-                     `((elapsed-seconds . ,before-seconds)
-                       (completed-count . ,completed-count))))
-            (let* ((observation (observer item))
-                   (next-count (+ completed-count 1))
-                   (after-seconds
-                    (elapsed-seconds start-jiffy (current-jiffy))))
-              (on-observation observation next-count after-seconds)
-              (unless (guard 'after-item
-                             after-seconds
-                             next-count
-                             observation)
-                (error "build observation guard blocked after item"
-                       `((elapsed-seconds . ,after-seconds)
-                         (completed-count . ,next-count))))
-              (loop (cdr remaining)
-                    (cons observation completed-reverse)
-                    next-count)))))))
+  (let* ((start-jiffy (current-jiffy))
+         (progress
+          (fold
+           (lambda (item progress)
+             (let* ((completed-reverse (vector-ref progress 0))
+                    (completed-count (vector-ref progress 1))
+                    (before-seconds
+                     (elapsed-seconds start-jiffy (current-jiffy))))
+               (unless (guard 'before-item
+                              before-seconds
+                              completed-count
+                              item)
+                 (error "build observation guard blocked before item"
+                        `((elapsed-seconds . ,before-seconds)
+                          (completed-count . ,completed-count))))
+               (let* ((observation (observer item))
+                      (next-count (+ completed-count 1))
+                      (after-seconds
+                       (elapsed-seconds start-jiffy (current-jiffy))))
+                 (on-observation observation next-count after-seconds)
+                 (unless (guard 'after-item
+                                after-seconds
+                                next-count
+                                observation)
+                   (error "build observation guard blocked after item"
+                          `((elapsed-seconds . ,after-seconds)
+                            (completed-count . ,next-count))))
+                 (vector (cons observation completed-reverse)
+                         next-count))))
+           (vector '() 0)
+           items)))
+    (reverse (vector-ref progress 0))))
 
 (def (sum-observation-field accessor observations)
   (apply + (map accessor observations)))

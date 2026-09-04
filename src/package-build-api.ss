@@ -1,5 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Public declarative Build API for downstream Gerbil package scripts.
+;;; This facade names the package-level API without colliding with the
+;;; implementation owner directory src/build-api/.
 
 (import ./build-api/builder-profile
         ./build-api/package-spec

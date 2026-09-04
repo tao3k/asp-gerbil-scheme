@@ -1,7 +1,7 @@
 {
   "languageId": "gerbil-scheme",
   "profileDigest": "blake3-256:0f6db61e73904d5a06d4b603189679e8def7346997b41ea2d26f5137ee082d2c",
-  "bundleDigest": "blake3-256:e820c0c94d60864beb7c386514d0323227a9b0abef500db55f2b4f2c8242621d",
+  "bundleDigest": "blake3-256:0d8368b118762d887d612b1549f781d5704e3181d2df5adacfac9e803c3efa06",
   "schemas": [
     {
       "name": "asp-client-cancellation-probe-request.schema.json",
@@ -76,12 +76,16 @@
       "digest": "blake3-256:9f7c9a437713874b8ea5c4e701f61adf355f26bbc35ddd5a59a2d6889d1f2bd0"
     },
     {
+      "name": "asp-client-workspace-search-playbook-request.v1.schema.json",
+      "digest": "blake3-256:b9d3c3a80c39681c42017f419025d70fca712aa0dc6b8cb40ac441591b266ac9"
+    },
+    {
       "name": "asp-client-workspace-source-mutation.schema.json",
       "digest": "blake3-256:74b0baf814e96b3f2f47eefcc537ae53c5ac740315cdbc8c4f1079dcc2f484a8"
     },
     {
       "name": "asp-python-graphs-session.v1.schema.json",
-      "digest": "blake3-256:920a23fc469dadfbb773ff82b3f064dcc114451e2fe9a77fccfafaca1b9bb4f0"
+      "digest": "blake3-256:74ced1d824c781b78062fd9f1f4ef4d3859adf07bb22a7cecb0e1011a99bbe7e"
     },
     {
       "name": "callable-skeleton.schema.json",
@@ -116,6 +120,10 @@
       "digest": "blake3-256:11f17ec46eb769fc3d650236af1fc19ba02486bce478b57d2fdd62a0cab3512d"
     },
     {
+      "name": "large-search-playbook-performance-receipt.v1.schema.json",
+      "digest": "blake3-256:951cee907a77fd2bc695a19b977a50508dc216eb3fe1e51f10195572880b4377"
+    },
+    {
       "name": "lexical-postings-work-reduction-receipt.schema.json",
       "digest": "blake3-256:416d3bbbd584a7268632aa9852eae189501f923bd39c5af9ed5469d001c9fff5"
     },
@@ -137,7 +145,7 @@
     },
     {
       "name": "provider-language-projection-batch-response.schema.json",
-      "digest": "blake3-256:5053370366b61b10844e084d9a0d622f93d7df7fa244798a69d74d5b592122ae"
+      "digest": "blake3-256:1fb2e8d535c278bb46e09f391b6b1812d1242491089a6abf49603783b8c6d122"
     },
     {
       "name": "provider-manifest.schema.json",
@@ -196,6 +204,10 @@
       "digest": "blake3-256:a607ae5a7ea24b889a6bac9ee4624c03def801da7932b8c9818de176a66f856f"
     },
     {
+      "name": "python-generation-graph-performance-receipt.v1.schema.json",
+      "digest": "blake3-256:301ad2fce1050064cfd20ba63522c1261434b030fe4513e9105cf14951d7e048"
+    },
+    {
       "name": "resident-search-result.v1.schema.json",
       "digest": "blake3-256:f725fd1b7a004f28e7e579e6b6b76626880931ff9663bbd1de42519d66afbe78"
     },
@@ -221,7 +233,7 @@
     },
     {
       "name": "semantic-agent-search-playbook-receipt.v1.schema.json",
-      "digest": "blake3-256:eb9116143de9b8a544a0fdfcc9332d9e4d565bd27b46169ca23a5cda01bf8c5c"
+      "digest": "blake3-256:d6f0857339726a293affa5bacc3553e5bcf0d3d94601a978e13a4d292f25ba5b"
     },
     {
       "name": "semantic-assurance-case.v1.schema.json",
@@ -305,11 +317,11 @@
     },
     {
       "name": "semantic-graph-resident-evaluation-request.v1.schema.json",
-      "digest": "blake3-256:79b106b7765d5241af944ce79cb5d25bcfb06aa75491abee33a7a7ddc79a1cb1"
+      "digest": "blake3-256:7b6b47e230d1c9384e9c710ce5d1c6ffba33de50037a1866ce821336de9aea8d"
     },
     {
       "name": "semantic-graph-resident-evaluation-result.v1.schema.json",
-      "digest": "blake3-256:e822a78c8910ce71e93d610a6d3bdaebfd34c642d254d296fd2b1346fe750f74"
+      "digest": "blake3-256:0b4c0b2ff31409e0e61745f2db72b20a7a786370efa304cb7c31cacc0059e3d4"
     },
     {
       "name": "semantic-graph-turbo-artifact-events.v1.schema.json",
@@ -321,7 +333,7 @@
     },
     {
       "name": "semantic-graph-turbo-request.v1.schema.json",
-      "digest": "blake3-256:50442f5de38cfe9ea1b3d9e2b3b37ab304b3f750ecfa53a96347b48960233381"
+      "digest": "blake3-256:bb79347cc1d9310d0628e2d7184b95df5784dde368e2ea4159a8574bf0cb7176"
     },
     {
       "name": "semantic-graph.v1.schema.json",
@@ -377,7 +389,7 @@
     },
     {
       "name": "semantic-search-packet.v1.schema.json",
-      "digest": "blake3-256:993623779091e9fa3e0689a591481cda8393c0f42d3b55dd58b53af620598d71"
+      "digest": "blake3-256:a179736b63d468cf78e5c78f4e78b35304d94993e50402cea328be06bec8a9fb"
     },
     {
       "name": "semantic-search-storage-route.v1.schema.json",
@@ -422,6 +434,10 @@
     {
       "name": "source-snapshot-evidence.v1.schema.json",
       "digest": "blake3-256:b22f980c1c70e1927670be25e8d86c4d3b78538e81e6aad28b608ca9707f99cb"
+    },
+    {
+      "name": "workspace-search-playbook-plan.v1.schema.json",
+      "digest": "blake3-256:d2fecfd3d38257b930ded6ca9d0d1e11980f2e5d3c95b64f8950d8ee574516af"
     }
   ]
 }

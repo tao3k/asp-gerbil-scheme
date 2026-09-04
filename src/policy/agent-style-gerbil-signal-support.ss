@@ -14,6 +14,7 @@
 ;;; - Converts proven parser facts into one public quality facet.
 ;;; - Empty facts mean no guidance; callers still own fact discovery.
 ;; : (forall (fact) (-> (List fact) QualityFacet (List QualityFacet)) )
+;; : (-> List QualityFacet (List QualityFacet))
 (def (typed-combinator-style-facts->quality-facet facts facet)
   (if (pair? facts) [facet] []))
 
@@ -21,6 +22,7 @@
 ;;; - Keeps feature signal lists declarative beside each feature owner.
 ;;; - The helper only gates on parser facts and never performs detection.
 ;; : (forall (fact) (-> (List fact) (List String) (List String)) )
+;; : (-> List (List String) (List String))
 (def (typed-combinator-style-facts->signals facts signals)
   (if (pair? facts) signals []))
 
@@ -28,6 +30,7 @@
 ;;; - Projects parser fact owners into compact policy target names.
 ;;; - The accessor keeps typed-contract, macro, and POO facts separate.
 ;; : (forall (fact) (-> (List fact) (-> fact TargetName) (List TargetName)) )
+;; : (-> List Procedure (List TargetName))
 (def (typed-combinator-style-facts->targets facts target-name)
   (map target-name facts))
 

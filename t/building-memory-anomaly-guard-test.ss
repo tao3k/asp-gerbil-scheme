@@ -5,11 +5,13 @@
 ;;;   ten-second trajectory and the hard line remain fail-closed.
 
 (import (only-in :std/test test-suite test-case check)
+        (only-in :std/srfi/13 string-contains)
         (only-in ../src/building/memory-anomaly-guard
                  framework-memory-anomaly-policy
                  framework-memory-anomaly-sample
                  framework-memory-anomaly-transition
                  framework-memory-guard-process-table
+                 framework-memory-guard-runtime-heap-bytes
                  framework-memory-guard-load-average
                  framework-memory-guard-active-compiler-jobs
                  framework-memory-guard-process-tree-cpu-percent
@@ -41,8 +43,30 @@
              "[asp-gerbil-scheme-build] phase=std-make-start"
              " worker-count=1\n"))
         (check result => 'done)))
+    (test-case "profile admission names its phase and emits terminal evidence"
+      (let (output
+            (with-output-to-string
+              (lambda ()
+                (parameterize ((current-error-port (current-output-port)))
+                  (call-with-framework-memory-anomaly-guard
+                   "test admission"
+                   1
+                   (lambda () 'done)
+                   #t
+                   'profile-admission-start)))))
+        (check (string-contains output
+                                "phase=profile-admission-start worker-count=1")
+               => #t)
+        (check (string-contains output
+                                "ASP_GERBIL_SCHEME_MEMORY_GUARD")
+               => #t)
+        (check (string-contains output "\"outcome\":\"completed\"")
+               => #t)))
     (test-case "denied process-table observation degrades to an empty sample"
       (check (list? (framework-memory-guard-process-table)) => #t))
+    (test-case "runtime heap observation does not depend on process-table access"
+      (check (framework-memory-guard-runtime-heap-bytes)
+             ? (lambda (bytes) (and (integer? bytes) (>= bytes 0)))))
     (test-case "host runnable pressure is represented without fixed cores"
       (let (load-average (framework-memory-guard-load-average))
         (check (list? load-average) => #t)

@@ -64,7 +64,7 @@ The v1 macro surface deliberately rejects a parallel option vocabulary:
 | =before:=        | omit        | list order and =append= |
 | =after:=         | omit        | list order and =append= |
 
-The installed =:asp-gerbil-scheme/src/build-api= module is the single public
+The installed =:asp-gerbil-scheme/src/package-build-api= module is the single public
 import surface for package declarations, source discovery, and profile
 application.  The same repository has an executable top-level =build-api.ss=
 source-bootstrap facade because a clean package cannot import its own installed
@@ -357,6 +357,35 @@ execution and restores their exact prior values afterward.  It does not choose
 a compiler, store an SDK path, mutate the caller permanently, or add a shell
 launcher.  Other platforms pass through the caller environment unchanged.
 
+** Downstream Dependency Boundary
+
+A downstream =gerbil.pkg= dependency imports only
+=:asp-gerbil-scheme/src/package-build-api=.  That facade contains the package
+declaration, source discovery, profile projection, and the =std/make= bridge.
+It does not import ASP's CLI, provider server, HTTP runtime, testing system, or
+ASP product-native plan.  Those are ASP product owners, not Build API
+dependencies.
+
+The package macro discovers one module catalog at =build.ss= load time.  Policy
+and =std/make= receive projections of that same catalog; policy does not run a
+second repository discovery.  Gerbil remains responsible for compiler import
+expansion, freshness, dependency ordering, and parallel scheduling.
+
+#+begin_src mermaid
+flowchart LR
+  D[downstream gerbil.pkg] --> F[package-build-api facade]
+  F --> M[package spec macro]
+  M --> C[one module owner catalog]
+  C --> P[policy projection]
+  C --> N[native build spec]
+  P --> G[admission]
+  G --> S[upstream std/make]
+  N --> S
+
+  X[ASP CLI / provider / HTTP / tests] --> Q[ASP product build]
+  X -. not imported .-> F
+#+end_src
+
 ** Required Deletions
 
 The migration removes:
@@ -403,3 +432,23 @@ command protocol is deleted rather than preserved as compatibility code.
 - Downstream examples use the same native commands and no hidden wrapper.
 - Policy and scenario coverage reject reintroduction of a second command
   protocol.
+* One Project Catalog, Profile-Owned Test Convention
+
+The public Package Spec declares one explicit source ownership boundary.  A
+normal Gerbil project therefore uses =roots: ["."]=.  It does not declare a
+second =runtime-roots= catalog.  The Builder Profile owns the conventional
+=t/= test root and removes those modules only when projecting the catalog to
+the native =std/make= build spec.  Provider static linking remains a separate,
+explicit =runtime-modules= projection owned by the Provider Package Spec.
+
+#+begin_src mermaid
+flowchart LR
+  BUILD["build.ss\nroots: [\".\"]"] --> CATALOG["One project module catalog"]
+  PROFILE["Builder Profile\nexclude scenarios/snapshots\ntest-roots: [\"t\"]"] --> CATALOG
+  PROFILE --> NATIVE["Native std/make projection"]
+  CATALOG --> NATIVE
+  CATALOG --> POLICY["Single policy scan"]
+  NATIVE --> LIB["Library modules\nt/ excluded"]
+  PROJECTOR["Optional named native-spec-projector"] --> NATIVE
+  PROVIDER["Provider Package Spec\nruntime-modules"] --> STATIC["Explicit static provider closure"]
+#+end_src

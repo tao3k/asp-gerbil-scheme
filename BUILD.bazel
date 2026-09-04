@@ -117,6 +117,13 @@ gerbil_project_test(
 )
 
 gerbil_project_test(
+    name = "projection_batch_test",
+    size = "small",
+    project = ":compile",
+    tests = ["//:t/projection-batch-test.ss"],
+)
+
+gerbil_project_test(
     name = "policy_string_growth_test",
     size = "small",
     srcs = ":test_sources",

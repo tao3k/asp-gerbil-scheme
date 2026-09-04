@@ -72,13 +72,13 @@
           "        :asp-gerbil-scheme/src/building/build-script)\n"
           "(def +modules+ '(\"src/core.ss\" \"t/core-test.ss\"))\n"
           "(asp-gerbil-scheme-package-spec! sample-package-spec\n"
+          " (spec sample-build-spec)\n"
           " (modules +modules+)\n"
           " (source-catalog-authority 'project)\n"
-          " (roots [\"src\" \"t\"])\n"
-          " (runtime-roots [\"src\"])\n"
+          " (roots [\".\"])\n"
           " (exclude-directories [\"vendor\"]))\n"
           "(defbuild-script\n"
-          " (error \"source coverage query started a build\")\n"
+          " (sample-build-spec)\n"
           " profile: development)\n"))
         (write-text (string-append src-dir "/core.ss")
                     ";;; -*- Gerbil -*-\n(def core-value 1)\n")
@@ -127,7 +127,7 @@
         (write-text (string-append root "/gerbil.pkg")
                     "(package: sample/gxtest-file-scope)\n")
         (write-text (string-append root "/build.ss")
-                    ";;; -*- Gerbil -*-\n(import :asp-gerbil-scheme/src/build-api/source-coverage)\n(asp-gerbil-scheme-source-coverage roots: '(\"src\") runtime-roots: '(\"src\"))\n")
+                    ";;; -*- Gerbil -*-\n(import :asp-gerbil-scheme/src/build-api/source-coverage)\n(asp-gerbil-scheme-source-coverage roots: '(\"src\"))\n")
         (write-text (string-append src-dir "/target.ss")
                     ";;; -*- Gerbil -*-\n(def target-value 1)\n")
         (write-text (string-append src-dir "/other.ss")

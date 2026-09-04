@@ -6,6 +6,7 @@
         (only-in :std/srfi/1 filter)
         (only-in :std/sugar ormap)
         "../src/build-api/native-build"
+        "../src/build-api/package-native-plan"
         "../src/build-api/package-spec"
         "../src/build-api/release-modules")
 (export cli-build-spec-test)

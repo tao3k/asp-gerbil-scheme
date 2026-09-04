@@ -1,10 +1,24 @@
+;;; The HTTP server owns transport lifecycle and JSON request/response framing.
+;;; Provider operations remain ordinary library calls, while the bounded memo
+;;; stores only validated projection responses and never source authority.
 (import :gerbil/gambit
         (only-in :asp-gerbil-scheme/src/runtime/provider-operation
                  provider-runtime-contract-receipt
                  provider-runtime-request->response)
-        :std/format
-        :std/io
-        :std/net/httpd
+        (only-in :std/format format)
+        (only-in :std/io
+                 call-with-output-string
+                 localhost4
+                 ServerSocket-close
+                 Socket-address
+                 tcp-listen)
+        (only-in :std/net/httpd
+                 http-register-handler
+                 http-request-body
+                 http-request-method
+                 http-response-write
+                 start-http-server!
+                 stop-http-server!)
         (only-in :std/sugar hash)
         (only-in :std/text/json read-json write-json))
 

@@ -4,6 +4,7 @@
 (import (only-in ./commands/provider-runtime provider-runtime-main))
 (export main)
 
+;; : (-> String ... Integer)
 (def (main . args)
   (if (and (pair? args) (string=? (car args) "serve"))
     (provider-runtime-main (cdr args))

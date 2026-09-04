@@ -3,11 +3,9 @@
 
 (import :gerbil/gambit
         (only-in "../build-api/source-coverage"
-                 asp-gerbil-scheme-load-source-coverage
                  asp-gerbil-scheme-source-coverage-exclude-directories
                  asp-gerbil-scheme-source-coverage-files
-                 asp-gerbil-scheme-source-coverage-roots
-                 asp-gerbil-scheme-source-coverage-runtime-roots)
+                 asp-gerbil-scheme-source-coverage-roots)
         (only-in "../constants" +language-id+ +provider-id+)
         (only-in "../parser/facade"
                  collect-source-scope/coverage
@@ -159,13 +157,15 @@
 
 ;; : (-> Root ProjectIndex)
 (def (project-policy-index root)
-  (let (policy-root (project-policy-root root))
-    (asp-gerbil-scheme-load-source-coverage policy-root)
+  (let* ((policy-root (project-policy-root root))
+         ;; source-coverage-files owns the only conditional build.ss load and
+         ;; returns the macro-declared owner catalog without directory discovery.
+         (files (asp-gerbil-scheme-source-coverage-files policy-root)))
     (collect-source-scope/coverage
      policy-root
-     (asp-gerbil-scheme-source-coverage-files policy-root)
+     files
      (asp-gerbil-scheme-source-coverage-roots)
-     (asp-gerbil-scheme-source-coverage-runtime-roots)
+     (asp-gerbil-scheme-source-coverage-roots)
      (asp-gerbil-scheme-source-coverage-exclude-directories))))
 
 ;; : (-> ProjectIndex (List TypeFinding) String MaybePaths Json )

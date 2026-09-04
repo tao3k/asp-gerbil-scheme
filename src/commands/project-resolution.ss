@@ -10,10 +10,10 @@
                  read-project-package
                  source-scope-policy-roots
                  source-scope-policy-runtime-roots)
-        :std/crypto/digest
+        (only-in :std/crypto/digest sha256)
         (only-in :std/misc/path path-directory path-expand path-normalize)
         (only-in :std/misc/ports read-all-as-string)
-        (only-in :std/srfi/1 filter-map find)
+        (only-in :std/srfi/1 delete-duplicates filter-map find)
         (only-in :std/srfi/13 string-prefix? string-suffix?)
         (only-in :std/sugar hash))
 
@@ -33,6 +33,11 @@
 
 (defstruct project-resolution-not-applicable ())
 
+;;; Resolution performs one pass over candidate package metadata and derives
+;;; package, dependency, and source-scope projections from that shared result.
+;;; The empty-candidate branch is the only not-applicable exit; once a manifest
+;;; is selected, malformed or unresolved package state remains explicit rather
+;;; than silently widening to a workspace scan.
 (def (project-resolution-request->response request)
   (validate-project-resolution-request request)
   (let* ((workspace-root (path-normalize (current-directory)))
@@ -341,15 +346,7 @@
          +source-extensions+))
 
 (def (unique values)
-  (let loop ((remaining values) (seen '()) (result '()))
-    (if (null? remaining)
-      (reverse result)
-      (let (value (car remaining))
-        (if (member value seen)
-          (loop (cdr remaining) seen result)
-          (loop (cdr remaining)
-                (cons value seen)
-                (cons value result)))))))
+  (delete-duplicates values equal?))
 
 (def (required-field object key)
   (let (value (hash-ref object key #f))

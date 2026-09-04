@@ -21,6 +21,7 @@
 
 ;; This is the common parser-owned definition projection.  Keep the full
 ;; source parser and the exact-owner fast path on the same fact constructor.
+;; : (-> Relpath Syntax Datum (List Definition))
 (def (definitions-from-form relpath form datum)
   (let ((head (car datum))
         (name-datums (definition-name-datums datum)))

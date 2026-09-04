@@ -346,9 +346,8 @@
         project-package-with-source-scope
         test-directory-policy-allowed-directories
         test-directory-policy-explanation
-        macro-governance-policy-allow-generated
         macro-governance-policy-explanation
-        macro-governance-policy-witness
+        macro-governance-policy-witnesses
         source-scope-policy-roots
         source-scope-policy-runtime-roots
         source-scope-policy-exclude-directories

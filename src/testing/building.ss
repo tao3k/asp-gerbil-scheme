@@ -1,7 +1,10 @@
 ;;; Boundary: Testing projects BuildRequest plans into performance objects without a reverse dependency from Building.
 
-(import ./model
-        ../building/facade)
+(import (only-in ./model performance-case performance-suite testing-project)
+        (only-in ../building/facade
+                 build-request-stage-plan
+                 build-request->alist
+                 build-stage?))
 
 (export build-request-stage-plan-runner
         build-request-stage-plan-valid?

@@ -16,7 +16,7 @@
     "packetKind": {"const": "resident-graph-evaluation-request"},
     "languageId": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
     "surface": {
-      "enum": ["search-pipe", "search-rg", "search-lexical", "search-owner", "query"]
+      "enum": ["search-playbook", "query"]
     },
     "queryTerms": {
       "type": "array", "maxItems": 32, "uniqueItems": true,

@@ -1,7 +1,7 @@
 #!/usr/bin/env gxi
 ;;; -*- Gerbil -*-
 ;;; Source-bootstrap facade for build.ss.  The installed public facade is
-;;; src/build-api.ss; both project the same owner modules.
+;;; src/package-build-api.ss; both project the same owner modules.
 
 (import "./src/build-api/builder-profile"
         "./src/build-api/package-spec"

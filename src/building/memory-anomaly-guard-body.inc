@@ -185,6 +185,15 @@
 (def (framework-memory-guard-process-table)
   (cdr (framework-memory-guard-process-table-observation)))
 
+;; Gambit's own heap statistics remain available when a sandbox denies process
+;; table inspection. This is the authoritative fallback for detecting runaway
+;; gxi admission memory; process-tree RSS remains the broader native-build view.
+(def (framework-memory-guard-runtime-heap-bytes)
+  (try
+   (inexact->exact
+    (f64vector-ref (##process-statistics) 15))
+   (catch _ 0)))
+
 (def (framework-memory-guard-load-average)
   (let (text
         (try
@@ -311,6 +320,11 @@
         ("host-contention-observed" host-contention?)
         ("window-seconds" (.ref policy 'window-seconds))
         ("peak-rss-bytes" peak-rss)
+        ("peak-observed-memory-bytes" peak-rss)
+        ("memory-measurement"
+         (if (zero? observer-failure-count)
+           "process-tree-rss-with-runtime-heap-floor"
+           "runtime-managed-heap-fallback"))
         ("hard-limit-bytes" (.ref policy 'hard-limit-bytes))
         ("maximum-window-growth-bytes" growth-bytes)
         ("maximum-growth-rate-bytes-per-second" growth-rate)
@@ -375,16 +389,20 @@
     (force-output (current-error-port))))
 
 ;; : (-> Integer String)
-(def (framework-build-start-line worker-count)
+(def (framework-build-start-line worker-count
+                                 (phase 'std-make-start))
   (call-with-output-string
    (lambda (port)
-     (display "[asp-gerbil-scheme-build] phase=std-make-start worker-count="
-              port)
+     (display "[asp-gerbil-scheme-build] phase=" port)
+     (display phase port)
+     (display " worker-count=" port)
      (display worker-count port))))
 
 ;; : (-> Integer Void)
-(def (framework-build-start-emit! worker-count)
-  (display (framework-build-start-line worker-count) (current-error-port))
+(def (framework-build-start-emit! worker-count
+                                  (phase 'std-make-start))
+  (display (framework-build-start-line worker-count phase)
+           (current-error-port))
   (newline (current-error-port))
   (force-output (current-error-port)))
 
@@ -394,7 +412,8 @@
 ;;; Therefore a confirmed anomaly fails closed with a receipt; the Framework
 ;;; never pretends it can pause or shrink already admitted native compiler jobs.
 (def (call-with-framework-memory-anomaly-guard label worker-count thunk
-                                               (trace? #f))
+                                               (trace? #f)
+                                               (start-phase 'std-make-start))
   (let* ((policy (framework-memory-anomaly-policy))
          (started (time->seconds (current-time)))
          (load-average-start (framework-memory-guard-load-average))
@@ -418,15 +437,21 @@
                         (observer-available? (car observation))
                         (rows (cdr observation))
                         (root-pid (##os-getpid))
+                        (runtime-heap-bytes
+                         (framework-memory-guard-runtime-heap-bytes))
                         (pids (framework-memory-guard-process-tree-pids
                                root-pid rows))
                         (rss
-                         (foldl (lambda (row total)
-                                  (if (member (car row) pids)
-                                    (+ total (caddr row))
-                                    total))
-                                0
-                                rows))
+                         (if observer-available?
+                           (max
+                            runtime-heap-bytes
+                            (foldl (lambda (row total)
+                                     (if (member (car row) pids)
+                                       (+ total (caddr row))
+                                       total))
+                                   0
+                                   rows))
+                           runtime-heap-bytes))
                         (cpu-percent
                          (framework-memory-guard-process-tree-cpu-percent
                           root-pid rows))
@@ -517,10 +542,10 @@
                         (begin
                           (thread-sleep! (.ref policy 'sample-seconds))
                           (loop))))))))))))
-    (framework-build-start-emit! worker-count)
+    (framework-build-start-emit! worker-count start-phase)
     (when trace?
       (framework-build-trace-emit!
-       (framework-build-trace-receipt label 'started 0 0 0 0)))
+       (framework-build-trace-receipt label start-phase 0 0 0 0)))
     (dynamic-wind
       (lambda () #!void)
       (lambda ()
@@ -543,11 +568,12 @@
                    ((positive? (vector-ref state 16))
                     'completed-with-degraded-observability)
                    (else 'within-envelope))))
-            ;; A healthy completion is intentionally silent: the one start
-            ;; line already established liveness. Emit the large diagnostic
-            ;; receipt only when it carries actionable failure or anomaly
-            ;; evidence.
-            (unless (and completed? (eq? reason 'within-envelope))
+            ;; Verbose/profiled owners need a terminal receipt even on healthy
+            ;; completion so RSS trajectory and observer cadence are proved.
+            ;; Ordinary builds retain the compact start-only progress stream.
+            (unless (and completed?
+                         (eq? reason 'within-envelope)
+                         (not trace?))
               (framework-memory-anomaly-emit!
                (framework-memory-anomaly-receipt
                 policy label (if completed? 'completed 'failed) reason
