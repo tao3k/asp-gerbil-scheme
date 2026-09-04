@@ -3,6 +3,8 @@
 (import (only-in "./src/build-api/package-spec"
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype)
+        (only-in "./src/build-api/builder-profile"
+                 asp-gerbil-scheme-production-builder-profile)
         (only-in "./src/building/build-script"
                  framework-executable-build-spec))
 
@@ -47,7 +49,7 @@
  @ asp-gerbil-scheme-library-package-prototype)
  (modules +provider-source-modules+)
  (role 'provider)
- (profile 'production)
+ (profile asp-gerbil-scheme-production-builder-profile)
  (entry "src/provider-server")
  (runtime-modules +provider-runtime-modules+)
  (library-modules +provider-library-modules+)

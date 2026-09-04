@@ -3,6 +3,8 @@
         :std/test
         (only-in "../provider-package-spec"
                  asp-gerbil-scheme-provider-package-spec)
+        (only-in "../src/build-api/package-spec"
+                 asp-gerbil-scheme-package-build-profile)
         (only-in "../src/build-api/source-closure"
                  asp-gerbil-scheme-source-dependency-order))
 
@@ -17,6 +19,10 @@
 
 (def provider-package-spec-test
   (test-suite "provider package spec"
+    (test-case "the provider projects its Builder Profile to production"
+      (check (asp-gerbil-scheme-package-build-profile
+              asp-gerbil-scheme-provider-package-spec)
+             => 'production))
     (test-case "declared native runtime modules match the closure oracle"
       (check (.get asp-gerbil-scheme-provider-package-spec runtime-modules)
              => (provider-closure-runtime-modules)))

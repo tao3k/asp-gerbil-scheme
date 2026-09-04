@@ -1,14 +1,16 @@
 (import :std/test
         :clan/poo/object
         :asp-gerbil-scheme/src/parser/model
-        :asp-gerbil-scheme/src/build-api/package-spec)
+        :asp-gerbil-scheme/src/build-api/package-spec
+        (only-in :asp-gerbil-scheme/src/build-api/builder-profile
+                 asp-gerbil-scheme-production-builder-profile))
 
 (export library-provider-boundary-test)
 
 (asp-gerbil-scheme-package-spec! library-package-spec-fixture
   (modules ["src/parser/model.ss"])
   (role 'library)
-  (profile 'production)
+  (profile asp-gerbil-scheme-production-builder-profile)
   (roots ["src"])
   (runtime-roots ["src"])
   (exclude-directories [])
