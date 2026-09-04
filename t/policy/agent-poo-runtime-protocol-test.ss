@@ -58,10 +58,17 @@
             (check (hash-get details 'agentEscapeConstraint)
                    => "do not weaken macro-governance or replace executable evidence with package metadata")
             (check (hash-get details 'requiredWitness)
-                   => "one collected source owner with a parser-visible macro call and test assertion")))
+                   => "one collected test owner with an assertion and either a parser-visible macro call or an exact load/include edge to its case owner")))
 (test-case "agent policy accepts executable macro source witness"
           (let* ((root ".run/policy-macro-runtime-source-allowed")
                  (_ (write-macro-runtime-source-project root #t))
+                 (index (collect-project root))
+                 (findings (run-agent-policy index))
+                 (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
+            (check matching => [])))
+(test-case "agent policy accepts a test linked to the exact macro case owner"
+          (let* ((root ".run/policy-macro-runtime-source-linked")
+                 (_ (write-linked-macro-runtime-source-project root))
                  (index (collect-project root))
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))

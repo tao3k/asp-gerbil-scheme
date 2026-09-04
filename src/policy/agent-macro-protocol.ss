@@ -7,8 +7,9 @@
         :asp-gerbil-scheme/src/policy/gerbil-utils-source
         :asp-gerbil-scheme/src/policy/model
         :asp-gerbil-scheme/src/policy/modularity
-        (only-in :std/srfi/13 string-contains)
-        (only-in :std/sugar filter-map hash ormap while)
+        (only-in :std/misc/path path-directory path-expand path-simplify)
+        (only-in :std/srfi/13 string-contains string-suffix?)
+        (only-in :std/sugar filter-map hash hash-key? hash-put! ormap while)
         :asp-gerbil-scheme/src/types/findings)
 
 (export macro-runtime-source-witness-findings
@@ -17,40 +18,132 @@
         protocol-evidence-finding
         facade-export-conflict-findings)
 
-;; A witness is executable project evidence, not package metadata: the same
-;; collected owner must invoke the macro and assert observable behaviour.
+;; A witness is executable project evidence, not package metadata: an asserting
+;; test either invokes the macro directly or loads/includes its exact case owner.
 (def +macro-runtime-source-witness-assertions+
   '("check" "check-equal?" "check-exception" "check-output"))
+(def +macro-runtime-source-witness-loaders+
+  '("load" "load!"))
 ;;; Boundary:
-;;; - Every runtime macro is checked independently against parser-owned call
-;;;   evidence in its declared witness owner.
+;;; - The project index is traversed once to derive executable witness names.
+;;; - A witness owner either contains its own assertion or is reached through
+;;;   an exact load/include edge from an asserting test owner.
 ;; : (-> ProjectIndex (List TypeFinding) )
 (def (macro-runtime-source-witness-findings index)
-  (apply append
-         (map (lambda (file)
-                (if (index-source-runtime-file-path? index
-                                                     (source-file-path file))
-                  (filter-map
-                   (lambda (fact)
-                     (and (not (macro-runtime-source-policy-allows?
-                                index fact))
-                          (macro-runtime-source-witness-finding file fact)))
-                   (source-file-macros file))
-                  '()))
-              (project-index-files index))))
-;; : (-> ProjectIndex MacroFact Boolean )
-(def (macro-runtime-source-policy-allows? index fact)
-  (ormap (lambda (owner)
-           (macro-runtime-source-witness-valid? owner fact))
-         (project-index-files index)))
-;;; A source owner is evidence only when parser facts prove both sides of the
-;;; executable contract: it invokes the named macro and contains an assertion.
-;; : (-> SourceFile MacroFact Boolean )
-(def (macro-runtime-source-witness-valid? owner fact)
-  (and (source-file-invokes? owner (macro-fact-name fact))
-       (ormap (lambda (assertion)
-                (source-file-invokes? owner assertion))
-              +macro-runtime-source-witness-assertions+)))
+  (let (witnesses (macro-runtime-source-witness-index index))
+    (apply append
+           (map (lambda (file)
+                  (if (index-source-runtime-file-path? index
+                                                       (source-file-path file))
+                    (filter-map
+                     (lambda (fact)
+                       (and (not (hash-key? witnesses (macro-fact-name fact)))
+                            (macro-runtime-source-witness-finding file fact)))
+                     (source-file-macros file))
+                    '()))
+                (project-index-files index)))))
+
+;; : (-> ProjectIndex HashTable)
+(def (macro-runtime-source-witness-index index)
+  (let ((files (project-index-files index))
+        (asserted-owner-paths (make-hash-table))
+        (witnesses (make-hash-table)))
+    (for-each
+     (lambda (test-owner)
+       (when (and (macro-runtime-source-test-owner? index test-owner)
+                  (macro-runtime-source-assertion-owner? test-owner))
+         (hash-put! asserted-owner-paths
+                    (macro-runtime-source-owner-path index test-owner)
+                    #t)
+         (for-each (lambda (path)
+                     (hash-put! asserted-owner-paths path #t))
+                   (macro-runtime-source-linked-owner-paths
+                    index test-owner))))
+     files)
+    (for-each
+     (lambda (owner)
+       (when (hash-key? asserted-owner-paths
+                        (macro-runtime-source-owner-path index owner))
+         (for-each (lambda (callee)
+                     (hash-put! witnesses callee #t))
+                   (macro-runtime-source-invocation-names owner))))
+     files)
+    witnesses))
+
+;; : (-> ProjectIndex SourceFile Boolean)
+(def (macro-runtime-source-test-owner? index owner)
+  (let* ((package (project-index-package index))
+         (policy (and package
+                      (project-package-test-directory-policy package)))
+         (roots (if policy
+                  (or (test-directory-policy-allowed-directories policy) '())
+                  ["t"])))
+    (ormap (lambda (root)
+             (source-path-under-root? (source-file-path owner) root))
+           roots)))
+
+;; : (-> SourceFile Boolean)
+(def (macro-runtime-source-assertion-owner? owner)
+  (ormap (lambda (assertion)
+           (source-file-invokes? owner assertion))
+         +macro-runtime-source-witness-assertions+))
+
+;; : (-> ProjectIndex SourceFile Path)
+(def (macro-runtime-source-owner-path index owner)
+  (macro-runtime-source-canonical-path
+   (path-expand (source-file-path owner) (project-index-root index))))
+
+;; : (-> ProjectIndex SourceFile (List Path))
+(def (macro-runtime-source-linked-owner-paths index owner)
+  (let* ((owner-path (macro-runtime-source-owner-path index owner))
+         (owner-directory (path-directory owner-path)))
+    (apply append
+           (map (lambda (path)
+                  (map macro-runtime-source-canonical-path
+                       (macro-runtime-source-linked-paths
+                        index owner-directory path)))
+                (append
+                 (source-file-includes owner)
+                 (filter-map macro-runtime-source-load-path
+                             (source-file-calls owner)))))))
+
+;; Catalog facts may retain either workspace-relative or owner-relative load
+;; paths. Project both candidates into the in-memory owner index; the exact
+;; collected owner match selects the valid identity without probing the
+;; filesystem or embedding a test-directory convention in this policy.
+;; : (-> ProjectIndex Path Path (List Path))
+(def (macro-runtime-source-linked-paths index owner-directory path)
+  (let ((workspace-path (path-expand path (project-index-root index)))
+        (owner-path (path-expand path owner-directory)))
+    (if (equal? workspace-path owner-path)
+      [workspace-path]
+      [workspace-path owner-path])))
+
+;; Gerbil's native reader canonicalizes load targets to module stems while the
+;; source catalog retains file extensions.  Compare both as source stems.
+;; : (-> Path Path)
+(def (macro-runtime-source-canonical-path path)
+  (let (normalized (path-simplify path))
+    (cond
+     ((string-suffix? ".ss" normalized)
+      (substring normalized 0 (- (string-length normalized) 3)))
+     ((string-suffix? ".scm" normalized)
+      (substring normalized 0 (- (string-length normalized) 4)))
+     (else normalized))))
+
+;; : (-> CallFact (Or Path False))
+(def (macro-runtime-source-load-path call)
+  (and (member (call-fact-callee call)
+               +macro-runtime-source-witness-loaders+)
+       (pair? (call-fact-arguments call))
+       ;; Call facts already project literal string arguments as strings; the
+       ;; exact collected-owner lookup below rejects dynamic or unrelated paths.
+       (car (call-fact-arguments call))))
+
+;; : (-> SourceFile (List String))
+(def (macro-runtime-source-invocation-names owner)
+  (append (map call-fact-callee (source-file-calls owner))
+          (map top-form-head (source-file-forms owner))))
 ;; : (-> SourceFile String Boolean )
 (def (source-file-invokes? owner callee)
   (or (ormap (lambda (call)
@@ -69,7 +162,7 @@
    (policy-rule-severity +agent-macro-runtime-source-witness-rule+)
    (source-file-path file)
    (string-append "macro " (macro-fact-name fact)
-                  " needs an executable source witness before agent edits; add a collected test owner that invokes the macro and asserts observable behaviour")
+                  " needs an executable source witness before agent edits; add a collected test owner that invokes the macro directly or loads its exact case owner and asserts observable behaviour")
    (macro-fact-selector fact)
    (hash (macro (macro-fact-name fact))
          (transformer (macro-fact-transformer fact))
@@ -97,7 +190,7 @@
           "do not weaken macro-governance or replace executable evidence with package metadata")
          (next "search runtime-source macro sugar module-sugar")
          (requiredWitness
-          "one collected source owner with a parser-visible macro call and test assertion"))))
+          "one collected test owner with an assertion and either a parser-visible macro call or an exact load/include edge to its case owner"))))
 ;;; Boundary:
 ;;; - protocol-evidence-findings composes first-class procedures.
 ;;; - Keep data-flow evidence visible.

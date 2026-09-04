@@ -8,22 +8,29 @@ package manifest may identify dependencies, but it cannot admit a macro edit.
 
 * Admission rule
 
-A runtime macro is admitted only when one collected source owner contains both:
+A runtime macro is admitted only when the collected source graph proves both:
 
-- a parser-owned call or top-level form for that macro; and
-- a parser-owned executable assertion such as =check=, =check-equal?=,
-  =check-exception=, or =check-output=.
+- a case owner with a parser-owned call or top-level form for that macro; and
+- a test owner with a parser-owned executable assertion such as =check=,
+  =check-equal?=, =check-exception=, or =check-output=.
 
-The two facts must belong to the same owner.  A declaration, comment, unrelated
-test, or =gerbil.pkg= metadata entry is not a witness.
+The test may invoke the macro directly, or it may reference the exact case owner
+through a parser-owned =load!=, =load=, or =include= edge.  Gerbil load targets
+and catalog paths are compared as normalized source stems because the native
+reader removes =.ss= or =.scm=.  Both workspace-relative and owner-relative
+candidates are simplified lexically and matched only against collected owners;
+admission never probes the filesystem.  An unrelated test, declaration,
+comment, or =gerbil.pkg= metadata entry is not a witness.
 
 #+begin_src mermaid
 flowchart LR
   M[Runtime macro fact] --> C{Collected owner calls macro?}
   C -- no --> R[Reject with Policy 011]
-  C -- yes --> A{Same owner has executable assertion?}
-  A -- no --> R
-  A -- yes --> P[Admit macro source]
+  C -- yes --> D{Direct assertion in test owner?}
+  D -- yes --> P[Admit macro source]
+  D -- no --> L{Asserting test loads/includes exact case owner?}
+  L -- no --> R
+  L -- yes --> P
   G[gerbil.pkg metadata] -. dependency identity only .-> C
 #+end_src
 
@@ -40,13 +47,15 @@ flowchart LR
 * Required scenarios
 
 1. A macro call without an assertion is rejected.
-2. A macro call and assertion in the same collected owner are accepted.
-3. An assertion in an owner that does not call the macro is rejected.
-4. Policy details direct the developer to executable source evidence and never
+2. A macro call and assertion in the same collected test owner are accepted.
+3. An asserting test that loads the exact macro case owner is accepted.
+4. An assertion with neither a macro call nor an exact owner edge is rejected.
+5. Policy details direct the developer to executable source evidence and never
    recommend package metadata as an escape.
 
 * Performance constraint
 
 Source discovery and parser extraction remain single-pass Build API work.  The
-policy consumes the resulting in-memory facts and must not rescan the filesystem,
-spawn a compiler, or evaluate Scheme source during admission.
+policy builds one in-memory witness index from the resulting facts and must not
+rescan the filesystem, spawn a compiler, or evaluate Scheme source during
+admission.
