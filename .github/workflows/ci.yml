@@ -229,4 +229,8 @@ jobs:
 
       - name: Run canonical provider binary test
         if: matrix.target == 'provider-production'
-        run: gxpkg env gxtest t/provider-http-json-server-test.ss
+        run: |
+          # The suite drives the production artifact over HTTP, while its
+          # Gerbil test client imports the canonical schema/projection modules.
+          gxpkg env gxi ./build.ss compile
+          gxpkg env gxtest t/provider-http-json-server-test.ss
