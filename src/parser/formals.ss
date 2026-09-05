@@ -40,7 +40,7 @@
 
 ;; : (-> Datum Boolean)
 (def (definition-value-name-head? head)
-  (member head '(def def* define define-type)))
+  (member head '(def def* define define-type .def)))
 
 ;; : (-> Datum Boolean)
 (def (definition-method-name-head? head)
