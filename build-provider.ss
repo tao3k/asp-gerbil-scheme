@@ -1,11 +1,14 @@
 #!/usr/bin/env gxi
 ;;; -*- Gerbil -*-
 
-(import (only-in :clan/building init-build-environment!)
+(import :gerbil/gambit
         (only-in "./provider-package-spec"
-                 asp-gerbil-scheme-provider-spec))
+                 asp-gerbil-scheme-provider-spec)
+        (only-in "./src/building/build-script"
+                 framework-build-main))
 
-(init-build-environment!
- name: "asp-gerbil-scheme-provider"
- deps: '("clan" "clan/poo")
- spec: (asp-gerbil-scheme-provider-spec))
+(framework-build-main
+ (cddr (command-line))
+ (asp-gerbil-scheme-provider-spec)
+ '(profile: production)
+ "build-provider.ss")

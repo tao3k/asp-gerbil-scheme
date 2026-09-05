@@ -108,16 +108,14 @@
     "src/runtime/provider-http-json-server.ss"
     "src/commands/provider-runtime.ss"))
 
-;; Ordinary library modules follow the executable target in std/make's build
-;; spec.  They are available to integration tests without entering the static
-;; provider runtime closure or changing the executable's embedded module set.
-(def +provider-library-modules+
-  '("src/support/time"))
+;; Every provider dependency is owned exactly once by the static runtime
+;; closure.  Re-declaring a runtime module after the executable gives std/make
+;; two completion owners for the same normalized module identity.
+(def +provider-library-modules+ '())
 
 (def +provider-source-modules+
   (append +provider-runtime-modules+
-          '("src/support/time.ss"
-            "src/provider-server.ss")))
+          '("src/provider-server.ss")))
 
 (asp-gerbil-scheme-package-spec!
  (asp-gerbil-scheme-provider-package-spec

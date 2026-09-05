@@ -15,7 +15,13 @@
     "rg": {"$ref": "#/$defs/nativeBlocks"},
     "tantivy": {"$ref": "#/$defs/nativeBlocks"},
     "syntax": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/producerNativeBlock"}},
-    "graph": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/graphNativeBlock"}}
+    "graph": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/graphNativeBlock"}},
+    "clauseOrder": {
+      "description": "Agent-authored acquisition priority followed by dependent graph barriers, preserved from CLI occurrence order.",
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/clauseRef"}
+    }
   },
   "oneOf": [
     {
@@ -25,12 +31,23 @@
           {"required": ["rg"]},
           {"required": ["tantivy"]},
           {"required": ["syntax"]},
-          {"required": ["graph"]}
+          {"required": ["graph"]},
+          {"required": ["clauseOrder"]}
         ]
       }
     },
     {
-      "required": ["fd", "rg", "tantivy", "syntax", "graph"],
+      "required": ["clauseOrder"],
+      "allOf": [
+        {
+          "anyOf": [
+            {"required": ["fd"]},
+            {"required": ["rg"]},
+            {"required": ["tantivy"]},
+            {"required": ["syntax"]}
+          ]
+        }
+      ],
       "anyOf": [
         {"required": ["languages"]},
         {"required": ["documents"]}
@@ -61,6 +78,15 @@
       "properties": {
         "language": {"$ref": "#/$defs/identity"},
         "argv": {"$ref": "#/$defs/nativeArgv"}
+      }
+    },
+    "clauseRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["axis", "blockIndex"],
+      "properties": {
+        "axis": {"enum": ["fd", "rg", "tantivy", "syntax", "graph"]},
+        "blockIndex": {"type": "integer", "minimum": 0}
       }
     }
   }

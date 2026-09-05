@@ -16,6 +16,7 @@
         framework-build-profile-options
         framework-build-spec-import-source
         framework-build-module-schedule-line
+        framework-build-main
         framework-parse-build-options
         framework-resolve-build-keys
         framework-normalize-build-options

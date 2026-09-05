@@ -1,7 +1,7 @@
 {
   "languageId": "gerbil-scheme",
   "profileDigest": "blake3-256:0f6db61e73904d5a06d4b603189679e8def7346997b41ea2d26f5137ee082d2c",
-  "bundleDigest": "blake3-256:f39b6ca559d4994bdbb2441c917f7e03b784ddfa7931f840d3aaf613a46cc5f3",
+  "bundleDigest": "blake3-256:a88f14714f609dff5b9b99133c6519f0c0bcdc72fc63ce93f580fb6b69f95951",
   "schemas": [
     {
       "name": "asp-client-cancellation-probe-request.schema.json",
@@ -77,7 +77,7 @@
     },
     {
       "name": "asp-client-workspace-search-playbook-request.v1.schema.json",
-      "digest": "blake3-256:46d23c3397da21059d424191045f7d7a600b60b8059905f22a4e9df1f2634b8e"
+      "digest": "blake3-256:a546d86a313d0bdd7a512cc37462f60b5f559025fbca5040d4d9ef00a0132952"
     },
     {
       "name": "asp-client-workspace-source-mutation.schema.json",
@@ -333,7 +333,7 @@
     },
     {
       "name": "semantic-graph-resident-evaluation-request.v1.schema.json",
-      "digest": "blake3-256:7b6b47e230d1c9384e9c710ce5d1c6ffba33de50037a1866ce821336de9aea8d"
+      "digest": "blake3-256:3147c5f98f8e0af8a461c74fba6d0114dab0f173fae6e2df4a43bee8e8cd1839"
     },
     {
       "name": "semantic-graph-resident-evaluation-result.v1.schema.json",
@@ -453,7 +453,7 @@
     },
     {
       "name": "workspace-search-playbook-result.v1.schema.json",
-      "digest": "blake3-256:8b16d08ab771b7e0f4f3f5866a1c157cd21b148828534fe106fac861b478f156"
+      "digest": "blake3-256:11d5c1ab3a6f8dd8362b91da631275763427345f3bfd1d9acfb66b801baa024f"
     }
   ]
 }

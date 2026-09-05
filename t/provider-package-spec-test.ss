@@ -26,13 +26,13 @@
     (test-case "declared native runtime modules match the closure oracle"
       (check (.get asp-gerbil-scheme-provider-package-spec runtime-modules)
              => (provider-closure-runtime-modules)))
-    (test-case "integration support remains outside the provider runtime closure"
+    (test-case "each provider module has one std make completion owner"
       (check (.get asp-gerbil-scheme-provider-package-spec library-modules)
-             => '("src/support/time"))
+             => '())
       (check (member
-              "src/support/time"
+              "src/support/time.ss"
               (.get asp-gerbil-scheme-provider-package-spec runtime-modules))
-             => #f))))
+             ? true))))
 
 (def (main . _args)
   (run-tests! provider-package-spec-test))

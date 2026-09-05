@@ -445,10 +445,15 @@
          (framework-validate-runtime-closure! build-spec))
        (and (memq verbose: options) #t))))
   (def (clean)
-    (apply make-clean
-           build-spec
-           srcdir: source-directory
-           (framework-resolve-build-keys keys)))
+    (let (bindir (framework-build-bindir))
+      (create-directory* bindir)
+      (call-with-framework-build-lease
+       (lambda ()
+         (parameterize ((current-directory bindir))
+           (apply make-clean
+                  build-spec
+                  srcdir: source-directory
+                  (framework-resolve-build-keys keys)))))))
   (match arguments
     (["meta"] (write '("spec" "compile" "clean")) (newline))
     (["spec"] (pretty-print build-spec))
