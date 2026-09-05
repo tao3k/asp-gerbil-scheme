@@ -64,6 +64,8 @@
 ;; : (-> ProjectIndex String Boolean )
 (def (index-source-runtime-file-path? index path)
   (and (string-suffix? ".ss" path)
+       (not (member (source-path-class path)
+                    '("declarative-case" "declarative-profile")))
        (let* ((package (project-index-package index))
               (policy (and package
                            (project-package-source-scope-policy package)))

@@ -150,3 +150,11 @@ gerbil_project_test(
     project = ":compile",
     tests = ["//:t/poo-definition-caller-test.ss"],
 )
+
+gerbil_project_test(
+    name = "declarative_user_interface_policy_test",
+    size = "small",
+    srcs = ["t/declarative-user-interface-policy-test.ss"],
+    project = ":compile",
+    tests = ["//:t/declarative-user-interface-policy-test.ss"],
+)
