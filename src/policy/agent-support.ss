@@ -24,6 +24,19 @@
 ;; Integer
 (def +poo-capability-dependencies+
   '("gerbil-poo" "clan/poo"))
+;; Source classes that participate in the one project scan but do not own
+;; runtime entrypoints.  Rule families for tests, build declarations, fixtures,
+;; and generated evidence consume those classes independently.
+(def +non-runtime-source-classes+
+  '("config"
+    "package-build"
+    "snapshot-output"
+    "policy-scenario"
+    "fixture"
+    "test"
+    "declarative-case"
+    "declarative-profile"
+    "generated"))
 ;;; Boundary:
 ;;; - poo-source-file? composes first-class procedures.
 ;;; - Keep data-flow evidence visible.
@@ -65,7 +78,7 @@
 (def (index-source-runtime-file-path? index path)
   (and (string-suffix? ".ss" path)
        (not (member (source-path-class path)
-                    '("declarative-case" "declarative-profile")))
+                    +non-runtime-source-classes+))
        (let* ((package (project-index-package index))
               (policy (and package
                            (project-package-source-scope-policy package)))

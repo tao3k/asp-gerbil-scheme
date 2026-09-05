@@ -24,12 +24,14 @@
 ;; : (-> Root Void )
 (def (write-user-interface-project root)
   (let ((src (string-append root "/src"))
+        (tests (string-append root "/t"))
         (user-interface (string-append root "/user-interface"))
         (cases (string-append root "/user-interface/custom/domain/cases"))
         (profiles (string-append root "/user-interface/profiles")))
     (ensure-directory ".run")
     (ensure-directory root)
     (ensure-directory src)
+    (ensure-directory tests)
     (ensure-directory user-interface)
     (ensure-directory (string-append user-interface "/custom"))
     (ensure-directory (string-append user-interface "/custom/domain"))
@@ -45,7 +47,16 @@
      ";;; -*- Gerbil -*-\n(.o (report (.o (kind 'report))))\n")
     (write-source
      (string-append src "/runtime.ss")
-     ";;; -*- Gerbil -*-\n(display \"runtime side effect\")\n")))
+     ";;; -*- Gerbil -*-\n(display \"runtime side effect\")\n")
+    (write-source
+     (string-append root "/domain.ss")
+     ";;; -*- Gerbil -*-\n(display \"root runtime side effect\")\n")
+    (write-source
+     (string-append root "/domain-build.ss")
+     ";;; -*- Gerbil -*-\n(display \"build declaration\")\n")
+    (write-source
+     (string-append tests "/domain-test.ss")
+     ";;; -*- Gerbil -*-\n(display \"test harness\")\n")))
 
 ;; : (-> (List TypeFinding) Path (List TypeFinding) )
 (def (findings-for-path findings path)
@@ -53,22 +64,39 @@
             (equal? (type-finding-path finding) path))
           findings))
 
+;; This is the exact Build API coverage shape that makes a root-level Gerbil
+;; project both the source catalog and runtime-root authority.
+(def +project-coverage-files+
+  '("gerbil.pkg"
+    "domain.ss"
+    "domain-build.ss"
+    "src/runtime.ss"
+    "t/domain-test.ss"
+    "user-interface/custom/domain/cases/artifact.ss"
+    "user-interface/profiles/report.ss"))
+
 (def declarative-user-interface-policy-test
   (test-suite "declarative user interface policy"
     (test-case "case and profile projections are not runtime entrypoints"
       (let* ((root ".run/declarative-user-interface-policy")
              (_ (write-user-interface-project root))
-             (index (collect-project root))
+             (index (collect-source-scope/coverage
+                     root +project-coverage-files+ ["."] ["."] []))
              (findings (top-level-executable-findings index)))
         (check (source-path-class
                 "user-interface/custom/domain/cases/artifact.ss")
                => "declarative-case")
         (check (source-path-class "user-interface/profiles/report.ss")
                => "declarative-profile")
+        (check (source-path-class "domain-build.ss") => "package-build")
+        (check (source-path-class "t/domain-test.ss") => "test")
         (check (findings-for-path
                 findings
                 "user-interface/custom/domain/cases/artifact.ss")
                => [])
         (check (findings-for-path findings "user-interface/profiles/report.ss")
                => [])
-        (check (length (findings-for-path findings "src/runtime.ss")) => 1)))))
+        (check (findings-for-path findings "domain-build.ss") => [])
+        (check (findings-for-path findings "t/domain-test.ss") => [])
+        (check (length (findings-for-path findings "src/runtime.ss")) => 1)
+        (check (length (findings-for-path findings "domain.ss")) => 1)))))
