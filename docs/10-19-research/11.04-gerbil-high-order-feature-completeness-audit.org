@@ -20,7 +20,7 @@
 
 This audit extends =11.03= from "important examples" to a more complete map of
 advanced Gerbil/Scheme features that should shape
-=gerbil-scheme-language-project-harness= policy and guide output.
+=asp-gerbil-scheme= policy and guide output.
 
 The important distinction is:
 
@@ -41,12 +41,12 @@ Discovery started with ASP search-first:
 
 #+begin_src sh
 asp gerbil-scheme search prime \
-  --workspace languages/gerbil-scheme-language-project-harness \
+  --workspace languages/asp-gerbil-scheme \
   --view seeds
 
 asp gerbil-scheme search pipe \
   'gerbil runtime and gerbil-utils advanced scheme language features macro hygiene phase match syntax parameter continuation protocol generic combinator engineering implementation' \
-  --workspace languages/gerbil-scheme-language-project-harness \
+  --workspace languages/asp-gerbil-scheme \
   --view seeds
 #+end_src
 
@@ -574,7 +574,7 @@ Validation command:
 
 #+begin_src sh
 gxi build.ss test
-./bin/gerbil-scheme-harness check ../../.data/gerbil-utils
+gxtest t/project-policy-test.ss
 #+end_src
 
 Observed parser coverage:

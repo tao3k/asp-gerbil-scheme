@@ -1,16 +1,16 @@
 ;;; -*- Gerbil -*-
 ;;; Optional native query command entrypoint for the Gerbil Scheme harness.
 
-(import (only-in :gslph/src/cli-launcher command-line-args provider-command-line-args)
-        (only-in :gslph/src/commands/query query-main))
+(import (only-in :asp-gerbil-scheme/src/cli-launcher command-line-args provider-command-line-args)
+        (only-in :asp-gerbil-scheme/src/commands/query query-main))
 (export main
         command-line-args
         provider-command-line-args)
 
 ;;; Optional fast-path boundary:
-;;; - This module is the source entrypoint for an explicit `gslph-query`
+;;; - This module is the source entrypoint for an explicit `asp-gerbil-scheme-query`
 ;;;   sibling binary when a build chooses to pay the heavier query link cost.
-;;; - The default package build keeps only `.bin/gslph`; tests therefore require
+;;; - The default package build keeps only `.bin/asp-gerbil-scheme`; tests therefore require
 ;;;   an executable sibling before measuring native query latency.
 ;;; - Arguments are already the query tail here. The public launcher strips the
 ;;;   `query` command token before delegating to any installed sibling.

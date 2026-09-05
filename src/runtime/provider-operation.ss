@@ -1,7 +1,12 @@
+;;; Provider operations validate protocol requests and dispatch to parser-owned
+;;; resolution/projection functions.  This is the semantic operation boundary;
+;;; transport, process lifecycle, and build policy remain outside it.
 (import :gerbil/gambit
-        (only-in :gslph/src/commands/project-resolution project-resolution-request->response)
-        (only-in :gslph/src/commands/projection-batch project-provider-projection-batch)
-        (only-in :gslph/src/exact-source-projection project-provider-native-exact-request)
+        (only-in :asp-gerbil-scheme/src/commands/project-resolution project-resolution-request->response)
+        (only-in :asp-gerbil-scheme/src/commands/projection-batch project-provider-projection-batch)
+        (only-in :asp-gerbil-scheme/src/exact-source-projection project-provider-native-exact-request)
+        (only-in :asp-gerbil-scheme/src/runtime/provider-semantic-search
+                 provider-semantic-search-packet)
         (only-in :std/sugar hash)
         (only-in :std/text/json write-json))
 
@@ -78,20 +83,33 @@
 
 (def +operations+
   [(hash ("operation" "projection-batch")
-         ("requestSchemaId"
-          "https://schemas.agent-semantic-protocols.dev/provider-language-projection-batch-request.schema.json")
-         ("responseSchemaId"
-          "https://schemas.agent-semantic-protocols.dev/provider-language-projection-batch-response.schema.json"))
+         ("requestSchema"
+          (hash ("schemaId" "agent.semantic-protocols.provider-language-projection-batch-request")
+                ("schemaVersion" "1")))
+         ("responseSchema"
+          (hash ("schemaId" "agent.semantic-protocols.provider-language-projection-batch-response")
+                ("schemaVersion" "1"))))
    (hash ("operation" "project-resolution")
-         ("requestSchemaId"
-          "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-request.schema.json")
-         ("responseSchemaId"
-          "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-response.schema.json"))
+         ("requestSchema"
+          (hash ("schemaId" "agent.semantic-protocols.provider-project-resolution-request")
+                ("schemaVersion" "1")))
+         ("responseSchema"
+          (hash ("schemaId" "agent.semantic-protocols.provider-project-resolution-response")
+                ("schemaVersion" "1"))))
    (hash ("operation" "query")
-         ("requestSchemaId"
-          "https://agent-semantic-protocols.dev/schemas/provider-native-exact-request.v1.schema.json")
-         ("responseSchemaId"
-          "https://agent-semantic-protocols.dev/schemas/provider-native-exact-response.v1.schema.json"))])
+         ("requestSchema"
+          (hash ("schemaId" "agent.semantic-protocols.provider-native-exact-request")
+                ("schemaVersion" "1")))
+         ("responseSchema"
+          (hash ("schemaId" "agent.semantic-protocols.provider-native-exact-projection")
+                ("schemaVersion" "1"))))
+   (hash ("operation" "semantic-search")
+         ("requestSchema"
+          (hash ("schemaId" "agent.semantic-protocols.provider-semantic-search-request")
+                ("schemaVersion" "1")))
+         ("responseSchema"
+          (hash ("schemaId" "agent.semantic-protocols.semantic-language")
+                ("schemaVersion" "1"))))])
 
 (def (required-environment name)
   (let (value (getenv name #f))
@@ -126,6 +144,13 @@
      (required-environment "ASP_PROVIDER_ID")
      (required-payload-string payload "parserIdentityDigest")
      (required-payload-string payload "queryPackDigest")))
+   ((string=? operation "semantic-search")
+    (provider-semantic-search-packet
+     (required-payload-string payload "namespace")
+     (let (terms (hash-ref payload "terms" #f))
+       (unless (and (list? terms) (andmap string? terms))
+         (error "resident semantic-search terms are invalid"))
+       terms)))
    (else (error "resident Gerbil provider operation is not admitted" operation))))
 
 (def (required-payload-string payload name)

@@ -92,7 +92,7 @@
                       suites: (suites [])
                       roots: (roots '("t"))
                       batch-size: (batch-size #f)
-                      receipt-prefix: (receipt-prefix "gslph-test"))
+                      receipt-prefix: (receipt-prefix "asp-gerbil-scheme-test"))
   (testing-object
    'testing-project
    `((name . ,name)
@@ -245,7 +245,7 @@
 
 ;; : (-> TestingProject String)
 (def (testing-project-receipt-prefix project)
-  (testing-object-ref project 'receiptPrefix "gslph-test"))
+  (testing-object-ref project 'receiptPrefix "asp-gerbil-scheme-test"))
 
 ;; : (-> TestingSuite String)
 (def (testing-suite-name suite)

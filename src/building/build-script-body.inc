@@ -1,14 +1,27 @@
 ;;; Single implementation shared by the root build.ss bootstrap and the public
-;;; :gslph/src/building/build-script module.
+;;; :asp-gerbil-scheme/src/building/build-script module.
 (import :gerbil/gambit
+        (only-in :gerbil/expander import-module current-expander-compiling?)
+        (only-in :gerbil/compiler/base __available-cores)
+        :clan/poo/object
         :std/make
-        (only-in :std/misc/path path-directory path-expand path-normalize)
-        (only-in :std/misc/process run-process/batch)
+        (only-in :std/misc/path
+                 path-default-extension path-directory path-expand
+                 path-normalize)
+        (only-in :std/misc/ports read-all-as-string)
+        (only-in :std/misc/process run-process)
         (only-in :std/os/flock open-output-file/lock LOCK_EX)
         (only-in :std/source gerbil-home)
         (only-in :std/sort sort)
-        (only-in :std/srfi/13 string-prefix? string-suffix?)
+        (only-in :std/srfi/13
+                 string-prefix?
+                 string-suffix?
+                 string-tokenize
+                 string-trim-both)
+        (only-in :std/text/json json-object->string write-json-sort-keys?)
         (only-in :gerbil/gambit getenv))
+
+(include "memory-anomaly-guard-body.inc")
 
 (def (framework-build-artifact-root)
   (getenv "ASP_PROVIDER_ARTIFACT_ROOT"
@@ -17,41 +30,8 @@
 (def (framework-build-bindir)
   (path-expand "bin" (framework-build-artifact-root)))
 
-(def (framework-file-modification-seconds path)
-  (time->seconds (file-info-last-modification-time (file-info path))))
-
-(def (framework-runtime-source-path source-directory module)
-  (path-expand (string-append module ".ss") source-directory))
-
-(def (framework-runtime-source-newer-than-executable? source-directory module
-                                                       executable)
-  (let (source (framework-runtime-source-path source-directory module))
-    (and (file-exists? source)
-         (> (framework-file-modification-seconds source)
-            (framework-file-modification-seconds executable)))))
-
-;; std/make owns compilation and linking, but its executable target does not
-;; model the explicitly embedded runtime-module closure as dependencies. Make
-;; that missing edge visible by invalidating only a stale generated executable;
-;; the same std/make invocation remains the sole builder and linker.
-(def (framework-invalidate-stale-executables! build-spec source-directory bindir)
-  (for-each
-   (lambda (spec)
-     (match spec
-       ([exe: module bin: binary]
-        (let ((executable (path-expand binary bindir))
-              (sources
-               (cons module
-                     (framework-modules-before-target build-spec spec))))
-          (when (and (file-exists? executable)
-                     (ormap
-                      (lambda (source)
-                        (framework-runtime-source-newer-than-executable?
-                         source-directory source executable))
-                      sources))
-            (delete-file executable))))
-       (else (void))))
-   build-spec))
+(def (framework-build-libdir)
+  (path-expand "lib" (framework-build-artifact-root)))
 
 (def (framework-modules-before-target build-spec target)
   (let loop ((rest build-spec) (modules []))
@@ -59,22 +39,100 @@
      ((null? rest) (reverse modules))
      ((eq? (car rest) target) (reverse modules))
      ((string? (car rest)) (loop (cdr rest) (cons (car rest) modules)))
+     ((and (pair? (car rest))
+           (eq? (caar rest) gxc:)
+           (pair? (cdar rest)))
+      (loop (cdr rest) (cons (cadar rest) modules)))
      (else (loop (cdr rest) modules)))))
 
-(def (framework-executable-build-spec module binary
-                                      (runtime-modules [])
-                                      (library-modules []))
-  (append runtime-modules
-          `((exe: ,module bin: ,binary))
+(def (framework-option resolver package fallback)
+  (or (try
+        (resolver package #f)
+        (catch _ #f))
+      fallback))
+
+(def (framework-homebrew-prefix packages)
+  (let loop ((rest packages))
+    (and (pair? rest)
+         (or (try
+              (string-trim-both
+               (run-process ["brew" "--prefix" (car rest)]
+                            coprocess: read-all-as-string
+                            stderr-redirection: #t))
+              (catch _ #f))
+             (loop (cdr rest))))))
+
+(def (framework-tls-cc-options)
+  (let (native (framework-option cppflags "openssl" #f))
+    (string-append
+     (or native
+         (cond-expand
+           (darwin
+            (let (prefix (framework-homebrew-prefix '("openssl@3" "openssl")))
+              (if prefix (string-append "-I" prefix "/include") "")))
+           (else "")))
+     " -include openssl/kdf.h")))
+
+(def (framework-tls-ld-options)
+  (framework-option
+   ldflags
+   "openssl"
+   (cond-expand
+     (darwin
+      (let (prefix (framework-homebrew-prefix '("openssl@3" "openssl")))
+        (if prefix
+          (string-append "-L" prefix "/lib -lssl -lcrypto")
+          "-lssl -lcrypto")))
+     (else "-lssl -lcrypto"))))
+
+(def (framework-native-link-options native-capabilities)
+  (apply append
+         (map
+          (lambda (capability)
+            (case capability
+              ((tls)
+               (list "-cc-options" (framework-tls-cc-options)
+                     "-ld-options" (framework-tls-ld-options)))
+              (else
+               (error "unsupported native build capability" capability))))
+          native-capabilities)))
+
+(def (framework-duplicate-module-owners modules)
+  (let loop ((remaining modules) (seen []) (duplicates []))
+    (if (null? remaining)
+      (reverse duplicates)
+      (let (module (car remaining))
+        (cond
+         ((and (member module seen) (not (member module duplicates)))
+          (loop (cdr remaining) seen (cons module duplicates)))
+         (else
+          (loop (cdr remaining) (cons module seen) duplicates)))))))
+
+(def (framework-executable-build-spec module binary runtime-modules
+                                          library-modules native-capabilities)
+  ;; Runtime modules remain separate native AOT units in the artifact libdir.
+  ;; The executable keeps ordinary source imports so gxc owns the native link;
+  ;; marking every dependency static would instead regenerate the entire
+  ;; HTTP/parser/query closure in one translation unit.
+  (append (map (lambda (runtime-module)
+                 `(gxc: ,runtime-module))
+               runtime-modules)
+          `((exe: ,module bin: ,binary runtime-linkage: separate-aot
+                  ,@(framework-native-link-options native-capabilities)))
           library-modules))
 
 (def (framework-validate-runtime-closure! build-spec)
   (def (module-name id)
     (if (symbol? id) (symbol->string id) id))
+  (def (module-stem module)
+    (let (module-length (string-length module))
+      (if (string-suffix? ".ss" module)
+        (substring module 0 (- module-length 3))
+        module)))
   (for-each
    (lambda (spec)
      (match spec
-       ([exe: module bin: binary]
+       ([exe: module bin: binary . options]
         (let* ((declared (framework-modules-before-target build-spec spec))
                (stub-path
                   (string-append
@@ -105,10 +163,28 @@
                                           (string-length name)))))
                       builtin-modules)
                      string<?))
-                   (expected (sort (cons module declared) string<?)))
+                   (expected
+                    (sort (cons module (map module-stem declared)) string<?)))
               (unless (equal? actual expected)
                 (error "provider runtime closure drift"
-                       expected actual stub-path)))))
+                       expected actual stub-path))
+              (unless (eq? (pgetq runtime-linkage: options) 'separate-aot)
+                (error "provider executable lacks separate AOT linkage"
+                       spec))
+              (for-each
+               (lambda (runtime-module)
+                 (let* ((stem (module-stem runtime-module))
+                        (artifact-stem
+                         (path-expand
+                          (string-append package-prefix stem)
+                          (framework-build-libdir))))
+                   (unless (and (file-exists?
+                                 (string-append artifact-stem ".ssi"))
+                                (file-exists?
+                                 (string-append artifact-stem ".o1")))
+                     (error "provider runtime AOT artifact missing"
+                            runtime-module artifact-stem))))
+               declared))))
        (else (void))))
    build-spec))
 
@@ -130,37 +206,14 @@
        (getenv "GERBIL_BUILD_CORES" #f))
       (max 1 (##cpu-count))))
 
-;; Gerbil 0.18.2 captures GERBIL_BUILD_CORES while compiler/base is imported.
-;; A build script therefore has to enter a child process with the variable set;
-;; setting it around std/make after module loading cannot change worker count.
-(def (framework-build-reexec-required? arguments)
-  (and (or (null? arguments)
-           (and (pair? arguments)
-                (string=? (car arguments) "compile")))
-       (not (framework-positive-core-count
-             (getenv "GERBIL_BUILD_CORES" #f)))))
-
-(def (framework-reexec-build-script source-file arguments)
-  (let ((absolute-source-file (path-expand source-file))
-        (previous-cores (getenv "GERBIL_BUILD_CORES" #f))
-        (selected (number->string (max 1 (##cpu-count)))))
-    (dynamic-wind
-      (lambda ()
-        (unless (framework-positive-core-count previous-cores)
-          (setenv "GERBIL_BUILD_CORES" selected)))
-      (lambda ()
-        (run-process/batch
-         (append ["gxpkg" "env" "gxi" absolute-source-file] arguments)))
-      (lambda ()
-        (setenv "GERBIL_BUILD_CORES" (or previous-cores ""))))))
-
-(def (call-with-framework-build-cores thunk)
-  (let ((previous (getenv "GERBIL_BUILD_CORES" #f))
-        (selected (number->string (framework-build-core-count))))
-    (dynamic-wind
-      (lambda () (setenv "GERBIL_BUILD_CORES" selected))
-      thunk
-      (lambda () (setenv "GERBIL_BUILD_CORES" (or previous ""))))))
+;; Gerbil 0.18.2 reads GERBIL_BUILD_CORES in std/make and captures it in
+;; compiler/base. Apply one value to both owners before std/make receives the
+;; package spec. An explicit override wins; otherwise use the logical CPU count.
+(def (framework-apply-build-core-policy!)
+  (let (selected (framework-build-core-count))
+    (setenv "GERBIL_BUILD_CORES" (number->string selected))
+    (set! __available-cores selected)
+    selected))
 
 (def (framework-recover-object-locks!)
   (def (recover-directory directory)
@@ -179,90 +232,325 @@
   (append (recover-directory (framework-static-directory))
           (recover-directory (framework-build-bindir))))
 
-(def (call-with-framework-build-lease thunk)
+(def +framework-darwin-native-environment-exclusions+
+  '("SDKROOT" "DEVELOPER_DIR"))
+
+;; Upstream clan/building evaluates the package spec before it enters
+;; std/make.  Normalize the current build process once at that declaration
+;; boundary so the later upstream compiler processes inherit the same Darwin
+;; toolchain environment as Framework-owned builds.
+(def (framework-apply-native-toolchain-environment!)
+  (cond-expand
+   (darwin
+    (for-each (lambda (name) (setenv name))
+              +framework-darwin-native-environment-exclusions+))
+   (else #!void)))
+
+(def (call-with-framework-native-toolchain-environment thunk)
+  (cond-expand
+   (darwin
+    (let (previous
+          (map (lambda (name) (cons name (getenv name #f)))
+               +framework-darwin-native-environment-exclusions+))
+      (dynamic-wind
+        framework-apply-native-toolchain-environment!
+        thunk
+        (lambda ()
+          (for-each
+           (lambda (entry)
+             (if (cdr entry)
+               (setenv (car entry) (cdr entry))
+               (setenv (car entry))))
+           previous)))))
+   (else (thunk))))
+
+(def (call-with-framework-build-lease thunk (trace? #f))
   (let* ((cache-root (framework-build-cache-root))
-         (lease-path (path-expand ".gslph-build.lease" cache-root)))
+         (lease-path (path-expand ".asp-gerbil-scheme-build.lease" cache-root)))
     (create-directory* cache-root)
+    (when trace?
+      (framework-build-trace-emit!
+       (framework-build-trace-receipt
+        "std/make package build" 'lease-wait 0 0 0 0)))
     (let (lease (open-output-file/lock lease-path op: LOCK_EX))
       (unwind-protect
-        (call-with-framework-build-cores
+        (call-with-framework-native-toolchain-environment
          (lambda ()
            (framework-recover-object-locks!)
            (thunk)))
         (close-port lease)))))
 
+(def (framework-build-profile-options profile)
+  (case profile
+    ((development)
+     [optimize: #f])
+    ((production)
+     ;; The provider is an AOT executable, but its HTTP/TLS boundary depends on
+     ;; the host C runtime and OpenSSL.  Gerbil's build-release option forwards
+     ;; `-static` to GCC; that produces neither a portable nor a reliably
+     ;; linkable artifact for these system libraries.  Preserve optimized
+     ;; multi-unit AOT compilation and use the platform dynamic linker on every
+     ;; supported host.
+     ;; Keep the final executable in std/make's separate-module mode. Runtime
+     ;; units carry their own optimize option in the declared build graph;
+     ;; setting this global option to true would rewrite exe: to optimized-exe:
+     ;; and invoke full-program optimization over the entire server closure.
+     [optimize: #f])
+    (else
+     (error "unsupported Scheme build profile" profile))))
+
+(def (framework-profile-controlled-option? option)
+  (memq option '(optimize: build-release: build-optimized:)))
+
+(def (framework-resolve-build-keys keys)
+  (let loop ((rest keys) (profile #f) (native-options []))
+    (match rest
+      ([]
+       (unless profile
+         (error "defbuild-script requires profile: development or production"))
+       (append (framework-build-profile-options profile)
+               (reverse native-options)))
+      ([profile: value . tail]
+       (when profile
+         (error "defbuild-script declares more than one build profile"))
+       (loop tail value native-options))
+      ([option value . tail]
+       (when (framework-profile-controlled-option? option)
+         (error "build profile owns std/make optimization options" option))
+       (loop tail profile (cons value (cons option native-options))))
+      (else
+       (error "malformed defbuild-script options" keys)))))
+
+(def (framework-build-option-keys options)
+  (let loop ((rest options) (keys []))
+    (match rest
+      ([] keys)
+      ([key _value . tail]
+       (loop tail (cons key keys)))
+      (else
+       (error "malformed std/make options" options)))))
+
+(def (framework-remove-build-options options removed-keys)
+  (let loop ((rest options) (kept []))
+    (match rest
+      ([] (reverse kept))
+      ([key value . tail]
+       (if (memq key removed-keys)
+         (loop tail kept)
+         (loop tail (cons value (cons key kept)))))
+      (else
+       (error "malformed std/make options" options)))))
+
+(def (framework-normalize-build-options options)
+  (match options
+    ([] [])
+    ([key value . tail]
+     (cons* key
+            value
+            (framework-normalize-build-options
+             (framework-remove-build-options tail [key]))))
+    (else
+     (error "malformed std/make options" options))))
+
+(def (framework-merge-build-options base overrides)
+  (let (normalized-overrides
+        (framework-normalize-build-options overrides))
+    (append normalized-overrides
+            (framework-remove-build-options
+             (framework-normalize-build-options base)
+             (framework-build-option-keys normalized-overrides)))))
+
+;; std/make stores verbose as a level and enables gxc's underlying expansion
+;; trace only at level 9. Keep the public CLI projection boolean, then lower it
+;; at the executor boundary so verbose output includes compiler source context.
+(def (framework-std-make-options options)
+  (let loop ((rest options) (lowered []))
+    (match rest
+      ([] (reverse lowered))
+      ([verbose: #t . tail]
+       (loop tail (cons 9 (cons verbose: lowered))))
+      ([key value . tail]
+       (loop tail (cons value (cons key lowered))))
+      (else
+       (error "malformed std/make options" options)))))
+
+(def (framework-parse-build-options options)
+  (def (present? keyword parsed)
+    (and (memq keyword parsed) #t))
+  (let loop ((rest options) (parsed []))
+    (match rest
+      ([] parsed)
+      (["--verbose" . rest]
+       (loop rest (cons* verbose: #t parsed)))
+      (["--release" . rest]
+         ;; Gerbil implements build-release: by forwarding -static to the
+         ;; final native linker. Darwin has no static C runtime startup object
+         ;; (crt0.o), so a release build there is optimized but dynamically
+         ;; linked. Keep this policy in the Building Framework so every
+         ;; executable target has the same platform-correct meaning.
+         (cond-expand
+          (darwin
+           (loop rest
+                 (if (present? build-optimized: parsed)
+                     parsed
+                     (cons* optimize: #t build-optimized: #t parsed))))
+          (else
+           (loop rest (cons* optimize: #t build-release: #t parsed)))))
+      (["--optimized" . rest]
+       (loop rest
+             (if (present? build-optimized: parsed)
+               parsed
+               (cons* optimize: #t build-optimized: #t parsed))))
+      (["--debug" . rest]
+       (loop rest (cons* debug: #t parsed)))
+      (else
+       (error "Unexpected " rest)))))
+
+;; std/make resolves every module id before it emits compiler messages.  These
+;; traces announce that native scheduling frontier without importing anything:
+;; std/make remains the sole expander, scheduler, and build decision authority.
+(def (framework-build-spec-import-source spec source-directory)
+  (def (source module extension)
+    (path-expand (path-default-extension module extension) source-directory))
+  (match spec
+    ((? string? module) (source module ".ss"))
+    ([gxc: (? string? module) . _] (source module ".ss"))
+    ([ssi: (? string? module) . _] (source module ".ssi"))
+    ([(or exe: static-exe: optimized-exe: optimized-static-exe:)
+      (? string? module) . _]
+     (source module ".ss"))
+    (else #f)))
+
+(def (framework-build-module-schedule-line source)
+  (string-append
+   "[asp-gerbil-scheme-build] phase=module-scheduled source=" source))
+
+(def (framework-build-module-schedule-emit! source)
+  (display (framework-build-module-schedule-line source)
+           (current-error-port))
+  (newline (current-error-port))
+  (force-output (current-error-port)))
+
+(def (framework-build-announce-modules! build-spec source-directory)
+  (for-each
+   (lambda (spec)
+     (alet (source
+            (framework-build-spec-import-source spec source-directory))
+       (framework-build-module-schedule-emit! source)))
+   build-spec))
+
+(def (framework-build-announce-first-module! build-spec source-directory)
+  (let loop ((remaining build-spec))
+    (when (pair? remaining)
+      (let (source
+            (framework-build-spec-import-source
+             (car remaining) source-directory))
+        (if source
+          (framework-build-module-schedule-emit! source)
+          (loop (cdr remaining)))))))
+
+(def (call-with-framework-build-libdir libdir thunk)
+  ;; std/make writes native module artifacts to libdir, while Gerbil's
+  ;; separate executable compiler resolves static modules through load-path.
+  ;; Keep the declared artifact tree first for exactly this build session and
+  ;; restore the caller's default Gerbil environment afterwards.
+  (let (previous-load-path (load-path))
+    (dynamic-wind
+      (lambda () (add-load-path! libdir))
+      thunk
+      (lambda () (set-load-path! previous-load-path)))))
+
 (def (framework-build-main arguments build-spec keys source-file)
-  (def (parse-options options)
-    (let loop ((rest options) (parsed []))
-      (match rest
-        ([] parsed)
-        (["--release" . rest]
-         (loop rest (cons* build-release: #t parsed)))
-        (["--optimized" . rest]
-         (loop rest (cons* build-optimized: #t parsed)))
-        (["--debug" . rest]
-         (loop rest (cons* debug: #t parsed)))
-        (else
-         (error "Unexpected " rest)))))
   (def source-directory
     (path-normalize (path-directory source-file)))
   (def (build options)
-    (let (bindir (framework-build-bindir))
+    (let ((bindir (framework-build-bindir))
+          (libdir (framework-build-libdir))
+          (build-keys (framework-resolve-build-keys keys)))
       (create-directory* bindir)
+      (create-directory* libdir)
       (call-with-framework-build-lease
        (lambda ()
-         (framework-invalidate-stale-executables!
-          build-spec source-directory bindir)
-         ;; std/make compiles sources under its absolute srcdir, then drains
-         ;; Gambit native jobs in the caller cwd.  Gerbil 0.18.2's macOS
-         ;; executable linker emits __exe.c relative to that cwd, so the
-         ;; caller must be the declared bindir for generation and consumption
-         ;; to share one path.
+         ;; std/make receives the complete declared spec and remains the only
+         ;; dependency, freshness, scheduling, compiler, and linker authority.
+         ;; ASP observes this one native session without pre-cleaning or
+         ;; filtering its module graph.
+         (call-with-framework-memory-anomaly-guard
+         "std/make package build"
+          (framework-build-core-count)
+          (lambda ()
+            (if (memq verbose: options)
+              (framework-build-announce-modules! build-spec source-directory)
+              (framework-build-announce-first-module!
+               build-spec source-directory))
+            (call-with-framework-build-libdir
+             libdir
+             (lambda ()
+               (parameterize ((current-directory bindir))
+                 (apply make
+                        build-spec
+                        srcdir: source-directory
+                        (framework-std-make-options
+                         (framework-merge-build-options
+                          build-keys
+                          (append [bindir: bindir libdir: libdir]
+                                  options))))))))
+          (and (memq verbose: options) #t))
+         (framework-validate-runtime-closure! build-spec))
+       (and (memq verbose: options) #t))))
+  (def (clean)
+    (let ((bindir (framework-build-bindir))
+          (libdir (framework-build-libdir)))
+      (create-directory* bindir)
+      (create-directory* libdir)
+      (call-with-framework-build-lease
+       (lambda ()
          (parameterize ((current-directory bindir))
-           (apply make
+           (apply make-clean
                   build-spec
                   srcdir: source-directory
-                  (append options keys))
-           (framework-validate-runtime-closure! build-spec))))))
-  (def (clean)
-    (apply make-clean build-spec srcdir: source-directory keys))
+                  (framework-merge-build-options
+                   (framework-resolve-build-keys keys)
+                   [bindir: bindir libdir: libdir])))))))
   (match arguments
     (["meta"] (write '("spec" "compile" "clean")) (newline))
     (["spec"] (pretty-print build-spec))
-    (["compile" . options] (build (parse-options options)))
+    (["compile" . options]
+     (build (framework-parse-build-options options)))
     (["clean"] (clean))
     ([] (build []))))
 
-(defsyntax (defbuild-script stx)
-  (syntax-case stx ()
-    ((macro build-spec keys ...)
-     (with-syntax* ((@this-script (stx-identifier #'macro 'this-source-file))
-                    (+this-source-file+ (syntax/loc stx (@this-script)))
-                    (@main (stx-identifier #'macro 'main)))
-       #'(def (@main . arguments)
-           (let (source-file +this-source-file+)
-             (if (framework-build-reexec-required? arguments)
-               (framework-reexec-build-script source-file arguments)
-               (parameterize
-                ((current-directory
-                  (path-normalize (path-directory source-file))))
-                (framework-build-main
-                 arguments build-spec [keys ...] source-file)))))))))
-
 (def (framework-build-contract)
-  '((schemaId . "gslph.build-script-contract")
+  '((schemaId . "asp-gerbil-scheme.build-script-contract")
     (schemaVersion . "1")
     (commandSurfaceOwner . "Building-Framework")
     (executor . "std/make")
     (dependencyGraphOwner . "std/make")
+    (buildProfileOwner . "POO-package-spec")
+    (buildProfileProjection . "native-std/make-options")
+    (developmentProfile . "gcc-optimize-disabled")
+    (productionProfile . "gcc-optimized-module-aot-separate-link")
+    (buildDepsOwner . "std/make-srcdir-default")
     (parallelismOwner . "GERBIL_BUILD_CORES")
+    (verbosityOwner . "build-script-cli-to-std-make")
+    (nativeVerboseLevel . 9)
     (defaultCoreSelection . "host-cpu-count")
-    (compilerCoreCapture . "pre-import-child-process")
+    (compilerCoreCapture . "environment-and-compiler-counter")
     (dependencyEnvironmentOwner . "gxpkg-env")
     (nativeLinkWorkingDirectory . "declared-bindir")
+    (darwinNativeEnvironmentOwner . "Building-Framework")
+    (darwinNativeEnvironmentExclusions . "SDKROOT-and-DEVELOPER_DIR")
+    (releaseLinkageOwner . "Building-Framework-platform-policy")
+    (darwinReleaseLinkage . "optimized-dynamic")
+    (linuxReleaseLinkage . "optimized-dynamic")
+    (darwinExecutableTopology . "optimized-multi-unit")
     (buildGraphProjection . "declared-compiler-runtime-closure-to-std/make")
+    (buildGraphAdmission . "none-full-declared-spec-to-std/make")
+    (affectedOutputInvalidation . "none")
+    (upstreamBuildSessionCount . "one-native-std/make-session")
     (libraryBuildProjection . "post-executable-package-modules-to-std/make")
-    (runtimeClosureDriftOracle . "gerbil-executable-stub")
+    (runtimeClosureDriftOracle . "entry-stub-and-separate-aot-modules")
+    (runtimeLinkage . "separate-aot")
     (executableFreshnessOwner . "declared-runtime-closure-to-std-make")
     (cacheConcurrencyOwner . "kernel-flock-per-GERBIL_PATH")
     (objectLockRecovery . "static-and-binary-under-exclusive-build-lease")

@@ -1,4 +1,255 @@
 * 31.07 Native Gerbil Declarative Build and Test Boundary
+
+** Authoritative Entry Points And Responsibilities
+
+Gerbil package projects expose exactly two native project entry points:
+
+- =gerbil.pkg= owns package identity, dependency identity, and package policy
+  metadata.
+- =build.ss= owns an executable, declarative Gerbil build specification.
+
+Neither entry point delegates package semantics to a component manifest, a
+shell pipeline, or a Bazel-specific metadata format.  ASP extends the native
+path with policy validation, typed receipts, observability, and test helpers;
+it does not replace Gerbil source discovery, compiler scheduling, dependency
+installation, or platform flag resolution.  Bazel consumes the two native
+entry points as a hermetic cached action and owns only the outer resource guard.
+
+#+begin_src mermaid
+flowchart LR
+  Package["gerbil.pkg<br/>identity + dependencies"] --> Gxpkg["gxpkg package lifecycle"]
+  Build["build.ss<br/>pure executable spec"] --> Native["clan/building + std/make"]
+  Discovery["clan/building<br/>src discovery"] --> Build
+  Flags["cppflags / ldflags<br/>Homebrew fallback on Darwin"] --> Build
+  Gxpkg --> Native
+  Native --> Artifacts["Gerbil library + explicit executables"]
+  ASP["ASP extensions<br/>policy + receipt + observability + gxtest"] -. observes .-> Native
+  Bazel["gerbil-bazel<br/>cache + sandbox + outer RSS guard"] --> Package
+  Bazel --> Build
+  Downstream["Downstream package<br/>package-specific spec only"] --> Package
+  Downstream --> Build
+#+end_src
+
+Native binding options follow one ordered resolution path in Scheme:
+
+1. Ask =std/make= =cppflags= or =ldflags= for the package.
+2. On Darwin, fall back to =brew --prefix= for the requested formula when
+   pkg-config metadata is unavailable.
+3. Fall back to portable compiler or linker flags that remain valid on Linux.
+
+This resolution is data used by the build spec.  It is not CI-only behavior and
+must not be duplicated in Bazel rules or shell launchers.
+
+ASP exposes one downstream declaration macro:
+=asp-gerbil-scheme-package-spec!=.  It hygienically expands to native Gerbil
+POO =.def= syntax.  The =native-spec= slot holds an ordinary Gerbil build-spec
+value; derived package specs use POO =@= inheritance and =previous= to compose
+that value.  The macro introduces no replacement keywords for module strings,
+=[ssi: ...]=, =[gxc: ...]=, =[gsc: ...]=, or =[exe: ...]=; discovery and
+composition continue to use Scheme functions from =std/make= and
+=clan/building=.  =asp-gerbil-scheme-package-native-spec= projects the final
+list into upstream =init-build-environment!= or =defbuild-script=.
+=asp-gerbil-scheme-package-build-profile= projects the package's required
+=development= or =production= profile into the same entrypoint; the Building
+Framework lowers that semantic value to ordinary =std/make= optimization and
+release keys.
+
+The v1 macro surface deliberately rejects a parallel option vocabulary:
+
+| Candidate option | v1 decision | Native Gerbil form retained |
+|------------------+-------------+-----------------------------|
+| =roots:=         | omit        | =all-gerbil-modules= plus ordinary Scheme filtering |
+| =modules:=       | omit        | module strings in the build spec |
+| =interfaces:=    | omit        | =[ssi: ...]= |
+| =before:=        | omit        | list order and =append= |
+| =after:=         | omit        | list order and =append= |
+
+The installed =:asp-gerbil-scheme/src/package-build-api= module is the single public
+import surface for package declarations, source discovery, and profile
+application.  The same repository has an executable top-level =build-api.ss=
+source-bootstrap facade because a clean package cannot import its own installed
+module before the first build.  Both facades project the same owner modules; a
+downstream =build.ss= must not import those internal modules one symbol at a
+time.
+
+=all-gerbil-modules= retains the native downstream call shape and
+=clan/building= remains the only source-catalog owner.  After that single
+upstream scan, the Build API proves the root is inside a Git worktree with =git
+rev-parse=; only then does one =git check-ignore --stdin= invocation filter the
+already-discovered candidates.  Untracked and unstaged Scheme files therefore
+remain immediate build inputs, while ignored untracked files follow nested
+=.gitignore=, =.git/info/exclude=, and standard user excludes.  Tracked files
+remain inputs even when an ignore rule later matches their path.  The Build API
+does not parse =.gitignore=, make Git own source discovery, or translate Git
+patterns into an =exclude-dirs= approximation.  Its initialized default
+=exclude-dirs= value is inherited by the POO package prototype, while each
+downstream package only appends its domain-specific exclusions.  In a source
+archive, the same upstream catalog is used without Git filtering, so Git does
+not become a package-build dependency.
+
+#+begin_src mermaid
+flowchart TD
+    Build["build.ss<br/>one bootstrap Build API import"] --> Discover["all-gerbil-modules<br/>native call shape"]
+    Discover --> UpstreamCatalog["clan/building<br/>one complete candidate scan"]
+    UpstreamCatalog --> GitProject{"git rev-parse<br/>inside worktree?"}
+    GitProject -->|yes| IgnoreQuery["git check-ignore --stdin<br/>one ignore query"]
+    GitProject -->|no| Modules["candidate catalog unchanged"]
+    IgnoreQuery --> Filter["O(n) ignored-path filter<br/>Git owns ignore semantics only"]
+    Filter --> Modules["one sorted module catalog"]
+    Modules --> PackageSpec["asp-gerbil-scheme-package-spec!"]
+    PackageSpec --> Native["native-spec / std/make"]
+    PackageSpec --> Policy["source coverage / policy"]
+#+end_src
+
+#+begin_src mermaid
+flowchart LR
+    Package[gerbil.pkg] --> Build[build.ss]
+    Native[Native Gerbil build-spec expression] --> Macro[asp-gerbil-scheme-package-spec!]
+    Macro --> Spec[POO package-spec object]
+    Build --> Macro
+    Spec --> Projection[native-spec slot projection]
+    Spec --> Profile[profile slot projection]
+    Projection --> Upstream{Upstream entrypoint}
+    Profile --> Upstream
+    Upstream --> DefBuild[defbuild-script]
+    Upstream --> InitBuild[init-build-environment!]
+    DefBuild --> StdMake[std/make execution]
+    InitBuild --> StdMake
+#+end_src
+
+** Library-default and explicit provider target
+
+Gerbil package installation selects one build script per package through the
+=build:= field in =gerbil.pkg= and invokes that script's =compile= command.
+=gxpkg= does not propagate consumer-selected feature names; its forwarded build
+options are release, optimized, and debug modes.  Therefore the root
+=asp-gerbil-scheme= package keeps =build.ss= library-only.  The ASP provider,
+HTTP server, and TLS-linked executable are owned by the explicit
+=build-provider.ss= entrypoint and the corresponding Bazel target.
+
+The Bazel projection preserves the same boundary in its action inputs:
+=//:compile= consumes =library_sources=, while =//:provider_compile= consumes
+the full project sources and declares =//:compile= as a dependency.  Provider,
+HTTP, or CLI product-entry edits therefore do not invalidate the default
+library compile cache.
+
+Native CI preserves the same ownership boundary with two independent targets.
+The ordinary library target declares logical package dependencies
+=("clan" "clan/poo")= to =init-build-environment!= and uses its upstream
+default optimized compilation.  Physical acquisition remains solely in
+=gerbil.pkg=, whose direct =gerbil-poo= locator transitively owns
+=gerbil-utils=.  The provider target uses the =production= profile and owns the
+provider binary and HTTP process test.  They run in separate jobs and therefore
+never reuse native outputs across profiles; Gerbil =std/make= freshness is
+based on source/output state and is not an options-identity cache.
+
+The measured declaration contains 224 library entries, while the provider
+transitive closure contains only 20 static runtime modules and one executable.
+Serially optimizing the full library before building that provider is therefore
+not a cache optimization: it compiles policy, testing, build tooling, and other
+modules outside the provider owner graph.  CI shares only dependency-package
+caches and gives each project-target build a ten-minute hard wall-time gate.
+
+#+begin_src mermaid
+flowchart LR
+    Manifest["gerbil.pkg<br/>physical gerbil-poo locator"] --> Gxpkg[gxpkg dependency installation]
+    Gxpkg --> Clan[clan]
+    Gxpkg --> POO[clan/poo]
+    Source[ASP source checkout] --> Library[Library development target<br/>224 declared modules]
+    Source --> Provider[Provider production target<br/>20 static modules + 1 executable]
+    Clan --> Library
+    POO --> Library
+    Deps --> Provider
+    Library --> LibraryTests[Semantic library tests]
+    Provider --> ProviderTest[Provider HTTP binary test]
+    Library -. isolated native outputs .-> Provider
+#+end_src
+
+The reusable POO parent lives in =src/build-api/package-spec.ss=, which is an
+ordinary import-safe Gerbil module.  Root =build.ss= and top-level
+=provider-package-spec.ss= each declare a concrete object derived from that
+library prototype.  The provider must not import =build.ss=: upstream
+=defbuild-script= expands through the script-context =this-source-file=
+binding, so a build entrypoint is not a library module.  Bazel's explicit
+=//:provider_compile -> //:compile= dependency is the execution dependency;
+POO inheritance supplies the shared semantic contract.
+
+The split-target CI receipt supersedes the earlier 33-second provider estimate.
+In the final green run, the complete library jobs took 1 minute 50 seconds on
+Linux and 7 minutes 3 seconds on Darwin; the complete provider jobs took 57
+seconds on Linux and 3 minutes 21 seconds on Darwin.  All four jobs include
+their owned tests and remain below their platform performance gates.
+
+The failed predecessor receipt is still useful root-cause evidence.  Its Darwin
+provider expanded and scheduled the 20-module graph in about one minute, but
+upstream =build-optimized:= then lowered the
+whole executable to one =SINGLE_HOST= C translation unit.  GCC 16 was still
+compiling that unit when the ten-minute gate fired; the matching local process
+used 1,552,400 KiB RSS (about 1.48 GiB).  The bottleneck is therefore executable C topology,
+not module discovery or missing std/make parallelism.
+
+Darwin =production= now keeps native Scheme optimization but does not request
+=build-optimized:=.  This retains std/make's multi-unit executable topology and
+platform-dynamic linkage.  Linux keeps =build-release:=.  Runtime closure
+validation remains unchanged: only the 20 declared static modules may enter the
+provider executable; integration support modules follow the executable target
+and are compiled as ordinary library units.
+
+#+begin_src mermaid
+flowchart LR
+    Graph[20-module provider graph<br/>about 1 minute on Darwin] --> Choice{Darwin production topology}
+    Choice -->|build-optimized| Single[One SINGLE_HOST executable C unit]
+    Single --> Timeout[More than 10 minutes<br/>1,552,400 KiB local RSS]
+    Choice -->|optimize only| Multi[std/make multi-unit executable]
+    Multi --> Gate[Target: below 10 minutes<br/>same 20-module closure oracle]
+#+end_src
+
+The ordinary library script uses upstream =init-build-environment!=.  The
+provider script uses =defbuild-script= from =src/building/build-script.ss=
+because it additionally owns a production artifact directory and native link
+policy.  Both paths still delegate compilation and linking to upstream
+=std/make=.  Before either passes its complete spec to =std/make=, the ASP
+Build API applies one core value to both =GERBIL_BUILD_CORES= and Gerbil
+0.18.2's already initialized =__available-cores=.  A positive caller override
+wins; otherwise Gambit's =##cpu-count= is used.  No shell probe, fixed machine
+count, child-process marker, or second scheduler is involved.
+
+A local Gerbil 0.18.2 receipt reproduced the captured values exactly.  With no
+environment override, =GERBIL_BUILD_CORES= resolved to zero while
+=__available-cores= was one on a 12-logical-CPU host.  Applying the Build API
+policy produced =(12 12 12)=; an explicit override produced =(3 3 12)=.  The
+following native build emitted multiple pending =execute compile job= units.
+CI remains the cold-build acceptance evidence because its checkout does not
+reuse the local package output tree.
+
+This is the feature-equivalent boundary for same-repository development:
+ordinary =depend:= consumers build only the library package, while the ASP
+Server release and CI paths request the provider target explicitly.  If the
+provider later needs independent =gxpkg= installation, it requires a distinct
+published package identity; =gxpkg= does not resolve a repository subdirectory
+as a second package.
+
+#+begin_src mermaid
+flowchart TD
+    Consumer[Ordinary Scheme consumer] --> Manifest[asp-gerbil-scheme gerbil.pkg]
+    Manifest --> LibraryBuild[build.ss]
+    Prototype[Import-safe library package-spec POO prototype<br/>src/build-api/package-spec.ss]
+    Prototype -->|POO @ inheritance| LibraryObject[Concrete library package-spec<br/>declared in build.ss]
+    Prototype -->|POO @ inheritance| ProviderObject[Concrete provider package-spec<br/>declared in provider-package-spec.ss]
+    LibraryObject --> LibraryBuild
+    LibraryBuild --> CorePolicy[Build API core policy]
+    CorePolicy --> CoreEnv[GERBIL_BUILD_CORES]
+    CorePolicy --> Available[compiler/base __available-cores]
+    Available --> StdMake[Upstream std/make]
+    StdMake --> Libraries[Library modules only]
+    ServerRelease[ASP Server release or CI] --> ProviderBuild[build-provider.ss]
+    ProviderObject --> ProviderBuild
+    LibraryBuild -->|Bazel dependency and cached artifact| ProviderBuild
+    ProviderBuild --> ProviderDelta[Provider-only delta<br/>23 modules plus 1 executable]
+    ProviderDelta --> Provider[Provider and HTTP executable]
+    Provider --> TLS[TLS native link flags]
+    Libraries -. no provider edge .-> ConsumerRuntime[Minimal consumer closure]
+#+end_src
 :PROPERTIES:
 :JD_ID: 31.07
 :STATUS: active-design
@@ -55,16 +306,16 @@ turn that into manual compiler or process dispatch.
 
 ** Package Module Identity
 
-The source package declares =gslph/src=.  Every package-local runtime import
-must therefore use =:gslph/src/<module>=.  A source-relative import such as
+The source package declares =asp-gerbil-scheme/src=.  Every package-local runtime import
+must therefore use =:asp-gerbil-scheme/src/<module>=.  A source-relative import such as
 =:support/time= is not a valid package identity: it only works when a caller
 adds =src/= to =GERBIL_LOADPATH=, and native =std/make= correctly rejects it.
 
 The migration is parser-first.  Native module import facts identify imports;
 the source-owner map decides whether a module is local.  Only an import whose
 unprefixed module corresponds to =src/<module>.ss= is rewritten to
-=:gslph/src/<module>=.  Upstream namespaces such as =:std/=, =:gerbil/=,
-=:clan/=, and =:wr/= remain unchanged.  Existing =:gslph/src/= imports and
+=:asp-gerbil-scheme/src/<module>=.  Upstream namespaces such as =:std/=, =:gerbil/=,
+=:clan/=, and =:wr/= remain unchanged.  Existing =:asp-gerbil-scheme/src/= imports and
 dynamic module names are already canonical.
 
 ** Test Contract
@@ -98,14 +349,42 @@ an upstream command directly. A build recipe uses =gxpkg env gxi=; a test
 recipe uses =gxpkg env gxtest=. It does not rewrite source paths or command
 behavior.
 
-On Darwin, a repository environment can inject a Nix SDK while the installed
-Gerbil runtime invokes the host C compiler. The installer may therefore make
-one command-local host-toolchain selection: clear inherited =SDKROOT= and
-resolve =CC= with =xcrun --find clang= for the native =gxi= invocation. This
-is not a compiler dispatcher, SDK path, or persistent environment mutation:
-the values are not stored, no path is hard-coded, and =gxi= still owns
-compilation. Other platforms invoke the same upstream command without an
-adaptation.
+On Darwin, a repository environment can inject =SDKROOT= or =DEVELOPER_DIR=
+from a Nix Apple SDK while the installed Homebrew Gerbil runtime invokes its
+configured GCC toolchain.  The Scheme build bridge therefore removes only
+those two foreign SDK selectors for the dynamic extent of native =std/make=
+execution and restores their exact prior values afterward.  It does not choose
+a compiler, store an SDK path, mutate the caller permanently, or add a shell
+launcher.  Other platforms pass through the caller environment unchanged.
+
+** Downstream Dependency Boundary
+
+A downstream =gerbil.pkg= dependency imports only
+=:asp-gerbil-scheme/src/package-build-api=.  That facade contains the package
+declaration, source discovery, profile projection, and the =std/make= bridge.
+It does not import ASP's CLI, provider server, HTTP runtime, testing system, or
+ASP product-native plan.  Those are ASP product owners, not Build API
+dependencies.
+
+The package macro discovers one module catalog at =build.ss= load time.  Policy
+and =std/make= receive projections of that same catalog; policy does not run a
+second repository discovery.  Gerbil remains responsible for compiler import
+expansion, freshness, dependency ordering, and parallel scheduling.
+
+#+begin_src mermaid
+flowchart LR
+  D[downstream gerbil.pkg] --> F[package-build-api facade]
+  F --> M[package spec macro]
+  M --> C[one module owner catalog]
+  C --> P[policy projection]
+  C --> N[native build spec]
+  P --> G[admission]
+  G --> S[upstream std/make]
+  N --> S
+
+  X[ASP CLI / provider / HTTP / tests] --> Q[ASP product build]
+  X -. not imported .-> F
+#+end_src
 
 ** Required Deletions
 
@@ -115,9 +394,8 @@ The migration removes:
 - bootstrap stage lists, source-interface materialization, and dynamic loading;
 - handwritten getopt, =compile= / =install= dispatch, and test subcommands;
 - SDK paths, compiler paths, load-path rewriting, and package-manager-specific
-  shell dispatch; a command-local Darwin host-toolchain selection is permitted
-  only to prevent an externally injected SDK from being mixed with the
-  installed Gerbil runtime;
+  shell dispatch; the Scheme bridge may dynamically exclude only foreign
+  Darwin SDK selectors while native =std/make= runs;
 - package-local wrappers which only forward to gxtest or std/make.
 
 =native-build.ss= and =gxtest-runner.ss= are retained only where they expose a
@@ -154,3 +432,23 @@ command protocol is deleted rather than preserved as compatibility code.
 - Downstream examples use the same native commands and no hidden wrapper.
 - Policy and scenario coverage reject reintroduction of a second command
   protocol.
+* One Project Catalog, Profile-Owned Test Convention
+
+The public Package Spec declares one explicit source ownership boundary.  A
+normal Gerbil project therefore uses =roots: ["."]=.  It does not declare a
+second =runtime-roots= catalog.  The Builder Profile owns the conventional
+=t/= test root and removes those modules only when projecting the catalog to
+the native =std/make= build spec.  Provider static linking remains a separate,
+explicit =runtime-modules= projection owned by the Provider Package Spec.
+
+#+begin_src mermaid
+flowchart LR
+  BUILD["build.ss\nroots: [\".\"]"] --> CATALOG["One project module catalog"]
+  PROFILE["Builder Profile\nexclude scenarios/snapshots\ntest-roots: [\"t\"]"] --> CATALOG
+  PROFILE --> NATIVE["Native std/make projection"]
+  CATALOG --> NATIVE
+  CATALOG --> POLICY["Single policy scan"]
+  NATIVE --> LIB["Library modules\nt/ excluded"]
+  PROJECTOR["Optional named native-spec-projector"] --> NATIVE
+  PROVIDER["Provider Package Spec\nruntime-modules"] --> STATIC["Explicit static provider closure"]
+#+end_src

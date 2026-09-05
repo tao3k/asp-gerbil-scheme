@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Project constants shared by command and protocol modules.
 
-(import (only-in :gslph/src/protocol/command-catalog provider-command-help))
+(import (only-in :asp-gerbil-scheme/src/protocol/command-catalog provider-command-help))
 
 (export +language-id+
         +cli-id+
@@ -13,7 +13,7 @@
 ;; String
 (def +language-id+ "gerbil-scheme")
 ;; String
-(def +cli-id+ "gslph")
+(def +cli-id+ "asp-gerbil-scheme")
 ;; String
 (def +provider-id+ "asp-gerbil-scheme")
 ;; String
@@ -22,7 +22,7 @@
 (def +semantic-extension-pattern-mapping-schema-id+
   "agent.semantic-protocols.semantic-extension-pattern-mapping")
 ;; Unit
-(def +display-name+ "Gerbil Scheme Harness")
+(def +display-name+ "ASP Gerbil Scheme")
 ;; ConfigConstant
 (def +help+
   (provider-command-help +cli-id+))

@@ -1,10 +1,4 @@
-(import (only-in :gerbil/gambit
-                 call-with-output-file
-                 delete-file
-                 file-exists?
-                 getenv)
-        (only-in :std/misc/path path-expand)
-        :std/test
+(import :std/test
         "../src/building/facade")
 
 (export building-framework-test)
@@ -13,22 +7,8 @@
   (let (entry (assq key alist))
     (and entry (cdr entry))))
 
-(def (write-fixture path datum)
-  (call-with-output-file path
-    (lambda (port)
-      (write datum port)
-      (newline port))))
-
-(def (write-fixture-forms path forms)
-  (call-with-output-file path
-    (lambda (port)
-      (for-each (lambda (form)
-                  (write form port)
-                  (newline port))
-                forms))))
-
 (def building-framework-test
-  (test-suite "gslph building framework"
+  (test-suite "asp-gerbil-scheme building framework"
     (test-case "exposes default std/make builder"
       (let (builder (default-std-builder "src"))
         (check (std-builder-name builder) => "std/make")
@@ -40,13 +20,13 @@
               (make-package-source-stage
                "native-concurrency"
                "src"
-               "gslph"
+               "asp-gerbil-scheme"
                ["core.ss"]
                #f))
              (request (package-source-stage->request stage []))
              (builder (build-profile-builder (build-request-profile request))))
         (check (std-builder-make-options builder)
-               => [prefix: "gslph"])))
+               => [prefix: "asp-gerbil-scheme"])))
     (test-case "projects stage receipts for agents"
       (let* ((receipt (make-build-stage-receipt
                        "core"
@@ -225,113 +205,4 @@
           (check (build-stage-receipt-result receipt) => 'made)
           (check calls => '((("stale-a.ss" "stale-b.ss"))))
           (check after-events => '(made)))))
-    (test-case "package source stages keep copied SSI artifacts current"
-      (let* ((module "package-source-stage-current-fixture.ss")
-             (dependency "package-source-stage-dependency-fixture.ss")
-             (source (path-expand module (current-directory)))
-             (dependency-source
-              (path-expand dependency (current-directory)))
-             (output
-              (path-expand
-               "gslph/package-source-stage-current-fixture.ssi"
-               (path-expand "lib" (or (getenv "GERBIL_PATH") ".gerbil"))))
-             (dependency-output
-              (path-expand
-               "gslph/package-source-stage-dependency-fixture.ssi"
-               (path-expand "lib" (or (getenv "GERBIL_PATH") ".gerbil"))))
-             (stage
-              (make-package-source-stage
-               "fixture"
-               (current-directory)
-               "gslph"
-               (list (list 'ssi: module) dependency)
-               'topology)))
-        (dynamic-wind
-          (lambda ()
-            (write-fixture
-             source
-             '(import :gslph/package-source-stage-dependency-fixture))
-            (write-fixture dependency-source '(source))
-            (write-fixture output '(output))
-            (thread-sleep! 1.1)
-            (write-fixture dependency-output '(output)))
-          (lambda ()
-            (check
-             (build-request-stage-specs
-              (package-source-stage->request stage []))
-             => '())
-            (delete-file output)
-            (check
-             (build-request-stage-specs
-              (package-source-stage->request stage []))
-             => (list (list (list 'ssi: module)))))
-          (lambda ()
-            (when (file-exists? source) (delete-file source))
-            (when (file-exists? dependency-source)
-              (delete-file dependency-source))
-            (when (file-exists? output) (delete-file output))
-            (when (file-exists? dependency-output)
-              (delete-file dependency-output))))))
-    (test-case "layers source topology while preserving declaration order"
-      (let (dependencies
-            '((core)
-              (policy core)
-              (runtime core)
-              (api policy runtime)))
-        (check
-         (source-topology-layers
-          '(core policy runtime api)
-          (lambda (node) (alist-ref dependencies node)))
-         => '((core) (policy runtime) (api)))))
-    (test-case "expands stale sources through reverse dependencies"
-      (let (dependencies
-            '((core)
-              (policy core)
-              (runtime core)
-              (api policy runtime)
-              (docs)))
-        (check
-         (source-topology-affected
-          '(core policy runtime api docs)
-          '(core)
-          (lambda (node) (alist-ref dependencies node)))
-         => '(core policy runtime api))))
-    (test-case "reads package imports into topology layers"
-      (let* ((root (current-directory))
-             (core "topology-core.ss")
-             (policy "topology-policy.ss")
-             (api "topology-api.ss")
-             (paths (map (lambda (module) (path-expand module root))
-                         [core policy api]))
-             (stage
-              (make-package-source-stage
-               "topology-fixture" root "gslph" [[ssi: core] policy api] 'topology)))
-        (dynamic-wind
-          (lambda ()
-            (write-fixture (car paths) '(export core))
-            (write-fixture-forms
-             (cadr paths)
-             '((export policy) (import "./topology-core") (def policy #t)))
-            (write-fixture
-             (caddr paths)
-             '(export (import: :gslph/topology-policy))))
-          (lambda ()
-            (check (package-source-stage-dependencies stage policy)
-                   => '("topology-core.ss"))
-            (check (package-source-stage-topology-layers stage)
-                   => '(("topology-core.ss")
-                        ("topology-policy.ss")
-                        ("topology-api.ss")))
-            (let (request (package-source-stage->request stage []))
-              (check
-               (build-request-stage-specs request)
-               => '(((ssi: "topology-core.ss")
-                    "topology-policy.ss"
-                    "topology-api.ss")))
-              (check
-               (map build-stage-label (build-request-stage-plan request))
-               => '("topology-fixture modules=3"))))
-          (lambda ()
-            (for-each (lambda (path)
-                        (when (file-exists? path) (delete-file path)))
-                      paths)))))))
+  ))

@@ -6,10 +6,10 @@
         :std/misc/ports
         :std/misc/process
         (only-in :std/text/json read-json)
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios
         :policy/fixtures)
 (export agent-basic-control-policy-test)
@@ -99,13 +99,15 @@
       (let* ((root ".run/policy-agent-import-reexport")
              (src (string-append root "/src"))
              (direct (string-append src "/direct"))
-             (reexport (string-append src "/reexport")))
+             (reexport (string-append src "/reexport"))
+             (relative (string-append src "/relative")))
         (reset-fixture-root root)
         (ensure-dir ".run")
         (ensure-dir root)
         (ensure-dir src)
         (ensure-dir direct)
         (ensure-dir reexport)
+        (ensure-dir relative)
         (write-text
          (string-append root "/gerbil.pkg")
          "(package: sample/agent-import-reexport)\n")
@@ -115,6 +117,12 @@
         (write-text
          (string-append reexport "/interface.ss")
          ";;; -*- Gerbil -*-\n(import :clan/poo/object)\n(export #t (import: :clan/poo/object))\n(def value (.o name: 'reexport))\n")
+        (write-text
+         (string-append relative "/core.ss")
+         ";;; -*- Gerbil -*-\n(export relative-value)\n(def relative-value 1)\n")
+        (write-text
+         (string-append relative "/interface.ss")
+         ";;; -*- Gerbil -*-\n(import ./core)\n(export (import: ./core))\n")
         (let* ((index (collect-project root))
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-018" findings)))

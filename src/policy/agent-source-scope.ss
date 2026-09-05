@@ -1,12 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing self-audit for policy source scope hardcoding.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/srfi/1 find)
         (only-in :std/srfi/13 string-contains string-prefix?)
         (only-in :std/sugar cut filter filter-map hash ormap)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export policy-source-scope-findings
         policy-source-scope-finding)

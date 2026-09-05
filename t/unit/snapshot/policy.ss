@@ -2,7 +2,7 @@
 ;;; Policy snapshot projection facade.
 
 (import :std/test
-        :gslph/src/snapshot/facade
+        :asp-gerbil-scheme/src/snapshot/facade
         (rename-in :unit/snapshot/policy-poo
           (downstream-poo-agent-policy-snapshot policy-poo-downstream-poo-agent-policy-snapshot)
           (poo-prototype-fixed-point-policy-snapshot policy-poo-poo-prototype-fixed-point-policy-snapshot)

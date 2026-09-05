@@ -2,9 +2,9 @@
 ;;; Higher-cost fixtures for testing-framework integration and benchmark tests.
 
 (import :gerbil/gambit
-        :gslph/src/testing/model
-        :gslph/src/testing/framework
-        :gslph/src/testing/build
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/framework
+        :asp-gerbil-scheme/src/testing/build
         :policy/testing-framework-support)
 
 (export +testing-benchmark-root+
@@ -101,7 +101,7 @@
                  +upstream-build-improvement-scenario-suite+)
    roots: (list +testing-fixture-root+ "t/scenarios/policy")
    batch-size: 3
-   receipt-prefix: "gslph-upstream-build-improvement"))
+   receipt-prefix: "asp-gerbil-scheme-upstream-build-improvement"))
 
 ;; TestingBuild
 (def +downstream-improvement-build+
@@ -126,4 +126,4 @@
    name: "poo-flow-like-gated"
    suites: (list +testing-gated-suite+ +testing-gated-scenario-suite+)
    roots: (list +testing-fixture-root+)
-   receipt-prefix: "gslph-testing-gated"))
+   receipt-prefix: "asp-gerbil-scheme-testing-gated"))

@@ -1,10 +1,14 @@
 (import :std/test
         :gerbil/gambit
         "../src/building/facade"
-        (only-in "../src/build-api/package-spec"
-                 gslph-package-api-stage-specs))
+        (only-in :asp-gerbil-scheme/src/testing/execution-profile
+                 declare-gxtest-serial)
+        (only-in "../src/build-api/package-native-plan"
+                 asp-gerbil-scheme-package-api-stage-specs))
 
 (export building-performance-test)
+
+(declare-gxtest-serial timing-sensitive-building)
 
 (def (elapsed-ms thunk)
   (let (started (time->seconds (current-time)))
@@ -18,7 +22,7 @@
       (loop (- remaining 1)))))
 
 (def building-performance-test
-  (test-suite "gslph building performance"
+  (test-suite "asp-gerbil-scheme building performance"
     (test-case "skips current stage within framework budget"
       (let* ((call-count 0)
              (builder
@@ -107,5 +111,5 @@
              (lambda ()
                (repeat 500
                  (lambda ()
-                   (gslph-package-api-stage-specs))))))
+                   (asp-gerbil-scheme-package-api-stage-specs))))))
         (check (< elapsed 300.0) => #t)))))

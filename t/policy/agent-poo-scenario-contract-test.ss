@@ -3,7 +3,7 @@
 
 (import :gerbil/gambit
         :std/test
-        :gslph/src/benchmark/framework
+        :asp-gerbil-scheme/src/benchmark/framework
         :policy/agent-poo-scenario-registry
         :policy/agent-poo-scenario-contract-support)
 

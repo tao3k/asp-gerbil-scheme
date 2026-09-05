@@ -24,7 +24,7 @@ Commands used during this audit:
 
 #+begin_src shell
 asp org search toc docs/10-19-research
-asp org query --from-hook direct-source-read --selector docs/10-19-research/11.05-gerbil-scheme-harness-engineering-audit.org:234-478 docs/10-19-research
+asp org query --from-hook direct-source-read --selector docs/10-19-research/11.05-asp-gerbil-scheme-engineering-audit.org:234-478 docs/10-19-research
 asp org query --from-hook direct-source-read --selector docs/10-19-research/11.06-current-quality-gap-register.org:44-220 docs/10-19-research
 asp rg -query 'GERBIL-SCHEME-AGENT-POLICY-016|quality-shape|predicate-family' -query 'typed-combinator|controlled-branch|comment-quality' src t docs/10-19-research
 asp rg -query 'predicateFamilyFacts|fieldAccessPatternFacts|booleanConditionFacts|loopDriverFacts' -query 'structural|snapshot|search|packet|projection' src t
@@ -40,7 +40,7 @@ asp gerbil-scheme query --selector src/types/findings.ss:1-180 --workspace . --c
 
 Important evidence:
 
-- =docs/10-19-research/11.05-gerbil-scheme-harness-engineering-audit.org=
+- =docs/10-19-research/11.05-asp-gerbil-scheme-engineering-audit.org=
   already identified the right long-term shape: capability posture, rule
   catalog centralization, search vocabulary, macro witness, POO opportunity
   rules, and structural performance profiling.
@@ -419,9 +419,9 @@ The loop is closed only when:
 
 #+begin_src shell
 gxi build.ss test
-./bin/gerbil-scheme-harness check --json .
-./bin/gerbil-scheme-harness self-apply --json .
-./bin/gerbil-scheme-harness bench --iterations 1 --max-total-ms 60000 .
+gxtest t/project-policy-test.ss
+./bin/asp-gerbil-scheme self-apply --json .
+./bin/asp-gerbil-scheme bench --iterations 1 --max-total-ms 60000 .
 #+end_src
 
 The important receipt is not "tests pass" alone.  The important receipt is that

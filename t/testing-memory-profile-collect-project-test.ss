@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 
 (import :std/test
-        :gslph/src/testing/gxtest-execution)
+        :asp-gerbil-scheme/src/testing/gxtest-execution)
 
 (export testing-memory-profile-collect-project-test)
 

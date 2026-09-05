@@ -1,14 +1,14 @@
 ;;; -*- Gerbil -*-
 ;;; Execution layer for downstream testing-build declarations.
 
-(import :gslph/src/testing/build
-        :gslph/src/testing/framework
-        :gslph/src/testing/build-support
-        (only-in :gslph/src/testing/build-runtime
+(import :asp-gerbil-scheme/src/testing/build
+        :asp-gerbil-scheme/src/testing/framework
+        :asp-gerbil-scheme/src/testing/build-support
+        (only-in :asp-gerbil-scheme/src/testing/build-runtime
                  testing-build-dry-gxtest-runner
                  testing-build-gxtest-runner))
 
-(export (import: :gslph/src/testing/build)
+(export (import: :asp-gerbil-scheme/src/testing/build)
         testing-build-select
         testing-build-main
         testing-build-dry-gxtest-runner

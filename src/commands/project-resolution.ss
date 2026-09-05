@@ -2,18 +2,18 @@
 ;;; Typed Gerbil package scope from ASP-admitted candidates.
 
 (import :gerbil/gambit
-        (only-in :gslph/src/constants +language-id+ +provider-id+)
-        (only-in :gslph/src/parser/package
+        (only-in :asp-gerbil-scheme/src/constants +language-id+ +provider-id+)
+        (only-in :asp-gerbil-scheme/src/parser/package
                  project-package-dependencies
                  project-package-name
                  project-package-source-scope-policy
                  read-project-package
                  source-scope-policy-roots
                  source-scope-policy-runtime-roots)
-        :std/crypto/digest
+        (only-in :std/crypto/digest sha256)
         (only-in :std/misc/path path-directory path-expand path-normalize)
         (only-in :std/misc/ports read-all-as-string)
-        (only-in :std/srfi/1 filter-map find)
+        (only-in :std/srfi/1 delete-duplicates filter-map find)
         (only-in :std/srfi/13 string-prefix? string-suffix?)
         (only-in :std/sugar hash))
 
@@ -28,11 +28,16 @@
 (def +package-graph-schema-id+
   "agent.semantic-protocols.language-package-graph")
 (def +parser-id+ "gerbil.package-spec")
-(def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld"))
+(def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld" ".inc"))
 (def +hex-digits+ "0123456789abcdef")
 
 (defstruct project-resolution-not-applicable ())
 
+;;; Resolution performs one pass over candidate package metadata and derives
+;;; package, dependency, and source-scope projections from that shared result.
+;;; The empty-candidate branch is the only not-applicable exit; once a manifest
+;;; is selected, malformed or unresolved package state remains explicit rather
+;;; than silently widening to a workspace scan.
 (def (project-resolution-request->response request)
   (validate-project-resolution-request request)
   (let* ((workspace-root (path-normalize (current-directory)))
@@ -193,7 +198,10 @@
                    (unique
                     (append (source-scope-policy-roots policy)
                             (source-scope-policy-runtime-roots policy)))
-                   '()))
+                   ;; The Builder Profile's canonical package default is the
+                   ;; package root. Candidate admission below still requires
+                   ;; an actual source file, so this never widens into a scan.
+                   '(".")))
                 (roots
                  (map (lambda (root)
                         (relative-package-path relative-root root))
@@ -341,15 +349,7 @@
          +source-extensions+))
 
 (def (unique values)
-  (let loop ((remaining values) (seen '()) (result '()))
-    (if (null? remaining)
-      (reverse result)
-      (let (value (car remaining))
-        (if (member value seen)
-          (loop (cdr remaining) seen result)
-          (loop (cdr remaining)
-                (cons value seen)
-                (cons value result)))))))
+  (delete-duplicates values equal?))
 
 (def (required-field object key)
   (let (value (hash-ref object key #f))

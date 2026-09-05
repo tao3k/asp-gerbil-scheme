@@ -3,7 +3,7 @@
 
 (import :gerbil/gambit
         (only-in :std/misc/path path-directory path-expand path-strip-directory)
-        (only-in "./launcher-receipt" gslph-build-module-artifact-files))
+        (only-in "./launcher-receipt" asp-gerbil-scheme-build-module-artifact-files))
 (export cleanup-compile-exe-artifacts!
         cleanup-generated-artifacts!
         cleanup-launcher-binary-artifacts!
@@ -47,5 +47,5 @@
   (cleanup-generated-artifacts!
    (apply append
           (map (lambda (module)
-                 (gslph-build-module-artifact-files output-root module))
+                 (asp-gerbil-scheme-build-module-artifact-files output-root module))
                module-spec))))

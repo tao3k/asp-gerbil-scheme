@@ -3,16 +3,16 @@
 
 (import :std/test
         (only-in :clan/poo/object object? .ref .slot?)
-        :gslph/src/testing/model
-        :gslph/src/testing/framework
-        :gslph/src/testing/performance
-        :gslph/src/testing/build
-        :gslph/src/testing/build-runner
-        :gslph/src/testing/build-process
-        :gslph/src/testing/build-support
-        :gslph/src/testing/build-runtime
-        :gslph/src/building/facade
-        :gslph/src/testing/building)
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/framework
+        :asp-gerbil-scheme/src/testing/performance
+        :asp-gerbil-scheme/src/testing/build
+        :asp-gerbil-scheme/src/testing/build-runner
+        :asp-gerbil-scheme/src/testing/build-process
+        :asp-gerbil-scheme/src/testing/build-support
+        :asp-gerbil-scheme/src/testing/build-runtime
+        :asp-gerbil-scheme/src/building/facade
+        :asp-gerbil-scheme/src/testing/building)
 
 (export testing-framework-test
         performance-smoke-work)
@@ -359,7 +359,7 @@
                         name: "lazy-poo-smoke"
                         fixture-path:
                         "t/scenarios/policy/poo-object-construction-loop-performance/benchmark.ss"
-                        runner-module: ':gslph/src/building/native-toolchain
+                        runner-module: ':asp-gerbil-scheme/src/building/native-toolchain
                         runner-symbol: 'native-toolchain-default)]))
              (project
               (testing-project
@@ -412,7 +412,7 @@
                => ["env"
                    "gxtest"
                    "t/unit-a-test.ss"
-                   "./.gerbil/gslph/testing/poo-flow-policy-test.ss"])))
+                   "./.gerbil/asp-gerbil-scheme/testing/poo-flow-policy-test.ss"])))
 
     (test-case "testing build can omit policy file after first delegate batch"
       (let (build (testing-build
@@ -450,21 +450,21 @@
         (check (testing-any?
                 (lambda (stamp)
                   (testing-string-suffix?
-                   "gslph/src/testing/scope.ssi"
+                   "asp-gerbil-scheme/src/testing/scope.ssi"
                    stamp))
                 stamps)
                => #t)
         (check (testing-any?
                 (lambda (stamp)
                   (testing-string-suffix?
-                   "gslph/src/testing/selection.ssi"
+                   "asp-gerbil-scheme/src/testing/selection.ssi"
                    stamp))
                 stamps)
                => #t)
         (check (testing-any?
                 (lambda (stamp)
                   (testing-string-suffix?
-                   "gslph/src/testing/batch.ssi"
+                   "asp-gerbil-scheme/src/testing/batch.ssi"
                    stamp))
                 stamps)
                => #t)))

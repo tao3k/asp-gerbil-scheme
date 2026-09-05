@@ -14,8 +14,7 @@
 ;; : (-> String Void)
 (def (configure-build-root! root)
   (set! package-root (path-normalize root))
-  (current-directory package-root)
-  (setenv "GERBIL_PATH" (path-expand ".gerbil" package-root)))
+  (current-directory package-root))
 
 ;; : (-> Path Void)
 ;; Configure only the shared path contract for a native build owner.
@@ -29,7 +28,7 @@
 
 ;; : (-> Path)
 (def (dev-launcher-binpath)
-  (path-expand ".bin/gslph" package-root))
+  (path-expand ".bin/asp-gerbil-scheme" package-root))
 
 ;; : (-> Path)
 (def (asp-state-home-directory)
@@ -43,9 +42,9 @@
 (def (install-launcher-binpath (flag #f))
   (case flag
     ((#f)
-     (path-expand ".local/bin/gslph" (user-home-directory)))
+     (path-expand ".local/bin/asp-gerbil-scheme" (user-home-directory)))
     ((asp)
-     (path-expand "gslph" (asp-install-launcher-directory)))
+     (path-expand "asp-gerbil-scheme" (asp-install-launcher-directory)))
     (else
      (error "unsupported gerbil-scheme install flag" flag))))
 

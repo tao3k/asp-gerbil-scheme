@@ -1,9 +1,20 @@
+;;; Build observability projects already-executed stage receipts and guard
+;;; samples into evidence.  It may detect rapid memory anomalies, but it must
+;;; not reduce configured concurrency or become a second scheduler.
 (import :gerbil/gambit
         (only-in :std/text/json
                  json-object->string
                  write-json-sort-keys?)
-        ./model
-        ./std-builder)
+        (only-in :std/srfi/1 fold)
+        (only-in ./model
+                 build-stage-receipt-description
+                 build-stage-receipt-elapsed-jiffies
+                 build-stage-receipt-kind
+                 build-stage-receipt-label
+                 build-stage-receipt-status
+                 build-stage-run!
+                 build-stage-spec)
+        (only-in ./std-builder build-request-stage-plan))
 
 (export build-stage-observation?
         make-build-stage-observation
@@ -93,40 +104,43 @@
 (def (ignore-build-observation! _observation _completed-count _elapsed-seconds)
   #!void)
 
-;; The guard is checked on both sides of every item.  It therefore blocks at a
-;; topology boundary without a polling thread, and can overrun only by the
+;; The guard is checked on both sides of every item.  It therefore blocks at an
+;; observation boundary without a polling thread, and can overrun only by the
 ;; duration of the currently executing item.  Callers own the budget policy;
 ;; this layer deliberately has no machine-independent time constant.
 (def (build-observe-sequence/guard! items observer guard on-observation)
-  (let ((start-jiffy (current-jiffy)))
-    (let loop ((remaining items) (completed-reverse '()) (completed-count 0))
-      (if (null? remaining)
-          (reverse completed-reverse)
-          (let* ((item (car remaining))
-                 (before-seconds
-                  (elapsed-seconds start-jiffy (current-jiffy))))
-            (unless (guard 'before-item
-                           before-seconds
-                           completed-count
-                           item)
-              (error "build observation guard blocked before item"
-                     `((elapsed-seconds . ,before-seconds)
-                       (completed-count . ,completed-count))))
-            (let* ((observation (observer item))
-                   (next-count (+ completed-count 1))
-                   (after-seconds
-                    (elapsed-seconds start-jiffy (current-jiffy))))
-              (on-observation observation next-count after-seconds)
-              (unless (guard 'after-item
-                             after-seconds
-                             next-count
-                             observation)
-                (error "build observation guard blocked after item"
-                       `((elapsed-seconds . ,after-seconds)
-                         (completed-count . ,next-count))))
-              (loop (cdr remaining)
-                    (cons observation completed-reverse)
-                    next-count)))))))
+  (let* ((start-jiffy (current-jiffy))
+         (progress
+          (fold
+           (lambda (item progress)
+             (let* ((completed-reverse (vector-ref progress 0))
+                    (completed-count (vector-ref progress 1))
+                    (before-seconds
+                     (elapsed-seconds start-jiffy (current-jiffy))))
+               (unless (guard 'before-item
+                              before-seconds
+                              completed-count
+                              item)
+                 (error "build observation guard blocked before item"
+                        `((elapsed-seconds . ,before-seconds)
+                          (completed-count . ,completed-count))))
+               (let* ((observation (observer item))
+                      (next-count (+ completed-count 1))
+                      (after-seconds
+                       (elapsed-seconds start-jiffy (current-jiffy))))
+                 (on-observation observation next-count after-seconds)
+                 (unless (guard 'after-item
+                                after-seconds
+                                next-count
+                                observation)
+                   (error "build observation guard blocked after item"
+                          `((elapsed-seconds . ,after-seconds)
+                            (completed-count . ,next-count))))
+                 (vector (cons observation completed-reverse)
+                         next-count))))
+           (vector '() 0)
+           items)))
+    (reverse (vector-ref progress 0))))
 
 (def (sum-observation-field accessor observations)
   (apply + (map accessor observations)))
@@ -139,7 +153,7 @@
 ;; the in-process receipt for Scheme callers only.
 (def (build-stage-observation->json-object observation)
   (let ((receipt (build-stage-observation-receipt observation)))
-    (hash ("schema" "gslph.build-stage-observation.v1")
+    (hash ("schema" "asp-gerbil-scheme.build-stage-observation.v1")
           ("version" 1)
           ("label" (build-stage-receipt-label receipt))
           ("kind" (json-name (build-stage-receipt-kind receipt)))
@@ -170,234 +184,12 @@
            (build-stage-observation-control-plane-allocated-bytes observation)))))
 
 (def (build-plan-observations->json-object observations)
-  (hash ("schema" "gslph.build-observations.v1")
+  (hash ("schema" "asp-gerbil-scheme.build-observations.v1")
         ("version" 1)
         ("metric-scope" "gerbil-control-plane")
         ("native-child-cpu-included" #f)
         ("stages" (map build-stage-observation->json-object observations))))
 
-(export build-topology-execution-windows->json-object
-        build-topology-execution-windows->json-string
-        package-source-stage-topology-execution-windows->json-object
-        package-source-stage-topology-execution-windows->json-string
-        build-adaptive-execution-windows->json-object
-        build-adaptive-execution-windows->json-string)
-
-(def (build-topology-execution-windows-flatten groups)
-  (apply append groups))
-
-(def (build-topology-execution-windows->json-object topology-groups execution-windows)
-  (let* ((topology-specs
-          (build-topology-execution-windows-flatten topology-groups))
-         (window-specs
-          (build-topology-execution-windows-flatten execution-windows))
-         (topology-group-count (length topology-groups))
-         (upstream-session-count (length execution-windows)))
-    (hash
-     ("schema" "gslph.build-topology-execution-windows.v1")
-     ("version" 1)
-     ("metric-scope" "build-topology-execution-windows")
-     ("upstream-executor" "std/make")
-     ("topology-group-count" topology-group-count)
-     ("upstream-session-count" upstream-session-count)
-     ("eliminated-barrier-count"
-      (max 0 (- topology-group-count upstream-session-count)))
-     ("spec-count" (length topology-specs))
-     ("dependency-order-preserved" (equal? topology-specs window-specs)))))
-
-(def (build-topology-execution-windows->json-string topology-groups execution-windows)
-  (json-object->canonical-string
-   (build-topology-execution-windows->json-object
-    topology-groups
-    execution-windows)))
-
-(def (package-source-stage-topology-execution-windows->json-object stage)
-  (build-topology-execution-windows->json-object
-   (package-source-stage-topology-request-spec-groups stage)
-   (package-source-stage-topology-request-specs stage)))
-
-(def (package-source-stage-topology-execution-windows->json-string stage)
-  (json-object->canonical-string
-   (package-source-stage-topology-execution-windows->json-object stage)))
-
-(def (build-adaptive-execution-window-spec->json-value spec)
-  (cond
-   ((symbol? spec) (symbol->string spec))
-   ((pair? spec)
-    (map build-adaptive-execution-window-spec->json-value spec))
-   ((null? spec) [])
-   (else spec)))
-
-(def (build-adaptive-execution-window->json-object
-      window observation index)
-  (hash
-   ("index" index)
-   ("spec-count" (length window))
-   ("specs"
-    (map build-adaptive-execution-window-spec->json-value window))
-   ("outcome"
-    (json-name (execution-window-observation-outcome observation)))
-   ("baseline-rss-bytes"
-    (execution-window-observation-baseline-rss-bytes observation))
-   ("peak-rss-bytes"
-    (execution-window-observation-peak-rss-bytes observation))
-   ("max-rss-bytes"
-    (execution-window-observation-max-rss-bytes observation))
-   ("elapsed-ms"
-    (execution-window-observation-elapsed-ms observation))))
-
-(def (build-adaptive-execution-window-json-objects
-      windows observations (index 0))
-  (if (null? windows)
-    []
-    (cons
-     (build-adaptive-execution-window->json-object
-      (car windows) (car observations) index)
-     (build-adaptive-execution-window-json-objects
-      (cdr windows) (cdr observations) (+ index 1)))))
-
-(def (build-adaptive-execution-windows->json-object result)
-  (unless (adaptive-execution-window-result? result)
-    (error "adaptive execution-window JSON requires an adaptive result" result))
-  (let* ((topology-groups
-          (adaptive-execution-window-result-topology-groups result))
-         (execution-windows
-          (adaptive-execution-window-result-execution-windows result))
-         (observations
-          (adaptive-execution-window-result-window-observations result))
-         (controller
-          (adaptive-execution-window-result-controller result))
-         (topology-specs
-          (build-topology-execution-windows-flatten topology-groups))
-         (attempted-specs
-          (build-topology-execution-windows-flatten execution-windows)))
-    (unless (= (length execution-windows) (length observations))
-      (error
-       "adaptive execution-window result has mismatched observations"
-       (length execution-windows)
-       (length observations)))
-    (hash
-     ("schema" "gslph.build-adaptive-execution-windows.v1")
-     ("version" 1)
-     ("metric-scope" "build-adaptive-execution-windows")
-     ("upstream-executor" "std/make")
-     ("topology-group-count" (length topology-groups))
-     ("attempted-window-count" (length execution-windows))
-     ("spec-count" (length attempted-specs))
-     ("dependency-order-preserved"
-      (equal? topology-specs attempted-specs))
-     ("hard-max-rss-bytes"
-      (execution-window-controller-hard-max-rss-bytes controller))
-     ("windows"
-      (build-adaptive-execution-window-json-objects
-       execution-windows observations)))))
-
-(export build-adaptive-execution-window-diagnostics->json-object
-        build-adaptive-execution-window-diagnostics->json-string)
-
-(def (build-adaptive-execution-window-diagnostic-limit window-count)
-  (if (<= window-count 0)
-    0
-    (let loop ((remaining window-count)
-               (levels 0))
-      (if (<= remaining 1)
-        (max 1 levels)
-        (loop (quotient (+ remaining 1) 2)
-              (+ levels 1))))))
-
-(def (build-adaptive-execution-window-ranked-json-objects
-      windows
-      observations
-      (index 0))
-  (if (null? windows)
-    '()
-    (cons
-     (cons
-      (execution-window-observation-elapsed-ms (car observations))
-      (build-adaptive-execution-window->json-object
-       (car windows)
-       (car observations)
-       index))
-     (build-adaptive-execution-window-ranked-json-objects
-      (cdr windows)
-      (cdr observations)
-      (+ index 1)))))
-
-(def (build-adaptive-execution-window-ranked-take ranked limit)
-  (if (or (<= limit 0) (null? ranked))
-    '()
-    (cons (car ranked)
-          (build-adaptive-execution-window-ranked-take
-           (cdr ranked)
-           (- limit 1)))))
-
-(def (build-adaptive-execution-window-ranked-insert candidate selected limit)
-  (cond
-   ((<= limit 0) '())
-   ((null? selected) (list candidate))
-   ((> (car candidate) (caar selected))
-    (cons candidate
-          (build-adaptive-execution-window-ranked-take
-           selected
-           (- limit 1))))
-   (else
-    (cons (car selected)
-          (build-adaptive-execution-window-ranked-insert
-           candidate
-           (cdr selected)
-           (- limit 1))))))
-
-(def (build-adaptive-execution-window-select-slowest ranked limit)
-  (let loop ((remaining ranked)
-             (selected '()))
-    (if (null? remaining)
-      selected
-      (loop
-       (cdr remaining)
-       (build-adaptive-execution-window-ranked-insert
-        (car remaining)
-        selected
-        limit)))))
-
-(def (build-adaptive-execution-window-diagnostics->json-object result)
-  (unless (adaptive-execution-window-result? result)
-    (error "adaptive execution-window diagnostics require an adaptive result"
-           result))
-  (let* ((windows
-          (adaptive-execution-window-result-execution-windows result))
-         (observations
-          (adaptive-execution-window-result-window-observations result))
-         (window-count (length windows))
-         (selection-limit
-          (build-adaptive-execution-window-diagnostic-limit window-count)))
-    (unless (= window-count (length observations))
-      (error "adaptive execution-window diagnostics have mismatched observations"
-             window-count
-             (length observations)))
-    (let* ((ranked
-            (build-adaptive-execution-window-ranked-json-objects
-             windows
-             observations))
-           (slowest
-            (build-adaptive-execution-window-select-slowest
-             ranked
-             selection-limit)))
-      (hash
-       ("schema" "gslph.build-adaptive-execution-window-diagnostics.v1")
-       ("version" 1)
-       ("metric-scope" "build-adaptive-execution-window-diagnostics")
-       ("selection-policy" "ceil-log2-window-count")
-       ("attempted-window-count" window-count)
-       ("selected-window-count" (length slowest))
-       ("slowest-windows" (map cdr slowest))))))
-
-(def (build-adaptive-execution-window-diagnostics->json-string result)
-  (json-object->canonical-string
-   (build-adaptive-execution-window-diagnostics->json-object result)))
-
-(def (build-adaptive-execution-windows->json-string result)
-  (json-object->canonical-string
-   (build-adaptive-execution-windows->json-object result)))
 
 (def (build-plan-observations-summary->json-object observations)
   (let* ((wall-seconds
@@ -406,7 +198,7 @@
          (cpu-seconds
           (sum-observation-field build-stage-observation-control-plane-cpu-seconds
                                  observations)))
-    (hash ("schema" "gslph.build-observations-summary.v1")
+    (hash ("schema" "asp-gerbil-scheme.build-observations-summary.v1")
           ("version" 1)
           ("metric-scope" "gerbil-control-plane")
           ("native-child-cpu-included" #f)

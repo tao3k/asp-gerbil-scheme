@@ -2,11 +2,11 @@
 ;;; Baseline agent policy checks for ownership, entrypoints, and functional idioms.
 
 (import :gerbil/gambit
-        :gslph/src/parser/facade
-        :gslph/src/policy/agent-poo
-        :gslph/src/policy/agent-support
-        :gslph/src/policy/model
-        :gslph/src/policy/modularity
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-poo
+        :asp-gerbil-scheme/src/policy/agent-support
+        :asp-gerbil-scheme/src/policy/model
+        :asp-gerbil-scheme/src/policy/modularity
         (only-in :std/misc/ports read-file-lines)
         (only-in :std/srfi/1 take)
         (only-in :std/srfi/13
@@ -15,7 +15,7 @@
                  string-suffix?
                  string-trim)
         (only-in :std/sugar cut filter filter-map find hash ormap with-catch)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export facade-intent-findings
         facade-intent-finding
@@ -239,10 +239,43 @@
 
 ;; : (-> SourceFile CallFact Boolean )
 (def (top-level-entrypoint-exempt-call? file call)
-  (or (explicit-runtime-entrypoint-path? (call-fact-path call))
-      (explicit-main-entrypoint-call? file call)
+  (or (explicit-main-entrypoint-call? file call)
       (explicit-test-entrypoint-call? file call)
+      (explicit-build-entrypoint-call? file call)
+      (definition-lowering-macro-call? file call)
       (declarative-top-level-call? file call)))
+
+(def +explicit-build-entrypoint-heads+
+  '("asp-gerbil-scheme-package-spec!" "init-build-environment!"))
+
+;;; Boundary:
+;;; - `build.ss` is the package-owned std/make declaration entrypoint.
+;;; - Only calls contained by the two canonical Build API top forms are
+;;;   declarative; arbitrary executable forms in the same file still fail.
+;; : (-> SourceFile CallFact Boolean )
+(def (explicit-build-entrypoint-call? file call)
+  (and (equal? (source-file-path file) "build.ss")
+       (ormap (lambda (form)
+                (and (member (top-form-head form)
+                             +explicit-build-entrypoint-heads+)
+                     (call-within-top-form-range? call form)))
+              (source-file-forms file))))
+
+;;; Parser-owned macro facets prove this exact local invocation lowers only to
+;;; a definition.  Name equality, source ownership, and top-form containment
+;;; keep the exemption narrower than a macro-name allowlist.
+;; : (-> SourceFile CallFact Boolean)
+(def (definition-lowering-macro-call? file call)
+  (ormap
+   (lambda (form)
+     (and (call-within-top-form-range? call form)
+          (ormap
+           (lambda (macro)
+             (and (equal? (macro-fact-name macro) (top-form-head form))
+                  (member "definition-lowering-macro"
+                          (macro-fact-quality-facets macro))))
+           (source-file-macros file))))
+   (source-file-forms file)))
 
 ;; (List TopFormHead)
 (def +explicit-main-entrypoint-heads+
@@ -259,6 +292,8 @@
     "use-module"
     "use-live-case"
     "declare-gxtest-memory-exception"
+    "define-entry-point"
+    "define-multicall-main"
     "modularity-policy"
     "poo-flow-module-object"
     "poo-flow-module-field-contract"))

@@ -3,12 +3,12 @@
 
 (import :gerbil/gambit
         :std/test
-        :gslph/src/testing/model
-        :gslph/src/testing/framework
-        :gslph/src/testing/build
-        :gslph/src/testing/build-runner
-        :gslph/src/testing/gxtest-smoke
-        :gslph/src/benchmark/framework
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/framework
+        :asp-gerbil-scheme/src/testing/build
+        :asp-gerbil-scheme/src/testing/build-runner
+        :asp-gerbil-scheme/src/testing/gxtest-smoke
+        :asp-gerbil-scheme/src/benchmark/framework
         :policy/testing-framework-support
         :policy/testing-framework-integration-support)
 
@@ -44,8 +44,8 @@
                => (testing-receipt-files suite-receipt))))
 
     (test-case "default testing gate includes full self-apply policy"
-      (let ((files (gslph-default-gxtest-smoke-files))
-            (suite (gslph-default-gxtest-smoke-suite)))
+      (let ((files (asp-gerbil-scheme-default-gxtest-smoke-files))
+            (suite (asp-gerbil-scheme-default-gxtest-smoke-suite)))
         (check (member "t/self-apply-full-gate.ss" files) ? true)
         (check (testing-suite-files suite) => files)))
 

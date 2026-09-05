@@ -2,8 +2,8 @@
 ;;; Modularity policy checks over parser-owned source-file facts.
 
 (import :gerbil/gambit
-        :gslph/src/parser/facade
-        :gslph/src/policy/model
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/misc/ports read-file-lines)
         (only-in :std/srfi/13
                  string-contains
@@ -12,7 +12,7 @@
                  string-suffix?
                  string-trim)
         (only-in :std/sugar cut filter filter-map find foldl hash ormap with-catch)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export run-modularity-policy
         +max-source-line-count+

@@ -31,7 +31,7 @@ All public framework values are POO objects: projects, suites, gates, selections
 
 ** 3. Upstream Gxtest Delegation Scenario Exists
 The =upstream-gxtest-delegation= scenario covers the boundary between pure model tests and downstream build tests:
-- its =expected/build.ss= imports only the thin =:gslph/src/testing/build= API
+- its =expected/build.ss= imports only the thin =:asp-gerbil-scheme/src/testing/build= API
 - it uses real test modules exporting =test-setup!=, =test-cleanup!=, and =alpha-test=
 - it proves selected files are computed before delegate execution
 - it checks gxtest-compatible export discovery through =gxtest-file-exported-symbols= and =gxtest-file-exported-suite=
@@ -44,14 +44,14 @@ Framework receipts expose phase receipts under the receipt =details= field:
 - scenario suite receipts include =delegate-policy=
 - suite receipts include =benchmark-assert= phases for gate-bearing suites
 
-Tests assert these phase names directly through =testing-receipt-phases= while preserving existing =children= semantics for suite and batch receipts. The build runner separately emits =gslph-test-phase= lines for package compile and gxtest execution phases.
+Tests assert these phase names directly through =testing-receipt-phases= while preserving existing =children= semantics for suite and batch receipts. The build runner separately emits =asp-gerbil-scheme-test-phase= lines for package compile and gxtest execution phases.
 
 ** 5. Downstream Build API Is Thin
 The target downstream shape is now the fixture shape:
 
 #+begin_src scheme
 (import :gerbil/gambit
-        :gslph/src/testing/build)
+        :asp-gerbil-scheme/src/testing/build)
 
 (export project
         test)

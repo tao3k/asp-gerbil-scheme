@@ -44,16 +44,16 @@ Rules:
   requires isolation
 - any full-project pass must be an explicit full/full-project target
 - unknown incremental scopes fail with a receipt instead of widening silently
-The complex guard for this rule is =testing-framework-upstream-build-improvement= plus the downstream loading scenario =downstream-testing-framework-api-loading= and the Marlin-derived =marlin-testing-speed-trap=. The first models a multi-suite project inside the framework. The second loads a scenario-owned downstream =build.ss= through package-qualified =:gslph/src/testing/*= imports. The third reproduces the agent-written Marlin build bottleneck where long gxtest lists and appended policy scope made one test action behave like a broad =gxtest-main= run. Together they prove that an explicit file selects only its suite, a manifest root expands only that suite, a scenario id runs no gxtest suites, and the framework-owned dispatch path remains under a =benchmark.ss= hot-path gate.
+The complex guard for this rule is =testing-framework-upstream-build-improvement= plus the downstream loading scenario =downstream-testing-framework-api-loading= and the Marlin-derived =marlin-testing-speed-trap=. The first models a multi-suite project inside the framework. The second loads a scenario-owned downstream =build.ss= through package-qualified =:asp-gerbil-scheme/src/testing/*= imports. The third reproduces the agent-written Marlin build bottleneck where long gxtest lists and appended policy scope made one test action behave like a broad =gxtest-main= run. Together they prove that an explicit file selects only its suite, a manifest root expands only that suite, a scenario id runs no gxtest suites, and the framework-owned dispatch path remains under a =benchmark.ss= hot-path gate.
 
 * Performance Receipt
 Warm default-smoke receipt after the framework boundary cleanup:
 
 #+begin_src text
-[gslph-package-build-receipt] status=current sources=15 outputs=15
-[gslph-test-phase] name=compile-package-api elapsedMs=4
-[gslph-test-runner] files=5 jobs=1 serial=0 mode=source-in-process
-[gslph-test-phase] name=run-gxtest elapsedMs=867
+[asp-gerbil-scheme-package-build-receipt] status=current sources=15 outputs=15
+[asp-gerbil-scheme-test-phase] name=compile-package-api elapsedMs=4
+[asp-gerbil-scheme-test-runner] files=5 jobs=1 serial=0 mode=source-in-process
+[asp-gerbil-scheme-test-phase] name=run-gxtest elapsedMs=867
 #+end_src
 
 The default gate is therefore a hot smoke gate. Broader TypeSpec proof coverage,

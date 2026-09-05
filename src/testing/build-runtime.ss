@@ -6,12 +6,12 @@
         (only-in :std/srfi/1 append-map find)
         (only-in :std/srfi/13 string-suffix?)
         (only-in :std/sugar hash-get hash-put!)
-        (only-in :gslph/src/policy/gxtest make-policy-test)
-        :gslph/src/testing/model
-        :gslph/src/testing/framework
-        :gslph/src/testing/build-paths
-        :gslph/src/testing/build-process
-        :gslph/src/testing/build-support)
+        (only-in :asp-gerbil-scheme/src/policy/gxtest make-policy-test)
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/framework
+        :asp-gerbil-scheme/src/testing/build-paths
+        :asp-gerbil-scheme/src/testing/build-process
+        :asp-gerbil-scheme/src/testing/build-support)
 
 (export #t)
 
@@ -149,7 +149,7 @@
 ;; : (-> TestingBuild String Symbol String Integer Void)
 (def (testing-build-display-inline-status build name kind status elapsed-ms)
   (unless (eq? (testing-build-output-mode build) 'quiet)
-    (display "[gslph-test-inline] kind=")
+    (display "[asp-gerbil-scheme-test-inline] kind=")
     (display kind)
     (display " name=")
     (display name)
@@ -231,7 +231,7 @@
 
 ;; : (-> Path Exception Void)
 (def (testing-build-display-gxtest-exception file exn)
-  (display "[gslph-test-inline] kind=gxtest name=")
+  (display "[asp-gerbil-scheme-test-inline] kind=gxtest name=")
   (display file)
   (display " status=failed reason=exception")
   (newline)

@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Package-level build.ss custom build-system detection.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/detection
-        :gslph/src/policy/poo-source
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/detection
+        :asp-gerbil-scheme/src/policy/poo-source
         (only-in :std/srfi/13 string-contains string-suffix?)
         (only-in :std/sugar cut filter hash ormap))
 

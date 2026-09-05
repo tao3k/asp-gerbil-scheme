@@ -4,9 +4,10 @@
 ;;; repair wording, and agent-facing severity stay outside the parser layer.
 
 (import :gerbil/gambit
-        :gslph/src/parser/model
-        (only-in :gslph/src/parser/support datum-list-items)
-        (only-in :gslph/src/parser/syntax form-caller-name)
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/quality-shape-loop-driver
+        (only-in :asp-gerbil-scheme/src/parser/support datum-list-items)
+        (only-in :asp-gerbil-scheme/src/parser/syntax form-caller-name)
         (only-in :std/misc/list unique)
         (only-in :std/srfi/1 find)
         (only-in :std/srfi/13 string-prefix? string-suffix?)
@@ -27,30 +28,6 @@
 ;; (List String)
 (def +condition-callees+ '("member" "equal?" "not" ">" "<" ">=" "<=" "string=?" "string-contains" "string-prefix?" "string-suffix?"))
 ;; (List String)
-(def +reader-driver-callees+ '("read" "read-line" "read-syntax"))
-;; (List String)
-(def +inline-file-reader-callees+
-  '("call-with-input-file" "path-expand"))
-;; (List String)
-(def +reader-collection-infrastructure-callees+
-  '("call-with-input-file" "path-expand" "read" "read-line" "read-syntax"
-    "eof-object?" "cons" "append" "reverse" "list" "@list" "null?" "pair?"
-    "car" "cdr" "caar" "cadr" "cdar" "cddr"
-    "lambda" "let" "let*" "if" "cond" "begin" "loop"
-    "file" "port" "form" "forms" "symbol" "symbols"))
-;; (List String)
-(def +parser-driver-callees+
-  '("string-length" "string-ref" "substring" "string->list" "list->string"
-    "char=?" "char<?" "char>?" "char-whitespace?" "char-numeric?"
-    "char-alphabetic?" "char-upper-case?" "char-lower-case?"))
-;; (List String)
-(def +parser-combinator-callees+
-  '("defparser" "parser-parse" "parser-fail" "parser-rewind"
-    "raise-parse-error" "make-token"))
-;; (List String)
-(def +state-mutation-callees+
-  '("set!" "set-car!" "set-cdr!" "vector-set!" "hash-put!" "hash-remove!"
-    "hash-clear!" "table-set!" "table-delete!" ".put!" ".slot-set!"))
 
 ;;; Predicate family facts identify repeated one-argument predicate helpers over the same subject.
 ;;; They give policy enough native evidence to request a helper/combinator rewrite without reading raw source.
@@ -510,89 +487,6 @@
           ["predicate-helper-candidate"]
           "keep this as a small expression-returning predicate or compose it through the predicate family helper"))))
 
-;;; Boundary: loop-driver facts classify parser-owned control-flow evidence into
-;;; policy signals; they do not decide whether a named let should be rewritten.
-;; : (-> Relpath Calls (List HigherOrderFact) (List ControlFlowFact) (List LoopDriverFact) )
-(def (loop-driver-facts-from-source relpath calls higher-order-forms control-flow-forms)
-  (map (cut loop-driver-fact-from-control-flow relpath calls higher-order-forms <>)
-       (filter manual-loop-control-flow? control-flow-forms)))
-
-;; : (-> Relpath Calls HigherOrderFacts ControlFlowFact LoopDriverFact )
-(def (loop-driver-fact-from-control-flow relpath calls higher-order-forms fact)
-  (let* ((driver-kind (loop-driver-kind calls higher-order-forms fact))
-         (quality-facets (loop-driver-quality-facets driver-kind)))
-    (make-loop-driver-fact
-     (control-flow-fact-name fact)
-     "loop-driver"
-     relpath
-     (control-flow-fact-start fact)
-     (control-flow-fact-end fact)
-     "manual-loop-classification"
-     (or (control-flow-fact-caller fact) "")
-     driver-kind
-     (control-flow-fact-binding-count fact)
-     (control-flow-fact-body-form-count fact)
-     quality-facets
-     (loop-driver-advice driver-kind))))
-
-;; : (-> Calls HigherOrderFacts ControlFlowFact String )
-(def (loop-driver-kind calls higher-order-forms fact)
-  (let (caller (control-flow-fact-caller fact))
-    (cond
-     ((and (caller-has-callee? calls caller +parser-driver-callees+)
-           (not (caller-has-callee? calls caller +parser-combinator-callees+)))
-      "manual-parser-state-machine")
-     ((caller-has-callee? calls caller +state-mutation-callees+)
-      "state-driver-candidate")
-     ((and (caller-has-callee? calls caller +reader-driver-callees+)
-           (caller-has-reader-collection-projection? calls caller))
-      "reader-collection-candidate")
-     ((and (caller-has-callee? calls caller +reader-driver-callees+)
-           (caller-has-callee? calls caller +inline-file-reader-callees+))
-      "inline-file-reader-candidate")
-     ((caller-has-callee? calls caller +reader-driver-callees+)
-      "io-reader-driver")
-     ((caller-has-higher-order? higher-order-forms caller)
-      "higher-order-boundary")
-     ((>= (control-flow-fact-binding-count fact) 4)
-      "state-driver-candidate")
-     (else "pure-transform-candidate"))))
-
-;; : (-> DriverKind (List QualityFacet) )
-(def (loop-driver-quality-facets driver-kind)
-  (cond
-   ((equal? driver-kind "pure-transform-candidate")
-    ["manual-loop-drift" "combinator-candidate"])
-   ((equal? driver-kind "manual-parser-state-machine")
-    ["manual-parser-state-machine" "parser-combinator-boundary"
-     "anti-ai-parser-scaffold"])
-   ((equal? driver-kind "reader-collection-candidate")
-    ["manual-loop-drift" "combinator-candidate"
-     "reader-collection-boundary" "source-form-reader-boundary"])
-   ((equal? driver-kind "inline-file-reader-candidate")
-    ["manual-loop-drift" "combinator-candidate"
-     "inline-file-reader-boundary" "source-form-reader-boundary"])
-   ((equal? driver-kind "io-reader-driver")
-    ["preserve-named-let-driver" "io-state-boundary"])
-   ((equal? driver-kind "higher-order-boundary")
-    ["preserve-named-let-driver" "higher-order-boundary"])
-   (else ["state-driver-candidate"])))
-
-;; : (-> DriverKind String )
-(def (loop-driver-advice driver-kind)
-  (cond
-   ((equal? driver-kind "pure-transform-candidate")
-    "prefer fold/filter-map/map or predicate helpers if behavior is a pure data transform")
-   ((equal? driver-kind "manual-parser-state-machine")
-    "replace manual string cursor parsing with a std/parser defparser grammar, parser-fail/parser-rewind, and source-aware parse errors")
-   ((equal? driver-kind "reader-collection-candidate")
-    "split source/form reading into a reader helper, then use filter-map/map/fold for selection and projection")
-   ((equal? driver-kind "io-reader-driver")
-    "preserve named let unless a runtime witness proves the IO state machine can be simplified")
-   ((equal? driver-kind "higher-order-boundary")
-    "preserve explicit loop shape when it is already coupled to a higher-order boundary")
-   (else "preserve state-driver shape unless parser facts show a smaller combinator rewrite")))
-
 ;; : (-> CallFact (List String) Boolean )
 (def (call-owned-by? call names)
   (member (or (call-fact-caller call) "") names))
@@ -657,48 +551,6 @@
   (filter (lambda (entry) (not (equal? (car entry) callee))) counts))
 
 ;; : (-> ControlFlowFact Boolean )
-(def (manual-loop-control-flow? fact)
-  (equal? (control-flow-fact-role fact) "manual-loop"))
-
-;;; Driver classification checks call evidence through ormap so IO/runtime
-;;; boundaries are preserved as witness-backed facts, not guessed from names in
-;;; policy code.
-;; : (-> Calls Caller (List Callee) Boolean )
-(def (caller-has-callee? calls caller callees)
-  (ormap (lambda (call)
-           (and (equal? (or (call-fact-caller call) "") (or caller ""))
-                (member (call-fact-callee call) callees)))
-         calls))
-
-;; : (-> Calls Caller Boolean )
-(def (caller-has-reader-collection-projection? calls caller)
-  (ormap (cut reader-collection-projection-call? <> caller)
-         calls))
-
-(def (reader-collection-projection-call? call caller)
-  (and (call-caller-matches? call caller)
-       (call-callee-external-to-caller? call caller)
-       (call-callee-reader-projection? call)))
-
-(def (call-caller-matches? call caller)
-  (equal? (or (call-fact-caller call) "") (or caller "")))
-
-(def (call-callee-external-to-caller? call caller)
-  (not (equal? (call-fact-callee call) (or caller ""))))
-
-(def (call-callee-reader-projection? call)
-  (not (member (call-fact-callee call)
-               +reader-collection-infrastructure-callees+)))
-
-;;; Higher-order presence is used as a conservative boundary: if native facts
-;;; already show combinator ownership, the loop classifier avoids suggesting a
-;;; flattening rewrite.
-;; : (-> HigherOrderFacts Caller Boolean )
-(def (caller-has-higher-order? facts caller)
-  (ormap (lambda (fact)
-           (equal? (or (higher-order-fact-caller fact) "") (or caller "")))
-         facts))
-
 ;;; Min/max folds keep location spans deterministic across parser runs without
 ;;; sorting the original definitions.
 ;; : (-> Definitions Integer )

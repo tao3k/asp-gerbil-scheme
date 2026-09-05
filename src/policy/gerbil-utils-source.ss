@@ -3,9 +3,9 @@
 ;;; This module keeps research corpus references structured without turning
 ;;; gerbil-utils, gerbil-poo, or gerbil:// references into runtime dependencies.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/detection
-        :gslph/src/policy/prototype
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/detection
+        :asp-gerbil-scheme/src/policy/prototype
         (only-in :std/srfi/1 find)
         (only-in :std/sugar ormap))
 
@@ -388,7 +388,7 @@
      "gerbil://gerbil/runtime/control.ss#with-unwind-protect"
      "gerbil://gerbil/runtime/control.ss#call-with-parameters"
      "poo-flow/build.ss#poo-flow-with-directory"
-     "gerbil-scheme-harness/src/build-api/source-coverage.ss#with-directory"]
+     "asp-gerbil-scheme/src/build-api/source-coverage.ss#with-directory"]
     ["dynamic-scope-cleanup-boundary"
      "manual-dynamic-scope-restore"
      "dynamic-wind-cleanup-boundary"

@@ -3,8 +3,8 @@
 
 (import (only-in :std/test test-suite test-case check)
         (only-in :clan/poo/object object? .ref .slot?)
-        :gslph/src/testing/model
-        :gslph/src/testing/framework)
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/framework)
 
 (export testing-framework-smoke-test)
 

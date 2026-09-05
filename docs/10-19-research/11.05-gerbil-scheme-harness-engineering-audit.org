@@ -1,4 +1,4 @@
-#+TITLE: 11.05 Gerbil Scheme Harness Engineering Audit
+#+TITLE: 11.05 ASP Gerbil Scheme Engineering Audit
 #+DATE: 2026-06-13
 #+PROPERTY: JD_ID 11.05
 #+PROPERTY: ASP_STATUS research-audit
@@ -32,7 +32,7 @@ Current assessment:
 | Area | Status | Assessment |
 |------+--------+------------|
 | Parser-owned facts | Strong | Structural feed reports 119 owners, 1066 symbols, 17730 syntax facts, and 376 dependency usages with =rawSourceStored=false=. |
-| Agent policy | Strong foundation | =check --full .= passes with findings=0 and =info.agentSteering= exposes R008/R009/R011/R012. |
+| Agent policy | Strong foundation | =check .= passes with findings=0 and =info.agentSteering= exposes R008/R009/R011/R012. |
 | Gerbil-specific steering | Good but incomplete | POO, macro witness, higher-order, runtime-source, and package-module guidance exist; usage-quality scoring is still shallow. |
 | Code elegance enforcement | Partial | The harness can warn about manual loops and vague shapes, but it does not yet produce an architectural "capability posture" score. |
 | Macro governance | Correct direction | Runtime-source witness policy exists; expansion-level witness coverage and version vocabulary can be improved. |
@@ -46,17 +46,17 @@ scans.
 
 Commands and observed receipts:
 
-- =asp gerbil-scheme search prime --workspace languages/gerbil-scheme-language-project-harness --view seeds=
+- =asp gerbil-scheme search prime --workspace languages/asp-gerbil-scheme --view seeds=
   - Project map: 119 files, 1066 definitions.
-  - Package: =gerbil-scheme-language-project-harness= from =gerbil.pkg=.
+  - Package: =asp-gerbil-scheme= from =gerbil.pkg=.
   - Dependency: =git.cons.io/mighty-gerbils/gerbil-poo=.
   - Extension capabilities: object system, metaobject protocol, protocols,
     policy protocol, macro governance, user override witness.
 
-- =./bin/gerbil-scheme-harness check --full .=
+- dependency-owned Gerbil policy API receipt
   - =status=pass files=119 definitions=1066 findings=0=.
 
-- =./bin/gerbil-scheme-harness info --json .=
+- =./bin/asp-gerbil-scheme info --json .=
   - =agentSteering.facts= includes =macroFacts=, =bindingFacts=,
     =pooFormFacts=, =higherOrderFacts=, =controlFlowFacts=, and
     =dependencyUsageFacts=.
@@ -76,7 +76,7 @@ Commands and observed receipts:
   - Artifact declares =schemaId=agent.semantic-protocols.semantic-structural-index=
     and =rawSourceStored=false=.
 
-- =./bin/gerbil-scheme-harness bench --iterations 1 --max-total-ms 60000 .=
+- =./bin/asp-gerbil-scheme bench --iterations 1 --max-total-ms 60000 .=
   - =status=pass totalMs=2141=.
   - Slowest: =structural-index-packet= at 1388 ms.
   - =collect-project= 669 ms, =type-check= 83 ms, =search-prime-packet= 1 ms.
@@ -236,7 +236,7 @@ Gap:
 ** Architecture and ownership
 
 The module layout is generally healthy.  There are clear owners for parser,
-policy, commands, protocol, snapshots, and tests.  =check --full .= passes with
+policy, commands, protocol, snapshots, and tests.  =check .= passes with
 zero findings, which means the current policy suite does not see facade bloat,
 retired test layout, vague names, or known generated-code policy drift.
 
@@ -483,7 +483,7 @@ Finding shape:
 Add a provider-owned command or view:
 
 #+begin_src shell
-./bin/gerbil-scheme-harness search capability --workspace . --view seeds
+./bin/asp-gerbil-scheme search capability --workspace . --view seeds
 #+end_src
 
 It should summarize:
@@ -586,7 +586,7 @@ Validation:
 Keep the existing bench output, but add a profile view:
 
 #+begin_src shell
-./bin/gerbil-scheme-harness bench --profile structural --iterations 1 .
+./bin/asp-gerbil-scheme bench --profile structural --iterations 1 .
 #+end_src
 
 Validation:
@@ -620,8 +620,8 @@ Run these after implementing the next improvements:
 
 #+begin_src shell
 gxi build.ss test
-./bin/gerbil-scheme-harness check --full .
-./bin/gerbil-scheme-harness bench --iterations 1 --max-total-ms 60000 .
+gxtest t/project-policy-test.ss
+./bin/asp-gerbil-scheme bench --iterations 1 --max-total-ms 60000 .
 asp gerbil-scheme search structural --workspace . --view seeds
 asp gerbil-scheme search lexical 'configurable interface' owner tests --workspace . --view seeds
 asp gerbil-scheme search lexical 'gxi version runtime-source' owner tests --workspace . --view seeds

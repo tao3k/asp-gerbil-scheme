@@ -41,14 +41,14 @@
   "structured-testing-receipt")
  (learnedStyleSources
   "std/make"
-  "gslph/src/building"
-  "gslph/src/build-api")
+  "asp-gerbil-scheme/src/building"
+  "asp-gerbil-scheme/src/build-api")
  (scenarioQualityAxes
   (stdMakeReuse
    (positive std/make make stage-spec srcdir prefix parallelize)
    (negative bespoke-compiler-loop raw-gxc-loadpath))
   (stageBoundary
-   (positive build-stage std-builder gslph-package-api-stage-specs)
+   (positive build-stage std-builder asp-gerbil-scheme-package-api-stage-specs)
    (negative flat-directory-scan dependency-race))
   (performanceGate
    (positive skipStageMs runStageMs packageStagePlanMs)

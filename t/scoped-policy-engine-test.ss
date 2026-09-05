@@ -9,13 +9,13 @@
 (export scoped-policy-engine-test)
 
 (def (policy-engine-api)
-  (import-module ':gslph/src/testing/gxtest-context #f #t)
-  (import-module ':gslph/src/testing/gxtest-policy #f #t)
-  ((eval 'gslph/src/testing/gxtest-context#ensure-build-root!))
-  [(eval 'gslph/src/testing/gxtest-policy#scoped-policy-engine-source-files)
-   (eval 'gslph/src/testing/gxtest-policy#scoped-policy-engine-source-module-files)
-   (eval 'gslph/src/testing/gxtest-policy#scoped-policy-engine-output-files)
-   (eval 'gslph/src/testing/gxtest-policy#scoped-policy-engine-receipt-path)])
+  (import-module ':asp-gerbil-scheme/src/testing/gxtest-context #f #t)
+  (import-module ':asp-gerbil-scheme/src/testing/gxtest-policy #f #t)
+  ((eval 'asp-gerbil-scheme/src/testing/gxtest-context#ensure-build-root!))
+  [(eval 'asp-gerbil-scheme/src/testing/gxtest-policy#scoped-policy-engine-source-files)
+   (eval 'asp-gerbil-scheme/src/testing/gxtest-policy#scoped-policy-engine-source-module-files)
+   (eval 'asp-gerbil-scheme/src/testing/gxtest-policy#scoped-policy-engine-output-files)
+   (eval 'asp-gerbil-scheme/src/testing/gxtest-policy#scoped-policy-engine-receipt-path)])
 
 (def scoped-policy-engine-test
   (test-suite "gerbil scheme scoped policy engine build boundary"

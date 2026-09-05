@@ -2,9 +2,9 @@
 ;;; Shared syntax constants, body projection, macro-family, and top-form helpers.
 
 (import :gerbil/expander
-        :gslph/src/parser/formals
-        :gslph/src/parser/model
-        :gslph/src/parser/support
+        :asp-gerbil-scheme/src/parser/formals
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/support
         (only-in :std/misc/list unique)
         (only-in :std/srfi/1 drop)
         (only-in :std/srfi/13 string-index-right string-prefix?)
@@ -40,6 +40,7 @@
         macro-phase
         macro-pattern-count
         syntax-rules-datum
+        definition-lowering-macro?
         macro-hygienic?
         macro-quality-facets
         macro-family-facts-from-macros
@@ -346,7 +347,7 @@
      ((eq? head 'defrule) 1)
      ((eq? head 'defrules) (max 0 (length (safe-cdddr datum))))
      ((tree-contains-symbol? datum 'syntax-rules)
-      (max 0 (length (safe-cdddr (syntax-rules-datum datum)))))
+      (max 0 (length (safe-cddr (syntax-rules-datum datum)))))
      (else 0))))
 ;; syntax-rules-datum
 ;;   : (-> Datum Datum)
@@ -366,6 +367,31 @@
               (and (pair? item) (eq? (car item) 'syntax-rules)))
             (flatten-with-pairs datum))
       '()))
+
+;;; A definition-lowering macro is safe at module top level only when every
+;;; declarative branch expands directly to a native definition form.  This is
+;;; deliberately stricter than accepting `begin` or recursively searching a
+;;; template: mixed definition/effect templates must remain visible to R005.
+;; : (-> Head Datum Boolean)
+(def (definition-lowering-macro? head datum)
+  (let (clauses
+        (cond
+         ((eq? head 'defrule) (safe-cddr datum))
+         ((eq? head 'defrules) (safe-cdddr datum))
+         ((tree-contains-symbol? datum 'syntax-rules)
+          (safe-cddr (syntax-rules-datum datum)))
+         (else '())))
+    (and (pair? clauses)
+         (andmap definition-lowering-clause? clauses))))
+
+;; : (-> Datum Boolean)
+(def (definition-lowering-clause? clause)
+  (and (pair? clause)
+       (pair? (cdr clause))
+       (let (template (cadr clause))
+         (and (pair? template)
+              (symbol? (car template))
+              (member (car template) +definition-heads+)))))
 ;; : (-> Datum Boolean )
 (def (macro-hygienic? datum)
   (let (head (and (pair? datum) (car datum)))
@@ -392,6 +418,8 @@
                  "declarative-macro-pattern")
             (and (tree-contains-symbol? datum 'syntax-rules)
                  "syntax-rules-pattern")
+            (and (definition-lowering-macro? head datum)
+                 "definition-lowering-macro")
             (and (tree-contains-symbol? datum 'identifier-rules)
                  "identifier-rules-pattern")
             (and (tree-contains-symbol? datum 'syntax-case)

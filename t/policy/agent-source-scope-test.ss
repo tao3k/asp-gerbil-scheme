@@ -3,11 +3,11 @@
 
 (import :gerbil/gambit
         :std/test
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
         :policy/fixtures
-        :gslph/src/policy/gxtest
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/types/facade)
 
 (export agent-source-scope-policy-test)
 
@@ -48,13 +48,13 @@
                     "(package: sample/policy-scope)\n")
         (write-text
          (string-append source-dir "/good.ss")
-         ";;; -*- Gerbil -*-\n(import :gslph/src/parser/facade)\n(def (policy-file? path)\n  (not (equal? (source-path-class path) \"policy-scenario\")))\n")
+         ";;; -*- Gerbil -*-\n(import :asp-gerbil-scheme/src/parser/facade)\n(def (policy-file? path)\n  (not (equal? (source-path-class path) \"policy-scenario\")))\n")
         (let* ((index (collect-project root))
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-021" findings)))
           (check matching => []))))
-    (test-case "parser reads package source coverage from build API and default tests"
-      (let* ((root ".run/policy-source-scope-build-api")
+    (test-case "project policy consumes executed package-spec source coverage"
+      (let* ((root ".run/policy-source-scope-package-spec")
              (src-dir (string-append root "/src"))
              (test-dir (string-append root "/t")))
         (reset-fixture-root root)
@@ -63,22 +63,32 @@
         (ensure-dir src-dir)
         (ensure-dir test-dir)
         (write-text (string-append root "/gerbil.pkg")
-                    "(package: sample/build-api-scope)\n")
-        (write-text (string-append root "/build.ss")
-                    ";;; -*- Gerbil -*-\n(import :gslph/src/build-api/source-coverage)\n(gslph-source-coverage\n roots: '(\"src\")\n runtime-roots: '(\"src\"))\n")
+                    "(package: sample/package-spec-scope)\n")
+        (write-text
+         (string-append root "/build.ss")
+         (string-append
+          ";;; -*- Gerbil -*-\n"
+          "(import :asp-gerbil-scheme/src/build-api/package-spec\n"
+          "        :asp-gerbil-scheme/src/building/build-script)\n"
+          "(def +modules+ '(\"src/core.ss\" \"t/core-test.ss\"))\n"
+          "(asp-gerbil-scheme-package-spec! sample-package-spec\n"
+          " (spec sample-build-spec)\n"
+          " (modules +modules+)\n"
+          " (source-catalog-authority 'project)\n"
+          " (roots [\".\"])\n"
+          " (exclude-directories [\"vendor\"]))\n"
+          "(defbuild-script\n"
+          " (sample-build-spec)\n"
+          " profile: development)\n"))
         (write-text (string-append src-dir "/core.ss")
                     ";;; -*- Gerbil -*-\n(def core-value 1)\n")
-        (write-text (string-append test-dir "/root-test.ss")
-                    ";;; -*- Gerbil -*-\n(import :std/test)\n(def root-test (test-suite \"root\"))\n")
-        (let* ((index (collect-project root))
-               (package (project-index-package index))
-               (scope (project-package-source-scope-policy package))
-               (paths (map source-file-path (project-index-files index))))
-          (check (not (not (member "src/core.ss" paths))) => #t)
-          (check (not (not (member "t/root-test.ss" paths))) => #t)
-          (check (source-scope-policy-roots scope) => ["src"])
-          (check (source-scope-policy-runtime-roots scope)
-                 => ["src"]))))
+        (write-text (string-append test-dir "/core-test.ss")
+                    ";;; -*- Gerbil -*-\n(displayln \"explicit test script\")\n")
+        (let* ((report (project-policy-report root))
+               (findings (hash-get report 'findings)))
+          (check (hash-get report 'files) => 2)
+          (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)
+                 => []))))
     (test-case "test source scope re-expands a module reached later at a shallower depth"
       (let* ((root ".run/policy-source-scope-depth-order")
              (src-dir (string-append root "/src"))
@@ -117,7 +127,7 @@
         (write-text (string-append root "/gerbil.pkg")
                     "(package: sample/gxtest-file-scope)\n")
         (write-text (string-append root "/build.ss")
-                    ";;; -*- Gerbil -*-\n(import :gslph/src/build-api/source-coverage)\n(gslph-source-coverage roots: '(\"src\") runtime-roots: '(\"src\"))\n")
+                    ";;; -*- Gerbil -*-\n(import :asp-gerbil-scheme/src/build-api/source-coverage)\n(asp-gerbil-scheme-source-coverage roots: '(\"src\"))\n")
         (write-text (string-append src-dir "/target.ss")
                     ";;; -*- Gerbil -*-\n(def target-value 1)\n")
         (write-text (string-append src-dir "/other.ss")

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Shared helpers for agent-facing policy rule families.
 
-(import :gslph/src/parser/facade
+(import :asp-gerbil-scheme/src/parser/facade
         (only-in :std/srfi/13 string-contains string-empty? string-prefix? string-suffix?)
         (only-in :std/sugar ormap))
 
@@ -12,7 +12,6 @@
         poo-capability-dependency?
         source-runtime-file-path?
         index-source-runtime-file-path?
-        explicit-runtime-entrypoint-path?
         configured-runtime-roots
         source-path-under-root?
         project-poo-forms
@@ -25,6 +24,19 @@
 ;; Integer
 (def +poo-capability-dependencies+
   '("gerbil-poo" "clan/poo"))
+;; Source classes that participate in the one project scan but do not own
+;; runtime entrypoints.  Rule families for tests, build declarations, fixtures,
+;; and generated evidence consume those classes independently.
+(def +non-runtime-source-classes+
+  '("config"
+    "package-build"
+    "snapshot-output"
+    "policy-scenario"
+    "fixture"
+    "test"
+    "declarative-case"
+    "declarative-profile"
+    "generated"))
 ;;; Boundary:
 ;;; - poo-source-file? composes first-class procedures.
 ;;; - Keep data-flow evidence visible.
@@ -59,16 +71,14 @@
 (def (source-runtime-file-path? path)
   (and (string-prefix? "src/" path)
        (string-suffix? ".ss" path)))
-;; : (-> String Boolean )
-(def (explicit-runtime-entrypoint-path? path)
-  (and (string-prefix? "src/search-fast/" path)
-       (string-suffix? ".ss" path)))
 ;;; Boundary:
 ;;; - index-source-runtime-file-path? composes first-class procedures.
 ;;; - Keep data-flow evidence visible.
 ;; : (-> ProjectIndex String Boolean )
 (def (index-source-runtime-file-path? index path)
   (and (string-suffix? ".ss" path)
+       (not (member (source-path-class path)
+                    +non-runtime-source-classes+))
        (let* ((package (project-index-package index))
               (policy (and package
                            (project-package-source-scope-policy package)))

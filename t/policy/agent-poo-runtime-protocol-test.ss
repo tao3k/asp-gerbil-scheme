@@ -6,11 +6,11 @@
         :std/misc/ports
         :std/misc/process
         (only-in :std/text/json read-json)
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios
         :policy/fixtures)
 (import :policy/agent-poo-support)
@@ -56,14 +56,40 @@
                                                'referenceExamples))))
                    => #t)
             (check (hash-get details 'agentEscapeConstraint)
-                   => "do not weaken macro-governance from a source macro edit; update gerbil.pkg only with a clear explanation and witness")))
-(test-case "agent policy accepts macro runtime-source witness policy"
+                   => "do not weaken macro-governance or replace executable evidence with package metadata")
+            (check (hash-get details 'requiredWitness)
+                   => "one collected test owner with an assertion and either a parser-visible macro call or an exact load/include edge to its case owner")))
+(test-case "agent policy accepts executable macro source witness"
           (let* ((root ".run/policy-macro-runtime-source-allowed")
                  (_ (write-macro-runtime-source-project root #t))
                  (index (collect-project root))
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
             (check matching => [])))
+(test-case "agent policy accepts a test loading the exact macro case owner"
+          (let* ((root ".run/policy-macro-runtime-source-linked")
+                 (_ (write-linked-macro-runtime-source-project root))
+                 (index (collect-project root))
+                 (findings (run-agent-policy index))
+                 (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
+            (check matching => [])))
+(test-case "agent policy accepts a transitive package import to the macro case owner"
+          (let* ((root ".run/policy-macro-runtime-source-import-linked")
+                 (_ (write-import-linked-macro-runtime-source-project root))
+                 (index (collect-project root))
+                 (findings (run-agent-policy index))
+                 (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
+            (check matching => [])))
+(test-case "agent policy rejects an assertion owner without the macro call"
+          (let* ((root ".run/policy-macro-runtime-source-wrong-owner")
+                 (_ (write-macro-runtime-source-project root #t))
+                 (_ (write-text
+                     (string-append root "/t/macro-witness-test.ss")
+                     ";;; -*- Gerbil -*-\n(import :std/test)\n(def macro-witness-test (test-suite \"macro witness\" (test-case \"no macro call\" (check #t => #t))))\n"))
+                 (index (collect-project root))
+                 (findings (run-agent-policy index))
+                 (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
+            (check (length matching) => 1)))
 (test-case "agent policy requires declared protocol evidence"
           (let* ((root ".run/policy-protocol-evidence")
                  (_ (write-protocol-evidence-project root #f))
@@ -117,7 +143,7 @@
             (check (project-policy-status root) => "pass")
             (check (project-policy-findings root) => [])
             (check (hash-get report 'schemaId)
-                   => "agent.semantic-protocols.gerbil-scheme-harness-gxtest-report")
+                   => "agent.semantic-protocols.asp-gerbil-scheme-gxtest-report")
             (check (hash-get report 'status) => "pass")
             (check (> (hash-get report 'files) 0) => #t)
             (check (> (hash-get report 'definitions) 0) => #t)

@@ -1,0 +1,151 @@
+#+title: Build Graph Performance Policy
+#+startup: overview
+
+* Decision
+
+ASP Build API delegates one complete module catalog to one Gerbil =std/make=
+session.  Downstream projects must not reproduce =std/make='s coordinator,
+completion, channel, or worker scheduler.  A lock may protect a short state
+transition, but it may not own dependency waiting or compilation.
+
+This policy preserves the upstream execution owner while preventing downstream
+code from reintroducing the serialization pattern that the upstream graph is
+supposed to schedule.
+
+#+begin_src mermaid
+flowchart LR
+  Spec["asp-gerbil-scheme-package-spec!\none module catalog"]
+  Bootstrap["source-loaded bootstrap\nno compiled ASP runtime dependency"]
+  Validation["ASP declaration validation\nprofile and owner constraints"]
+  Make["Gerbil std/make\none upstream session"]
+  Workers["GERBIL_BUILD_CORES\navailable cores or override"]
+  Receipt["Scheme observability receipt\nCPU, compiler jobs, RSS, contention"]
+
+  Spec --> Bootstrap --> Validation --> Make --> Workers --> Receipt
+  Shadow["global import lock +\ndependency wait + private channel"]
+  LockedCompile["global lock + compiler call\nin the same caller"]
+  Parser["source-header graph parser\nmtime freshness oracle + pre-clean"]
+  Shadow -. "blocked" .-> Validation
+  LockedCompile -. "blocked" .-> Validation
+  Parser -. "blocked" .-> Validation
+#+end_src
+
+* Executable Rules
+
+| Evidence | Outcome |
+|----------+---------|
+| Global-lock call and compiler or scheduler call share one caller | =GERBIL-SCHEME-AGENT-POLICY-020= emits =build-runtime-global-lock-compile= |
+| Global-lock, dependency-completion wait, and work-channel calls occur in one build/runtime owner | =GERBIL-SCHEME-AGENT-POLICY-020= emits =build-runtime-shadow-scheduler= |
+| A short state-table lock and compilation live in different callers | Accepted |
+| One declarative module catalog reaches one =std/make= invocation | Accepted |
+
+Before invoking =std/make=, the Build API validates only declaration-level
+properties and resolves the profile/toolchain environment.  It passes the
+complete declared spec to one =make= call.  It does not parse imports, infer
+reverse dependencies, compare source/output mtimes, pre-clean an affected
+closure, or decide that a build is current.  Those operations require Gerbil
+expander and =std/make= semantics.
+
+Every invocation emits the memory/CPU/compiler observation for the one upstream
+session.  The receipt describes what ran; it is not a freshness oracle.  A warm
+regression is established by repeated native =std/make= execution and upstream
+compiler activity, not by an ASP-predicted affected-module set.
+
+The root build script is also the cold bootstrap entrypoint and may depend only
+on Gerbil/std bindings already owned by the source-loaded script.  It must not
+import =building/std-builder= or another compiled ASP runtime module.  CI may
+remove the package's installed library before invoking =build.ss clean=; clean
+and compile still delegate directly to upstream =make-clean= and =make=.
+
+There is deliberately no =verify-current= command.  ASP cannot prove Gerbil
+currentness without duplicating the upstream executor.  Native repeated-build
+scenarios retain elapsed, CPU, RSS, compiler-job, source, profile, and toolchain
+identities so regressions remain measurable without inventing a second build
+graph.
+
+The rules use composite parser-owned call facts.  A mutex, completion, channel,
+or compiler call by itself is insufficient evidence and must not produce a
+finding.
+
+* Removed Downstream Execution APIs
+
+The former source-topology, source-currentness, topology execution-window, and
+adaptive execution-window APIs have no production owner and are removed.  They
+attempted to predict or partition work that belongs to =std/make= and therefore
+could not be retained as compatibility surfaces.  Package declarations now
+provide source groups only; the complete native spec reaches the upstream
+executor without an ASP-derived dependency graph or freshness filter.
+
+=:clan/building= and =:std/make= are not peer schedulers.  Clan owns the
+package-level discovery and build-environment projection, while =std/make= owns
+execution.  ASP package macros may specialize the declaration syntax, but must
+lower into that upstream path rather than introducing another builder loop.
+
+#+begin_src mermaid
+flowchart LR
+  Macro["ASP package macro\nroots · features · profile"]
+  Clan[":clan/building\ndiscovery · environment · options"]
+  Make[":std/make\ndependency · incremental · parallel execution"]
+  Observe["passive receipt\nelapsed · CPU · RSS · compiler jobs"]
+
+  Macro --> Clan --> Make
+  Make -. "observed, never rescheduled" .-> Observe
+#+end_src
+
+** Native removal receipt (2026-09-03)
+
+After removing the downstream topology/currentness/adaptive window subsystem,
+the focused Building tests and the native build completed successfully.  The
+first changed-source =std/make= phase took =5,647 ms=, used all =12= configured
+workers without a memory-derived worker cap, reached =5= active compiler jobs,
+and peaked at =859,881,472 bytes= RSS.
+
+Two immediately repeated native invocations took =4,215 ms= and =3,692 ms= in
+the observed =std/make= phase.  They still compiled three and then two downstream
+modules as upstream dependency propagation converged.  Both receipts retained
+=configured-worker-count=12= and =worker-count=12=.  This is recorded as native
+upstream behavior; ASP does not add an mtime filter, affected-module parser, or
+alternate scheduler to hide it.
+
+* Runtime Evidence Boundary
+
+Gerbil 0.18.2 keeps =workch=, =completions=, and =import-mx= lexical inside
+=std/make#make-build=.  The public API does not expose an exact ready-queue
+count.  ASP therefore does not infer =ready-module-count= from static topology
+width or child process counts.
+
+The Scheme observer records what it can prove: configured cores, active compiler
+front ends, process-tree CPU, first native job latency, RSS trajectory, and host
+contention.  Exact ready-worker starvation becomes a hard runtime decision only
+when an upstream scheduler event surface provides ready, active, and completion
+events.  Until then, the source policy prevents downstream shadow schedulers and
+the receipt keeps upstream scheduler limitations explicit.
+
+Observer completeness follows measured cadence, not an impossible theoretical
+sample count.  The receipt tracks the maximum interval between samples,
+including the terminal gap; the sequence is complete only when every interval
+is at most twice the declared sampling period and process-table observation had
+no failures.  =observer-expected-samples= is the corresponding lower bound.
+
+The receipt therefore publishes =ready-queue-observed=false= and
+=scheduler-starvation-verdict=not-provable-with-current-std-make-public-api=.
+It also marks a performance baseline invalid when the host is already contended,
+the process-table observer degraded, or the expected sample sequence is
+incomplete.  A raw maximum child count remains evidence, not a pass/fail verdict.
+
+* Regression Scenarios
+
+#+begin_src mermaid
+flowchart TD
+  A["Linear dependency chain"] --> A1["No shadow scheduler finding"]
+  B["Wide module catalog"] --> B1["Full spec reaches one std/make session"]
+  C["Lock only state mutation"] --> C1["Accepted"]
+  D["Compile while caller owns global lock"] --> D1["Policy finding"]
+  E["Import lock + completion wait + private channel"] --> E1["Policy finding"]
+  F["Source parser + mtime pre-clean"] --> F1["Rejected second authority"]
+#+end_src
+
+The focused tests live in =t/policy/agent-build-test.ss=.  The declaration-only
+build lifecycle is separately covered by =t/source-coverage-query-test.ss= so a
+policy query cannot accidentally start a native build or suppress a later real
+build in the same process.

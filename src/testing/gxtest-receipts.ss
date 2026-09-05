@@ -5,12 +5,12 @@
         (only-in :std/sort sort)
         (only-in :std/srfi/13 string-join string-prefix? string-suffix?)
         (only-in "../build-api/package-receipt"
-                 gslph-package-build-receipt-status
-                 gslph-package-build-receipt-status-line
-                 gslph-package-build-receipt-status-ref
-                 gslph-package-build-receipt-write)
-        (only-in "../build-api/package-spec"
-                 gslph-package-api-spec)
+                 asp-gerbil-scheme-package-build-receipt-status
+                 asp-gerbil-scheme-package-build-receipt-status-line
+                 asp-gerbil-scheme-package-build-receipt-status-ref
+                 asp-gerbil-scheme-package-build-receipt-write)
+        (only-in "../build-api/package-native-plan"
+                 asp-gerbil-scheme-package-api-spec)
         (only-in "./gxtest-context"
                  package-root
                  source-root
@@ -86,7 +86,7 @@
 (def (package-api-build-source-files)
   (map (lambda (module)
          (path-expand module source-root))
-       (gslph-package-api-spec)))
+       (asp-gerbil-scheme-package-api-spec)))
 
 ;; : (-> (List Path))
 (def (package-api-build-output-files)
@@ -94,7 +94,7 @@
          (path-expand
           (string-append (module-path-stem module) ".ssi")
           (package-api-output-root)))
-       (gslph-package-api-spec)))
+       (asp-gerbil-scheme-package-api-spec)))
 
 ;; : (-> (List Path) (List Path))
 (def (selected-gxtest-build-source-files files)
@@ -126,31 +126,31 @@
 
 ;; : (-> BuildReceiptStatus)
 (def (package-api-build-receipt-status)
-  (gslph-package-build-receipt-status
+  (asp-gerbil-scheme-package-build-receipt-status
    (package-api-build-receipt-path)
    expected-sources: (package-api-build-source-files)
    expected-outputs: (package-api-build-output-files)))
 
 ;; : (-> (List Path) BuildReceiptStatus)
 (def (selected-gxtest-build-receipt-status files)
-  (gslph-package-build-receipt-status
+  (asp-gerbil-scheme-package-build-receipt-status
    (selected-gxtest-build-receipt-path files)
    expected-sources: (selected-gxtest-build-source-files files)
    expected-outputs: (selected-gxtest-build-output-files files)))
 
 ;; : (-> BuildReceiptStatus Boolean)
 (def (package-api-build-current? status)
-  (eq? (gslph-package-build-receipt-status-ref status 'status 'unknown)
+  (eq? (asp-gerbil-scheme-package-build-receipt-status-ref status 'status 'unknown)
        'current))
 
 ;; : (-> BuildReceiptStatus Boolean)
 (def (selected-gxtest-build-current? status)
-  (eq? (gslph-package-build-receipt-status-ref status 'status 'unknown)
+  (eq? (asp-gerbil-scheme-package-build-receipt-status-ref status 'status 'unknown)
        'current))
 
 ;; : (-> BuildReceiptStatus Void)
 (def (display-package-api-build-receipt-status status)
-  (display (gslph-package-build-receipt-status-line status))
+  (display (asp-gerbil-scheme-package-build-receipt-status-line status))
   (newline)
   (force-output))
 
@@ -177,7 +177,7 @@
 (def (write-package-api-build-receipt!)
   (let (stamp (package-api-build-receipt-path))
     (ensure-directory! (path-directory stamp))
-    (gslph-package-build-receipt-write
+    (asp-gerbil-scheme-package-build-receipt-write
      stamp
      (package-api-build-source-files)
      (package-api-build-output-files))))
@@ -186,7 +186,7 @@
 (def (write-selected-gxtest-build-receipt! files (metadata []))
   (let (stamp (selected-gxtest-build-receipt-path files))
     (ensure-directory! (path-directory stamp))
-    (gslph-package-build-receipt-write
+    (asp-gerbil-scheme-package-build-receipt-write
      stamp
      (selected-gxtest-build-source-files files)
      (selected-gxtest-build-output-files files)

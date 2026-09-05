@@ -1,3 +1,6 @@
+;;; Immutable building values describe stages, profiles, requests, and receipts.
+;;; Execution belongs to Builder implementations; this owner must remain free
+;;; of environment discovery and process side effects.
 (import :gerbil/gambit)
 
 (export build-stage

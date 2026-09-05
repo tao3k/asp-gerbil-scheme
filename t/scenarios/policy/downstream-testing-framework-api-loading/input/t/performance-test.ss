@@ -2,7 +2,7 @@
 ;;; Input anti-pattern: downstream gxtest builds benchmark timing directly.
 
 (import :std/test
-        (only-in :gslph/src/benchmark/gate
+        (only-in :asp-gerbil-scheme/src/benchmark/gate
                  benchmark-receipt-pass?
                  benchmark-run/result))
 

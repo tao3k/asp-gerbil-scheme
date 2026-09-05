@@ -2,11 +2,11 @@
 ;;; Test source-scope expansion and package-local import resolution.
 
 (import :gerbil/gambit
-        :gslph/src/parser/model
-        :gslph/src/parser/package
-        :gslph/src/parser/parse-workers
-        :gslph/src/parser/source-file
-        :gslph/src/parser/source-scope
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/package
+        :asp-gerbil-scheme/src/parser/parse-workers
+        :asp-gerbil-scheme/src/parser/source-file
+        :asp-gerbil-scheme/src/parser/source-scope
         (only-in :std/sort sort)
         (only-in :std/srfi/13
                  string-index-right
@@ -14,6 +14,7 @@
 
 (export +test-source-scope-import-depth+
         collect-source-scope
+        collect-source-scope/coverage
         collect-test-source-scope
         test-source-scope-files
         test-source-scope-import-entries
@@ -53,6 +54,23 @@
 (def (collect-source-scope root paths)
   (let* ((root (path-normalize root))
          (package (read-project-package root))
+         (files (sort (changed-source-files root package paths) string<?)))
+    (make-project-index root
+                        (parse-source-files root files)
+                        package)))
+
+;;; Build API boundary: consume the coverage emitted by executing build.ss,
+;;; rather than reinterpreting the build declaration inside the parser.
+;; : (-> String (List String) (List Path) (List Path) (List Path) ProjectIndex)
+(def (collect-source-scope/coverage root paths roots runtime-roots exclude-directories)
+  (let* ((root (path-normalize root))
+         (package
+          (project-package-with-source-scope
+           (read-project-package root)
+           roots
+           runtime-roots
+           exclude-directories
+           "Projected from executed build.ss Build API source coverage."))
          (files (sort (changed-source-files root package paths) string<?)))
     (make-project-index root
                         (parse-source-files root files)

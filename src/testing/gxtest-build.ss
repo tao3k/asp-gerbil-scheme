@@ -2,18 +2,20 @@
 ;;; Gxtest package build lifecycle helpers.
 
 (import (only-in :std/misc/path path-directory path-expand path-strip-directory)
+        (rename-in (only-in "../build-api/native-build-spec"
+                            configure-build-root!)
+                   (configure-build-root! configure-native-build-root!))
         (rename-in "../build-api/native-build"
-                   (configure-build-root! configure-native-build-root!)
                    (compile-package-api-if-stale
                     native-compile-package-api-if-stale))
         (only-in "../build-api/native-build"
                  compile-selected-gxtest-target)
         (only-in "../build-api/package-receipt"
-                 gslph-package-build-receipt-status
-                 gslph-package-build-receipt-status-ref
-                 gslph-package-build-receipt-write)
-        (only-in "../build-api/package-spec"
-                 gslph-package-api-spec)
+                 asp-gerbil-scheme-package-build-receipt-status
+                 asp-gerbil-scheme-package-build-receipt-status-ref
+                 asp-gerbil-scheme-package-build-receipt-write)
+        (only-in "../build-api/package-native-plan"
+                 asp-gerbil-scheme-package-api-spec)
         (only-in "./gxtest-context"
                  package-root
                  ensure-build-root!)
@@ -31,6 +33,7 @@
 (export clean-target
         compile-package-api-if-stale
         compile-scoped-policy-engine-if-stale
+        scoped-policy-engine-needs-source-build?
         compile-selected-gxtest-if-stale
         compile-spec
         dev-launcher-binpath
@@ -39,17 +42,14 @@
 ;; : (-> (List String))
 (def cli-bootstrap-modules
   '("constants.ss"
-    "commands/search-prime-light-list.ss"
-    "commands/search-prime-light.ss"
-    "commands/search.ss"
-    "commands/query.ss"
+    "runtime/provider-http-json-client.ss"
+    "runtime/provider-http-json-command-client.ss"
     "commands/check-cache.ss"
     "commands/check.ss"
     "commands/evidence.ss"
     "commands/agent.ss"
     "commands/guide.ss"
     "commands/info.ss"
-    "search-light-launcher.ss"
     "build-api/source-coverage.ss"
     "build-api/package-receipt.ss"
     "policy/gxtest-report.ss"
@@ -64,7 +64,7 @@
    ((or full? release?)
     (error "full and release compile specs are owned by native-build"))
    (binary? cli-bootstrap-modules)
-   (else (gslph-package-api-spec))))
+   (else (asp-gerbil-scheme-package-api-spec))))
 
 ;; : (-> BuildReceiptStatus)
 (def (compile-package-api-if-stale)
@@ -93,22 +93,28 @@
         (selected-gxtest-build-receipt-status files)))))
 
 (def +scoped-policy-engine-build-receipt-version+
-  'gslph-scoped-policy-engine-build.v1)
+  'asp-gerbil-scheme-scoped-policy-engine-build.v1)
 
 (def (write-scoped-policy-engine-build-receipt! receipt-path source-files output-files)
   (ensure-directory! (path-directory receipt-path))
-  (gslph-package-build-receipt-write
+  (asp-gerbil-scheme-package-build-receipt-write
    receipt-path
    source-files
    output-files
    version: +scoped-policy-engine-build-receipt-version+))
 
 (def (scoped-policy-engine-build-receipt-status receipt-path source-files output-files)
-  (gslph-package-build-receipt-status
+  (asp-gerbil-scheme-package-build-receipt-status
    receipt-path
    version: +scoped-policy-engine-build-receipt-version+
    expected-sources: source-files
    expected-outputs: output-files))
+
+;; The dependency manager owns installed ASP modules for downstream projects.
+;; Only the ASP source workspace itself has a local policy-engine source set
+;; that can legitimately be rebuilt by this package API.
+(def (scoped-policy-engine-needs-source-build? source-files)
+  (pair? source-files))
 
 (def (compile-scoped-policy-engine-if-stale source-files output-files receipt-path)
   (let (status (scoped-policy-engine-build-receipt-status
@@ -116,10 +122,11 @@
                 source-files
                 output-files))
     (display-package-api-build-receipt-status status)
-    (if (eq? (gslph-package-build-receipt-status-ref status 'status #f) 'current)
+    (if (eq? (asp-gerbil-scheme-package-build-receipt-status-ref status 'status #f) 'current)
       status
       (begin
-        (compile-package-api-if-stale)
+        (when (scoped-policy-engine-needs-source-build? source-files)
+          (compile-package-api-if-stale))
         (write-scoped-policy-engine-build-receipt! receipt-path source-files output-files)
         (scoped-policy-engine-build-receipt-status
          receipt-path
@@ -128,16 +135,25 @@
 
 ;; : (-> Path)
 (def (dev-launcher-binpath)
-  (path-expand ".bin/gslph" package-root))
+  (path-expand ".bin/asp-gerbil-scheme" package-root))
 
 ;; : (-> Path)
 (def (install-launcher-binpath)
-  (path-expand ".local/bin/gslph" (user-home-directory)))
+  (path-expand "asp-gerbil-scheme" (asp-install-launcher-directory)))
+
+;; : (-> Path)
+(def (asp-state-home-directory)
+  (or (getenv "ASP_STATE_HOME" #f)
+      (path-expand ".agent-semantic-protocols" (user-home-directory))))
+
+(def (asp-install-launcher-directory)
+  (or (getenv "SEMANTIC_AGENT_BIN_DIR" #f)
+      (path-expand "runtime/bin" (asp-state-home-directory))))
 
 ;; : (-> Path)
 (def (user-home-directory)
   (or (getenv "HOME" #f)
-      (error "HOME is required to install asp gerbil-scheme into $HOME/.local/bin")))
+      (error "HOME is required when ASP_STATE_HOME is unset")))
 
 ;; : (-> Path Void)
 (def (delete-file* path)

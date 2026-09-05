@@ -10,8 +10,8 @@
 (import :gerbil/gambit
         (only-in :std/srfi/1 find)
         (only-in :clan/poo/object .o)
-        :gslph/src/testing/model
-        :gslph/src/testing/framework)
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/framework)
 
 (export +testing-fixture-root+
         fixture-path
@@ -110,4 +110,4 @@
    name: "poo-flow-like"
    suites: (list +testing-suite+ +testing-scenario-suite+)
    roots: (list +testing-fixture-root+)
-   receipt-prefix: "gslph-testing"))
+   receipt-prefix: "asp-gerbil-scheme-testing"))

@@ -39,8 +39,8 @@
         parallel-gxtest-files
         serial-gxtest-files)
 
-(import :gslph/src/testing/memory-profile)
-(import :gslph/src/testing/execution-profile)
+(import :asp-gerbil-scheme/src/testing/memory-profile)
+(import :asp-gerbil-scheme/src/testing/execution-profile)
 
 ;; : (-> Form Boolean)
 (def (gxtest-benchmark-form? form)

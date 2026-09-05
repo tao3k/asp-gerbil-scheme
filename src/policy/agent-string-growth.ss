@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing loop policy for string growth by repeated append.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/sugar filter-map hash ormap)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export string-growth-loop-performance-findings
         string-growth-loop-performance-finding)
@@ -38,8 +38,26 @@
                 (and (equal? (loop-driver-fact-caller loop)
                              (call-fact-caller call))
                      (string-growth-call-inside-loop? call loop)
+                     (string-growth-call-feeds-loop? file call loop)
                      loop))
               (source-file-loop-driver-facts file))))
+
+;;; A loop-local append is growth only when its result is carried into the
+;;; recursive driver call.  Per-item identifiers and labels may legitimately
+;;; use string-append inside a loop without accumulating the previous string.
+;; : (-> SourceFile CallFact LoopDriverFact Boolean )
+(def (string-growth-call-feeds-loop? file call loop)
+  (ormap
+   (lambda (candidate)
+     (and (equal? (call-fact-callee candidate)
+                  (loop-driver-fact-name loop))
+          (equal? (call-fact-caller candidate)
+                  (call-fact-caller call))
+          (number? (call-fact-start candidate))
+          (number? (call-fact-end candidate))
+          (>= (call-fact-start call) (call-fact-start candidate))
+          (<= (call-fact-end call) (call-fact-end candidate))))
+   (source-file-calls file)))
 
 ;; : (-> CallFact LoopDriverFact Boolean )
 (def (string-growth-call-inside-loop? call loop)

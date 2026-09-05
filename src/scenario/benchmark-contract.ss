@@ -3,7 +3,7 @@
 
 (import :gerbil/gambit
         (only-in :std/sugar hash hash-put!)
-        :gslph/src/support/time)
+        :asp-gerbil-scheme/src/support/time)
 
 (export scenario-benchmark-contract/path
         scenario-benchmark-datum->contract

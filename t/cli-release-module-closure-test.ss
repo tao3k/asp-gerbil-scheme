@@ -2,7 +2,7 @@
 ;;; Parser-owned exact-set gate for the standalone CLI release projection.
 
 (import :gerbil/gambit
-        :gslph/src/parser/facade
+        :asp-gerbil-scheme/src/parser/facade
         :std/sort
         :std/test
         (only-in :std/misc/path path-directory path-expand path-normalize)
@@ -12,7 +12,8 @@
         "../src/build-api/release-modules")
 (import ../src/build-api/install-static-modules)
 
-(export cli-release-module-closure-test)
+(export cli-release-module-closure-test
+        parser-owned-release-module-closure)
 
 ;; : String
 (def +release-source-root+ (path-normalize (path-expand "src")))
@@ -29,8 +30,7 @@
     "commands/fmt.ss"
     "commands/guide.ss"
     "commands/info.ss"
-    "commands/query.ss"
-    "commands/search.ss"))
+    "runtime/provider-http-json-command-client.ss"))
 
 ;; : (List String)
 (def +release-forbidden-prefixes+
@@ -53,10 +53,10 @@
 ;; : (-> ModulePath String (Or False ModulePath))
 (def (release-local-module-reference importer-path reference)
   (cond
-   ((string-prefix? ":gslph/src/" reference)
+   ((string-prefix? ":asp-gerbil-scheme/src/" reference)
     (ensure-source-suffix
      (substring reference
-                (string-length ":gslph/src/")
+                (string-length ":asp-gerbil-scheme/src/")
                 (string-length reference))))
    ((string-prefix? ":" reference)
     (let* ((candidate
@@ -112,8 +112,8 @@
              (declared
               (sort (cons "cli-release-linker.ss" cli-release-modules)
                     string<?)))
-        (check (length actual) => cli-release-closure-count)
-        (check actual => declared)))
+        (check actual => declared)
+        (check (length actual) => cli-release-closure-count)))
     (test-case "install static projection retains the launcher root"
       (check (member "cli-launcher.ss" cli-install-static-modules) ? true))
     (test-case "install static projection covers the release module projection"

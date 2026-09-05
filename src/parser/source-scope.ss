@@ -5,8 +5,8 @@
 ;;; - This module turns that policy into concrete parser file sets.
 
 (import :gerbil/gambit
-        :gslph/src/parser/package
-        (only-in :gslph/src/parser/selectors relative-path source-full-path)
+        :asp-gerbil-scheme/src/parser/package
+        (only-in :asp-gerbil-scheme/src/parser/selectors relative-path source-full-path)
         (only-in :std/iter for/fold)
         (only-in :std/misc/list unique)
         (only-in :std/misc/ports read-file-lines)
@@ -30,7 +30,7 @@
         read-source-lines)
 
 ;; ConfigConstant
-(def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld"))
+(def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld" ".inc"))
 ;; ConfigConstant
 (def +config-files+ '("gerbil.pkg" "build.ss"))
 ;; Boolean

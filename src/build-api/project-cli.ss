@@ -1,21 +1,17 @@
+;;; The project CLI only decodes user intent and delegates to Build API library
+;;; operations.  Compilation policy stays in package/profile declarations so
+;;; CLI invocation cannot create a second platform or concurrency authority.
 (export #t)
 
 (import :gerbil/tools/env
-        :std/cli/getopt
- :std/cli/multicall
-  :gslph/src/build-api/project-build
-  :gslph/src/testing/project-build
-  :gslph/src/build-api/source-coverage)
+        (only-in :std/cli/getopt flag option rest-arguments)
+        (only-in :std/cli/multicall
+                 define-entry-point
+                 define-multicall-main)
+  :asp-gerbil-scheme/src/build-api/project-build
+  :asp-gerbil-scheme/src/testing/project-build)
 
-(import :gslph/src/build-api/component-closure)
-
-(def +package-root+ (current-directory))
-
-(configure-project-build-root! +package-root+)
-(gslph-source-coverage
- roots: ["src"]
- runtime-roots: ["src"])
-
+;; : (-> GetoptOption ... (List GetoptOption))
 (def (native-build-getopt . options)
   (append
    [(flag 'verbose "-V" "--verbose"
@@ -30,6 +26,7 @@
           help: "Build optimized release executables")]
    options))
 
+;; : (List GetoptOption)
 (def compile-getopt
   (native-build-getopt
    (flag 'binary "--binary"
@@ -37,6 +34,7 @@
    (flag 'full "--full"
          help: "Compile every library module instead of the CLI launcher")))
 
+;; : (List GetoptOption)
 (def install-getopt
   (native-build-getopt
    (option 'flag "--flag"
@@ -45,13 +43,10 @@
    (flag 'full "--full"
          help: "Compile every library module before installing the CLI launcher")))
 
+;; : (List GetoptOption)
 (def test-file-getopt
   [(rest-arguments 'files
                    help: "Selected gxtest files")])
-
-(def component-spec-getopt
-  [(rest-arguments 'components
-                   help: "Named component")])
 
 (define-entry-point (compile verbose: (verbose #f)
                              debug: (debug #f)
@@ -77,7 +72,7 @@
         (release #f)
         (flag #f)
         (full #f))
-  (help: "Install standalone gslph; use --flag asp for ASP State Home runtime"
+  (help: "Install standalone asp-gerbil-scheme; use --flag asp for ASP State Home runtime"
    getopt: install-getopt)
   (project-install-target
    verbose debug no-optimize optimized release full flag))
@@ -101,12 +96,5 @@
   (help: "Run every top-level gxtest file"
    getopt: [])
   (project-test-full-target))
-
-(define-entry-point (component-spec . components)
-  (help: "Write a checked component source-closure receipt"
-   getopt: component-spec-getopt)
-  (match components
-    ([component] (write-gslph-component-receipt component))
-    (else (error "component-spec requires exactly one component" components))))
 
 (define-multicall-main)

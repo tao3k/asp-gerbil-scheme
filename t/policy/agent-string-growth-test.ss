@@ -3,11 +3,11 @@
 
 (import :gerbil/gambit
         :std/test
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
         :policy/fixtures
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade)
 
 (export agent-string-growth-policy-test)
 
@@ -58,6 +58,24 @@
         (let* ((index (collect-project root))
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-042" findings)))
+          (check matching => []))))
+    (test-case "agent policy accepts per-item string construction inside a loop"
+      (let* ((root ".run/policy-string-per-item")
+             (source-dir (string-append root "/src/reports")))
+        (reset-fixture-root root)
+        (ensure-dir ".run")
+        (ensure-dir root)
+        (ensure-dir (string-append root "/src"))
+        (ensure-dir source-dir)
+        (write-text (string-append root "/gerbil.pkg")
+                    "(package: sample/reports)\n")
+        (write-text
+         (string-append source-dir "/render.ss")
+         ";;; -*- Gerbil -*-\n(package: sample/reports)\n(export render-ids)\n(def (render-ids count)\n  (let loop ((index 0) (out '()))\n    (if (= index count)\n      (reverse out)\n      (let (id (string-append \"item-\" (number->string index)))\n        (loop (+ index 1) (cons id out))))))\n")
+        (let* ((index (collect-project root))
+               (findings (run-agent-policy index))
+               (matching
+                (filter-rule "GERBIL-SCHEME-AGENT-POLICY-042" findings)))
           (check matching => []))))
     (test-case "agent policy validates string append scenario under performance gate"
       (let* ((scenario

@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Stable parser facade for the Gerbil Scheme project harness.
 
-(import :gslph/src/parser/core
-        :gslph/src/parser/package
-        :gslph/src/parser/source-class
-        :gslph/src/parser/source-scope)
+(import :asp-gerbil-scheme/src/parser/core
+        :asp-gerbil-scheme/src/parser/package
+        :asp-gerbil-scheme/src/parser/source-class
+        :asp-gerbil-scheme/src/parser/source-scope)
 
 (export +source-extensions+
         +config-files+
@@ -12,6 +12,7 @@
         collect-project
         collect-project/profile
         collect-source-scope
+        collect-source-scope/coverage
         collect-selected-source-scope
         collect-test-source-scope
         collect-project-package-only
@@ -342,11 +343,11 @@
         project-package-source-scope-policy
         project-package-modularity-policy
         project-package-agent-policy
+        project-package-with-source-scope
         test-directory-policy-allowed-directories
         test-directory-policy-explanation
-        macro-governance-policy-allow-generated
         macro-governance-policy-explanation
-        macro-governance-policy-witness
+        macro-governance-policy-witnesses
         source-scope-policy-roots
         source-scope-policy-runtime-roots
         source-scope-policy-exclude-directories

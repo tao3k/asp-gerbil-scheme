@@ -82,17 +82,17 @@
              (stamp (package-build-receipt-path "current/build.sexp")))
         (package-build-receipt-write-file source "source")
         (package-build-receipt-write-file output "output")
-        (gslph-package-build-receipt-write stamp [source] [output])
-        (let (status (gslph-package-build-receipt-status stamp))
-          (check (gslph-package-build-receipt-status-ref status 'status #f)
+        (asp-gerbil-scheme-package-build-receipt-write stamp [source] [output])
+        (let (status (asp-gerbil-scheme-package-build-receipt-status stamp))
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref status 'status #f)
                  => 'current)
-          (check (gslph-package-build-receipt-status-ref status 'sources #f)
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref status 'sources #f)
                  => 1)
-          (check (gslph-package-build-receipt-status-ref status 'outputs #f)
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref status 'outputs #f)
                  => 1)
           (check (string-prefix?
-                  "[gslph-package-build-receipt] status=current"
-                  (gslph-package-build-receipt-status-line status))
+                  "[asp-gerbil-scheme-package-build-receipt] status=current"
+                  (asp-gerbil-scheme-package-build-receipt-status-line status))
                  => #t))))
     (test-case "reports current receipts with compile debug metadata"
       (package-build-receipt-reset!)
@@ -101,7 +101,7 @@
              (stamp (package-build-receipt-path "metadata/build.sexp")))
         (package-build-receipt-write-file source "source")
         (package-build-receipt-write-file output "output")
-        (gslph-package-build-receipt-write
+        (asp-gerbil-scheme-package-build-receipt-write
          stamp
          [source]
          [output]
@@ -110,16 +110,16 @@
                      (command-dir . ,+package-build-receipt-test-root+)
                      (elapsed-micros . 42)
                      (cache-key . "metadata/source.ss")))
-        (let (status (gslph-package-build-receipt-status stamp))
-          (check (gslph-package-build-receipt-status-ref status 'status #f)
+        (let (status (asp-gerbil-scheme-package-build-receipt-status stamp))
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref status 'status #f)
                  => 'current)
-          (check (gslph-package-build-receipt-status-ref status 'phase #f)
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref status 'phase #f)
                  => 'compile-selected-gxtest)
-          (check (gslph-package-build-receipt-status-ref status 'command #f)
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref status 'command #f)
                  => "gxc")
-          (check (gslph-package-build-receipt-status-ref status 'elapsed-micros #f)
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref status 'elapsed-micros #f)
                  => 42)
-          (check (gslph-package-build-receipt-status-ref status 'cache-key #f)
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref status 'cache-key #f)
                  => "metadata/source.ss"))))
     (test-case "reports stale when an output is missing"
       (package-build-receipt-reset!)
@@ -127,11 +127,11 @@
              (output (package-build-receipt-path "missing-output/source.ssi"))
              (stamp (package-build-receipt-path "missing-output/build.sexp")))
         (package-build-receipt-write-file source "source")
-        (gslph-package-build-receipt-write stamp [source] [output])
-        (let (status (gslph-package-build-receipt-status stamp))
-          (check (gslph-package-build-receipt-status-ref status 'status #f)
+        (asp-gerbil-scheme-package-build-receipt-write stamp [source] [output])
+        (let (status (asp-gerbil-scheme-package-build-receipt-status stamp))
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref status 'status #f)
                  => 'stale)
-          (check (gslph-package-build-receipt-status-ref status 'reason #f)
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref status 'reason #f)
                  => 'dirty-source-or-missing-output))))
     (test-case "checks a source against its selected artifact"
       (package-build-receipt-reset!)
@@ -139,12 +139,12 @@
              (output (package-build-receipt-path "artifact/source.ssi")))
         (package-build-receipt-write-file source "source")
         (package-build-receipt-write-file output "output")
-        (check (gslph-package-build-receipt-source-output-current?
+        (check (asp-gerbil-scheme-package-build-receipt-source-output-current?
                 source output)
                => #t)
         (thread-sleep! 1.1)
         (package-build-receipt-write-file source "newer source")
-        (check (gslph-package-build-receipt-source-output-current?
+        (check (asp-gerbil-scheme-package-build-receipt-source-output-current?
                 source output)
                => #f)))
     (test-case "selects a persistent static artifact when scm is absent"
@@ -152,10 +152,10 @@
       (let* ((output-root (package-build-receipt-path "artifact-family"))
              (module "nested/example.ss")
              (candidates
-              (gslph-build-module-artifact-files output-root module))
+              (asp-gerbil-scheme-build-module-artifact-files output-root module))
              (static-output (cadr candidates)))
         (package-build-receipt-write-file static-output "static output")
-        (check (gslph-build-module-artifact-file output-root module)
+        (check (asp-gerbil-scheme-build-module-artifact-file output-root module)
                => static-output)))
     (test-case "reports stale when expected receipt shape changed"
       (package-build-receipt-reset!)
@@ -166,27 +166,27 @@
         (package-build-receipt-write-file source "source")
         (package-build-receipt-write-file new-source "new source")
         (package-build-receipt-write-file output "output")
-        (gslph-package-build-receipt-write stamp [source] [output])
-        (let (status (gslph-package-build-receipt-status
+        (asp-gerbil-scheme-package-build-receipt-write stamp [source] [output])
+        (let (status (asp-gerbil-scheme-package-build-receipt-status
                       stamp
                       expected-sources: [source new-source]
                       expected-outputs: [output]))
-          (check (gslph-package-build-receipt-status-ref status 'status #f)
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref status 'status #f)
                  => 'stale)
-          (check (gslph-package-build-receipt-status-ref status 'reason #f)
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref status 'reason #f)
                  => 'receipt-shape-mismatch))))
     (test-case "reports stale for missing or invalid receipts"
       (package-build-receipt-reset!)
       (let ((missing (package-build-receipt-path "missing/build.sexp"))
             (invalid (package-build-receipt-path "invalid/build.sexp")))
-        (let (missing-status (gslph-package-build-receipt-status missing))
-          (check (gslph-package-build-receipt-status-ref missing-status 'status #f)
+        (let (missing-status (asp-gerbil-scheme-package-build-receipt-status missing))
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref missing-status 'status #f)
                  => 'stale)
-          (check (gslph-package-build-receipt-status-ref missing-status 'reason #f)
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref missing-status 'reason #f)
                  => 'missing-stamp))
         (package-build-receipt-write-file invalid "not-a-valid-receipt")
-        (let (invalid-status (gslph-package-build-receipt-status invalid))
-          (check (gslph-package-build-receipt-status-ref invalid-status 'status #f)
+        (let (invalid-status (asp-gerbil-scheme-package-build-receipt-status invalid))
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref invalid-status 'status #f)
                  => 'stale)
-          (check (gslph-package-build-receipt-status-ref invalid-status 'reason #f)
+          (check (asp-gerbil-scheme-package-build-receipt-status-ref invalid-status 'reason #f)
                  => 'invalid-stamp))))))

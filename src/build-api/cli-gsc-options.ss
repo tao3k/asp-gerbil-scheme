@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-;;; GSC option discovery for native gslph launcher builds.
+;;; GSC option discovery for native asp-gerbil-scheme launcher builds.
 
 (import (only-in :std/misc/path path-directory path-expand)
         (only-in :std/misc/process run-process)
@@ -10,11 +10,11 @@
                  native-toolchain-compiler-path
                  native-toolchain-toolchain-kind
                  native-toolchain-sdk-kind))
-(export gslph-cli-gsc-options
-        gslph-cli-gsc-options-cache-key)
+(export asp-gerbil-scheme-cli-gsc-options
+        asp-gerbil-scheme-cli-gsc-options-cache-key)
 
 ;; : (-> (List (Maybe String)))
-(def (gslph-cli-gsc-options-cache-key)
+(def (asp-gerbil-scheme-cli-gsc-options-cache-key)
   (let (toolchain (native-toolchain-default))
     [(native-toolchain-compiler-path toolchain)
      (native-toolchain-toolchain-kind toolchain)
@@ -171,8 +171,8 @@
           (gsc-option "-ld-options" (openssl-ld-options))))
 
 ;; : (-> Path (List String))
-(def (gslph-cli-gsc-options package-root)
-  (let (key (gslph-cli-gsc-options-cache-key))
+(def (asp-gerbil-scheme-cli-gsc-options package-root)
+  (let (key (asp-gerbil-scheme-cli-gsc-options-cache-key))
     (or (read-cli-gsc-options-cache package-root key)
         (let (options (uncached-cli-gsc-options))
           (write-cli-gsc-options-cache! package-root key options)

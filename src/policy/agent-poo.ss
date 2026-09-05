@@ -1,15 +1,15 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing POO policy checks.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-poo-callees
-        :gslph/src/policy/agent-poo-object-literal
-        :gslph/src/policy/agent-poo-loop-performance
-        :gslph/src/policy/agent-support
-        :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-poo-callees
+        :asp-gerbil-scheme/src/policy/agent-poo-object-literal
+        :asp-gerbil-scheme/src/policy/agent-poo-loop-performance
+        :asp-gerbil-scheme/src/policy/agent-support
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/srfi/13 string-contains string-join string-prefix?)
         (only-in :std/sugar filter filter-map hash hash-get ormap)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export poo-direct-writeenv-findings
         poo-direct-writeenv-finding
@@ -138,13 +138,48 @@
     '()))
 ;; : (-> ProjectIndex SourceFile CallFact Boolean )
 (def (manual-object-model-call? index file call)
+  (let (caller (call-fact-caller call))
+    (and (manual-object-model-owner? index file)
+         (manual-object-model-callee? call)
+         caller
+         (manual-object-domain-constructor-caller? file caller))))
+
+;; : (-> ProjectIndex SourceFile Boolean)
+(def (manual-object-model-owner? index file)
   (and (index-source-runtime-file-path? index (source-file-path file))
-       (null? (source-file-poo-forms file))
-       (member (call-fact-callee call) +manual-object-model-callees+)
-       (call-fact-caller call)
-       (or (string-prefix? "make-" (call-fact-caller call))
-           (string-prefix? "new-" (call-fact-caller call))
-           (string-prefix? "build-" (call-fact-caller call)))))
+       (null? (source-file-poo-forms file))))
+
+;; : (-> CallFact Boolean)
+(def (manual-object-model-callee? call)
+  (member (call-fact-callee call) +manual-object-model-callees+))
+
+;; : (-> SourceFile Caller Boolean)
+(def (manual-object-domain-constructor-caller? file caller)
+  (and (not (caller-builds-type-finding? file caller))
+       (or (string-prefix? "make-" caller)
+           (string-prefix? "new-" caller)
+           (string-prefix? "build-" caller))))
+
+;;; A hash nested in make-type-finding is typed diagnostic evidence, not an
+;;; alternative domain object model. Require both calls in the same caller so
+;;; ordinary build-/make-/new- constructors remain covered by POLICY-010.
+;; caller-builds-type-finding?
+;; : (-> SourceFile Caller Boolean)
+;; | doc m%
+;; Recognizes a typed diagnostic constructor in the same lexical caller.
+;; # Examples
+;; ```scheme
+;; (caller-builds-type-finding? file "build-policy-findings")
+;; => #t when that caller invokes make-type-finding
+;; ```
+;; Result: true only for parser-owned call evidence in one caller boundary.
+(def (caller-builds-type-finding? file caller)
+  (and (find (lambda (candidate)
+               (and (equal? (call-fact-caller candidate) caller)
+                    (equal? (call-fact-callee candidate)
+                            "make-type-finding")))
+             (source-file-calls file))
+       #t))
 ;; : (-> SourceFile CallFact TypeFinding )
 (def (poo-object-model-finding file call)
   (make-type-finding
@@ -241,7 +276,7 @@
          (docsPath "docs/50-59-policy/51.02-gerbil-poo-programming-guidelines.org")
          (source "gerbil-poo doc/poo.md:299-319, t/object-test.ss, and t/mop-test.ss")
          (preferredSyntax "{(:: @ super) slot: ...}, =>, =>.+, ?, .mix")
-         (next "read docs/50-59-policy/51.02-gerbil-poo-programming-guidelines.org; gerbil-scheme-harness agent guide . --poo"))))
+         (next "read docs/50-59-policy/51.02-gerbil-poo-programming-guidelines.org; asp-gerbil-scheme agent guide . --poo"))))
 ;;; Boundary:
 ;;; - This is a POO performance policy, not a build policy.
 ;;; - Large data-shaped `.o` calls can create avoidable macro-expansion work.
@@ -539,5 +574,6 @@
            (source "gerbil-poo doc/poo.md:30-50, 655-720")
            (next
             (string-append
-             "asp gerbil-scheme search owner " (source-file-path file)
-             " items --query 'poo putdefault setslots typed doc result example' --workspace . --view seeds"))))))
+             "asp-gerbil-scheme projection --native-index --owner "
+             (source-file-path file)
+             " --json --workspace ."))))))

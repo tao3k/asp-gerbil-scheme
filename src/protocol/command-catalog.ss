@@ -31,45 +31,33 @@
 ;; : (List ProviderCommandDescriptor)
 (def provider-command-descriptors
   [(make-provider-command-descriptor
-    "search"
-    "gslph/src/commands/search"
-    'gslph/src/commands/search#search-main
-    'search-main
-    ["search <view> ... [--json] [--code] [PROJECT_ROOT]"]
-    10
-    ["search/prime" "search/owner" "search/lexical" "search/ingest"
-     "search/pattern" "search/runtime-source" "search/compare"
-     "search/proof" "search/compiler-evidence"
-     "index/structural" "index/native-syntax-owner-facts"])
-   (make-provider-command-descriptor
     "query"
-    "gslph/src/commands/query"
-    'gslph/src/commands/query#query-main
-    'query-main
-    ["query --selector <gerbil-scheme-structural-selector> --projection source --workspace PROJECT_ROOT"
-     "query --selector <gerbil-scheme-callable-selector> --projection callable-skeleton --workspace PROJECT_ROOT"]
+    "asp-gerbil-scheme/src/runtime/provider-http-json-command-client"
+    'asp-gerbil-scheme/src/runtime/provider-http-json-command-client#provider-http-json-query-main
+    'provider-http-json-query-main
+    ["query --server-endpoint <resident-runtime-endpoint> --runtime-request-frame-stdin"]
     20
     ["query/selector" "query/exact-selector-native-v1"])
    (make-provider-command-descriptor
     "projection"
-    "gslph/src/commands/projection"
-    'gslph/src/commands/projection#projection-main
+    "asp-gerbil-scheme/src/commands/projection"
+    'asp-gerbil-scheme/src/commands/projection#projection-main
     'projection-main
     ["projection <owner-path> --workspace PROJECT_ROOT --json"]
     0
-    [])
+    ["index/structural" "index/native-syntax-owner-facts"])
    (make-provider-command-descriptor
     "fmt"
-    "gslph/src/commands/fmt"
-    'gslph/src/commands/fmt#fmt-main
+    "asp-gerbil-scheme/src/commands/fmt"
+    'asp-gerbil-scheme/src/commands/fmt#fmt-main
     'fmt-main
     ["fmt [--check] [--json] [--workspace PROJECT_ROOT] [PATH ...]"]
     0
     [])
    (make-provider-command-descriptor
     "evidence"
-    "gslph/src/commands/evidence"
-    'gslph/src/commands/evidence#evidence-main
+    "asp-gerbil-scheme/src/commands/evidence"
+    'asp-gerbil-scheme/src/commands/evidence#evidence-main
     'evidence-main
     ["evidence graph [--json] [PROJECT_ROOT]"
      "evidence analyze [--json] [PROJECT_ROOT]"]
@@ -77,8 +65,8 @@
     ["evidence/graph" "evidence/analyze"])
    (make-provider-command-descriptor
     "agent"
-    "gslph/src/commands/agent"
-    'gslph/src/commands/agent#agent-main
+    "asp-gerbil-scheme/src/commands/agent"
+    'asp-gerbil-scheme/src/commands/agent#agent-main
     'agent-main
     ["agent doctor [--json] [PROJECT_ROOT]"
      "agent guide [PROJECT_ROOT]"]
@@ -86,16 +74,16 @@
     [])
    (make-provider-command-descriptor
     "guide"
-    "gslph/src/commands/guide"
-    'gslph/src/commands/guide#guide-main
+    "asp-gerbil-scheme/src/commands/guide"
+    'asp-gerbil-scheme/src/commands/guide#guide-main
     'guide-main
     ["guide [--json] [PROJECT_ROOT]"]
     30
     ["guide"])
    (make-provider-command-descriptor
     "info"
-    "gslph/src/commands/info"
-    'gslph/src/commands/info#info-main
+    "asp-gerbil-scheme/src/commands/info"
+    'asp-gerbil-scheme/src/commands/info#info-main
     'info-main
     ["info [--json] [PROJECT_ROOT]"]
     40

@@ -2,14 +2,14 @@
 
 * Decision
 
-The Gerbil standard-library dependency index is owned by Rust in the ASP
-language facade. It is not a workspace seed, and it is not implemented inside
-the Scheme provider.
+The Gerbil standard-library dependency index is a provider-owned native fact
+source consumed by the ASP Search Playbook. It is not a workspace seed, and
+the Scheme provider does not own a second search planner or ranking surface.
 
 The first public surface is:
 
 #+begin_src sh
-asp gerbil-scheme search deps gerbil :std/srfi/13 items --query string-prefix
+asp gerbil-scheme search 'std/srfi/13 string-prefix export'
 asp gerbil-scheme query --selector 'gerbil:/std/srfi/13#export/string-prefix?' --code
 #+end_src
 
@@ -30,10 +30,12 @@ home/source tree. The command must not require =--workspace=.
 
 * Output Contract
 
-The search command returns a compact receipt for agents:
+The provider publishes native module/export facts. The ASP Search Playbook
+combines those facts with lexical and graph evidence and returns its shared V1
+receipt; the provider does not render a private =gerbil-deps= result packet.
 
 #+begin_example
-[gerbil-deps] namespace=gerbil authority=active-gxi module=:std/srfi/13 scope=standard-library/srfi
+namespace=gerbil authority=active-gxi module=:std/srfi/13 scope=standard-library/srfi
 |use import="(import (only-in :std/srfi/13 string-prefix? string-prefix-ci?))"
 |item kind=export name=string-prefix? selector=gerbil:/std/srfi/13#export/string-prefix?
 |item kind=export name=string-prefix-ci? selector=gerbil:/std/srfi/13#export/string-prefix-ci?
@@ -56,13 +58,13 @@ the module includes implementation files, the index follows bounded local
 
 * Performance Boundary
 
-The index is a Rust hot path and runs before provider activation. It does not
-start =gslph=, does not require a hook activation file, and does not scan the
-workspace. Broad input is rejected with a concrete next command so agents refine
-the module and query instead of launching wide searches.
+The native fact index is a bounded hot path. It does not own a private Search
+CLI, does not require a hook activation file, and does not scan the workspace.
+ASP alone plans and ranks the resulting Search Playbook stages.
 
 * Evolution
 
 The initial index is source-backed. A future cache can persist module export
-tables keyed by active =gxi= path and source metadata, while keeping the same
-command contract and selectors.
+tables keyed by active =gxi= path and source metadata while keeping the same
+fact schema and selectors; it must not reintroduce a provider-local search
+command.

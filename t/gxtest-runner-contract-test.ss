@@ -6,9 +6,9 @@
         (only-in :std/misc/path path-expand)
         (only-in :std/srfi/1 append-map)
         (only-in :std/srfi/13 string-contains)
-        (only-in "../src/build-api/package-spec"
-                 gslph-package-api-spec
-                 gslph-package-api-stage-specs)
+        (only-in "../src/build-api/package-native-plan"
+                 asp-gerbil-scheme-package-api-spec
+                 asp-gerbil-scheme-package-api-stage-specs)
         (only-in "../src/policy/gxtest"
                  make-gxtest-policy-test)
         "../src/testing/model"
@@ -16,7 +16,11 @@
         (only-in "../src/testing/gxtest-execution"
                  gxtest-native-parallelism
                  gxtest-serial-resource-groups)
-        :gslph/src/testing/memory-profile)
+        (only-in "../src/testing/gxtest-build"
+                 scoped-policy-engine-needs-source-build?)
+        (only-in "../src/testing/gxtest-policy"
+                 scoped-policy-engine-owned-by-project?)
+        :asp-gerbil-scheme/src/testing/memory-profile)
 (export gxtest-runner-contract-test)
 
 (declare-gxtest-memory-exception
@@ -35,8 +39,16 @@
   (append-map (lambda (stage) stage) stages))
 
 (def gxtest-runner-contract-test
-  (test-suite "gslph gxtest runner contract"
-    (test-case "gxtest entry files are discovered from default test root"
+  (test-suite "asp-gerbil-scheme gxtest runner contract"
+    (test-case "gxtest root preserves the caller Gerbil path"
+      (let ((caller-gerbil-path (getenv "GERBIL_PATH" #f))
+            (sentinel "/tmp/asp-gerbil-scheme-gxtest-path-sentinel"))
+        (setenv "GERBIL_PATH" sentinel)
+        (configure-build-root! (current-directory))
+        (check (getenv "GERBIL_PATH" #f) => sentinel)
+        (setenv "GERBIL_PATH" (or caller-gerbil-path ""))
+        (configure-build-root! (current-directory))))
+    (test-case "gxtest entry files honor path-directory trailing separators"
       (configure-build-root! (current-directory))
       (let (files (gxtest-test-files))
         (check (member "t/policy-test.ss" files) ? true)
@@ -52,7 +64,7 @@
         (check (length files) => 8)
         (check (member "t/agent-poo-scenario-contract-test.ss" files) ? true)
         (check (member "t/build-install-test.ss" files) ? true)
-        (check (member "t/component-closure-test.ss" files) ? true)
+        (check (member "t/source-closure-test.ss" files) ? true)
         (check (member "t/parser-memory-stability-test.ss" files) ? true)
         (check (member "t/self-apply-full-gate.ss" files) => #f)
         (check (member "t/package-build-receipt-test.ss" files) => #f)
@@ -94,6 +106,7 @@
       (let (files ["t/benchmark-gate-test.ss"
                    "t/agent-poo-scenario-contract-test.ss"
                    "t/build-api-native-stage-boundary-test.ss"
+                   "t/building-performance-test.ss"
                    "t/building-gxtest-stage-boundary-test.ss"
                    "t/cli-dev-linker-test.ss"
                    "t/fmt-scenario-test.ss"
@@ -104,6 +117,7 @@
         (check (serial-gxtest-files files)
                => ["t/benchmark-gate-test.ss"
                    "t/build-api-native-stage-boundary-test.ss"
+                   "t/building-performance-test.ss"
                    "t/building-gxtest-stage-boundary-test.ss"
                    "t/cli-dev-linker-test.ss"
                    "t/fmt-scenario-test.ss"
@@ -134,29 +148,37 @@
                  ["t/query-test.ss"]]))
     (test-case "test phase receipts are machine parseable"
       (check (test-phase-receipt-line "run-gxtest" 1234)
-             => "[gslph-test-phase] name=run-gxtest elapsedMicros=1234 elapsedMs=1\n"))
+             => "[asp-gerbil-scheme-test-phase] name=run-gxtest elapsedMicros=1234 elapsedMs=1\n"))
     (test-case "scoped policy status receipt is machine parseable"
       (check (scoped-policy-status-line
               '((status . stale)
                 (reason . dirty-source-or-missing-output)
                 (sources . 9)
                 (outputs . 1)))
-             => "[gslph-scoped-policy] status=stale reason=dirty-source-or-missing-output sources=9 outputs=1\n"))
+             => "[asp-gerbil-scheme-scoped-policy] status=stale reason=dirty-source-or-missing-output sources=9 outputs=1\n"))
     (test-case "scoped policy phase receipts are machine parseable"
       (check (scoped-policy-phase-line "policy-report" 9876)
-             => "[gslph-scoped-policy-phase] name=policy-report elapsedMicros=9876 elapsedMs=9\n"))
+             => "[asp-gerbil-scheme-scoped-policy-phase] name=policy-report elapsedMicros=9876 elapsedMs=9\n"))
+    (test-case "downstream policy uses the installed ASP engine"
+      (check (scoped-policy-engine-owned-by-project? "asp-gerbil-scheme")
+             => #t)
+      (check (scoped-policy-engine-owned-by-project? "poo-flow") => #f)
+      (check (scoped-policy-engine-needs-source-build? []) => #f)
+      (check (scoped-policy-engine-needs-source-build?
+              ["src/policy/gxtest-runtime.ss"])
+             => #t))
     (test-case "gxtest timing summaries are machine parseable"
       (check (gxtest-summary-line "serial" 13 29643000 3624000)
-             => "[gslph-test-summary] kind=serial count=13 sumMs=29643 wallMs=3624\n")
+             => "[asp-gerbil-scheme-test-summary] kind=serial count=13 sumMs=29643 wallMs=3624\n")
       (check (gxtest-top-line 1 "t/policy-test.ss" 3397000)
-             => "[gslph-test-top] rank=1 name=t/policy-test.ss elapsedMs=3397\n"))
+             => "[asp-gerbil-scheme-test-top] rank=1 name=t/policy-test.ss elapsedMs=3397\n"))
     (test-case "gxtest failures are visible before verbose output"
       (check (gxtest-failure-line "t/failing-test.ss" 42)
-             => "[gslph-test-failure] name=t/failing-test.ss status=42\n"))
+             => "[asp-gerbil-scheme-test-failure] name=t/failing-test.ss status=42\n"))
     (test-case "gxtest batch expression leaves policy to runner phase"
       (configure-build-root! (current-directory))
       (check (gxtest-source-load-batch-expression ["t/build-install-test.ss"])
-             => "(begin (add-load-path! \".\") (add-load-path! \"src\") (add-load-path! \"t\") (import :std/test) (load \"t/build-install-test.ss\") (let (ok #t) (let (start (current-jiffy)) (unless (run-test-suite! build-install-test) (set! ok #f)) (display \"[gslph-test-file] name=t/build-install-test.ss elapsedMs=\") (display (quotient (* (- (current-jiffy) start) 1000) (jiffies-per-second))) (newline) (force-output)) ok))"))
+             => "(begin (add-load-path! \".\") (add-load-path! \"src\") (add-load-path! \"t\") (import :std/test) (load \"t/build-install-test.ss\") (let (ok #t) (let (start (current-jiffy)) (unless (run-test-suite! build-install-test) (set! ok #f)) (display \"[asp-gerbil-scheme-test-file] name=t/build-install-test.ss elapsedMs=\") (display (quotient (* (- (current-jiffy) start) 1000) (jiffies-per-second))) (newline) (force-output)) ok))"))
     (test-case "gxtest policy macro expands literal file scope"
       (let (suite (make-gxtest-policy-test "." ["t/build-install-test.ss"]))
         (check (not (not suite)) => #t)))
@@ -204,7 +226,7 @@
       (check (gxtest-file-exported-suite "t/build-install-test.ss")
              => 'build-install-test)
       (check (gxtest-source-load-batch-expression ["t/build-install-test.ss"])
-             => "(begin (add-load-path! \".\") (add-load-path! \"src\") (add-load-path! \"t\") (import :std/test) (load \"t/build-install-test.ss\") (let (ok #t) (let (start (current-jiffy)) (unless (run-test-suite! build-install-test) (set! ok #f)) (display \"[gslph-test-file] name=t/build-install-test.ss elapsedMs=\") (display (quotient (* (- (current-jiffy) start) 1000) (jiffies-per-second))) (newline) (force-output)) ok))"))
+             => "(begin (add-load-path! \".\") (add-load-path! \"src\") (add-load-path! \"t\") (import :std/test) (load \"t/build-install-test.ss\") (let (ok #t) (let (start (current-jiffy)) (unless (run-test-suite! build-install-test) (set! ok #f)) (display \"[asp-gerbil-scheme-test-file] name=t/build-install-test.ss elapsedMs=\") (display (quotient (* (- (current-jiffy) start) 1000) (jiffies-per-second))) (newline) (force-output)) ok))"))
     (test-case "gxtest delegate contract filters selected suites"
       (configure-build-root! (current-directory))
       (let (contract (gxtest-delegate-contract filter: 'build-install-test))
@@ -212,7 +234,7 @@
                 ["t/build-install-test.ss"
                  "t/testing-framework-test.ss"]
                 contract)
-               => "(begin (add-load-path! \".\") (add-load-path! \"src\") (add-load-path! \"t\") (import :std/test) (load \"t/build-install-test.ss\") (let (ok #t) (let (start (current-jiffy)) (unless (run-test-suite! build-install-test) (set! ok #f)) (display \"[gslph-test-file] name=t/build-install-test.ss elapsedMs=\") (display (quotient (* (- (current-jiffy) start) 1000) (jiffies-per-second))) (newline) (force-output)) ok))")))
+               => "(begin (add-load-path! \".\") (add-load-path! \"src\") (add-load-path! \"t\") (import :std/test) (load \"t/build-install-test.ss\") (let (ok #t) (let (start (current-jiffy)) (unless (run-test-suite! build-install-test) (set! ok #f)) (display \"[asp-gerbil-scheme-test-file] name=t/build-install-test.ss elapsedMs=\") (display (quotient (* (- (current-jiffy) start) 1000) (jiffies-per-second))) (newline) (force-output)) ok))")))
     (test-case "gxtest delegate contract rejects unsupported switches with receipt"
       (configure-build-root! (current-directory))
       (let* ((contract
@@ -362,12 +384,12 @@
         (check (member "policy/gxtest.ss" stage) ? true)
         (check (member "support/args.ss" stage) ? true)
         (check (member "support/io.ss" stage) ? true)
-        (check (member "commands/query.ss" stage) ? true)
-        (check (member "commands/search-owner-items.ss" stage) ? true)
-        (check (member "search-light-launcher.ss" stage) ? true)
+        (check (member "commands/query.ss" stage) => #f)
+        (check (member "runtime/provider-http-json-client.ss" stage) ? true)
+        (check (member "runtime/provider-http-json-command-client.ss" stage) ? true)
         (check (member "cli-launcher.ss" stage) ? true)))
     (test-case "package api stages keep clean-ci dependency order"
-      (let* ((stages (gslph-package-api-stage-specs))
+      (let* ((stages (asp-gerbil-scheme-package-api-stage-specs))
              (gate (stage-index-containing stages "benchmark/gate.ss"))
              (benchmark-framework
               (stage-index-containing stages "benchmark/framework.ss"))
@@ -382,8 +404,8 @@
         (check (< scenario selection) => #t)
         (check (< selection framework) => #t)))
     (test-case "package api flat spec is derived from ordered stages"
-      (check (gslph-package-api-spec)
-             => (stage-files (gslph-package-api-stage-specs))))
+      (check (asp-gerbil-scheme-package-api-spec)
+             => (stage-files (asp-gerbil-scheme-package-api-stage-specs))))
     (test-case "binary bootstrap spec includes downstream gxtest support"
       (configure-build-root! (current-directory))
       (let (stage (compile-spec #f #f #t))

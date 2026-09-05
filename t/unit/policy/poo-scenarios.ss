@@ -125,6 +125,11 @@
     (ensure-dir root)
     (ensure-dir src)
     (ensure-dir owner)
+    (write-text (string-append root "/gerbil.pkg")
+                "(package: sample/orders)\n")
+    (write-text
+     (string-append root "/build.ss")
+     "#!/usr/bin/env gxi\n;;; -*- Gerbil -*-\n;;; Build boundary:\n;;; - The package spec owns source selection; clan/building owns std/make execution.\n(import (only-in :clan/building init-build-environment!) :asp-gerbil-scheme/build-api)\n(asp-gerbil-scheme-package-spec! (sample-orders-package-spec @ asp-gerbil-scheme-library-package-prototype) (spec spec) (role 'library) (profile asp-gerbil-scheme-development-builder-profile) (modules '(\"src/orders/core.ss\" \"src/orders/methods.ss\")))\n(init-build-environment! name: \"sample-orders\" deps: '(\"clan\" \"clan/poo\") spec: spec)\n")
     (write-text (string-append owner "/core.ss")
                 ";;; -*- Gerbil -*-\n;;; Fixture preserves parser-visible POO and combinator evidence for agent repair tests.\n(package: sample/orders)\n(import (only-in :clan/poo/object defclass object))\n;;; POO invariant: keep Order as a class so method policy has runtime model evidence.\n;; : (-> Id Total Order)\n(defclass (Order object) (id total) transparent: #t)\n;; : (-> Order Total)\n(def (order-total order) order)\n;;; Composition boundary: summary stays parser-visible as map evidence for R013.\n;; : (-> Order Summary)\n(def (order-summary order) (car (map order-total [order])))\n")
     (write-text (string-append owner "/methods.ss")

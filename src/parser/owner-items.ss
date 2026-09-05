@@ -3,10 +3,10 @@
 
 (import :gerbil/expander
         :gerbil/gambit
-        (only-in :gslph/src/parser/definition-syntax definitions-from-form)
-        :gslph/src/parser/exports
-        :gslph/src/parser/model
-        (only-in :gslph/src/parser/package
+        (only-in :asp-gerbil-scheme/src/parser/definition-syntax definitions-from-form)
+        :asp-gerbil-scheme/src/parser/exports
+        :asp-gerbil-scheme/src/parser/model
+        (only-in :asp-gerbil-scheme/src/parser/package
                  agent-policy-disabled-rules
                  package-agent-policy
                  package-dependencies
@@ -19,9 +19,9 @@
                  source-scope-policy-roots
                  source-scope-policy-runtime-roots
                  test-directory-policy-allowed-directories)
-        :gslph/src/parser/selectors
-        :gslph/src/parser/support
-        :gslph/src/parser/syntax
+        :asp-gerbil-scheme/src/parser/selectors
+        :asp-gerbil-scheme/src/parser/support
+        :asp-gerbil-scheme/src/parser/syntax
         (only-in :std/misc/list unique)
         (only-in :std/misc/ports open-output-string read-file-lines)
         (only-in :std/sort sort)

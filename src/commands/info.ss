@@ -1,12 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; Machine-readable harness info and verification receipt.
 
-(import :gslph/src/constants
-        :gslph/src/parser/facade
-        :gslph/src/policy/catalog
-        :gslph/src/protocol/json
-        :gslph/src/support/args
-        :gslph/src/support/io
+(import :asp-gerbil-scheme/src/constants
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/catalog
+        :asp-gerbil-scheme/src/protocol/json
+        :asp-gerbil-scheme/src/support/args
+        :asp-gerbil-scheme/src/support/io
         (only-in :std/srfi/13 string-join))
 
 (export info-main
@@ -14,7 +14,7 @@
         display-info-packet)
 ;; String
 (def +info-schema-id+
-  "agent.semantic-protocols.gerbil-scheme-harness-info")
+  "agent.semantic-protocols.asp-gerbil-scheme-info")
 ;; : (-> String JsonPacket )
 (def (info-packet root)
   (let* ((index (collect-project-package-only root))

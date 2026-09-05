@@ -3,8 +3,8 @@
 
 (import :gerbil/gambit
         (only-in :std/sugar filter)
-        :gslph/src/testing/model
-        :gslph/src/testing/build-paths)
+        :asp-gerbil-scheme/src/testing/model
+        :asp-gerbil-scheme/src/testing/build-paths)
 
 (export testing-build-path
         testing-build-contract-root

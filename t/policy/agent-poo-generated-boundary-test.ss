@@ -4,8 +4,8 @@
 (import :gerbil/gambit
         :std/test
         :policy/agent-poo-support
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade)
 
 (export agent-poo-generated-boundary-policy-test)
 

@@ -2,9 +2,11 @@
 ;;; Shared gxtest build-root context and module path helpers.
 
 (import (only-in :std/misc/path path-expand path-normalize)
-        (only-in :std/srfi/13 string-prefix? string-suffix?)
-        (only-in :gerbil/tools/env setup-local-pkg-env!)
-        :gerbil/gambit)
+         (only-in :std/srfi/13 string-prefix? string-suffix?)
+         (only-in "../build-api/package-build"
+                  asp-gerbil-scheme-package-configure-build-root!
+                  asp-gerbil-scheme-package-build-package-name)
+         :gerbil/gambit)
 
 (export package-root
         source-root
@@ -30,9 +32,7 @@
 ;; : (-> String Void)
 (def (configure-build-root! root)
   (set! package-root (path-normalize root))
-  (current-directory package-root)
-  (setenv "GERBIL_PATH" (path-expand ".gerbil" package-root))
-  (setup-local-pkg-env! #t)
+  (asp-gerbil-scheme-package-configure-build-root! package-root)
   (set! source-root (path-expand "src" package-root))
   (set! test-root (path-expand "t" package-root))
   (set! package-name (read-build-package-name package-root)))
@@ -44,30 +44,7 @@
 
 ;; : (-> Path MaybeString)
 (def (read-build-package-name root)
-  (let* ((package-file (path-expand "gerbil.pkg" root))
-         (plist (with-catch
-                 (lambda (_) #f)
-                 (lambda () (call-with-input-file package-file read))))
-         (name (and plist (plist-ref plist 'package: #f))))
-    (cond
-     ((symbol? name) (symbol->string name))
-     ((string? name) name)
-     (else #f))))
-
-;; plist-ref
-;;   : (-> PropertyList Symbol Datum Datum)
-;;   | doc m%
-;;       `plist-ref` is the local property-list selector used while reading
-;;       `gerbil.pkg`; it returns `default` when the key is absent or the list
-;;       shape is incomplete.
-;;     %
-(def (plist-ref plist key default)
-  (match plist
-    ([head value . rest]
-     (if (eq? head key)
-       value
-       (plist-ref rest key default)))
-    (else default)))
+  (asp-gerbil-scheme-package-build-package-name root))
 
 ;; : (-> String String)
 (def (package-output-prefix root-name)

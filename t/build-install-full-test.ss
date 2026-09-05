@@ -15,7 +15,7 @@
       (unless (file-exists? ".bin")
         (create-directory ".bin"))
       (let ((binpath (dev-launcher-binpath))
-            (artifact (path-expand ".bin/gslph__exe.c" (current-directory))))
+            (artifact (path-expand ".bin/asp-gerbil-scheme__exe.c" (current-directory))))
         (call-with-output-file binpath
           (lambda (out) (display "test launcher" out)))
         (call-with-output-file artifact

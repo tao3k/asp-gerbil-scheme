@@ -3,24 +3,24 @@
 
 (import :gerbil/expander
         :gerbil/gambit
-        :gslph/src/parser/comment-quality
-        :gslph/src/parser/control-flow
-        :gslph/src/parser/dependency-adapter-quality
-        (only-in :gslph/src/parser/definition-syntax definitions-from-form)
-        :gslph/src/parser/exports
-        :gslph/src/parser/function-quality
-        :gslph/src/parser/higher-order
-        :gslph/src/parser/model
-        :gslph/src/parser/package
-        :gslph/src/parser/poo
-        :gslph/src/parser/profile
-        :gslph/src/parser/quality-shape
-        :gslph/src/parser/selectors
-        :gslph/src/parser/source-scope
-        :gslph/src/parser/support
-        :gslph/src/parser/syntax
-        :gslph/src/parser/typed-contract
-        :gslph/src/support/time
+        :asp-gerbil-scheme/src/parser/comment-quality
+        :asp-gerbil-scheme/src/parser/control-flow
+        :asp-gerbil-scheme/src/parser/dependency-adapter-quality
+        (only-in :asp-gerbil-scheme/src/parser/definition-syntax definitions-from-form)
+        :asp-gerbil-scheme/src/parser/exports
+        :asp-gerbil-scheme/src/parser/function-quality
+        :asp-gerbil-scheme/src/parser/higher-order
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/package
+        :asp-gerbil-scheme/src/parser/poo
+        :asp-gerbil-scheme/src/parser/profile
+        :asp-gerbil-scheme/src/parser/quality-shape
+        :asp-gerbil-scheme/src/parser/selectors
+        :asp-gerbil-scheme/src/parser/source-scope
+        :asp-gerbil-scheme/src/parser/support
+        :asp-gerbil-scheme/src/parser/syntax
+        :asp-gerbil-scheme/src/parser/typed-contract
+        :asp-gerbil-scheme/src/support/time
         (only-in :std/misc/list unique)
         (only-in :std/misc/ports open-output-string read-file-lines)
         (only-in :std/srfi/1 take)

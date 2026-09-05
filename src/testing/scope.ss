@@ -3,7 +3,7 @@
 
 (import :gerbil/gambit
         (only-in :std/sugar filter filter-map hash-get hash-put!)
-        :gslph/src/testing/model)
+        :asp-gerbil-scheme/src/testing/model)
 
 (export #t)
 

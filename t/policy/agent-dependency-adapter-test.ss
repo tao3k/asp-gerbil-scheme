@@ -4,10 +4,10 @@
 (import :gerbil/gambit
         :std/test
         (only-in :clan/poo/object .call)
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/policy/prototype
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/prototype
+        :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios
         :policy/fixtures)
 (export agent-dependency-adapter-policy-test)
@@ -92,10 +92,10 @@
             (check (hash-get details 'agentRepairStandard)
                    => "current dependency already provides the bottom data structure; do not hand-write loose hash/alist objects. Build a typed protocol adapter: precise only-in imports for primitives, define-type Key/Value plus primitive methods.table slots (.empty/.ref/.acons/.remove/.foldl/.foldr), iteration/conversion/update/selection/equality/lens/serialization slots, behavior on protocol slots, derived table/set/list/iteration/lens/sexp/json/bytes/marshal capabilities when slots exist, and generic contract tests")
             (check (hash-get details 'repairAction)
-                   => "search-forwarded-example-then-guide-code")
+                   => "provider-facts-then-guide-code")
             (check (hash-get details 'guideCodeFlag) => "--code")
-            (check (hash-get details 'searchExampleCommand)
-                   => "asp gerbil-scheme search pattern poo rationaldict adapter --workspace . --view seeds")
+            (check (hash-get details 'factProjectionCommand)
+                   => "asp-gerbil-scheme evidence graph --json .")
             (check (hash-get details 'repairCodeCommand)
                    => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-017 --intent repair")
             (check (hash-get details 'codeShapeExemplar)
@@ -148,9 +148,9 @@
                    => "keep src/cli.ss as a thin dispatcher; compose option objects when command option surfaces grow")
             (check (not (not (string-contains
                               (hash-get details 'adapterRepairShape)
-                              "query the search-forwarded rationaldict adapter example first")))
+                              "inspect provider-native dependency facts first")))
                    => #t)
-            (check (not (not (member "run asp gerbil-scheme search pattern poo rationaldict adapter --workspace . --view seeds to inspect the dependency example before editing"
+            (check (not (not (member "run asp-gerbil-scheme evidence graph --json . to inspect provider-native dependency facts before editing"
                                       (hash-get details 'allowedMoves))))
                    => #t)
             (check (not (not (member "run asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-017 --intent repair to inspect local R017 parser/policy repair code"
@@ -164,7 +164,7 @@
                    => #t)
             (check (hash-get repair 'guideTopic) => "dependency-protocol-adapter")
             (check (hash-get repair 'nextCommand)
-                   => "asp gerbil-scheme search pattern poo rationaldict adapter --workspace . --view seeds")))
+                   => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-017 --intent repair")))
     (test-case "agent policy rejects manual object encoding inside dependency adapters"
           (let* ((root ".run/policy-dependency-manual-object-adapter")
                  (_ (write-dependency-manual-object-adapter-project root))

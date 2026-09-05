@@ -2,7 +2,7 @@
 
 (import :gerbil/gambit
         :std/test
-        (only-in :gslph/src/commands/projection-batch
+        (only-in :asp-gerbil-scheme/src/commands/projection-batch
                  project-provider-projection-batch)
         (only-in :std/sugar hash))
 

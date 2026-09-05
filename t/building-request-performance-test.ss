@@ -1,7 +1,7 @@
 (export building-request-performance-test)
 
 (import :std/test
-        :gslph/src/building/facade)
+        :asp-gerbil-scheme/src/building/facade)
 
 (def (elapsed-ms thunk)
   (let (start (time->seconds (current-time)))
@@ -10,7 +10,7 @@
 
 (def building-request-performance-test
   (test-suite
-   "gslph building request performance"
+   "asp-gerbil-scheme building request performance"
    (test-case "constructs and projects reusable requests within framework budget"
      (let* ((make-calls 0)
             (builder

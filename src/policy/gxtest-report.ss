@@ -3,11 +3,12 @@
 
 (import :gerbil/gambit
         (only-in "../build-api/source-coverage"
-                 gslph-load-source-coverage
-                 gslph-source-coverage-files)
+                 asp-gerbil-scheme-source-coverage-exclude-directories
+                 asp-gerbil-scheme-source-coverage-files
+                 asp-gerbil-scheme-source-coverage-roots)
         (only-in "../constants" +language-id+ +provider-id+)
         (only-in "../parser/facade"
-                 collect-source-scope
+                 collect-source-scope/coverage
                  collect-selected-source-scope
                  collect-test-source-scope
                  project-definitions
@@ -156,13 +157,20 @@
 
 ;; : (-> Root ProjectIndex)
 (def (project-policy-index root)
-  (let (policy-root (project-policy-root root))
-    (gslph-load-source-coverage policy-root)
-    (collect-source-scope policy-root (gslph-source-coverage-files policy-root))))
+  (let* ((policy-root (project-policy-root root))
+         ;; source-coverage-files owns the only conditional build.ss load and
+         ;; returns the macro-declared owner catalog without directory discovery.
+         (files (asp-gerbil-scheme-source-coverage-files policy-root)))
+    (collect-source-scope/coverage
+     policy-root
+     files
+     (asp-gerbil-scheme-source-coverage-roots)
+     (asp-gerbil-scheme-source-coverage-roots)
+     (asp-gerbil-scheme-source-coverage-exclude-directories))))
 
 ;; : (-> ProjectIndex (List TypeFinding) String MaybePaths Json )
 (def (project-policy-report-json index findings scope requested-files)
-  (hash (schemaId "agent.semantic-protocols.gerbil-scheme-harness-gxtest-report")
+  (hash (schemaId "agent.semantic-protocols.asp-gerbil-scheme-gxtest-report")
         (schemaVersion "1")
         (languageId +language-id+)
         (providerId +provider-id+)
@@ -267,7 +275,7 @@
 ;; : (-> Boolean)
 (def (project-policy-detail-output?)
   (let (value (with-catch (lambda (_) #f)
-               (lambda () (getenv "GSLPH_POLICY_DETAIL"))))
+               (lambda () (getenv "ASP_GERBIL_SCHEME_POLICY_DETAIL"))))
     (or (equal? value "1")
         (equal? value "true")
         (equal? value "full"))))
@@ -292,7 +300,7 @@
     typedDocMissingCount typedDocMissingTargets
     invalidTypedContractCount invalidTypedContractReasons
     invalidTypedContractExamples
-    repairAction guideCodeFlag searchExampleCommand repairCodeCommand
+    repairAction guideCodeFlag factProjectionCommand repairCodeCommand
     codeShapeExemplar adapterRepairShape agentRepairStandard
     qualityFacets qualityFacetSteering requiredWitness rewriteScope
     evidence kind name selector))

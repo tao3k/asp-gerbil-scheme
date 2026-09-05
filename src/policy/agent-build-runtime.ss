@@ -1,15 +1,15 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing build/runtime support quality policy.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-package-build-system
-        :gslph/src/policy/detection
-        :gslph/src/policy/model
-        :gslph/src/policy/poo-source
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-package-build-system
+        :asp-gerbil-scheme/src/policy/detection
+        :asp-gerbil-scheme/src/policy/model
+        :asp-gerbil-scheme/src/policy/poo-source
         (only-in :std/srfi/1 count)
         (only-in :std/srfi/13 string-contains string-prefix? string-suffix?)
         (only-in :std/sugar cut filter filter-map hash ormap)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export build-runtime-quality-findings
         build-runtime-quality-finding)
@@ -67,6 +67,22 @@
 (def +native-fast-disallowed-import-prefixes+
   '(":commands/"))
 
+;; A project lock may protect a short state transition, but it must never own
+;; the upstream compiler or scheduler call.  Keeping these vocabularies as
+;; data makes the same-caller composite precise without parsing lock syntax.
+(def +build-runtime-global-lock-callees+
+  '("with-lock" "mutex-lock!" "call-with-mutex"))
+
+(def +build-runtime-compile-callees+
+  '("make" "compile-module" "gxc-compile" "gsc-compile"
+    "execute-pending-compile-jobs!"))
+
+(def +build-runtime-dependency-wait-callees+
+  '("completion-wait!" "barrier-wait!"))
+
+(def +build-runtime-work-channel-callees+
+  '("make-channel" "channel-put" "channel-get" "channel-close"))
+
 ;;; Boundary:
 ;;; - Quality findings are composite gates over parser-owned definitions and
 ;;;   call arguments.
@@ -91,7 +107,103 @@
   (append
    (map (cut build-runtime-quality-finding<- file <>)
         (build-runtime-quality-detections file))
+   (build-runtime-global-lock-compile-findings file)
+   (build-runtime-shadow-scheduler-findings file)
    (runtime-cache-version-findings file)))
+
+;; : (-> SourceFile (List TypeFinding))
+(def (build-runtime-global-lock-compile-findings file)
+  (if (build-runtime-source-file? file)
+    (filter-map
+     (lambda (lock-call)
+       (let (compile-call
+             (build-runtime-compile-call-for-caller
+              file (call-fact-caller lock-call)))
+         (and compile-call
+              (make-type-finding
+               (policy-rule-id +agent-build-runtime-quality-rule+)
+               (policy-rule-severity +agent-build-runtime-quality-rule+)
+               (source-file-path file)
+               "build/runtime support holds a global lock in the same owner that invokes the compiler or std/make scheduler; restrict the lock to state mutation and invoke the upstream build executor after releasing it"
+               (call-fact-selector lock-call)
+               (hash
+                (kind "build-runtime-global-lock-compile")
+                (caller (call-fact-caller lock-call))
+                (lockCallee (call-fact-callee lock-call))
+                (compileCallee (call-fact-callee compile-call))
+                (compileSelector (call-fact-selector compile-call))
+                (requiredEvidence
+                 "parser-owned global-lock and compiler/scheduler calls with the same caller")
+                (allowedShape
+                 "lock only the state-table transition; call std/make or compiler functions after releasing the lock")
+                (disallowedShape
+                 "with-lock or mutex ownership spanning make, compile-module, gxc-compile, gsc-compile, or pending native compilation")
+                (next
+                 "split the locked state mutation into a small helper and leave dependency waiting plus compilation under upstream std/make ownership"))))))
+     (filter build-runtime-global-lock-call?
+             (source-file-calls file)))
+    []))
+
+;; : (-> SourceFile MaybeString MaybeCallFact)
+(def (build-runtime-compile-call-for-caller file caller)
+  (and caller
+       (let (calls
+             (filter
+              (lambda (call)
+                (and (equal? (call-fact-caller call) caller)
+                     (member (call-fact-callee call)
+                             +build-runtime-compile-callees+)))
+              (source-file-calls file)))
+         (and (pair? calls) (car calls)))))
+
+;; : (-> CallFact Boolean)
+(def (build-runtime-global-lock-call? call)
+  (member (call-fact-callee call)
+          +build-runtime-global-lock-callees+))
+
+;; : (-> SourceFile (List TypeFinding))
+;;; Three independent parser-owned call groups identify the harmful topology:
+;;; an import/global lock, dependency completion waiting, and a private work
+;;; channel.  Any one group alone is ordinary concurrent Scheme code.
+(def (build-runtime-shadow-scheduler-findings file)
+  (if (build-runtime-source-file? file)
+    (let ((locks
+           (filter build-runtime-global-lock-call?
+                   (source-file-calls file)))
+          (waits
+           (filter
+            (lambda (call)
+              (member (call-fact-callee call)
+                      +build-runtime-dependency-wait-callees+))
+            (source-file-calls file)))
+          (channels
+           (filter
+            (lambda (call)
+              (member (call-fact-callee call)
+                      +build-runtime-work-channel-callees+))
+            (source-file-calls file))))
+      (if (and (pair? locks) (pair? waits) (pair? channels))
+        [(make-type-finding
+          (policy-rule-id +agent-build-runtime-quality-rule+)
+          (policy-rule-severity +agent-build-runtime-quality-rule+)
+          (source-file-path file)
+          "build/runtime support combines a global import lock, dependency-completion waits, and a private work channel; delegate the complete module graph to one upstream std/make session instead of creating a serializing shadow scheduler"
+          (call-fact-selector (car locks))
+          (hash
+           (kind "build-runtime-shadow-scheduler")
+           (lockSelector (call-fact-selector (car locks)))
+           (dependencyWaitSelector (call-fact-selector (car waits)))
+           (workChannelSelector (call-fact-selector (car channels)))
+           (requiredEvidence
+            "global-lock, dependency-completion-wait, and work-channel calls in one build/runtime owner")
+           (allowedShape
+            "one declarative module catalog lowered to one upstream std/make invocation")
+           (disallowedShape
+            "module coordinators serialized by a global import lock before feeding a private worker channel")
+           (next
+            "remove the private coordinator/worker scheduler and pass the complete build spec plus GERBIL_BUILD_CORES to std/make")))]
+        []))
+    []))
 
 ;;; Finding contract:
 ;;; - The detection combinator owns the multi-evidence decision.
@@ -163,7 +275,7 @@
          (requiredEvidence "parser-owned top-level cache-version binding with string value type")
          (allowedShape "runtime cache version constants derive from +release-version+; cache format/schema constants may remain literal")
          (disallowedShape "top-level cache-version constants whose value type is a string literal")
-         (next "import +release-version+ from :gslph/src/constants and define the runtime cache version from it; keep formatVersion as the separate cache schema literal"))))
+         (next "import +release-version+ from :asp-gerbil-scheme/src/constants and define the runtime cache version from it; keep formatVersion as the separate cache schema literal"))))
 
 ;; : (-> BindingFact Boolean )
 (def (cache-version-literal-binding? binding)

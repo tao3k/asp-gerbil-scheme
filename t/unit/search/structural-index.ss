@@ -1,6 +1,6 @@
 ;;; -*- Gerbil -*-
-(import :gslph/src/parser/facade
-        :gslph/src/protocol/json
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/json
         :std/misc/process
         :std/sort
         :std/test)
@@ -11,7 +11,7 @@
 ;; Integer
 (def +structural-interface-summary-preview-limit+ 20)
 ;; String
-(def +structural-interface-owner-path+ "src/commands/search-structural.ss")
+(def +structural-interface-owner-path+ "src/commands/projection.ss")
 
 ;; : (-> (List Json) OwnerPath Boolean)
 (def (summary-owner-present? summaries owner-path)
@@ -40,15 +40,12 @@
            => "agent.semantic-protocols.semantic-language")
     (check (hash-get packet 'protocolVersion) => "1")
     (check (hash-get packet 'languageId) => "gerbil-scheme")
-    (check (hash-get packet 'providerId) => "gerbil-scheme-harness")
+    (check (hash-get packet 'providerId) => "asp-gerbil-scheme")
     (check (hash-get packet 'exportMethod) => "index/structural")
     (check (hash-get packet 'projectRoot) => (project-index-root index))
     (check (hash-get packet 'packageRoot) => ".")
     (check (hash-get packet 'rawSourceStored) => #f)
     (check (hash-get packet 'indexMode) => "interface")
-    (check (hash-get packet 'indexOwner) => "asp-structural-index")
-    (check (hash-get packet 'heavyIndexOwner) => "asp-rust")
-    (check (hash-get packet 'graphTurboOwner) => "asp-graph-turbo")
     (check (string? generation-id) => #t)
     (check (hash-get packet 'sourceArtifactId)
            => (string-append "structural-index/" generation-id ".json"))
@@ -66,7 +63,7 @@
            => #t)
     (check (summary-family-detail-present? summaries) => #f)
     (check (hash-get (hash-get packet 'factInterface) 'ownerFactsCommand)
-           => "gerbil-scheme-harness search structural --owner <path> --json .")
+           => "asp-gerbil-scheme projection --native-index --owner <path> --json --workspace .")
     (check (length (hash-get packet 'dependencyUsages)) => 0)
     (check (>= (hash-get packet 'dependencyUsageTotal) 0) => #t)))
 
@@ -108,12 +105,12 @@
     ["object" "hookFamily:poo-io" "runtimeHook:json-write"]]
    ["custom" "methods.string<-json"
     [['role "type"]
-     ['slots [".string<-:" ".<-string:"]]]
-    [".string<-:" ".<-string:"]]
+     ['slots [".json<-" ".<-json" ".string<-" ".<-string"]]]
+    [".json<-" ".<-json" ".string<-" ".<-string"]]
    ["custom" "methods.bytes<-marshal"
     [['role "type"]
-     ['slots [".bytes<-:" ".<-bytes:"]]]
-    [".bytes<-:" ".<-bytes:"]]
+     ['slots [".marshal" ".unmarshal" ".bytes<-" ".<-bytes"]]]
+    [".marshal" ".unmarshal" ".bytes<-" ".<-bytes"]]
    ["custom" "cache-node"
     [['role "object"]
      ['supers ["left-cache" "right-cache"]]
@@ -148,38 +145,38 @@
    ["custom" "F_q."
     [['role "type"]
      ['supers ["expt<-mul-inv."]]]
-    ["expt<-mul-inv." ".mul:" ".n<-:" ".<-n:"]]
+    ["expt<-mul-inv." ".mul" ".n<-" ".<-n"]]
    ["custom" "F_2^n."
     [['supers ["F_q."]]]
-    [".element?:" ".=?:"]]
+    [".element?" ".=?"]]
    ["custom" "F_2^8"
     [['supers ["F_2^n."]]
-     ['slots [".n:" ".xn:"]]]
+     ['slots [".n" ".xn"]]]
     []]
    ["custom" "Costep."
     [['role "type"]
      ['supers ["Type."]]]
-    ["height:" "key:" ".validate:"]]
+    ["height" "key" ".validate"]]
    ["custom" "Trie."
     [['supers ["Wrap." "methods.table"]]]
-    ["methods.table" "T:" "Unstep:" "Step:" ".acons:" ".<-list:"]]
+    ["methods.table" "T" "Unstep" "Step" ".acons" ".<-list"]]
    ["custom" "RationalDict."
     [['supers ["methods.table"]]]
-    ["Key:" ".key?:" ".sexp<-:"]]
+    ["Key" ".key?" ".sexp<-"]]
    ["custom" "RationalSet"
     [['supers ["Set<-Table."]]]
-    ["Table:" ".min-elt:"]]
+    ["Table" ".min-elt"]]
    ["custom" "EmailAddress."
     [['role "type"]
      ['supers ["String."]]]
-    [".validate:" ".sexp<-:"]]
+    [".validate" ".sexp<-"]]
    ["custom" "Tuple."
     [['role "type"]
      ['supers ["Type."]]]
-    ["types:" ".json<-:" ".marshal:"]]
+    ["types" ".json<-" ".marshal"]]
    ["custom" "PositiveList."
     [['supers ["List."]]]
-    ["Elt:" ".validate:"]]
+    ["Elt" ".validate"]]
    ["custom" "trace-probe"
     [['role "object"]
      ['supers ["base"]]]
@@ -206,16 +203,18 @@
 
 ;; Integer
 (def (check-structural-index-queryable-facts)
-  (let* ((index (collect-project "."))
+  (let* ((fixture-owners
+          (append ["t/fixtures/parser/complex-syntax.ss"]
+                  +poo-structural-fixture-owners+
+                  ["t/fixtures/parser/higher-order.ss"
+                   "t/fixtures/parser/control-flow.ss"]))
+         (index (collect-project "."))
+         (fixture-index
+          (collect-selected-source-scope "." fixture-owners))
          (packet (structural-index-packet-json index))
          (facts-packet
-          (owner-facts-packet
-           index
-           (append ["t/fixtures/parser/complex-syntax.ss"]
-                   +poo-structural-fixture-owners+
-                   ["t/fixtures/parser/higher-order.ss"
-                    "t/fixtures/parser/control-flow.ss"]))))
-    (check (packet-has-owner? packet "src/commands/search.ss") => #t)
+          (owner-facts-packet fixture-index fixture-owners)))
+    (check (packet-has-owner? packet "src/commands/projection.ss") => #t)
     (check (> (hash-get packet 'symbolTotal) 0) => #t)
     (check (packet-has-syntax-fact? facts-packet "macro" "capture-safe") => #t)
     (check (packet-has-syntax-fact? facts-packet "import" ":std/text/json") => #t)
@@ -255,21 +254,24 @@
     (check (packet-has-syntax-fact-field? facts-packet "custom" "match" 'role "pattern-branch") => #t)
     (check (packet-has-syntax-fact-query-key? facts-packet "custom" "match" "control-flow") => #t)
     (check (packet-has-syntax-fact-field? facts-packet "comment" "make-widget" 'role "typed-combinator-style") => #t)
-    (check (packet-has-syntax-fact-field? facts-packet "comment" "make-widget" 'contract "String <- String (List String)") => #t)
+    (check (packet-has-syntax-fact-field? facts-packet "comment" "make-widget" 'contract "(-> String (List String) String )") => #t)
     (check (packet-has-syntax-fact-field? facts-packet "comment" "make-widget" 'contractOutput "String") => #t)
     (check (packet-has-syntax-fact-field? facts-packet "comment" "make-widget" 'contractInputs ["String" "(List String)"]) => #t)
     (check (packet-has-syntax-fact-field? facts-packet "comment" "make-widget" 'definitionArity 2) => #t)
     (check (packet-has-syntax-fact-field? facts-packet "comment" "make-widget" 'contractInputCount 2) => #t)
     (check (packet-has-syntax-fact-field? facts-packet "comment" "make-widget" 'arityAlignment "aligned") => #t)
-    (check (packet-has-syntax-fact-field? facts-packet "comment" "make-widget" 'quality "grouped-transform") => #t)
+    (check (packet-has-syntax-fact-field? facts-packet "comment" "make-widget" 'quality "domain-transform") => #t)
     (check (packet-has-syntax-fact-query-key? facts-packet "comment" "make-widget" "combinator-candidate") => #t)
-    (check (packet-has-syntax-fact-field? facts-packet "comment" "<Widget>" 'quality "declaration-contract") => #t)
+    (check (packet-has-syntax-fact-field? facts-packet "comment" "<Widget>" 'quality "weak") => #t)
     (check (packet-has-syntax-fact-query-key? facts-packet "comment" "make-widget" "typed-combinator-style") => #t)
     (check (packet-has-syntax-fact-field? facts-packet "comment" "with-widget" 'role "engineering-comment-quality") => #t)
     (check (packet-has-syntax-fact-field? facts-packet "comment" "with-widget" 'context "macro") => #t)
     (check (packet-has-syntax-fact-field? facts-packet "comment" "with-widget" 'commentKind "contract-only") => #t)
     (check (packet-has-syntax-fact-field? facts-packet "comment" "with-widget" 'quality "weak") => #t)
-    (check (packet-has-syntax-fact-field? facts-packet "comment" "with-widget" 'required #t) => #t)
+    (check (packet-has-syntax-fact-field?
+            facts-packet "comment" "with-widget" 'required
+            ["defrule" "defsyntax" "defclass" "defgeneric" "defmethod" "defprotocol"])
+           => #t)
     (check (packet-has-syntax-fact-query-key? facts-packet "comment" "with-widget" "comment-quality") => #t)
     (check (packet-syntax-fact-ids-are-sorted? facts-packet) => #t)
     (check (> (hash-get packet 'dependencyUsageTotal) 0) => #t)

@@ -42,7 +42,7 @@
                      "lens/binding: .lens .Binding .Bindings"
                      "set algebra: .union .inter .diff .compare"))
                    (adapterRepairShape
-                    "query the search-forwarded rationaldict adapter example first, then use R017 guide --code for local parser/policy repair code; follow exact only-in dependency import -> define-type protocol surface -> Key/Value -> primitive methods.table slots (.empty/.ref/.acons/.remove/.foldl/.foldr) -> iteration/conversion/update/selection/equality/lens/serialization slots when dependency primitives exist -> generic contract tests")
+                    "inspect provider-native dependency facts first, then use R017 guide --code for the source-backed rationaldict exemplar and local repair shape; follow exact only-in dependency import -> define-type protocol surface -> Key/Value -> primitive methods.table slots (.empty/.ref/.acons/.remove/.foldl/.foldr) -> iteration/conversion/update/selection/equality/lens/serialization slots when dependency primitives exist -> generic contract tests")
                    (agentRepairStandard
                     "current dependency already provides the bottom data structure; do not hand-write loose hash/alist objects. Build a typed protocol adapter: precise only-in imports for primitives, define-type Key/Value plus primitive methods.table slots (.empty/.ref/.acons/.remove/.foldl/.foldr), iteration/conversion/update/selection/equality/lens/serialization slots, behavior on protocol slots, derived table/set/list/iteration/lens/sexp/json/bytes/marshal capabilities when slots exist, and generic contract tests"))))
  (after (r017Findings ())))

@@ -1,18 +1,61 @@
-load("@gerbil_bazel//gerbil:defs.bzl", "gerbil_project_compile")
+load(
+    "@gerbil_bazel//gerbil:defs.bzl",
+    "gerbil_project_compile",
+    "gerbil_project_test",
+)
 
 package(default_visibility = ["//visibility:private"])
 
+PROVIDER_ENTRY_SOURCES = [
+    "src/cli-dev-linker.ss",
+    "src/cli-install-linker.ss",
+    "src/cli-launcher.ss",
+    "src/cli-query.ss",
+    "src/cli-release-linker.ss",
+    "src/cli.ss",
+    "src/commands/provider-runtime.ss",
+    "src/provider-server.ss",
+    "src/runtime/provider-http-json-server.ss",
+    "src/runtime/provider-operation.ss",
+    "src/search-light-launcher.ss",
+]
+
+PACKAGE_DECLARATION_SOURCES = [
+    "build-api.ss",
+    "gerbil.pkg",
+]
+
 exports_files([
+    "build-provider.ss",
     "build.ss",
     "gerbil.pkg",
+    "provider-package-spec.ss",
 ])
 
 filegroup(
     name = "project_sources",
-    srcs = ["gerbil.pkg"] + glob([
+    srcs = PACKAGE_DECLARATION_SOURCES + [
+        "provider-package-spec.ss",
+    ] + glob([
         "src/**/*.inc",
         "src/**/*.ss",
     ]),
+)
+
+filegroup(
+    name = "library_sources",
+    srcs = PACKAGE_DECLARATION_SOURCES + glob(
+        [
+            "src/**/*.inc",
+            "src/**/*.ss",
+        ],
+        exclude = PROVIDER_ENTRY_SOURCES,
+    ),
+)
+
+filegroup(
+    name = "test_sources",
+    srcs = glob(["t/**/*.ss"]),
 )
 
 gerbil_project_compile(
@@ -40,9 +83,78 @@ gerbil_project_compile(
 
 gerbil_project_compile(
     name = "compile",
-    srcs = [":project_sources"],
+    srcs = [":library_sources"],
     args = ["compile"],
     build_script = ":build.ss",
     deps = [":gerbil_poo_package"],
     visibility = ["//visibility:public"],
+)
+
+gerbil_project_compile(
+    name = "provider_compile",
+    srcs = [":project_sources"],
+    args = ["compile"],
+    build_script = ":build-provider.ss",
+    deps = [":compile"],
+    visibility = ["//visibility:public"],
+)
+
+gerbil_project_test(
+    name = "build_script_bridge_test",
+    size = "small",
+    project = ":compile",
+    tests = ["//:t/build-script-bridge-test.ss"],
+)
+
+gerbil_project_test(
+    name = "library_provider_boundary_test",
+    size = "small",
+    project = ":compile",
+    tests = ["//:t/scenarios/building/library-provider-boundary/test.ss"],
+)
+
+gerbil_project_test(
+    name = "explicit_provider_boundary_test",
+    size = "small",
+    project = ":provider_compile",
+    tests = ["//:t/scenarios/building/library-provider-boundary/provider-test.ss"],
+)
+
+gerbil_project_test(
+    name = "projection_batch_test",
+    size = "small",
+    project = ":compile",
+    tests = ["//:t/projection-batch-test.ss"],
+)
+
+gerbil_project_test(
+    name = "policy_string_growth_test",
+    size = "small",
+    srcs = ":test_sources",
+    project = ":compile",
+    tests = ["//:t/policy/agent-string-growth-test.ss"],
+)
+
+gerbil_project_test(
+    name = "policy_dependency_adapter_test",
+    size = "small",
+    srcs = ["t/dependency-adapter-admission-test.ss"],
+    project = ":compile",
+    tests = ["//:t/dependency-adapter-admission-test.ss"],
+)
+
+gerbil_project_test(
+    name = "poo_definition_caller_test",
+    size = "small",
+    srcs = ["t/poo-definition-caller-test.ss"],
+    project = ":compile",
+    tests = ["//:t/poo-definition-caller-test.ss"],
+)
+
+gerbil_project_test(
+    name = "declarative_user_interface_policy_test",
+    size = "small",
+    srcs = ["t/declarative-user-interface-policy-test.ss"],
+    project = ":compile",
+    tests = ["//:t/declarative-user-interface-policy-test.ss"],
 )

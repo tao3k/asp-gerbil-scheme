@@ -6,8 +6,8 @@
 ;;; batch them instead of serializing every scenario through this aggregator.
 
 (import :std/test
-        :gslph/src/policy/catalog
-        :gslph/src/policy/model)
+        :asp-gerbil-scheme/src/policy/catalog
+        :asp-gerbil-scheme/src/policy/model)
 
 (export agent-poo-policy-test)
 
@@ -22,7 +22,7 @@
              => "poo-generated-receipt-boundary")
       (check (agent-rule-guide-next-command
               (policy-rule-id +agent-poo-generated-receipt-boundary-rule+))
-             => "asp gerbil-scheme search pattern defstruct receipt ->alist boundary --workspace . --view seeds"))
+             => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-043 --intent repair"))
     (test-case "POO policy catalog keeps loop object construction rule available"
       (check (policy-rule-id +agent-poo-object-construction-loop-performance-rule+)
              => "GERBIL-SCHEME-AGENT-POLICY-033"))))

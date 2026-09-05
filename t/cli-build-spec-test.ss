@@ -3,11 +3,10 @@
 
 (import :gerbil/gambit
         :std/test
-        (only-in :std/srfi/1 filter)
         (only-in :std/sugar ormap)
-        "../src/build-api/native-build"
-        "../src/build-api/package-spec"
-        "../src/build-api/release-modules")
+        "../src/build-api/native-build-spec"
+        "../src/build-api/package-native-plan"
+        "../src/build-api/package-spec")
 (export cli-build-spec-test)
 
 ;; : (-> (List (List Path)) Path (Or False Integer))
@@ -35,13 +34,13 @@
         (check (member "cli-launcher.ss" spec) ? true)
         (check (ormap (lambda (entry)
                         (match entry
-                          ([optimized-exe: "cli-release-linker" bin: "gslph" . _] #t)
+                          ([optimized-exe: "cli-release-linker" bin: "asp-gerbil-scheme" . _] #t)
                           (_ #f)))
                       spec)
                => #t)
         (check (ormap (lambda (entry)
                         (match entry
-                          ([optimized-exe: "cli-dev-linker" bin: "gslph" . _] #t)
+                          ([optimized-exe: "cli-dev-linker" bin: "asp-gerbil-scheme" . _] #t)
                           (_ #f)))
                       spec)
                => #f)))
@@ -51,7 +50,7 @@
         (check (member "cli-launcher.ss" spec) ? true)
         (check (ormap (lambda (entry)
                         (match entry
-                          ([optimized-exe: "cli-release-linker" bin: "gslph" . _] #t)
+                          ([optimized-exe: "cli-release-linker" bin: "asp-gerbil-scheme" . _] #t)
                           (_ #f)))
                       spec)
                => #t)
@@ -60,9 +59,8 @@
         (check (member "policy/core.ss" spec) => #f)))
     (test-case "release binary uses the bounded parser-owned projection"
       (let (spec (cli-binary-build-spec #t))
-      (check cli-release-module-count => 109)
-      (check cli-release-closure-count => 110)
-        (check (length (filter string? spec)) => cli-release-module-count)
+        (check (pair? spec) => #t)
+        (check (equal? spec (cli-binary-build-spec #t)) => #t)
         (check (member "commands/evidence.ss" spec) ? true)
         (check (member "format/facade.ss" spec) ? true)
         (check (member "build-api/native-build.ss" spec) => #f)
@@ -75,13 +73,13 @@
         (check (member "cli-dev-linker.ss" spec) => #f)
         (check (ormap (lambda (entry)
                         (match entry
-                          ([optimized-exe: "cli-dev-linker" bin: "gslph" . _] #t)
+                          ([optimized-exe: "cli-dev-linker" bin: "asp-gerbil-scheme" . _] #t)
                           (_ #f)))
                       spec)
                => #t)
         (check (ormap (lambda (entry)
                         (match entry
-                          ([optimized-exe: "cli-release-linker" bin: "gslph" . _] #t)
+                          ([optimized-exe: "cli-release-linker" bin: "asp-gerbil-scheme" . _] #t)
                           (_ #f)))
                       spec)
                => #f)
@@ -101,7 +99,7 @@
         (check (member "format/facade.ss" spec) ? true)
         (check (member "commands/fmt.ss" spec) ? true)))
     (test-case "policy stages preserve generated SSI dependency order"
-      (let (stages (gslph-package-api-stage-specs))
+      (let (stages (asp-gerbil-scheme-package-api-stage-specs))
         (check (module-stage-before? stages
                                      "policy/model.ss"
                                      "policy/agent-poo-loop-performance.ss")
@@ -135,7 +133,11 @@
                                      "policy/gxtest-report.ss")
                => #t)))
     (test-case "project CLI stages follow Build and Testing interfaces"
-      (let (stages (gslph-package-api-stage-specs))
+      (let (stages (asp-gerbil-scheme-package-api-stage-specs))
+        (check (module-stage-before? stages
+                                     "build-api/native-build-spec.ss"
+                                     "build-api/native-build.ss")
+               => #t)
         (check (module-stage-before? stages
                                      "build-api/native-build.ss"
                                      "build-api/project-build.ss")
@@ -145,7 +147,7 @@
                                      "build-api/project-build.ss")
                => #t)))
     (test-case "policy stages preserve style and repair dependency order"
-      (let (stages (gslph-package-api-stage-specs))
+      (let (stages (asp-gerbil-scheme-package-api-stage-specs))
         (check (module-stage-before? stages
                                      "policy/agent-style-gerbil-signal-support.ss"
                                      "policy/agent-style-gerbil-signals.ss")

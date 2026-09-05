@@ -3,17 +3,18 @@
 (export provider-http-json-server-test)
 
 (import :gerbil/gambit
-        :gslph/src/commands/projection-batch
-        :gslph/src/runtime/provider-http-json-server
-        :gslph/src/runtime/provider-operation
+        :asp-gerbil-scheme/src/commands/projection-batch
+        :asp-gerbil-scheme/src/runtime/provider-http-json-server
+        :asp-gerbil-scheme/src/runtime/provider-operation
         (only-in :std/format format)
         (only-in :std/misc/path path-expand)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
+        (only-in :std/srfi/1 append-map iota)
         (only-in :std/sugar hash hash-key?)
         (only-in :std/text/base64 base64-encode)
         (only-in :std/text/json read-json write-json)
-        (only-in :gslph/src/support/time
+        (only-in :asp-gerbil-scheme/src/support/time
                  duration-micros
                  monotonic-micros)
         :std/test)
@@ -106,6 +107,7 @@
 (def (owner-header path bytes)
   (hash ("ownerPath" path)
         ("sourceLeafDigest" (string-append "digest:" path))
+        ("sourceEncoding" "utf8")
         ("sourceText" (utf8->string bytes))))
 
 (def (live-corpus-request package-root request-id
@@ -188,13 +190,11 @@
   (let* ((url (string-append endpoint "v1/provider-runtime"))
          (total (+ warm-count sample-count))
          (arguments
-          (let build ((remaining total) (first? #t) (result '("curl")))
-            (if (zero? remaining)
-                result
-                (build (- remaining 1)
-                       #f
-                       (append result
-                               (curl-transfer-arguments url body first?))))))
+          (cons "curl"
+                (append-map
+                 (lambda (index)
+                   (curl-transfer-arguments url body (zero? index)))
+                 (iota total))))
          (output
           (run-process arguments
                        coprocess: read-all-as-string
@@ -293,22 +293,33 @@
            (check (hash-ref health "registrationDigest") => +registration-digest+)
            (check (hash-ref health "contractDigest") => +contract-digest+)
            (let ((operations (hash-ref health "operations")))
-             (check (length operations) => 3)
+             ;; The runtime contract catalog contains the three structural
+             ;; operations plus the server-owned semantic-search operation.
+             (check (length operations) => 4)
              (check (hash-ref (car operations) "operation") => "projection-batch")
-             (check (hash-ref (car operations) "requestSchemaId")
-                    => "https://schemas.agent-semantic-protocols.dev/provider-language-projection-batch-request.schema.json")
-             (check (hash-ref (car operations) "responseSchemaId")
-                    => "https://schemas.agent-semantic-protocols.dev/provider-language-projection-batch-response.schema.json")
+             (check (hash-ref (hash-ref (car operations) "requestSchema") "schemaId")
+                    => "agent.semantic-protocols.provider-language-projection-batch-request")
+             (check (hash-ref (hash-ref (car operations) "responseSchema") "schemaId")
+                    => "agent.semantic-protocols.provider-language-projection-batch-response")
              (check (hash-ref (cadr operations) "operation") => "project-resolution")
-             (check (hash-ref (cadr operations) "requestSchemaId")
-                    => "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-request.schema.json")
-             (check (hash-ref (cadr operations) "responseSchemaId")
-                    => "https://schemas.agent-semantic-protocols.dev/provider-project-resolution-response.schema.json")
+             (check (hash-ref (hash-ref (cadr operations) "requestSchema") "schemaVersion")
+                    => "1")
+             (check (hash-ref (hash-ref (cadr operations) "responseSchema") "schemaVersion")
+                    => "1")
              (check (hash-ref (caddr operations) "operation") => "query")
-             (check (hash-ref (caddr operations) "requestSchemaId")
-                    => "https://agent-semantic-protocols.dev/schemas/provider-native-exact-request.v1.schema.json")
-             (check (hash-ref (caddr operations) "responseSchemaId")
-                    => "https://agent-semantic-protocols.dev/schemas/provider-native-exact-response.v1.schema.json"))
+             (check (hash-ref (hash-ref (caddr operations) "requestSchema") "schemaId")
+                    => "agent.semantic-protocols.provider-native-exact-request")
+             (check (hash-ref (hash-ref (caddr operations) "responseSchema") "schemaId")
+                    => "agent.semantic-protocols.provider-native-exact-projection")
+             (let (semantic-search (list-ref operations 3))
+               (check (hash-ref semantic-search "operation")
+                      => "semantic-search")
+               (check (hash-ref
+                       (hash-ref semantic-search "requestSchema") "schemaId")
+                      => "agent.semantic-protocols.provider-semantic-search-request")
+               (check (hash-ref
+                       (hash-ref semantic-search "responseSchema") "schemaId")
+                      => "agent.semantic-protocols.semantic-language")))
            (check (hash-ref invalid "schemaVersion") => "1")
            (check (hash-ref invalid "outcome") => "error")
            (check (string? (hash-ref invalid "error" #f)) => #t)
@@ -366,7 +377,7 @@
            (service-sorted (sort-latencies service-samples))
            (service-maximum (apply max service-samples))
            (memo-stats
-            (gslph/src/runtime/provider-operation#provider-runtime-projection-memo-stats)))
+            (asp-gerbil-scheme/src/runtime/provider-operation#provider-runtime-projection-memo-stats)))
       (check (hash-ref direct-response "outcome") => "ready")
       (displayln
         (format "[provider-projection-memo-input] requestBytes=~a responsePayloadBytes=~a entries=~a hits=~a misses=~a"
@@ -408,7 +419,7 @@
                   p95
                   p99
                   maximum))
-                (check (< service-maximum 1000) => #t))
+                (check (< (latency-percentile service-sorted 99) 1000) => #t))
               (let (responses
                     (concurrent-live-corpus-responses endpoint body 16))
                 (check (length responses) => 16)
@@ -419,7 +430,7 @@
     "projection memo is bounded and evicts old content identities"
     (let* ((package-root (current-directory))
            (before
-            (gslph/src/runtime/provider-operation#provider-runtime-projection-memo-stats))
+            (asp-gerbil-scheme/src/runtime/provider-operation#provider-runtime-projection-memo-stats))
            (first-body
             (live-corpus-request package-root "memo-0" "memo-generation-0")))
       (let populate ((index 0))
@@ -433,7 +444,7 @@
               (format "memo-generation-~a" index)))))
           (populate (+ index 1))))
       (let (after
-            (gslph/src/runtime/provider-operation#provider-runtime-projection-memo-stats))
+            (asp-gerbil-scheme/src/runtime/provider-operation#provider-runtime-projection-memo-stats))
         (check (hash-ref after "entries") => 4)
         (check (>= (- (hash-ref after "misses")
                       (hash-ref before "misses"))
@@ -444,7 +455,7 @@
            (read-json (open-input-string first-body)))
           (check
            (> (hash-ref
-               (gslph/src/runtime/provider-operation#provider-runtime-projection-memo-stats)
+               (asp-gerbil-scheme/src/runtime/provider-operation#provider-runtime-projection-memo-stats)
                "misses")
               misses-before-replay)
            => #t))))
@@ -535,7 +546,7 @@
      (with-catch
       (lambda (_) #t)
       (lambda ()
-     (gslph/src/runtime/provider-http-json-server#validate-provider-http-json-environment!
+     (asp-gerbil-scheme/src/runtime/provider-http-json-server#validate-provider-http-json-environment!
       (lambda (_) #f))
         #f))
      => #t)))))

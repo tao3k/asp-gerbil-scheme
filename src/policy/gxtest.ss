@@ -124,7 +124,7 @@
                                      (gxtest-policy-resolve-root #'root)))
                      (resolved-files
                       (datum->syntax (stx-car stx) resolved-files)))
-         #'(gslph/src/policy/gxtest#make-policy-test
+         #'(asp-gerbil-scheme/src/policy/gxtest#make-policy-test
             resolved-root
             resolved-files))))
     (_

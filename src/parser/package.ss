@@ -2,8 +2,9 @@
 ;;; Parser-owned package metadata facts.
 
 (import :gerbil/gambit
-        (only-in :gslph/src/parser/support datum-list-items safe-cadr)
-        (only-in :std/misc/list unique))
+        (only-in :asp-gerbil-scheme/src/parser/support datum-list-items safe-cadr)
+        (only-in :std/misc/list unique)
+        (only-in :std/sugar filter-map))
 
 (export read-project-package
         project-package-path
@@ -15,11 +16,11 @@
         project-package-source-scope-policy
         project-package-modularity-policy
         project-package-agent-policy
+        project-package-with-source-scope
         test-directory-policy-allowed-directories
         test-directory-policy-explanation
-        macro-governance-policy-allow-generated
         macro-governance-policy-explanation
-        macro-governance-policy-witness
+        macro-governance-policy-witnesses
         source-scope-policy-roots
         source-scope-policy-runtime-roots
         source-scope-policy-exclude-directories
@@ -48,7 +49,7 @@
 ;; TestDirectoryPolicyStruct
 (defstruct test-directory-policy (allowed-directories explanation))
 ;; MacroGovernancePolicyStruct
-(defstruct macro-governance-policy (allow-generated explanation witness))
+(defstruct macro-governance-policy (explanation witnesses))
 ;; SourceScopePolicyStruct
 (defstruct source-scope-policy (roots runtime-roots exclude-directories explanation))
 ;; ModularityPolicyStruct
@@ -58,38 +59,39 @@
 (defstruct agent-policy (disabled-rules explanation))
 ;; ProjectPackageStruct
 (defstruct project-package (path name dependencies manager test-directory-policy macro-governance-policy source-scope-policy modularity-policy agent-policy))
+
+;;; Runtime Build API coverage may refine the source scope after build.ss has
+;;; executed.  Preserve every package-owned policy field while replacing only
+;;; that projection.
+;; : (-> ProjectPackage (List Path) (List Path) (List Path) String ProjectPackage)
+(def (project-package-with-source-scope package roots runtime-roots exclude-directories explanation)
+  (make-project-package
+   (project-package-path package)
+   (project-package-name package)
+   (project-package-dependencies package)
+   (project-package-manager package)
+   (project-package-test-directory-policy package)
+   (project-package-macro-governance-policy package)
+   (make-source-scope-policy roots runtime-roots exclude-directories explanation)
+   (project-package-modularity-policy package)
+   (project-package-agent-policy package)))
 ;;; Boundary:
 ;;; - read-project-package coordinates multiple evidence fields.
 ;;; - Keep packet shape and invariants stable.
 ;; : (-> String ParsedData )
 (def (read-project-package root)
-  (let* ((package-form (read-package-form root))
-         (build-scope (read-build-source-scope-policy root))
-         (package-scope (and package-form
-                             (package-source-scope-policy package-form)))
-         (source-scope (merge-source-scope-policies package-scope build-scope)))
-    (cond
-     (package-form
-      (make-project-package "gerbil.pkg"
-                            (datum->string (safe-cadr package-form))
-                            (package-dependencies package-form)
-                            "gxpkg"
-                            (package-test-directory-policy package-form)
-                            (package-macro-governance-policy package-form)
-                            source-scope
-                            (package-modularity-policy root package-form)
-                            (package-agent-policy package-form)))
-     (build-scope
-      (make-project-package "build.ss"
-                            #f
-                            '()
-                            "gxpkg"
-                            #f
-                            #f
-                            build-scope
-                            #f
-                            #f))
-     (else #f))))
+  (let (package-form (read-package-form root))
+    (and package-form
+         (make-project-package
+          "gerbil.pkg"
+          (datum->string (safe-cadr package-form))
+          (package-dependencies package-form)
+          "gxpkg"
+          (package-test-directory-policy package-form)
+          (package-macro-governance-policy package-form)
+          (package-source-scope-policy package-form)
+          (package-modularity-policy root package-form)
+          (package-agent-policy package-form)))))
 ;;; Boundary:
 ;;; - read-package-form composes first-class procedures.
 ;;; - Keep data-flow evidence visible.
@@ -101,55 +103,6 @@
      (let* ((path (path-expand "gerbil.pkg" root))
             (forms (read-package-forms path)))
        (find package-form? forms)))))
-;;; Boundary:
-;;; - read-build-source-scope-policy composes first-class procedures.
-;;; - Keep data-flow evidence visible.
-;; : (-> String String )
-(def (read-build-source-scope-policy root)
-  (with-catch
-   (lambda (_) #f)
-   (lambda ()
-     (let* ((path (path-expand "build.ss" root))
-            (forms (read-package-forms path))
-            (entry (build-source-coverage-entry forms)))
-       (or (and entry
-                (build-source-coverage-policy entry))
-           (and (ormap all-gerbil-modules-form? forms)
-                (make-source-scope-policy
-                 '(".")
-                 '(".")
-                 '()
-                 "Declared by build.ss all-gerbil-modules.")))))))
-
-;; `all-gerbil-modules` is package-manager build semantics, not a provider
-;; default. Recognize it recursively without executing build.ss.
-(def (all-gerbil-modules-form? datum)
-  (cond
-   ((pair? datum)
-    (or (eq? (car datum) 'all-gerbil-modules)
-        (ormap all-gerbil-modules-form? datum)))
-   ((vector? datum)
-    (ormap all-gerbil-modules-form? (vector->list datum)))
-   (else #f)))
-;;; Boundary:
-;;; - merge-source-scope-policies keeps gerbil.pkg metadata and build.ss
-;;;   coverage declarations additive instead of letting one hide the other.
-;;; - Keep package/build precedence explicit at the parser boundary.
-;; : (-> MaybeSourceScopePolicy MaybeSourceScopePolicy SourceScopePolicy )
-(def (merge-source-scope-policies package-policy build-policy)
-  (cond
-   ((and package-policy build-policy)
-    (make-source-scope-policy
-     (unique (append (source-scope-policy-roots package-policy)
-                     (source-scope-policy-roots build-policy)))
-     (unique (append (source-scope-policy-runtime-roots package-policy)
-                     (source-scope-policy-runtime-roots build-policy)))
-     (unique (append (source-scope-policy-exclude-directories package-policy)
-                     (source-scope-policy-exclude-directories build-policy)))
-     (or (source-scope-policy-explanation package-policy)
-         (source-scope-policy-explanation build-policy))))
-   (package-policy package-policy)
-   (else build-policy)))
 ;; read-package-forms
 ;;   : (-> Path (List Datum))
 ;;   | doc m%
@@ -211,9 +164,22 @@
          (let (entry (policy-macro-governance-entry policy))
            (and entry
                 (make-macro-governance-policy
-                 (policy-boolean-field entry 'allow-generated:)
                  (policy-string-field entry 'explanation:)
-                 (policy-string-field entry 'witness:)))))))
+                 (policy-macro-witness-list-field entry 'witnesses:)))))))
+;;; A macro witness is admitted only as an exact macro-name/owner pair.  The
+;;; policy layer still verifies that the owner exists and contains the named
+;;; macro call, so package metadata cannot substitute prose for parser evidence.
+;; : (-> Datum Symbol (List (Pair String String)))
+(def (policy-macro-witness-list-field datum field)
+  (filter-map
+   (lambda (entry)
+     (and (pair? entry)
+          (pair? (cdr entry))
+          (null? (cddr entry))
+          (string? (car entry))
+          (string? (cadr entry))
+          (cons (car entry) (cadr entry))))
+   (datum-list-items (package-field-value datum field))))
 ;;; Boundary:
 ;;; - policy-macro-governance-entry composes first-class procedures.
 ;;; - Keep data-flow evidence visible.
@@ -377,38 +343,6 @@
 (def (quoted-datum? datum)
   (and (pair? datum) (eq? (car datum) 'quote)))
 
-;;; Boundary:
-;;; `build.ss` owns the project source coverage universe through an explicit
-;;; no-op API call. The parser reads the datum only; execution scope still comes
-;;; from gxtest files, changed files, or explicit full-project gates.
-;; : (-> (List Datum) BuildSourceCoverageEntry )
-(def (build-source-coverage-entry forms)
-  (find build-source-coverage-form? forms))
-
-;; : (-> Datum Boolean )
-(def (build-source-coverage-form? datum)
-  (and (pair? datum)
-       (eq? (car datum) 'gslph-source-coverage)))
-
-;; : (-> Datum SourceScopePolicy )
-(def (build-source-coverage-policy entry)
-  (let* ((roots (or (policy-string-list-field entry 'roots:)
-                    (policy-string-list-field entry 'source-roots:)
-                    (policy-string-list-field entry 'source-root:)
-                    '()))
-         (runtime-roots (or (policy-string-list-field entry 'runtime-roots:)
-                            (policy-string-list-field entry 'runtime-root:)
-                            roots)))
-    (and (or (pair? roots) (pair? runtime-roots))
-         (make-source-scope-policy
-          roots
-          runtime-roots
-          (or (policy-string-list-field entry 'exclude-directories:)
-              (policy-string-list-field entry 'excluded-directories:)
-              (policy-string-list-field entry 'ignore-directories:)
-              '())
-          (or (policy-string-field entry 'explanation:)
-              "Declared by build.ss gslph-source-coverage.")))))
 ;; : (-> Datum PackageAgentPolicy )
 (def (package-agent-policy datum)
   (let (policy (package-field-value datum 'policy:))

@@ -10,63 +10,64 @@
         (only-in "../building/declarative" std-build)
         (only-in "../building/build-script"
                  call-with-framework-build-lease)
-        (only-in :std/misc/path path-directory path-expand path-normalize)
-        (only-in :std/srfi/13 string-prefix? string-suffix?)
-        (only-in "./package-build"
-                 gslph-package-configure-build-root!
-                 gslph-package-build-active-gerbil-path
-                 gslph-package-build-package-name)
+        (only-in :std/misc/path path-directory path-expand)
+        (only-in :std/srfi/13 string-prefix?)
         (only-in "./cli-gsc-options"
-                 gslph-cli-gsc-options
-                 gslph-cli-gsc-options-cache-key)
-        (only-in "./source-coverage"
-                 gslph-source-coverage-files
-                 gslph-source-coverage-runtime-roots
-                 gslph-source-coverage-exclude-directories)
-        (only-in "./component-closure"
-                 gslph-source-dependency-order)
+                 asp-gerbil-scheme-cli-gsc-options
+                 asp-gerbil-scheme-cli-gsc-options-cache-key)
+        (only-in "./package-build"
+                 asp-gerbil-scheme-package-build-active-gerbil-path)
         (only-in "./package-receipt"
-                 gslph-package-build-receipt-status
-                 gslph-package-build-receipt-status-ref
-                 gslph-package-build-receipt-source-output-current?
-                 gslph-package-build-receipt-status-line
-                 gslph-package-build-receipt-write)
+                 asp-gerbil-scheme-package-build-receipt-status
+                 asp-gerbil-scheme-package-build-receipt-status-ref
+                 asp-gerbil-scheme-package-build-receipt-source-output-current?
+                 asp-gerbil-scheme-package-build-receipt-status-line
+                 asp-gerbil-scheme-package-build-receipt-write)
         (only-in "./launcher-receipt"
-                 gslph-build-module-source-file
-                 gslph-build-module-output-file
-                 gslph-build-module-artifact-files
-                 gslph-build-module-artifact-file
-                 gslph-cli-launcher-build-current?
-                 gslph-cli-launcher-build-receipt-status
-                 gslph-ensure-cli-launcher-inputs!
-                 gslph-ensure-install-launcher-inputs!
-                 gslph-install-launcher-build-current?
-                 gslph-install-launcher-build-receipt-status
-                 gslph-write-cli-launcher-build-receipt!
-                 gslph-write-install-launcher-build-receipt!)
+                 asp-gerbil-scheme-build-module-source-file
+                 asp-gerbil-scheme-build-module-output-file
+                 asp-gerbil-scheme-build-module-artifact-files
+                 asp-gerbil-scheme-build-module-artifact-file
+                 asp-gerbil-scheme-cli-launcher-build-current?
+                 asp-gerbil-scheme-cli-launcher-build-receipt-status
+                 asp-gerbil-scheme-ensure-cli-launcher-inputs!
+                 asp-gerbil-scheme-ensure-install-launcher-inputs!
+                 asp-gerbil-scheme-install-launcher-build-current?
+                 asp-gerbil-scheme-install-launcher-build-receipt-status
+                 asp-gerbil-scheme-write-cli-launcher-build-receipt!
+                 asp-gerbil-scheme-write-install-launcher-build-receipt!)
 (only-in "./artifact-cleanup"
          cleanup-compile-exe-artifacts!
          cleanup-generated-artifacts!
          cleanup-launcher-binary-artifacts!
          cleanup-launcher-module-artifacts!)
         (only-in "./build-path-contract"
-                 configure-build-path-root!
                  dev-launcher-binpath
                  install-launcher-binpath)
-        (only-in "./package-spec"
-                 gslph-package-api-spec
-                 gslph-package-api-stage-specs)
-        (only-in "./release-modules" cli-release-modules)
-        (only-in :gerbil/gambit current-jiffy jiffies-per-second setenv))
+        (only-in "./native-build-spec"
+                 package-root
+                 source-root
+                 configure-build-root!
+                 ensure-build-root!
+                 source-output-prefix
+                 test-output-prefix
+                 package-api-output-root
+                 package-build-spec
+                 cli-binary-module-spec
+                 cli-binary-exe-spec
+                 cli-install-module-spec
+                 cli-install-spec
+                 provider-server-workspace-install-spec
+                 workspace-runtime-library-spec
+                 install-launcher-source-modules
+                 cli-launcher-source-modules
+                 compile-spec)
+        (only-in "./package-native-plan"
+                 asp-gerbil-scheme-package-api-stage-specs)
+        (only-in :gerbil/gambit current-jiffy jiffies-per-second))
 (export clean-target
         compile-target
          install-target
-         compile-spec
-         cli-binary-module-spec
-         cli-binary-build-spec
-         configure-build-root!
-        dev-launcher-binpath
-        install-launcher-binpath
         package-api-build-current?
         package-api-build-output-files
         package-api-build-receipt-path
@@ -76,184 +77,7 @@
          run-package-api-build-request!
         compile-selected-gxtest-target
         provider-workspace-install-target
-        write-package-api-build-receipt!
-        package-build-spec)
-
-;; : (Maybe Path)
-(def package-root #f)
-
-;; : (Maybe Path)
-(def source-root #f)
-
-;; : (Maybe Datum)
-(def current-package-gerbil-modules-key #f)
-
-;; : (Maybe (List ModulePath))
-(def current-package-gerbil-modules #f)
-
-;; : (Maybe String)
-(def package-name #f)
-
-;; : (-> String Void)
-(def (configure-build-root! root)
-  (set! package-root (path-normalize root))
-  (configure-build-path-root! package-root)
-  (gslph-package-configure-build-root! package-root)
-  (set! source-root (path-expand "src" package-root))
-  (set! current-package-gerbil-modules-key #f)
-  (set! current-package-gerbil-modules #f)
-  (set! package-name (read-build-package-name package-root)))
-
-;; : (-> Void)
-(def (ensure-build-root!)
-  (unless package-root
-    (configure-build-root! (current-directory))))
-
-;; : (-> Path (Maybe String))
-(def (read-build-package-name root)
-  (gslph-package-build-package-name root))
-
-;; : (-> String String)
-(def (package-output-prefix root-name)
-  (ensure-build-root!)
-  (unless package-name
-    (error "gerbil.pkg must declare package: for build output prefix"))
-  (string-append package-name "/" root-name))
-
-;; : (-> String)
-(def (package-root-output-prefix)
-  (ensure-build-root!)
-  (unless package-name
-    (error "gerbil.pkg must declare package: for build output prefix"))
-  package-name)
-
-;; : (-> String)
-(def (source-output-prefix)
-  (package-output-prefix "src"))
-
-;; : (-> String)
-;; : (-> String)
-(def (test-output-prefix)
-  (package-output-prefix "t"))
-
-;; : (List ModulePath)
-(def excluded-library-files
-  '("cli.ss"
-    "cli-dev-linker.ss"
-    "cli-install-linker.ss"
-    "cli-launcher.ss"
-    "cli-release-linker.ss"))
-
-;; : (-> Boolean String (List BuildSpec))
-(def (cli-exe-spec optimized? root)
-  [(append (if optimized?
-             [optimized-exe: root bin: "asp-gerbil-scheme"]
-             [exe: root bin: "asp-gerbil-scheme"])
-           (gslph-cli-gsc-options package-root))])
-
-;; : (-> Boolean (List BuildSpec))
-(def (cli-dev-spec optimized?)
-  (cli-exe-spec optimized? "cli-dev-linker"))
-
-;; : (-> Boolean (List BuildSpec))
-(def (cli-release-spec optimized?)
-  (cli-exe-spec optimized? "cli-release-linker"))
-
-;; : (-> Boolean (List BuildSpec))
-(def (cli-install-spec optimized?)
-  (cli-exe-spec optimized? "cli-release-linker"))
-
-;; : (-> (List BuildSpec))
-(def (provider-server-workspace-install-spec)
-  [(append [exe: "provider-server" bin: "asp-gerbil-scheme"]
-           (gslph-cli-gsc-options package-root))])
-
-;; : (-> (List ModulePath))
-(def (cli-install-module-spec)
-  (cli-launcher-source-modules #t))
-
-;; : (List ModulePath)
-(def cli-bootstrap-modules
-  '("constants.ss"
-    "commands/search-prime-light-list.ss"
-    "commands/search-prime-light.ss"
-    "search-light-launcher.ss"
-    "support/time.ss"))
-
-;; : (List String)
-(def +library-excluded-dirs+
-  '("search-fast" "testing"))
-
-;; : (List String)
-(def +default-excluded-dirs+
-  '("run" "t" ".git" "_darcs" ".gerbil"))
-
-;; : (-> Boolean (List ModulePath))
-(def (cli-binary-module-spec release?)
-  (if release?
-    (cli-release-module-spec)
-    cli-bootstrap-modules))
-
-;; : (-> (List BuildSpec))
-(def (cli-release-module-spec)
-  cli-release-modules)
-
-;; : (-> Boolean (List BuildSpec))
-(def (cli-binary-exe-spec release? optimized?)
-  (if release?
-    (cli-release-spec optimized?)
-    (cli-dev-spec optimized?)))
-
-;; : (-> Boolean (List BuildSpec))
-(def (cli-binary-spec release? optimized?)
-  (append (cli-binary-module-spec release?)
-          (cli-binary-exe-spec release? optimized?)))
-
-;; : (-> ModulePath Boolean)
-(def (runtime-library-module? module)
-  (and (not (member module excluded-library-files))
-       (not (library-excluded-dir-module? module))))
-
-;; : (-> ModulePath Boolean)
-(def (library-excluded-dir-module? module)
-  (let loop ((dirs +library-excluded-dirs+))
-    (and (pair? dirs)
-         (or (let (prefix-output (open-output-string))
-               (display (car dirs) prefix-output)
-               (write-char #\/ prefix-output)
-               (string-prefix? (get-output-string prefix-output) module))
-             (loop (cdr dirs))))))
-
-;; : (-> ModulePath Boolean)
-(def (library-module? module)
-  (runtime-library-module? module))
-
-;; : (-> (List BuildSpec))
-(def (library-spec)
-  (filter library-module? (all-package-gerbil-modules)))
-
-;; : (-> (List BuildSpec))
-(def (runtime-library-spec)
-  (filter runtime-library-module? (all-package-gerbil-modules)))
-
-(def (runtime-library-source-files)
-  (filter (lambda (path)
-            (let (module (source-runtime-module-path path))
-              (and module (runtime-library-module? module))))
-          (gslph-source-coverage-files package-root)))
-
-(def (workspace-runtime-library-spec)
-  (let* ((ordered-source-files
-          (gslph-source-dependency-order
-           package-root
-           (runtime-library-source-files)))
-         (ordered-runtime-spec
-          (map source-runtime-module-path ordered-source-files)))
-    ;; cli-launcher.ss is generated by the workspace installer.  It is not a
-    ;; package source and therefore must not enter source-graph validation.
-    (if (member "cli-launcher.ss" ordered-runtime-spec)
-      ordered-runtime-spec
-      (cons "cli-launcher.ss" ordered-runtime-spec))))
+        write-package-api-build-receipt!)
 
 ;; Build a relocatable ASP artifact with sibling bin/ and lib/ roots.  The
 ;; launcher remains small and loads cold command modules from the library tree.
@@ -265,105 +89,24 @@
      (package-api-output-root)
      module-spec)
     (make-target module-spec #f #f #f #f #f)
-    (setenv "GERBIL_PATH" artifact-root)
     (compile-binary-artifact
      (path-expand "bin/asp-gerbil-scheme" artifact-root)
      module-spec
      (provider-server-workspace-install-spec)
      #f #f #f #f #f)))
 
-;; : (-> (List BuildSpec))
-(def (native-runtime-spec)
-  '("src/build-api/install-static-modules.ss"
-    "src/build-api/cli-gsc-options.ss"
-    "src/build-api/launcher-receipt.ss"
-    "src/build-api/package-build.ss"
-    "src/build-api/build-path-contract.ss"
-    "src/testing/gxtest-smoke.ss"
-    "src/testing/gxtest-runner.ss"
-    "src/build-api/native-build.ss"))
-
-;; : (-> [Path (List Path) (List String)])
-(def (package-gerbil-modules-cache-key)
-  (list package-root
-        (gslph-source-coverage-runtime-roots)
-        (coverage-excluded-directories)))
-
-;; : (-> (List ModulePath))
-(def (uncached-package-gerbil-modules)
-  (apply append
-         (map runtime-root-gerbil-modules
-              (gslph-source-coverage-runtime-roots))))
-
-;; : (-> (List ModulePath))
-(def (all-package-gerbil-modules)
-  (let (key (package-gerbil-modules-cache-key))
-    (if (and current-package-gerbil-modules-key
-             (equal? current-package-gerbil-modules-key key))
-      current-package-gerbil-modules
-      (let (modules (uncached-package-gerbil-modules))
-        (set! current-package-gerbil-modules-key key)
-        (set! current-package-gerbil-modules modules)
-        modules))))
-
-;; : (-> Path (Maybe ModulePath))
-(def (source-runtime-module-path path)
-  (let (prefix "src/")
-    (and (string-prefix? prefix path)
-         (substring path
-                    (string-length prefix)
-                    (string-length path)))))
-
-;; : (-> (List ModulePath))
-(def (source-runtime-modules)
-  (filter (lambda (module) module)
-          (map source-runtime-module-path
-               (gslph-source-coverage-files package-root))))
-
-;; : (-> Path (List ModulePath))
-(def (runtime-root-gerbil-modules root)
-  (cond
-   ((string=? root "src")
-    (source-runtime-modules))
-   (else
-    [])))
-
-;; : (-> (List String))
-(def (coverage-excluded-directories)
-  (append +default-excluded-dirs+
-          +library-excluded-dirs+
-          (gslph-source-coverage-exclude-directories)))
-
-;; : (-> (List BuildSpec))
-(def (package-build-spec)
-  (ensure-build-root!)
-  (gslph-package-api-spec))
-
-;; : (-> Path String)
-(def (module-path-stem module)
-  (if (string-suffix? ".ss" module)
-    (substring module 0 (- (string-length module) 3))
-    module))
-
-;; : (-> PackageLibOutputRoot)
-(def (package-api-output-root)
-  (path-expand (source-output-prefix)
-               (path-expand "lib"
-                            (gslph-package-build-active-gerbil-path
-                             package-root))))
-
 ;; : (-> PackageApiReceiptPath)
 (def (package-api-build-receipt-path)
   (path-expand "build/package-api.receipt"
-               (gslph-package-build-active-gerbil-path package-root)))
+               (asp-gerbil-scheme-package-build-active-gerbil-path package-root)))
 
 ;; : (-> (List Path))
 (def (build-module-source-file module)
-  (gslph-build-module-source-file source-root module))
+  (asp-gerbil-scheme-build-module-source-file source-root module))
 
 ;; : (-> (List Path))
 (def (build-module-output-file module)
-  (gslph-build-module-output-file (package-api-output-root) module))
+  (asp-gerbil-scheme-build-module-output-file (package-api-output-root) module))
 
 ;; : (-> (List Path))
 (def (package-api-build-source-files)
@@ -377,11 +120,11 @@
 
 ;; : (-> ModulePath (List Path))
 (def (package-api-module-artifact-files module)
-  (gslph-build-module-artifact-files (package-api-output-root) module))
+  (asp-gerbil-scheme-build-module-artifact-files (package-api-output-root) module))
 
 ;; : (-> ModulePath Path)
 (def (package-api-module-output-file module)
-  (gslph-build-module-artifact-file (package-api-output-root) module))
+  (asp-gerbil-scheme-build-module-artifact-file (package-api-output-root) module))
 
 ;; : (-> ModulePath Boolean)
 (def (package-api-module-current? module)
@@ -389,20 +132,20 @@
         (candidates (package-api-module-artifact-files module)))
     (let loop ((remaining candidates))
       (and (pair? remaining)
-           (or (gslph-package-build-receipt-source-output-current?
+           (or (asp-gerbil-scheme-package-build-receipt-source-output-current?
                 source
                 (car remaining))
                (loop (cdr remaining)))))))
 
 ;; : (-> BuildReceiptStatus)
 (def (package-api-build-receipt-status)
-  (gslph-package-build-receipt-status
+  (asp-gerbil-scheme-package-build-receipt-status
    (package-api-build-receipt-path)
    expected-sources: (package-api-build-source-files)))
 
 ;; : (-> BuildReceiptStatus Boolean)
 (def (package-api-build-current? status)
-  (eq? (gslph-package-build-receipt-status-ref status 'status 'unknown)
+  (eq? (asp-gerbil-scheme-package-build-receipt-status-ref status 'status 'unknown)
        'current))
 
 ;; : (-> BuildSpec (List ModulePath))
@@ -418,14 +161,14 @@
 
 ;; : (-> BuildReceiptStatus Void)
 (def (display-package-api-build-receipt-status status)
-  (display (gslph-package-build-receipt-status-line status))
+  (display (asp-gerbil-scheme-package-build-receipt-status-line status))
   (newline)
   (force-output))
 
 ;; : (-> Boolean String Integer Void)
 (def (display-build-progress verbose phase started-jiffy)
   (when verbose
-    (display "[gslph-build] phase=")
+    (display "[asp-gerbil-scheme-build] phase=")
     (display phase)
     (display " elapsed-ms=")
     (display
@@ -439,7 +182,7 @@
 (def (write-package-api-build-receipt! (receipts #f))
   (let (stamp (package-api-build-receipt-path))
     (ensure-directory! (path-directory stamp))
-    (gslph-package-build-receipt-write
+    (asp-gerbil-scheme-package-build-receipt-write
      stamp
      (package-api-build-source-files)
      (package-api-build-output-files)
@@ -482,7 +225,7 @@
                       "package-api"
                       source-root
                       (source-output-prefix)
-                      (gslph-package-api-stage-specs)
+                      (asp-gerbil-scheme-package-api-stage-specs)
                       (lambda (_spec _context)
                         (and (not force?)
                              (package-api-stage-current? _spec)))
@@ -541,32 +284,6 @@
                      (build-request-run! test-request)))
          `((buildPlan . ,(build-plan-receipts->alist receipts))))))))
 
-;; : (-> (List ModulePath))
-(def (install-launcher-source-modules)
-  (cli-launcher-source-modules #t))
-
-;; : (-> Boolean (List ModulePath))
-(def (cli-launcher-source-modules release?)
-  (append (cli-binary-module-spec release?)
-          (list (if release?
-                  "cli-release-linker.ss"
-                  "cli-dev-linker.ss"))))
-
-;; : (-> Boolean (List BuildSpec))
-(def (build-spec release?)
-  (if release?
-    (cli-binary-spec #t #t)
-    (library-spec)))
-
-;; : (-> Boolean Boolean Boolean (List BuildSpec))
-(def (compile-spec full? release? binary?)
-  (ensure-build-root!)
-  (cond
-   (full? (library-spec))
-   (release? (cli-binary-spec #t #t))
-   (binary? (cli-binary-spec #f #f))
-   (else (gslph-package-api-spec))))
-
 ;; : (-> Boolean Boolean Boolean Boolean Boolean Boolean Boolean Boolean Void)
 (def (compile-target verbose debug no-optimize optimized release full binary force?)
   (ensure-build-root!)
@@ -592,16 +309,16 @@
                                   release? effective-release?
                                   effective-optimized?)
   (let* ((inputs-path
-          (gslph-ensure-cli-launcher-inputs!
+          (asp-gerbil-scheme-ensure-cli-launcher-inputs!
            package-root
            release?
            build-optimize?
            effective-release?
            effective-optimized?
-           (gslph-cli-gsc-options-cache-key)
-           (gslph-cli-gsc-options package-root)))
+           (asp-gerbil-scheme-cli-gsc-options-cache-key)
+           (asp-gerbil-scheme-cli-gsc-options package-root)))
          (status
-          (gslph-cli-launcher-build-receipt-status
+          (asp-gerbil-scheme-cli-launcher-build-receipt-status
            package-root
            source-root
            (package-api-output-root)
@@ -611,14 +328,14 @@
            (cli-binary-module-spec release?)
            (cli-launcher-source-modules release?))))
     (display-package-api-build-receipt-status status)
-    (if (gslph-cli-launcher-build-current? status)
+    (if (asp-gerbil-scheme-cli-launcher-build-current? status)
       status
       (begin
         (compile-cli-binary binpath
                             verbose debug build-optimize?
                             release? effective-release?
                             effective-optimized?)
-        (gslph-write-cli-launcher-build-receipt!
+        (asp-gerbil-scheme-write-cli-launcher-build-receipt!
          package-root
          source-root
          (package-api-output-root)
@@ -627,7 +344,7 @@
          inputs-path
          (cli-binary-module-spec release?)
          (cli-launcher-source-modules release?))
-        (gslph-cli-launcher-build-receipt-status
+        (asp-gerbil-scheme-cli-launcher-build-receipt-status
          package-root
          source-root
          (package-api-output-root)
@@ -662,15 +379,15 @@
                                           effective-release? effective-optimized?
                                           force?)
   (let* ((inputs-path
-          (gslph-ensure-install-launcher-inputs!
+          (asp-gerbil-scheme-ensure-install-launcher-inputs!
            package-root
            build-optimize?
            effective-release?
            effective-optimized?
-           (gslph-cli-gsc-options-cache-key)
-           (gslph-cli-gsc-options package-root)))
+           (asp-gerbil-scheme-cli-gsc-options-cache-key)
+           (asp-gerbil-scheme-cli-gsc-options package-root)))
          (status
-          (gslph-install-launcher-build-receipt-status
+          (asp-gerbil-scheme-install-launcher-build-receipt-status
            package-root
            source-root
            (package-api-output-root)
@@ -680,13 +397,13 @@
            (install-launcher-source-modules))))
     (display-package-api-build-receipt-status status)
     (if (and (not force?)
-             (gslph-install-launcher-build-current? status))
+             (asp-gerbil-scheme-install-launcher-build-current? status))
       status
       (begin (cleanup-launcher-binary-artifacts! binpath)
         (compile-install-binary binpath
                                 verbose debug build-optimize?
                                 effective-release? effective-optimized?)
-        (gslph-write-install-launcher-build-receipt!
+        (asp-gerbil-scheme-write-install-launcher-build-receipt!
          package-root
          source-root
          (package-api-output-root)
@@ -694,7 +411,7 @@
          inputs-path
          '()
          (install-launcher-source-modules))
-        (gslph-install-launcher-build-receipt-status
+        (asp-gerbil-scheme-install-launcher-build-receipt-status
          package-root
          source-root
          (package-api-output-root)
@@ -741,16 +458,6 @@
     (cleanup-compile-exe-artifacts! binpath)
     (display-build-progress verbose "launcher/complete" started-jiffy)
     binpath))
-
-;; : (-> Boolean (List BuildSpec))
-(def (cli-binary-build-spec release?)
-  (cli-binary-spec release? #t))
-
-
-;; : (-> HomeDirectoryPath)
-(def (user-home-directory)
-  (or (getenv "HOME" #f)
-      (error "HOME is required to install gslph into $HOME/.local/bin")))
 
 ;; : (-> Path Void)
 (def (ensure-directory! path)

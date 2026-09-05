@@ -2,15 +2,15 @@
 ;;; Framework-owned performance suite execution.
 
 (import :gerbil/gambit
-        (only-in :gslph/src/benchmark/gate
+        (only-in :asp-gerbil-scheme/src/benchmark/gate
                  benchmark-fixture-contract-pass?
                  benchmark-receipt-pass?
                  benchmark-run/result)
-        (only-in :gslph/src/support/time
+        (only-in :asp-gerbil-scheme/src/support/time
                  monotonic-micros
                  duration-micros)
         (only-in :std/sugar cut filter foldl)
-        :gslph/src/testing/model)
+        :asp-gerbil-scheme/src/testing/model)
 
 (export #t)
 

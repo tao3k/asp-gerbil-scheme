@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Package executable entrypoint for the Gerbil Scheme project harness.
 
-(import (rename-in :gslph/src/cli-launcher
+(import (rename-in :asp-gerbil-scheme/src/cli-launcher
                    (main launcher-main)
                    (command-line-args launcher-command-line-args)
                    (provider-command-line-args launcher-provider-command-line-args)))

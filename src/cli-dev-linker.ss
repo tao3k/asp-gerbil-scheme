@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
-;;; Development executable root for gslph.
+;;; Development executable root for asp-gerbil-scheme.
 
 (import :gerbil/gambit
         (only-in :std/misc/path path-expand)
-        (only-in :gslph/src/support/args executable-argv))
+        (only-in :asp-gerbil-scheme/src/support/args executable-argv))
 (export main
         dev-linker-run)
 
@@ -15,12 +15,12 @@
 (def (dev-linker-run args)
   (add-load-path! (path-expand ".gerbil/lib" (current-directory)))
   (##global-var-set! (##make-global-var 'load-module) load-module)
-  (load-module "gslph/src/cli-launcher")
-  (let (launcher-main (eval 'gslph/src/cli-launcher#main))
+  (load-module "asp-gerbil-scheme/src/cli-launcher")
+  (let (launcher-main (eval 'asp-gerbil-scheme/src/cli-launcher#main))
     (unless (procedure? launcher-main)
       (error "provider-runtime-source-mismatch"
-             "gslph/src/cli-launcher"
-             'gslph/src/cli-launcher#main
+             "asp-gerbil-scheme/src/cli-launcher"
+             'asp-gerbil-scheme/src/cli-launcher#main
              launcher-main))
     (apply launcher-main args)))
 

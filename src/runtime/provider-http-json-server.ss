@@ -1,27 +1,47 @@
+;;; The HTTP server owns transport lifecycle and JSON request/response framing.
+;;; Provider operations remain ordinary library calls, while the bounded memo
+;;; stores only validated projection responses and never source authority.
 (import :gerbil/gambit
-        (only-in :gslph/src/runtime/provider-operation
+        (only-in :asp-gerbil-scheme/src/runtime/provider-operation
                  provider-runtime-contract-receipt
                  provider-runtime-request->response)
-        :std/format
-        :std/io
-        :std/net/httpd
+        (only-in :std/format format)
+        (only-in :std/io
+                 call-with-output-string
+                 localhost4
+                 ServerSocket-close
+                 Socket-address
+                 tcp-listen)
+        (only-in :std/net/httpd
+                 http-register-handler
+                 http-request-body
+                 http-request-method
+                 http-response-write
+                 start-http-server!
+                 stop-http-server!)
         (only-in :std/sugar hash)
         (only-in :std/text/json read-json write-json))
 
 (export serve-provider-http-json-runtime!
         validate-provider-http-json-environment!)
 
+;; : (List String)
 (def +provider-contract-environment+
   '("ASP_PROVIDER_ID"
     "ASP_PROVIDER_LANGUAGE_ID"
     "ASP_PROVIDER_ARTIFACT_DIGEST"
     "ASP_PROVIDER_REGISTRATION_DIGEST"
     "ASP_PROVIDER_RUNTIME_CONTRACT_DIGEST"))
+;; : (Maybe HttpServer)
 (def *provider-http-server* #f)
+;; : Mutex
 (def *provider-request-stream-lock* (make-mutex 'provider-request-stream))
+;; : (List (Pair String RequestStreamState))
 (def *provider-request-streams* '())
+;; : Integer
 (def +provider-request-stream-frame-limit+ 1024)
 
+;; : (-> (-> String (Maybe String)) Void)
 (def (validate-provider-http-json-environment! lookup)
   (for-each
    (lambda (name)
@@ -30,23 +50,29 @@
          (error "resident Gerbil provider environment is missing" name))))
    +provider-contract-environment+))
 
+;; : (-> String String)
 (def (required-environment name)
-  (let (value (getenv name #f))
-    (unless (and value (> (string-length value) 0))
-      (error "resident Gerbil provider environment is missing" name))
-    value))
+  (match (getenv name #f)
+    (#f (error "resident Gerbil provider environment is missing" name))
+    (value
+     (if (> (string-length value) 0)
+       value
+       (error "resident Gerbil provider environment is missing" name)))))
 
+;; : (-> Json U8Vector)
 (def (json->u8vector value)
   (string->utf8
    (call-with-output-string ""
      (lambda (output) (write-json value output)))))
 
+;; : (-> U8Vector Json)
 (def (u8vector->json bytes)
   ;; HTTP owns UTF-8 bytes while `read-json` owns characters.  Passing a raw
   ;; u8vector port through here makes each non-ASCII byte a separate character
   ;; and changes parser byte offsets after a JSON round trip.
   (read-json (open-input-string (utf8->string bytes))))
 
+;; : (-> HttpResponse Integer Json Void)
 (def (write-json-response response status value)
   (let (body (json->u8vector value))
     (http-response-write
@@ -57,6 +83,7 @@
            (cons "Connection" "keep-alive"))
      body)))
 
+;; : (-> RuntimeError String)
 (def (runtime-error->string error)
   ;; This is a v1 wire boundary. Runtime-owned cold admission can surface a
   ;; non-Exception failure value, but the frame's `error` field is always a
@@ -86,6 +113,7 @@
                  rendered
                  "provider runtime operation failed"))))))))))
 
+;; : (-> String RuntimeError JsonObject)
 (def (runtime-error-response request-id error)
   (hash ("schemaId" "agent.semantic-protocols.provider-runtime-response-frame")
         ("schemaVersion" "1")
@@ -93,19 +121,28 @@
         ("outcome" "error")
         ("error" (runtime-error->string error))))
 
+;; : (-> JsonObject JsonObject)
 (def (provider-runtime-request-value->response request-value)
   (let (request-id (hash-ref request-value "requestId" "invalid-request"))
     (with-catch
      (lambda (error) (runtime-error-response request-id error))
      (lambda () (provider-runtime-request->response request-value)))))
 
+;;; The request table is intentionally an association list consumed through
+;;; `assoc`; quasiquote preserves that public pair protocol without an
+;;; anonymous cons-built tuple handoff between helpers.
+;; : (-> String (List (Pair String RequestStreamState))
+;;        (List (Pair String RequestStreamState)))
 (def (remove-request-stream stream-id streams)
-  (cond
-   ((null? streams) '())
-   ((string=? stream-id (caar streams)) (cdr streams))
-   (else (cons (car streams)
-               (remove-request-stream stream-id (cdr streams))))))
+  (match streams
+    ([] [])
+    ([[candidate-id . state] . rest]
+     (if (string=? stream-id candidate-id)
+       rest
+       `((,candidate-id . ,state)
+         . ,(remove-request-stream stream-id rest))))))
 
+;; : (-> String Integer Integer String RequestStreamOutcome)
 (def (accept-request-stream-frame! stream-id frame-index frame-count request-chunk)
   (dynamic-wind
     (lambda () (mutex-lock! *provider-request-stream-lock*))
@@ -141,13 +178,17 @@
             (cons 'accepted frame-index))))
     (lambda () (mutex-unlock! *provider-request-stream-lock*))))
 
+;; : (-> HttpRequest HttpResponse Void)
 (def (health-handler request response)
-  (if (eq? (http-request-method request) 'GET)
-      (write-json-response response 200 (provider-runtime-contract-receipt))
-      (write-json-response response 405
-                           (hash ("state" "failed")
-                                 ("failure" "health endpoint requires GET")))))
+  (case (http-request-method request)
+    ((GET)
+     (write-json-response response 200 (provider-runtime-contract-receipt)))
+    (else
+     (write-json-response response 405
+                          (hash ("state" "failed")
+                                ("failure" "health endpoint requires GET"))))))
 
+;; : (-> HttpRequest HttpResponse Void)
 (def (provider-runtime-handler request response)
   (if (eq? (http-request-method request) 'POST)
       (with-catch
@@ -170,6 +211,7 @@
                            (hash ("state" "failed")
                                  ("failure" "provider runtime endpoint requires POST")))))
 
+;; : (-> HttpRequest HttpResponse Void)
 (def (provider-runtime-stream-handler request response)
   (if (eq? (http-request-method request) 'POST)
       (with-catch
@@ -215,6 +257,7 @@
        (hash ("state" "failed")
              ("failure" "provider runtime stream endpoint requires POST")))))
 
+;; : (-> HttpRequest HttpResponse Void)
 (def (shutdown-handler request response)
   (if (eq? (http-request-method request) 'POST)
       (begin
@@ -227,6 +270,7 @@
                            (hash ("state" "failed")
                                  ("failure" "shutdown endpoint requires POST")))))
 
+;; : (-> String JsonObject)
 (def (runtime-bootstrap endpoint)
   (hash ("schemaId" "agent.semantic-protocols.asp-client-server-bootstrap")
         ("schemaVersion" "1")
@@ -236,29 +280,33 @@
         ("state" "ready")
         ("endpoint" endpoint)))
 
+;; : (-> String String)
 (def (concrete-http-address requested-address)
-  (if (string=? requested-address "127.0.0.1:0")
-      (let* ((reservation (tcp-listen (cons localhost4 0)))
-             (bound-address (Socket-address reservation))
-             (address (format "127.0.0.1:~a" (cdr bound-address))))
-        (ServerSocket-close reservation)
-        address)
-      requested-address))
+  (match requested-address
+    ("127.0.0.1:0"
+     (let* ((reservation (tcp-listen (cons localhost4 0)))
+            (bound-address (Socket-address reservation))
+            (address (format "127.0.0.1:~a" (cdr bound-address))))
+       (ServerSocket-close reservation)
+       address))
+    (address address)))
 
+;; : (-> Void)
 (def (serve-provider-http-json-runtime!)
   (validate-provider-http-json-environment!
    (lambda (name) (getenv name #f)))
   (let* ((address (concrete-http-address
                    (required-environment "ASP_CLIENT_SERVER_HOST")))
          (endpoint (format "http://~a/" address))
-         (server (start-http-server! backlog: 64 address)))
+         (server (start-http-server! backlog: 64 address))
+         (output (current-output-port)))
     (set! *provider-http-server* server)
     (http-register-handler server "/health" health-handler)
     (http-register-handler server "/v1/provider-runtime" provider-runtime-handler)
     (http-register-handler server "/v1/provider-runtime-stream"
                            provider-runtime-stream-handler)
     (http-register-handler server "/shutdown" shutdown-handler)
-    (write-json (runtime-bootstrap endpoint) (current-output-port))
+    (write-json (runtime-bootstrap endpoint) output)
     (newline)
-    (force-output (current-output-port))
+    (force-output output)
     (thread-join! server)))

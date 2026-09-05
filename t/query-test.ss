@@ -3,8 +3,9 @@
 
 (import :gerbil/gambit
         :std/test
-        :gslph/src/commands/query
-        (only-in :gslph/src/testing/execution-profile
+        (only-in :asp-gerbil-scheme/src/runtime/provider-http-json-command-client
+                 provider-http-json-query-main)
+        (only-in :asp-gerbil-scheme/src/testing/execution-profile
                  declare-gxtest-serial))
 (export query-test)
 
@@ -14,11 +15,11 @@
   (with-catch
    (lambda (_) #t)
    (lambda ()
-     (query-main args)
+     (provider-http-json-query-main args)
      #f)))
 
 (def query-test
-  (test-suite "gerbil scheme harness exact query boundary"
+  (test-suite "gerbil scheme HTTP query boundary"
     (test-case "public code facade is physically unsupported"
       (check
        (query-route-rejected?

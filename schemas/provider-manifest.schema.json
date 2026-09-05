@@ -85,6 +85,9 @@
     "queryPackDescriptor": {
       "$ref": "https://schemas.agent-semantic-protocols.dev/provider-query-pack-descriptor.schema.json"
     },
+    "searchPlaybookContract": {
+      "$ref": "https://schemas.agent-semantic-protocols.dev/provider-search-playbook-contract.schema.json"
+    },
     "policy": {
       "$ref": "#/$defs/hookPolicy"
     },
@@ -122,18 +125,6 @@
           "properties": {
             "languageId": {"const": "julia"},
             "providerId": {"const": "asp-julia"}
-          }
-        },
-        {
-          "properties": {
-            "languageId": {"const": "md"},
-            "providerId": {"const": "asp-md"}
-          }
-        },
-        {
-          "properties": {
-            "languageId": {"const": "org"},
-            "providerId": {"const": "asp-org"}
           }
         },
         {
@@ -408,38 +399,16 @@
     },
     "methodId": {
       "type": "string",
-      "pattern": "^(?:guide|query|(search|query|check|proof|review|verification|evidence|ast-patch|agent)/[a-z][a-z0-9_-]*)$"
+      "pattern": "^(?:guide|query|(query|proof|review|evidence|ast-patch|agent)/[a-z][a-z0-9_-]*)$"
     },
     "hookRouteBindings": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "prime",
-        "owner",
-        "lexical",
-        "ingest",
-        "checkChanged"
-      ],
       "properties": {
-        "prime": {
-          "$ref": "#/$defs/methodId"
-        },
-        "owner": {
-          "$ref": "#/$defs/methodId"
-        },
-        "lexical": {
-          "$ref": "#/$defs/methodId"
-        },
         "query": {
           "$ref": "#/$defs/methodId"
         },
         "exactSelectorNative": {
-          "$ref": "#/$defs/methodId"
-        },
-        "ingest": {
-          "$ref": "#/$defs/methodId"
-        },
-        "checkChanged": {
           "$ref": "#/$defs/methodId"
         },
         "dependencyTopology": {

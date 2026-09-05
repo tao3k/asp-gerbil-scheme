@@ -1,10 +1,30 @@
 ;;; -*- Gerbil -*-
 (import :gerbil/gambit
         :std/test
-        :gslph/src/types/model
-        :gslph/src/types/signatures
-        :gslph/src/types/validation)
+        :asp-gerbil-scheme/src/types/model
+        :asp-gerbil-scheme/src/types/signatures
+        :asp-gerbil-scheme/src/types/validation
+        (only-in :asp-gerbil-scheme/src/utilities/contracts
+                 contract-issue-code
+                 make-object-type-contract
+                 make-slot-contract
+                 object-contract-issues
+                 object-contract-valid?
+                 require-object-contract!)
+        (only-in :asp-gerbil-scheme/src/utilities/contract-syntax
+                 defobject-contract)
+        (only-in :asp-gerbil-scheme/src/utilities/projection
+                 object-contract-report-rows
+                 object-type-contract->alist))
 (export types-full-test)
+
+;;; Executable macro witness: the test owns both the declaration expansion and
+;;; observable runtime assertions, without package metadata or policy escapes.
+(defobject-contract contract-witness
+  owner: 'types-test
+  object-kind: 'contract-witness
+  slots:
+  ((name String string? required)))
 
 ;; : TestSuite
 (def types-parser-shape-test
@@ -273,7 +293,22 @@
         (check (cdr (assoc 'object-kind contract-alist)) => 'type-spec)
         (check slot-names => '(kind name params result))
         (check slot-types => '(Symbol Any Any Any))
-        (check report-slot-names => '(kind name params result))))))
+        (check report-slot-names => '(kind name params result))))
+    (test-case "defobject-contract emits executable validation helpers"
+      (let* ((valid (make-contract-witness "ready"))
+             (invalid (make-contract-witness 7))
+             (contract-alist (contract-witness-type-contract->alist))
+             (report (contract-witness-contract-report-rows valid)))
+        (check (contract-witness? valid) => #t)
+        (check (require-contract-witness-slots! valid) => valid)
+        (check (contract-witness-contract-valid? valid) => #t)
+        (check (contract-witness-contract-valid? invalid) => #f)
+        (check (map contract-issue-code
+                    (contract-witness-contract-issues invalid))
+               => '(slot-predicate))
+        (check (cdr (assoc 'owner contract-alist)) => 'types-test)
+        (check (map (lambda (row) (cdr (assoc 'status row))) report)
+               => '(ok))))))
 
 (def types-full-test
   (test-suite "gerbil scheme harness types"

@@ -2,14 +2,14 @@
 ;;; topics and selectors; it does not implement search or policy decisions.
 
 (import :gerbil/gambit
-        :gslph/src/commands/guide-sections
-        :gslph/src/language/evidence
-        :gslph/src/parser/facade
-        (only-in :gslph/src/parser/owner-items
+        :asp-gerbil-scheme/src/commands/guide-sections
+        :asp-gerbil-scheme/src/language/evidence
+        :asp-gerbil-scheme/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/parser/owner-items
                  parse-owner-items-source-file)
-        :gslph/src/policy/catalog
-        :gslph/src/support/args
-        :gslph/src/support/io
+        :asp-gerbil-scheme/src/policy/catalog
+        :asp-gerbil-scheme/src/support/args
+        :asp-gerbil-scheme/src/support/io
         (only-in :std/misc/list length<=n? unique)
         (only-in :std/srfi/1 drop take)
         (only-in :std/srfi/13
@@ -133,6 +133,10 @@
 (defstruct guide-exemplar-spec
   (owner symbols include-file-comment?)
   transparent: #t)
+;;; The exemplar catalog binds each guide topic to a small, reviewed owner and
+;;; symbol set.  Keeping this data declarative prevents guide rendering from
+;;; embedding source-selection branches and makes missing exemplars fail at the
+;;; existing guide-definition boundary.
 (def +guide-exemplar-specs+
      [(cons 'higher-order
             (make-guide-exemplar-spec
@@ -158,8 +162,8 @@
              #t))
       (cons 'controlled-branch-shape
             (make-guide-exemplar-spec
-             "src/commands/search-render.ss"
-             ["ranked-syntax-facts" "select-ranked-syntax-facts"]
+             "src/parser/control-flow.ss"
+             ["control-flow-facts-from-form"]
              #t))
       (cons 'engineering-comment-quality
             (make-guide-exemplar-spec
@@ -441,8 +445,8 @@
      (cond ((option "--workspace" args) => values)
            ((file-directory? "src") ".")
            ((file-directory?
-             "languages/gerbil-scheme-language-project-harness/src")
-            "languages/gerbil-scheme-language-project-harness")
+             "languages/asp-gerbil-scheme/src")
+            "languages/asp-gerbil-scheme")
            (else (project-root args))))
 (def (guide-code-lines args)
      (let* ((topic (guide-topic args))

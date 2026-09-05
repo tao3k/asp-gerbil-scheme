@@ -2,12 +2,12 @@
 ;;; Expected repair: downstream gxtest consumes Testing Framework body timing.
 
 (import :std/test
-        (only-in :gslph/src/benchmark/gate
+        (only-in :asp-gerbil-scheme/src/benchmark/gate
                  benchmark-receipt-pass?)
-        (only-in :gslph/src/testing/model
+        (only-in :asp-gerbil-scheme/src/testing/model
                  testing-receipt-detail
                  testing-receipt-ok?)
-        (only-in :gslph/src/testing/performance
+        (only-in :asp-gerbil-scheme/src/testing/performance
                  testing-benchmark-run/result))
 
 (export downstream-performance-test)

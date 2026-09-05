@@ -4,11 +4,11 @@
 ;;; - Packet construction stays pure; display helpers own the serialization side effect.
 ;;; Invariant: packet fields and receipt commands name executable public surfaces.
 
-(import :gslph/src/constants
-        :gslph/src/parser/facade
-        :gslph/src/protocol/json
+(import :asp-gerbil-scheme/src/constants
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/json
         (only-in :std/sugar filter match unless)
-        :gslph/src/support/args)
+        :asp-gerbil-scheme/src/support/args)
 
 (export evidence-main
         evidence-graph-packet
@@ -96,12 +96,12 @@
                                 (hash (candidateId "gerbil-scheme.evidence.project-harness")
                                       (sourceRuleId "GERBIL-SCHEME-EVIDENCE-GRAPH")
                                       (receiptKind "gxtest-policy")
-                                      (summary "Project-level Gerbil Scheme search and policy behavior should be linked to GSLPH Testing Framework receipts.")))
+                                      (summary "Project-level Gerbil Scheme search and policy behavior should be linked to ASP_GERBIL_SCHEME Testing Framework receipts.")))
                  (evidence-node receipt-id "verification-receipt" test-command
                                 owner-path "needs-injection"
                                 (hash (receiptId "gerbil-scheme.harness.gxtest")
                                       (command test-command)
-                                      (summary "Run project tests through the GSLPH Testing Framework and attach the receipt before treating the claim as verified.")))
+                                      (summary "Run project tests through the ASP_GERBIL_SCHEME Testing Framework and attach the receipt before treating the claim as verified.")))
                  (evidence-node action-id "review-action"
                                 (string-append "Run " test-command)
                                 owner-path "missing"
@@ -117,7 +117,7 @@
                                 "requires-evidence" action-id claim-id)])
          (gaps [(hash (gapId gap-id)
                       (ownerPath owner-path)
-                      (summary "No attached GSLPH Testing Framework receipt for this evidence graph.")
+                      (summary "No attached ASP_GERBIL_SCHEME Testing Framework receipt for this evidence graph.")
                       (severity "warning")
                       (fields (hash (nextCommand test-command))))]))
     (hash
@@ -259,7 +259,7 @@
 (def (evidence-producer)
   (hash (languageId +language-id+)
         (providerId +provider-id+)
-        (namespace "agent.semantic-protocols.languages.gerbil-scheme.gerbil-scheme-harness")))
+        (namespace "agent.semantic-protocols.languages.gerbil-scheme.asp-gerbil-scheme")))
 ;; : (-> ProjectIndex String )
 (def (evidence-project index)
   (let ((root (project-index-root index))

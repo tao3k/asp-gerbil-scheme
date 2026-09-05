@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
-(import :gslph/src/commands/evidence
-        :gslph/src/commands/guide
-        :gslph/src/protocol/registry
+(import :asp-gerbil-scheme/src/commands/evidence
+        :asp-gerbil-scheme/src/commands/guide
+        :asp-gerbil-scheme/src/protocol/registry
         :std/srfi/13
         :std/test)
 
@@ -20,8 +20,8 @@
            => "agent.semantic-protocols.evidence-graph")
     (check (hash-get packet 'graphId) => "gerbil-scheme.evidence.graph")
     (check (hash-get producer 'languageId) => "gerbil-scheme")
-    (check (hash-get producer 'providerId) => "gerbil-scheme-harness")
-    (check (hash-get project 'package) => "gerbil-scheme-language-project-harness")
+    (check (hash-get producer 'providerId) => "asp-gerbil-scheme")
+    (check (hash-get project 'package) => "asp-gerbil-scheme")
     (check (hash-get summary 'nodes) => 4)
     (check (hash-get summary 'edges) => 3)
     (check (hash-get summary 'owners) => 1)
@@ -57,45 +57,12 @@
          (schemas (hash-get language 'schemas))
          (descriptors (hash-get language 'methodDescriptors))
          (guide (guide-lines)))
-    (check (method-registered? methods "search/pattern") => #t)
-    (check (method-registered? methods "search/runtime-source") => #t)
-    (check (method-registered? methods "search/compare") => #t)
     (check (method-registered? methods "index/structural") => #t)
     (check (method-registered? methods "index/native-syntax-owner-facts") => #t)
     (check (method-registered? methods "evidence/graph") => #t)
     (check (method-registered? methods "evidence/analyze") => #t)
-    (check (schema-registered? schemas
-                               "agent.semantic-protocols.semantic-extension-pattern-mapping"
-                               "schemas/semantic-extension-pattern-mapping.v1.schema.json")
-           => #t)
-    (check (schema-registered? schemas
-                               "agent.semantic-protocols.semantic-runtime-source-acquisition"
-                               "schemas/semantic-runtime-source-acquisition.v1.schema.json")
-           => #t)
-    (check (schema-registered? schemas
-                               "agent.semantic-protocols.semantic-compare-packet"
-                               "schemas/semantic-compare-packet.v1.schema.json")
-           => #t)
-    (check (schema-registered? schemas
-                               "agent.semantic-protocols.semantic-structural-index"
-                               "schemas/semantic-structural-index.v1.schema.json")
-           => #t)
-    (check (schema-registered? schemas
-                               "agent.semantic-protocols.semantic-native-syntax-fact-index"
-                               "schemas/semantic-native-syntax-fact-index.v1.schema.json")
-           => #t)
-    (check (descriptor-output-schema? descriptors
-                                      "search/pattern"
-                                      "agent.semantic-protocols.semantic-extension-pattern-mapping")
-           => #t)
-    (check (descriptor-output-schema? descriptors
-                                      "search/runtime-source"
-                                      "agent.semantic-protocols.semantic-runtime-source-acquisition")
-           => #t)
-    (check (descriptor-output-schema? descriptors
-                                      "search/compare"
-                                      "agent.semantic-protocols.semantic-compare-packet")
-           => #t)
+    (check (ormap (lambda (method) (string-prefix? "search/" method)) methods)
+           => #f)
     (check (descriptor-output-schema? descriptors
                                       "index/structural"
                                       "agent.semantic-protocols.semantic-structural-index")
@@ -106,8 +73,8 @@
            => #t)
     (check (guide-has-fragment? guide "evidence graph --json") => #t)
     (check (guide-has-fragment? guide "evidence analyze --json") => #t)
-    (check (guide-has-fragment? guide "search structural --json") => #t)
-    (check (guide-has-fragment? guide "search structural --owner <path> --json") => #t)))
+    (check (guide-has-fragment? guide "projection --native-index --json") => #t)
+    (check (guide-has-fragment? guide "projection --native-index --owner <path> --json") => #t)))
 ;; : (-> Packet String Boolean )
 (def (packet-has-node-kind? packet kind)
   (ormap (lambda (node)

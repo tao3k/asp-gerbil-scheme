@@ -1,13 +1,13 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing dependency protocol adapter policy over parser-owned facts.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-support
-        :gslph/src/policy/dependency-adapter-profile
-        :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-support
+        :asp-gerbil-scheme/src/policy/dependency-adapter-profile
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/misc/list unique)
         (only-in :std/srfi/13 string-contains string-join string-prefix?)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export dependency-protocol-adapter-findings
         dependency-protocol-adapter-finding)
@@ -27,8 +27,8 @@
 (def +dependency-adapter-repair-code-command+
   "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-017 --intent repair")
 ;; Command
-(def +dependency-adapter-search-example-command+
-  "asp gerbil-scheme search pattern poo rationaldict adapter --workspace . --view seeds")
+(def +dependency-adapter-fact-command+
+  "asp-gerbil-scheme evidence graph --json .")
 
 ;;; Entry boundary: policy only consumes parser-owned adapter facts.
 ;;; It does not infer adapter quality from raw source text.
@@ -83,7 +83,7 @@
 (def (dependency-protocol-adapter-details index fact missing)
   (dependency-adapter-profile-details
    (dependency-adapter-standard-profile
-    +dependency-adapter-search-example-command+
+    +dependency-adapter-fact-command+
     +dependency-adapter-repair-code-command+)
    fact
    missing

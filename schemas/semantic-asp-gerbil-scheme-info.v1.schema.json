@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-semantic-protocols.local/schemas/semantic-asp-gerbil-scheme-info.v1.schema.json",
+  "title": "Gerbil Scheme harness info packet",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaId",
+    "schemaVersion",
+    "languageId",
+    "providerId",
+    "projectRoot",
+    "files",
+    "definitions",
+    "configurableInterface",
+    "agentSteering",
+    "closureCommands"
+  ],
+  "properties": {
+    "schemaId": {
+      "const": "agent.semantic-protocols.asp-gerbil-scheme-info"
+    },
+    "schemaVersion": {
+      "const": "1"
+    },
+    "languageId": {
+      "const": "gerbil-scheme"
+    },
+    "providerId": {
+      "const": "asp-gerbil-scheme"
+    },
+    "projectRoot": {
+      "type": "string"
+    },
+    "files": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "definitions": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "indexStatsStatus": {
+      "type": "string",
+      "enum": ["rust-owned-not-materialized"]
+    },
+    "package": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "packageManager": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "configurableInterface": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "sourceScope",
+        "buildScope",
+        "agentPolicy"
+      ],
+      "properties": {
+        "sourceScope": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "buildScope": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "agentPolicy": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "agentSteering": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "facts",
+        "rules"
+      ],
+      "properties": {
+        "facts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": [
+              "id",
+              "topic"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "topic": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "closureCommands": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "selfApply"
+      ],
+      "properties": {
+        "selfApply": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

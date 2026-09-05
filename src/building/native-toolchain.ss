@@ -18,9 +18,10 @@
         native-toolchain-default
         with-native-toolchain)
 
-;; : (-> String String NativeToolchain)
+;; : (-> String String Path String String NativeToolchain)
 (defstruct native-toolchain (sdkroot developer-dir compiler-path toolchain-kind sdk-kind))
 
+;; : (-> String String Path)
 (def (resolve-executable name env-name)
   (let* ((explicit (getenv env-name #f))
          (path (or (getenv "PATH" #f) ""))
@@ -36,6 +37,7 @@
 ;; Resolve a companion compiler from the selected cohort, never from an
 ;; unrelated PATH entry. An explicit override remains admissible and is checked
 ;; by native-toolchain-default against the leader's family.
+;; : (-> Path String String Path)
 (def (resolve-cohort-executable leader name env-name)
   (let (explicit (getenv env-name #f))
     (if (and explicit (not (string=? explicit "")))
@@ -54,6 +56,7 @@
           (error "native compiler cohort companion not found"
                  leader name env-name runtime-companion sibling)))))))
 
+;; : (-> Path Symbol)
 (def (toolchain-family executable)
   (cond
    ((string-prefix? "/opt/homebrew/" executable) 'homebrew-gerbil)
@@ -82,13 +85,14 @@
         (make-native-toolchain "" "" (or (getenv "CC" #f) "clang")
                                "unknown" "unknown")))))
 
-;; : (-> String Any String)
+;; : (-> String String String)
 (def (native-toolchain-value name value)
   (if (string? value)
     value
     (error "native toolchain values must be strings" name value)))
 
-;; : (-> NativeToolchain Procedure Any)
+;; : (forall (A) (-> NativeToolchain (-> A) A))
+;; : (-> NativeToolchain Thunk Result)
 (def (with-native-toolchain toolchain thunk)
   (unless (native-toolchain? toolchain)
     (error "expected native toolchain" toolchain))

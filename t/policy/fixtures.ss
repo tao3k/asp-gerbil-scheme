@@ -4,22 +4,22 @@
 (import :gerbil/gambit
         :std/misc/process
         (only-in :std/srfi/13 string-prefix? string-tokenize)
-        (only-in :gslph/src/constants +language-id+ +provider-id+)
-        (only-in :gslph/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/constants +language-id+ +provider-id+)
+        (only-in :asp-gerbil-scheme/src/parser/facade
                  collect-project
                  collect-source-scope
                  project-definitions
                  project-index-files)
-        (only-in :gslph/src/policy/core run-policy-checks)
-        (only-in :gslph/src/policy/facade
+        (only-in :asp-gerbil-scheme/src/policy/core run-policy-checks)
+        (only-in :asp-gerbil-scheme/src/policy/facade
                  agent-repair-report-json
                  agent-repair-summary-parts
                  finding-agent-repair-json
                  finding-agent-repair-parts
                  finding-guide-detail-parts)
-        (only-in :gslph/src/protocol/json write-json-line)
-        (only-in :gslph/src/types/core type-status)
-        :gslph/src/types/facade)
+        (only-in :asp-gerbil-scheme/src/protocol/json write-json-line)
+        (only-in :asp-gerbil-scheme/src/types/core type-status)
+        :asp-gerbil-scheme/src/types/facade)
 (export filter-rule
         json-finding-by-rule
         policy-check-output
@@ -52,6 +52,8 @@
         reset-fixture-root
         write-functional-idiom-control-context-project
         write-macro-runtime-source-project
+        write-linked-macro-runtime-source-project
+        write-import-linked-macro-runtime-source-project
         write-protocol-evidence-project
         ensure-dir
         write-text
@@ -87,7 +89,7 @@
          (findings (run-policy-checks index))
          (status (type-status findings))
          (report
-          (hash (schemaId "agent.semantic-protocols.gerbil-scheme-harness-report")
+          (hash (schemaId "agent.semantic-protocols.asp-gerbil-scheme-report")
                 (schemaVersion "1")
                 (languageId +language-id+)
                 (providerId +provider-id+)
@@ -558,17 +560,76 @@
 ;; : (-> String Allowed Unit )
 (def (write-macro-runtime-source-project root allowed?)
   (let* ((src (string-append root "/src"))
-         (owner (string-append src "/macros")))
+         (owner (string-append src "/macros"))
+         (tests (string-append root "/t")))
     (ensure-dir ".run")
     (ensure-dir root)
     (ensure-dir src)
     (ensure-dir owner)
-    (if allowed?
-      (write-text (string-append root "/gerbil.pkg")
-                  "(package: sample/macros\n  policy: ((macro-governance allow-generated: #t explanation: \"Macro transformer edits are allowed only with runtime-source and expansion evidence.\" witness: \"search runtime-source macro sugar module-sugar\")))\n")
-      (delete-file-if-exists (string-append root "/gerbil.pkg")))
+    (ensure-dir tests)
+    (write-text (string-append root "/gerbil.pkg")
+                "(package: sample/macros)\n")
     (write-text (string-append owner "/core.ss")
-                ";;; -*- Gerbil -*-\n(package: sample/macros)\n(defsyntax (with-order stx)\n  #'(void))\n")))
+                ";;; -*- Gerbil -*-\n(package: sample/macros)\n(defsyntax (with-order stx)\n  #'(void))\n")
+    (write-text (string-append tests "/macro-witness-test.ss")
+                (string-append
+                 ";;; -*- Gerbil -*-\n(import :std/test ../src/macros/core)\n"
+                 "(def macro-witness-test\n  (test-suite \"macro witness\"\n"
+                 "    (test-case \"expands to runtime behaviour\"\n"
+                 "      (with-order)\n"
+                 (if allowed? "      (check #t => #t)\n" "")
+                 "      )))\n"))))
+;; : (-> String Unit)
+(def (write-linked-macro-runtime-source-project root)
+  (let* ((src (string-append root "/src"))
+         (owner (string-append src "/macros"))
+         (cases (string-append root "/user-interface"))
+         (tests (string-append root "/t")))
+    (ensure-dir ".run")
+    (ensure-dir root)
+    (ensure-dir src)
+    (ensure-dir owner)
+    (ensure-dir cases)
+    (ensure-dir tests)
+    (write-text (string-append root "/gerbil.pkg")
+                "(package: sample/macros)\n")
+    (write-text (string-append owner "/core.ss")
+                ";;; -*- Gerbil -*-\n(package: sample/macros)\n(defsyntax (with-order stx)\n  #'(void))\n")
+    (write-text (string-append cases "/order-case.ss")
+                ";;; -*- Gerbil -*-\n(import ../src/macros/core)\n(def order-case (with-order))\n")
+    (write-text (string-append tests "/order-case-test.ss")
+                (string-append
+                 ";;; -*- Gerbil -*-\n(import :std/test)\n"
+                 "(load! \"../user-interface/order-case.ss\")\n"
+                 "(def order-case-test\n  (test-suite \"order case\"\n"
+                 "    (test-case \"observes loaded macro case\"\n"
+                 "      (check order-case => #!void))))\n"))))
+;; : (-> String Unit)
+(def (write-import-linked-macro-runtime-source-project root)
+  (let* ((src (string-append root "/src"))
+         (owner (string-append src "/macros"))
+         (cases (string-append root "/user-interface"))
+         (tests (string-append root "/t")))
+    (ensure-dir ".run")
+    (ensure-dir root)
+    (ensure-dir src)
+    (ensure-dir owner)
+    (ensure-dir cases)
+    (ensure-dir tests)
+    (write-text (string-append root "/gerbil.pkg")
+                "(package: sample/macros)\n")
+    (write-text (string-append owner "/core.ss")
+                ";;; -*- Gerbil -*-\n(package: sample/macros)\n(defsyntax (with-order stx)\n  #'(void))\n")
+    (write-text (string-append cases "/order-case.ss")
+                ";;; -*- Gerbil -*-\n(import ../src/macros/core)\n(export order-case)\n(def order-case (with-order))\n")
+    (write-text (string-append cases "/facade.ss")
+                ";;; -*- Gerbil -*-\n(import :sample/macros/user-interface/order-case)\n(export order-case)\n")
+    (write-text (string-append tests "/order-case-test.ss")
+                (string-append
+                 ";;; -*- Gerbil -*-\n(import :std/test :sample/macros/user-interface/facade)\n"
+                 "(def order-case-test\n  (test-suite \"order case\"\n"
+                 "    (test-case \"observes transitively imported macro case\"\n"
+                 "      (check order-case => #!void))))\n"))))
 ;; : (-> String Declared String )
 (def (write-protocol-evidence-project root declared?)
   (let* ((src (string-append root "/src"))

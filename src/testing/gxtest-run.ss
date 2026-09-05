@@ -149,7 +149,7 @@
               (duration-micros serial-start-micros (monotonic-micros)))
              (results (append parallel-results serial-results))
              (status (first-failure-status results)))
-        (display (string-append "[gslph-test-runner] files="
+        (display (string-append "[asp-gerbil-scheme-test-runner] files="
                                 (number->string (length files))
                                 " process-isolation=per-file"
                                 " native-parallelism="

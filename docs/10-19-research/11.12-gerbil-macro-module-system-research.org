@@ -6,7 +6,7 @@
 :PROPERTIES:
 :JD_ID: 11.12
 :STATUS: active
-:OWNER: gerbil-scheme-language-project-harness
+:OWNER: asp-gerbil-scheme
 :EVIDENCE: gerbil://src/gerbil/expander, gerbil://src/gerbil/compiler
 :END:
 
@@ -475,7 +475,7 @@ gate fails only against the scenario's own declared budget.
   path merely to obtain metadata.
 - No global memory threshold is introduced; each exceptional scenario owns its
   own literal =maxHeapMiB= configuration.
-- No =gslph= benchmark or build passthrough command is added. Build stays on
+- No =asp-gerbil-scheme= benchmark or build passthrough command is added. Build stays on
   the upstream =gxi= / =gxtest= foundation.
 
 *** 11.12.11.6 Implementation Order And Exit Criteria
