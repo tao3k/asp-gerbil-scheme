@@ -47,21 +47,23 @@
 
 ;; : (-> ProjectIndex HashTable)
 (def (macro-runtime-source-witness-index index)
-  (let ((files (project-index-files index))
+  (let* ((files (project-index-files index))
+        (owners-by-path (macro-runtime-source-owner-index index files))
         (asserted-owner-paths (make-hash-table))
-        (witnesses (make-hash-table)))
+        (witnesses (make-hash-table))
+        (asserting-owners
+         (filter (lambda (owner)
+                   (and (macro-runtime-source-test-owner? index owner)
+                        (macro-runtime-source-assertion-owner? owner)))
+                 files)))
     (for-each
      (lambda (test-owner)
-       (when (and (macro-runtime-source-test-owner? index test-owner)
-                  (macro-runtime-source-assertion-owner? test-owner))
-         (hash-put! asserted-owner-paths
-                    (macro-runtime-source-owner-path index test-owner)
-                    #t)
-         (for-each (lambda (path)
-                     (hash-put! asserted-owner-paths path #t))
-                   (macro-runtime-source-linked-owner-paths
-                    index test-owner))))
-     files)
+       (hash-put! asserted-owner-paths
+                  (macro-runtime-source-owner-path index test-owner)
+                  #t))
+     asserting-owners)
+    (macro-runtime-source-mark-linked-owners!
+     index owners-by-path asserted-owner-paths asserting-owners)
     (for-each
      (lambda (owner)
        (when (hash-key? asserted-owner-paths
@@ -71,6 +73,41 @@
                    (macro-runtime-source-invocation-names owner))))
      files)
     witnesses))
+
+;; Indexing canonical paths once keeps multi-source import closure O(V + E)
+;; instead of rescanning the project catalog for every asserting test owner.
+;; : (-> ProjectIndex (List SourceFile) HashTable)
+(def (macro-runtime-source-owner-index index files)
+  (let (owners-by-path (make-hash-table))
+    (for-each
+     (lambda (owner)
+       (hash-put! owners-by-path
+                  (macro-runtime-source-owner-path index owner)
+                  owner))
+     files)
+    owners-by-path))
+
+;; Walk the exact collected owner graph from all asserting tests. The visited
+;; table is also the admission set, so cycles and shared facades are processed
+;; once while transitive package imports remain executable witness edges.
+;; : (-> ProjectIndex HashTable HashTable (List SourceFile) Unit)
+(def (macro-runtime-source-mark-linked-owners!
+      index owners-by-path asserted-owner-paths pending)
+  (unless (null? pending)
+    (let* ((owner (car pending))
+           (next
+            (fold (lambda (path worklist)
+                    (let (linked-owner (hash-get owners-by-path path))
+                      (if (and linked-owner
+                               (not (hash-key? asserted-owner-paths path)))
+                        (begin
+                          (hash-put! asserted-owner-paths path #t)
+                          (cons linked-owner worklist))
+                        worklist)))
+                  (cdr pending)
+                  (macro-runtime-source-linked-owner-paths index owner))))
+      (macro-runtime-source-mark-linked-owners!
+       index owners-by-path asserted-owner-paths next))))
 
 ;; : (-> ProjectIndex SourceFile Boolean)
 (def (macro-runtime-source-test-owner? index owner)

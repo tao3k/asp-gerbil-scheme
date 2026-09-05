@@ -622,11 +622,13 @@
                 ";;; -*- Gerbil -*-\n(package: sample/macros)\n(defsyntax (with-order stx)\n  #'(void))\n")
     (write-text (string-append cases "/order-case.ss")
                 ";;; -*- Gerbil -*-\n(import ../src/macros/core)\n(export order-case)\n(def order-case (with-order))\n")
+    (write-text (string-append cases "/facade.ss")
+                ";;; -*- Gerbil -*-\n(import :sample/macros/user-interface/order-case)\n(export order-case)\n")
     (write-text (string-append tests "/order-case-test.ss")
                 (string-append
-                 ";;; -*- Gerbil -*-\n(import :std/test :sample/macros/user-interface/order-case)\n"
+                 ";;; -*- Gerbil -*-\n(import :std/test :sample/macros/user-interface/facade)\n"
                  "(def order-case-test\n  (test-suite \"order case\"\n"
-                 "    (test-case \"observes imported macro case\"\n"
+                 "    (test-case \"observes transitively imported macro case\"\n"
                  "      (check order-case => #!void))))\n"))))
 ;; : (-> String Declared String )
 (def (write-protocol-evidence-project root declared?)

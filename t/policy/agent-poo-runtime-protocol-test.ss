@@ -73,7 +73,7 @@
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
             (check matching => [])))
-(test-case "agent policy accepts a test importing the exact macro case owner"
+(test-case "agent policy accepts a transitive package import to the macro case owner"
           (let* ((root ".run/policy-macro-runtime-source-import-linked")
                  (_ (write-import-linked-macro-runtime-source-project root))
                  (index (collect-project root))
