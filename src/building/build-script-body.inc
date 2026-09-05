@@ -30,12 +30,19 @@
 (def (framework-build-bindir)
   (path-expand "bin" (framework-build-artifact-root)))
 
+(def (framework-build-libdir)
+  (path-expand "lib" (framework-build-artifact-root)))
+
 (def (framework-modules-before-target build-spec target)
   (let loop ((rest build-spec) (modules []))
     (cond
      ((null? rest) (reverse modules))
      ((eq? (car rest) target) (reverse modules))
      ((string? (car rest)) (loop (cdr rest) (cons (car rest) modules)))
+     ((and (pair? (car rest))
+           (eq? (caar rest) gxc:)
+           (pair? (cdar rest)))
+      (loop (cdr rest) (cons (cadar rest) modules)))
      (else (loop (cdr rest) modules)))))
 
 (def (framework-option resolver package fallback)
@@ -101,23 +108,31 @@
          (else
           (loop (cdr remaining) (cons module seen) duplicates)))))))
 
-(def (framework-static-runtime-build-spec runtime-modules)
-  (map (lambda (module) `(gxc: ,module (static: #t))) runtime-modules))
-
 (def (framework-executable-build-spec module binary runtime-modules
                                           library-modules native-capabilities)
-  (append (framework-static-runtime-build-spec runtime-modules)
-               `((exe: ,module bin: ,binary
-                       ,@(framework-native-link-options native-capabilities)))
-               library-modules))
+  ;; Runtime modules remain separate native AOT units in the artifact libdir.
+  ;; The executable keeps ordinary source imports so gxc owns the native link;
+  ;; marking every dependency static would instead regenerate the entire
+  ;; HTTP/parser/query closure in one translation unit.
+  (append (map (lambda (runtime-module)
+                 `(gxc: ,runtime-module (optimize: #t)))
+               runtime-modules)
+          `((exe: ,module bin: ,binary runtime-linkage: separate-aot
+                  ,@(framework-native-link-options native-capabilities)))
+          library-modules))
 
 (def (framework-validate-runtime-closure! build-spec)
   (def (module-name id)
     (if (symbol? id) (symbol->string id) id))
+  (def (module-stem module)
+    (let (module-length (string-length module))
+      (if (string-suffix? ".ss" module)
+        (substring module 0 (- module-length 3))
+        module)))
   (for-each
    (lambda (spec)
      (match spec
-       ([exe: module bin: binary]
+       ([exe: module bin: binary . options]
         (let* ((declared (framework-modules-before-target build-spec spec))
                (stub-path
                   (string-append
@@ -148,10 +163,28 @@
                                           (string-length name)))))
                       builtin-modules)
                      string<?))
-                   (expected (sort (cons module declared) string<?)))
+                   (expected
+                    (sort (cons module (map module-stem declared)) string<?)))
               (unless (equal? actual expected)
                 (error "provider runtime closure drift"
-                       expected actual stub-path)))))
+                       expected actual stub-path))
+              (unless (eq? (pgetq runtime-linkage: options) 'separate-aot)
+                (error "provider executable lacks separate AOT linkage"
+                       spec))
+              (for-each
+               (lambda (runtime-module)
+                 (let* ((stem (module-stem runtime-module))
+                        (artifact-stem
+                         (path-expand
+                          (string-append package-prefix stem)
+                          (framework-build-libdir))))
+                   (unless (and (file-exists?
+                                 (string-append artifact-stem ".ssi"))
+                                (file-exists?
+                                 (string-append artifact-stem ".o1")))
+                     (error "provider runtime AOT artifact missing"
+                            runtime-module artifact-stem))))
+               declared))))
        (else (void))))
    build-spec))
 
@@ -252,14 +285,17 @@
     ((development)
      [optimize: #f])
     ((production)
-     (cond-expand
-      ;; Gerbil's build-optimized path emits one SINGLE_HOST executable C
-      ;; translation unit.  GCC 16 needs more than ten minutes and about
-      ;; 1.55 GiB RSS for the provider unit on Darwin, while the preceding
-      ;; module graph finishes in about one minute.  Keep Scheme optimization
-      ;; enabled but retain std/make's multi-unit executable topology there.
-      (darwin [optimize: #t])
-      (else [optimize: #t build-release: #t])))
+     ;; The provider is an AOT executable, but its HTTP/TLS boundary depends on
+     ;; the host C runtime and OpenSSL.  Gerbil's build-release option forwards
+     ;; `-static` to GCC; that produces neither a portable nor a reliably
+     ;; linkable artifact for these system libraries.  Preserve optimized
+     ;; multi-unit AOT compilation and use the platform dynamic linker on every
+     ;; supported host.
+     ;; Keep the final executable in std/make's separate-module mode. Runtime
+     ;; units carry their own optimize option in the declared build graph;
+     ;; setting this global option to true would rewrite exe: to optimized-exe:
+     ;; and invoke full-program optimization over the entire server closure.
+     [optimize: #f])
     (else
      (error "unsupported Scheme build profile" profile))))
 
@@ -418,8 +454,10 @@
     (path-normalize (path-directory source-file)))
   (def (build options)
     (let ((bindir (framework-build-bindir))
+          (libdir (framework-build-libdir))
           (build-keys (framework-resolve-build-keys keys)))
       (create-directory* bindir)
+      (create-directory* libdir)
       (call-with-framework-build-lease
        (lambda ()
          ;; std/make receives the complete declared spec and remains the only
@@ -440,20 +478,26 @@
                      srcdir: source-directory
                      (framework-std-make-options
                       (framework-merge-build-options
-                       build-keys options)))))
+                       build-keys
+                       (append [bindir: bindir libdir: libdir]
+                               options))))))
           (and (memq verbose: options) #t))
          (framework-validate-runtime-closure! build-spec))
        (and (memq verbose: options) #t))))
   (def (clean)
-    (let (bindir (framework-build-bindir))
+    (let ((bindir (framework-build-bindir))
+          (libdir (framework-build-libdir)))
       (create-directory* bindir)
+      (create-directory* libdir)
       (call-with-framework-build-lease
        (lambda ()
          (parameterize ((current-directory bindir))
            (apply make-clean
                   build-spec
                   srcdir: source-directory
-                  (framework-resolve-build-keys keys)))))))
+                  (framework-merge-build-options
+                   (framework-resolve-build-keys keys)
+                   [bindir: bindir libdir: libdir])))))))
   (match arguments
     (["meta"] (write '("spec" "compile" "clean")) (newline))
     (["spec"] (pretty-print build-spec))
@@ -471,7 +515,7 @@
     (buildProfileOwner . "POO-package-spec")
     (buildProfileProjection . "native-std/make-options")
     (developmentProfile . "gcc-optimize-disabled")
-    (productionProfile . "gcc-platform-release-policy")
+    (productionProfile . "gcc-optimized-module-aot-separate-link")
     (buildDepsOwner . "std/make-srcdir-default")
     (parallelismOwner . "GERBIL_BUILD_CORES")
     (verbosityOwner . "build-script-cli-to-std-make")
@@ -484,13 +528,15 @@
     (darwinNativeEnvironmentExclusions . "SDKROOT-and-DEVELOPER_DIR")
     (releaseLinkageOwner . "Building-Framework-platform-policy")
     (darwinReleaseLinkage . "optimized-dynamic")
+    (linuxReleaseLinkage . "optimized-dynamic")
     (darwinExecutableTopology . "optimized-multi-unit")
     (buildGraphProjection . "declared-compiler-runtime-closure-to-std/make")
     (buildGraphAdmission . "none-full-declared-spec-to-std/make")
     (affectedOutputInvalidation . "none")
     (upstreamBuildSessionCount . "one-native-std/make-session")
     (libraryBuildProjection . "post-executable-package-modules-to-std/make")
-    (runtimeClosureDriftOracle . "gerbil-executable-stub")
+    (runtimeClosureDriftOracle . "entry-stub-and-separate-aot-modules")
+    (runtimeLinkage . "separate-aot")
     (executableFreshnessOwner . "declared-runtime-closure-to-std-make")
     (cacheConcurrencyOwner . "kernel-flock-per-GERBIL_PATH")
     (objectLockRecovery . "static-and-binary-under-exclusive-build-lease")

@@ -1,21 +1,11 @@
-(import :clan/building
-        :clan/poo/object
+(import :clan/poo/object
         :std/test
         (only-in "../provider-package-spec"
                  asp-gerbil-scheme-provider-package-spec)
         (only-in "../src/build-api/package-spec"
-                 asp-gerbil-scheme-package-build-profile)
-        (only-in "../src/build-api/source-closure"
-                 asp-gerbil-scheme-source-dependency-order))
+                 asp-gerbil-scheme-package-build-profile))
 
 (export provider-package-spec-test main)
-
-(def (provider-closure-runtime-modules)
-  (remove-build-file
-   (asp-gerbil-scheme-source-dependency-order
-    "."
-    '("src/provider-server.ss"))
-   "src/provider-server.ss"))
 
 (def provider-package-spec-test
   (test-suite "provider package spec"
@@ -23,9 +13,18 @@
       (check (asp-gerbil-scheme-package-build-profile
               asp-gerbil-scheme-provider-package-spec)
              => 'production))
-    (test-case "declared native runtime modules match the closure oracle"
-      (check (.get asp-gerbil-scheme-provider-package-spec runtime-modules)
-             => (provider-closure-runtime-modules)))
+    (test-case "declared runtime modules project to one separate AOT boundary"
+      (let* ((runtime-modules
+              (.get asp-gerbil-scheme-provider-package-spec runtime-modules))
+             (native-spec
+              (.get asp-gerbil-scheme-provider-package-spec native-spec))
+             (entry (list-ref native-spec (length runtime-modules))))
+        (check (map cadr (take native-spec (length runtime-modules)))
+               => runtime-modules)
+        (check (take entry 6)
+               => '(exe: "src/provider-server"
+                       bin: "asp-gerbil-scheme"
+                       runtime-linkage: separate-aot))))
     (test-case "each provider module has one std make completion owner"
       (check (.get asp-gerbil-scheme-provider-package-spec library-modules)
              => '())

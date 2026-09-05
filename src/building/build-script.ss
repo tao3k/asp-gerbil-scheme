@@ -7,6 +7,7 @@
 
 (export framework-build-artifact-root
         framework-build-bindir
+        framework-build-libdir
         framework-executable-build-spec
         framework-validate-runtime-closure!
         framework-build-cache-root

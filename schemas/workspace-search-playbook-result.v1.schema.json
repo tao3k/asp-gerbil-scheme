@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://agent-semantic-protocols.dev/schemas/workspace-search-playbook-result.v1.schema.json",
   "title": "Workspace Search Playbook Result V1",
-  "description": "Save-token Search result projected only after all five Runtime axes complete. Runtime audit receipts and identity digests are intentionally not part of this Agent-facing projection.",
+  "description": "Save-token Search result projected after every Agent-authored acquisition clause and requested Graph fan-in completes. Evidence exposes exact Query affordances without source, audit digests, or a prescribed next action.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaId", "schemaVersion", "result", "evidence"],
@@ -24,6 +24,9 @@
         "provider-contract-failure"
       ]
     },
+    "queryGrammar": {
+      "const": "asp query --selector <exact-selector> --projection <callable-skeleton|source>"
+    },
     "evidence": {
       "type": "array",
       "maxItems": 30,
@@ -32,13 +35,33 @@
       }
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"evidence": {"minItems": 1}},
+        "required": ["evidence"]
+      },
+      "then": {"required": ["queryGrammar"]}
+    },
+    {
+      "if": {
+        "properties": {"evidence": {"maxItems": 0}},
+        "required": ["evidence"]
+      },
+      "then": {"not": {"required": ["queryGrammar"]}}
+    }
+  ],
   "$defs": {
     "selectorEvidence": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["owner", "selector", "relation"],
+      "required": ["owner", "item", "selector", "matchedBy", "relation"],
       "properties": {
         "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "item": {
           "type": "string",
           "minLength": 1
         },
@@ -46,6 +69,16 @@
           "type": "string",
           "minLength": 1,
           "pattern": "^[a-z][a-z0-9-]*://.+#item/.+$"
+        },
+        "matchedBy": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 69,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(fd|rg|tantivy|syntax|graph):[0-9]+$"
+          }
         },
         "relation": {
           "type": "string",

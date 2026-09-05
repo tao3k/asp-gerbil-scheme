@@ -23,8 +23,8 @@
       (check
        (framework-executable-build-spec
         "main" "provider" '("runtime") '("library") '())
-       => '((gxc: "runtime" (static: #t))
-            (exe: "main" bin: "provider")
+       => '((gxc: "runtime" (optimize: #t))
+            (exe: "main" bin: "provider" runtime-linkage: separate-aot)
             "library")))
     (test-case "native TLS flags remain declarative and platform resolved"
       (let* ((spec (framework-executable-build-spec
@@ -36,13 +36,8 @@
     (test-case "package profiles lower directly to std/make options"
       (check (framework-build-profile-options 'development)
              => [optimize: #f])
-      (cond-expand
-       (darwin
-        (check (framework-build-profile-options 'production)
-               => [optimize: #t]))
-       (else
-        (check (framework-build-profile-options 'production)
-               => [optimize: #t build-release: #t])))
+      (check (framework-build-profile-options 'production)
+             => [optimize: #f])
       (check (framework-resolve-build-keys
               [profile: 'development bindir: "/tmp/profile-bin"])
              => [optimize: #f bindir: "/tmp/profile-bin"])
@@ -124,6 +119,8 @@
                => "SDKROOT-and-DEVELOPER_DIR")
         (check (cdr (assoc 'darwinExecutableTopology contract))
                => "optimized-multi-unit")
+        (check (cdr (assoc 'linuxReleaseLinkage contract))
+               => "optimized-dynamic")
         (check (cdr (assoc 'buildGraphProjection contract))
                => "declared-compiler-runtime-closure-to-std/make")
         (check (cdr (assoc 'buildGraphAdmission contract))
@@ -135,7 +132,9 @@
         (check (cdr (assoc 'libraryBuildProjection contract))
                => "post-executable-package-modules-to-std/make")
         (check (cdr (assoc 'runtimeClosureDriftOracle contract))
-               => "gerbil-executable-stub")
+               => "entry-stub-and-separate-aot-modules")
+        (check (cdr (assoc 'runtimeLinkage contract))
+               => "separate-aot")
         (check (cdr (assoc 'executableFreshnessOwner contract))
                => "declared-runtime-closure-to-std-make")
         (check (cdr (assoc 'cacheConcurrencyOwner contract))

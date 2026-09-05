@@ -108,6 +108,17 @@
                    policy 'suspect 1 samples 10 (* 3 gib)))
                 list)
                => '(tripped 2 rapid-rss-growth))))
+    (test-case "active native compilation records rapid growth without aborting"
+      (let* ((policy (framework-memory-anomaly-policy))
+             (gib (* 1024 1024 1024))
+             (samples [(framework-memory-anomaly-sample 0 gib)]))
+        (check (call-with-values
+                (lambda ()
+                  (framework-memory-anomaly-transition
+                   policy 'suspect 1 samples 10 (* 3 gib) 4))
+                list)
+               => '(suspect 2
+                    rapid-rss-growth-during-native-compilation))))
     (test-case "hard five GiB line trips immediately"
       (let* ((policy (framework-memory-anomaly-policy))
              (gib (* 1024 1024 1024)))

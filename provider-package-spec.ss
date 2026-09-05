@@ -108,9 +108,9 @@
     "src/runtime/provider-http-json-server.ss"
     "src/commands/provider-runtime.ss"))
 
-;; Every provider dependency is owned exactly once by the static runtime
-;; closure.  Re-declaring a runtime module after the executable gives std/make
-;; two completion owners for the same normalized module identity.
+;; Every provider dependency is owned exactly once by the sibling native AOT
+;; runtime closure. Re-declaring a runtime module after the executable gives
+;; std/make two completion owners for the same normalized module identity.
 (def +provider-library-modules+ '())
 
 (def +provider-source-modules+

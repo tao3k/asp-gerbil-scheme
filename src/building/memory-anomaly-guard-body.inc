@@ -117,7 +117,8 @@
 ;;; hard breach or repeated rapid growth across the rolling window trips the
 ;;; guard; one rapid sample first enters the suspect state.
 (def (framework-memory-anomaly-transition
-      policy state rapid-confirmations samples now-seconds current-rss-bytes)
+      policy state rapid-confirmations samples now-seconds current-rss-bytes
+      (active-compiler-jobs 0))
   (unless (framework-memory-anomaly-policy? policy)
     (error "invalid build memory anomaly policy" policy))
   (let* ((hard-limit (.ref policy 'hard-limit-bytes))
@@ -138,8 +139,16 @@
     (cond
      ((>= current-rss-bytes hard-limit)
       (values 'tripped next-confirmations 'hard-limit-exceeded))
-     ((>= next-confirmations (.ref policy 'confirmations))
+     ((and (>= next-confirmations (.ref policy 'confirmations))
+           (zero? active-compiler-jobs))
       (values 'tripped next-confirmations 'rapid-rss-growth))
+     ((>= next-confirmations (.ref policy 'confirmations))
+      ;; Parallel cold AOT compilation grows aggregate process-tree RSS in
+      ;; bounded steps. Preserve it as anomaly evidence, but let the hard
+      ;; limit—not a growth derivative—own termination while native work is
+      ;; actively draining.
+      (values 'suspect next-confirmations
+              'rapid-rss-growth-during-native-compilation))
      (rapid?
       (values 'suspect next-confirmations 'rapid-rss-growth-suspected))
      (else
@@ -490,7 +499,7 @@
                        policy
                        (vector-ref state 1)
                        (vector-ref state 2)
-                       samples now rss))
+                       samples now rss active-jobs))
                     (lambda (next-state confirmations reason)
                       (vector-set! state 1 next-state)
                       (vector-set! state 2 confirmations)

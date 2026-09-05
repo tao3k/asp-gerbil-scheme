@@ -7,6 +7,8 @@
         (only-in :std/srfi/13 string-suffix? string-tokenize)
         (only-in :std/text/json json-object->string write-json-sort-keys?))
 
+;;; Keep this module owner fresh when the shared classifier/control-loop body
+;;; changes; std/make does not model include-file timestamps independently.
 (include "memory-anomaly-guard-body.inc")
 
 (export framework-memory-anomaly-policy
