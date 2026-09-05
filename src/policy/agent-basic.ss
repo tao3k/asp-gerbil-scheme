@@ -241,8 +241,25 @@
 (def (top-level-entrypoint-exempt-call? file call)
   (or (explicit-main-entrypoint-call? file call)
       (explicit-test-entrypoint-call? file call)
+      (explicit-build-entrypoint-call? file call)
       (definition-lowering-macro-call? file call)
       (declarative-top-level-call? file call)))
+
+(def +explicit-build-entrypoint-heads+
+  '("asp-gerbil-scheme-package-spec!" "init-build-environment!"))
+
+;;; Boundary:
+;;; - `build.ss` is the package-owned std/make declaration entrypoint.
+;;; - Only calls contained by the two canonical Build API top forms are
+;;;   declarative; arbitrary executable forms in the same file still fail.
+;; : (-> SourceFile CallFact Boolean )
+(def (explicit-build-entrypoint-call? file call)
+  (and (equal? (source-file-path file) "build.ss")
+       (ormap (lambda (form)
+                (and (member (top-form-head form)
+                             +explicit-build-entrypoint-heads+)
+                     (call-within-top-form-range? call form)))
+              (source-file-forms file))))
 
 ;;; Parser-owned macro facets prove this exact local invocation lowers only to
 ;;; a definition.  Name equality, source ownership, and top-form containment

@@ -5,6 +5,8 @@
         (only-in :asp-gerbil-scheme/src/commands/project-resolution project-resolution-request->response)
         (only-in :asp-gerbil-scheme/src/commands/projection-batch project-provider-projection-batch)
         (only-in :asp-gerbil-scheme/src/exact-source-projection project-provider-native-exact-request)
+        (only-in :asp-gerbil-scheme/src/runtime/provider-semantic-search
+                 provider-semantic-search-packet)
         (only-in :std/sugar hash)
         (only-in :std/text/json write-json))
 
@@ -100,6 +102,13 @@
                 ("schemaVersion" "1")))
          ("responseSchema"
           (hash ("schemaId" "agent.semantic-protocols.provider-native-exact-projection")
+                ("schemaVersion" "1"))))
+   (hash ("operation" "semantic-search")
+         ("requestSchema"
+          (hash ("schemaId" "agent.semantic-protocols.provider-semantic-search-request")
+                ("schemaVersion" "1")))
+         ("responseSchema"
+          (hash ("schemaId" "agent.semantic-protocols.semantic-language")
                 ("schemaVersion" "1"))))])
 
 (def (required-environment name)
@@ -135,6 +144,13 @@
      (required-environment "ASP_PROVIDER_ID")
      (required-payload-string payload "parserIdentityDigest")
      (required-payload-string payload "queryPackDigest")))
+   ((string=? operation "semantic-search")
+    (provider-semantic-search-packet
+     (required-payload-string payload "namespace")
+     (let (terms (hash-ref payload "terms" #f))
+       (unless (and (list? terms) (andmap string? terms))
+         (error "resident semantic-search terms are invalid"))
+       terms)))
    (else (error "resident Gerbil provider operation is not admitted" operation))))
 
 (def (required-payload-string payload name)

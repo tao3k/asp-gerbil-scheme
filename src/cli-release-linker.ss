@@ -8,7 +8,8 @@
         (only-in :asp-gerbil-scheme/src/commands/guide guide-main)
         (only-in :asp-gerbil-scheme/src/commands/info info-main)
         (only-in :asp-gerbil-scheme/src/commands/projection projection-main)
-        (only-in :asp-gerbil-scheme/src/commands/query query-main)
+        (only-in :asp-gerbil-scheme/src/runtime/provider-http-json-command-client
+                 provider-http-json-query-main)
         (only-in :asp-gerbil-scheme/src/protocol/command-catalog
                  provider-command-descriptor-name
                  provider-command-descriptor-static-main
@@ -25,7 +26,7 @@
 ;; : (-> ProviderCommandDescriptor CommandMain)
 (def (release-command-main descriptor)
   (case (provider-command-descriptor-static-main descriptor)
-    ((query-main) query-main)
+    ((provider-http-json-query-main) provider-http-json-query-main)
     ((projection-main) projection-main)
     ((fmt-main) fmt-main)
     ((evidence-main) evidence-main)

@@ -6,6 +6,10 @@
         (only-in :std/srfi/13 string-prefix? string-suffix?)
         (only-in "../build-api/source-coverage"
                  asp-gerbil-scheme-source-coverage-files)
+        (only-in "../build-api/builder-profile"
+                 asp-gerbil-scheme-development-builder-profile
+                 asp-gerbil-scheme-builder-profile-test-roots
+                 asp-gerbil-scheme-builder-profile-modules/root-roots)
         (only-in "../build-api/package-receipt"
                  asp-gerbil-scheme-package-build-receipt-status-ref)
         (only-in "./gxtest-smoke"
@@ -130,7 +134,11 @@
   (let (buckets
         (fold gxtest-catalog-test-file-step
               (list [] [])
-              (asp-gerbil-scheme-source-coverage-files package-root)))
+              (asp-gerbil-scheme-builder-profile-modules/root-roots
+               asp-gerbil-scheme-development-builder-profile
+               package-root
+               (asp-gerbil-scheme-builder-profile-test-roots
+                asp-gerbil-scheme-development-builder-profile))))
     (append (reverse (car buckets))
             (reverse (cadr buckets)))))
 

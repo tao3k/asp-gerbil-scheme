@@ -7,13 +7,17 @@
 (import :gerbil/gambit
         (only-in :std/test test-suite test-case check)
         (only-in :std/misc/path path-expand)
+        (only-in :std/source gerbil-home)
+        (only-in "../src/build-api/package-build"
+                 asp-gerbil-scheme-package-build-active-gerbil-path)
         (only-in "../src/build-api/build-path-contract"
                  configure-build-root!
                  install-launcher-binpath
                  dev-launcher-binpath)
         (only-in "../src/build-api/native-build"
-                 cli-binary-module-spec
                  package-api-build-output-files)
+        (only-in "../src/build-api/native-build-spec"
+                 cli-binary-module-spec)
         (only-in "../src/build-api/package-native-plan"
                  asp-gerbil-scheme-package-api-stage-specs)
         (only-in "../src/commands/guide-sections" guide-section-lines-for)
@@ -26,19 +30,31 @@
 ;; : TestSuite
 (def build-install-test
   (test-suite "asp gerbil-scheme build install path contract"
-    (test-case "build root configures package-local Gerbil path"
-      (configure-build-root! (current-directory))
-      (check (getenv "GERBIL_PATH")
-             => (path-expand ".gerbil" (current-directory))))
+    (test-case "build root preserves the caller Gerbil path"
+      (let ((caller-gerbil-path (getenv "GERBIL_PATH" #f))
+            (sentinel "/tmp/asp-gerbil-scheme-caller-path-sentinel"))
+        (setenv "GERBIL_PATH" sentinel)
+        (configure-build-root! (current-directory))
+        (check (getenv "GERBIL_PATH" #f) => sentinel)
+        (setenv "GERBIL_PATH" (or caller-gerbil-path ""))
+        (configure-build-root! (current-directory))))
+    (test-case "empty caller Gerbil path resolves to the Gerbil default"
+      (let (caller-gerbil-path (getenv "GERBIL_PATH" #f))
+        (setenv "GERBIL_PATH" "")
+        (check (asp-gerbil-scheme-package-build-active-gerbil-path
+                (current-directory))
+               => (path-expand (gerbil-home)))
+        (setenv "GERBIL_PATH" (or caller-gerbil-path ""))
+        (configure-build-root! (current-directory))))
     (test-case "install path is ASP State Home runtime bin"
       (configure-build-root! (current-directory))
       (let* ((state-home
-              (or (getenv "ASP_STATE_HOME")
+              (or (getenv "ASP_STATE_HOME" #f)
                   (path-expand ".agent-semantic-protocols" (getenv "HOME"))))
              (bin-dir
-              (or (getenv "SEMANTIC_AGENT_BIN_DIR")
+              (or (getenv "SEMANTIC_AGENT_BIN_DIR" #f)
                   (path-expand "runtime/bin" state-home))))
-        (check (install-launcher-binpath)
+        (check (install-launcher-binpath 'asp)
                => (path-expand "asp-gerbil-scheme" bin-dir))))
     (test-case "development binary path is package-local .bin"
       (configure-build-root! (current-directory))
@@ -97,14 +113,15 @@
                       (and (member "build-api/package-build.ss" stage) index))
                   (or native-build-index
                       (and (member "build-api/native-build.ss" stage) index))))))))
-    (test-case "package runtime stage does not rewrite bootstrap controls"
+    (test-case "package build API materializes native std/make owners only"
       (let (modules (apply append (asp-gerbil-scheme-package-api-stage-specs)))
         (for-each
          (lambda (module)
-           (check (member module modules) => #f))
+           (check (not (not (member module modules))) => #t))
          '("building/native-toolchain.ss"
-           "building/model.ss"
-           "building/std-builder.ss"
-           "building/facade.ss"
-           "building/declarative.ss"))))
+            "building/model.ss"
+            "building/std-builder.ss"
+            "building/facade.ss"
+            "building/declarative.ss"))
+        (check (member "build-api/source-coverage-query.ss" modules) => #f)))
   ))

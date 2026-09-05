@@ -5,8 +5,7 @@
 ;;; Framework does not own dependency ordering, freshness, or job scheduling.
 (include "build-script-body.inc")
 
-(export defbuild-script
-        framework-build-artifact-root
+(export framework-build-artifact-root
         framework-build-bindir
         framework-executable-build-spec
         framework-validate-runtime-closure!

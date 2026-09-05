@@ -17,9 +17,11 @@
                  asp-gerbil-scheme-development-builder-profile
                  asp-gerbil-scheme-builder-profile-exclude-directories
                  asp-gerbil-scheme-builder-profile-module-under-root?
-                 asp-gerbil-scheme-builder-profile-modules
+                 asp-gerbil-scheme-builder-profile-modules/config
                  asp-gerbil-scheme-builder-profile-native-profile
                  asp-gerbil-scheme-builder-profile-test-roots)
+        (only-in "./source-discovery"
+                 +default-excluded-module-files+)
         (only-in "./source-coverage"
                  asp-gerbil-scheme-source-coverage)
         (only-in "../building/build-script"
@@ -77,11 +79,11 @@
     (let* ((root (path-directory source-file))
            (profile (asp-gerbil-scheme-package-builder-profile package-spec))
            (modules
-            (asp-gerbil-scheme-builder-profile-modules
+            (asp-gerbil-scheme-builder-profile-modules/config
              profile
-             root: root
-             roots: (asp-gerbil-scheme-package-source-roots package-spec)
-             exclude-dirs:
+             root
+             (asp-gerbil-scheme-package-source-roots package-spec)
+             +default-excluded-module-files+
              (asp-gerbil-scheme-package-exclude-directories package-spec)))
            (excluded
             (map asp-gerbil-scheme-module-source-stem
@@ -127,7 +129,7 @@
          (asp-gerbil-scheme-package-modules package-spec)))))))
 
 ;; The macro-generated spec procedure is the direct std/make boundary used by
-;; clan/building or defbuild-script.  A PackageSpec remains the POO owner;
+;; clan/building. A PackageSpec remains the POO owner;
 ;; spec-projector selects its native or policy-admitted projection.
 (def (asp-gerbil-scheme-package-build-spec package-spec)
   (let (projector (.get package-spec spec-projector))

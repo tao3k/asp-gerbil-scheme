@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-semantic-protocols.dev/schemas/workspace-search-playbook-result.v1.schema.json",
+  "title": "Workspace Search Playbook Result V1",
+  "description": "Save-token Search result projected only after all five Runtime axes complete. Runtime audit receipts and identity digests are intentionally not part of this Agent-facing projection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaId", "schemaVersion", "result", "evidence"],
+  "properties": {
+    "schemaId": {
+      "const": "agent.semantic-protocols.workspace-search-playbook-result"
+    },
+    "schemaVersion": {
+      "const": "1"
+    },
+    "result": {
+      "enum": [
+        "exact-selector-ready",
+        "disambiguation-required",
+        "relationship-supported",
+        "no-match",
+        "contradiction",
+        "refinement-required",
+        "provider-contract-failure"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/selectorEvidence"
+      }
+    }
+  },
+  "$defs": {
+    "selectorEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner", "selector", "relation"],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selector": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9-]*://.+#item/.+$"
+        },
+        "relation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    }
+  }
+}

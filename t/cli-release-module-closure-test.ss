@@ -30,7 +30,7 @@
     "commands/fmt.ss"
     "commands/guide.ss"
     "commands/info.ss"
-    "commands/query.ss"))
+    "runtime/provider-http-json-command-client.ss"))
 
 ;; : (List String)
 (def +release-forbidden-prefixes+

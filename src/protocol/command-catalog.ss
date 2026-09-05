@@ -32,11 +32,10 @@
 (def provider-command-descriptors
   [(make-provider-command-descriptor
     "query"
-    "asp-gerbil-scheme/src/commands/query"
-    'asp-gerbil-scheme/src/commands/query#query-main
-    'query-main
-    ["query --selector <gerbil-scheme-structural-selector> --projection source --workspace PROJECT_ROOT"
-     "query --selector <gerbil-scheme-callable-selector> --projection callable-skeleton --workspace PROJECT_ROOT"]
+    "asp-gerbil-scheme/src/runtime/provider-http-json-command-client"
+    'asp-gerbil-scheme/src/runtime/provider-http-json-command-client#provider-http-json-query-main
+    'provider-http-json-query-main
+    ["query --server-endpoint <resident-runtime-endpoint> --runtime-request-frame-stdin"]
     20
     ["query/selector" "query/exact-selector-native-v1"])
    (make-provider-command-descriptor

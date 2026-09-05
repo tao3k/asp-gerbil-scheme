@@ -14,8 +14,7 @@
 ;; : (-> String Void)
 (def (configure-build-root! root)
   (set! package-root (path-normalize root))
-  (current-directory package-root)
-  (setenv "GERBIL_PATH" (path-expand ".gerbil" package-root)))
+  (current-directory package-root))
 
 ;; : (-> Path Void)
 ;; Configure only the shared path contract for a native build owner.

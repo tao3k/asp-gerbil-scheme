@@ -2,13 +2,14 @@
 ;;; Intent:
 ;;; - This suite protects the parser's repeated-project memory boundary.
 ;;; - The runner reads its declaration before execution and applies the heap cap.
-(import (only-in :gerbil/gambit getenv setenv)
+(import (only-in :gerbil/gambit getenv setenv thread-receive thread-send)
         (only-in :std/test test-suite test-case check)
         (only-in :std/srfi/1 iota)
         (only-in :std/srfi/13 string-prefix? string-split)
         (only-in :std/misc/path path-expand)
         (only-in :std/sort sort)
         :asp-gerbil-scheme/src/parser/core
+        (only-in :asp-gerbil-scheme/src/parser/parse-workers parse-source-files)
         :asp-gerbil-scheme/src/parser/profile
         (only-in :asp-gerbil-scheme/src/policy/gxtest-report
                  policy-source-report)
@@ -87,6 +88,15 @@
         (check (policy-parse-start-lines files)
                =>
                (expected-policy-parse-start-lines files))))
+    (test-case "isolates concurrent parse replies from the caller mailbox"
+      ;; A caller mailbox may already contain an unrelated runtime message.
+      ;; Project parsing owns a private reply channel and must neither consume
+      ;; nor interpret that message as a parser-worker result.
+      (let* ((caller (current-thread))
+             (stale (vector 'ok caller 9999 #f 0 #f)))
+        (thread-send caller stale)
+        (check (length (parse-source-files "." ["build.ss" "gerbil.pkg"])) => 2)
+        (check (thread-receive) => stale)))
     (test-case "releases repeated fixture profile receipts"
       (let ((counts (parser-profile-definition-counts)))
         (for-each (lambda (definition-count)

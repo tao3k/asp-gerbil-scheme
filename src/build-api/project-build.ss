@@ -8,7 +8,13 @@
  configure-project-build-root!
  project-install-target)
 
-(import :asp-gerbil-scheme/src/build-api/native-build)
+(import (only-in :asp-gerbil-scheme/src/build-api/native-build
+                 clean-target
+                 compile-target
+                 install-target)
+        (only-in :asp-gerbil-scheme/src/build-api/native-build-spec
+                 compile-spec
+                 configure-build-root!))
 
 ;; : (-> Void)
 (def (project-clean-target)

@@ -3,9 +3,10 @@
 ;;; - test owner records policy expectations.
 ;;; - Keep typed contracts and fixture intent explicit.
 (import :asp-gerbil-scheme/src/commands/info
-        :asp-gerbil-scheme/src/commands/search
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/protocol/json
+        (only-in :asp-gerbil-scheme/src/runtime/provider-semantic-search
+                 provider-semantic-search-packet)
         :std/misc/ports
         :std/srfi/13
         :std/test
@@ -21,16 +22,6 @@
 ;; : (-> Table Key Json )
 (def (json-get table key)
   (hash-get table key))
-;; : (-> (List String) Json )
-(def (search-json args)
-  (let* ((status #f)
-         (output
-          (call-with-output-string
-            (lambda (out)
-              (parameterize ((current-output-port out))
-                (set! status (search-main args)))))))
-    (check status => 0)
-    (call-with-input-string output read-json)))
 
 (def (packet-json packet)
   (call-with-input-string
@@ -83,7 +74,9 @@
 
 ;; Json
 (def (check-language-evidence-json-schema-conformance)
-  (let* ((packet (search-json ["compiler-evidence" "assert-type" "--json" "."]))
+  (let* ((packet (packet-json
+                  (provider-semantic-search-packet
+                   "compiler-evidence" ["assert-type"])))
          (facts (json-get packet "facts"))
          (fact (car facts))
          (details (json-get fact "details")))
@@ -113,7 +106,9 @@
    (hash->list (json-get schema "properties"))))
 ;; Json
 (def (check-runtime-source-json-schema-conformance)
-  (let* ((packet (search-json ["runtime-source" "writeenv" "printer" "hook" "--json" "."]))
+  (let* ((packet (packet-json
+                  (provider-semantic-search-packet
+                   "runtime-source" ["writeenv" "printer" "hook"])))
          (source-ref (json-get packet "sourceRef"))
          (acquisition (json-get packet "acquisition"))
          (selector-resolver (json-get packet "selectorResolver"))
@@ -142,7 +137,8 @@
 
 ;; Json
 (def (check-type-proof-json-schema-conformance)
-  (let* ((packet (search-json ["proof" "record" "--json" "."]))
+  (let* ((packet (packet-json
+                  (provider-semantic-search-packet "proof" ["record"])))
          (proof-system (json-get packet "proofSystem"))
          (proofs (json-get packet "proofs"))
          (proof (car proofs))
@@ -161,7 +157,9 @@
     (check (json-get proof-tree "rule") => "record")))
 ;; Json
 (def (check-extension-pattern-json-schema-conformance)
-  (let* ((packet (search-json ["pattern" "poo" "json" "fallback" "--json" "."]))
+  (let* ((packet (packet-json
+                  (provider-semantic-search-packet
+                   "pattern" ["json" "fallback"])))
          (mapping (json-get packet "patternMapping"))
          (source-ref (json-get mapping "sourceRef"))
          (selector-resolver (json-get mapping "selectorResolver"))
@@ -182,7 +180,7 @@
     (check (json-get (json-get source-ref "localSource") "missingAction")
            => "install-package-before-repository-fallback")
     (check (json-get (json-get source-ref "localSource") "installHint")
-           => "gxpkg install github.com/mighty-gerbils/gerbil-poo")
+           => "gxpkg install git.cons.io/mighty-gerbils/gerbil-poo")
     (check (json-get (json-get source-ref "repositorySource") "url")
            => "https://git.cons.io/mighty-gerbils/gerbil-poo")
     (check (json-get (json-get source-ref "indexHint") "backend")
@@ -195,7 +193,7 @@
            => "gerbil-poo-logical-symbol")
     (check (json-get selector-resolver "querySelector") => "not-direct")
     (check (json-get selector-resolver "sourceRef")
-           => "package-manager-source:gxpkg:github.com/mighty-gerbils/gerbil-poo:runtime-resolved")
+           => "package-manager-source:gxpkg:git.cons.io/mighty-gerbils/gerbil-poo:runtime-resolved")
     (check (json-get source-lookup "order") => "local-source-before-git")
     (check (json-get source-lookup "missingLocalAction")
            => "install-package-before-repository-fallback")
@@ -204,7 +202,7 @@
     (check (json-get (json-get source-lookup "localSource") "status")
            => "probe-first")
     (check (json-get (json-get source-lookup "localSource") "installHint")
-           => "gxpkg install github.com/mighty-gerbils/gerbil-poo")
+           => "gxpkg install git.cons.io/mighty-gerbils/gerbil-poo")
     (check (json-get (json-get source-lookup "repositorySource") "status")
            => "fallback")
     (check (json-get (json-get source-lookup "indexHint") "mode")
@@ -223,7 +221,9 @@
     (check (not (null? (json-get mapping "qualitySignals"))) => #t)))
 ;; Json
 (def (check-compare-json-schema-conformance)
-  (let* ((packet (search-json ["compare" "env" "active" "documented" "--json" "."]))
+  (let* ((packet (packet-json
+                  (provider-semantic-search-packet
+                   "compare" ["env" "active" "documented"])))
          (comparisons (json-get packet "comparisons"))
          (comparison (car comparisons))
          (left (json-get comparison "left"))

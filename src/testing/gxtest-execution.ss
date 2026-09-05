@@ -110,7 +110,6 @@
 
 ;; : (-> (List Path) GxTestResult)
 (def (run-gxtest-batch/compiled-subprocess files)
-  (setenv "GERBIL_PATH" (path-expand ".gerbil" package-root))
   (run-gxtest-batch/process files
                              (gxtest-compiled-batch-expression files)))
 
@@ -173,13 +172,11 @@
 
 ;; : (-> (List Path) GxTestResult)
 (def (run-gxtest-batch/compiled-in-process files)
-  (setenv "GERBIL_PATH" (path-expand ".gerbil" package-root))
   (add-load-path! (path-expand ".gerbil/lib" package-root))
   (run-gxtest-batch/in-process files eval-compiled-gxtest-batch!))
 
 ;; : (-> (List Path) GxTestResult)
 (def (run-gxtest-batch/source-in-process files)
-  (setenv "GERBIL_PATH" (path-expand ".gerbil" package-root))
   (run-gxtest-batch/in-process files eval-source-gxtest-batch!))
 
 ;; : (-> Path GxTestResult)

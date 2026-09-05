@@ -1,10 +1,14 @@
 (import :std/test
         :gerbil/gambit
         "../src/building/facade"
+        (only-in :asp-gerbil-scheme/src/testing/execution-profile
+                 declare-gxtest-serial)
         (only-in "../src/build-api/package-native-plan"
                  asp-gerbil-scheme-package-api-stage-specs))
 
 (export building-performance-test)
+
+(declare-gxtest-serial timing-sensitive-building)
 
 (def (elapsed-ms thunk)
   (let (started (time->seconds (current-time)))

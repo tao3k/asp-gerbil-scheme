@@ -3,7 +3,12 @@
 depend:
 ("github.com/mighty-gerbils/gerbil-poo@1c3225637525400341a09e958296962c10184ead")
 policy:
-((macro-governance
+((source-scope
+  roots: ("src")
+  runtime-roots: ("src")
+  exclude-directories: ()
+  explanation: "Project collection owns production modules under src and executable contracts under the native t test root; reference and runtime state directories are not parser inputs.")
+ (macro-governance
   explanation: "Public macros are hygienic declaration bridges whose expansion families are exercised by parser-visible source or test owners."
   witnesses:
   (("asp-gerbil-scheme-package-spec!" "t/build-api-macro-expansion-witness-test.ss")

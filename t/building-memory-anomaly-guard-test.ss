@@ -54,13 +54,15 @@
                    (lambda () 'done)
                    #t
                    'profile-admission-start)))))
-        (check (string-contains output
-                                "phase=profile-admission-start worker-count=1")
+        (check (and (string-contains output
+                                     "phase=profile-admission-start worker-count=1")
+                    #t)
                => #t)
-        (check (string-contains output
-                                "ASP_GERBIL_SCHEME_MEMORY_GUARD")
+        (check (and (string-contains output
+                                     "ASP_GERBIL_SCHEME_MEMORY_GUARD")
+                    #t)
                => #t)
-        (check (string-contains output "\"outcome\":\"completed\"")
+        (check (and (string-contains output "\"outcome\":\"completed\"") #t)
                => #t)))
     (test-case "denied process-table observation degrades to an empty sample"
       (check (list? (framework-memory-guard-process-table)) => #t))

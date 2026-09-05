@@ -16,6 +16,9 @@
 ;; PolicyTest
 (def downstream-gxtest-policy-scope-test
   (test-suite "downstream gxtest policy scope scenario"
+    (make-gxtest-policy-test
+     "."
+     ["t/policy/downstream-gxtest-policy-scope-test.ss"])
     (test-case "build test scope policy reaches imported source owner"
       (let* ((scenario-id +downstream-gxtest-policy-scope-scenario+)
              (context (agent-style-policy-r013-scenario-context scenario-id))

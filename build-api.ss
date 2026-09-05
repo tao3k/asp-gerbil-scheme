@@ -6,11 +6,9 @@
 (import "./src/build-api/builder-profile"
         "./src/build-api/package-spec"
         "./src/build-api/profile-build-spec"
-        "./src/build-api/source-discovery"
-        "./src/building/build-script")
+        "./src/build-api/source-discovery")
 
 (export (import: "./src/build-api/builder-profile")
         (import: "./src/build-api/package-spec")
         (import: "./src/build-api/profile-build-spec")
-        (import: "./src/build-api/source-discovery")
-        (import: "./src/building/build-script"))
+        (import: "./src/build-api/source-discovery"))

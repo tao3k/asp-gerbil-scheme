@@ -1,7 +1,7 @@
 {
   "languageId": "gerbil-scheme",
   "profileDigest": "blake3-256:0f6db61e73904d5a06d4b603189679e8def7346997b41ea2d26f5137ee082d2c",
-  "bundleDigest": "blake3-256:0d8368b118762d887d612b1549f781d5704e3181d2df5adacfac9e803c3efa06",
+  "bundleDigest": "blake3-256:f39b6ca559d4994bdbb2441c917f7e03b784ddfa7931f840d3aaf613a46cc5f3",
   "schemas": [
     {
       "name": "asp-client-cancellation-probe-request.schema.json",
@@ -21,11 +21,11 @@
     },
     {
       "name": "asp-client-exact-query-failure.schema.json",
-      "digest": "blake3-256:178dd3f10fa39bab9ff34e8470543ec4454e6a40f91cbe0e9d381eec2d8c9977"
+      "digest": "blake3-256:0a59369cdd4dd4a305f60fd073733acddabd0593c475817f93064ba54e065cf7"
     },
     {
       "name": "asp-client-exact-query-request.schema.json",
-      "digest": "blake3-256:addd74db755e221e488d7b3f1099fb15be025310fe657103fd476d4346f8abaa"
+      "digest": "blake3-256:a3a4da1f1dddb8b600936b5f70cd493043f7332bf72256963a023563991adabb"
     },
     {
       "name": "asp-client-exact-query-response.schema.json",
@@ -45,7 +45,7 @@
     },
     {
       "name": "asp-client-query-readiness-failure.schema.json",
-      "digest": "blake3-256:ad26764369935a98c01c7ac433af6dcde6f9dd70c8b1a60f354babcf7a474b56"
+      "digest": "blake3-256:451736da76395cdb07ffc14523323657db1be90f22bd4e776282f47bc3e32fb3"
     },
     {
       "name": "asp-client-schema-bundle-request.schema.json",
@@ -77,11 +77,19 @@
     },
     {
       "name": "asp-client-workspace-search-playbook-request.v1.schema.json",
-      "digest": "blake3-256:b9d3c3a80c39681c42017f419025d70fca712aa0dc6b8cb40ac441591b266ac9"
+      "digest": "blake3-256:46d23c3397da21059d424191045f7d7a600b60b8059905f22a4e9df1f2634b8e"
     },
     {
       "name": "asp-client-workspace-source-mutation.schema.json",
       "digest": "blake3-256:74b0baf814e96b3f2f47eefcc537ae53c5ac740315cdbc8c4f1079dcc2f484a8"
+    },
+    {
+      "name": "asp-client-workspace-syntax-query-request.v1.schema.json",
+      "digest": "blake3-256:5d545b03a0ed1ea888bcdb0d7566b82b4df9bc15ce6d88096e2ee89454a61dda"
+    },
+    {
+      "name": "asp-client-workspace-syntax-query-response.v1.schema.json",
+      "digest": "blake3-256:003e5090bb807467a75fa814d92c97cca7489c6bab777f41634a38a57c5b5137"
     },
     {
       "name": "asp-python-graphs-session.v1.schema.json",
@@ -149,7 +157,7 @@
     },
     {
       "name": "provider-manifest.schema.json",
-      "digest": "blake3-256:083ce2246c3590c626452fd06b7271031e1f989cf219af113643afd54b57ed44"
+      "digest": "blake3-256:73c9aa93f4dbcd91c7e353e318121c5be736ba731c5c3d127288c3fe2eedd0a3"
     },
     {
       "name": "provider-method-argument-projection.v1.schema.json",
@@ -181,7 +189,7 @@
     },
     {
       "name": "provider-registration.schema.json",
-      "digest": "blake3-256:c21cf1d2d5b5403255f38a789e0d942b6817acf7b19f2b98363be15453de6ae7"
+      "digest": "blake3-256:28fabee177fd41196e38eef5a831b90314bd8931fdab28f399f6383ebc4ddb4b"
     },
     {
       "name": "provider-route.schema.json",
@@ -198,6 +206,10 @@
     {
       "name": "provider-runtime-request-stream-frame.schema.json",
       "digest": "blake3-256:958c8f4bbabfa06b7600be3067e9feb7c5257a97597bf8221a1f424302ba2336"
+    },
+    {
+      "name": "provider-search-playbook-contract.schema.json",
+      "digest": "blake3-256:be1f65354006b9d479575d7b01fbaca08b205f879a8f9eb7f5427bf984db7f23"
     },
     {
       "name": "provider-workspace-install.schema.json",
@@ -232,8 +244,12 @@
       "digest": "blake3-256:2c367cda53c1d03672c268fe2576fff2d11b7cd349992bc0f2c96bea206a2d80"
     },
     {
+      "name": "search-playbook-contract-projection.v1.schema.json",
+      "digest": "blake3-256:105dbeca6aef8945e481ca38966baada4ce45ec110cd7187c997cf2903ba8a94"
+    },
+    {
       "name": "semantic-agent-search-playbook-receipt.v1.schema.json",
-      "digest": "blake3-256:d6f0857339726a293affa5bacc3553e5bcf0d3d94601a978e13a4d292f25ba5b"
+      "digest": "blake3-256:13b69e753558a969b8e18535ab15e84c4fa4c3c2fb22be6b3d0cd5a57c1cdde4"
     },
     {
       "name": "semantic-assurance-case.v1.schema.json",
@@ -436,8 +452,8 @@
       "digest": "blake3-256:b22f980c1c70e1927670be25e8d86c4d3b78538e81e6aad28b608ca9707f99cb"
     },
     {
-      "name": "workspace-search-playbook-plan.v1.schema.json",
-      "digest": "blake3-256:d2fecfd3d38257b930ded6ca9d0d1e11980f2e5d3c95b64f8950d8ee574516af"
+      "name": "workspace-search-playbook-result.v1.schema.json",
+      "digest": "blake3-256:8b16d08ab771b7e0f4f3f5866a1c157cd21b148828534fe106fac861b478f156"
     }
   ]
 }

@@ -48,15 +48,19 @@
       (let (root (fixture-path +source-discovery-test-root+ "checkout"))
         (ensure-directory* root)
         (run-process/batch ["git" "init" "--quiet"] directory: root)
-        (write-module root ".gitignore" "ignored.ss\ngenerated/\n")
+        (write-module root ".gitignore"
+                      "ignored.ss\ngenerated/\nignored-package/\n")
         (write-module root "src/.gitignore" "hidden.ss\n!visible.ss\n")
         (write-module root "src/kept.ss" "(export kept)\n(def kept #t)\n")
         (write-module root "src/unstaged.ss" "(export unstaged)\n")
         (write-module root "src/hidden.ss" "(export hidden)\n")
         (write-module root "src/visible.ss" "(export visible)\n")
+        (write-module root "t/kept-test.ss" "(export kept-test)\n")
         (write-module root "ignored.ss" "(export ignored)\n")
         (write-module root "tracked-ignored.ss" "(export tracked)\n")
         (write-module root "generated/generated.ss" "(export generated)\n")
+        (write-module root "ignored-package/gerbil.pkg" "(package: nested)\n")
+        (write-module root "ignored-package/src/nested.ss" "(export nested)\n")
         (write-module root "main.ss" "(export main)\n")
         (write-module root "tool.ss" "#!/usr/bin/env gxi\n(displayln 'tool)\n")
         (run-process/batch ["chmod" "+x" "tool.ss"] directory: root)
@@ -67,6 +71,7 @@
                            directory: root)
         (check (all-gerbil-modules root: root)
                => '("src/kept.ss" "src/unstaged.ss" "src/visible.ss"
+                    "t/kept-test.ss"
                     "tracked-ignored.ss"))
         (check
          (asp-gerbil-scheme-builder-profile-modules
@@ -74,7 +79,15 @@
           root: root
           roots: ["."])
          => '("src/kept.ss" "src/unstaged.ss" "src/visible.ss"
+              "t/kept-test.ss"
               "tracked-ignored.ss"))))
+
+    (test-case "nested package does not inherit enclosing Git ignore authority"
+      (let (root (fixture-path +source-discovery-test-root+
+                               "checkout/ignored-package"))
+        (check (git-project? root) => #f)
+        (check (all-gerbil-modules root: root)
+               => '("src/nested.ss"))))
 
     (test-case "source archives retain upstream discovery without Git"
       (let (root (fixture-path +source-discovery-test-root+ "archive"))

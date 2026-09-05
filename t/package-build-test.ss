@@ -4,6 +4,7 @@
 (import :gerbil/gambit
         :std/test
         (only-in :std/misc/path path-expand)
+        (only-in :std/source gerbil-home)
         "../src/build-api/package-build")
 
 (export package-build-test)
@@ -37,10 +38,10 @@
                   => expected)
            (check (asp-gerbil-scheme-package-build-active-gerbil-lib-path package-root)
                   => (path-expand "lib" expected))))))
-    (test-case "falls back to package local GERBIL_PATH when caller path is absent"
+    (test-case "uses the Gerbil default path when caller path is absent"
       (let* ((package-root (path-expand "standalone-package"
                                         +package-build-test-root+))
-             (expected (path-expand ".gerbil" package-root)))
+             (expected (path-expand (gerbil-home))))
         (with-gerbil-path
          ""
          (lambda ()

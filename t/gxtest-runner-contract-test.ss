@@ -40,6 +40,14 @@
 
 (def gxtest-runner-contract-test
   (test-suite "asp-gerbil-scheme gxtest runner contract"
+    (test-case "gxtest root preserves the caller Gerbil path"
+      (let ((caller-gerbil-path (getenv "GERBIL_PATH" #f))
+            (sentinel "/tmp/asp-gerbil-scheme-gxtest-path-sentinel"))
+        (setenv "GERBIL_PATH" sentinel)
+        (configure-build-root! (current-directory))
+        (check (getenv "GERBIL_PATH" #f) => sentinel)
+        (setenv "GERBIL_PATH" (or caller-gerbil-path ""))
+        (configure-build-root! (current-directory))))
     (test-case "gxtest entry files honor path-directory trailing separators"
       (configure-build-root! (current-directory))
       (let (files (gxtest-test-files))
@@ -98,6 +106,7 @@
       (let (files ["t/benchmark-gate-test.ss"
                    "t/agent-poo-scenario-contract-test.ss"
                    "t/build-api-native-stage-boundary-test.ss"
+                   "t/building-performance-test.ss"
                    "t/building-gxtest-stage-boundary-test.ss"
                    "t/cli-dev-linker-test.ss"
                    "t/fmt-scenario-test.ss"
@@ -108,6 +117,7 @@
         (check (serial-gxtest-files files)
                => ["t/benchmark-gate-test.ss"
                    "t/build-api-native-stage-boundary-test.ss"
+                   "t/building-performance-test.ss"
                    "t/building-gxtest-stage-boundary-test.ss"
                    "t/cli-dev-linker-test.ss"
                    "t/fmt-scenario-test.ss"
@@ -374,7 +384,9 @@
         (check (member "policy/gxtest.ss" stage) ? true)
         (check (member "support/args.ss" stage) ? true)
         (check (member "support/io.ss" stage) ? true)
-        (check (member "commands/query.ss" stage) ? true)
+        (check (member "commands/query.ss" stage) => #f)
+        (check (member "runtime/provider-http-json-client.ss" stage) ? true)
+        (check (member "runtime/provider-http-json-command-client.ss" stage) ? true)
         (check (member "cli-launcher.ss" stage) ? true)))
     (test-case "package api stages keep clean-ci dependency order"
       (let* ((stages (asp-gerbil-scheme-package-api-stage-specs))

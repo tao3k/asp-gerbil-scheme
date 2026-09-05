@@ -310,6 +310,7 @@
 
 ;; Canonical selector components use the shared RFC 3986 unreserved set and
 ;; uppercase percent escapes, matching the language-neutral ASP contract.
+;; : (-> String String)
 (def (selector-component-encode component)
   (let ((bytes (string->utf8 component))
         (output (open-output-string)))
@@ -325,6 +326,21 @@
           (loop (+ index 1)))))
     (get-output-string output)))
 
+;; selector-component-canonicalize
+;;   : (-> String String)
+;;   | doc m%
+;;       Canonicalize a structural-selector component without decoding it.
+;;
+;;       Existing escapes are normalized to uppercase while literal bytes use
+;;       the shared RFC 3986 unreserved-byte contract.
+;;
+;;       # Examples
+;;
+;;       ```scheme
+;;       (selector-component-canonicalize "name%2fpart")
+;;       ;; => "name%2Fpart"
+;;       ```
+;;     %
 (def (selector-component-canonicalize component)
   (let ((bytes (string->utf8 component))
         (output (open-output-string)))
@@ -384,6 +400,7 @@
   ;; query delimiters such as `?` must be percent-encoded.
   (member byte '(45 46 95 126)))
 
+;; : (-> Integer (Maybe Integer))
 (def (selector-hex-byte-value byte)
   (cond
    ((selector-digit-byte? byte) (- byte 48))
@@ -391,6 +408,7 @@
    ((and (>= byte 97) (<= byte 102)) (+ 10 (- byte 97)))
    (else #f)))
 
+;; : (-> Integer Char)
 (def (selector-hex-digit value)
   (integer->char (+ value (if (< value 10) 48 55))))
 

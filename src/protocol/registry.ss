@@ -60,7 +60,9 @@
                (hash (argv
                       ["asp-gerbil-scheme"
                        "query"
-                       "--asp-exact-request-stdin"]))))
+                       "--server-endpoint"
+                       "<resident-runtime-endpoint>"
+                       "--runtime-request-frame-stdin"]))))
         (hash (method "evidence/graph")
               (command "evidence")
               (summary "Emit a portable semantic evidence graph for Gerbil Scheme provider evidence.")

@@ -2,7 +2,9 @@
 ;;; Declarative Builder Profile shared by discovery and native build.
 
 (import (only-in :clan/poo/object .def .get)
-        "./source-discovery"
+        (only-in "./source-discovery"
+                 +default-excluded-module-files+
+                 all-gerbil-modules/roots/config)
         (only-in :std/srfi/13 string-prefix?))
 
 (export asp-gerbil-scheme-builder-profile-prototype
@@ -15,7 +17,9 @@
         asp-gerbil-scheme-builder-profile-gitignore?
         asp-gerbil-scheme-builder-profile-default-project-excludes?
         asp-gerbil-scheme-builder-profile-module-under-root?
-        asp-gerbil-scheme-builder-profile-modules)
+        asp-gerbil-scheme-builder-profile-modules
+        asp-gerbil-scheme-builder-profile-modules/root-roots
+        asp-gerbil-scheme-builder-profile-modules/config)
 
 (.def asp-gerbil-scheme-builder-profile-prototype
   (name 'builder)
@@ -76,17 +80,29 @@
       exclude-dirs:
       (exclude-dirs
        (asp-gerbil-scheme-builder-profile-exclude-directories profile)))
-  (filter
-   (lambda (module)
-     (ormap (lambda (source-root)
-              (asp-gerbil-scheme-builder-profile-module-under-root?
-               module source-root))
-            roots))
-   (all-gerbil-modules
-    root: root
-    exclude: exclude
-    exclude-dirs: exclude-dirs
-    default-project-excludes?:
-    (asp-gerbil-scheme-builder-profile-default-project-excludes? profile)
-    respect-gitignore?:
-    (asp-gerbil-scheme-builder-profile-gitignore? profile))))
+  (asp-gerbil-scheme-builder-profile-modules/config
+   profile root roots exclude exclude-dirs))
+
+;; : (-> BuilderProfile Path (List Path) (List Path))
+(def (asp-gerbil-scheme-builder-profile-modules/root-roots profile root roots)
+  (asp-gerbil-scheme-builder-profile-modules/config
+   profile
+   root
+   roots
+   +default-excluded-module-files+
+   (asp-gerbil-scheme-builder-profile-exclude-directories profile)))
+
+;;; AOT boundary:
+;;; - Source coverage and package-spec owners call this positional entry.
+;;; - Keyword defaults are resolved by the declarative API above, within the
+;;;   module that owns its generated dispatcher.
+;; : (-> BuilderProfile Path (List Path) (List Path) (List Path) (List Path))
+(def (asp-gerbil-scheme-builder-profile-modules/config
+      profile root roots exclude exclude-dirs)
+  (all-gerbil-modules/roots/config
+   root
+   roots
+   exclude
+   exclude-dirs
+   (asp-gerbil-scheme-builder-profile-default-project-excludes? profile)
+   (asp-gerbil-scheme-builder-profile-gitignore? profile)))

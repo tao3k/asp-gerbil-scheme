@@ -7,8 +7,9 @@
         (only-in :std/misc/process run-process)
         (only-in :std/srfi/1 append-map)
         (only-in :std/sugar filter)
-        (only-in :asp-gerbil-scheme/src/build-api/source-coverage
-                 asp-gerbil-scheme-source-coverage-files)
+        (only-in :asp-gerbil-scheme/src/build-api/builder-profile
+                 asp-gerbil-scheme-development-builder-profile
+                 asp-gerbil-scheme-builder-profile-modules/root-roots)
         :asp-gerbil-scheme/src/testing/model
         :asp-gerbil-scheme/src/testing/framework
         :asp-gerbil-scheme/src/testing/build-paths
@@ -164,8 +165,10 @@
     (filter (lambda (file)
               (and (testing-build-support-source-file? file)
                    (equal? (path-directory file) directory-path)))
-            (asp-gerbil-scheme-source-coverage-files
-             (testing-object-ref build 'root ".")))))
+            (asp-gerbil-scheme-builder-profile-modules/root-roots
+             asp-gerbil-scheme-development-builder-profile
+             (testing-object-ref build 'root ".")
+             [normalized-directory]))))
 
 ;; : (-> TestingBuild [Path])
 (def (testing-build-support-files build)

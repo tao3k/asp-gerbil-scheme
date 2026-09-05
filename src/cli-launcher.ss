@@ -3,31 +3,25 @@
 
 (import :gerbil/gambit
   :asp-gerbil-scheme/src/protocol/command-catalog
+        (only-in :asp-gerbil-scheme/src/runtime/provider-http-json-command-client
+                 provider-http-json-query-main)
         (only-in :asp-gerbil-scheme/src/constants +help+)
         (only-in :asp-gerbil-scheme/src/protocol/command-catalog
                  provider-dynamic-command-dispatch
                  provider-recognized-command-names)
         (only-in :std/misc/path path-expand)
-        (only-in :std/misc/ports read-all-as-string)
-        (only-in :std/srfi/13 string-contains string-index string-index-right string-prefix?)
-        (only-in :std/sugar foldl))
+        (only-in :std/srfi/13 string-suffix?)
+        (only-in :std/sugar ormap))
 (export main
         command-line-args
         provider-command-line-args
         register-static-command-dispatch!)
 
-;;; Install boundary:
-;;; - The native launcher is the command boundary. It dispatches subcommands
-;;;   in-process so an installed harness is one native executable.
-
 ;; : (List String)
 (def +launcher-names+
   '("gxi" "asp-gerbil-scheme"))
 
-;; Keep the executable boundary safe even when a stale parser artifact is
-;; accidentally selected during static linking.
-(def +native-owner-max-source-bytes+ (* 1024 1024))
-
+;; : (Vector StaticCommandDispatch)
 (def static-command-dispatch [])
 
 ;; : (-> (List StaticCommandDispatch) Void)
@@ -39,8 +33,9 @@
 ;;;   statically link the full command graph.
 ;; : (-> (List String) (List String))
 (def (command-line-args argv)
-  (or (command-line-command-tail argv)
-      (strip-launcher-frames argv)))
+  (match (command-line-command-tail argv)
+    (#f (strip-launcher-frames argv))
+    (tail tail)))
 
 ;; : (-> (List String) (List String))
 (def provider-command-line-args command-line-args)
@@ -71,25 +66,24 @@
 
 ;; : (-> String Boolean)
 (def (launcher-frame? arg)
-  (or (launcher-name? arg)
-      (launcher-binary-path? arg)
-      (launcher-script-path? arg)))
+  (ormap (lambda (predicate) (predicate arg))
+         [launcher-name? launcher-binary-path? launcher-script-path?]))
 
 ;; : (-> String Boolean)
 (def (launcher-name? arg)
-  (member arg +launcher-names+))
+  (ormap (lambda (name) (equal? arg name)) +launcher-names+))
 
 ;; : (-> String Boolean)
 (def (launcher-binary-path? arg)
-  (or (string-suffix? "/gxi" arg)
-      (string-suffix? "/asp-gerbil-scheme" arg)))
+  (ormap (lambda (suffix) (string-suffix? suffix arg))
+         ["/gxi" "/asp-gerbil-scheme"]))
 
 ;; : (-> String Boolean)
 (def (launcher-script-path? arg)
-  (or (equal? arg "src/cli.ss")
-      (equal? arg "src/cli-launcher.ss")
-      (string-suffix? "/src/cli.ss" arg)
-      (string-suffix? "/src/cli-launcher.ss" arg)))
+  (ormap (lambda (path)
+           (or (equal? arg path)
+               (string-suffix? (string-append "/" path) arg)))
+         ["src/cli.ss" "src/cli-launcher.ss"]))
 
 ;;; Public CLI:
 ;;; - Help stays in-process so `asp gerbil-scheme --help` has no startup dependency on the
@@ -98,9 +92,10 @@
 ;;;   dispatch. Missing native coverage is a hard implementation error.
 ;; : (-> (List String) Boolean)
 (def (help-args? args)
-  (or (null? args)
-      (and (null? (cdr args))
-           (member (car args) '("-h" "--help" "help")))))
+  (match args
+    ([] #t)
+    ([arg] (member arg '("-h" "--help" "help")))
+    (else #f)))
 
 ;; : (-> Integer Integer)
 (def (emit-help status)
@@ -109,136 +104,10 @@
 
 ;; : (-> String (List String) Integer)
 (def (dispatch-command command rest)
-  (or (try-native-direct-source-query command rest)
-      (dispatch-native-command command rest)))
-
-;; : (-> Path Unit )
-(def (guard-native-source-path! path)
-  (let (bytes (file-info-size (file-info path)))
-    (when (> bytes +native-owner-max-source-bytes+)
-      (error "source exceeds native Scheme read budget; use asp search/query"
-             path bytes))))
-
-;;; Direct query boundary:
-;;; - Hook selector reads must be a native launcher fast path.
-;;; - Do not import `:asp-gerbil-scheme/src/cli`; that pulls in parser/checker
-;;;   modules before reading a small line range.
-;; : (-> String (List String) (U Integer #f))
-(def (try-native-direct-source-query command rest)
-  (and (equal? command "query")
-       (let ((from-hook (launcher-option "--from-hook" rest))
-             (selector (launcher-option "--selector" rest)))
-         (cond
-          ((and from-hook
-                (equal? from-hook "direct-source-read")
-                (not selector))
-           (error "direct-source-read requires --selector"))
-          ((and selector (launcher-direct-source-selector? selector))
-           (emit-native-direct-source-query rest selector)
-           0)
-          (else #f)))))
-
-;; : (-> String (List String) (U String #f))
-(def (launcher-option name args)
-  (cond
-   ((null? args) #f)
-   ((equal? (car args) name)
-    (and (pair? (cdr args)) (cadr args)))
-   (else
-    (launcher-option name (cdr args)))))
-
-;; : (-> String Boolean)
-(def (launcher-direct-source-selector? selector)
-  (and (not (launcher-structural-selector? selector))
-       (or (string-contains selector "/")
-           (string-contains selector ".")
-           (string-contains selector ":"))))
-
-;; : (-> String Boolean)
-(def (launcher-structural-selector? selector)
-  (string-prefix? "gerbil-scheme://" selector))
-
-;; : (-> String (List String) Boolean)
-(def (launcher-flag? name args)
-  (and (member name args) #t))
-
-;;; Search owner-items fast path:
-;;; - Provider search evidence must come from the local checkout during binary
-;;;   validation; dynamic command loading can resolve stale global modules.
-;; : (-> String (List String) (U Integer #f))
-;; : (-> (List String) Selector Integer)
-(def (emit-native-direct-source-query rest selector)
-  (let* ((workspace (or (launcher-option "--workspace" rest) "."))
-         (code (launcher-read-selector workspace selector)))
-    (if (launcher-flag? "--json" rest)
-      (begin
-        (display "{\"selector\":")
-        (write selector)
-        (display ",\"code\":")
-        (write code)
-        (displayln "}"))
-      (display code))))
-
-;; : (-> String String String)
-(def (launcher-read-selector root selector)
-  (let* ((parts (launcher-split-selector selector))
-         (path (car parts))
-         (start (cadr parts))
-         (end (caddr parts))
-         (source-path (path-expand path root)))
-    (guard-native-source-path! source-path)
-    (if (and start end)
-      (launcher-read-line-range source-path start end)
-      (call-with-input-file source-path read-all-as-string))))
-
-;; : (-> String SelectorParts)
-(def (launcher-split-selector selector)
-  (let (ix (string-index-right selector #\:))
-    (if ix
-      (let* ((path (substring selector 0 ix))
-             (range (substring selector (fx1+ ix) (string-length selector)))
-             (dash (string-index range #\-)))
-        (if dash
-          [path
-           (string->number (substring range 0 dash))
-           (string->number (substring range (fx1+ dash) (string-length range)))]
-          (let* ((prev (string-index-right path #\:))
-                 (start-text (and prev (substring path (fx1+ prev) (string-length path))))
-                 (start (and start-text (string->number start-text)))
-                 (end (string->number range)))
-            (if (and prev start end)
-              [(substring path 0 prev) start end]
-              [path end end]))))
-      [selector #f #f])))
-
-;; launcher-read-line-range
-;;   : (-> String Integer Integer String)
-;;   | doc m%
-;;       Read the inclusive one-based line range from `path`.
-;;
-;;       This is intentionally local to the launcher fast path so hook source
-;;       reads do not import the full parser/check command graph.
-;;
-;;       # Examples
-;;
-;;       ```scheme
-;;       (launcher-read-line-range "src/cli.ss" 1 2)
-;;       ;; => first two source lines
-;;       ```
-;;     %
-(def (launcher-read-line-range path start end)
-  (call-with-input-file path
-    (lambda (port)
-      (call-with-output-string
-       (lambda (out)
-         (let loop ((line-number 1))
-           (when (<= line-number end)
-             (let (line (read-line port))
-               (unless (eof-object? line)
-                 (when (>= line-number start)
-                   (display line out)
-                   (newline out))
-                 (loop (fx1+ line-number)))))))))))
+  (match command
+    ("query"
+     (provider-http-json-query-main rest))
+    (else (dispatch-native-command command rest))))
 
 ;; : (-> String (List String) Integer)
 (def (dispatch-native-command command rest)

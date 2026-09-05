@@ -3,7 +3,9 @@
 (import :std/test
         (only-in :asp-gerbil-scheme/src/testing/execution-profile
                  declare-gxtest-serial)
-        :asp-gerbil-scheme/src/build-api/native-build)
+        (only-in :asp-gerbil-scheme/src/build-api/native-build compile-target)
+        (only-in :asp-gerbil-scheme/src/build-api/native-build-spec
+                 configure-build-root!))
 
 (declare-gxtest-serial shared-package-artifacts)
 

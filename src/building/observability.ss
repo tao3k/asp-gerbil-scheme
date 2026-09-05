@@ -2,7 +2,6 @@
 ;;; samples into evidence.  It may detect rapid memory anomalies, but it must
 ;;; not reduce configured concurrency or become a second scheduler.
 (import :gerbil/gambit
-        (only-in :clan/poo/object defclass object)
         (only-in :std/text/json
                  json-object->string
                  write-json-sort-keys?)
@@ -54,7 +53,7 @@
 ;; These counters intentionally describe only the long-lived Gerbil control
 ;; process.  Native compiler children are outside ##process-statistics and must
 ;; never be presented as control-plane CPU time.
-(defclass (build-stage-observation object)
+(defstruct build-stage-observation
   (receipt
    work-item-count
    wall-seconds

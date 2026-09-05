@@ -5,8 +5,6 @@
         (only-in :gerbil/compiler/base __available-cores)
         :clan/poo/object
         :std/make
-        (only-in "../build-api/source-coverage-query"
-                 asp-gerbil-scheme-consume-source-coverage-query!)
         (only-in :std/misc/path
                  path-default-extension path-directory path-expand
                  path-normalize)
@@ -458,33 +456,6 @@
      (build (framework-parse-build-options options)))
     (["clean"] (clean))
     ([] (build []))))
-
-;;; Script lifecycle boundary: declaration queries execute the package-spec
-;;; projection but never enter re-exec, locking, compilation, or cleaning.
-;;; Keeping this decision inside the Building Framework prevents an internal
-;;; query binding from leaking into downstream macro expansions.
-;; : (-> (List String) BuildSpec (List BuildOption) Path Void)
-(def (framework-build-dispatch arguments build-spec keys source-file)
-  (unless (asp-gerbil-scheme-consume-source-coverage-query! source-file)
-    (framework-apply-build-core-policy!)
-    (parameterize
-     ((current-directory
-       (path-normalize (path-directory source-file))))
-     (framework-build-main arguments build-spec keys source-file))))
-
-(defsyntax (defbuild-script stx)
-  (syntax-case stx ()
-    ((macro build-spec keys ...)
-     (with-syntax* ((+this-source-file+
-                    (datum->syntax
-                     #'macro
-                     (path-normalize
-                      (path-expand
-                       (source-location-path (stx-source stx))))))
-                    (@main (stx-identifier #'macro 'main)))
-       #'(def (@main . arguments)
-           (framework-build-dispatch
-            arguments build-spec [keys ...] +this-source-file+))))))
 
 (def (framework-build-contract)
   '((schemaId . "asp-gerbil-scheme.build-script-contract")

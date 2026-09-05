@@ -198,7 +198,10 @@
                    (unique
                     (append (source-scope-policy-roots policy)
                             (source-scope-policy-runtime-roots policy)))
-                   '()))
+                   ;; The Builder Profile's canonical package default is the
+                   ;; package root. Candidate admission below still requires
+                   ;; an actual source file, so this never widens into a scan.
+                   '(".")))
                 (roots
                  (map (lambda (root)
                         (relative-package-path relative-root root))

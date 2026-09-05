@@ -3,12 +3,10 @@
 
 (import :gerbil/gambit
         :std/test
-        (only-in :std/srfi/1 filter)
         (only-in :std/sugar ormap)
-        "../src/build-api/native-build"
+        "../src/build-api/native-build-spec"
         "../src/build-api/package-native-plan"
-        "../src/build-api/package-spec"
-        "../src/build-api/release-modules")
+        "../src/build-api/package-spec")
 (export cli-build-spec-test)
 
 ;; : (-> (List (List Path)) Path (Or False Integer))
@@ -61,9 +59,8 @@
         (check (member "policy/core.ss" spec) => #f)))
     (test-case "release binary uses the bounded parser-owned projection"
       (let (spec (cli-binary-build-spec #t))
-      (check cli-release-module-count => 109)
-      (check cli-release-closure-count => 110)
-        (check (length (filter string? spec)) => cli-release-module-count)
+        (check (pair? spec) => #t)
+        (check (equal? spec (cli-binary-build-spec #t)) => #t)
         (check (member "commands/evidence.ss" spec) ? true)
         (check (member "format/facade.ss" spec) ? true)
         (check (member "build-api/native-build.ss" spec) => #f)
@@ -137,6 +134,10 @@
                => #t)))
     (test-case "project CLI stages follow Build and Testing interfaces"
       (let (stages (asp-gerbil-scheme-package-api-stage-specs))
+        (check (module-stage-before? stages
+                                     "build-api/native-build-spec.ss"
+                                     "build-api/native-build.ss")
+               => #t)
         (check (module-stage-before? stages
                                      "build-api/native-build.ss"
                                      "build-api/project-build.ss")

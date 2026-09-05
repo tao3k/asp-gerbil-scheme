@@ -3,7 +3,7 @@
 
 (import (only-in :std/misc/path path-expand path-normalize)
          (only-in :std/srfi/13 string-prefix?)
-         (only-in :gerbil/tools/env setup-local-pkg-env!)
+         (only-in :std/source gerbil-home)
         :gerbil/gambit)
 (export asp-gerbil-scheme-package-configure-build-root!
          asp-gerbil-scheme-package-build-package-name
@@ -24,9 +24,6 @@
 (def package-root #f)
 
 ;; : (-> Path Path)
-(def (package-local-gerbil-path root)
-  (path-expand ".gerbil" root))
-
 ;; : (-> MaybeString Boolean)
 (def (package-build-non-empty-string? value)
   (and (string? value)
@@ -66,7 +63,7 @@
    (let (path (getenv "GERBIL_PATH" #f))
      (if (package-build-non-empty-string? path)
        path
-       (package-local-gerbil-path root)))))
+       (gerbil-home)))))
 
 ;; : (-> Path Path)
 (def (asp-gerbil-scheme-package-build-active-gerbil-lib-path root)
@@ -77,9 +74,7 @@
   (let (active-gerbil-path (asp-gerbil-scheme-package-build-active-gerbil-path root))
     (set! package-root (path-normalize root))
     (current-directory package-root)
-     (setup-local-pkg-env! #t)
-     (setenv "GERBIL_PATH" active-gerbil-path)
-     (add-load-path! (path-expand "lib" active-gerbil-path))))
+    (add-load-path! (path-expand "lib" active-gerbil-path))))
 
 ;; : (-> Void)
 ;; ensure-package-build-root!

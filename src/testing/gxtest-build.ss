@@ -2,8 +2,10 @@
 ;;; Gxtest package build lifecycle helpers.
 
 (import (only-in :std/misc/path path-directory path-expand path-strip-directory)
+        (rename-in (only-in "../build-api/native-build-spec"
+                            configure-build-root!)
+                   (configure-build-root! configure-native-build-root!))
         (rename-in "../build-api/native-build"
-                   (configure-build-root! configure-native-build-root!)
                    (compile-package-api-if-stale
                     native-compile-package-api-if-stale))
         (only-in "../build-api/native-build"
@@ -40,7 +42,8 @@
 ;; : (-> (List String))
 (def cli-bootstrap-modules
   '("constants.ss"
-    "commands/query.ss"
+    "runtime/provider-http-json-client.ss"
+    "runtime/provider-http-json-command-client.ss"
     "commands/check-cache.ss"
     "commands/check.ss"
     "commands/evidence.ss"

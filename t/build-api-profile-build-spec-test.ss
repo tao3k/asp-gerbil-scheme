@@ -8,8 +8,10 @@
         (only-in ../src/build-api/builder-profile
                  asp-gerbil-scheme-development-builder-profile
                  asp-gerbil-scheme-builder-profile-profiles)
-        (only-in ../src/build-api/package-spec
-                 asp-gerbil-scheme-library-package-prototype)
+(only-in ../src/build-api/package-spec
+                 asp-gerbil-scheme-library-package-prototype
+                 asp-gerbil-scheme-package-spec!
+                 asp-gerbil-scheme-package-modules)
         (only-in ../src/build-api/profile-build-spec
                  asp-gerbil-scheme-package-profile-admit-report!
                  asp-gerbil-scheme-package-profiled-build-spec))
@@ -26,6 +28,14 @@
   (profile native-only-builder-profile)
   (native-spec ["src/main"]))
 
+(asp-gerbil-scheme-package-spec!
+ (macro-witness-package-spec
+  @ asp-gerbil-scheme-library-package-prototype)
+ (spec macro-witness-native-spec)
+ (profile native-only-builder-profile)
+ (modules ["src/main.ss"])
+ (native-spec ["src/main"]))
+
 (def build-api-profile-build-spec-test
   (test-suite "Build API Builder Profiles"
     (test-case "official Builder Profile selects ASP quality"
@@ -35,7 +45,11 @@
     (test-case "downstream POO profile declaratively controls projection"
       (check (asp-gerbil-scheme-package-profiled-build-spec
               native-only-package-spec)
-             => ["src/main"]))
+              => ["src/main"]))
+    (test-case "package declaration macro projects modules and native spec"
+      (check (asp-gerbil-scheme-package-modules macro-witness-package-spec)
+             => ["src/main.ss"])
+      (check (macro-witness-native-spec) => ["src/main"]))
     (test-case "passing profile report is admitted"
       (let (report (hash (status "pass") (findings [])))
         (check (asp-gerbil-scheme-package-profile-admit-report! report)

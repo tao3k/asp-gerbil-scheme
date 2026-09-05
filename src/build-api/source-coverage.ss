@@ -2,8 +2,10 @@
 ;;; Build-time ASP source coverage declarations.
 
 (import :gerbil/gambit
-        (only-in "./source-coverage-query"
-                 asp-gerbil-scheme-register-source-coverage-query!)
+        (only-in "./builder-profile"
+                 asp-gerbil-scheme-development-builder-profile
+                 asp-gerbil-scheme-builder-profile-exclude-directories
+                 asp-gerbil-scheme-builder-profile-modules/root-roots)
         (only-in :std/misc/path path-expand path-normalize)
         (only-in :std/sort sort))
 
@@ -42,24 +44,20 @@
 
 ;; : (-> Root Unit)
 (def (asp-gerbil-scheme-load-source-coverage root)
-  (let* ((owner-root (path-normalize (path-expand root)))
-         (build-file (path-expand "build.ss" owner-root)))
+  (let (owner-root (path-normalize (path-expand root)))
     (unless (and current-source-coverage-declared-files
                  (equal? owner-root current-source-coverage-owner-root))
-      (unless (file-exists? build-file)
-        (error "Build API source coverage requires build.ss" owner-root))
-      (set! current-source-coverage-declared-files #f)
-      (set! current-source-coverage-owner-root #f)
-      ;; Gerbil may invoke a loaded script's main after `load` returns.  Keep a
-      ;; process-local path receipt instead of relying on dynamic extent.
-      (asp-gerbil-scheme-register-source-coverage-query! build-file)
-      (with-directory owner-root
-        (lambda ()
-          (load build-file)))
-      (unless (and current-source-coverage-declared-files
-                   (equal? owner-root current-source-coverage-owner-root))
-        (error "build.ss did not declare a Build API module catalog"
-               owner-root)))))
+      (let* ((profile asp-gerbil-scheme-development-builder-profile)
+             (roots current-source-coverage-roots)
+             (files
+              (asp-gerbil-scheme-builder-profile-modules/root-roots
+               profile owner-root roots)))
+        (asp-gerbil-scheme-source-coverage
+         roots: roots
+         exclude-directories:
+         (asp-gerbil-scheme-builder-profile-exclude-directories profile)
+         files: files
+         owner-root: owner-root)))))
 
 ;; : (-> (List Path))
 (def (asp-gerbil-scheme-source-coverage-roots)
@@ -82,11 +80,3 @@
   (asp-gerbil-scheme-load-source-coverage root)
   (or (asp-gerbil-scheme-source-coverage-declared-files)
       (error "source coverage requires the Build API module catalog")))
-
-;; : (forall (A) (-> Path (-> A) A))
-(def (with-directory directory thunk)
-  (let (previous (current-directory))
-    (dynamic-wind
-      (lambda () (current-directory directory))
-      thunk
-      (lambda () (current-directory previous)))))
