@@ -14,8 +14,6 @@
     "src/cli-install-linker"
     "src/cli-query"
     "src/cli-release-linker"
-    "src/runtime/provider-operation"
-    "src/runtime/provider-http-json-server"
     "src/commands/provider-runtime"
     "src/cli-launcher"))
 
