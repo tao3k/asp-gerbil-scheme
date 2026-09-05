@@ -72,7 +72,68 @@
                      (hash-put! witnesses callee #t))
                    (macro-runtime-source-invocation-names owner))))
      files)
+    (macro-runtime-source-mark-invoked-macro-owners! files witnesses)
     witnesses))
+
+;; A tested public macro also witnesses the private macro helpers that its
+;; transformer invokes.  Resolve only globally unique macro names; ambiguous
+;; names remain unowned and therefore fail closed instead of granting evidence
+;; to an unrelated transformer.  The owner index and work queue keep the
+;; transitive call closure O(V + E), including recursive macro families.
+;; : (-> (List SourceFile) HashTable Unit)
+(def (macro-runtime-source-mark-invoked-macro-owners! files witnesses)
+  (let* ((owners-by-name (macro-runtime-source-macro-owner-index files))
+         (pending
+          (apply append
+                 (map (lambda (owner)
+                        (filter-map
+                         (lambda (fact)
+                           (let (name (macro-fact-name fact))
+                             (and (hash-key? witnesses name) name)))
+                         (source-file-macros owner)))
+                      files)))
+         (expanded (make-hash-table)))
+    (let loop ((pending pending))
+      (unless (null? pending)
+        (let* ((name (car pending))
+               (owner (hash-get owners-by-name name)))
+          (if (or (not owner) (hash-key? expanded name))
+            (loop (cdr pending))
+            (begin
+              (hash-put! expanded name #t)
+              (let (next
+                    (fold (lambda (callee worklist)
+                            (if (and (hash-key? owners-by-name callee)
+                                     (hash-get owners-by-name callee)
+                                     (not (hash-key? witnesses callee)))
+                              (begin
+                                (hash-put! witnesses callee #t)
+                                (cons callee worklist))
+                              worklist))
+                          (cdr pending)
+                          (macro-runtime-source-invocation-names owner)))
+                (loop next)))))))))
+
+;; A false owner marks an ambiguous macro name.  Repeated facts in the same
+;; source owner retain that owner; only cross-owner collisions revoke it.
+;; : (-> (List SourceFile) HashTable)
+(def (macro-runtime-source-macro-owner-index files)
+  (let (owners-by-name (make-hash-table))
+    (for-each
+     (lambda (owner)
+       (for-each
+        (lambda (fact)
+          (let (name (macro-fact-name fact))
+            (if (hash-key? owners-by-name name)
+              (let (prior (hash-get owners-by-name name))
+                (unless (and prior
+                             (equal? (source-file-path prior)
+                                     (source-file-path owner)))
+                  (hash-put! owners-by-name name #f)))
+              (hash-put! owners-by-name name owner))))
+        (source-file-macros owner)))
+     files)
+    owners-by-name))
 
 ;; Indexing canonical paths once keeps multi-source import closure O(V + E)
 ;; instead of rescanning the project catalog for every asserting test owner.
