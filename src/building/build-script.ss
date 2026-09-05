@@ -26,5 +26,6 @@
         framework-recover-object-locks!
         framework-apply-native-toolchain-environment!
         call-with-framework-native-toolchain-environment
+        call-with-framework-build-libdir
         call-with-framework-build-lease
         framework-build-contract)

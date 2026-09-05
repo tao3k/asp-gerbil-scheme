@@ -115,7 +115,7 @@
   ;; marking every dependency static would instead regenerate the entire
   ;; HTTP/parser/query closure in one translation unit.
   (append (map (lambda (runtime-module)
-                 `(gxc: ,runtime-module (optimize: #t)))
+                 `(gxc: ,runtime-module))
                runtime-modules)
           `((exe: ,module bin: ,binary runtime-linkage: separate-aot
                   ,@(framework-native-link-options native-capabilities)))
@@ -449,6 +449,17 @@
           (framework-build-module-schedule-emit! source)
           (loop (cdr remaining)))))))
 
+(def (call-with-framework-build-libdir libdir thunk)
+  ;; std/make writes native module artifacts to libdir, while Gerbil's
+  ;; separate executable compiler resolves static modules through load-path.
+  ;; Keep the declared artifact tree first for exactly this build session and
+  ;; restore the caller's default Gerbil environment afterwards.
+  (let (previous-load-path (load-path))
+    (dynamic-wind
+      (lambda () (add-load-path! libdir))
+      thunk
+      (lambda () (set-load-path! previous-load-path)))))
+
 (def (framework-build-main arguments build-spec keys source-file)
   (def source-directory
     (path-normalize (path-directory source-file)))
@@ -472,15 +483,18 @@
               (framework-build-announce-modules! build-spec source-directory)
               (framework-build-announce-first-module!
                build-spec source-directory))
-            (parameterize ((current-directory bindir))
-              (apply make
-                     build-spec
-                     srcdir: source-directory
-                     (framework-std-make-options
-                      (framework-merge-build-options
-                       build-keys
-                       (append [bindir: bindir libdir: libdir]
-                               options))))))
+            (call-with-framework-build-libdir
+             libdir
+             (lambda ()
+               (parameterize ((current-directory bindir))
+                 (apply make
+                        build-spec
+                        srcdir: source-directory
+                        (framework-std-make-options
+                         (framework-merge-build-options
+                          build-keys
+                          (append [bindir: bindir libdir: libdir]
+                                  options))))))))
           (and (memq verbose: options) #t))
          (framework-validate-runtime-closure! build-spec))
        (and (memq verbose: options) #t))))

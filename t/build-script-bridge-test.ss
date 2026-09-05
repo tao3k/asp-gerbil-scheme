@@ -13,6 +13,7 @@
                  framework-std-make-options
                  framework-executable-build-spec
                  call-with-framework-native-toolchain-environment
+                 call-with-framework-build-libdir
                  framework-build-contract))
 
 (export build-script-bridge-test main)
@@ -23,9 +24,18 @@
       (check
        (framework-executable-build-spec
         "main" "provider" '("runtime") '("library") '())
-       => '((gxc: "runtime" (optimize: #t))
+       => '((gxc: "runtime")
             (exe: "main" bin: "provider" runtime-linkage: separate-aot)
             "library")))
+    (test-case "the declared artifact libdir owns static module resolution"
+      (let ((caller-load-path (load-path))
+            (observed-load-path #f))
+        (call-with-framework-build-libdir
+         "/tmp/asp-gerbil-scheme-artifact-lib"
+         (lambda () (set! observed-load-path (load-path))))
+        (check (car observed-load-path)
+               => "/tmp/asp-gerbil-scheme-artifact-lib")
+        (check (load-path) => caller-load-path)))
     (test-case "native TLS flags remain declarative and platform resolved"
       (let* ((spec (framework-executable-build-spec
                     "main" "provider" '("runtime") '("library") '(tls)))
