@@ -8,7 +8,7 @@
         :asp-gerbil-scheme/src/policy/model
         :asp-gerbil-scheme/src/policy/modularity
         (only-in :std/misc/path path-directory path-expand path-simplify)
-        (only-in :std/srfi/13 string-contains string-suffix?)
+        (only-in :std/srfi/13 string-contains string-prefix? string-suffix?)
         (only-in :std/sugar filter-map hash hash-key? hash-put! ormap while)
         :asp-gerbil-scheme/src/types/findings)
 
@@ -19,7 +19,9 @@
         facade-export-conflict-findings)
 
 ;; A witness is executable project evidence, not package metadata: an asserting
-;; test either invokes the macro directly or loads/includes its exact case owner.
+;; test either invokes the macro directly or imports/loads/includes its exact
+;; case owner. Gerbil module imports are executable compile-time dependencies,
+;; so they are the canonical edge for ordinary package tests.
 (def +macro-runtime-source-witness-assertions+
   '("check" "check-equal?" "check-exception" "check-output"))
 (def +macro-runtime-source-witness-loaders+
@@ -104,8 +106,28 @@
                         index owner-directory path)))
                 (append
                  (source-file-includes owner)
+                 (filter-map
+                  (lambda (path)
+                    (macro-runtime-source-import-path index path))
+                  (source-file-imports owner))
                  (filter-map macro-runtime-source-load-path
                              (source-file-calls owner)))))))
+
+;; Resolve only imports owned by the collected project package. External
+;; package imports remain outside the witness graph and cannot grant admission.
+;; : (-> ProjectIndex ModuleImport (Or Path False))
+(def (macro-runtime-source-import-path index path)
+  (let* ((package (project-index-package index))
+         (package-name (and package (project-package-name package)))
+         (package-prefix (and package-name
+                              (string-append ":" package-name "/"))))
+    (cond
+     ((and package-prefix (string-prefix? package-prefix path))
+      (substring path (string-length package-prefix) (string-length path)))
+     ((or (string-prefix? "./" path)
+          (string-prefix? "../" path))
+      path)
+     (else #f))))
 
 ;; Catalog facts may retain either workspace-relative or owner-relative load
 ;; paths. Project both candidates into the in-memory owner index; the exact

@@ -53,6 +53,7 @@
         write-functional-idiom-control-context-project
         write-macro-runtime-source-project
         write-linked-macro-runtime-source-project
+        write-import-linked-macro-runtime-source-project
         write-protocol-evidence-project
         ensure-dir
         write-text
@@ -602,6 +603,30 @@
                  "(load! \"../user-interface/order-case.ss\")\n"
                  "(def order-case-test\n  (test-suite \"order case\"\n"
                  "    (test-case \"observes loaded macro case\"\n"
+                 "      (check order-case => #!void))))\n"))))
+;; : (-> String Unit)
+(def (write-import-linked-macro-runtime-source-project root)
+  (let* ((src (string-append root "/src"))
+         (owner (string-append src "/macros"))
+         (cases (string-append root "/user-interface"))
+         (tests (string-append root "/t")))
+    (ensure-dir ".run")
+    (ensure-dir root)
+    (ensure-dir src)
+    (ensure-dir owner)
+    (ensure-dir cases)
+    (ensure-dir tests)
+    (write-text (string-append root "/gerbil.pkg")
+                "(package: sample/macros)\n")
+    (write-text (string-append owner "/core.ss")
+                ";;; -*- Gerbil -*-\n(package: sample/macros)\n(defsyntax (with-order stx)\n  #'(void))\n")
+    (write-text (string-append cases "/order-case.ss")
+                ";;; -*- Gerbil -*-\n(import ../src/macros/core)\n(export order-case)\n(def order-case (with-order))\n")
+    (write-text (string-append tests "/order-case-test.ss")
+                (string-append
+                 ";;; -*- Gerbil -*-\n(import :std/test :sample/macros/user-interface/order-case)\n"
+                 "(def order-case-test\n  (test-suite \"order case\"\n"
+                 "    (test-case \"observes imported macro case\"\n"
                  "      (check order-case => #!void))))\n"))))
 ;; : (-> String Declared String )
 (def (write-protocol-evidence-project root declared?)
