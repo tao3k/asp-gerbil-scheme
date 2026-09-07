@@ -31,6 +31,10 @@
       (check (member
               "src/support/time.ss"
               (.get asp-gerbil-scheme-provider-package-spec runtime-modules))
+             ? true)
+      (check (member
+              "src/parser/syntax-ast.ss"
+              (.get asp-gerbil-scheme-provider-package-spec runtime-modules))
              ? true))))
 
 (def (main . _args)

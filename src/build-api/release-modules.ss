@@ -65,6 +65,7 @@
     "parser/source-file.ss"
     "parser/source-scope.ss"
     "parser/support.ss"
+    "parser/syntax-ast.ss"
     "parser/syntax-calls.ss"
     "parser/syntax-support.ss"
     "parser/syntax.ss"

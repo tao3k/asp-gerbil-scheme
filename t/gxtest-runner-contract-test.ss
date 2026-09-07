@@ -405,7 +405,10 @@
         (check (< selection framework) => #t)))
     (test-case "package api flat spec is derived from ordered stages"
       (check (asp-gerbil-scheme-package-api-spec)
-             => (stage-files (asp-gerbil-scheme-package-api-stage-specs))))
+             => (stage-files (asp-gerbil-scheme-package-api-stage-specs)))
+      (check (member "parser/syntax-ast.ss"
+                     (asp-gerbil-scheme-package-api-spec))
+             ? true))
     (test-case "binary bootstrap spec includes downstream gxtest support"
       (configure-build-root! (current-directory))
       (let (stage (compile-spec #f #f #t))

@@ -116,6 +116,8 @@
         (check (length actual) => cli-release-closure-count)))
     (test-case "install static projection retains the launcher root"
       (check (member "cli-launcher.ss" cli-install-static-modules) ? true))
+    (test-case "release closure retains native syntax relation ownership"
+      (check (member "parser/syntax-ast.ss" cli-release-modules) ? true))
     (test-case "install static projection covers the release module projection"
       (for-each
        (lambda (module-path)
