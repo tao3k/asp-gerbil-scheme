@@ -298,11 +298,26 @@
         comment-quality-fact-context
         comment-quality-fact-evidence
         comment-quality-fact-selector
+        syntax-relation-kind
+        syntax-relation-name
+        syntax-relation-owner
+        syntax-relation-path
+        syntax-relation-start
+        syntax-relation-end
+        syntax-relation-phase
+        syntax-relation-context
+        syntax-relation-structural-path
+        syntax-ast-version
+        syntax-ast-native-root
+        syntax-ast-relations
+        syntax-ast-template-callees
+        syntax-ast-relation-projection
         top-form-kind
         top-form-head
         top-form-path
         top-form-start
         top-form-end
+        top-form-syntax-ast
         top-form-selector
         declarative-top-form?
         source-file-path

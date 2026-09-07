@@ -82,7 +82,7 @@
 ;; transitive call closure O(V + E), including recursive macro families.
 ;; : (-> (List SourceFile) HashTable Unit)
 (def (macro-runtime-source-mark-invoked-macro-owners! files witnesses)
-  (let* ((owners-by-name (macro-runtime-source-macro-owner-index files))
+  (let* ((nodes-by-name (macro-runtime-source-macro-node-index files))
          (pending
           (apply append
                  (map (lambda (owner)
@@ -96,44 +96,74 @@
     (let loop ((pending pending))
       (unless (null? pending)
         (let* ((name (car pending))
-               (owner (hash-get owners-by-name name)))
-          (if (or (not owner) (hash-key? expanded name))
+               (node (hash-get nodes-by-name name)))
+          (if (or (not node) (hash-key? expanded name))
             (loop (cdr pending))
             (begin
               (hash-put! expanded name #t)
               (let (next
                     (fold (lambda (callee worklist)
-                            (if (and (hash-key? owners-by-name callee)
-                                     (hash-get owners-by-name callee)
+                            (if (and (hash-key? nodes-by-name callee)
+                                     (hash-get nodes-by-name callee)
                                      (not (hash-key? witnesses callee)))
                               (begin
                                 (hash-put! witnesses callee #t)
                                 (cons callee worklist))
                               worklist))
                           (cdr pending)
-                          (macro-runtime-source-invocation-names owner)))
+                          (syntax-ast-template-callees
+                           (top-form-syntax-ast (cdr node)))))
                 (loop next)))))))))
 
-;; A false owner marks an ambiguous macro name.  Repeated facts in the same
-;; source owner retain that owner; only cross-owner collisions revoke it.
+;; Bind each macro fact to the native TopForm AST with the same source span.
+;; A false node marks either an ambiguous name or a missing AST binding, so
+;; evidence never crosses owners by textual name alone.
 ;; : (-> (List SourceFile) HashTable)
-(def (macro-runtime-source-macro-owner-index files)
-  (let (owners-by-name (make-hash-table))
+(def (macro-runtime-source-macro-node-index files)
+  (let ((forms-by-location (macro-runtime-source-form-index files))
+        (nodes-by-name (make-hash-table)))
     (for-each
      (lambda (owner)
        (for-each
         (lambda (fact)
-          (let (name (macro-fact-name fact))
-            (if (hash-key? owners-by-name name)
-              (let (prior (hash-get owners-by-name name))
+          (let* ((name (macro-fact-name fact))
+                 (form (hash-get forms-by-location
+                                 (macro-runtime-source-fact-location-key
+                                  (macro-fact-path fact)
+                                  (macro-fact-start fact)
+                                  (macro-fact-end fact)))))
+            (if (hash-key? nodes-by-name name)
+              (let (prior (hash-get nodes-by-name name))
                 (unless (and prior
-                             (equal? (source-file-path prior)
-                                     (source-file-path owner)))
-                  (hash-put! owners-by-name name #f)))
-              (hash-put! owners-by-name name owner))))
+                             (equal? (macro-fact-path (car prior))
+                                     (macro-fact-path fact)))
+                  (hash-put! nodes-by-name name #f)))
+              (hash-put! nodes-by-name name
+                         (and form (cons fact form))))))
         (source-file-macros owner)))
      files)
-    owners-by-name))
+    nodes-by-name))
+
+;; : (-> (List SourceFile) HashTable)
+(def (macro-runtime-source-form-index files)
+  (let (forms-by-location (make-hash-table))
+    (for-each
+     (lambda (owner)
+       (for-each
+        (lambda (form)
+          (hash-put! forms-by-location
+                     (macro-runtime-source-fact-location-key
+                      (top-form-path form)
+                      (top-form-start form)
+                      (top-form-end form))
+                     form))
+        (source-file-forms owner)))
+     files)
+    forms-by-location))
+
+;; : (-> String Integer Integer String)
+(def (macro-runtime-source-fact-location-key path start end)
+  (string-append path ":" (number->string start) ":" (number->string end)))
 
 ;; Indexing canonical paths once keeps multi-source import closure O(V + E)
 ;; instead of rescanning the project catalog for every asserting test owner.

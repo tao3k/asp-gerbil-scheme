@@ -52,6 +52,9 @@
         reset-fixture-root
         write-functional-idiom-control-context-project
         write-macro-runtime-source-project
+        write-macro-expansion-closure-project
+        write-macro-quoted-data-project
+        write-macro-ambiguous-expansion-project
         write-linked-macro-runtime-source-project
         write-import-linked-macro-runtime-source-project
         write-protocol-evidence-project
@@ -579,6 +582,110 @@
                  "      (with-order)\n"
                  (if allowed? "      (check #t => #t)\n" "")
                  "      )))\n"))))
+;; : (-> String Unit)
+(def (write-macro-expansion-closure-project root)
+  (let* ((src (string-append root "/src"))
+         (owner (string-append src "/macros"))
+         (tests (string-append root "/t")))
+    (ensure-dir ".run")
+    (ensure-dir root)
+    (ensure-dir src)
+    (ensure-dir owner)
+    (ensure-dir tests)
+    (write-text (string-append root "/gerbil.pkg")
+                "(package: sample/macros)\n")
+    (write-text
+     (string-append owner "/core.ss")
+     (string-append
+      ";;; -*- Gerbil -*-\n(package: sample/macros)\n"
+      "(defrules private-order-helper () ((_ value) value))\n"
+      "(defrules public-with-order () ((_ value) (private-order-helper value)))\n"
+      "(defrules private-procedural-helper () ((_ value) value))\n"
+      "(defsyntax (public-procedural stx)\n"
+      "  (syntax-case stx ()\n"
+      "    ((_ value) (syntax (private-procedural-helper value)))))\n"
+      "(defrules private-identifier-helper () ((_ value) value))\n"
+      "(defsyntax public-identifier\n"
+      "  (identifier-rules (id (private-identifier-helper id))))\n"
+      "(defrules private-quasi-helper () ((_ value) value))\n"
+      "(defsyntax (public-quasi stx)\n"
+      "  (syntax-case stx ()\n"
+      "    ((_ value)\n"
+      "     (quasisyntax\n"
+      "      (private-quasi-helper (unsyntax (syntax->datum (syntax value))))))))\n"
+      "(defrules cycle-a () ((_ value) (cycle-b value)))\n"
+      "(defrules cycle-b () ((_ value) (cycle-a value)))\n"
+      "(defrules public-cycle () ((_ value) (cycle-a value)))\n"))
+    (write-text
+     (string-append tests "/macro-expansion-closure-test.ss")
+     (string-append
+      ";;; -*- Gerbil -*-\n(import :std/test ../src/macros/core)\n"
+      "(def macro-expansion-closure-test\n"
+      "  (test-suite \"macro expansion closure\"\n"
+      "    (test-case \"public macro witnesses private expansion helper\"\n"
+      "      (check (public-with-order 42) => 42)\n"
+      "      (check (public-procedural 42) => 42)\n"
+      "      (check (public-identifier 42) => 42)\n"
+      "      (check (public-quasi 42) => 42)\n"
+      "      (check (public-cycle 42) => 42))))\n"))))
+
+;; : (-> String Unit)
+(def (write-macro-quoted-data-project root)
+  (let* ((src (string-append root "/src"))
+         (owner (string-append src "/macros"))
+         (tests (string-append root "/t")))
+    (ensure-dir ".run")
+    (ensure-dir root)
+    (ensure-dir src)
+    (ensure-dir owner)
+    (ensure-dir tests)
+    (write-text (string-append root "/gerbil.pkg")
+                "(package: sample/quoted-macros)\n")
+    (write-text
+     (string-append owner "/core.ss")
+     (string-append
+      "(defrules quoted-helper () ((_ value) value))\n"
+      "(defsyntax (public-quoted-only stx)\n"
+      "  (let ((datum '(quoted-helper 42)))\n"
+      "    (syntax-case stx () ((_ value) (syntax value)))))\n"))
+    (write-text
+     (string-append tests "/quoted-macro-test.ss")
+     (string-append
+      "(import :std/test ../src/macros/core)\n"
+      "(def quoted-macro-test\n"
+      "  (test-suite \"quoted macro data\"\n"
+      "    (test-case \"quoted data is not an expansion edge\"\n"
+      "      (check (public-quoted-only 42) => 42))))\n"))))
+
+;; : (-> String Unit)
+(def (write-macro-ambiguous-expansion-project root)
+  (let* ((src (string-append root "/src"))
+         (left (string-append src "/left"))
+         (right (string-append src "/right"))
+         (tests (string-append root "/t")))
+    (ensure-dir ".run")
+    (ensure-dir root)
+    (ensure-dir src)
+    (ensure-dir left)
+    (ensure-dir right)
+    (ensure-dir tests)
+    (write-text (string-append root "/gerbil.pkg")
+                "(package: sample/ambiguous-macros)\n")
+    (write-text
+     (string-append left "/core.ss")
+     (string-append
+      "(defrules shared-helper () ((_ value) value))\n"
+      "(defrules public-left () ((_ value) (shared-helper value)))\n"))
+    (write-text (string-append right "/core.ss")
+                "(defrules shared-helper () ((_ value) value))\n")
+    (write-text
+     (string-append tests "/ambiguous-macro-test.ss")
+     (string-append
+      "(import :std/test ../src/left/core)\n"
+      "(def ambiguous-macro-test\n"
+      "  (test-suite \"ambiguous macro closure\"\n"
+      "    (test-case \"ambiguous helper names fail closed\"\n"
+      "      (check (public-left 42) => 42))))\n"))))
 ;; : (-> String Unit)
 (def (write-linked-macro-runtime-source-project root)
   (let* ((src (string-append root "/src"))

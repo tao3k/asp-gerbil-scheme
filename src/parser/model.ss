@@ -257,12 +257,27 @@
         comment-quality-fact-required
         comment-quality-fact-context
         comment-quality-fact-evidence
+        make-syntax-relation
+        syntax-relation-kind
+        syntax-relation-name
+        syntax-relation-owner
+        syntax-relation-path
+        syntax-relation-start
+        syntax-relation-end
+        syntax-relation-phase
+        syntax-relation-context
+        syntax-relation-structural-path
+        make-syntax-ast
+        syntax-ast-version
+        syntax-ast-native-root
+        syntax-ast-relations
         make-top-form
         top-form-kind
         top-form-head
         top-form-path
         top-form-start
         top-form-end
+        top-form-syntax-ast
         source-file::t
         make-source-file
         source-file-path
@@ -336,8 +351,19 @@
 (defstruct typed-contract-fact (definition-name definition-kind definition-formals definition-arity path definition-start definition-end comment-start comment-end contract contract-output contract-inputs contract-input-count arity-alignment tokens arrow-count group-count quality reasons quality-facets repair-evidence typed-comment))
 ;; CommentQualityFactStruct
 (defstruct comment-quality-fact (target-kind target-name path target-start target-end comment-start comment-end comment-lines comment-kind quality reasons required context evidence))
+;; SyntaxRelationStruct
+;;
+;; A deterministic, serializable projection of one native syntax occurrence.
+;; The native syntax object remains owned by SyntaxAst and never crosses the
+;; JSON/protocol boundary.
+(defstruct syntax-relation (kind name owner path start end phase context structural-path))
+;; SyntaxAstStruct
+;;
+;; The parser retains Gerbil's syntax object in memory and derives reusable,
+;; phase-aware relations from it exactly once.
+(defstruct syntax-ast (version native-root relations))
 ;; TopFormStruct
-(defstruct top-form (kind head path start end))
+(defstruct top-form (kind head path start end syntax-ast))
 ;; SourceFileStruct
 (defstruct source-file (path line-count package prelude namespace imports exports includes definitions calls forms module-imports module-exports macros macro-family-facts bindings poo-forms higher-order-forms control-flow-forms predicate-family-facts field-access-pattern-facts projection-burst-facts boolean-condition-facts loop-driver-facts dependency-adapter-quality-facts function-quality-profiles typed-contract-facts comment-quality-facts parse-error))
 ;; ProjectIndexStruct

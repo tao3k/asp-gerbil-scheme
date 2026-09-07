@@ -5,6 +5,7 @@
         :asp-gerbil-scheme/src/parser/formals
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/support
+        :asp-gerbil-scheme/src/parser/syntax-ast
         (only-in :std/misc/list unique)
         (only-in :std/srfi/1 drop)
         (only-in :std/srfi/13 string-index-right string-prefix?)
@@ -621,7 +622,9 @@
   (let* ((head (top-form-datum-head datum))
          (loc (stx-source form)))
     (make-top-form (form-kind head) (top-form-head-name head) relpath
-                   (source-start-line loc) (source-end-line loc))))
+                   (source-start-line loc) (source-end-line loc)
+                   (syntax-ast-from-form relpath form
+                                         (form-caller-name datum)))))
 ;; : (-> Head String )
 (def (top-form-head-name head)
   (if head

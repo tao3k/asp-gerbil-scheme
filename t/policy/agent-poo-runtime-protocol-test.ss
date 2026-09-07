@@ -16,6 +16,12 @@
 (import :policy/agent-poo-support)
 (export agent-poo-runtime-protocol-policy-test)
 
+;; : (-> (List TypeFinding) (List String))
+(def (macro-finding-names findings)
+  (map (lambda (finding)
+         (hash-get (type-finding-details finding) 'macro))
+       findings))
+
 ;; PolicyTest
 (def agent-poo-runtime-protocol-policy-test
   (test-suite "gerbil scheme harness agent POO runtime protocol policy"
@@ -66,6 +72,30 @@
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
             (check matching => [])))
+(test-case "agent policy follows a tested macro expansion closure"
+          (let* ((root ".run/policy-macro-expansion-closure")
+                 (_ (write-macro-expansion-closure-project root))
+                 (index (collect-project root))
+                 (findings (run-agent-policy index))
+                 (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
+            (check matching => [])))
+(test-case "agent policy does not treat quoted transformer data as an expansion edge"
+          (let* ((root ".run/policy-macro-quoted-data")
+                 (_ (write-macro-quoted-data-project root))
+                 (index (collect-project root))
+                 (findings (run-agent-policy index))
+                 (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
+            (check (length matching) => 1)
+            (check (macro-finding-names matching) => ["quoted-helper"])))
+(test-case "agent policy fails closed for ambiguous expansion helper owners"
+          (let* ((root ".run/policy-macro-ambiguous-expansion")
+                 (_ (write-macro-ambiguous-expansion-project root))
+                 (index (collect-project root))
+                 (findings (run-agent-policy index))
+                 (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
+            (check (length matching) => 2)
+            (check (macro-finding-names matching)
+                   => ["shared-helper" "shared-helper"])))
 (test-case "agent policy accepts a test loading the exact macro case owner"
           (let* ((root ".run/policy-macro-runtime-source-linked")
                  (_ (write-linked-macro-runtime-source-project root))

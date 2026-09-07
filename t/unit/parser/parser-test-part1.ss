@@ -79,6 +79,21 @@
           (and (equal? (poo-form-fact-name fact) name)
                (equal? (poo-form-fact-role fact) role)))
         facts))
+;; : (-> SourceFile String TopForm)
+(def (find-syntax-owner-form file owner)
+  (find (lambda (form)
+          (let (relations
+                (syntax-ast-relations (top-form-syntax-ast form)))
+            (and (pair? relations)
+                 (equal? (syntax-relation-owner (car relations)) owner))))
+        (source-file-forms file)))
+
+;; : (-> TopForm String String (List SyntaxRelation))
+(def (syntax-owner-relations form name context)
+  (filter (lambda (relation)
+            (and (equal? (syntax-relation-name relation) name)
+                 (equal? (syntax-relation-context relation) context)))
+          (syntax-ast-relations (top-form-syntax-ast form))))
 ;; ParsedData
 ;; : (-> String EnsureDir )
 (def (ensure-dir path)
@@ -130,6 +145,69 @@
                      => ["declarative" "definition"])
               (check (map call-fact-callee (source-file-calls file))
                      => []))))
+    (test-case "native syntax AST preserves phase, context, source, and deterministic projection"
+          (let* ((root ".run/parser-native-syntax-ast")
+                 (src (string-append root "/src"))
+                 (path (string-append src "/macros.ss")))
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/native-syntax)\n")
+            (write-text
+             path
+             (string-append
+              "(defrules emitted-helper () ((_ value) value))\n"
+              "(defrules declarative-public () ((_ value) (emitted-helper value)))\n"
+              "(defsyntax (procedural-public stx)\n"
+              "  (syntax-case stx () ((_ value) (syntax (emitted-helper value)))))\n"
+              "(defsyntax identifier-public\n"
+              "  (identifier-rules (id (emitted-helper id))))\n"
+              "(defsyntax (quoted-only stx)\n"
+              "  (let ((datum '(emitted-helper 1)))\n"
+              "    (syntax-case stx () ((_ ) (syntax datum)))))\n"
+              "(defsyntax (quasi-public stx)\n"
+              "  (quasisyntax (emitted-helper (unsyntax (compute stx)))))\n"))
+            (let* ((file (parse-source-file root "src/macros.ss"))
+                   (again (parse-source-file root "src/macros.ss"))
+                   (declarative (find-syntax-owner-form file "declarative-public"))
+                   (procedural (find-syntax-owner-form file "procedural-public"))
+                   (identifier (find-syntax-owner-form file "identifier-public"))
+                   (quoted (find-syntax-owner-form file "quoted-only"))
+                   (quasi (find-syntax-owner-form file "quasi-public"))
+                   (quasi-helper (car (syntax-owner-relations
+                                       quasi "emitted-helper"
+                                       "quasisyntax-template")))
+                   (quasi-compute (car (syntax-owner-relations
+                                        quasi "compute" "transformer"))))
+              (check (map (lambda (form)
+                            (syntax-ast-version (top-form-syntax-ast form)))
+                          (source-file-forms file))
+                     => (make-list 6 "gerbil-native-syntax-relations.v1"))
+              (check (syntax-ast-template-callees
+                      (top-form-syntax-ast declarative))
+                     => ["emitted-helper"])
+              (check (syntax-ast-template-callees
+                      (top-form-syntax-ast procedural))
+                     => ["emitted-helper"])
+              (check (syntax-ast-template-callees
+                      (top-form-syntax-ast identifier))
+                     => ["emitted-helper"])
+              (check (syntax-ast-template-callees
+                      (top-form-syntax-ast quoted))
+                     => [])
+              (check (syntax-relation-phase quasi-helper) => 0)
+              (check (syntax-relation-phase quasi-compute) => 1)
+              (check (> (syntax-relation-start quasi-helper) 0) => #t)
+              (check (pair? (syntax-relation-structural-path quasi-helper)) => #t)
+              (check (map (lambda (form)
+                            (syntax-ast-relation-projection
+                             (top-form-syntax-ast form)))
+                          (source-file-forms file))
+                     => (map (lambda (form)
+                               (syntax-ast-relation-projection
+                                (top-form-syntax-ast form)))
+                             (source-file-forms again))))))
     (test-case "package modularity policy supports external config files"
           (let* ((root ".run/parser-modularity-policy")
                  (policy-dir (string-append root "/policy"))
