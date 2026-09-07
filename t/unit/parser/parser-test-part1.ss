@@ -82,17 +82,14 @@
 ;; : (-> SourceFile String TopForm)
 (def (find-syntax-owner-form file owner)
   (find (lambda (form)
-          (let (relations
-                (syntax-ast-relations (top-form-syntax-ast form)))
-            (and (pair? relations)
-                 (equal? (syntax-relation-owner (car relations)) owner))))
+          (equal? (syntax-ast-owner (top-form-syntax-ast form)) owner))
         (source-file-forms file)))
 
-;; : (-> TopForm String String (List SyntaxRelation))
+;; : (-> TopForm Symbol Symbol (List SyntaxRelation))
 (def (syntax-owner-relations form name context)
   (filter (lambda (relation)
-            (and (equal? (syntax-relation-name relation) name)
-                 (equal? (syntax-relation-context relation) context)))
+            (and (eq? (syntax-relation-name relation) name)
+                 (eq? (syntax-relation-context relation) context)))
           (syntax-ast-relations (top-form-syntax-ast form))))
 ;; ParsedData
 ;; : (-> String EnsureDir )
@@ -176,14 +173,14 @@
                    (quoted (find-syntax-owner-form file "quoted-only"))
                    (quasi (find-syntax-owner-form file "quasi-public"))
                    (quasi-helper (car (syntax-owner-relations
-                                       quasi "emitted-helper"
-                                       "quasisyntax-template")))
+                                       quasi 'emitted-helper
+                                       'quasisyntax-template)))
                    (quasi-compute (car (syntax-owner-relations
-                                        quasi "compute" "transformer"))))
+                                        quasi 'compute 'transformer))))
               (check (map (lambda (form)
                             (syntax-ast-version (top-form-syntax-ast form)))
                           (source-file-forms file))
-                     => (make-list 6 "gerbil-native-syntax-relations.v1"))
+                     => (make-list 6 "gerbil-native-syntax-relations.v2"))
               (check (syntax-ast-template-callees
                       (top-form-syntax-ast declarative))
                      => ["emitted-helper"])

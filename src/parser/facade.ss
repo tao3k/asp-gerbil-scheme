@@ -300,15 +300,14 @@
         comment-quality-fact-selector
         syntax-relation-kind
         syntax-relation-name
-        syntax-relation-owner
-        syntax-relation-path
         syntax-relation-start
         syntax-relation-end
         syntax-relation-phase
         syntax-relation-context
         syntax-relation-structural-path
         syntax-ast-version
-        syntax-ast-native-root
+        syntax-ast-path
+        syntax-ast-owner
         syntax-ast-relations
         syntax-ast-template-callees
         syntax-ast-relation-projection

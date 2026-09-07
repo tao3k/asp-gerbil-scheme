@@ -260,8 +260,6 @@
         make-syntax-relation
         syntax-relation-kind
         syntax-relation-name
-        syntax-relation-owner
-        syntax-relation-path
         syntax-relation-start
         syntax-relation-end
         syntax-relation-phase
@@ -269,7 +267,8 @@
         syntax-relation-structural-path
         make-syntax-ast
         syntax-ast-version
-        syntax-ast-native-root
+        syntax-ast-path
+        syntax-ast-owner
         syntax-ast-relations
         make-top-form
         top-form-kind
@@ -353,15 +352,21 @@
 (defstruct comment-quality-fact (target-kind target-name path target-start target-end comment-start comment-end comment-lines comment-kind quality reasons required context evidence))
 ;; SyntaxRelationStruct
 ;;
-;; A deterministic, serializable projection of one native syntax occurrence.
-;; The native syntax object remains owned by SyntaxAst and never crosses the
-;; JSON/protocol boundary.
-(defstruct syntax-relation (kind name owner path start end phase context structural-path))
+;; A compact retained projection of one native syntax occurrence. Native
+;; syntax objects never cross into this model or the JSON/protocol boundary.
+(defstruct syntax-relation
+  (kind name start end phase context reverse-structural-path))
+
+;; The walker retains reverse-cons paths so sibling and descendant relations
+;; share their prefix spine.  Consumers continue to receive source order.
+;; : (-> SyntaxRelation (List Integer))
+(def (syntax-relation-structural-path relation)
+  (reverse (syntax-relation-reverse-structural-path relation)))
 ;; SyntaxAstStruct
 ;;
-;; The parser retains Gerbil's syntax object in memory and derives reusable,
-;; phase-aware relations from it exactly once.
-(defstruct syntax-ast (version native-root relations))
+;; Gerbil's native syntax object is traversed exactly once, then released.  The
+;; retained AST owns shared source identity plus compact phase-aware relations.
+(defstruct syntax-ast (version path owner relations))
 ;; TopFormStruct
 (defstruct top-form (kind head path start end syntax-ast))
 ;; SourceFileStruct

@@ -4,7 +4,7 @@
 ;;; - The runner reads its declaration before execution and applies the heap cap.
 (import (only-in :gerbil/gambit getenv setenv thread-receive thread-send)
         (only-in :std/test test-suite test-case check)
-        (only-in :std/srfi/1 iota)
+        (only-in :std/srfi/1 foldl iota)
         (only-in :std/srfi/13 string-prefix? string-split)
         (only-in :std/misc/path path-expand)
         (only-in :std/sort sort)
@@ -37,6 +37,21 @@
            (##gc)
            definition-count))
        (iota 32)))
+
+;; : (-> ProjectIndex Integer)
+(def (project-native-syntax-relation-count index)
+  (foldl
+   (lambda (file total)
+     (+ total
+        (foldl
+         (lambda (form file-total)
+           (+ file-total
+              (length
+               (syntax-ast-relations (top-form-syntax-ast form)))))
+         0
+         (source-file-forms file))))
+   0
+   (project-index-files index)))
 
 ;; : (forall (A) (-> String (-> A) A))
 (def (with-parser-trace value thunk)
@@ -97,6 +112,12 @@
         (thread-send caller stale)
         (check (length (parse-source-files "." ["build.ss" "gerbil.pkg"])) => 2)
         (check (thread-receive) => stale)))
+    (test-case "materializes the repository syntax index within the declared heap"
+      (let* ((index (collect-project "."))
+             (relation-count (project-native-syntax-relation-count index)))
+        (check (> (length (project-index-files index)) 0) => #t)
+        (check (> relation-count 0) => #t)
+        (##gc)))
     (test-case "releases repeated fixture profile receipts"
       (let ((counts (parser-profile-definition-counts)))
         (for-each (lambda (definition-count)

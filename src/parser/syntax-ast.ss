@@ -13,9 +13,9 @@
         syntax-ast-relation-projection)
 
 ;; This version names the semantics of the stable relation projection.  Native
-;; syntax objects are intentionally retained only in memory and are not part of
-;; the wire representation.
-(def +syntax-ast-version+ "gerbil-native-syntax-relations.v1")
+;; syntax objects are traversed during construction and released; only compact
+;; source identity and relations survive in the project index.
+(def +syntax-ast-version+ "gerbil-native-syntax-relations.v2")
 
 (def +syntax-ast-macro-definition-heads+
   '(define-syntax defsyntax defsyntax-for-match defrules defrule
@@ -27,33 +27,35 @@
 (def (syntax-ast-from-form relpath form owner)
   (make-syntax-ast
    +syntax-ast-version+
-   form
+   relpath
+   owner
    (reverse
-    (syntax-relations-from-stx/acc relpath form owner 0 "runtime" '()
-                                   0 "runtime" '()))))
+    (syntax-relations-from-stx/acc relpath form owner 0 'runtime '()
+                                   0 'runtime '()))))
 
 ;; : (-> SyntaxAst (List String))
 (def (syntax-ast-template-callees ast)
   (unique
-   (map syntax-relation-name
+   (map (lambda (relation)
+          (datum->string (syntax-relation-name relation)))
         (filter (lambda (relation)
-                  (and (equal? (syntax-relation-kind relation)
-                               "application-head")
-                       (member (syntax-relation-context relation)
-                               '("template" "quasisyntax-template"))))
+                  (and (eq? (syntax-relation-kind relation)
+                            'application-head)
+                       (memq (syntax-relation-context relation)
+                             '(template quasisyntax-template))))
                 (syntax-ast-relations ast)))))
 
 ;; : (-> SyntaxAst (List Json))
 (def (syntax-ast-relation-projection ast)
   (map (lambda (relation)
-         (hash (kind (syntax-relation-kind relation))
-               (name (syntax-relation-name relation))
-               (owner (or (syntax-relation-owner relation) ""))
-               (path (syntax-relation-path relation))
+         (hash (kind (datum->string (syntax-relation-kind relation)))
+               (name (datum->string (syntax-relation-name relation)))
+               (owner (or (syntax-ast-owner ast) ""))
+               (path (syntax-ast-path ast))
                (start (syntax-relation-start relation))
                (end (syntax-relation-end relation))
                (phase (syntax-relation-phase relation))
-               (context (syntax-relation-context relation))
+               (context (datum->string (syntax-relation-context relation)))
                (structuralPath (syntax-relation-structural-path relation))))
        (syntax-ast-relations ast)))
 
@@ -61,8 +63,8 @@
 ;; project definition can evaluate its transformer.  Gerbil's native stx API
 ;; remains the structural authority; the cases below only assign phase/context
 ;; to the standard quote and macro forms.
-;; : (-> Relpath Syntax (Or String False) Integer String (List Integer)
-;;        Integer String (List SyntaxRelation) (List SyntaxRelation))
+;; : (-> Relpath Syntax (Or String False) Integer Symbol (List Integer)
+;;        Integer Symbol (List SyntaxRelation) (List SyntaxRelation))
 (def (syntax-relations-from-stx/acc relpath stx owner phase context
                                     structural-path resume-phase resume-context
                                     out)
@@ -86,33 +88,36 @@
          resume-phase resume-context head-out))
        ((eq? head 'quote)
         (syntax-relations-from-children/acc
-         relpath children owner phase "quoted-data" structural-path 1
+         relpath children owner phase 'quoted-data structural-path 1
          phase context head-out))
        ((eq? head 'quasiquote)
         (syntax-relations-from-children/acc
-         relpath children owner phase "quasiquoted-data" structural-path 1
+         relpath children owner phase 'quasiquoted-data structural-path 1
          phase context head-out))
        ((and (member head '(unquote unquote-splicing))
-             (equal? context "quasiquoted-data"))
+             (eq? context 'quasiquoted-data))
         (syntax-relations-from-children/acc
          relpath children owner resume-phase resume-context structural-path 1
          resume-phase resume-context head-out))
        ((member head '(syntax quote-syntax))
         (syntax-relations-from-children/acc
-         relpath children owner (max 0 (- phase 1)) "template"
+         relpath children owner (max 0 (- phase 1)) 'template
          structural-path 1 phase context head-out))
        ((eq? head 'quasisyntax)
         (syntax-relations-from-children/acc
-         relpath children owner (max 0 (- phase 1)) "quasisyntax-template"
+         relpath children owner (max 0 (- phase 1)) 'quasisyntax-template
          structural-path 1 phase context head-out))
+       ((eq? head 'syntax/loc)
+        (syntax-relations-from-syntax-loc/acc
+         relpath children owner phase context structural-path head-out))
        ((and (member head '(unsyntax unsyntax-splicing))
-             (equal? context "quasisyntax-template"))
+             (eq? context 'quasisyntax-template))
         (syntax-relations-from-children/acc
          relpath children owner resume-phase resume-context structural-path 1
          resume-phase resume-context head-out))
        ((eq? head 'begin-syntax)
         (syntax-relations-from-children/acc
-         relpath children owner (+ phase 1) "transformer" structural-path 1
+         relpath children owner (+ phase 1) 'transformer structural-path 1
          phase context head-out))
        ((member head +syntax-ast-macro-definition-heads+)
         (syntax-relations-from-macro-definition/acc
@@ -125,25 +130,110 @@
         (syntax-relations-from-syntax-case/acc
          relpath children owner phase structural-path
          resume-phase resume-context head-out))
+       ((member head '(lambda lambda% define def define-values defvalues))
+        (syntax-relations-from-binding-form/acc
+         relpath children owner phase context structural-path head-out))
+       ((member head '(let let* letrec letrec* let-values let*-values
+                           letrec-values))
+        (syntax-relations-from-let/acc
+         relpath children owner phase context structural-path head-out))
        (else
         (syntax-relations-from-children/acc
          relpath children owner phase context structural-path 1
          resume-phase resume-context head-out))))))
 
-;; : (-> Relpath Syntax (Or String False) Integer String (List Integer)
+;; : (-> Relpath Syntax (Or String False) Integer Symbol (List Integer)
 ;;        SyntaxRelation)
-(def (syntax-ast-head-relation relpath head-stx owner phase context structural-path)
+(def (syntax-ast-head-relation _relpath head-stx _owner phase context structural-path)
   (let (loc (stx-source head-stx))
     (make-syntax-relation
-     "application-head"
-     (datum->string (stx-e head-stx))
-     owner
-     relpath
+     'application-head
+     (stx-e head-stx)
      (source-start-line loc)
      (source-end-line loc)
      phase
      context
      structural-path)))
+
+;; syntax/loc evaluates its source expression at the surrounding transformer
+;; phase and emits only its second operand as runtime template syntax.
+;; : (-> Relpath (List Syntax) (Or String False) Integer Symbol
+;;        (List Integer) (List SyntaxRelation) (List SyntaxRelation))
+(def (syntax-relations-from-syntax-loc/acc relpath children owner phase context
+                                           structural-path out)
+  (let* ((source-out
+          (if (null? children)
+            out
+            (syntax-relations-from-stx/acc
+             relpath (car children) owner phase context
+             (cons 1 structural-path) phase context out)))
+         (template-out
+          (if (< (length children) 2)
+            source-out
+            (syntax-relations-from-stx/acc
+             relpath (cadr children) owner (max 0 (- phase 1)) 'template
+             (cons 2 structural-path) phase context source-out))))
+    (syntax-relations-from-children/acc
+     relpath (syntax-ast-drop children 2) owner phase context structural-path 3
+     phase context template-out)))
+
+;; Lambda/definition targets are binding syntax, never emitted applications;
+;; their bodies remain in the surrounding template or transformer context.
+;; : (-> Relpath (List Syntax) (Or String False) Integer Symbol
+;;        (List Integer) (List SyntaxRelation) (List SyntaxRelation))
+(def (syntax-relations-from-binding-form/acc relpath children owner phase context
+                                             structural-path out)
+  (let (binding-out
+        (if (null? children)
+          out
+          (syntax-relations-from-stx/acc
+           relpath (car children) owner phase 'binding
+           (cons 1 structural-path) phase context out)))
+    (syntax-relations-from-children/acc
+     relpath (if (null? children) '() (cdr children)) owner phase context
+     structural-path 2 phase context binding-out)))
+
+;; Let binding names/patterns are syntax, while initializer expressions and
+;; bodies can contain emitted macro applications.  Named-let adds one binding
+;; identifier before the binding list.
+;; : (-> Relpath (List Syntax) (Or String False) Integer Symbol
+;;        (List Integer) (List SyntaxRelation) (List SyntaxRelation))
+(def (syntax-relations-from-let/acc relpath children owner phase context
+                                    structural-path out)
+  (let* ((named? (and (pair? children) (identifier? (car children))))
+         (binding-index (if named? 2 1))
+         (bindings-tail (if named? (cdr children) children))
+         (bindings (and (pair? bindings-tail) (car bindings-tail)))
+         (body (if (pair? bindings-tail) (cdr bindings-tail) '()))
+         (binding-out
+          (if bindings
+            (syntax-relations-from-let-bindings/acc
+             relpath (syntax-ast-list-items bindings) owner phase context
+             (cons binding-index structural-path) out)
+            out)))
+    (syntax-relations-from-children/acc
+     relpath body owner phase context structural-path (+ binding-index 1)
+     phase context binding-out)))
+
+;; : (-> Relpath (List Syntax) (Or String False) Integer Symbol
+;;        (List Integer) (List SyntaxRelation) (List SyntaxRelation))
+(def (syntax-relations-from-let-bindings/acc relpath bindings owner phase context
+                                             structural-path out)
+  (let loop ((rest bindings) (index 0) (out out))
+    (if (null? rest)
+      out
+      (let* ((items (syntax-ast-list-items (car rest)))
+             (name-out
+              (if (null? items)
+                out
+                (syntax-relations-from-stx/acc
+                 relpath (car items) owner phase 'binding
+                 (cons 0 (cons index structural-path)) phase context out)))
+             (value-out
+              (syntax-relations-from-children/acc
+               relpath (if (null? items) '() (cdr items)) owner phase context
+               (cons index structural-path) 1 phase context name-out)))
+        (loop (cdr rest) (+ index 1) value-out)))))
 
 ;; : (-> Relpath (List Syntax) (Or String False) Integer String
 ;;        (List Integer) Integer Integer String (List SyntaxRelation))
@@ -157,7 +247,7 @@
             (+ index 1)
             (syntax-relations-from-stx/acc
              relpath (car rest) owner phase context
-             (append structural-path [index])
+             (cons index structural-path)
              resume-phase resume-context out)))))
 
 ;; : (-> Relpath Symbol (List Syntax) (Or String False) (List Integer)
@@ -179,7 +269,7 @@
     ;; templates through the generic walker.
     (syntax-relations-from-children/acc
      relpath (if (pair? children) (cdr children) '())
-     owner 1 "transformer" structural-path 2 1 "transformer" out))))
+     owner 1 'transformer structural-path 2 1 'transformer out))))
 
 ;; : (-> Relpath Symbol (List Syntax) (Or String False) Integer
 ;;        (List Integer) Integer String (List SyntaxRelation))
@@ -204,7 +294,7 @@
             (+ index 1)
             (syntax-relations-from-rule/acc
              relpath (car rest) owner phase
-             (append structural-path [index]) out)))))
+             (cons index structural-path) out)))))
 
 ;; syntax-rules/defrules clauses have a pattern, an optional fender, and an
 ;; emitted template.  This mirrors the public form boundary, not Gerbil's
@@ -218,16 +308,16 @@
       out
       (let* ((pattern-out
               (syntax-relations-from-stx/acc
-               relpath (car items) owner phase "pattern"
-               (append structural-path [0]) phase "transformer" out))
+               relpath (car items) owner phase 'pattern
+               (cons 0 structural-path) phase 'transformer out))
              (fender-out
               (syntax-relations-from-children/acc
-               relpath (syntax-ast-middle items) owner phase "transformer"
-               structural-path 1 phase "transformer" pattern-out)))
+               relpath (syntax-ast-middle items) owner phase 'transformer
+               structural-path 1 phase 'transformer pattern-out)))
         (syntax-relations-from-stx/acc
-         relpath (syntax-ast-last items) owner (max 0 (- phase 1)) "template"
-         (append structural-path [(- (length items) 1)])
-         phase "transformer" fender-out)))))
+         relpath (syntax-ast-last items) owner (max 0 (- phase 1)) 'template
+         (cons (- (length items) 1) structural-path)
+         phase 'transformer fender-out)))))
 
 ;; defrule's declared formals are its pattern.  The optional expression before
 ;; the final template is a transformer-phase fender.
@@ -240,17 +330,17 @@
     out
     (let* ((pattern-out
             (syntax-relations-from-stx/acc
-             relpath (car children) owner phase "pattern"
-             (append structural-path [start-index]) phase "transformer" out))
+             relpath (car children) owner phase 'pattern
+             (cons start-index structural-path) phase 'transformer out))
            (fender-out
             (syntax-relations-from-children/acc
-             relpath (syntax-ast-middle children) owner phase "transformer"
-             structural-path (+ start-index 1) phase "transformer"
+             relpath (syntax-ast-middle children) owner phase 'transformer
+             structural-path (+ start-index 1) phase 'transformer
              pattern-out)))
       (syntax-relations-from-stx/acc
-       relpath (syntax-ast-last children) owner (max 0 (- phase 1)) "template"
-       (append structural-path [(+ start-index (- (length children) 1))])
-       phase "transformer" fender-out))))
+       relpath (syntax-ast-last children) owner (max 0 (- phase 1)) 'template
+       (cons (+ start-index (- (length children) 1)) structural-path)
+       phase 'transformer fender-out))))
 
 ;; syntax-case clause bodies execute at transformer phase.  Any emitted syntax
 ;; is discovered by the syntax/quote-syntax/quasisyntax cases in the generic
@@ -262,7 +352,7 @@
                                             resume-context out)
   (let (prefix-out
         (syntax-relations-from-children/acc
-         relpath (syntax-ast-take children 2) owner phase "transformer"
+         relpath (syntax-ast-take children 2) owner phase 'transformer
          structural-path 1 resume-phase resume-context out))
     (let loop ((clauses (syntax-ast-drop children 2))
                (index 3)
@@ -274,16 +364,16 @@
                 (if (null? items)
                   out
                   (syntax-relations-from-stx/acc
-                   relpath (car items) owner phase "pattern"
-                   (append structural-path [index 0])
-                   phase "transformer" out)))
+                   relpath (car items) owner phase 'pattern
+                   (cons 0 (cons index structural-path))
+                   phase 'transformer out)))
                (body-out
                 (if (null? items)
                   pattern-out
                   (syntax-relations-from-children/acc
-                   relpath (cdr items) owner phase "transformer"
-                   (append structural-path [index]) 1
-                   phase "transformer" pattern-out))))
+                   relpath (cdr items) owner phase 'transformer
+                   (cons index structural-path) 1
+                   phase 'transformer pattern-out))))
           (loop (cdr clauses) (+ index 1) body-out))))))
 
 ;; : (-> Syntax (List Syntax))
