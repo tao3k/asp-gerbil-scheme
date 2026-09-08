@@ -1,7 +1,7 @@
 {
   "languageId": "gerbil-scheme",
   "profileDigest": "blake3-256:d91a4b223edc98e4fb9526b98aceff251f92b7af1ac8792628a5eb3307a6bbef",
-  "bundleDigest": "blake3-256:5e1a69e5a74eeb28e05c20fef8371f7c41d1c9335e829050678ad7fcf5ec51d1",
+  "bundleDigest": "blake3-256:a8b9d866cf7d5e11484a90f431c6706c2cc71dd7cea297ed5e605263cfff7d9b",
   "schemas": [
     {
       "name": "asp-client-cancellation-probe-request.schema.json",
@@ -145,7 +145,7 @@
     },
     {
       "name": "large-search-playbook-performance-receipt.v1.schema.json",
-      "digest": "blake3-256:951cee907a77fd2bc695a19b977a50508dc216eb3fe1e51f10195572880b4377"
+      "digest": "blake3-256:06a8a9c3fdcd7394b11eef3b7a00c4fd3f1d8a582a19ad6955efda59284e4db2"
     },
     {
       "name": "lexical-postings-work-reduction-receipt.schema.json",
