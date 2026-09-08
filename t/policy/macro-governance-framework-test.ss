@@ -117,6 +117,9 @@
          root
          "(export define-value)\n(defsyntax define-value (lambda (stx) stx))\n"
          "(import :std/test)\n(def core-test (test-suite \"no invocation\" (test-case \"asserts only\" (check #t => #t))))\n")
+        (macro-governance-write-text
+         (string-append root "/gerbil.pkg")
+         "(package: sample/macro-governance)\n")
         (let (baseline (macro-governance-receipt-json
                          (macro-governance-admit (collect-project root))))
           (macro-governance-write-text
@@ -125,7 +128,9 @@
           (check (source-file-parse-error (parse-source-file root "gerbil.pkg")) => #f)
           (check (macro-governance-receipt-json
                    (macro-governance-admit (collect-project root))) => baseline)
-          (delete-file (string-append root "/gerbil.pkg"))
+          (macro-governance-write-text
+           (string-append root "/gerbil.pkg")
+           "(package: sample/macro-governance)\n")
           (check (macro-governance-receipt-json
                    (macro-governance-admit (collect-project root))) => baseline)
           (check (hash-get baseline 'status) => "rejected"))))

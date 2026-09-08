@@ -13,5 +13,4 @@
 (defbuild-script
  (asp-gerbil-scheme-provider-spec)
  optimize: #f
- bindir: (path-expand "bin" +provider-build-root+)
- libdir: (path-expand "lib" +provider-build-root+))
+ bindir: (path-expand "bin" +provider-build-root+))
