@@ -7,6 +7,8 @@
         :std/misc/ports
         :std/misc/process
         (only-in :std/text/json read-json)
+        (only-in :asp-gerbil-scheme/src/build-api/source-coverage
+                 asp-gerbil-scheme-source-coverage)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
         :asp-gerbil-scheme/src/policy/gxtest
@@ -211,7 +213,7 @@
                  (finding (car matching))
                  (details (type-finding-details finding)))
             (check (length matching) => 1)
-            (check (type-finding-path finding) => "t/native-syntax-test.ss")
+            (check (type-finding-path finding) => "t/search-test.ss")
             (check (hash-get details 'sourceClass) => "test")
             (check (hash-get details 'lineCountLimit) => 650)
             (check (hash-get details 'hardLineCountLimit) => 1000)
@@ -288,6 +290,13 @@
                         "(package: sample/gxtest-policy\n  policy: ((modularity-policy config: \"policy/modularity.ss\")))\n")
             (write-text (string-append policy-dir "/modularity.ss")
                         "(modularity-policy max-test-lines: 700 explanation: \"Downstream gxtest policy helper keeps replay thresholds in package config.\")\n")
+            ;; project-policy-findings runs after downstream build.ss has
+            ;; declared the package-owned source catalog.  Reproduce that
+            ;; execution boundary without widening back to directory scans.
+            (asp-gerbil-scheme-source-coverage
+             roots: '("t")
+             files: '("t/search-test.ss")
+             owner-root: root)
             (let (matching (filter-rule
                             "GERBIL-SCHEME-MOD-R007"
                             (project-policy-findings root)))
