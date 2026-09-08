@@ -26,7 +26,6 @@
         macro-governance-contract-macro
         macro-governance-contract-purpose
         macro-governance-contract-capabilities
-        macro-governance-contract-witness-owners
         macro-governance-decision
         make-macro-governance-decision
         macro-governance-decision?
@@ -135,14 +134,13 @@
 ;; A contract is a POO value so downstream profiles can extend it without
 ;; adding new parser syntax.  Its evidence remains parser-owned.
 (def (make-macro-governance-contract
-      macro-name purpose-value capability-values witness-values)
+      macro-name purpose-value capability-values)
   ;; Parenthesized slot/value pairs capture lexical values.  Keyword slots with
   ;; same-named identifiers are POO self-slot references, so constructor
   ;; formals deliberately use distinct names.
   (.o (macro macro-name)
       (purpose purpose-value)
-      (capabilities capability-values)
-      (witness-owners witness-values)))
+      (capabilities capability-values)))
 
 (def (macro-governance-contract-macro contract)
   (.get contract macro))
@@ -152,9 +150,6 @@
 
 (def (macro-governance-contract-capabilities contract)
   (.get contract capabilities))
-
-(def (macro-governance-contract-witness-owners contract)
-  (.get contract witness-owners))
 
 ;; Decisions and receipts are closed typed data, not extensible policy objects.
 (defstruct macro-governance-decision

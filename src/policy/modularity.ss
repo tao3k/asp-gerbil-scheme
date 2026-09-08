@@ -2,6 +2,7 @@
 ;;; Modularity policy checks over parser-owned source-file facts.
 
 (import :gerbil/gambit
+        (only-in :clan/poo/object .def .get)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/model
         (only-in :std/misc/ports read-file-lines)
@@ -15,6 +16,7 @@
         :asp-gerbil-scheme/src/types/findings)
 
 (export run-modularity-policy
+        default-modularity-profile
         +max-source-line-count+
         +max-test-line-count+
         +hard-max-leaf-line-count+
@@ -46,34 +48,15 @@
 (def +max-test-definition-span+ 260)
 ;; ConfigConstant
 (def +default-test-directory+ "t")
-;; Integer
-(def +min-test-directory-policy-explanation-length+ 24)
-;;; Boundary:
-;;; - project-modularity-policy is the only package policy lookup for this rule family.
-;;; - Keep root/package ownership separate from per-file policy decisions.
-;; : (-> ProjectIndex PackageModularityPolicy )
-(def (project-modularity-policy index)
-  (and (project-index-package index)
-       (project-package-modularity-policy (project-index-package index))))
-;; : (-> MaybePolicy Boolean )
-(def (modularity-policy-disabled? policy)
-  (and policy (modularity-policy-disabled policy)))
-;;; Boundary:
-;;; - filter-enabled-modularity-findings applies package rule lists after detection.
-;;; - Detector coverage stays project-wide even when gerbil.pkg filters output.
-;; : (-> MaybePolicy (List TypeFinding) (List TypeFinding) )
-(def (filter-enabled-modularity-findings policy findings)
-  (if policy
-    (filter (cut modularity-finding-enabled? policy <>)
-            findings)
-    findings))
-;; : (-> Policy TypeFinding Boolean )
-(def (modularity-finding-enabled? policy finding)
-  (let ((rule-id (type-finding-rule-id finding))
-        (enabled (modularity-policy-enabled-rules policy))
-        (disabled (modularity-policy-disabled-rules policy)))
-    (and (or (null? enabled) (member rule-id enabled))
-         (not (member rule-id disabled)))))
+;; Explicit native POO configuration; all rules remain enabled.
+(.def default-modularity-profile
+  (max-source-lines +max-source-line-count+)
+  (max-test-lines +max-test-line-count+)
+  (min-source-definitions +min-source-definition-count+)
+  (min-test-definitions +min-test-definition-count+)
+  (max-test-cases +max-test-case-count+)
+  (max-test-definition-span +max-test-definition-span+))
+
 ;;; Boundary:
 ;;; - sibling-file-dir-owner-collision-findings composes first-class procedures.
 ;;; - Keep data-flow evidence visible.
@@ -220,12 +203,12 @@
 (def (project-source-roots index)
   (let* ((package (project-index-package index))
          (policy (and package
-                      (project-package-source-scope-policy package)))
-         (roots (and policy (source-scope-policy-roots policy))))
+                      (project-package-source-scope package)))
+         (roots (and policy (source-scope-roots policy))))
     (cond
      ((and roots (pair? roots)) roots)
-     ((and policy (pair? (source-scope-policy-runtime-roots policy)))
-      (source-scope-policy-runtime-roots policy))
+     ((and policy (pair? (source-scope-runtime-roots policy)))
+      (source-scope-runtime-roots policy))
      (else ["src"]))))
 ;; : (-> String String Boolean )
 (def (source-path-under-root? path root)
@@ -352,59 +335,22 @@
    (lambda (file)
      (let (actual-directory (non-t-test-directory-source-file file))
        (and actual-directory
-            (not (test-directory-policy-allows? index actual-directory))
             (test-directory-layout-finding index file actual-directory))))
    (project-index-files index)))
-;; : (-> ProjectIndex Directory Boolean )
-(def (test-directory-policy-allows? index directory)
-  (and (test-directory-policy-directory-listed? index directory)
-       (test-directory-policy-explanation-clear? (project-test-directory-policy index))))
-;; : (-> ProjectIndex Directory Boolean )
-(def (test-directory-policy-directory-listed? index directory)
-  (let (policy (project-test-directory-policy index))
-    (and policy
-         (member directory (test-directory-policy-allowed-directories policy)))))
-;; : (-> Policy Boolean )
-(def (test-directory-policy-explanation-clear? policy)
-  (and policy
-       (let (explanation (test-directory-policy-explanation policy))
-         (and explanation
-              (fx>= (string-length (string-trim explanation))
-                    +min-test-directory-policy-explanation-length+)))))
-;; : (-> ProjectIndex ProjectTestDirectoryPolicy )
-(def (project-test-directory-policy index)
-  (and (project-index-package index)
-       (project-package-test-directory-policy (project-index-package index))))
-;; : (-> ProjectIndex SourceFile ActualDirectory TypeFinding )
+;; : (-> ProjectIndex SourceFile ActualDirectory TypeFinding)
 (def (test-directory-layout-finding index file actual-directory)
-  (let* ((policy (project-test-directory-policy index))
-         (listed? (test-directory-policy-directory-listed? index actual-directory))
-         (explanation (and policy (test-directory-policy-explanation policy)))
-         (reason (test-directory-policy-rejection-reason policy listed?)))
-    (make-type-finding
-     (policy-rule-id +modularity-test-directory-rule+)
-     (policy-rule-severity +modularity-test-directory-rule+)
-     (source-file-path file)
-     (string-append "Gerbil unit test owner "
-                    (source-file-path file)
-                    " uses non-t "
-                    actual-directory
-                    "/ layout; use t/ unless gerbil.pkg policy explicitly allows this directory with a clear explanation ("
-                    reason
-                    ")")
-     (source-file-path file)
-     (hash (expectedDirectory +default-test-directory+)
-           (actualDirectory actual-directory)
-           (policyDirectoryAllowed listed?)
-           (policyExplanation explanation)
-           (policyExplanationMinimumChars
-            +min-test-directory-policy-explanation-length+)))))
-;; : (-> Policy Listed String )
-(def (test-directory-policy-rejection-reason policy listed?)
-  (cond
-   ((not policy) "no policy override")
-   ((not listed?) "directory is not allowed by policy")
-   (else "policy override is missing a clear explanation")))
+  (make-type-finding
+   (policy-rule-id +modularity-test-directory-rule+)
+   (policy-rule-severity +modularity-test-directory-rule+)
+   (source-file-path file)
+   (string-append "Gerbil unit test owner "
+                  (source-file-path file)
+                  " uses non-t " actual-directory
+                  "/ layout; move native test owners under t/")
+   (source-file-path file)
+   (hash (expectedDirectory +default-test-directory+)
+         (actualDirectory actual-directory))))
+
 ;;; Boundary:
 ;;; - source-leaf-bloat-findings composes first-class procedures.
 ;;; - Keep data-flow evidence visible.
@@ -458,17 +404,17 @@
                policy))))
      (project-index-files index))))
 ;;; Boundary:
-;;; - modularity-max-source-line-count resolves package thresholds.
-;;; - Defaults remain provider-owned when gerbil.pkg does not opt in.
+;;; - modularity-max-source-line-count resolves explicit POO profile thresholds.
+;;; - Defaults are provider-owned and package metadata cannot override them.
 ;; : (-> MaybePolicy Integer )
 (def (modularity-max-source-line-count policy)
   (modularity-line-count-limit
-   (and policy (modularity-policy-max-source-line-count policy))
+   (and policy (.get policy max-source-lines))
    +max-source-line-count+))
 ;; : (-> MaybePolicy Integer )
 (def (modularity-max-test-line-count policy)
   (modularity-line-count-limit
-   (and policy (modularity-policy-max-test-line-count policy))
+   (and policy (.get policy max-test-lines))
    +max-test-line-count+))
 ;; : (-> MaybeInteger Integer Integer )
 (def (modularity-line-count-limit configured-count default-count)
@@ -478,39 +424,34 @@
       +hard-max-leaf-line-count+)))
 ;; : (-> MaybePolicy Integer )
 (def (modularity-min-source-definition-count policy)
-  (or (and policy (modularity-policy-min-source-definition-count policy))
+  (or (and policy (.get policy min-source-definitions))
       +min-source-definition-count+))
 ;; : (-> MaybePolicy Integer )
 (def (modularity-min-test-definition-count policy)
-  (or (and policy (modularity-policy-min-test-definition-count policy))
+  (or (and policy (.get policy min-test-definitions))
       +min-test-definition-count+))
 ;; : (-> MaybePolicy Integer )
 (def (modularity-max-test-case-count policy)
-  (or (and policy (modularity-policy-max-test-case-count policy))
+  (or (and policy (.get policy max-test-cases))
       +max-test-case-count+))
 ;; : (-> MaybePolicy Integer )
 (def (modularity-max-test-definition-span policy)
-  (or (and policy (modularity-policy-max-test-definition-span policy))
+  (or (and policy (.get policy max-test-definition-span))
       +max-test-definition-span+))
 ;;; Boundary:
-;;; - run-modularity-policy composes project-wide findings, then policy filters.
-;;; - Do not narrow coverage by folder before package policy has been resolved.
-;; : (-> ProjectIndex Integer )
-(def (run-modularity-policy index)
-  (let (policy (project-modularity-policy index))
-    (if (modularity-policy-disabled? policy)
-      '()
-      (filter-enabled-modularity-findings
-       policy
-       (append
-        (sibling-file-dir-owner-collision-findings index)
-        (repeated-owner-entry-findings index)
-        (file-name-mismatch-findings index)
-        (bin-entrypoint-implementation-findings index)
-        (facade-implementation-findings index)
-        (test-directory-layout-findings index)
-        (source-leaf-bloat-findings index policy)
-        (test-leaf-bloat-findings index policy))))))
+;;; - Policy execution uses an explicit immutable POO profile.
+;;; - Package metadata never suppresses rule findings.
+;; : (-> ProjectIndex (List TypeFinding))
+(def (run-modularity-policy index profile: (profile default-modularity-profile))
+  (append
+   (sibling-file-dir-owner-collision-findings index)
+   (repeated-owner-entry-findings index)
+   (file-name-mismatch-findings index)
+   (bin-entrypoint-implementation-findings index)
+   (facade-implementation-findings index)
+   (test-directory-layout-findings index)
+   (source-leaf-bloat-findings index profile)
+   (test-leaf-bloat-findings index profile)))
 ;; : (-> String Boolean )
 (def (project-gerbil-test-path? path)
   (equal? (source-path-class path) "test"))
@@ -611,7 +552,7 @@
                     (number->string test-case-count)
                     " test cases and max definition span "
                     (number->string definition-span)
-                    "; split the test owner; gerbil.pkg may justify parsed complexity limits, but effective owner lines are hard-capped at "
+                    "; split the test owner; effective owner lines are hard-capped at "
                     (number->string +hard-max-leaf-line-count+))
      (source-file-path file)
      (hash (sourceClass (source-path-class (source-file-path file)))
@@ -624,6 +565,4 @@
            (testCaseCount test-case-count)
            (testCaseCountLimit max-test-case-count)
            (maxDefinitionSpan definition-span)
-           (maxDefinitionSpanLimit max-definition-span)
-           (policyConfigPath (and policy (modularity-policy-config-path policy)))
-           (policyExplanation (and policy (modularity-policy-explanation policy)))))))
+           (maxDefinitionSpanLimit max-definition-span)))))

@@ -383,8 +383,8 @@
          timings))
 
 ;;; Full policy runner:
-;;; - Use this when a scenario validates user-facing package policy controls.
-;;; - run-policy-checks applies gerbil.pkg rule filters; run-agent-policy does not.
+;;; - Use this when a scenario validates the complete provider policy runner.
+;;; - run-policy-checks includes modularity and agent rules without package filters.
 ;; : (-> PolicyScenario PolicyScenarioResult )
 (def (policy-scenario-run/checks scenario)
   (let* ((before-index (collect-project (policy-scenario-input-root scenario)))

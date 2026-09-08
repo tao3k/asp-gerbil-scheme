@@ -202,15 +202,7 @@
 
 ;; : (-> ProjectIndex SourceFile Boolean)
 (def (macro-runtime-source-test-owner? index owner)
-  (let* ((package (project-index-package index))
-         (policy (and package
-                      (project-package-test-directory-policy package)))
-         (roots (if policy
-                  (or (test-directory-policy-allowed-directories policy) '())
-                  ["t"])))
-    (ormap (lambda (root)
-             (source-path-under-root? (source-file-path owner) root))
-           roots)))
+  (source-path-under-root? (source-file-path owner) "t"))
 
 ;; : (-> SourceFile Boolean)
 (def (macro-runtime-source-assertion-owner? owner)

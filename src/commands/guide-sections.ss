@@ -32,7 +32,7 @@
        "|downstream gxtest-fixture=(def project-policy-test (make-project-policy-test \".\"))"
        "|cmd downstream-test=gxtest t/project-policy-test.ss"
        "|policy downstream-state-boundary=gxpkg package state belongs under ~/.gerbil; do not create, depend on, or commit repository-local .gerbil"
-       "|policy downstream-policy-ownership=gerbil.pkg owns source-scope, runtime-roots, modularity config, and agent-policy overrides; gxtest should call the harness, not duplicate policy rules"
+       "|policy downstream-policy-ownership=gerbil.pkg owns package identity and dependency acquisition only; explicit POO profiles own policy; gxtest calls the harness"
        "|policy downstream-reporting=make-project-policy-test prints gerbil-gxtest compact findings plus agent repair lines on failure; use project-policy-report plus gxtest-report-* accessors for custom structured status/files/definitions/findings"]))
 (def +guide-extension-section+
      (make-guide-section
@@ -44,7 +44,7 @@
       "policy"
       (append ["|policy structural-fact-boundary=Gerbil publishes parser/interface facts through typed provider evidence; no provider-local search command owns them"
        "|policy structural-index-owner=Gerbil Scheme provider-local parser facts; ASP Server may route the packet, while graph topology, caching, and ranking are separate contracts"
-               "|policy configurable-interface=downstream gerbil.pkg policy may declare source-scope roots/runtime-roots/exclude-directories and agent-policy enabled-rules/disabled-rules; without explicit source-scope, build.ss defbuild-script targets provide runtime-root evidence"
+               "|policy configurable-interface=Build API coverage supplies roots/runtime-roots/exclude-directories; explicit POO profiles configure policy; gerbil.pkg cannot disable rules"
                "|policy package-build-canonical-lanes=build.ss has three native Gerbil lanes: :clan/building plus all-gerbil-modules for src-root package discovery, :std/build-script defbuild-script for simple gxpkg package templates, and :std/make build-spec for ssi:/gsc:/FFI/static/native build forms"
                "|policy package-build-forbidden-control=R025 should target handwritten GERBIL_LOADPATH/srcdir setup, manual compiler/process dispatch, shell pipelines, and runtime/CLI routing in build.ss; do not canonicalize valid std/make ssi:/gsc:/FFI builds into clan/building"
                "|policy cli-option-composition=keep src/cli.ss as a thin dispatcher with precise only-in imports; when command option surfaces grow, compose option objects instead of expanding dispatcher parsing logic"

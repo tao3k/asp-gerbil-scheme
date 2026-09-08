@@ -1,5 +1,6 @@
 ;;; -*- Gerbil -*-
 (import :std/test
+        (only-in :asp-gerbil-scheme/src/parser/package read-project-package)
         :asp-gerbil-scheme/src/extensions/facade
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/protocol/json
@@ -205,7 +206,7 @@
                                (syntax-ast-relation-projection
                                 (top-form-syntax-ast form)))
                              (source-file-forms again))))))
-    (test-case "package modularity policy supports external config files"
+    (test-case "package metadata does not project or load external policy config"
           (let* ((root ".run/parser-modularity-policy")
                  (policy-dir (string-append root "/policy"))
                  (config-path (string-append policy-dir "/modularity.ss")))
@@ -216,19 +217,16 @@
                         "(package: sample/parser-policy\n  policy: ((modularity-policy config: \"policy/modularity.ss\" max-source-lines: 700)))\n")
             (write-text config-path
                         "(modularity-policy max-test-lines: 1000 min-test-definitions: 2 disabled-rules: (\"GERBIL-SCHEME-MOD-R007\") explanation: \"Large generated replay tests stay package-local while policy config remains out of the test owner.\")\n")
-            (let* ((index (collect-project root))
-                   (package (project-index-package index))
-                   (policy (project-package-modularity-policy package)))
-              (check (modularity-policy-config-path policy)
-                     => "policy/modularity.ss")
-              (check (modularity-policy-max-source-line-count policy) => 700)
-              (check (modularity-policy-max-test-line-count policy) => 1000)
-              (check (modularity-policy-min-test-definition-count policy) => 2)
-              (check (modularity-policy-disabled-rules policy)
-                     => ["GERBIL-SCHEME-MOD-R007"])
-              (check (modularity-policy-explanation policy)
-                     => "Large generated replay tests stay package-local while policy config remains out of the test owner."))))
-    (test-case "collect-source-scope parses only named changed owners"
+            (let* ((package (read-project-package root))
+                   (fields (hash-get (project-package-json package) 'fields)))
+              (check (project-package-name package) => "sample/parser-policy")
+              (check (project-package-source-scope package) => #f)
+              (check (hash-keys fields) => ['packageManager])
+              ;; Invalid external data cannot affect package reading.
+              (write-text config-path "(")
+              (check (project-package-json (read-project-package root))
+                     => (project-package-json package)))))
+    (test-case "collect-source-scope keeps named owners despite package exclusions"
           (let* ((root ".run/parser-changed-project-files")
                  (src (string-append root "/src"))
                  (generated (string-append root "/src/generated")))
@@ -254,9 +252,10 @@
                       "src/missing.ss"
                       "README.md"]))
                    (files (project-index-files index)))
-              (check (map source-file-path files) => ["src/changed.ss"])
+              (check (map source-file-path files)
+                     => ["src/changed.ss" "src/generated/ignored.ss"])
               (check (map definition-name (project-definitions index))
-                     => ["changed"]))))
+                     => ["changed" "ignored"]))))
     (test-case "collect-test-source-scope deduplicates shared import closure"
           (let* ((root ".run/parser-test-source-scope-dedup")
                  (src (string-append root "/src"))

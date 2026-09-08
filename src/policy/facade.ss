@@ -9,7 +9,8 @@
         :asp-gerbil-scheme/src/policy/modularity
         :asp-gerbil-scheme/src/policy/repair)
 
-(export make-policy-rule
+(export default-modularity-profile
+        make-policy-rule
         policy-rule-id
         policy-rule-severity
         +modularity-facade-rule+

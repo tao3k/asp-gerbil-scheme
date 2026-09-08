@@ -139,17 +139,17 @@
       "configurable-interface-posture"
       "configurable-interface"
       (configurable-interface-status package)
-      "Downstream projects can override source scope and agent policy through gerbil.pkg policy without redeclaring built-in defaults."
-      "parser-owned-gerbil.pkg-and-build.ss-policy"
+      "Build API coverage supplies source scope; explicit POO profiles own policy configuration, with all rules enabled by default."
+      "build-api-coverage-and-native-poo-profiles"
       "info --json ."
-      ["capability" "posture" "configurable" "interface" "source-scope" "agent-policy" "gerbil.pkg" "build.ss"]
+      ["capability" "posture" "configurable" "interface" "source-scope" "agent-policy" "build.ss"]
       (hash (sourceScope (source-scope-status package))
             (agentPolicy (agent-policy-status package))
             (dependencies dependencies))
       []
-      ["downstream-policy-override" "build-ss-runtime-root-fallback"]
+      ["explicit-poo-profile" "executed-build-api-coverage"]
       "agent-configures-downstream-project-harness"
-      "use-gerbil.pkg-policy-overrides-only-when-project-declares-them")
+      "keep-package-acquisition-separate-from-policy")
      (capability-posture-fact
       "quality-closure-posture"
       "quality-closure"
@@ -223,33 +223,26 @@
 (def (configurable-interface-status package)
   (cond
    ((not package) "builtin-defaults")
-   ((or (project-package-source-scope-policy package)
-        (project-package-agent-policy package))
+   ((project-package-source-scope package)
     "project-overridden")
    (else "builtin-defaults")))
 ;; : (-> Package String )
 (def (source-scope-status package)
-  (let (policy (and package (project-package-source-scope-policy package)))
+  (let (policy (and package (project-package-source-scope package)))
     (if policy
       (hash (status "project-overridden")
-            (roots (source-scope-policy-roots policy))
-            (runtimeRoots (source-scope-policy-runtime-roots policy))
-            (excludeDirectories (source-scope-policy-exclude-directories policy))
-            (explanation (source-scope-policy-explanation policy)))
+            (roots (source-scope-roots policy))
+            (runtimeRoots (source-scope-runtime-roots policy))
+            (excludeDirectories (source-scope-exclude-directories policy))
+            (explanation (source-scope-explanation policy)))
       (hash (status "builtin-defaults")
             (roots ["."])
             (runtimeRoots [])
             (excludeDirectories [])
-            (explanation "Builtin source-scope defaults apply unless gerbil.pkg policy overrides them.")))))
+            (explanation "Builtin source-scope defaults apply unless executed Build API evidence supplies a scope.")))))
 ;; : (-> Package Status )
 (def (agent-policy-status package)
-  (let (policy (and package (project-package-agent-policy package)))
-    (if policy
-      (hash (status "project-overridden")
-            (default "all-rules-enabled")
-            (disabledRules (agent-policy-disabled-rules policy))
-            (explanation (agent-policy-explanation policy)))
-      (hash (status "builtin-defaults")
-            (default "all-rules-enabled")
-            (disabledRules [])
-            (explanation #f)))))
+  (hash (status "builtin-defaults")
+        (default "all-rules-enabled")
+        (disabledRules [])
+        (explanation #f)))

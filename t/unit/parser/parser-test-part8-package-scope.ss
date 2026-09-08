@@ -9,7 +9,7 @@
         :asp-gerbil-scheme/src/protocol/json
         :asp-gerbil-scheme/src/protocol/structural-facts
         :std/srfi/13)
-(import :asp-gerbil-scheme/t/unit/parser/parser-test-part8-support)
+(import "./parser-test-part8-support")
 (export parser-test-part-8-package-scope)
 
 ;; PolicyTest
@@ -47,7 +47,7 @@
             (check (map source-file-path
                         (project-index-files (collect-project root)))
                    => ["gerbil.pkg" "src/main.ss" "t/main-test.ss"])))
-    (test-case "project package infers runtime roots from build script"
+    (test-case "Build API coverage supplies runtime roots without package inference"
           (let* ((root (path-normalize ".run/parser-build-scope"))
                  (lib-dir (string-append root "/lib"))
                  (package-path (string-append root "/gerbil.pkg"))
@@ -63,15 +63,17 @@
                         ";;; -*- Gerbil -*-\n(defbuild-script '(\"lib/main\" \"cli\"))\n")
             (write-text lib-path "(package: sample/build-scope/main)\n(def answer 42)\n")
             (write-text flat-path "(package: sample/build-scope/cli)\n(def (main . args) args)\n")
-            (let* ((index (collect-project root))
+            (let* ((index (collect-source-scope/coverage
+                           root ["build.ss" "cli.ss" "gerbil.pkg" "lib/main.ss"]
+                           [] ["lib" "."] []))
                    (package (project-index-package index))
-                   (scope (project-package-source-scope-policy package)))
+                   (scope (project-package-source-scope package)))
               (check (map source-file-path (project-index-files index))
                      => ["build.ss" "cli.ss" "gerbil.pkg" "lib/main.ss"])
-              (check (source-scope-policy-roots scope) => [])
-              (check (source-scope-policy-runtime-roots scope) => ["lib" "."])
-              (check (source-scope-policy-explanation scope)
-                     => "Inferred from build.ss defbuild-script targets."))))
+              (check (source-scope-roots scope) => [])
+              (check (source-scope-runtime-roots scope) => ["lib" "."])
+              (check (source-scope-explanation scope)
+                     => "Projected from executed build.ss Build API source coverage."))))
     (test-case "project package dependency activates poo extension"
           (let* ((root (path-normalize ".run/parser-poo-dependency"))
                  (source-dir (string-append root "/src"))

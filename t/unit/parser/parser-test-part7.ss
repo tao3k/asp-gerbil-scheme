@@ -1,5 +1,6 @@
 ;;; -*- Gerbil -*-
 (import :std/test
+        (only-in :asp-gerbil-scheme/src/parser/package read-project-package)
         :asp-gerbil-scheme/src/extensions/facade
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/protocol/json
@@ -141,7 +142,7 @@
               (check (project-package-manager package) => "gxpkg")
               (check (project-package-dependencies package)
                      => ["git.cons.io/mighty-gerbils/gerbil-utils"]))))
-    (test-case "project package configures source scope"
+    (test-case "source scope comes from Build API coverage not package policy"
           (let* ((root (path-normalize ".run/parser-source-scope"))
                  (lib-dir (string-append root "/lib"))
                  (ignored-dir (string-append root "/scratch"))
@@ -160,11 +161,17 @@
             (write-text lib-path "(package: sample/scope/main)\n(def answer 42)\n")
             (write-text ignored-path "(package: sample/scope/ignored)\n(def ignored 0)\n")
             (write-text flat-path "(package: sample/scope/flat)\n(def flat 1)\n")
-            (let* ((index (collect-project root))
+            (check (project-package-source-scope (read-project-package root)) => #f)
+            (check (not (not (member "scratch/ignored.ss"
+                                     (map source-file-path
+                                          (project-index-files (collect-project root)))))) => #t)
+            (let* ((index (collect-source-scope/coverage
+                           root ["build.ss" "flat.ss" "gerbil.pkg" "lib/main.ss" "scratch/ignored.ss"]
+                           ["lib" "."] ["lib"] ["scratch"]))
                    (package (project-index-package index))
-                   (scope (project-package-source-scope-policy package)))
+                   (scope (project-package-source-scope package)))
               (check (map source-file-path (project-index-files index))
                      => ["build.ss" "flat.ss" "gerbil.pkg" "lib/main.ss"])
-              (check (source-scope-policy-roots scope) => ["lib" "."])
-              (check (source-scope-policy-runtime-roots scope) => ["lib"])
-              (check (source-scope-policy-exclude-directories scope) => ["scratch"]))))))
+              (check (source-scope-roots scope) => ["lib" "."])
+              (check (source-scope-runtime-roots scope) => ["lib"])
+              (check (source-scope-exclude-directories scope) => ["scratch"]))))))

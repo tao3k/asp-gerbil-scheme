@@ -83,11 +83,6 @@
           (project-index-package (policy-scenario-index result 'before)))
          (after-package
           (project-index-package (policy-scenario-index result 'after)))
-         (before-policy-finding
-          (policy-scenario-required-finding
-           result
-           'before
-           "GERBIL-SCHEME-AGENT-POLICY-024"))
          (before-style-finding
           (policy-scenario-required-finding
            result
@@ -108,8 +103,6 @@
           (list 'before
                 (list 'package
                       (package-agent-policy-snapshot before-package))
-                (list 'policyFinding
-                      (finding-snapshot-copy before-policy-finding))
                 (list 'styleFinding
                       (finding-snapshot-copy before-style-finding)))
           (list 'after

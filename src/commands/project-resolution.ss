@@ -6,10 +6,10 @@
         (only-in :asp-gerbil-scheme/src/parser/package
                  project-package-dependencies
                  project-package-name
-                 project-package-source-scope-policy
+                 project-package-source-scope
                  read-project-package
-                 source-scope-policy-roots
-                 source-scope-policy-runtime-roots)
+                 source-scope-roots
+                 source-scope-runtime-roots)
         (only-in :std/crypto/digest sha256)
         (only-in :std/misc/path path-directory path-expand path-normalize)
         (only-in :std/misc/ports read-all-as-string)
@@ -192,12 +192,12 @@
            (path-expand relative-root workspace-root)))
          (package (read-project-package package-root)))
     (and package
-         (let* ((policy (project-package-source-scope-policy package))
+         (let* ((policy (project-package-source-scope package))
                 (declared-roots
                  (if policy
                    (unique
-                    (append (source-scope-policy-roots policy)
-                            (source-scope-policy-runtime-roots policy)))
+                    (append (source-scope-roots policy)
+                            (source-scope-runtime-roots policy)))
                    ;; The Builder Profile's canonical package default is the
                    ;; package root. Candidate admission below still requires
                    ;; an actual source file, so this never widens into a scan.

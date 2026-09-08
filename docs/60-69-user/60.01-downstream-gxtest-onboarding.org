@@ -8,8 +8,9 @@ This document is the downstream user contract for packages that consume the
 Gerbil Scheme language project harness through =gerbil.pkg= and =gxtest=.
 
 The harness owns policy discovery, reporting, and repair hints. Downstream
-projects own their =gerbil.pkg= policy stanza, source-scope roots, runtime roots,
-and optional threshold configuration.
+projects supply source coverage through the Build API and configure optional
+thresholds through explicit native POO profiles. =gerbil.pkg= owns only package
+identity and dependency acquisition.
 
 * Install Boundary
 Install the harness from its checkout into the global Gerbil package store:
@@ -37,19 +38,25 @@ Downstream packages should declare the harness dependency in =gerbil.pkg=:
  depend: ("github.com/tao3k/asp-gerbil-scheme"))
 #+end_src
 
-Project-specific policy remains package-owned. A downstream package can keep
-its own policy stanza, for example:
+Do not put =policy:= in =gerbil.pkg=. Legacy source-scope, test-directory,
+modularity, agent-rule switches, and macro-witness declarations are ignored;
+external policy files are not loaded. Defaults remain active.
+
+For a custom modularity audit, derive and pass a native POO profile explicitly:
 
 #+begin_src scheme
-(package: your/package
- depend: ("github.com/tao3k/asp-gerbil-scheme")
- policy: ((source-scope
-           roots: (".")
-           runtime-roots: ("src")
-           explanation: "The harness covers every .ss file in this package.")
-          (modularity-policy
-           config: "harness-policy/gerbil.ss")))
+(import (only-in :clan/poo/object .cc)
+        :asp-gerbil-scheme/src/policy/modularity)
+
+(def focused-profile
+  (.cc default-modularity-profile 'max-source-lines 500))
+
+(run-modularity-policy project-index profile: focused-profile)
 #+end_src
+
+The profile does not mutate provider defaults or disable rules. The hard owner
+line cap still applies. Macro admission likewise accepts an explicit POO
+=profile:=; executable witnesses come only from the parser-owned test graph.
 
 * gxtest Fixture
 Create a small test owner such as =t/project-policy-test.ss=:

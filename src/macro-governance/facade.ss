@@ -25,7 +25,6 @@
         macro-governance-contract-macro
         macro-governance-contract-purpose
         macro-governance-contract-capabilities
-        macro-governance-contract-witness-owners
         macro-governance-decision?
         macro-governance-decision-macro
         macro-governance-decision-selector

@@ -16,11 +16,19 @@
 ;; TestSuite
 (def parser-test
   (test-suite "gerbil scheme harness parser"
-    parser-test-part-1
-    parser-test-part-2
-    parser-test-part-3
-    parser-test-part-4
-    parser-test-part-5
-    parser-test-part-6
-    parser-test-part-7
-    parser-test-part-8))
+    (test-case "parser-test-part-1"
+      (check (run-test-suite! parser-test-part-1) => #t))
+    (test-case "parser-test-part-2"
+      (check (run-test-suite! parser-test-part-2) => #t))
+    (test-case "parser-test-part-3"
+      (check (run-test-suite! parser-test-part-3) => #t))
+    (test-case "parser-test-part-4"
+      (check (run-test-suite! parser-test-part-4) => #t))
+    (test-case "parser-test-part-5"
+      (check (run-test-suite! parser-test-part-5) => #t))
+    (test-case "parser-test-part-6"
+      (check (run-test-suite! parser-test-part-6) => #t))
+    (test-case "parser-test-part-7"
+      (check (run-test-suite! parser-test-part-7) => #t))
+    (test-case "parser-test-part-8"
+      (check (run-test-suite! parser-test-part-8) => #t))))

@@ -386,5 +386,7 @@
 ;; TestSuite
 (def parser-test-part-5
   (test-suite "gerbil scheme harness parser part 5"
-    parser-test-part-5-higher-order-control
-    parser-test-part-5-quality-shape))
+    (test-case "parser-test-part-5-higher-order-control"
+      (check (run-test-suite! parser-test-part-5-higher-order-control) => #t))
+    (test-case "parser-test-part-5-quality-shape"
+      (check (run-test-suite! parser-test-part-5-quality-shape) => #t))))

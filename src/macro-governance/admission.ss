@@ -34,45 +34,20 @@
   (map macro-governance-rule-id
        (macro-governance-profile-rules profile)))
 
-;; : (-> ProjectIndex Boolean)
-(def (macro-governance-configured? index)
-  (let (package (project-index-package index))
-    (and package
-         (project-package-macro-governance-policy package))))
-
 ;; : (-> ProjectIndex (List MacroFact))
 (def (macro-governance-macros index)
   (apply append
          (map source-file-macros (project-index-files index))))
 
-;; Contracts project existing package declarations and parser facts; metadata
-;; never replaces executable witness admission.
+;; Contracts project parser facts. Package metadata never grants admission.
 (def (macro-governance-contracts index)
-  (let (witnesses (macro-governance-witnesses index))
-    (map (lambda (macro)
-           (macro-governance-contract-for macro witnesses))
-         (macro-governance-macros index))))
+  (map macro-governance-contract-for (macro-governance-macros index)))
 
-;; Package metadata projects witness ownership only; the parser-owned macro
-;; fact remains the executable authority used by admission.
-(def (macro-governance-witnesses index)
-  (let* ((package (project-index-package index))
-         (policy (and package
-                      (project-package-macro-governance-policy package)))
-         (witnesses (and policy
-                         (macro-governance-policy-witnesses policy))))
-    (or witnesses '())))
-
-(def (macro-governance-contract-for macro witnesses)
+(def (macro-governance-contract-for macro)
   (make-macro-governance-contract
    (macro-fact-name macro)
    (macro-governance-macro-purpose macro)
-   (macro-governance-macro-capabilities macro)
-   (filter-map
-    (lambda (entry)
-      (and (equal? (car entry) (macro-fact-name macro))
-           (cdr entry)))
-    witnesses)))
+   (macro-governance-macro-capabilities macro)))
 
 (def (macro-governance-macro-purpose macro)
   (cond
@@ -118,16 +93,14 @@
       plan: (plan #f))
   (let (compiled-plan
         (or plan (macro-governance-compile-rule-plan profile)))
-    (if (macro-governance-configured? index)
-      (filter-map
-       (lambda (macro)
-         (let (reasons
-               (macro-governance-profile-reason-kinds
-                profile compiled-plan macro))
-           (and (pair? reasons)
-                (macro-governance-profile-finding profile macro reasons))))
-       (macro-governance-macros index))
-      '())))
+    (filter-map
+     (lambda (macro)
+       (let (reasons
+             (macro-governance-profile-reason-kinds
+              profile compiled-plan macro))
+         (and (pair? reasons)
+              (macro-governance-profile-finding profile macro reasons))))
+     (macro-governance-macros index))))
 
 (def (macro-governance-profile-reason-kinds profile plan macro)
   (filter identity
@@ -169,13 +142,12 @@
       index
       profile: (profile asp-strict-macro-governance-profile))
   (let* ((macros (macro-governance-macros index))
-         (witnesses (macro-governance-witnesses index))
          (findings (macro-governance-findings index profile: profile))
          (decisions
           (map (lambda (macro)
                  (macro-governance-decision-for
                   macro
-                  (macro-governance-contract-for macro witnesses)
+                  (macro-governance-contract-for macro)
                   findings))
                macros))
          (rejected

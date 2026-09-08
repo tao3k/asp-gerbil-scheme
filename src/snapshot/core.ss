@@ -31,44 +31,7 @@
         (list 'name (project-package-name package))
         (list 'dependencies (list-copy (project-package-dependencies package)))
         (list 'fields
-              (list 'packageManager (project-package-manager package))
-              (source-scope-policy-snapshot
-               (project-package-source-scope-policy package))
-              (modularity-policy-snapshot
-               (project-package-modularity-policy package))
-              (agent-policy-snapshot
-               (project-package-agent-policy package)))))
-;; : (-> Policy String )
-(def (source-scope-policy-snapshot policy)
-  (list 'sourceScopePolicy
-        (if policy
-          (list (list 'roots (list-copy (source-scope-policy-roots policy)))
-                (list 'runtimeRoots (list-copy (source-scope-policy-runtime-roots policy)))
-                (list 'excludeDirectories (list-copy (source-scope-policy-exclude-directories policy)))
-                (list 'explanation (source-scope-policy-explanation policy)))
-          '())))
-;; : (-> Policy Snapshot )
-(def (agent-policy-snapshot policy)
-  (list 'agentPolicy
-        (if policy
-          (list (list 'default "all-rules-enabled")
-                (list 'disabledRules (list-copy (agent-policy-disabled-rules policy)))
-                (list 'explanation (agent-policy-explanation policy)))
-          '())))
-;; : (-> Policy Snapshot )
-(def (modularity-policy-snapshot policy)
-  (list 'modularityPolicy
-        (if policy
-          (list (list 'disabled (modularity-policy-disabled policy))
-                (list 'enabledRules (list-copy (modularity-policy-enabled-rules policy)))
-                (list 'disabledRules (list-copy (modularity-policy-disabled-rules policy)))
-                (list 'maxSourceLineCount (modularity-policy-max-source-line-count policy))
-                (list 'maxTestLineCount (modularity-policy-max-test-line-count policy))
-                (list 'minSourceDefinitionCount (modularity-policy-min-source-definition-count policy))
-                (list 'minTestDefinitionCount (modularity-policy-min-test-definition-count policy))
-                (list 'configPath (modularity-policy-config-path policy))
-                (list 'explanation (modularity-policy-explanation policy)))
-          '())))
+              (list 'packageManager (project-package-manager package)))))
 ;; : (-> Fact Snapshot )
 (def (extension-fact-snapshot fact)
   (list 'providerExtension

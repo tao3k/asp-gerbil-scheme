@@ -155,7 +155,7 @@
                    (findings (run-policy-checks index))
                    (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-013" findings)))
               (check matching => []))))
-(test-case "typed-combinator-style policy can be disabled by package config"
+(test-case "package metadata cannot disable typed-combinator-style policy"
           (let* ((root ".run/policy-typed-combinator-style-disabled")
                  (src (string-append root "/src"))
                  (owner (string-append src "/orders")))
@@ -170,5 +170,5 @@
             (let* ((index (collect-project root))
                    (findings (run-policy-checks index))
                    (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-013" findings)))
-              (check matching => []))))
+              (check (length matching) => 1))))
   ))

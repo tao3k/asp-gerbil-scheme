@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned source scope and filesystem discovery helpers.
 ;;; Boundary:
-;;; - Package policy owns source/test roots and exclusions.
-;;; - This module turns that policy into concrete parser file sets.
+;;; - Executed Build API coverage owns source roots and exclusions.
+;;; - This module turns scope evidence into concrete parser file sets.
 
 (import :gerbil/gambit
         :asp-gerbil-scheme/src/parser/package
@@ -54,7 +54,7 @@
 ;;   : (-> String MaybePackage (List String))
 ;;   | doc m%
 ;;       `collect-source-files root package` returns config files plus configured
-;;       runtime/test source files after applying package-owned source scope.
+;;       runtime/test source files after applying Build API source scope.
 ;;
 ;;       # Examples
 ;;
@@ -66,14 +66,14 @@
 (def (collect-source-files root . maybe-package)
   (let* ((package (and (pair? maybe-package) (car maybe-package)))
          (scope-policy (and package
-                            (project-package-source-scope-policy package)))
+                            (project-package-source-scope package)))
          (source-roots (configured-source-roots scope-policy))
          (test-roots (configured-test-roots package))
          (scan-roots
           (minimal-scan-roots (unique (append source-roots test-roots))))
          (ignored-dirs (append +ignored-dirs+
                                (if scope-policy
-                                 (source-scope-policy-exclude-directories scope-policy)
+                                 (source-scope-exclude-directories scope-policy)
                                  '()))))
     (unique
      (map path-normalize
@@ -95,14 +95,14 @@
 (def (collect-source-files-preview root limit . maybe-package)
   (let* ((package (and (pair? maybe-package) (car maybe-package)))
          (scope-policy (and package
-                            (project-package-source-scope-policy package)))
+                            (project-package-source-scope package)))
          (source-roots (configured-source-roots scope-policy))
          (test-roots (configured-test-roots package))
          (scan-roots
           (minimal-scan-roots (unique (append source-roots test-roots))))
          (ignored-dirs (append +ignored-dirs+
                                (if scope-policy
-                                 (source-scope-policy-exclude-directories scope-policy)
+                                 (source-scope-exclude-directories scope-policy)
                                  '())))
          (configs (take-up-to (root-config-files root) limit))
          (remaining (- limit (length configs))))
@@ -173,13 +173,13 @@
 ;; : (-> Root MaybePackage (List Path) (List Path) )
 (def (changed-source-files root package paths)
   (let* ((scope-policy (and package
-                            (project-package-source-scope-policy package)))
+                            (project-package-source-scope package)))
          (source-roots (configured-source-roots scope-policy))
          (test-roots (configured-test-roots package))
          (scan-roots (unique (append source-roots test-roots)))
          (ignored-dirs (append +ignored-dirs+
                                (if scope-policy
-                                 (source-scope-policy-exclude-directories scope-policy)
+                                 (source-scope-exclude-directories scope-policy)
                                  '())))
          (config-files (root-config-files root)))
     (unique
@@ -376,17 +376,12 @@
 
 ;; : (-> Policy (List String) )
 (def (configured-source-roots policy)
-  (let (roots (and policy (source-scope-policy-roots policy)))
+  (let (roots (and policy (source-scope-roots policy)))
     (if (and roots (pair? roots)) roots ["."])))
 
 ;; : (-> MaybePackage (List String) )
 (def (configured-test-roots package)
-  (let* ((policy (and package (project-package-test-directory-policy package)))
-         (roots (and policy
-                     (test-directory-policy-allowed-directories policy))))
-    (if policy
-      (or roots '())
-      ["t"])))
+  ["t"])
 
 ;; root-config-files
 ;;   : (-> String (List String))

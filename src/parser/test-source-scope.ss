@@ -290,9 +290,9 @@
 
 ;; : (-> MaybePackage (List Path))
 (def (package-source-roots package)
-  (let (policy (and package (project-package-source-scope-policy package)))
+  (let (policy (and package (project-package-source-scope package)))
     (if policy
-      (source-scope-policy-roots policy)
+      (source-scope-roots policy)
       ["src"])))
 
 ;; module-source-path/candidates

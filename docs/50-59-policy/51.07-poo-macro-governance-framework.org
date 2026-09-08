@@ -3,11 +3,10 @@
 
 * Status
 
-Implemented as an opt-in hard admission profile for packages that declare
-=macro-governance= in =gerbil.pkg=.  The existing executable-witness and
-expansion-I/O policies remain active for every project; the stricter hygiene,
-phase, and pattern-family rules become hard findings when a package selects the
-framework.
+Implemented as a default hard admission profile independent of package
+metadata. Executable-witness, expansion-I/O, hygiene, phase, and pattern-family
+checks all run without requiring a declaration in =gerbil.pkg=. Callers supply
+an explicit POO profile through =profile:= when a boundary needs configuration.
 
 This design governs macros without creating another macro expander.  Gerbil's
 expander owns syntax semantics, and =std/make= owns native build scheduling and
@@ -29,7 +28,7 @@ Macro governance is a two-level contract:
 #+begin_src mermaid
 flowchart LR
   Source["Gerbil source"] --> Parser["native parser\nMacroFact + call + owner facts"]
-  Package["gerbil.pkg\nprofile selection + witness owner names"] --> Contract["POO governance contract"]
+  Contract["POO governance contract"]
   Profile["POO profile\nrule objects + budgets"] --> Compile["compile once\nflat rule-id plan"]
   Parser --> Contract
   Contract --> Admission["single admission composition"]
@@ -78,10 +77,17 @@ transformer kind, phase, pattern count, hygiene, and quality facets.  The
 framework does not rescan source text, invoke expansion, infer policy from file
 names, or inspect a downstream project name.
 
-=gerbil.pkg= may identify an exact macro-name/witness-owner pair and explain the
-package policy.  This metadata never proves execution by itself.  R011 still
-requires the collected owner graph to reach an asserting test and its exact
-macro invocation or macro-owner edge.
+=gerbil.pkg= owns only package identity and dependency acquisition. Its former
+=policy:= DSL, external modularity config loading, rule switches, directory
+exceptions, and macro witness declarations have been removed. Legacy entries
+are inert package data and cannot alter findings or appear as policy facts.
+
+R011 requires the collected owner graph to reach an asserting test and its
+exact macro invocation or macro-owner edge. No manifest declaration satisfies
+that requirement. Source coverage comes from executed Build API evidence,
+not package policy. Modularity thresholds use =default-modularity-profile=
+and explicit =run-modularity-policy index profile: profile= calls; native POO
+composition does not remove the hard owner-line cap.
 
 R040 and R011 are called only through =macro-governance-findings= in the normal
 agent-policy path.  They are not also called by a second policy owner.  This
@@ -129,6 +135,7 @@ structure:
 The focused framework test proves:
 
 - strict profile inheritance is immutable under =.cc=;
+- absent package files and legacy package policy declarations cannot bypass admission;
 - a bounded hygienic macro with an executable witness is admitted;
 - an opaque function-shaped transformer is rejected with
   =hygiene-required=;

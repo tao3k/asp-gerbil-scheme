@@ -382,17 +382,11 @@
         project-package-name
         project-package-dependencies
         project-package-manager
-        project-package-test-directory-policy
-        project-package-source-scope-policy
-        project-package-agent-policy
-        test-directory-policy-allowed-directories
-        test-directory-policy-explanation
-        source-scope-policy-roots
-        source-scope-policy-runtime-roots
-        source-scope-policy-exclude-directories
-        source-scope-policy-explanation
-        agent-policy-disabled-rules
-        agent-policy-explanation
+        project-package-source-scope
+        source-scope-roots
+        source-scope-runtime-roots
+        source-scope-exclude-directories
+        source-scope-explanation
         project-index-root
         project-index-files
         project-index-package)

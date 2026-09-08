@@ -226,14 +226,9 @@
 
 ;; : (-> ProjectPackage PackageAgentPolicySnapshot )
 (def (package-agent-policy-snapshot package)
-  (let (policy (and package (project-package-agent-policy package)))
-    (list (list 'dependencies
-                (and package (project-package-dependencies package)))
-          (list 'default "all-rules-enabled")
-          (list 'disabledRules
-                (if policy (agent-policy-disabled-rules policy) '()))
-          (list 'explanation
-                (and policy (agent-policy-explanation policy))))))
+  (list (list 'dependencies
+              (and package (project-package-dependencies package)))
+        (list 'default "all-rules-enabled")))
 
 ;; : (-> PolicyDetails MacroControlledHelperGuidanceSnapshot )
 (def (macro-controlled-helper-guidance-snapshot details)

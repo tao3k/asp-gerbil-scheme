@@ -81,7 +81,7 @@
                     +non-runtime-source-classes+))
        (let* ((package (project-index-package index))
               (policy (and package
-                           (project-package-source-scope-policy package)))
+                           (project-package-source-scope package)))
               (roots (configured-runtime-roots policy)))
          (ormap (lambda (root)
                   (source-path-under-root? path root))
@@ -89,10 +89,10 @@
 ;; : (-> Policy (List String) )
 (def (configured-runtime-roots policy)
   (cond
-   ((and policy (pair? (source-scope-policy-runtime-roots policy)))
-    (source-scope-policy-runtime-roots policy))
-   ((and policy (pair? (source-scope-policy-roots policy)))
-    (source-scope-policy-roots policy))
+   ((and policy (pair? (source-scope-runtime-roots policy)))
+    (source-scope-runtime-roots policy))
+   ((and policy (pair? (source-scope-roots policy)))
+    (source-scope-roots policy))
    (else ["src"])))
 ;; : (-> String String Boolean )
 (def (source-path-under-root? path root)

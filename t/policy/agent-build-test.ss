@@ -562,6 +562,9 @@
 ;; PolicyTest
 (def agent-build-policy-test
   (test-suite "gerbil scheme harness agent build policy"
-    agent-build-runtime-policy-test
-    agent-build-package-rejection-policy-test
-    agent-build-canonical-acceptance-policy-test))
+    (test-case "agent-build-runtime-policy-test"
+      (check (run-test-suite! agent-build-runtime-policy-test) => #t))
+    (test-case "agent-build-package-rejection-policy-test"
+      (check (run-test-suite! agent-build-package-rejection-policy-test) => #t))
+    (test-case "agent-build-canonical-acceptance-policy-test"
+      (check (run-test-suite! agent-build-canonical-acceptance-policy-test) => #t))))

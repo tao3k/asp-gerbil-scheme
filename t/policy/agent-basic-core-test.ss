@@ -82,7 +82,7 @@
                           (type-finding-selector finding)))))
             (check (map project-finding actual)
                    => (map project-finding expected))))
-    (test-case "package agent-policy disables selected rules"
+    (test-case "package metadata cannot suppress agent findings"
           (let* ((root ".run/policy-agent-disabled-rule")
                  (src (string-append root "/src"))
                  (owner (string-append src "/orders")))
@@ -98,7 +98,7 @@
             (let* ((index (collect-project root))
                    (findings (run-policy-checks index))
                    (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-004" findings)))
-              (check matching => []))))
+              (check (length matching) => 1))))
     (test-case "agent policy rejects top-level executable calls in src"
           (let* ((root ".run/policy-top-level-executable")
                  (_ (write-top-level-executable-project root))

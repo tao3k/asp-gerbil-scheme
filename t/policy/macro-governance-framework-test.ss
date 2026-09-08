@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-;;; Executable contracts for package macro admission and typed receipts.
+;;; Executable contracts for POO macro admission independent of package metadata.
 
 (import :gerbil/gambit
         :std/test
@@ -38,12 +38,7 @@
     (macro-governance-ensure-directory test-dir)
     (macro-governance-write-text
      (string-append root "/gerbil.pkg")
-     (string-append
-      "(package: sample/macro-governance\n"
-      " policy: ((source-scope roots: (\"src\") runtime-roots: (\"src\") exclude-directories: ())\n"
-      "          (macro-governance\n"
-      "           explanation: \"Every governed macro has executable source evidence.\"\n"
-      "           witnesses: ((\"define-value\" \"t/core-test.ss\")))))\n"))
+     "(package: sample/macro-governance)\n")
     (macro-governance-write-text
      (string-append source-dir "/core.ss") macro-source)
     (macro-governance-write-text
@@ -116,6 +111,24 @@
                  => '(phase-not-admitted pattern-budget-exceeded))
           (check (member 'pattern-budget-exceeded reasons)
                  => '(pattern-budget-exceeded)))))
+    (test-case "package policy cannot enable disable or satisfy macro admission"
+      (let (root ".run/macro-governance-package-ignored")
+        (write-macro-governance-project
+         root
+         "(export define-value)\n(defsyntax define-value (lambda (stx) stx))\n"
+         "(import :std/test)\n(def core-test (test-suite \"no invocation\" (test-case \"asserts only\" (check #t => #t))))\n")
+        (let (baseline (macro-governance-receipt-json
+                         (macro-governance-admit (collect-project root))))
+          (macro-governance-write-text
+           (string-append root "/gerbil.pkg")
+           "(package: sample/macro-governance policy: ((agent-policy disabled-rules: (\"GERBIL-SCHEME-MACRO-GOVERNANCE-001\") explanation: \"legacy exception\") (macro-governance witnesses: ((\"define-value\" \"t/core-test.ss\")))))\n")
+          (check (source-file-parse-error (parse-source-file root "gerbil.pkg")) => #f)
+          (check (macro-governance-receipt-json
+                   (macro-governance-admit (collect-project root))) => baseline)
+          (delete-file (string-append root "/gerbil.pkg"))
+          (check (macro-governance-receipt-json
+                   (macro-governance-admit (collect-project root))) => baseline)
+          (check (hash-get baseline 'status) => "rejected"))))
     (test-case "scenario closes an unhygienic macro admission finding"
       (let* ((scenario
               (make-policy-scenario

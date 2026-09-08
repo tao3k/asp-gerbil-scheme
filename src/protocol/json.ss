@@ -73,55 +73,7 @@
        (hash (path (project-package-path package))
              (name (project-package-name package))
              (dependencies (project-package-dependencies package))
-             (fields (hash (packageManager (project-package-manager package))
-                           (testDirectoryPolicy
-                            (test-directory-policy-json
-                             (project-package-test-directory-policy package)))
-                           (macroGovernancePolicy
-                            (macro-governance-policy-json
-                             (project-package-macro-governance-policy package)))
-                           (sourceScopePolicy
-                            (source-scope-policy-json
-                             (project-package-source-scope-policy package)))
-                           (agentPolicy
-                            (agent-policy-json
-                             (project-package-agent-policy package))))))))
-;; : (-> Policy Json )
-(def (test-directory-policy-json policy)
-  (and policy
-       (hash (allowedDirectories
-              (test-directory-policy-allowed-directories policy))
-             (explanation
-              (test-directory-policy-explanation policy)))))
-;; : (-> Policy Json )
-(def (macro-governance-policy-json policy)
-  (and policy
-       (hash (explanation
-              (macro-governance-policy-explanation policy))
-             (witnesses
-              (map (lambda (entry)
-                     (hash (macro (car entry))
-                           (owner (cdr entry))))
-                   (macro-governance-policy-witnesses policy))))))
-;; : (-> Policy String )
-(def (source-scope-policy-json policy)
-  (and policy
-       (hash (roots
-              (source-scope-policy-roots policy))
-             (runtimeRoots
-              (source-scope-policy-runtime-roots policy))
-             (excludeDirectories
-              (source-scope-policy-exclude-directories policy))
-             (explanation
-              (source-scope-policy-explanation policy)))))
-;; : (-> Policy Json )
-(def (agent-policy-json policy)
-  (and policy
-       (hash (default "all-rules-enabled")
-             (disabledRules
-              (agent-policy-disabled-rules policy))
-             (explanation
-              (agent-policy-explanation policy)))))
+             (fields (hash (packageManager (project-package-manager package)))))))
 ;;; Boundary:
 ;;; - pattern-mapping-json composes first-class procedures.
 ;;; - Keep data-flow evidence visible.

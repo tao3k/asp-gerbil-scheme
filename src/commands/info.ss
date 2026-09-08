@@ -41,13 +41,15 @@
 ;; Json
 (def (configurable-interface-json)
   (hash (sourceScope
-         (hash (owner "gerbil.pkg policy")
+         (hash (owner "executed build.ss Build API coverage")
                (fields ["roots" "runtime-roots" "exclude-directories" "explanation"])
-               (buildFallback
-                "build.ss defbuild-script targets provide runtimeRoots when explicit source-scope is absent")))
+               (default "built-in source discovery")))
+        (buildScope
+         (hash (owner "build.ss")
+               (projection "executed Build API source coverage")))
         (agentPolicy
-         (hash (owner "gerbil.pkg policy")
-               (fields ["enabled-rules" "disabled-rules"])))))
+         (hash (owner "explicit POO profile")
+               (default "all-rules-enabled")))))
 ;; Json
 (def (agent-steering-json)
   (hash (facts (agent-steering-facts))
@@ -74,11 +76,11 @@
         (line-field "name" (hash-get package 'name))
         (line-field "manager" (hash-get package 'packageManager))])))
   (emit-text-line
-   "|interface source-scope=gerbil.pkg-policy fields=roots,runtime-roots,exclude-directories explanation=required-for-overrides")
+   "|interface source-scope=executed-build-api-coverage fields=roots,runtime-roots,exclude-directories")
   (emit-text-line
-   "|interface build-scope=build.ss defbuild-script targets -> runtime-roots when explicit source-scope is absent")
+   "|interface build-scope=build.ss Build API execution supplies source coverage; parser build facts remain evidence")
   (emit-text-line
-   "|interface agent-policy=gerbil.pkg-policy fields=enabled-rules,disabled-rules")
+   "|interface agent-policy=explicit-poo-profile default=all-rules-enabled package-overrides=unsupported")
   (emit-field-line
    "|agent-steering"
    [(line-field "facts" (string-join (agent-steering-facts) ","))])
