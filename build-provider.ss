@@ -1,14 +1,17 @@
 #!/usr/bin/env gxi
 ;;; -*- Gerbil -*-
 
-(import :gerbil/gambit
+(import (only-in :std/build-script defbuild-script)
+        (only-in :std/misc/path path-expand)
+        (only-in :std/source this-source-file)
         (only-in "./provider-package-spec"
-                 asp-gerbil-scheme-provider-spec)
-        (only-in "./src/building/build-script"
-                 framework-build-main))
+                 asp-gerbil-scheme-provider-spec))
 
-(framework-build-main
- (cddr (command-line))
+(def +provider-build-root+
+  (path-expand "build/workspace-provider" (current-directory)))
+
+(defbuild-script
  (asp-gerbil-scheme-provider-spec)
- '(profile: production)
- "build-provider.ss")
+ optimize: #f
+ bindir: (path-expand "bin" +provider-build-root+)
+ libdir: (path-expand "lib" +provider-build-root+))

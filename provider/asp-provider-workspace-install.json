@@ -47,7 +47,6 @@
       "languages/asp-gerbil-scheme/build/workspace-provider"
     ],
     "env": {
-      "ASP_PROVIDER_ARTIFACT_ROOT": "${ASP_WORKSPACE_ROOT}/languages/asp-gerbil-scheme/build/workspace-provider",
       "GERBIL_PATH": "${ASP_WORKSPACE_ROOT}/languages/asp-gerbil-scheme/.gerbil",
       "GERBIL_LOADPATH": "${ASP_WORKSPACE_ROOT}/languages/asp-gerbil-scheme/.gerbil/lib"
     }

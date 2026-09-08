@@ -11,6 +11,7 @@
   "./policy/agent-list-growth-test"
   "./policy/agent-list-random-access-test"
   "./policy/agent-macro-io-test"
+  "./policy/macro-governance-framework-test"
   "./policy/agent-string-growth-test"
   "./policy/agent-alist-access-test"
   "./policy/agent-anonymous-pair-test"
@@ -38,6 +39,7 @@
     agent-list-growth-policy-test
     agent-list-random-access-policy-test
     agent-macro-io-policy-test
+    macro-governance-framework-policy-test
     agent-string-growth-policy-test
     agent-alist-access-policy-test
     agent-anonymous-pair-policy-test

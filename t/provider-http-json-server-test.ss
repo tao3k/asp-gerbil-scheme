@@ -37,7 +37,7 @@
              package-root)))
     (unless (file-exists? artifact)
       (error
-       "provider-http-json-server-test-artifact-required: materialize the workspace provider artifact first with ASP_PROVIDER_ARTIFACT_ROOT=<artifact-root> /usr/bin/env -u SDKROOT gxi build.ss"
+       "provider-http-json-server-test-artifact-required: materialize the workspace provider artifact first with gxpkg env gxi ./build-provider.ss compile"
        artifact))
     artifact))
 

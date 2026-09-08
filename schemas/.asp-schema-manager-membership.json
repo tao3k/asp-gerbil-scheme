@@ -1,7 +1,7 @@
 {
   "languageId": "gerbil-scheme",
-  "profileDigest": "blake3-256:0f6db61e73904d5a06d4b603189679e8def7346997b41ea2d26f5137ee082d2c",
-  "bundleDigest": "blake3-256:004786aa5a09d16985957a7ea49ae5d2868fda3a85c31041af31a8ae86ed01df",
+  "profileDigest": "blake3-256:d91a4b223edc98e4fb9526b98aceff251f92b7af1ac8792628a5eb3307a6bbef",
+  "bundleDigest": "blake3-256:5e1a69e5a74eeb28e05c20fef8371f7c41d1c9335e829050678ad7fcf5ec51d1",
   "schemas": [
     {
       "name": "asp-client-cancellation-probe-request.schema.json",
@@ -25,7 +25,7 @@
     },
     {
       "name": "asp-client-exact-query-request.schema.json",
-      "digest": "blake3-256:a3a4da1f1dddb8b600936b5f70cd493043f7332bf72256963a023563991adabb"
+      "digest": "blake3-256:95e9b4cf48223f31bbe86a816890e4689070790288b300799290d7041adaa7ba"
     },
     {
       "name": "asp-client-exact-query-response.schema.json",
@@ -33,7 +33,7 @@
     },
     {
       "name": "asp-client-frame.schema.json",
-      "digest": "blake3-256:58c00dd0763f03316edb714e81aaa5c06a1628682567296bb22d01f01b8e8572"
+      "digest": "blake3-256:67df97458bb86ef192bfe03f6200860fa2c1b952199a92881a9d474acc04666b"
     },
     {
       "name": "asp-client-graphs-timeline-request.v1.schema.json",
@@ -76,8 +76,12 @@
       "digest": "blake3-256:9f7c9a437713874b8ea5c4e701f61adf355f26bbc35ddd5a59a2d6889d1f2bd0"
     },
     {
+      "name": "asp-client-workspace-query-playbook-request.v1.schema.json",
+      "digest": "blake3-256:171112801e36325b4854c1190ad2f67581a3b4a2d9849f3578ebf80be025ddd3"
+    },
+    {
       "name": "asp-client-workspace-search-playbook-request.v1.schema.json",
-      "digest": "blake3-256:a546d86a313d0bdd7a512cc37462f60b5f559025fbca5040d4d9ef00a0132952"
+      "digest": "blake3-256:6e4c2cf3da32a9c74999a35542bea21866e2ed9ed99bb02247393e2405cb4078"
     },
     {
       "name": "asp-client-workspace-source-mutation.schema.json",
@@ -108,6 +112,14 @@
       "digest": "blake3-256:29932815327cfba4424cc6443f04a9b3586c6ab8ce1f64d76904e9e80fc970e4"
     },
     {
+      "name": "content-binding.schema.json",
+      "digest": "blake3-256:d994d67092a39eb4c7cec8df470839372d06c815f9068c7e685336ad251a0b1a"
+    },
+    {
+      "name": "content-publication-commit.v1.schema.json",
+      "digest": "blake3-256:afac75ce2bece1c60ffb9435a5c107c9687088459988dc7c3e79fd78c38aacfe"
+    },
+    {
       "name": "exact-definitions.v1.schema.json",
       "digest": "blake3-256:f2a9d369c221ad07ec3376150fec180c617d40318d4b0d49def6e68b0c5d00f1"
     },
@@ -118,6 +130,10 @@
     {
       "name": "grpc-warm-latency-receipt.schema.json",
       "digest": "blake3-256:b05cb70a17c9169e81fef1491fb6e6c972e9bab8843131af5637d52405424297"
+    },
+    {
+      "name": "host-workspace-initialization-binding.v1.schema.json",
+      "digest": "blake3-256:bd2fd298d4b3f8e469986a092aa40653a3bbfc59c4f51810c1829f4f6dd146a0"
     },
     {
       "name": "language-package-graph.schema.json",
@@ -140,6 +156,14 @@
       "digest": "blake3-256:bfa2f1966d9d05e0f0c05cdb635112513498dedb076edf760f0504db60a358bb"
     },
     {
+      "name": "project-topology-library.v1.schema.json",
+      "digest": "blake3-256:6affc5b32ccc6530126038a2925ba224979499b093f27d3c09d548081b8860c4"
+    },
+    {
+      "name": "project-workspace-binding.v1.schema.json",
+      "digest": "blake3-256:85a1cfdff5e432e593bb346ae447116a4bf11e5e49be10530ff1362e81603061"
+    },
+    {
       "name": "provider-definitions.v1.schema.json",
       "digest": "blake3-256:0ff66bd35a2c1561424f0aa2b95df689cfcb6513059ea5d06245f7efb38c45ce"
     },
@@ -157,7 +181,7 @@
     },
     {
       "name": "provider-manifest.schema.json",
-      "digest": "blake3-256:73c9aa93f4dbcd91c7e353e318121c5be736ba731c5c3d127288c3fe2eedd0a3"
+      "digest": "blake3-256:083ce2246c3590c626452fd06b7271031e1f989cf219af113643afd54b57ed44"
     },
     {
       "name": "provider-method-argument-projection.v1.schema.json",
@@ -189,7 +213,7 @@
     },
     {
       "name": "provider-registration.schema.json",
-      "digest": "blake3-256:28fabee177fd41196e38eef5a831b90314bd8931fdab28f399f6383ebc4ddb4b"
+      "digest": "blake3-256:c21cf1d2d5b5403255f38a789e0d942b6817acf7b19f2b98363be15453de6ae7"
     },
     {
       "name": "provider-route.schema.json",
@@ -208,16 +232,20 @@
       "digest": "blake3-256:958c8f4bbabfa06b7600be3067e9feb7c5257a97597bf8221a1f424302ba2336"
     },
     {
-      "name": "provider-search-playbook-contract.schema.json",
-      "digest": "blake3-256:be1f65354006b9d479575d7b01fbaca08b205f879a8f9eb7f5427bf984db7f23"
-    },
-    {
       "name": "provider-workspace-install.schema.json",
       "digest": "blake3-256:a607ae5a7ea24b889a6bac9ee4624c03def801da7932b8c9818de176a66f856f"
     },
     {
       "name": "python-generation-graph-performance-receipt.v1.schema.json",
       "digest": "blake3-256:301ad2fce1050064cfd20ba63522c1261434b030fe4513e9105cf14951d7e048"
+    },
+    {
+      "name": "query-playbook-materialization-receipt.v1.schema.json",
+      "digest": "blake3-256:05d6793b11c3b2643bf394b8773c1b9131aa17cf9ddcc588f3f592542553d83c"
+    },
+    {
+      "name": "query-playbook-materialization-request.v1.schema.json",
+      "digest": "blake3-256:080aa7a4443f7f694d38da9cd26dee1cc86f75618159c3f91f799e28591ef6d3"
     },
     {
       "name": "resident-search-result.v1.schema.json",
@@ -232,24 +260,52 @@
       "digest": "blake3-256:9faa9e8e584171ff85907fbe6715fab6408e77c505e97cd484a286c17f2aa836"
     },
     {
+      "name": "runtime-artifact-bundle-binding.v2.schema.json",
+      "digest": "blake3-256:33502b4f75b3213cba8f24ba74d460525838b9627542c7fec9bdb28e35d1cbce"
+    },
+    {
+      "name": "runtime-artifact-execution-closure-member.v1.schema.json",
+      "digest": "blake3-256:f0f47ae132953e45ac81ef407a3279d6a5f153e5f0bd60cc042755e5df5caa4c"
+    },
+    {
+      "name": "runtime-binary-bundle.v2.schema.json",
+      "digest": "blake3-256:70ad1c9d87f4841788ba348fba007f8e12152bb74aa34a00f3e52c1a016eab91"
+    },
+    {
       "name": "runtime-client-terminal.schema.json",
       "digest": "blake3-256:bdf3e6b1bd11b201cc7802a364d678ad7a99a74cc40df2be90f76e2f6e050e70"
+    },
+    {
+      "name": "runtime-execution-binding.v2.schema.json",
+      "digest": "blake3-256:86f2829a05451dd84d180a6dab2cf621a14bd7e0c1ffcb3552ab9b7e61f6feb6"
     },
     {
       "name": "runtime-provider-search-receipt.v1.schema.json",
       "digest": "blake3-256:2e439b2ee83198710238aed803c9c37cd2cb06bc7a5e2c010486cdaa605df691"
     },
     {
+      "name": "runtime-search-client-timing-witness.v1.schema.json",
+      "digest": "blake3-256:076543ae9ba44348c9867a5454f043aeb36211742a6c299f57f33543cc071881"
+    },
+    {
+      "name": "runtime-search-execution-budget.v1.schema.json",
+      "digest": "blake3-256:e7af7abd057b887c63490bcb143e6be322ed8e10ce244fa93e9cb043ed1107a7"
+    },
+    {
+      "name": "runtime-workspace-execution-pointer.v1.schema.json",
+      "digest": "blake3-256:858db6ddc09da3fc1b71e45aa7cea58680bee44bfd78b0fa4c36bfb9b56b9276"
+    },
+    {
+      "name": "runtime-workspace-execution-publication.v1.schema.json",
+      "digest": "blake3-256:889e816172637c38d87e8e0fdd8d186d0a1562149823774638f0128189d2f5d5"
+    },
+    {
       "name": "search-generation-change-set.v1.schema.json",
       "digest": "blake3-256:2c367cda53c1d03672c268fe2576fff2d11b7cd349992bc0f2c96bea206a2d80"
     },
     {
-      "name": "search-playbook-contract-projection.v1.schema.json",
-      "digest": "blake3-256:105dbeca6aef8945e481ca38966baada4ce45ec110cd7187c997cf2903ba8a94"
-    },
-    {
-      "name": "semantic-agent-search-playbook-receipt.v1.schema.json",
-      "digest": "blake3-256:13b69e753558a969b8e18535ab15e84c4fa4c3c2fb22be6b3d0cd5a57c1cdde4"
+      "name": "search-topology-settlement.v1.schema.json",
+      "digest": "blake3-256:9fc0cfde08823e1c52d302d1fae437b9395e7a8fb1f33dacc6a1892edcc60104"
     },
     {
       "name": "semantic-assurance-case.v1.schema.json",
@@ -450,10 +506,6 @@
     {
       "name": "source-snapshot-evidence.v1.schema.json",
       "digest": "blake3-256:b22f980c1c70e1927670be25e8d86c4d3b78538e81e6aad28b608ca9707f99cb"
-    },
-    {
-      "name": "workspace-search-playbook-result.v1.schema.json",
-      "digest": "blake3-256:8f74688229b279830f36e0a1905430e2fa24cc1bb637f89a9555d75351ff44e0"
     }
   ]
 }

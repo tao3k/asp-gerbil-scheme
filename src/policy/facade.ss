@@ -1,7 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Stable policy facade for Gerbil project rules.
 
-(import :asp-gerbil-scheme/src/policy/agent
+(import :asp-gerbil-scheme/src/macro-governance/facade
+        :asp-gerbil-scheme/src/policy/agent
         :asp-gerbil-scheme/src/policy/agent-poo
         :asp-gerbil-scheme/src/policy/agent-build
         :asp-gerbil-scheme/src/policy/core
@@ -61,6 +62,11 @@
         +agent-macro-expansion-io-boundary-rule+
         +agent-list-random-access-loop-performance-rule+
         +agent-string-growth-loop-performance-rule+
+        +macro-governance-admission-rule+
+        macro-governance-admit
+        macro-governance-findings
+        macro-governance-receipt-json
+        asp-strict-macro-governance-profile
         repairable-finding?
         repairable-findings
         agent-repair-report-json

@@ -204,12 +204,15 @@ flowchart LR
     Multi --> Gate[Target: below 10 minutes<br/>same 20-module closure oracle]
 #+end_src
 
-The ordinary library script uses upstream =init-build-environment!=.  The
-provider script uses =defbuild-script= from =src/building/build-script.ss=
-because it additionally owns a production artifact directory and native link
-policy.  Both paths still delegate compilation and linking to upstream
-=std/make=.  Before either passes its complete spec to =std/make=, the ASP
-Build API applies one core value to both =GERBIL_BUILD_CORES= and Gerbil
+The ordinary library script uses upstream =init-build-environment!= and the
+provider script uses upstream =std/build-script#defbuild-script=.  The Build
+API macro projects the Package Spec's declared host build-environment profile
+immediately before either upstream entrypoint consumes the native spec.  On
+macOS that profile removes inherited =SDKROOT= and =DEVELOPER_DIR= selectors;
+workflow files and project CLIs do not own or reproduce that policy.  Both
+paths delegate compilation and linking to upstream =std/make=.  Before either
+passes its complete spec to =std/make=, the ASP Build API applies one core value
+to both =GERBIL_BUILD_CORES= and Gerbil
 0.18.2's already initialized =__available-cores=.  A positive caller override
 wins; otherwise Gambit's =##cpu-count= is used.  No shell probe, fixed machine
 count, child-process marker, or second scheduler is involved.

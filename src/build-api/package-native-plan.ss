@@ -13,7 +13,8 @@
 ;; cannot safely be widened into one directory-parallel batch.
 ;; : (List (List ModulePath))
 (def +package-api-prologue-stages+
-  '(("build-api/package-build.ss")
+  '(("build-api/package-build.ss"
+     "build-api/build-environment-profile.ss")
     ("build-api/source-discovery.ss"
      "constants.ss")
     ("build-api/package-receipt.ss"
@@ -80,6 +81,7 @@
      "parser/parse-workers.ss"
      "parser/core.ss"
      "parser/facade.ss"
+     "macro-governance/model.ss"
      "extensions/poo-pattern-support.ss"
      "extensions/poo-pattern-typeclass.ss"
      "extensions/poo-patterns.ss")
@@ -128,11 +130,13 @@
      "policy/agent-style-details.ss"
      "policy/agent-macro-protocol.ss"
      "policy/agent-poo.ss")
+    ("macro-governance/admission.ss")
     ("policy/agent-basic.ss"
      "policy/agent-build-runtime.ss"
      "policy/agent-style.ss")
     ("policy/agent.ss")
     ("policy/core.ss")
+    ("macro-governance/facade.ss")
     ("policy/facade.ss")
     ("policy/gxtest-report.ss")))
 
@@ -245,6 +249,8 @@
      "policy/prototype.ss" "policy/repair-calibration.ss"
      "policy/repair-diagnostic.ss" "policy/repair-report.ss"
      "policy/repair.ss" "policy/streaming.ss")
+    ("macro-governance/admission.ss" "macro-governance/facade.ss"
+     "macro-governance/model.ss")
     ("protocol/command-catalog.ss" "protocol/function-quality-facts.ss"
      "protocol/json-output.ss" "protocol/json.ss"
      "protocol/quality-shape-facts.ss" "protocol/registry.ss"

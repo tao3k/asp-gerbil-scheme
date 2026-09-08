@@ -15,6 +15,7 @@
 (import (only-in :clan/poo/object .cc .def .get)
         (only-in "./builder-profile"
                  asp-gerbil-scheme-development-builder-profile
+                 asp-gerbil-scheme-builder-profile-apply-build-environment!
                  asp-gerbil-scheme-builder-profile-exclude-directories
                  asp-gerbil-scheme-builder-profile-module-under-root?
                  asp-gerbil-scheme-builder-profile-modules/config
@@ -25,8 +26,7 @@
         (only-in "./source-coverage"
                  asp-gerbil-scheme-source-coverage)
         (only-in "../building/build-script"
-                 framework-apply-build-core-policy!
-                 framework-apply-native-toolchain-environment!)
+                 framework-apply-build-core-policy!)
         (only-in :std/misc/path path-directory path-expand path-normalize)
         (only-in :std/srfi/13 string-suffix?))
 
@@ -68,7 +68,8 @@
         (asp-gerbil-scheme-apply-package-source-coverage!
          name +this-source-file+)
         (def (spec-name)
-          (framework-apply-native-toolchain-environment!)
+          (asp-gerbil-scheme-builder-profile-apply-build-environment!
+           (asp-gerbil-scheme-package-builder-profile name))
           (framework-apply-build-core-policy!)
           (asp-gerbil-scheme-package-build-spec name)))))))
 

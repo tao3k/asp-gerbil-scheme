@@ -5,6 +5,9 @@
 (import :std/test
         (only-in "../build-api"
                  asp-gerbil-scheme-package-profiled-build-spec
+                 asp-gerbil-scheme-build-environment-profile-name
+                 asp-gerbil-scheme-build-environment-profile-bindings
+                 asp-gerbil-scheme-host-build-environment-profile
                  asp-gerbil-scheme-development-builder-profile
                  asp-gerbil-scheme-production-builder-profile
                  asp-gerbil-scheme-builder-profile-native-profile))
@@ -17,6 +20,17 @@
       (check (procedure? asp-gerbil-scheme-package-profiled-build-spec)
              => #t))
     (test-case "exports the declarative Builder Profile values"
+      (check (asp-gerbil-scheme-build-environment-profile-name
+              asp-gerbil-scheme-host-build-environment-profile)
+             => (cond-expand
+                 (darwin 'macos-native)
+                 (else 'portable)))
+      (check (asp-gerbil-scheme-build-environment-profile-bindings
+              asp-gerbil-scheme-host-build-environment-profile)
+             => (cond-expand
+                 (darwin '(("SDKROOT" . #f)
+                           ("DEVELOPER_DIR" . #f)))
+                 (else [])))
       (check (asp-gerbil-scheme-builder-profile-native-profile
               asp-gerbil-scheme-development-builder-profile)
              => 'development)

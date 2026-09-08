@@ -24,8 +24,7 @@
 (include "memory-anomaly-guard-body.inc")
 
 (def (framework-build-artifact-root)
-  (getenv "ASP_PROVIDER_ARTIFACT_ROOT"
-          (getenv "GERBIL_PATH" (gerbil-home))))
+  (getenv "GERBIL_PATH" (gerbil-home)))
 
 (def (framework-build-bindir)
   (path-expand "bin" (framework-build-artifact-root)))
@@ -554,4 +553,4 @@
     (executableFreshnessOwner . "declared-runtime-closure-to-std-make")
     (cacheConcurrencyOwner . "kernel-flock-per-GERBIL_PATH")
     (objectLockRecovery . "static-and-binary-under-exclusive-build-lease")
-    (artifactRootEnvironment . "ASP_PROVIDER_ARTIFACT_ROOT")))
+    (artifactRootEnvironment . "GERBIL_PATH")))

@@ -2,6 +2,9 @@
 ;;; Declarative Builder Profile shared by discovery and native build.
 
 (import (only-in :clan/poo/object .def .get)
+        (only-in "./build-environment-profile"
+                 asp-gerbil-scheme-host-build-environment-profile
+                 asp-gerbil-scheme-apply-build-environment-profile!)
         (only-in "./source-discovery"
                  +default-excluded-module-files+
                  all-gerbil-modules/roots/config)
@@ -11,6 +14,8 @@
         asp-gerbil-scheme-development-builder-profile
         asp-gerbil-scheme-production-builder-profile
         asp-gerbil-scheme-builder-profile-native-profile
+        asp-gerbil-scheme-builder-profile-build-environment
+        asp-gerbil-scheme-builder-profile-apply-build-environment!
         asp-gerbil-scheme-builder-profile-profiles
         asp-gerbil-scheme-builder-profile-exclude-directories
         asp-gerbil-scheme-builder-profile-test-roots
@@ -24,6 +29,7 @@
 (.def asp-gerbil-scheme-builder-profile-prototype
   (name 'builder)
   (native-profile 'development)
+  (build-environment-profile asp-gerbil-scheme-host-build-environment-profile)
   (profiles ['asp-quality])
   ;; Scenario fixtures and generated snapshots are policy/test inputs owned by
   ;; their harnesses, not package modules discovered by std/make.
@@ -46,6 +52,13 @@
 
 (def (asp-gerbil-scheme-builder-profile-native-profile profile)
   (.get profile native-profile))
+
+(def (asp-gerbil-scheme-builder-profile-build-environment profile)
+  (.get profile build-environment-profile))
+
+(def (asp-gerbil-scheme-builder-profile-apply-build-environment! profile)
+  (asp-gerbil-scheme-apply-build-environment-profile!
+   (asp-gerbil-scheme-builder-profile-build-environment profile)))
 
 (def (asp-gerbil-scheme-builder-profile-profiles profile)
   (.get profile profiles))

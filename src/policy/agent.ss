@@ -2,6 +2,8 @@
 ;;; Agent-facing policy checks over facade intent comments.
 
 (import :gerbil/gambit
+        (only-in :asp-gerbil-scheme/src/macro-governance/admission
+                 macro-governance-findings)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/agent-basic
         :asp-gerbil-scheme/src/policy/agent-macro-protocol
@@ -98,8 +100,7 @@
    (list-growth-loop-performance-findings index)
    (list-random-access-loop-performance-findings index)
    (string-growth-loop-performance-findings index)
-   (macro-expansion-io-boundary-findings index)
-   (macro-runtime-source-witness-findings index)
+   (macro-governance-findings index)
    (protocol-evidence-findings index)
    (typed-combinator-style-findings index)
    (comment-quality-findings index)

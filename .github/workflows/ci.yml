@@ -206,8 +206,6 @@ jobs:
       - name: Build canonical provider production target
         if: matrix.target == 'provider-production'
         timeout-minutes: 10
-        env:
-          ASP_PROVIDER_ARTIFACT_ROOT: ${{ github.workspace }}/build/workspace-provider
         run: |
           gxpkg env gxi ./build-provider.ss clean
           gxpkg env gxi ./build-provider.ss

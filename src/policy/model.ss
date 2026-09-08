@@ -56,7 +56,8 @@
         +agent-list-growth-loop-performance-rule+
         +agent-macro-expansion-io-boundary-rule+
         +agent-list-random-access-loop-performance-rule+
-        +agent-string-growth-loop-performance-rule+)
+        +agent-string-growth-loop-performance-rule+
+        +macro-governance-admission-rule+)
 ;; PolicyRuleStruct
 (defstruct policy-rule (id severity))
 ;; Integer
@@ -209,3 +210,7 @@
 ;; ConfigConstant
 (def +agent-string-growth-loop-performance-rule+
   (make-policy-rule "GERBIL-SCHEME-AGENT-POLICY-042" "warning"))
+;; Macro governance profile violations stop admission before native build; the
+;; stable rule id remains separate from R011 and R040 compatibility findings.
+(def +macro-governance-admission-rule+
+  (make-policy-rule "GERBIL-SCHEME-MACRO-GOVERNANCE-001" "error"))
