@@ -27,9 +27,9 @@
   "bounded-pattern-family"
   "executable-witness")
  (tags "style" "macro" "poo" "hygiene" "admission")
- (targetRationale . "one parser pass and one flat governance pass must remain inside the focused policy budget")
+ (targetRationale . "three retained samples separate parser cold initialization from the best steady-state parser plus flat governance pass")
  (unit . "ms")
- (iterations . 1)
+ (iterations . 3)
  (target_total . 18ms)
  (regression_budget . 26ms)
  (expected_over_input_budget . 12ms)

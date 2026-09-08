@@ -134,11 +134,15 @@
 
 ;; A contract is a POO value so downstream profiles can extend it without
 ;; adding new parser syntax.  Its evidence remains parser-owned.
-(def (make-macro-governance-contract macro purpose capabilities witnesses)
-  (.o macro: macro
-      purpose: purpose
-      capabilities: capabilities
-      witness-owners: witnesses))
+(def (make-macro-governance-contract
+      macro-name purpose-value capability-values witness-values)
+  ;; Parenthesized slot/value pairs capture lexical values.  Keyword slots with
+  ;; same-named identifiers are POO self-slot references, so constructor
+  ;; formals deliberately use distinct names.
+  (.o (macro macro-name)
+      (purpose purpose-value)
+      (capabilities capability-values)
+      (witness-owners witness-values)))
 
 (def (macro-governance-contract-macro contract)
   (.get contract macro))

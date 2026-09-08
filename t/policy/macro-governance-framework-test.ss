@@ -3,25 +3,40 @@
 
 (import :gerbil/gambit
         :std/test
+        (only-in :std/misc/process run-process)
         (only-in :clan/poo/object .cc)
         :asp-gerbil-scheme/src/macro-governance/facade
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/scenario/policy
-        :asp-gerbil-scheme/src/types/facade
-        "./fixtures")
+        :asp-gerbil-scheme/src/testing/memory-profile
+        :asp-gerbil-scheme/src/types/facade)
 
 (export macro-governance-framework-policy-test)
+
+(declare-gxtest-memory-exception
+ '((maxHeapMiB . 512)))
+
+(def (macro-governance-reset-root root)
+  (when (file-exists? root)
+    (void (run-process ["rm" "-rf" root] stderr-redirection: #t))))
+
+(def (macro-governance-ensure-directory path)
+  (with-catch (lambda (_) #f) (lambda () (create-directory path))))
+
+(def (macro-governance-write-text path text)
+  (when (file-exists? path) (delete-file path))
+  (call-with-output-file path (lambda (port) (display text port))))
 
 ;; : (-> String String String Unit)
 (def (write-macro-governance-project root macro-source test-source)
   (let ((source-dir (string-append root "/src"))
         (test-dir (string-append root "/t")))
-    (reset-fixture-root root)
-    (ensure-dir ".run")
-    (ensure-dir root)
-    (ensure-dir source-dir)
-    (ensure-dir test-dir)
-    (write-text
+    (macro-governance-reset-root root)
+    (macro-governance-ensure-directory ".run")
+    (macro-governance-ensure-directory root)
+    (macro-governance-ensure-directory source-dir)
+    (macro-governance-ensure-directory test-dir)
+    (macro-governance-write-text
      (string-append root "/gerbil.pkg")
      (string-append
       "(package: sample/macro-governance\n"
@@ -29,8 +44,10 @@
       "          (macro-governance\n"
       "           explanation: \"Every governed macro has executable source evidence.\"\n"
       "           witnesses: ((\"define-value\" \"t/core-test.ss\")))))\n"))
-    (write-text (string-append source-dir "/core.ss") macro-source)
-    (write-text (string-append test-dir "/core-test.ss") test-source)))
+    (macro-governance-write-text
+     (string-append source-dir "/core.ss") macro-source)
+    (macro-governance-write-text
+     (string-append test-dir "/core-test.ss") test-source)))
 
 ;; : TestSuite
 (def macro-governance-framework-policy-test

@@ -137,10 +137,10 @@ The focused framework test proves:
 - the =macro-governance-admission= scenario has one finding before repair and
   zero after replacing the transformer with a small =defrules= form.
 
-The scenario owns benchmark timing and RSS limits.  Admission performs one
-parser collection already required by policy, one rule-plan compilation, and a
-linear pass over macro facts and findings.  It does not expand or compile the
-fixture during policy evaluation.
+The scenario owns benchmark timing and RSS limits.  Admission consumes the
+parser collection already required by policy, compiles one rule plan, and maps
+source-ordered macro facts to closed decisions while retaining all matching
+findings.  It does not expand or compile the fixture during policy evaluation.
 
 * Non-goals
 

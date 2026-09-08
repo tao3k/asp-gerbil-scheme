@@ -48,23 +48,31 @@
 ;; Contracts project existing package declarations and parser facts; metadata
 ;; never replaces executable witness admission.
 (def (macro-governance-contracts index)
+  (let (witnesses (macro-governance-witnesses index))
+    (map (lambda (macro)
+           (macro-governance-contract-for macro witnesses))
+         (macro-governance-macros index))))
+
+;; Package metadata projects witness ownership only; the parser-owned macro
+;; fact remains the executable authority used by admission.
+(def (macro-governance-witnesses index)
   (let* ((package (project-index-package index))
          (policy (and package
                       (project-package-macro-governance-policy package)))
-         (witnesses (if policy
-                      (macro-governance-policy-witnesses policy)
-                      '())))
-    (map (lambda (macro)
-           (make-macro-governance-contract
-            (macro-fact-name macro)
-            (macro-governance-macro-purpose macro)
-            (macro-governance-macro-capabilities macro)
-            (filter-map
-             (lambda (entry)
-               (and (equal? (car entry) (macro-fact-name macro))
-                    (cdr entry)))
-             witnesses)))
-         (macro-governance-macros index))))
+         (witnesses (and policy
+                         (macro-governance-policy-witnesses policy))))
+    (or witnesses '())))
+
+(def (macro-governance-contract-for macro witnesses)
+  (make-macro-governance-contract
+   (macro-fact-name macro)
+   (macro-governance-macro-purpose macro)
+   (macro-governance-macro-capabilities macro)
+   (filter-map
+    (lambda (entry)
+      (and (equal? (car entry) (macro-fact-name macro))
+           (cdr entry)))
+    witnesses)))
 
 (def (macro-governance-macro-purpose macro)
   (cond
@@ -161,10 +169,15 @@
       index
       profile: (profile asp-strict-macro-governance-profile))
   (let* ((macros (macro-governance-macros index))
-         (contracts (macro-governance-contracts index))
+         (witnesses (macro-governance-witnesses index))
          (findings (macro-governance-findings index profile: profile))
          (decisions
-          (macro-governance-decisions macros contracts findings))
+          (map (lambda (macro)
+                 (macro-governance-decision-for
+                  macro
+                  (macro-governance-contract-for macro witnesses)
+                  findings))
+               macros))
          (rejected
           (length
            (filter (lambda (decision)
@@ -181,18 +194,6 @@
      (- total rejected)
      rejected
      decisions)))
-
-;; Parser facts and projected contracts share source order.  Walk both lists
-;; explicitly because Gerbil's native map accepts one collection.
-(def (macro-governance-decisions macros contracts findings)
-  (let loop ((macros macros) (contracts contracts) (out '()))
-    (if (or (null? macros) (null? contracts))
-      (reverse out)
-      (loop (cdr macros)
-            (cdr contracts)
-            (cons (macro-governance-decision-for
-                   (car macros) (car contracts) findings)
-                  out)))))
 
 (def (macro-governance-decision-for macro contract findings)
   (let (reasons
