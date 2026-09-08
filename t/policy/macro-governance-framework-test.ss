@@ -4,6 +4,7 @@
 (import :gerbil/gambit
         :std/test
         (only-in :std/misc/process run-process)
+        (only-in :std/text/json json-object->string write-json-sort-keys?)
         (only-in :clan/poo/object .cc)
         :asp-gerbil-scheme/src/macro-governance/facade
         :asp-gerbil-scheme/src/parser/facade
@@ -26,6 +27,10 @@
 (def (macro-governance-write-text path text)
   (when (file-exists? path) (delete-file path))
   (call-with-output-file path (lambda (port) (display text port))))
+
+(def (macro-governance-canonical-json value)
+  (parameterize ((write-json-sort-keys? #t))
+    (json-object->string value)))
 
 ;; : (-> String String String Unit)
 (def (write-macro-governance-project root macro-source test-source)
@@ -120,20 +125,27 @@
         (macro-governance-write-text
          (string-append root "/gerbil.pkg")
          "(package: sample/macro-governance)\n")
-        (let (baseline (macro-governance-receipt-json
-                         (macro-governance-admit (collect-project root))))
+        (let* ((baseline-receipt
+                (macro-governance-receipt-json
+                 (macro-governance-admit (collect-project root))))
+               (baseline
+                (macro-governance-canonical-json baseline-receipt)))
           (macro-governance-write-text
            (string-append root "/gerbil.pkg")
            "(package: sample/macro-governance policy: ((agent-policy disabled-rules: (\"GERBIL-SCHEME-MACRO-GOVERNANCE-001\") explanation: \"legacy exception\") (macro-governance witnesses: ((\"define-value\" \"t/core-test.ss\")))))\n")
           (check (source-file-parse-error (parse-source-file root "gerbil.pkg")) => #f)
-          (check (macro-governance-receipt-json
-                   (macro-governance-admit (collect-project root))) => baseline)
+          (let (with-policy
+                (macro-governance-canonical-json
+                 (macro-governance-receipt-json
+                  (macro-governance-admit (collect-project root)))))
+            (check with-policy => baseline))
           (macro-governance-write-text
            (string-append root "/gerbil.pkg")
            "(package: sample/macro-governance)\n")
-          (check (macro-governance-receipt-json
-                   (macro-governance-admit (collect-project root))) => baseline)
-          (check (hash-get baseline 'status) => "rejected"))))
+          (check (macro-governance-canonical-json
+                  (macro-governance-receipt-json
+                   (macro-governance-admit (collect-project root)))) => baseline)
+          (check (hash-get baseline-receipt 'status) => "rejected"))))
     (test-case "scenario closes an unhygienic macro admission finding"
       (let* ((scenario
               (make-policy-scenario
