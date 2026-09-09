@@ -254,7 +254,7 @@
 ;;;   declarative; arbitrary executable forms in the same file still fail.
 ;; : (-> SourceFile CallFact Boolean )
 (def (explicit-build-entrypoint-call? file call)
-  (and (equal? (source-file-path file) "build.ss")
+  (and (equal? (source-path-class (source-file-path file)) "package-build")
        (ormap (lambda (form)
                 (and (member (top-form-head form)
                              +explicit-build-entrypoint-heads+)

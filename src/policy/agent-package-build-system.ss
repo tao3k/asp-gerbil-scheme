@@ -194,8 +194,9 @@
     ["shell-dispatch-call" "shell-pipeline-literal"]
     "package build shell-pipeline drift requires dispatch and payload evidence")))
 
-;;; Scope guard: only package-root build.ss is checked for custom build-system
-;;; drift.  build/runtime owners use a separate detector profile.
+;;; Scope guard: every package-owned build.ss, including nested workspace
+;;; packages, is checked for custom build-system drift. Build/runtime owners
+;;; use a separate detector profile.
 ;; : (-> SourceFile Boolean)
 (def (package-build-file? file)
   (equal? (source-path-class (source-file-path file))

@@ -15,7 +15,8 @@
   (cond
    ((equal? path "gerbil.pkg")
     "config")
-   ((equal? path "build.ss")
+   ((or (equal? path "build.ss")
+        (string-suffix? "/build.ss" path))
     "package-build")
    ((and (not (string-contains path "/"))
          (or (string-prefix? "build-" path)
