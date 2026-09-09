@@ -20,7 +20,8 @@
         blank-string?)
 ;; ConfigConstant
 (def +poo-declarative-heads+
-  '(".def" "define-type" "defclass" ".defclass" ".defgeneric" "defmethod" ".defmethod"))
+  '(".def" "define-type" "defclass" ".defclass" ".defgeneric" "defmethod" ".defmethod"
+    "defpoo-object-family"))
 ;; Integer
 (def +poo-capability-dependencies+
   '("gerbil-poo" "clan/poo"))

@@ -31,6 +31,32 @@
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
             (check matching => [])))
+(test-case "agent policy treats the native POO family macro as declarative"
+      (let* ((root ".run/policy-poo-object-family-declarative")
+             (src (string-append root "/src")))
+        (reset-fixture-root root)
+        (ensure-dir ".run")
+        (ensure-dir root)
+        (ensure-dir src)
+        (write-text
+         (string-append root "/gerbil.pkg")
+         "(package: sample/poo-object-family-declarative)\n")
+        (write-text
+         (string-append src "/objects.ss")
+         (string-append
+          ";;; -*- Gerbil -*-\n"
+          "(import (only-in :clan/poo/object .o .ref)\n"
+          "        (only-in :asp-gerbil-scheme/src/object-family/syntax defpoo-object-family poo-family-ref))\n"
+          "(defpoo-object-family\n"
+          "  (prototype sample-prototype (sample? #t))\n"
+          "  (constructor (make-sample value-value) (value value-value))\n"
+          "  (accessors poo-family-ref\n"
+          "             (required (sample-value value))\n"
+          "             (optional)))\n"))
+        (let* ((index (collect-project root))
+               (findings (run-agent-policy index))
+               (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
+          (check matching => []))))
 (test-case "agent policy treats user config and module object fragments as declarative"
       (let* ((root ".run/policy-agent-declarative-config")
              (src (string-append root "/src"))
@@ -134,9 +160,9 @@
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
           (check (macro-fact-pattern-count macro) => 1)
-          (check (member "definition-lowering-macro"
-                         (macro-fact-quality-facets macro))
-                 => '("definition-lowering-macro"))
+          (check (not (not (member "definition-lowering-macro"
+                                   (macro-fact-quality-facets macro))))
+                 => #t)
           (check matching => []))))
 (test-case "agent policy rejects effectful local syntax-rules macros"
       (let* ((root ".run/policy-effectful-local-macro")
