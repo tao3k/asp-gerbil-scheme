@@ -2,6 +2,7 @@
 ;;; Declarative Builder Profile shared by discovery and native build.
 
 (import (only-in :clan/poo/object .def .get)
+        :asp-gerbil-scheme/src/object-family/syntax
         (only-in "./build-environment-profile"
                  asp-gerbil-scheme-host-build-environment-profile
                  asp-gerbil-scheme-apply-build-environment-profile!)
@@ -26,19 +27,34 @@
         asp-gerbil-scheme-builder-profile-modules/root-roots
         asp-gerbil-scheme-builder-profile-modules/config)
 
-(.def asp-gerbil-scheme-builder-profile-prototype
-  (name 'builder)
-  (native-profile 'development)
-  (build-environment-profile asp-gerbil-scheme-host-build-environment-profile)
-  (profiles ['asp-quality])
-  ;; Scenario fixtures and generated snapshots are policy/test inputs owned by
-  ;; their harnesses, not package modules discovered by std/make.
-  (exclude-directories ["scenarios" "snapshots"])
-  ;; Gerbil projects conventionally use either t/ or test/; neither directory
-  ;; is part of the package's native library projection by default.
-  (test-roots ["t" "test"])
-  (gitignore? #t)
-  (default-project-excludes? #t))
+(defpoo-object-family
+  (prototype asp-gerbil-scheme-builder-profile-prototype
+             (name 'builder)
+             (native-profile 'development)
+             (build-environment-profile
+              asp-gerbil-scheme-host-build-environment-profile)
+             (profiles ['asp-quality])
+             ;; Scenario fixtures and generated snapshots are policy/test
+             ;; inputs owned by their harnesses, not package modules.
+             (exclude-directories ["scenarios" "snapshots"])
+             ;; Gerbil projects conventionally use either t/ or test/; neither
+             ;; directory is part of the native library projection by default.
+             (test-roots ["t" "test"])
+             (gitignore? #t)
+             (default-project-excludes? #t))
+  (accessors poo-family-ref
+             (required
+              (asp-gerbil-scheme-builder-profile-native-profile native-profile)
+              (asp-gerbil-scheme-builder-profile-build-environment
+               build-environment-profile)
+              (asp-gerbil-scheme-builder-profile-profiles profiles)
+              (asp-gerbil-scheme-builder-profile-exclude-directories
+               exclude-directories)
+              (asp-gerbil-scheme-builder-profile-test-roots test-roots)
+              (asp-gerbil-scheme-builder-profile-gitignore? gitignore?)
+              (asp-gerbil-scheme-builder-profile-default-project-excludes?
+               default-project-excludes?))
+             (optional)))
 
 (.def (asp-gerbil-scheme-development-builder-profile
        @ asp-gerbil-scheme-builder-profile-prototype)
@@ -50,34 +66,9 @@
   (name 'production)
   (native-profile 'production))
 
-(def (asp-gerbil-scheme-builder-profile-native-profile profile)
-  (.get profile native-profile))
-
-(def (asp-gerbil-scheme-builder-profile-build-environment profile)
-  (.get profile build-environment-profile))
-
 (def (asp-gerbil-scheme-builder-profile-apply-build-environment! profile)
   (asp-gerbil-scheme-apply-build-environment-profile!
    (asp-gerbil-scheme-builder-profile-build-environment profile)))
-
-(def (asp-gerbil-scheme-builder-profile-profiles profile)
-  (.get profile profiles))
-
-;; : (-> BuilderProfile (List Path))
-(def (asp-gerbil-scheme-builder-profile-exclude-directories profile)
-  (.get profile exclude-directories))
-
-;; Test roots are a build-profile convention, not a second source catalog.
-;; Downstream packages still declare one explicit project root set.
-;; : (-> BuilderProfile (List Path))
-(def (asp-gerbil-scheme-builder-profile-test-roots profile)
-  (.get profile test-roots))
-
-(def (asp-gerbil-scheme-builder-profile-gitignore? profile)
-  (.get profile gitignore?))
-
-(def (asp-gerbil-scheme-builder-profile-default-project-excludes? profile)
-  (.get profile default-project-excludes?))
 
 ;; : (-> Path Path Boolean)
 (def (asp-gerbil-scheme-builder-profile-module-under-root? module root)

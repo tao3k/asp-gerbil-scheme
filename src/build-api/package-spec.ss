@@ -13,6 +13,7 @@
         asp-gerbil-scheme-package-exclude-modules)
 
 (import (only-in :clan/poo/object .cc .def .get)
+        :asp-gerbil-scheme/src/object-family/syntax
         (only-in "./builder-profile"
                  asp-gerbil-scheme-development-builder-profile
                  asp-gerbil-scheme-builder-profile-apply-build-environment!
@@ -138,27 +139,14 @@
       (error "Package Spec spec-projector must be a procedure" projector))
     (projector package-spec)))
 
-(def (asp-gerbil-scheme-package-builder-profile package-spec)
-  (.get package-spec profile))
-
 (def (asp-gerbil-scheme-package-build-profile package-spec)
   (asp-gerbil-scheme-builder-profile-native-profile
    (asp-gerbil-scheme-package-builder-profile package-spec)))
-
-(def (asp-gerbil-scheme-package-modules package-spec)
-  (.get package-spec modules))
-
-(def (asp-gerbil-scheme-package-source-roots package-spec)
-  (.get package-spec roots))
 
 (def (asp-gerbil-scheme-package-exclude-directories package-spec)
   (or (.get package-spec exclude-directories)
       (asp-gerbil-scheme-builder-profile-exclude-directories
        (asp-gerbil-scheme-package-builder-profile package-spec))))
-
-;; : (-> PackageSpec (List ModulePath))
-(def (asp-gerbil-scheme-package-exclude-modules package-spec)
-  (.get package-spec exclude-modules))
 
 ;; The macro calls this once while loading build.ss.  Keeping the projection
 ;; behind a named function leaves the public syntax purely declarative.
@@ -174,14 +162,22 @@
 ;; Import-safe semantic base for concrete project library and provider specs.
 ;; Script entrypoints remain in top-level build.ss files; this module owns only
 ;; reusable POO values and projections.
-(.def asp-gerbil-scheme-library-package-prototype
- (role 'library)
- (profile asp-gerbil-scheme-development-builder-profile)
- (source-catalog-authority 'project)
- (modules #f)
- (roots ["."])
- (exclude-directories #f)
- (exclude-modules [])
- (spec-projector asp-gerbil-scheme-package-native-spec)
- (native-spec-projector #f)
- (native-spec #f))
+(defpoo-object-family
+  (prototype asp-gerbil-scheme-library-package-prototype
+             (role 'library)
+             (profile asp-gerbil-scheme-development-builder-profile)
+             (source-catalog-authority 'project)
+             (modules #f)
+             (roots ["."])
+             (exclude-directories #f)
+             (exclude-modules [])
+             (spec-projector asp-gerbil-scheme-package-native-spec)
+             (native-spec-projector #f)
+             (native-spec #f))
+  (accessors poo-family-ref
+             (required
+              (asp-gerbil-scheme-package-builder-profile profile)
+              (asp-gerbil-scheme-package-modules modules)
+              (asp-gerbil-scheme-package-source-roots roots)
+              (asp-gerbil-scheme-package-exclude-modules exclude-modules))
+             (optional)))

@@ -2,7 +2,8 @@
 ;;; POO policy values and typed receipts for macro governance.
 
 (import :gerbil/gambit
-        (only-in :clan/poo/object .def .get .o)
+        (only-in :clan/poo/object .def)
+        :asp-gerbil-scheme/src/object-family/syntax
         (only-in :std/sugar hash))
 
 (export macro-governance-rule-prototype
@@ -22,6 +23,7 @@
         macro-governance-profile-require-hygiene?
         macro-governance-profile-max-pattern-count
         macro-governance-profile-rule-enabled?
+        macro-governance-contract-prototype
         make-macro-governance-contract
         macro-governance-contract-macro
         macro-governance-contract-purpose
@@ -53,10 +55,17 @@
 ;; ids into one flat rule plan before walking parser-owned MacroFacts.  V1 keeps
 ;; executable evaluators closed in the admission module: packages may compose
 ;; and narrow these values, but package metadata cannot inject policy code.
-(.def macro-governance-rule-prototype
-  (id #f)
-  (reason-kind #f)
-  (severity "error"))
+(defpoo-object-family
+  (prototype macro-governance-rule-prototype
+             (id #f)
+             (reason-kind #f)
+             (severity "error"))
+  (accessors poo-family-ref
+             (required
+              (macro-governance-rule-id id)
+              (macro-governance-rule-reason-kind reason-kind)
+              (macro-governance-rule-severity severity))
+             (optional)))
 
 (.def (macro-governance-hygiene-rule
        @ macro-governance-rule-prototype)
@@ -83,21 +92,21 @@
   (id 'expansion-io)
   (reason-kind 'expansion-io-denied))
 
-(def (macro-governance-rule-id rule)
-  (.get rule id))
-
-(def (macro-governance-rule-reason-kind rule)
-  (.get rule reason-kind))
-
-(def (macro-governance-rule-severity rule)
-  (.get rule severity))
-
-(.def macro-governance-profile-prototype
-  (name 'macro-governance-v1)
-  (rules [])
-  (allowed-phases ["syntax"])
-  (require-hygiene? #t)
-  (max-pattern-count 64))
+(defpoo-object-family
+  (prototype macro-governance-profile-prototype
+             (name 'macro-governance-v1)
+             (rules [])
+             (allowed-phases ["syntax"])
+             (require-hygiene? #t)
+             (max-pattern-count 64))
+  (accessors poo-family-ref
+             (required
+              (macro-governance-profile-name name)
+              (macro-governance-profile-rules rules)
+              (macro-governance-profile-allowed-phases allowed-phases)
+              (macro-governance-profile-require-hygiene? require-hygiene?)
+              (macro-governance-profile-max-pattern-count max-pattern-count))
+             (optional)))
 
 (.def (asp-strict-macro-governance-profile
        @ macro-governance-profile-prototype)
@@ -111,21 +120,6 @@
   (require-hygiene? #t)
   (max-pattern-count 64))
 
-(def (macro-governance-profile-name profile)
-  (.get profile name))
-
-(def (macro-governance-profile-rules profile)
-  (.get profile rules))
-
-(def (macro-governance-profile-allowed-phases profile)
-  (.get profile allowed-phases))
-
-(def (macro-governance-profile-require-hygiene? profile)
-  (.get profile require-hygiene?))
-
-(def (macro-governance-profile-max-pattern-count profile)
-  (.get profile max-pattern-count))
-
 (def (macro-governance-profile-rule-enabled? profile id)
   (ormap (lambda (rule)
            (eq? (macro-governance-rule-id rule) id))
@@ -133,23 +127,23 @@
 
 ;; A contract is a POO value so downstream profiles can extend it without
 ;; adding new parser syntax.  Its evidence remains parser-owned.
-(def (make-macro-governance-contract
-      macro-name purpose-value capability-values)
-  ;; Parenthesized slot/value pairs capture lexical values.  Keyword slots with
-  ;; same-named identifiers are POO self-slot references, so constructor
-  ;; formals deliberately use distinct names.
-  (.o (macro macro-name)
-      (purpose purpose-value)
-      (capabilities capability-values)))
-
-(def (macro-governance-contract-macro contract)
-  (.get contract macro))
-
-(def (macro-governance-contract-purpose contract)
-  (.get contract purpose))
-
-(def (macro-governance-contract-capabilities contract)
-  (.get contract capabilities))
+(defpoo-object-family
+  (prototype macro-governance-contract-prototype
+             (macro #f)
+             (purpose #f)
+             (capabilities []))
+  (constructor
+   (make-macro-governance-contract
+    macro-name purpose-value capability-values)
+   (macro macro-name)
+   (purpose purpose-value)
+   (capabilities capability-values))
+  (accessors poo-family-ref
+             (required
+              (macro-governance-contract-macro macro)
+              (macro-governance-contract-purpose purpose)
+              (macro-governance-contract-capabilities capabilities))
+             (optional)))
 
 ;; Decisions and receipts are closed typed data, not extensible policy objects.
 (defstruct macro-governance-decision

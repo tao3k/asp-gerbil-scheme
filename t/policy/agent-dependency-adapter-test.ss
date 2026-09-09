@@ -99,7 +99,7 @@
             (check (hash-get details 'codeShapeExemplar)
                    => "gerbil-poo rationaldict-style typed protocol adapter")
             (check (hash-get details 'profileComposition)
-                   => "clan/list c3-compute-precedence-list + clan/poo/proto compose-proto*")
+                   => "gerbil-poo object<-alist semantic construction + native object C3 supers")
             (check (hash-get details 'profileOverlays)
                    => ["dependency-protocol-surface"
                        "dependency-poo-lineage"

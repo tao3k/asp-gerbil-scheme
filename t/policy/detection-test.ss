@@ -2,6 +2,7 @@
 ;;; Direct tests for policy detection combinators.
 
 (import :std/test
+        (only-in :clan/poo/object object?)
         :asp-gerbil-scheme/src/policy/detection
         :asp-gerbil-scheme/src/policy/prototype)
 
@@ -35,6 +36,8 @@
              (result (run-detection-prototype 'subject prototype))
              (details (detection-result-details result)))
         (check (not (not result)) => #t)
+        (check (object? result) => #t)
+        (check (object? (car (detection-result-groups result))) => #t)
         (check (detection-result-combiner result) => "poo-backed-threshold")
         (check (detection-result-combiner-kind result) => "threshold")
         (check (detection-result-selector result "fallback.ss")
@@ -73,6 +76,8 @@
                    "right-profile"
                    "left-profile"
                    "base-profile"])
+        (check (object? joined) => #t)
+        (check (slot-profile? joined) => #t)
         (check (slot-profile-ref joined 'slot "") => "right")
         (check (slot-profile-ref joined 'baseOnly #f) => #t)))
     (test-case "threshold prototype requires enough independent groups"

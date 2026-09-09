@@ -195,7 +195,7 @@
 ;; ConfigConstant
 (def +agent-poo-documentation-usage-rule+
   (make-policy-rule "GERBIL-SCHEME-AGENT-POLICY-038" "warning"))
-;; ConfigConstant
+;; Retired compatibility constant; P043 has no detector or catalog entry.
 (def +agent-poo-generated-receipt-boundary-rule+
   (make-policy-rule "GERBIL-SCHEME-AGENT-POLICY-043" "warning"))
 ;; ConfigConstant

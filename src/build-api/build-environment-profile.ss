@@ -2,6 +2,7 @@
 ;;; Declarative host build-environment profiles projected by Package Spec.
 
 (import (only-in :clan/poo/object .def .get)
+        :asp-gerbil-scheme/src/object-family/syntax
         :gerbil/gambit)
 
 (export asp-gerbil-scheme-build-environment-profile-prototype
@@ -12,9 +13,15 @@
         asp-gerbil-scheme-build-environment-profile-bindings
         asp-gerbil-scheme-apply-build-environment-profile!)
 
-(.def asp-gerbil-scheme-build-environment-profile-prototype
-  (name 'portable)
-  (bindings []))
+(defpoo-object-family
+  (prototype asp-gerbil-scheme-build-environment-profile-prototype
+             (name 'portable)
+             (bindings []))
+  (accessors poo-family-ref
+             (required
+              (asp-gerbil-scheme-build-environment-profile-name name)
+              (asp-gerbil-scheme-build-environment-profile-bindings bindings))
+             (optional)))
 
 (.def (asp-gerbil-scheme-portable-build-environment-profile
        @ asp-gerbil-scheme-build-environment-profile-prototype))
@@ -31,12 +38,6 @@
   (cond-expand
    (darwin asp-gerbil-scheme-macos-build-environment-profile)
    (else asp-gerbil-scheme-portable-build-environment-profile)))
-
-(def (asp-gerbil-scheme-build-environment-profile-name profile)
-  (.get profile name))
-
-(def (asp-gerbil-scheme-build-environment-profile-bindings profile)
-  (.get profile bindings))
 
 ;; The macro-generated spec procedure runs immediately before the upstream
 ;; std/make call.  Project the declared host environment into that process;

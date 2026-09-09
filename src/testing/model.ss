@@ -2,7 +2,8 @@
 ;;; POO-shaped testing model for downstream Gerbil build.ss entrypoints.
 
 (import :gerbil/gambit
-        (only-in :clan/poo/object object? object<-alist .ref .slot?))
+        (only-in :clan/poo/object object? object<-alist .ref .slot?)
+        :asp-gerbil-scheme/src/object-family/syntax)
 
 (export #t)
 
@@ -87,293 +88,219 @@
     (testing-lazy-object-ref object key default)
     (testing-poo-slot-ref (testing-force-object object) key default)))
 
-;; : (-> String List List MaybeInteger String TestingProject)
-(def (testing-project name: (name "gerbil-project")
-                      suites: (suites [])
-                      roots: (roots '("t"))
-                      batch-size: (batch-size #f)
-                      receipt-prefix: (receipt-prefix "asp-gerbil-scheme-test"))
-  (testing-object
-   'testing-project
-   `((name . ,name)
-     (suites . ,suites)
-     (roots . ,roots)
-     (batchSize . ,batch-size)
-     (receiptPrefix . ,receipt-prefix))))
+;;; Stable public testing families are declared once.  Each declaration expands
+;;; to a native POO prototype, its existing keyword constructor, and lazy-aware
+;;; accessors.  Dynamic field intake remains in testing-object and
+;;; testing-lazy-object as the explicit alist adapter boundary.
+(defpoo-object-family
+  (prototype testing-project-prototype (kind 'testing-project))
+  (constructor
+   (testing-project name: (project-name "gerbil-project")
+                    suites: (project-suites [])
+                    roots: (project-roots '("t"))
+                    batch-size: (project-batch-size #f)
+                    receipt-prefix:
+                    (project-receipt-prefix "asp-gerbil-scheme-test"))
+   (name project-name)
+   (suites project-suites)
+   (roots project-roots)
+   (batchSize project-batch-size)
+   (receiptPrefix project-receipt-prefix))
+  (accessors testing-object-ref
+             (required (testing-project-name name))
+             (optional
+              (testing-project-suites suites [])
+              (testing-project-batch-size batchSize #f)
+              (testing-project-receipt-prefix
+               receiptPrefix "asp-gerbil-scheme-test"))))
 
-;; : (-> String MaybePath List TestFiles List MaybeInteger MaybeInteger MaybeInteger MaybeInteger Procedure GxTestSuite)
-(def (gxtest-suite name: (name "gxtest")
-                   default-root: (default-root #f)
-                   roots: (roots [])
-                   files: (files 'auto)
-                   batch-size: (batch-size #f)
-                   gates: (gates [])
-                   max-selected-files: (max-selected-files #f)
-                   max-selected-sources: (max-selected-sources #f)
-                   max-selected-outputs: (max-selected-outputs #f)
-                   import->file: (import->file default-testing-import->file))
-  (testing-object
-   'gxtest-suite
-   `((name . ,name)
-     (defaultRoot . ,default-root)
-     (roots . ,roots)
-     (files . ,files)
-     (batchSize . ,batch-size)
-     (gates . ,gates)
-     (maxSelectedFiles . ,max-selected-files)
-     (maxSelectedSources . ,max-selected-sources)
-     (maxSelectedOutputs . ,max-selected-outputs)
-     (import->file . ,import->file))))
+(defpoo-object-family
+  (prototype gxtest-suite-prototype (kind 'gxtest-suite))
+  (constructor
+   (gxtest-suite name: (suite-name "gxtest")
+                 default-root: (suite-default-root #f)
+                 roots: (suite-roots [])
+                 files: (suite-files 'auto)
+                 batch-size: (suite-batch-size #f)
+                 gates: (suite-gates [])
+                 max-selected-files: (suite-max-selected-files #f)
+                 max-selected-sources: (suite-max-selected-sources #f)
+                 max-selected-outputs: (suite-max-selected-outputs #f)
+                 import->file:
+                 (suite-import->file default-testing-import->file))
+   (name suite-name)
+   (defaultRoot suite-default-root)
+   (roots suite-roots)
+   (files suite-files)
+   (batchSize suite-batch-size)
+   (gates suite-gates)
+   (maxSelectedFiles suite-max-selected-files)
+   (maxSelectedSources suite-max-selected-sources)
+   (maxSelectedOutputs suite-max-selected-outputs)
+   (import->file suite-import->file))
+  (accessors testing-object-ref
+             (required (testing-suite-name name))
+             (optional
+              (testing-suite-default-root defaultRoot #f)
+              (testing-suite-roots roots [])
+              (testing-suite-files files 'auto)
+              (testing-suite-batch-size batchSize #f)
+              (testing-suite-gates gates [])
+              (testing-suite-max-selected-files maxSelectedFiles #f)
+              (testing-suite-max-selected-sources maxSelectedSources #f)
+              (testing-suite-max-selected-outputs maxSelectedOutputs #f)
+              (testing-suite-import->file
+               import->file default-testing-import->file))))
 
-;; : (-> String List List MaybeInteger List MaybeProcedure ScenarioSuite)
-(def (scenario-suite name: (name "policy-scenarios")
-                     roots: (roots '("t/scenarios/policy"))
-                     scenarios: (scenarios [])
-                     batch-size: (batch-size #f)
-                     gates: (gates [])
-                     runner: (runner #f))
-  (testing-object
-   'scenario-suite
-   `((name . ,name)
-     (roots . ,roots)
-     (scenarios . ,scenarios)
-     (batchSize . ,batch-size)
-     (gates . ,gates)
-     (runner . ,runner))))
+(defpoo-object-family
+  (prototype scenario-suite-prototype (kind 'scenario-suite))
+  (constructor
+   (scenario-suite name: (scenario-suite-name "policy-scenarios")
+                   roots: (scenario-suite-roots '("t/scenarios/policy"))
+                   scenarios: (scenario-suite-scenarios [])
+                   batch-size: (scenario-suite-batch-size #f)
+                   gates: (scenario-suite-gates [])
+                   runner: (scenario-suite-runner #f))
+   (name scenario-suite-name)
+   (roots scenario-suite-roots)
+   (scenarios scenario-suite-scenarios)
+   (batchSize scenario-suite-batch-size)
+   (gates scenario-suite-gates)
+   (runner scenario-suite-runner))
+  (accessors testing-object-ref
+             (required)
+             (optional
+              (testing-scenario-suite-scenarios scenarios [])
+              (testing-scenario-suite-runner runner #f))))
 
-;; : (-> String Alist Procedure MaybeProcedure List PerformanceCase)
-(def (performance-case name: (name "performance-case")
-                       fixture: (fixture [])
-                       fixture-path: (fixture-path #f)
-                       runner: (runner #f)
-                       runner-module: (runner-module #f)
-                       runner-symbol: (runner-symbol #f)
-                       validator: (validator #f)
-                       validator-module: (validator-module #f)
-                       validator-symbol: (validator-symbol #f)
-                       details: (details []))
-  (testing-object
-   'performance-case
-   `((name . ,name)
-     (fixture . ,fixture)
-     (fixturePath . ,fixture-path)
-     (runner . ,runner)
-     (runnerModule . ,runner-module)
-     (runnerSymbol . ,runner-symbol)
-     (validator . ,validator)
-     (validatorModule . ,validator-module)
-     (validatorSymbol . ,validator-symbol)
-     (details . ,details))))
+(defpoo-object-family
+  (prototype performance-case-prototype (kind 'performance-case))
+  (constructor
+   (performance-case name: (case-name "performance-case")
+                     fixture: (case-fixture [])
+                     fixture-path: (case-fixture-path #f)
+                     runner: (case-runner #f)
+                     runner-module: (case-runner-module #f)
+                     runner-symbol: (case-runner-symbol #f)
+                     validator: (case-validator #f)
+                     validator-module: (case-validator-module #f)
+                     validator-symbol: (case-validator-symbol #f)
+                     details: (case-details []))
+   (name case-name)
+   (fixture case-fixture)
+   (fixturePath case-fixture-path)
+   (runner case-runner)
+   (runnerModule case-runner-module)
+   (runnerSymbol case-runner-symbol)
+   (validator case-validator)
+   (validatorModule case-validator-module)
+   (validatorSymbol case-validator-symbol)
+   (details case-details))
+  (accessors testing-object-ref
+             (required (testing-performance-case-name name))
+             (optional
+              (testing-performance-case-fixture fixture [])
+              (testing-performance-case-fixture-path fixturePath #f)
+              (testing-performance-case-runner runner #f)
+              (testing-performance-case-runner-module runnerModule #f)
+              (testing-performance-case-runner-symbol runnerSymbol #f)
+              (testing-performance-case-validator validator #f)
+              (testing-performance-case-validator-module validatorModule #f)
+              (testing-performance-case-validator-symbol validatorSymbol #f)
+              (testing-performance-case-details details []))))
 
-;; : (-> String List List MaybeInteger List PerformanceSuite)
-(def (performance-suite name: (name "performance")
-                        roots: (roots [])
-                        cases: (cases [])
-                        batch-size: (batch-size #f)
-                        gates: (gates []))
-  (testing-object
-   'performance-suite
-   `((name . ,name)
-     (roots . ,roots)
-     (cases . ,cases)
-     (batchSize . ,batch-size)
-     (gates . ,gates))))
+(defpoo-object-family
+  (prototype performance-suite-prototype (kind 'performance-suite))
+  (constructor
+   (performance-suite name: (performance-suite-name "performance")
+                      roots: (performance-suite-roots [])
+                      cases: (performance-suite-cases [])
+                      batch-size: (performance-suite-batch-size #f)
+                      gates: (performance-suite-gates []))
+   (name performance-suite-name)
+   (roots performance-suite-roots)
+   (cases performance-suite-cases)
+   (batchSize performance-suite-batch-size)
+   (gates performance-suite-gates))
+  (accessors testing-object-ref
+             (required)
+             (optional (testing-performance-suite-cases cases []))))
 
-;; : (-> String MaybePath MaybeContract Symbol PerformanceGate)
-(def (performance-gate name: (name "performance")
-                       contract-root: (contract-root #f)
-                       contract: (contract #f)
-                       scope: (scope 'tested-files))
-  (testing-object
-   'performance-gate
-   `((name . ,name)
-     (contractRoot . ,contract-root)
-     (contract . ,contract)
-     (scope . ,scope))))
+(defpoo-object-family
+  (prototype performance-gate-prototype (kind 'performance-gate))
+  (constructor
+   (performance-gate name: (gate-name "performance")
+                     contract-root: (gate-contract-root #f)
+                     contract: (gate-contract #f)
+                     scope: (gate-scope 'tested-files))
+   (name gate-name)
+   (contractRoot gate-contract-root)
+   (contract gate-contract)
+   (scope gate-scope))
+  (accessors testing-object-ref
+             (required
+              (testing-gate-name name)
+              (testing-gate-scope scope)
+              (testing-performance-gate-contract-root contractRoot))
+             (optional)))
 
-;; : (-> String Symbol PolicyGate)
-(def (policy-gate name: (name "policy")
-                  scope: (scope 'tested-files))
-  (testing-object
-   'policy-gate
-   `((name . ,name)
-     (scope . ,scope))))
+(defpoo-object-family
+  (prototype policy-gate-prototype (kind 'policy-gate))
+  (constructor
+   (policy-gate name: (gate-name "policy")
+                scope: (gate-scope 'tested-files))
+   (name gate-name)
+   (scope gate-scope))
+  (accessors testing-object-ref (required) (optional)))
 
-;; : (-> Symbol Symbol MaybeString List Number List List TestingReceipt)
-(def (testing-receipt kind: (kind 'testing-run)
-                      status: (status 'ok)
-                      suite: (suite #f)
-                      files: (files [])
-                      elapsed-micros: (elapsed-micros 0)
-                      children: (children [])
-                      details: (details []))
-  (testing-object
-   'testing-receipt
-   `((receiptKind . ,kind)
-     (status . ,status)
-     (suite . ,suite)
-     (files . ,files)
-     (elapsedMicros . ,elapsed-micros)
-     (children . ,children)
-     (details . ,details))))
+(defpoo-object-family
+  (prototype testing-receipt-prototype (kind 'testing-receipt))
+  (constructor
+   (testing-receipt kind: (receipt-kind 'testing-run)
+                    status: (receipt-status 'ok)
+                    suite: (receipt-suite #f)
+                    files: (receipt-files [])
+                    elapsed-micros: (receipt-elapsed-micros 0)
+                    children: (receipt-children [])
+                    details: (receipt-details []))
+   (receiptKind receipt-kind)
+   (status receipt-status)
+   (suite receipt-suite)
+   (files receipt-files)
+   (elapsedMicros receipt-elapsed-micros)
+   (children receipt-children)
+   (details receipt-details))
+  (accessors testing-object-ref
+             (required
+              (testing-receipt-status status)
+              (testing-receipt-kind receiptKind))
+             (optional
+              (testing-receipt-files files [])
+              (testing-receipt-children children [])
+              (testing-receipt-elapsed-micros elapsedMicros 0)
+              (testing-receipt-details details []))))
 
-;; : (-> MaybeTestingProject List List Symbol List TestingSelection)
-(def (testing-selection project: (project #f)
-                        args: (args [])
-                        suites: (suites [])
-                        status: (status 'ok)
-                        details: (details []))
-  (testing-object
-   'testing-selection
-   `((project . ,project)
-     (args . ,args)
-     (suites . ,suites)
-     (status . ,status)
-     (details . ,details))))
-
-;; : (-> TestingProject String)
-(def (testing-project-name project)
-  (testing-object-ref project 'name))
-
-;; : (-> TestingProject List)
-(def (testing-project-suites project)
-  (testing-object-ref project 'suites []))
-
-;; : (-> TestingProject MaybeInteger)
-(def (testing-project-batch-size project)
-  (testing-object-ref project 'batchSize #f))
-
-;; : (-> TestingProject String)
-(def (testing-project-receipt-prefix project)
-  (testing-object-ref project 'receiptPrefix "asp-gerbil-scheme-test"))
-
-;; : (-> TestingSuite String)
-(def (testing-suite-name suite)
-  (testing-object-ref suite 'name))
-
-;; : (-> TestingSuite MaybePath)
-(def (testing-suite-default-root suite)
-  (testing-object-ref suite 'defaultRoot #f))
-
-;; : (-> TestingSuite List)
-(def (testing-suite-roots suite)
-  (testing-object-ref suite 'roots []))
-
-;; : (-> TestingSuite TestFiles)
-(def (testing-suite-files suite)
-  (testing-object-ref suite 'files 'auto))
-
-;; : (-> TestingSuite MaybeInteger)
-(def (testing-suite-batch-size suite)
-  (testing-object-ref suite 'batchSize #f))
-
-;; : (-> TestingSuite List)
-(def (testing-suite-gates suite)
-  (testing-object-ref suite 'gates []))
-
-;; : (-> TestingSuite MaybeInteger)
-(def (testing-suite-max-selected-files suite)
-  (testing-object-ref suite 'maxSelectedFiles #f))
-
-;; : (-> TestingSuite MaybeInteger)
-(def (testing-suite-max-selected-sources suite)
-  (testing-object-ref suite 'maxSelectedSources #f))
-
-;; : (-> TestingSuite MaybeInteger)
-(def (testing-suite-max-selected-outputs suite)
-  (testing-object-ref suite 'maxSelectedOutputs #f))
-
-;; : (-> TestingSuite Procedure)
-(def (testing-suite-import->file suite)
-  (testing-object-ref suite 'import->file default-testing-import->file))
-
-;; : (-> ScenarioSuite List)
-(def (testing-scenario-suite-scenarios suite)
-  (testing-object-ref suite 'scenarios []))
-
-;; : (-> ScenarioSuite MaybeProcedure)
-(def (testing-scenario-suite-runner suite)
-  (testing-object-ref suite 'runner #f))
-
-;; : (-> PerformanceSuite List)
-(def (testing-performance-suite-cases suite)
-  (testing-object-ref suite 'cases []))
-
-;; : (-> PerformanceCase String)
-(def (testing-performance-case-name case)
-  (testing-object-ref case 'name))
-
-;; : (-> PerformanceCase Alist)
-(def (testing-performance-case-fixture case)
-  (testing-object-ref case 'fixture []))
-
-;; : (-> PerformanceCase MaybePath)
-(def (testing-performance-case-fixture-path case)
-  (testing-object-ref case 'fixturePath #f))
-
-;; : (-> PerformanceCase Procedure)
-(def (testing-performance-case-runner case)
-  (testing-object-ref case 'runner #f))
-
-;; : (-> PerformanceCase MaybeSymbol)
-(def (testing-performance-case-runner-module case)
-  (testing-object-ref case 'runnerModule #f))
-
-;; : (-> PerformanceCase MaybeSymbol)
-(def (testing-performance-case-runner-symbol case)
-  (testing-object-ref case 'runnerSymbol #f))
-
-;; : (-> PerformanceCase MaybeProcedure)
-(def (testing-performance-case-validator case)
-  (testing-object-ref case 'validator #f))
-
-;; : (-> PerformanceCase MaybeSymbol)
-(def (testing-performance-case-validator-module case)
-  (testing-object-ref case 'validatorModule #f))
-
-;; : (-> PerformanceCase MaybeSymbol)
-(def (testing-performance-case-validator-symbol case)
-  (testing-object-ref case 'validatorSymbol #f))
-
-;; : (-> PerformanceCase List)
-(def (testing-performance-case-details case)
-  (testing-object-ref case 'details []))
-
-;; : (-> TestingGate String)
-(def (testing-gate-name gate)
-  (testing-object-ref gate 'name))
-
-;; : (-> TestingGate Symbol)
-(def (testing-gate-scope gate)
-  (testing-object-ref gate 'scope))
-
-;; : (-> PerformanceGate MaybePath)
-(def (testing-performance-gate-contract-root gate)
-  (testing-object-ref gate 'contractRoot))
-
-;; : (-> TestingReceipt Symbol)
-(def (testing-receipt-status receipt)
-  (testing-object-ref receipt 'status))
-
-;; : (-> TestingReceipt Symbol)
-(def (testing-receipt-kind receipt)
-  (testing-object-ref receipt 'receiptKind))
-
-;; : (-> TestingReceipt List)
-(def (testing-receipt-files receipt)
-  (testing-object-ref receipt 'files []))
-
-;; : (-> TestingReceipt List)
-(def (testing-receipt-children receipt)
-  (testing-object-ref receipt 'children []))
-
-;; : (-> TestingReceipt Number)
-(def (testing-receipt-elapsed-micros receipt)
-  (testing-object-ref receipt 'elapsedMicros 0))
-
-;; : (-> TestingReceipt List)
-(def (testing-receipt-details receipt)
-  (testing-object-ref receipt 'details []))
+(defpoo-object-family
+  (prototype testing-selection-prototype (kind 'testing-selection))
+  (constructor
+   (testing-selection project: (selection-project #f)
+                      args: (selection-args [])
+                      suites: (selection-suites [])
+                      status: (selection-status 'ok)
+                      details: (selection-details []))
+   (project selection-project)
+   (args selection-args)
+   (suites selection-suites)
+   (status selection-status)
+   (details selection-details))
+  (accessors testing-object-ref
+             (required
+              (testing-selection-project project)
+              (testing-selection-status status))
+             (optional
+              (testing-selection-args args [])
+              (testing-selection-suites suites [])
+              (testing-selection-details details []))))
 
 ;; : (-> TestingReceipt Symbol Datum Datum)
 (def (testing-receipt-detail receipt key default: (default #f))
@@ -388,26 +315,6 @@
 ;; : (-> TestingReceipt Boolean)
 (def (testing-receipt-ok? receipt)
   (eq? (testing-receipt-status receipt) 'ok))
-
-;; : (-> TestingSelection MaybeTestingProject)
-(def (testing-selection-project selection)
-  (testing-object-ref selection 'project))
-
-;; : (-> TestingSelection List)
-(def (testing-selection-args selection)
-  (testing-object-ref selection 'args []))
-
-;; : (-> TestingSelection List)
-(def (testing-selection-suites selection)
-  (testing-object-ref selection 'suites []))
-
-;; : (-> TestingSelection Symbol)
-(def (testing-selection-status selection)
-  (testing-object-ref selection 'status))
-
-;; : (-> TestingSelection List)
-(def (testing-selection-details selection)
-  (testing-object-ref selection 'details []))
 
 ;; : (-> TestingSelection Boolean)
 (def (testing-selection-ok? selection)

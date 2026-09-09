@@ -23,8 +23,6 @@
         poo-prototype-fixed-point-finding
         poo-construction-performance-findings
         poo-construction-performance-finding
-        poo-generated-receipt-boundary-findings
-        poo-generated-receipt-boundary-finding
         poo-clone-override-loop-performance-findings
         poo-clone-override-loop-performance-finding
         poo-materialization-loop-performance-findings
@@ -320,71 +318,6 @@
          (publicApiBoundary "keep POO declarations native and parser-visible")
          (sourceEvidence "gerbil-poo object.ss:149-158")
          (next "use GERBIL-SCHEME-AGENT-POLICY-032 for loop-local object construction performance"))))
-
-(def +poo-generated-boundary-keywords+
-  '("receipt" "manifest" "snapshot" "handoff" "diagnostic"))
-
-;;; Boundary:
-;;; - Generated runtime receipts are fixed data state, not user-authored POO
-;;;   declarations.
-;;; - Adapter constructors remain valid for external ingestion, but generated
-;;;   receipt/handoff/manifest builders should use defstruct internally and
-;;;   serialize once through an explicit ->alist boundary.
-;; : (-> ProjectIndex (List TypeFinding) )
-(def (poo-generated-receipt-boundary-findings index)
-  (if (poo-capability-active? index)
-    (apply append
-           (map (lambda (file)
-                  (if (index-source-runtime-file-path? index
-                                                       (source-file-path file))
-                    (filter-map
-                     (lambda (call)
-                       (and (poo-generated-receipt-boundary-call? file call)
-                            (poo-generated-receipt-boundary-finding
-                             file
-                             call)))
-                     (source-file-calls file))
-                    '()))
-                (project-index-files index)))
-    '()))
-
-;; : (-> SourceFile CallFact Boolean )
-(def (poo-generated-receipt-boundary-call? file call)
-  (and (member (call-fact-callee call) +poo-super-constructor-callees+)
-       (poo-generated-boundary-context? file call)))
-
-;; : (-> SourceFile CallFact Boolean )
-(def (poo-generated-boundary-context? file call)
-  (or (poo-generated-boundary-name? (source-file-path file))
-      (poo-generated-boundary-name? (or (call-fact-caller call) ""))))
-
-;; : (-> String Boolean )
-(def (poo-generated-boundary-name? name)
-  (ormap (lambda (fragment)
-           (and (string-contains name fragment) #t))
-         +poo-generated-boundary-keywords+))
-
-;; : (-> SourceFile CallFact TypeFinding )
-(def (poo-generated-receipt-boundary-finding file call)
-  (make-type-finding
-   (policy-rule-id +agent-poo-generated-receipt-boundary-rule+)
-   (policy-rule-severity +agent-poo-generated-receipt-boundary-rule+)
-   (source-file-path file)
-   (string-append
-    "generated runtime boundary " (or (call-fact-caller call) "top-level")
-    " constructs receipt-like state with " (call-fact-callee call)
-    "; use a fixed defstruct internally and one explicit ->alist projection at the ABI boundary")
-   (call-fact-selector call)
-   (hash (kind "poo-generated-receipt-boundary")
-         (callee (call-fact-callee call))
-         (caller (or (call-fact-caller call) "top-level"))
-         (guidanceMode "quality-performance-warning")
-         (trigger "receipt/manifest/snapshot/handoff context uses POO adapter constructor for generated state")
-         (allowedUse "native .o/.def user POO declarations and adapter constructors at external ingestion boundaries remain valid")
-         (preferredConstruction "defstruct for generated receipt state plus explicit receipt->alist projection at presentation/runtime ABI boundary")
-         (performanceEvidence "fixed Gerbil structs keep generated receipt construction stable; object<-alist/object<-hash rebuild object shape and hide the boundary behind adapter conversion")
-         (sourceEvidence "gerbil runtime-response defstruct->alist pattern and gerbil-poo object.ss adapter constructors")
-         (next "replace generated receipt object<-alist/object<-hash/object<-fun with defstruct fields and a named ->alist serializer"))))
 
 ;;; Boundary:
 ;;; - poo-method-shape-findings composes first-class procedures.

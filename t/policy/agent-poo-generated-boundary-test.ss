@@ -12,7 +12,7 @@
 ;; PolicyTest
 (def agent-poo-generated-boundary-policy-test
   (test-suite "gerbil scheme harness generated POO boundary policy"
-    (test-case "agent policy moves generated receipt adapters to defstruct boundary projection"
+    (test-case "P043 does not infer representation defects from receipt names"
       (let* ((scenario
               (make-policy-scenario
                "poo-generated-receipt-boundary-performance"
@@ -30,15 +30,10 @@
                result
                'after
                "GERBIL-SCHEME-AGENT-POLICY-043"))
-             (finding (car before-matching))
-             (details (type-finding-details finding)))
+             )
         (check (length timings) => 4)
         (check (policy-scenario-timing-steps-measured? timings) => #t)
         (check (policy-scenario-benchmark-constrained? timing) => #t)
-        (check (length before-matching) => 1)
+        (check before-matching => [])
         (check after-matching => [])
-        (check (type-finding-path finding) => "src/runtime/receipt.ss")
-        (check (hash-get details 'kind) => "poo-generated-receipt-boundary")
-        (check (hash-get details 'callee) => "object<-alist")
-        (check (hash-get details 'preferredConstruction)
-               => "defstruct for generated receipt state plus explicit receipt->alist projection at presentation/runtime ABI boundary")))))
+        ))))

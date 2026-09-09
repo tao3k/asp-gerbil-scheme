@@ -9,7 +9,7 @@
   ((name . policy-after) (durationMs . 1)))
  (targetRationale
   .
-  "generated receipt boundary policy must stay single-digit ms while rejecting adapter-object internal receipt state")
+  "retired P043 must stay silent for semantic POO constructors regardless of receipt-like owner names")
  (maxCollectMs . 8)
  (observedCollectMs . 0)
  (maxParseMs . 10)
@@ -23,12 +23,12 @@
  (memoryUnit . "MB")
  (iterations . 1)
  (unit . "ms")
- (purpose . "generated runtime receipt repair scenario keeps policy analysis fast and boundary-correct")
+ (purpose . "P043 retirement regression keeps representation choice outside naming-based policy")
  (feature . "poo-generated-receipt-boundary")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-043")
- (optimizationFocus . "fixed defstruct generated receipt state with explicit bounded ->alist ABI projection")
+ (optimizationFocus . "no naming-based representation policy for generated receipt state")
  (inputShape . "agent-generated receipt builder using object<-alist for internal runtime state")
- (expectedOutcome . "model generated receipt state with defstruct and serialize through one named ->alist function at presentation/runtime ABI boundaries")
+ (expectedOutcome . "object<-alist remains a valid semantic POO constructor in receipt-named owners")
  (generatedRuntimeBoundary . #t)
  (hotPathExemption . "generated-receipt-boundary")
  (hotPathEvidence
@@ -40,7 +40,7 @@
   "benchmark-contract")
  (styleRewriteBoundary
   .
-  "do not rewrite user native POO declarations; only generated receipt/manifest/snapshot/handoff state should move from object<-alist adapters to defstruct plus ->alist")
+  "do not infer representation defects from receipt, manifest, snapshot, handoff, or diagnostic names")
  (measurementPhases
   "collect-before"
   "collect-after"
@@ -48,4 +48,4 @@
   "policy-after"
   "assert-time-gate"
   "assert-memory-gate")
- (tags "poo" "receipt" "defstruct" "boundary-alist" "performance"))
+ (tags "poo" "receipt" "object-constructor" "policy-retirement" "performance"))

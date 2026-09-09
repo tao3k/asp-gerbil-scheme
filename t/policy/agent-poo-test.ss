@@ -14,15 +14,15 @@
 ;; PolicyTest
 (def agent-poo-policy-test
   (test-suite "gerbil scheme harness agent POO policy smoke"
-    (test-case "POO policy catalog exposes generated receipt boundary guidance"
+    (test-case "retired P043 has no style-prescriptive catalog guidance"
       (check (policy-rule-id +agent-poo-generated-receipt-boundary-rule+)
              => "GERBIL-SCHEME-AGENT-POLICY-043")
       (check (agent-rule-topic
               (policy-rule-id +agent-poo-generated-receipt-boundary-rule+))
-             => "poo-generated-receipt-boundary")
+             => #f)
       (check (agent-rule-guide-next-command
               (policy-rule-id +agent-poo-generated-receipt-boundary-rule+))
-             => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-043 --intent repair"))
+             => #f))
     (test-case "POO policy catalog keeps loop object construction rule available"
       (check (policy-rule-id +agent-poo-object-construction-loop-performance-rule+)
              => "GERBIL-SCHEME-AGENT-POLICY-033"))))

@@ -21,6 +21,7 @@
         macro-governance-profile-require-hygiene?
         macro-governance-profile-max-pattern-count
         macro-governance-profile-rule-enabled?
+        macro-governance-contract-prototype
         make-macro-governance-contract
         macro-governance-contract-macro
         macro-governance-contract-purpose

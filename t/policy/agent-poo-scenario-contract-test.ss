@@ -75,7 +75,7 @@
               +poo-optimizer-visible-scenario-ids+)
              => []))
 
-    (test-case "POO generated runtime boundary scenarios prefer defstruct plus projection"
+    (test-case "POO scenarios do not reserve a generated-receipt representation"
       (check (poo-performance-scenarios-missing-generated-boundary
               +poo-generated-boundary-scenario-ids+)
              => []))

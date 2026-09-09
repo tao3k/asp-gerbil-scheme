@@ -85,7 +85,6 @@
    (poo-method-shape-findings index)
    (poo-prototype-fixed-point-findings index)
    (poo-construction-performance-findings index)
-   (poo-generated-receipt-boundary-findings index)
    (poo-clone-override-loop-performance-findings index)
    (poo-materialization-loop-performance-findings index)
    (poo-composition-loop-performance-findings index)

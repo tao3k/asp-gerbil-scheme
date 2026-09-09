@@ -124,7 +124,7 @@
    [(dependency-adapter-profile
      "dependency-profile-composition"
      [(cons 'profileComposition
-            "clan/list c3-compute-precedence-list + clan/poo/proto compose-proto*")
+            "gerbil-poo object<-alist semantic construction + native object C3 supers")
       (cons 'profileOverlays
             ["dependency-protocol-surface"
              "dependency-poo-lineage"
