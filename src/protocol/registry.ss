@@ -63,14 +63,7 @@
                        "--server-endpoint"
                        "<resident-runtime-endpoint>"
                        "--runtime-request-frame-stdin"]))))
-        (hash (method "evidence/graph")
-              (command "evidence")
-              (summary "Emit a portable semantic evidence graph for Gerbil Scheme provider evidence.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-evidence-graph"]))
-        (hash (method "evidence/analyze")
-              (command "evidence")
-              (summary "Emit a graph-turbo request for evidence-quality ranking.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-graph-turbo-request"]))])
+        ])
       (source (hash
                (defaultExtensions +source-extensions+)
                (defaultConfigFiles +config-files+)

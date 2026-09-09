@@ -60,7 +60,7 @@
       (package-module-posture-status package module-imports)
       "Gerbil package/module/namespace/import facts should preserve project module shape instead of flattening into small-Scheme files."
       "parser-owned-package-and-module-facts"
-      "search owner <path> --workspace . --view seeds"
+      "asp search playbook --languages gerbil-scheme --rg -n -e <term> <path> --tantivy term <term>"
       ["capability" "posture" "package" "module" "namespace" "import" "export"]
       (hash (files (length files))
             (package (capability-package-name package))
@@ -154,17 +154,17 @@
       "quality-closure-posture"
       "quality-closure"
       "declared-closure"
-      "Agent-facing Gerbil engineering quality is closed through info, guide, check, self-apply, structural snapshots, and bench receipts."
-      "info-owned-closure-commands-plus-parser-owned-policy-facts"
+      "Agent-facing Gerbil engineering quality is closed through build/API policy, guide, self-apply, structural snapshots, and bench receipts."
+      "build-api-plus-parser-owned-policy-facts"
       "info --json ."
-      ["capability" "posture" "quality" "closure" "engineering-quality" "agent-steering" "policy" "guide" "check" "self-apply" "bench" "snapshot" "search-projection" "source-class"]
+      ["capability" "posture" "quality" "closure" "engineering-quality" "agent-steering" "policy" "guide" "self-apply" "bench" "snapshot" "search-projection" "source-class"]
       (hash (files (length files))
             (definitions (length (project-definitions index)))
             (agentRules (agent-steering-rule-ids))
             (facts (agent-steering-facts))
-            (closures ["info" "guide" "check" "self-apply" "bench" "structural-snapshot"]))
+            (closures ["build-api-policy" "guide" "self-apply" "bench" "structural-snapshot"]))
       (agent-steering-rule-ids)
-      ["policy-covered" "guide-covered" "snapshot-covered" "bench-covered" "check-covered" "self-apply-covered" "source-class-covered"]
+      ["policy-covered" "guide-covered" "snapshot-covered" "bench-covered" "self-apply-covered" "source-class-covered"]
       "agent-assesses-gerbil-project-quality-before-editing"
       "query-capability-posture-and-run-closure-commands-before-claiming-quality")]))
 ;; : (-> String Capability Status Summary Witness Next (List SearchTerm) Counts PolicyRules QualitySignals AgentScenario String Fact )

@@ -26,7 +26,6 @@
 (def +release-dynamic-command-targets+
   '("commands/agent.ss"
     "commands/bench.ss"
-    "commands/evidence.ss"
     "commands/fmt.ss"
     "commands/guide.ss"
     "commands/info.ss"

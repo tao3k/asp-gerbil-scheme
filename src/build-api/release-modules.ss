@@ -11,7 +11,6 @@
 (def cli-release-modules
   '("cli-launcher.ss"
     "commands/agent.ss"
-    "commands/evidence.ss"
     "commands/fmt.ss"
     "commands/guide-sections.ss"
     "commands/guide.ss"

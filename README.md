@@ -57,7 +57,7 @@ Gerbil package-manager state belongs under the global `~/.gerbil` store. Do not 
 This first native version aligns the common provider surface:
 - compact text by default
 - `agent doctor --json` provider metadata for protocol consumers
-- `search workspace`, `prime`, `owner`, `owner items`, `symbol`, `import`, `lexical`, and `ingest`
+- Runtime-owned Search Playbook discovery with Gerbil-native facts
 - ASP-owned exact projection backed by the provider-native typed request
 - exact source and callable skeletons via `asp gerbil-scheme query --selector ... --projection source|callable-skeleton`
 - `agent doctor --json`

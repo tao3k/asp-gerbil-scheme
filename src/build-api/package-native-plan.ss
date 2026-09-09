@@ -264,7 +264,7 @@
     ("language/capability.ss" "language/compare.ss" "language/evidence.ss"
      "language/facade.ss")
     ("format/core.ss" "format/facade.ss" "format/files.ss")
-    ("commands/agent.ss" "commands/evidence.ss" "commands/fmt.ss"
+    ("commands/agent.ss" "commands/fmt.ss"
      "commands/guide-sections.ss" "commands/guide.ss" "commands/info.ss"
      "commands/project-resolution.ss" "commands/projection-batch.ss"
      "commands/projection.ss" "commands/provider-runtime.ss")))

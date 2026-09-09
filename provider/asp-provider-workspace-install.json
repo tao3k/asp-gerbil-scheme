@@ -7,7 +7,7 @@
   "providerId": "asp-gerbil-scheme",
   "binary": "asp-gerbil-scheme",
   "providerRegistration": "asp-provider-registration.json",
-  "schemaBundleReceipt": "../schemas/.asp-schema-manager-receipt.json",
+  "schemaBundleReceipt": "schemas/.asp-schema-manager-receipt.json",
   "workspaceArtifact": {
     "root": "languages/asp-gerbil-scheme/build/workspace-provider",
     "entrypoint": "bin/asp-gerbil-scheme"

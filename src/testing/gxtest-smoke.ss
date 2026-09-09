@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-;;; Default gxtest smoke suite for the Gerbil language harness.
+;;; Default gxtest smoke suite for the Gerbil ASP language provider.
 
 (import (only-in "./model" gxtest-suite))
 

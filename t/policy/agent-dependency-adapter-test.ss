@@ -94,8 +94,6 @@
             (check (hash-get details 'repairAction)
                    => "provider-facts-then-guide-code")
             (check (hash-get details 'guideCodeFlag) => "--code")
-            (check (hash-get details 'factProjectionCommand)
-                   => "asp-gerbil-scheme evidence graph --json .")
             (check (hash-get details 'repairCodeCommand)
                    => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-017 --intent repair")
             (check (hash-get details 'codeShapeExemplar)
@@ -150,9 +148,6 @@
                               (hash-get details 'adapterRepairShape)
                               "inspect provider-native dependency facts first")))
                    => #t)
-            (check (not (not (member "run asp-gerbil-scheme evidence graph --json . to inspect provider-native dependency facts before editing"
-                                      (hash-get details 'allowedMoves))))
-                   => #t)
             (check (not (not (member "run asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-017 --intent repair to inspect local R017 parser/policy repair code"
                                       (hash-get details 'allowedMoves))))
                    => #t)
@@ -163,7 +158,7 @@
                                       (hash-get details 'disallowedMoves))))
                    => #t)
             (check (hash-get repair 'guideTopic) => "dependency-protocol-adapter")
-            (check (hash-get repair 'nextCommand)
+            (check (hash-get repair 'guideCommand)
                    => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-017 --intent repair")))
     (test-case "agent policy rejects manual object encoding inside dependency adapters"
           (let* ((root ".run/policy-dependency-manual-object-adapter")

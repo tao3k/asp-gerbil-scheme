@@ -61,7 +61,7 @@
       (let (spec (cli-binary-build-spec #t))
         (check (pair? spec) => #t)
         (check (equal? spec (cli-binary-build-spec #t)) => #t)
-        (check (member "commands/evidence.ss" spec) ? true)
+        (check (member "commands/evidence.ss" spec) => #f)
         (check (member "format/facade.ss" spec) ? true)
         (check (member "build-api/native-build.ss" spec) => #f)
         (check (member "building/facade.ss" spec) => #f)

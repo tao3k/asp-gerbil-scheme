@@ -3,7 +3,6 @@
 
 (import (rename-in :asp-gerbil-scheme/src/cli-launcher (main cli-main))
         (only-in :asp-gerbil-scheme/src/commands/agent agent-main)
-        (only-in :asp-gerbil-scheme/src/commands/evidence evidence-main)
         (only-in :asp-gerbil-scheme/src/commands/fmt fmt-main)
         (only-in :asp-gerbil-scheme/src/commands/guide guide-main)
         (only-in :asp-gerbil-scheme/src/commands/info info-main)
@@ -29,7 +28,6 @@
     ((provider-http-json-query-main) provider-http-json-query-main)
     ((projection-main) projection-main)
     ((fmt-main) fmt-main)
-    ((evidence-main) evidence-main)
     ((agent-main) agent-main)
     ((guide-main) guide-main)
     ((info-main) info-main)

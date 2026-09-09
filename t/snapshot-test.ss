@@ -3,7 +3,6 @@
 ;;; Individual snapshot domains live in smaller owners under t/snapshot/.
 
 (import :std/test
-  "./snapshot/evidence-test"
   "./snapshot/policy-parser-test"
   "./snapshot/protocol-test")
 
@@ -13,5 +12,4 @@
 (def snapshot-test
   (test-suite "gerbil scheme harness snapshots"
     snapshot-protocol-test
-    snapshot-policy-parser-test
-    snapshot-evidence-test))
+    snapshot-policy-parser-test))

@@ -5,8 +5,8 @@
 (import :asp-gerbil-scheme/src/commands/info
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/protocol/json
-        (only-in :asp-gerbil-scheme/src/runtime/provider-semantic-search
-                 provider-semantic-search-packet)
+        (only-in :asp-gerbil-scheme/src/runtime/provider-semantic-evidence
+                 provider-semantic-evidence-packet)
         :std/misc/ports
         :std/srfi/13
         :std/test
@@ -75,7 +75,7 @@
 ;; Json
 (def (check-language-evidence-json-schema-conformance)
   (let* ((packet (packet-json
-                  (provider-semantic-search-packet
+                  (provider-semantic-evidence-packet
                    "compiler-evidence" ["assert-type"])))
          (facts (json-get packet "facts"))
          (fact (car facts))
@@ -107,7 +107,7 @@
 ;; Json
 (def (check-runtime-source-json-schema-conformance)
   (let* ((packet (packet-json
-                  (provider-semantic-search-packet
+                  (provider-semantic-evidence-packet
                    "runtime-source" ["writeenv" "printer" "hook"])))
          (source-ref (json-get packet "sourceRef"))
          (acquisition (json-get packet "acquisition"))
@@ -138,7 +138,7 @@
 ;; Json
 (def (check-type-proof-json-schema-conformance)
   (let* ((packet (packet-json
-                  (provider-semantic-search-packet "proof" ["record"])))
+                  (provider-semantic-evidence-packet "proof" ["record"])))
          (proof-system (json-get packet "proofSystem"))
          (proofs (json-get packet "proofs"))
          (proof (car proofs))
@@ -158,7 +158,7 @@
 ;; Json
 (def (check-extension-pattern-json-schema-conformance)
   (let* ((packet (packet-json
-                  (provider-semantic-search-packet
+                  (provider-semantic-evidence-packet
                    "pattern" ["json" "fallback"])))
          (mapping (json-get packet "patternMapping"))
          (source-ref (json-get mapping "sourceRef"))
@@ -222,7 +222,7 @@
 ;; Json
 (def (check-compare-json-schema-conformance)
   (let* ((packet (packet-json
-                  (provider-semantic-search-packet
+                  (provider-semantic-evidence-packet
                    "compare" ["env" "active" "documented"])))
          (comparisons (json-get packet "comparisons"))
          (comparison (car comparisons))

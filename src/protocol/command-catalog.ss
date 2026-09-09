@@ -55,15 +55,6 @@
     0
     [])
    (make-provider-command-descriptor
-    "evidence"
-    "asp-gerbil-scheme/src/commands/evidence"
-    'asp-gerbil-scheme/src/commands/evidence#evidence-main
-    'evidence-main
-    ["evidence graph [--json] [PROJECT_ROOT]"
-     "evidence analyze [--json] [PROJECT_ROOT]"]
-    50
-    ["evidence/graph" "evidence/analyze"])
-   (make-provider-command-descriptor
     "agent"
     "asp-gerbil-scheme/src/commands/agent"
     'asp-gerbil-scheme/src/commands/agent#agent-main

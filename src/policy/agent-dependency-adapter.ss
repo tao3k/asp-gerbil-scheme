@@ -26,10 +26,6 @@
 ;; Command
 (def +dependency-adapter-repair-code-command+
   "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-017 --intent repair")
-;; Command
-(def +dependency-adapter-fact-command+
-  "asp-gerbil-scheme evidence graph --json .")
-
 ;;; Entry boundary: policy only consumes parser-owned adapter facts.
 ;;; It does not infer adapter quality from raw source text.
 ;; : (-> ProjectIndex (List TypeFinding) )
@@ -82,7 +78,6 @@
 (def (dependency-protocol-adapter-details index fact missing)
   (dependency-adapter-profile-details
    (dependency-adapter-standard-profile
-    +dependency-adapter-fact-command+
     +dependency-adapter-repair-code-command+)
    fact
    missing

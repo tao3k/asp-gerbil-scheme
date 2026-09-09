@@ -9,7 +9,7 @@
         (only-in :std/srfi/13 string-join)
         (only-in :std/sugar hash))
 
-(export provider-semantic-search-packet)
+(export provider-semantic-evidence-packet)
 
 ;; : (-> String (List String) JsonObject)
 (def (semantic-packet-base schema-id namespace authority query quality
@@ -184,12 +184,12 @@
 ;;;   packets served by the resident provider.
 ;;; - The CLI transports a typed request and never invokes this module.
 ;; : (-> String (List String) JsonObject)
-(def (provider-semantic-search-packet namespace terms)
+(def (provider-semantic-evidence-packet namespace terms)
   (case (string->symbol namespace)
     ((compiler-evidence) (compiler-evidence-packet terms))
     ((runtime-source) (runtime-source-packet terms))
     ((pattern) (extension-pattern-packet terms))
     ((compare) (compare-packet terms))
     ((proof) (type-proof-packet terms))
-    (else (error "resident semantic-search namespace is not admitted"
+    (else (error "resident semantic-evidence namespace is not admitted"
                  namespace))))

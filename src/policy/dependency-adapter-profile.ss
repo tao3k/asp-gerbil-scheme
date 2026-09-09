@@ -93,16 +93,13 @@
     (cons 'cliOptionPattern
           "keep src/cli.ss as a thin dispatcher; compose option objects when command option surfaces grow")]))
 
-;; : (-> Command Command DependencyAdapterProfile )
-(def (dependency-adapter-repair-command-profile fact-command repair-command)
+;; : (-> Command DependencyAdapterProfile )
+(def (dependency-adapter-repair-command-profile repair-command)
   (dependency-adapter-profile
    "dependency-repair-commands"
-   [(cons 'factProjectionCommand fact-command)
-    (cons 'repairCodeCommand repair-command)
+   [(cons 'repairCodeCommand repair-command)
     (cons 'allowedMoves
-          [(string-append "run " fact-command
-                          " to inspect provider-native dependency facts before editing")
-           (string-append "run " repair-command
+          [(string-append "run " repair-command
                           " to inspect local R017 parser/policy repair code")
            "add or tighten only-in dependency primitive imports"
            "wrap dependency primitives with define-type and protocol slots"
@@ -120,8 +117,8 @@
 ;;; - This is the production POO use site for R017 repair guidance.
 ;;; - Each overlay contributes one adapter concern instead of one large hash.
 ;;; - The final composition overlay makes POO provenance visible in details.
-;; : (-> Command Command DependencyAdapterProfile )
-(def (dependency-adapter-standard-profile fact-command repair-command)
+;; : (-> Command DependencyAdapterProfile )
+(def (dependency-adapter-standard-profile repair-command)
   (slot-profile-compose
    "dependency-adapter-standard"
    [(dependency-adapter-profile
@@ -133,7 +130,7 @@
              "dependency-poo-lineage"
              "dependency-build-cli-lineage"
              "dependency-repair-commands"])])
-    (dependency-adapter-repair-command-profile fact-command repair-command)
+    (dependency-adapter-repair-command-profile repair-command)
     +dependency-adapter-build-cli-profile+
     +dependency-adapter-poo-lineage-profile+
     +dependency-adapter-protocol-surface-profile+]))
@@ -153,7 +150,6 @@
         (profilePrecedence (dependency-adapter-profile-precedence profile))
         (repairAction (dependency-adapter-profile-ref profile 'repairAction ""))
         (guideCodeFlag (dependency-adapter-profile-ref profile 'guideCodeFlag ""))
-        (factProjectionCommand (dependency-adapter-profile-ref profile 'factProjectionCommand ""))
         (repairCodeCommand (dependency-adapter-profile-ref profile 'repairCodeCommand ""))
         (codeShapeExemplar (dependency-adapter-profile-ref profile 'codeShapeExemplar ""))
         (sourcePatternLineage (dependency-adapter-profile-ref profile 'sourcePatternLineage ""))
@@ -209,4 +205,4 @@
         (nativeFactSource
          (dependency-adapter-profile-ref profile 'nativeFactSource ""))
         (advice (dependency-adapter-quality-fact-advice fact))
-        (next (dependency-adapter-profile-ref profile 'factProjectionCommand ""))))
+        (next (dependency-adapter-profile-ref profile 'repairCodeCommand ""))))

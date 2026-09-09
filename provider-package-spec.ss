@@ -100,7 +100,6 @@
     "src/language/compare.ss"
     "src/language/capability.ss"
     "src/language/facade.ss"
-    "src/runtime/provider-semantic-search.ss"
     "src/parser/exact-owner.ss"
     "src/exact-source-projection.ss"
     "src/commands/projection-batch.ss"

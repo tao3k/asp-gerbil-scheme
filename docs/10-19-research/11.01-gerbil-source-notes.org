@@ -49,7 +49,7 @@ uses Gerbil reader/expander APIs as the parser boundary.
    project prelude would execute project reader code during search.
 4. Extract package/prelude/namespace/import/export/include/definition facts.
 5. Expose the common search/query/check/agent surfaces used by the other
-   language harnesses.
+   ASP language providers.
 6. Keep compiler/type enrichment as the next step: use ~import-module~,
    module-context exports, and compiler facts only where the command explicitly
    needs expanded or phase-aware semantics.

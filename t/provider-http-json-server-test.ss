@@ -293,9 +293,9 @@
            (check (hash-ref health "registrationDigest") => +registration-digest+)
            (check (hash-ref health "contractDigest") => +contract-digest+)
            (let ((operations (hash-ref health "operations")))
-             ;; The runtime contract catalog contains the three structural
-             ;; operations plus the server-owned semantic-search operation.
-             (check (length operations) => 4)
+             ;; The runtime contract catalog contains only structural
+             ;; projection, resolution, and exact-query operations.
+             (check (length operations) => 3)
              (check (hash-ref (car operations) "operation") => "projection-batch")
              (check (hash-ref (hash-ref (car operations) "requestSchema") "schemaId")
                     => "agent.semantic-protocols.provider-language-projection-batch-request")
@@ -310,16 +310,7 @@
              (check (hash-ref (hash-ref (caddr operations) "requestSchema") "schemaId")
                     => "agent.semantic-protocols.provider-native-exact-request")
              (check (hash-ref (hash-ref (caddr operations) "responseSchema") "schemaId")
-                    => "agent.semantic-protocols.provider-native-exact-projection")
-             (let (semantic-search (list-ref operations 3))
-               (check (hash-ref semantic-search "operation")
-                      => "semantic-search")
-               (check (hash-ref
-                       (hash-ref semantic-search "requestSchema") "schemaId")
-                      => "agent.semantic-protocols.provider-semantic-search-request")
-               (check (hash-ref
-                       (hash-ref semantic-search "responseSchema") "schemaId")
-                      => "agent.semantic-protocols.semantic-language")))
+                    => "agent.semantic-protocols.provider-native-exact-projection"))
            (check (hash-ref invalid "schemaVersion") => "1")
            (check (hash-ref invalid "outcome") => "error")
            (check (string? (hash-ref invalid "error" #f)) => #t)
