@@ -3,7 +3,7 @@
 
 (import :gerbil/gambit
         (only-in :clan/poo/object .def)
-        :asp-gerbil-scheme/src/object-family/syntax
+        (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
         (only-in :std/sugar hash))
 
 (export macro-governance-rule-prototype

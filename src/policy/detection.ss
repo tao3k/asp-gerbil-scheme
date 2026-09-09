@@ -2,7 +2,7 @@
 ;;; Policy-owned combinators for parser-owned evidence groups.
 
 (import :gerbil/gambit
-        :asp-gerbil-scheme/src/object-family/syntax
+        (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
         :asp-gerbil-scheme/src/policy/prototype
         (only-in :std/sugar filter filter-map hash ormap))
 

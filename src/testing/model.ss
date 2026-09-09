@@ -3,7 +3,7 @@
 
 (import :gerbil/gambit
         (only-in :clan/poo/object object? object<-alist .ref .slot?)
-        :asp-gerbil-scheme/src/object-family/syntax)
+        (only-in "../object-family/syntax" defpoo-object-family))
 
 (export #t)
 

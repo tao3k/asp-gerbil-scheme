@@ -2,7 +2,7 @@
 ;;; Declarative host build-environment profiles projected by Package Spec.
 
 (import (only-in :clan/poo/object .def .get)
-        :asp-gerbil-scheme/src/object-family/syntax
+        (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
         :gerbil/gambit)
 
 (export asp-gerbil-scheme-build-environment-profile-prototype

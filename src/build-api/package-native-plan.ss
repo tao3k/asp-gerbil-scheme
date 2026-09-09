@@ -13,7 +13,8 @@
 ;; cannot safely be widened into one directory-parallel batch.
 ;; : (List (List ModulePath))
 (def +package-api-prologue-stages+
-  '(("build-api/package-build.ss"
+  '(("object-family/syntax.ss")
+    ("build-api/package-build.ss"
      "build-api/build-environment-profile.ss")
     ("build-api/source-discovery.ss"
      "constants.ss")

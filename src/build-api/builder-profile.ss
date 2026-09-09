@@ -2,7 +2,7 @@
 ;;; Declarative Builder Profile shared by discovery and native build.
 
 (import (only-in :clan/poo/object .def .get)
-        :asp-gerbil-scheme/src/object-family/syntax
+        (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
         (only-in "./build-environment-profile"
                  asp-gerbil-scheme-host-build-environment-profile
                  asp-gerbil-scheme-apply-build-environment-profile!)

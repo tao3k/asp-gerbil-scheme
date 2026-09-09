@@ -13,7 +13,7 @@
         asp-gerbil-scheme-package-exclude-modules)
 
 (import (only-in :clan/poo/object .cc .def .get)
-        :asp-gerbil-scheme/src/object-family/syntax
+        (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
         (only-in "./builder-profile"
                  asp-gerbil-scheme-development-builder-profile
                  asp-gerbil-scheme-builder-profile-apply-build-environment!
