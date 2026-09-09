@@ -45,8 +45,7 @@
          (string-append src "/objects.ss")
          (string-append
           ";;; -*- Gerbil -*-\n"
-          "(import (only-in :clan/poo/object .o .ref)\n"
-          "        (only-in :asp-gerbil-scheme/src/object-family/syntax defpoo-object-family poo-family-ref))\n"
+          "(import (only-in :asp-gerbil-scheme/src/object-family/syntax defpoo-object-family poo-family-ref))\n"
           "(defpoo-object-family\n"
           "  (prototype sample-prototype (sample? #t))\n"
           "  (constructor (make-sample value-value) (value value-value))\n"

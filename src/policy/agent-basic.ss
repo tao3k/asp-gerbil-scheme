@@ -294,6 +294,7 @@
     "declare-gxtest-memory-exception"
     "define-entry-point"
     "define-multicall-main"
+    "defpoo-object-family"
     "modularity-policy"
     "poo-flow-module-object"
     "poo-flow-module-field-contract"))
