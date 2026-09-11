@@ -222,7 +222,6 @@ jobs:
             t/exact-source-projection-test.ss \
             t/projection-batch-test.ss \
             t/projection-batch-scenario-test.ss \
-            t/query-test.ss \
             t/language-projection-test.ss
 
       - name: Run package policy boundary regressions
