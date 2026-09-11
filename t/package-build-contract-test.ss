@@ -101,7 +101,16 @@
         (check (string-contains provider-source "\"./build-api\"") => #f)
         (check (string-contains provider-source "source-bootstrap") => #f)
         (check (string-contains public-facade-source "source-bootstrap")
-               => #f)))
+               => #f)
+        (check (string-contains public-facade-source
+                                "./src/build-api/source-closure")
+               ? true)
+        (check (string-contains public-facade-source
+                                "./src/testing/build")
+               ? true)
+        (check (string-contains public-facade-source
+                                "./src/testing/framework")
+               ? true)))
     (test-case "retired duplicate native owners stay absent"
       (for-each
        (lambda (path)

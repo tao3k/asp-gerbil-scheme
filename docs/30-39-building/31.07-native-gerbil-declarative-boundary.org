@@ -93,6 +93,11 @@ package BuildPlan or reuse a production source-root option.
 Native compile/spec/clean are available only through =build.ss=. The installed
 project CLI retains test targets and no longer duplicates those commands.
 
+Downstream packages may wrap =init-build-environment!= with the public
+=call-with-framework-native-build-memory-anomaly-guard=.  This composition reads
+the same machine-capacity selection used by PackageSpec, emits upstream-owned
+trace/guard receipts, and never changes or caps =std/make= scheduling.
+
 ** Generated sidecars
 
 A verified generated artifact may add immutable =extra-inputs:= to its matching

@@ -100,6 +100,14 @@ module catalog, BuildPlan cache, ASP currentness predicate, build lease, or
 toolchain mutation. =exclude-dirs= remains the POO-native extension point for
 clan's ignore set.
 
+A downstream package that requires build-process anomaly supervision composes
+the public =call-with-framework-native-build-memory-anomaly-guard= around its
+=init-build-environment!= call.  The wrapper observes the same positive caller
+override or host CPU count as PackageSpec, but only PackageSpec mutates the
+compiler capacity immediately before =std/make= settings are constructed.  The
+guard therefore reports and supervises native concurrency without becoming a
+second scheduler or forcing downstream code to copy capacity selection.
+
 ** Testing boundary
 
 GxTest discovery owns its explicit test closure. When compiled execution is

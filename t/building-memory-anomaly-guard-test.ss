@@ -17,7 +17,8 @@
                  framework-memory-guard-process-tree-cpu-percent
                  framework-memory-anomaly-receipt
                  framework-build-start-line
-                 call-with-framework-memory-anomaly-guard))
+                 call-with-framework-memory-anomaly-guard
+                 call-with-framework-native-build-memory-anomaly-guard))
 
 (export building-memory-anomaly-guard-test)
 
@@ -64,6 +65,25 @@
                => #t)
         (check (and (string-contains output "\"outcome\":\"completed\"") #t)
                => #t)))
+    (test-case "native build guard shares the machine-capacity selector"
+      (let ((previous (getenv "GERBIL_BUILD_CORES" #f))
+            (output #f))
+        (dynamic-wind
+          (lambda () (setenv "GERBIL_BUILD_CORES" "3"))
+          (lambda ()
+            (set! output
+                  (with-output-to-string
+                    (lambda ()
+                      (parameterize ((current-error-port
+                                      (current-output-port)))
+                        (call-with-framework-native-build-memory-anomaly-guard
+                         "downstream build"
+                         (lambda () 'done)))))))
+          (lambda () (setenv "GERBIL_BUILD_CORES" (or previous ""))))
+        (check output
+               => (string-append
+                   "[asp-gerbil-scheme-build] phase=std-make-start"
+                   " worker-count=3\n"))))
     (test-case "denied process-table observation degrades to an empty sample"
       (check (list? (framework-memory-guard-process-table)) => #t))
     (test-case "runtime heap observation does not depend on process-table access"
