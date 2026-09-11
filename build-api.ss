@@ -3,14 +3,9 @@
 ;;; Implementation owners remain under src/; callers import only
 ;;; :asp-gerbil-scheme/build-api, so repository layout never becomes API.
 
-(import "./src/build-api/build-environment-profile"
-        "./src/build-api/builder-profile"
-        "./src/build-api/generated-artifact"
+(import "./src/build-api/generated-artifact"
         "./src/build-api/package-spec"
-        "./src/build-api/profile-build-spec"
-        "./src/build-api/source-discovery"
         "./src/build-api/source-coverage"
-        "./src/building/build-script"
         "./src/building/facade"
         "./src/building/declarative"
         "./src/testing/build-runner"
@@ -22,14 +17,9 @@
         "./src/policy/modularity"
         "./src/benchmark/gate")
 
-(export (import: "./src/build-api/build-environment-profile")
-        (import: "./src/build-api/builder-profile")
-        (import: "./src/build-api/generated-artifact")
+(export (import: "./src/build-api/generated-artifact")
         (import: "./src/build-api/package-spec")
-        (import: "./src/build-api/profile-build-spec")
-        (import: "./src/build-api/source-discovery")
         (import: "./src/build-api/source-coverage")
-        (import: "./src/building/build-script")
         (import: "./src/building/facade")
         (import: "./src/building/declarative")
         (import: "./src/testing/build-runner")

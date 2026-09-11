@@ -3,13 +3,13 @@
 
 (import :gerbil/gambit
         (only-in :gerbil/gambit getenv)
-        (only-in :std/misc/path path-directory)
+        (rename-in :clan/building
+                   (all-gerbil-modules upstream-all-gerbil-modules))
+        (only-in :std/misc/path path-directory path-expand)
         (only-in :std/misc/process run-process)
+        (only-in :std/sort sort)
         (only-in :std/srfi/1 append-map)
         (only-in :std/sugar filter)
-        (only-in :asp-gerbil-scheme/src/build-api/builder-profile
-                 asp-gerbil-scheme-development-builder-profile
-                 asp-gerbil-scheme-builder-profile-modules/root-roots)
         :asp-gerbil-scheme/src/testing/model
         :asp-gerbil-scheme/src/testing/framework
         :asp-gerbil-scheme/src/testing/build-paths
@@ -164,14 +164,21 @@
          (directory-path
           (if (testing-string-suffix? "/" normalized-directory)
             normalized-directory
-            (string-append normalized-directory "/"))))
-    (filter (lambda (file)
-              (and (testing-build-support-source-file? file)
-                   (equal? (path-directory file) directory-path)))
-            (asp-gerbil-scheme-builder-profile-modules/root-roots
-             asp-gerbil-scheme-development-builder-profile
-             (testing-object-ref build 'root ".")
-             [normalized-directory]))))
+            (string-append normalized-directory "/")))
+         (root (testing-object-ref build 'root "."))
+         (catalog-root (path-expand normalized-directory root))
+         (files
+          (if (file-exists? catalog-root)
+            (parameterize ((current-directory catalog-root))
+              (map (cut string-append directory-path <>)
+                   (upstream-all-gerbil-modules)))
+            [])))
+    (sort
+     (filter (lambda (file)
+               (and (testing-build-support-source-file? file)
+                    (equal? (path-directory file) directory-path)))
+             files)
+     string<?)))
 
 ;; : (-> TestingBuild [Path])
 (def (testing-build-support-files build)

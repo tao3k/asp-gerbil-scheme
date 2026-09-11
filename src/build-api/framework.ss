@@ -31,8 +31,6 @@
                  package-source-stages-spec package-source-stages-run!
                  package-source-stages-clean!)
         ./package-spec
-        (only-in ./profile-build-spec
-                 asp-gerbil-scheme-package-profiled-build-spec)
         :asp-gerbil-scheme/src/building/commands)
 
 (export build-stage
@@ -90,6 +88,5 @@
         package-source-stages-spec
         package-source-stages-run!
         package-source-stages-clean!
-        asp-gerbil-scheme-package-profiled-build-spec
         (import: ./package-spec)
         (import: :asp-gerbil-scheme/src/building/commands))

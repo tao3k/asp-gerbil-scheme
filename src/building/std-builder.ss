@@ -18,10 +18,7 @@
                  build-stage-spec
                  make-build-profile
                  make-build-request
-                 make-build-stage)
-        (only-in ./native-toolchain
-                 native-toolchain-default
-                 with-native-toolchain))
+                 make-build-stage))
 
 ;;; Keep the full public surface in one declaration so dependent facades receive
 ;;; the complete module interface during incremental compilation.
@@ -34,7 +31,6 @@
         std-builder-description
         std-builder-srcdir
         std-builder-make-options
-        std-builder-toolchain
         default-std-builder
         std-builder-effective-options
         std-builder-run-spec!
@@ -64,7 +60,7 @@
         build-request->alist)
 
 (defstruct std-builder
-  (name make-proc stage-kind description srcdir make-options toolchain))
+  (name make-proc stage-kind description srcdir make-options))
 
 ;;; Boundary: projects declare source groups. std/make alone owns dependency
 ;;; topology, freshness, scheduling, and GERBIL_BUILD_CORES.
@@ -72,16 +68,14 @@
   (label source prefix specs batched?))
 
 (def (default-std-builder (srcdir #f)
-                          (make-options [])
-                          (toolchain (native-toolchain-default)))
+                          (make-options []))
   (make-std-builder
    "std/make"
    make
    'std/make
    "Gerbil std/make stage runner"
    srcdir
-   make-options
-   toolchain))
+   make-options))
 
 ;; : (-> StdBuilder (List BuildOption) (List BuildOption))
 (def (std-builder-effective-options builder extra-options)
@@ -99,30 +93,22 @@
 (def (std-builder-run-spec/raw! builder spec (extra-options []))
   (let ((stage (std-builder-spec-list spec))
         (options (std-builder-effective-options builder extra-options)))
-    (let (result
-          (with-native-toolchain
-           (std-builder-toolchain builder)
-           (lambda ()
-             (if (std-builder-srcdir builder)
-               (apply (std-builder-make-proc builder)
-                      stage
-                      srcdir: (std-builder-srcdir builder)
-                      options)
-               (apply (std-builder-make-proc builder)
-                      stage
-                      options)))))
-      result)))
+    (if (std-builder-srcdir builder)
+      (apply (std-builder-make-proc builder)
+             stage
+             srcdir: (std-builder-srcdir builder)
+             options)
+      (apply (std-builder-make-proc builder)
+             stage
+             options))))
 
 ;; : (-> StdBuilder BuildSpec (List BuildOption) Unit)
 (def (std-builder-clean-spec! builder spec (extra-options []))
   (let ((stage (std-builder-spec-list spec))
         (options (std-builder-effective-options builder extra-options)))
-    (with-native-toolchain
-     (std-builder-toolchain builder)
-     (lambda ()
-       (if (std-builder-srcdir builder)
-         (apply make-clean stage srcdir: (std-builder-srcdir builder) options)
-         (apply make-clean stage options))))))
+    (if (std-builder-srcdir builder)
+      (apply make-clean stage srcdir: (std-builder-srcdir builder) options)
+      (apply make-clean stage options))))
 
 (def (std-builder-stage builder
                         label

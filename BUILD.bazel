@@ -94,13 +94,6 @@ gerbil_project_compile(
 )
 
 gerbil_project_test(
-    name = "build_script_bridge_test",
-    size = "small",
-    project = ":compile",
-    tests = ["//:t/build-script-bridge-test.ss"],
-)
-
-gerbil_project_test(
     name = "library_provider_boundary_test",
     size = "small",
     project = ":compile",

@@ -18,23 +18,21 @@ The build and testing framework improves the user layer around upstream Gerbil;
 it does not replace =std/make=, =clan/building=, or =gxtest=.
 
 Current owners:
-- =src/build-api/source-coverage.ss= declares project coverage.
-- =src/build-api/package-spec.ss= declares the package API compile set.
-- =src/build-api/package-build.ss= owns warm package API compilation receipts.
-- =src/build-api/native-build.ss= owns library compilation and package-local
-  cleanup only.
+- Root =build.ss= declares the sole production library Graph, logical
+  dependencies, and upstream =init-build-environment!= entry.
+- =src/build-api/package-spec.ss= provides the POO declaration and native spec
+  projection used by that root Graph.
 - =build-provider.ss= is the sole provider executable build owner. It imports
-  the stable Build API =defbuild-script= bridge, which projects the POO package
-  profile and host policy into one upstream =std/make= session.
+  =defbuild-script= directly from =:std/build-script=.
 - =src/testing/gxtest-runner.ss= owns gxtest scope expansion, batching,
   benchmark-sensitive scheduling, selected-suite receipts, and phase receipts.
 - =src/testing/gxtest-smoke.ss= owns the default smoke file set.
 
-=build.ss= should only import those APIs, configure =+package-root+=, and
-dispatch library =compile=, =clean=, =test=, =test-file=, and =test-full=.
-It must not carry a second copy of framework logic or compile the resident
-provider executable.  Provider builds run through =build-provider.ss= and the
-Build API bridge rather than a project-owned compiler, linker, scheduler, or
+=build.ss= owns native =compile=, =clean=, =meta=, and =spec= through
+=clan/building=. Test selection remains in the installed project CLI and its
+GxTest helpers. The root build must not carry a second framework runner or
+compile the resident provider executable. Provider builds run through
+=build-provider.ss= rather than a project-owned compiler, linker, scheduler, or
 receipt chain.
 
 * Scope Rules
@@ -55,8 +53,6 @@ The complex guard for this rule is =testing-framework-upstream-build-improvement
 Warm default-smoke receipt after the framework boundary cleanup:
 
 #+begin_src text
-[asp-gerbil-scheme-package-build-receipt] status=current sources=15 outputs=15
-[asp-gerbil-scheme-test-phase] name=compile-package-api elapsedMs=4
 [asp-gerbil-scheme-test-runner] files=5 jobs=1 serial=0 mode=source-in-process
 [asp-gerbil-scheme-test-phase] name=run-gxtest elapsedMs=867
 #+end_src

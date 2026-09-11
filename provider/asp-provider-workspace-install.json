@@ -9,23 +9,23 @@
   "providerRegistration": "asp-provider-registration.json",
   "schemaBundleReceipt": "schemas/.asp-schema-manager-receipt.json",
   "workspaceArtifact": {
-    "root": "languages/asp-gerbil-scheme/build/workspace-provider",
+    "root": "languages/asp-gerbil-scheme/.gerbil",
     "entrypoint": "bin/asp-gerbil-scheme"
   },
   "workspaceBuild": {
     "program": "/usr/bin/env",
     "args": [
-      "-u",
-      "SDKROOT",
       "gxi",
-      "build.ss"
+      "build-provider.ss",
+      "compile"
     ],
     "workingDirectory": "languages/asp-gerbil-scheme",
     "sourceSnapshotAnchors": [
       "languages/asp-gerbil-scheme/gerbil.pkg",
       "languages/asp-gerbil-scheme/manifest.ss",
       "languages/asp-gerbil-scheme/build.ss",
-      "languages/asp-gerbil-scheme/src/building/native-toolchain.ss",
+      "languages/asp-gerbil-scheme/build-provider.ss",
+      "languages/asp-gerbil-scheme/provider-package-spec.ss",
       "languages/asp-gerbil-scheme/src/parser/model.ss",
       "languages/asp-gerbil-scheme/src/parser/selectors.ss",
       "languages/asp-gerbil-scheme/src/parser/support.ss",
@@ -46,7 +46,7 @@
       "languages/asp-gerbil-scheme/src/provider-server.ss"
     ],
     "derivedPaths": [
-      "languages/asp-gerbil-scheme/build/workspace-provider"
+      "languages/asp-gerbil-scheme/.gerbil/bin/asp-gerbil-scheme"
     ],
     "env": {
       "GERBIL_PATH": "${ASP_WORKSPACE_ROOT}/languages/asp-gerbil-scheme/.gerbil",

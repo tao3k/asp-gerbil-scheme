@@ -20,14 +20,11 @@
 
 (def building-gxtest-stage-boundary-test
   (test-suite "asp-gerbil-scheme selected GxTest Building boundary"
-    (test-case "selected target projects Building stages into its receipt"
+    (test-case "selected target records native std make ownership"
       (let (files '("t/building-gxtest-stage-boundary-test.ss"))
         (configure-build-root! ".")
         (compile-selected-gxtest-if-stale files)
-        (let* ((receipt (read-selected-gxtest-build-receipt files))
-               (plan (alist-value receipt 'buildPlan))
-               (stages (alist-value plan 'stages)))
-          (check (and plan #t) => #t)
-          (check (alist-value plan 'version) => 1)
-          (check (> (length stages) 1) => #t)
-          (check (alist-value (car stages) 'kind) => 'std/make))))))
+        (let (receipt (read-selected-gxtest-build-receipt files))
+          (check (alist-value receipt 'executor) => "std/make")
+          (check (alist-value receipt 'freshnessOwner) => "std/make")
+          (check (alist-value receipt 'buildPlan) => #f))))))

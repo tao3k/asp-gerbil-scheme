@@ -59,8 +59,7 @@
                'std-builder
                "fake std/make"
                #f
-               []
-               (native-toolchain-default))))
+               [])))
         (check (std-builder-run-spec! builder ["a.ss" "b.ss"]) => 'made)
         (check calls => '((("a.ss" "b.ss"))))))
     (test-case "skips current std builder stage"
@@ -74,8 +73,7 @@
                'std-builder
                "fake std/make"
                #f
-               []
-               (native-toolchain-default)))
+               []))
              (stage
               (std-builder-stage
                builder
@@ -96,8 +94,7 @@
                'std-builder
                "fake std/make"
                #f
-               []
-               (native-toolchain-default)))
+               []))
              (stages
               (std-builder-stage-plan
                builder
@@ -119,8 +116,7 @@
                'std-builder
                "fake std/make"
                #f
-               []
-               (native-toolchain-default)))
+               []))
              (stages
               (std-builder-stage-plan
                builder
@@ -144,8 +140,7 @@
                'std-builder
                "profile std/make"
                #f
-               []
-               (native-toolchain-default)))
+               []))
              (profile
               (make-std-builder-profile
                builder
@@ -189,8 +184,7 @@
                'std-builder
                "fake std/make"
                #f
-               []
-               (native-toolchain-default)))
+               []))
              (stage
               (std-builder-stage
                builder

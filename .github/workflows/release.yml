@@ -153,7 +153,7 @@ jobs:
           }
           GERBIL_BUILD_CORES="$(build_cores)" gxpkg env gxi ./build-provider.ss clean
           GERBIL_BUILD_CORES="$(build_cores)" gxpkg env gxi ./build-provider.ss compile
-          test -x build/workspace-provider/bin/asp-gerbil-scheme
+          test -x .gerbil/bin/asp-gerbil-scheme
 
       - name: Package provider binary
         shell: bash
@@ -161,7 +161,7 @@ jobs:
           set -euo pipefail
           rm -rf package
           mkdir -p package/bin package/src
-          cp build/workspace-provider/bin/asp-gerbil-scheme package/bin/asp-gerbil-scheme
+          cp .gerbil/bin/asp-gerbil-scheme package/bin/asp-gerbil-scheme
           cp -R src/. package/src/
           cp gerbil.pkg package/gerbil.pkg
           chmod +x "package/bin/${BINARY}"

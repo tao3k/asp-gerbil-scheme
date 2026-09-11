@@ -1,13 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Build API projection of the project test graph.
 
-(import (only-in :std/misc/path path-directory)
-        (only-in :std/srfi/1 fold)
+(import (rename-in :clan/building
+                   (all-gerbil-modules upstream-all-gerbil-modules))
+        (only-in :std/misc/path path-directory path-expand)
+        (only-in :std/srfi/1 append-map fold)
         (only-in :std/srfi/13 string-prefix? string-suffix?)
-        (only-in "../build-api/builder-profile"
-                 asp-gerbil-scheme-development-builder-profile
-                 asp-gerbil-scheme-builder-profile-test-roots
-                 asp-gerbil-scheme-builder-profile-modules/root-roots)
         (only-in "./gxtest-context"
                  ensure-build-root!
                  gxtest-test-module-path
@@ -56,19 +54,26 @@
     (list (car buckets) (cons path (cadr buckets))))
    (else buckets)))
 
-;; The Builder Profile owns roots and exclusions.  This projection only selects
-;; runnable test entries from that already-declared module catalog.
+(def +native-test-roots+ ["t" "test"])
+
+;; Test discovery applies clan/building's native catalog independently under
+;; each conventional test directory. This is Testing data, not a package
+;; BuildSpec or a source-root option on PackageSpec.
 ;; : (-> (List Path))
 (def (gxtest-test-files)
   (ensure-build-root!)
   (let (buckets
         (fold gxtest-catalog-test-file-step
               (list [] [])
-              (asp-gerbil-scheme-builder-profile-modules/root-roots
-               asp-gerbil-scheme-development-builder-profile
-               package-root
-               (asp-gerbil-scheme-builder-profile-test-roots
-                asp-gerbil-scheme-development-builder-profile))))
+              (append-map
+               (lambda (root)
+                 (let (directory (path-expand root package-root))
+                   (if (file-exists? directory)
+                     (parameterize ((current-directory directory))
+                       (map (cut string-append root "/" <>)
+                            (upstream-all-gerbil-modules)))
+                     [])))
+               +native-test-roots+)))
     (append (reverse (car buckets))
             (reverse (cadr buckets)))))
 

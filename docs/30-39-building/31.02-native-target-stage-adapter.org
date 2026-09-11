@@ -1,131 +1,63 @@
-#+TITLE: 31.02 Native Target Stage Adapter
-#+SUBTITLE: Preserve Gerbil make semantics while exposing a stable Build Plan boundary
+#+TITLE: 31.02 Native Build Ownership
 #+OPTIONS: toc:2 num:nil
 
-* Purpose
+* Decision
 
-The Building API owns stage planning, execution receipts, and the projections
-consumed by humans and agents. Native Gerbil target compilation remains the
-owner of the actual =std/make= invocation. The adapter connects those two
-owners without turning a native target build into a second build system.
+The former native target stage adapter is removed. It duplicated responsibilities
+already owned by =clan/building= and =std/make=: package Graph storage,
+currentness prediction, stage ordering, clean behavior, and package compile
+commands.
 
-This document records the boundary because it is easy to accidentally lose it
-when changing a fast path: a direct =make= call may still compile correctly,
-but it silently removes the stage receipt, plan explanation, and policy hooks
-that make the framework useful to an agent.
-
-* Contract
-
-#+begin_src scheme
-;; input: native target request
-;; output: package receipt with a versioned buildPlan projection
-;; invariant: std/make keyword arguments remain direct keyword calls
-#+end_src
-
-The adapter has four non-overlapping responsibilities.
-
-| Owner | Responsibility | Must not own |
-|-------+----------------+--------------|
-| =src/build-api/native-build.ss= | Interpret the native target request and invoke Gerbil =make=. | Plan storage or generic receipt projection. |
-| =src/building/std-builder.ss= | Represent one =std/make= stage and its stale/current behavior. | Native target command-line policy. |
-| =src/building/facade.ss= | Run stages as a Build Plan and return typed receipts. | Gerbil keyword argument reconstruction. |
-| =src/building/model.ss= | Project receipts to stable data for tools and agents. | Filesystem compilation. |
-
-* Execution Boundary
+The production path is now direct:
 
 #+begin_src mermaid
 flowchart LR
-  request["compile-target request"] --> route{"target mode"}
-  route -->|"ordinary incremental"| package["package stage plan"]
-  route -->|"release or full"| native["native target stage"]
-  route -->|"release/binary incremental"| binary["binary stale check"]
-  package --> plan["build-plan-run!"]
-  native --> plan
-  plan --> stage["std/make direct keyword call"]
-  stage --> receipt["versioned buildPlan receipt"]
-  binary --> receipt
+  Script["build.ss
+PackageSpec Graph + deps"]
+  Clan["init-build-environment!"]
+  Make["std/make"]
+  Output["native library artifacts"]
+
+  Script --> Clan --> Make --> Output
 #+end_src
 
-The normal incremental route must use the package stage plan. Full and release
-builds retain their native target behavior, but are enclosed by a Build Plan
-stage so the observable contract does not disappear. The binary-only
-incremental route may short-circuit only after its stale check has produced the
-same receipt-level status.
+There is no =src/build-api/native-build.ss=,
+=src/build-api/native-build-spec.ss=, =src/build-api/package-native-plan.ss=,
+or =src/build-api/project-build.ss=.
 
-* Keyword-Safety Rule
+* Ownership
 
-Gerbil keyword arguments are not ordinary list values that can safely be
-spliced into a dynamically assembled positional argument list. Therefore the
-generic stage layer carries the source list and options as data, while the
-native =std/make= adapter performs the final call with explicit keyword syntax.
+| Concern | Owner |
+|---------+-------|
+| Package identity and acquisition | =gerbil.pkg= / =gxpkg= |
+| Library Graph and logical dependencies | root =build.ss= |
+| Provider executable Graph | =provider-package-spec.ss= / =build-provider.ss= |
+| Native import dependency resolution | =std/make= |
+| Native currentness and clean | =std/make= |
+| Release, optimized, and debug lowering | upstream build entrypoint |
+| Selected test closure | GxTest testing modules |
+| Build observations and scenario values | optional =src/building/= library |
 
-#+begin_src scheme
-;; Correct boundary shape: the native adapter owns this call form.
-(make stage srcdir: srcdir options ...)
+A receipt may record that =std/make= ran. It must not skip the call, declare a
+target current, split the package Graph into ASP-owned stages, or repair native
+artifacts.
+
+* Project commands
+
+Native compile, spec, and clean commands belong to =build.ss=. The reusable
+project CLI exposes test selection only; it no longer provides a second
+compile/spec/clean route.
+
+#+begin_src sh
+gxpkg env gxi ./build.ss spec
+gxpkg env gxi ./build.ss compile
+gxpkg env gxi ./build.ss clean
 #+end_src
 
-Do not "generalize" this by appending keyword/value pairs to a list and applying
-=make= to it. That may appear to work for a simple stage while changing the
-calling convention observed by Gerbil's macro-expanded procedure.
+* Regression contract
 
-* Incremental and Feedback Guarantees
-
-- Stage specifications are cached for the lifetime of the process. A warm
-  package build reuses the plan instead of rescanning the source tree.
-- A current stage returns a =skipped= receipt and does not call =make=.
-- A stale stage returns a =compiled= receipt whose result is the native build
-  result.
-- The package receipt exposes =buildPlanVersion= and a stage list, so agent
-  tooling can explain what was considered, skipped, or compiled without
-  parsing terminal text.
-- Build execution must not require =GERBIL_LOADPATH= or a prior =gxpkg clean=.
-  Correctness is based on package-managed artifacts and stale checks.
-
-* Acceptance Gates
-
-The implementation is accepted only when all of the following hold.
-
-| Gate | Evidence |
-|------+----------|
-| Build contract | =gxpkg build= completes in the harness checkout. |
-| Stage semantics | =t/building-framework-test.ss= covers current and stale =std/make= stages. |
-| Public facade | =t/build-api-framework-test.ss= proves receipt projection through the legacy Build API facade. |
-| Hot path | =t/building-performance-test.ss= keeps skipped stages, stale stages, and package plan construction within their budgets. |
-| Native route | =t/build-api-native-stage-boundary-test.ss= invokes ordinary =compile-target= and asserts the receipt schema, the versioned =buildPlan=, stage projection, and =skipped= or =compiled= status. |
-
-* Next Implementation Step
-
-=t/build-api-native-stage-boundary-test.ss= is discovered by the canonical
-=build.ss test-full= runner and can be run in isolation with =build.ss
-test-file t/build-api-native-stage-boundary-test.ss=. Keep the regression
-black-box: it asserts receipt projection and route selection, not the
-implementation details of =make=. This keeps the keyword-safe native adapter
-free to evolve while making a regression back to a receipt-less monolithic call
-observable.
-
-The remaining full-suite policy findings belong to separate benchmark, CLI,
-receipt, support, and test owners. Repair them in owner-scoped changes; do not
-weaken the Build Plan assertion or suppress the native target test to obtain a
-green full suite.
-
-* Build Script Convergence
-
-=build.ss= is the command and target-selection boundary. Its package call
-loads the Build API and evaluates the selected public operation; it must not
-recreate stage planning or receipt semantics.
-
-#+begin_src mermaid
-flowchart LR
-  cli["build.ss compile"] --> dispatch["Build API package call"]
-  dispatch --> native["native-build package policy"]
-  native --> plan["std-builder-stage-plan"]
-  plan --> stages["std-builder-stage values"]
-  stages --> runner["build-plan-run!"]
-  runner --> receipt["versioned package buildPlan receipt"]
-#+end_src
-
-=std-builder-stage-plan= is the pure convergence point. It maps stage specs,
-label policy, and a current predicate into ordinary Building stages. The native
-adapter supplies package-specific source specs and receipt persistence. A warm
-package request therefore projects every stage as =skipped= without invoking
-the native builder, while a stale request preserves normal execution order.
+=t/package-build-contract-test.ss= asserts that the root entry retains
+=init-build-environment!=, =deps:=, native =all-gerbil-modules= defaults, the
+POO =product-entry-modules= option for the complete provider-owned closure, and
+the internal cold source bootstrap. It
+also asserts that the retired duplicate owner files remain absent.

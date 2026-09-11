@@ -4,28 +4,22 @@
 * Purpose
 
 The Building Framework is a library, not a project-specific shell recipe.
-Downstream =build.ss= files use =building/build-script= for executable builds.
-The declarative BuildRequest macros remain the typed plan/receipt surface for
-Testing and inspection; they are not a second compiler entry point.
-
-The declaration layer does not schedule compiler workers. Native toolchain
-selection, cache admission, and the default host-core projection belong to
-Building, while =std/make= owns the dependency graph and consumes
-=GERBIL_BUILD_CORES=.
+Package build entrypoints use Gerbil's native =:clan/building= or
+=:std/build-script= surface. The declarative BuildRequest macros remain a typed
+plan/receipt library for Testing and inspection; they are not a package
+compiler entrypoint and do not define development or production modes.
 
 * Dependency Boundary
 
 #+begin_mermaid
 flowchart LR
-  Package["POO package spec<br/>profile: development | production"] --> Script["Downstream build.ss"]
-  Script --> Bridge["building/build-script"]
-  Bridge --> Profile["native std/make options"]
-  Bridge --> Make["std/make"]
-  Profile --> Make
+  Package["POO package spec<br/>optional native overrides"] --> Script["Downstream build.ss"]
+  Script --> Native["clan/building or std/build-script"]
+  Native --> Make["std/make"]
   Decl["typed plan and receipt"] --> Build["building/facade"]
   TestDecl["testing/building"] --> TestModel["testing/model"]
   TestDecl --> Build
-  Script --> TestDecl
+  Script -. separate library .-> TestDecl
 #+end_mermaid
 
 =building/= has no import of =testing/=.  The Testing-side adapter owns the
@@ -35,34 +29,17 @@ strictly =Testing -> Building=.
 * Downstream Form
 
 #+begin_src scheme
-(import :asp-gerbil-scheme/build-api)
+(import (only-in :std/build-script defbuild-script)
+        (only-in :example/provider-spec example-provider-spec))
 
-(defbuild-script
-  (framework-executable-build-spec
-   "src/main"
-   "example-provider"
-   '("src/core" "src/workflow"))
-  profile: 'development
-  bindir: (framework-build-bindir))
+(defbuild-script (example-provider-spec))
 #+end_src
 
-Every executable build declaration supplies one package profile.  The public
-profile vocabulary is deliberately limited to =development= and =production=:
-
-| Profile | Native lowering |
-|---------+-----------------|
-| =development= | =std/make= with optimization disabled |
-| =production= | optimized release policy selected by the host platform |
-
-The profile is package policy stored in the POO package spec and projected by
-the top-level =build.ss=.  It is not a replacement compiler, scheduler, cache,
-or platform detector.  Downstream scripts must not also declare
-=optimize:=, =build-release:=, or =build-optimized:=; the bridge rejects those
-duplicate owners before delegating to =std/make=.  A command-line release or
-optimized request remains an explicit upstream-compatible override of the
-declared default.  Before delegation, the bridge normalizes every keyword to
-one value, so combined =--release --optimized= requests cannot produce duplicate
-=std/make= keyword arguments.
+There is no ASP development/production build profile. =gxpkg build -R=,
+=gxpkg build -O=, and Gerbil's native build-script options remain the only
+release/optimized/debug control plane. PackageSpec defaults module discovery
+internally and exposes only real native BuildSpec customization when a target
+needs it.
 
 For typed plan inspection and Testing projection, downstream libraries may also
 compose the declarative API:
@@ -99,17 +76,9 @@ composition when a named binding is not appropriate.
 
 - A BuildRequest is inspectable before execution and can be projected into a
   receipt without running a compiler.
-- Compiler worker count is never duplicated in the declaration. A positive
-  =GERBIL_BUILD_CORES= remains authoritative; otherwise the Scheme Framework
-  supplies =##cpu-count= before compiler import to the single upstream
-  scheduler. The declared runtime-module closure is target data, not another
-  scheduler; Gerbil's emitted executable stub is its conformance oracle.
-- When core selection requires a pre-import child, the Scheme bridge starts
-  =gxpkg env= from the declaring =build.ss= package directory.  Invocation from
-  a monorepo root therefore cannot change package identity.
-- Build profile ownership is singular: the POO package spec declares the
-  semantic profile, the bridge lowers it to native =std/make= keys, and
-  =std/make= remains the executor.
+- Compiler mode, worker count, artifact root, freshness, and scheduling are
+  native Gerbil concerns and are not duplicated in PackageSpec.
+- The declared runtime-module closure is target data, not another scheduler.
 - The Testing projection produces plan-only runners.  Stage execution remains
   an explicit Building operation.
 - Multiple suite and case names are mapped functionally, so matrix coverage is

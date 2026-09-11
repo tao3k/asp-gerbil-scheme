@@ -31,7 +31,9 @@
 
 ;; : (-> String Void)
 (def (configure-build-root! root)
-  (set! package-root (path-normalize root))
+  ;; Keep one absolute identity domain. Source coverage returns absolute paths,
+  ;; while callers may legitimately select the package with ".".
+  (set! package-root (path-normalize (path-expand root)))
   (asp-gerbil-scheme-package-configure-build-root! package-root)
   (set! source-root (path-expand "src" package-root))
   (set! test-root (path-expand "t" package-root))

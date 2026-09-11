@@ -6,254 +6,122 @@
 :JD_ID: 31.01
 :STATUS: active-design
 :OWNER: src/building
-:EVIDENCE: src/building/model.ss src/building/std-builder.ss src/build-api/native-build.ss t/building-performance-test.ss
+:EVIDENCE: build.ss build-provider.ss src/building t/building-framework-test.ss
 :END:
 
-The harness now treats building as a peer framework to testing. Testing owns
-test objects, runners, and policy feedback. Building owns stage objects, build
-plans, std/make adapters, receipts, and performance gates.
+** Boundary
 
-This is not a replacement for Gerbil's =std/make=. The correct boundary is:
-=std/make= remains the execution engine, while the harness Building Framework
-adds stage semantics, package-specific ordering, receipt-oriented observability,
-and stable performance gates around that engine.
+Production package compilation is native Gerbil:
+
+- =build.ss= declares the complete library Graph with
+  =clan/building#init-build-environment!=.
+- =build-provider.ss= declares the explicit provider executable Graph with
+  =std/build-script#defbuild-script=.
+- =std/make= alone owns import dependency resolution, currentness, build modes,
+  compiler scheduling, workers, artifact locations, and clean behavior.
+- =gerbil.pkg= owns package identity and dependency acquisition.
+
+=src/building/= is an optional POO/functional value library for modelling
+stages, requests, scenario fixtures, and observations. It is not on the
+production package execution path and cannot suppress or partition a
+=std/make= invocation.
 
 #+begin_src mermaid
 flowchart LR
-  PackageSpec["package-spec.ss\nordered stage specs"]
-  Building["src/building\nstage + std-builder + plan"]
-  StdMake["Gerbil std/make\ncompile executor"]
-  NativeBuild["build-api/native-build.ss\npackage build adapter"]
-  Receipt["build receipts\nstatus + timing + label"]
-  Tests["gxtest + performance gates"]
+  Manifest["gerbil.pkg
+identity + acquisition"]
+  Build["build.ss
+name + deps + PackageSpec Graph"]
+  Provider["build-provider.ss
+provider BuildSpec"]
+  Clan["clan/building
+package environment"]
+  Make["std/make
+native dependency and freshness owner"]
+  Values["src/building
+optional pure values"]
+  Tests["GxTest explicit test closure"]
 
-  PackageSpec --> NativeBuild
-  NativeBuild --> Building
-  Building --> StdMake
-  Building --> Receipt
-  Tests --> Building
-  Tests --> NativeBuild
+  Manifest --> Build
+  Build --> Clan --> Make
+  Provider --> Make
+  Tests --> Make
+  Values -. observe or model .-> Make
 #+end_src
 
-** 31.01.1 Reflection: upstream improvement
+** Root declaration
 
-The upstream improvement is architectural, not just a local helper.
-
-Before this change, harness package compilation was effectively a flat
-=std/make= call over a package build spec. That made two things hard:
-
-- The package API had no named stage boundary, so dependency-order mistakes
-  surfaced as compile races instead of as plan-level errors.
-- Build behavior lived under =build-api=, so there was no reusable library
-  equivalent to the existing testing library.
-
-The new upstream shape is:
-
-- =src/testing= remains the testing framework.
-- =src/building= becomes the building framework.
-- =src/build-api= becomes the harness/package adapter that consumes
-  =src/building=.
-
-This gives downstream projects a stable library surface instead of forcing them
-to copy package build scripts. It also lets future policy checks reason about
-building as a first-class harness capability.
-
-** 31.01.2 Reflection: building-system improvement
-
-The building improvement is the split between execution and orchestration.
-
-=std/make= is good at compiling Gerbil specs. The missing layer for agent-facing
-engineering is not another compiler; it is an object model around build stages.
-That model now has:
-
-- =build-stage= for label, kind, spec, current predicate, runner, after hook,
-  and description.
-- =build-stage-receipt= for label, kind, status, description, result, and
-  elapsed jiffies.
-- =build-stage-receipt->alist= and =build-plan-receipts->alist= for
-  machine-readable agent projection.
-- =build-plan-run!= for ordered stage execution.
-- =std-builder= for adapting a stage spec to =std/make=.
-- =default-std-builder= for the ordinary Gerbil =std/make= runner.
-
-The harness package build now uses =asp-gerbil-scheme-package-api-stage-specs= instead of a
-single flat list for the package API. The new =building/model.ss=,
-=building/std-builder.ss=, and =building/facade.ss= files are explicit ordered
-stages. This fixes the dependency race where a facade could compile before the
-module it imports. The stage spec plan is cached inside the build process so
-agent-facing repeated plan inspection does not repeatedly scan and sort source
-directories.
-
-#+begin_src mermaid
-flowchart TB
-  S1["building/model.ss"]
-  S2["building/std-builder.ss"]
-  S3["building/facade.ss"]
-  S4["types/parser/policy stages"]
-  S5["commands/build-api stages"]
-
-  S1 --> S2 --> S3 --> S4 --> S5
-#+end_src
-
-The important design rule is:
-
-- =std/make= compiles one stage.
-- =src/building= decides what a stage means.
-- =src/build-api= decides which harness package stages to run.
-
-** 31.01.3 Reflection: speed and developer UX
-
-The speed improvement is not only raw milliseconds. It is also faster diagnosis
-and safer iteration.
-
-Developer UX improvements:
-
-- Agents can inspect a named stage instead of reverse-engineering a flat list.
-- A compile failure can be attached to a stage label such as
-  =building/std-builder.ss= or =package-api=.
-- Stage receipts create a natural observability path for future JSON output.
-- The build path no longer requires =clean= before every build; it is compatible
-  with incremental Gerbil package builds.
-- The Homebrew path can stay normal: no =GERBIL_LOADPATH= escape hatch and no
-  Nix SDK unsetting wrapper.
-- The harness supplies the selected native linker as =GERBIL_GCC= only for the
-  scoped Builder call; Gerbil's static executable driver owns the actual final
-  link. A valid caller =GERBIL_BUILD_CORES= remains authoritative; when it is
-  absent, the Scheme Framework selects Gambit's =##cpu-count= and applies it to
-  both the environment and Gerbil 0.18.2's captured compiler counter. It fixes
-  =GERBIL_BUILD_PREFIX= to the active runtime cohort so a project build cannot
-  drift into the user-global cache. It never creates a second Farm scheduler.
-- Performance gates can measure framework overhead separately from full compiler
-  cost.
-
-The current micro gate intentionally measures framework overhead:
-
-- 2000 skipped stage runs must stay under 200 ms.
-- 500 stale stage runs through the std-builder path must stay under 300 ms.
-- 500 package stage plan constructions must stay under 300 ms.
-
-Current local measurement on this machine:
-
-#+begin_example
-skipStageMs         1.469
-runStageMs          0.500
-packageStagePlanMs  0.651
-#+end_example
-
-Before stage-spec caching, 500 package stage plan constructions measured about
-240 ms locally. After caching, the same gate measured about 0.651 ms. These
-numbers are not a final benchmark suite. They are the first regression floor:
-if framework dispatch or plan inspection becomes expensive, the test fails
-before the cost is hidden inside a full package compile.
-
-** 31.01.4 Current evidence
-
-The current landed evidence is:
-
-- =src/building/build-script.ss= is the public downstream =build.ss= bridge.
-  It preserves the =meta/spec/compile/clean= command surface and delegates the
-  declared targets to one upstream =std/make= executor.
-- The bridge holds one kernel =flock= per =GERBIL_PATH= during compilation.
-  Gerbil 0.18.x creates empty =.o.lock= files and polls them forever after an
-  interrupted compiler; after acquiring the exclusive build lease, the bridge
-  recovers project-owned object locks from both =lib/static= and the declared
-  binary output directory. Recovery therefore uses one cache ownership domain,
-  not an age threshold or timeout.
-- =src/building/model.ss= defines stage and receipt objects.
-- =src/building/model.ss= projects stage receipts into alists for agent-facing
-  observability.
-- =src/building/std-builder.ss= adapts stages to =std/make= and exports
-  =default-std-builder=.
-- =src/building/facade.ss= exports the public building library.
-- =src/build-api/package-spec.ss= includes explicit ordered building stages.
-- =src/build-api/package-spec.ss= caches the package stage plan inside the
-  build process.
-- =build.ss= declares the public =asp-gerbil-scheme= executable plus the 15
-  module runtime-closure manifest emitted by Gerbil's executable stub. It does
-  not widen provider admission to every module under =src/=; =std/make= remains
-  the only scheduler and the emitted stub is the drift oracle.
-- =src/testing/gxtest-build.ss= delegates selected source and test compilation
-  to the native Building adapter instead of dynamically loading a package
-  compiler.
-- Selected GxTest receipts project the two Building requests as =buildPlan=
-  metadata, so an agent can distinguish source and test stages after a run.
-- =src/build-api/package-build.ss= owns only package-local Gerbil environment
-  setup. Internal BuildRequest compilation and public Build SS compilation use
-  the same =call-with-framework-build-lease= boundary.
-- =src/build-api/native-build.ss= records the build plan projection in package
-  build receipt metadata when the default Building path runs.
-- =t/building-framework-test.ss= covers the new public building API.
-- =t/build-script-bridge-test.ss= covers downstream command compatibility and
-  ownership metadata. Clean/compile acceptance uses Gerbil-generated artifacts
-  and asserts that no compiler object lock remains.
-- =t/build-api-framework-test.ss= protects the build-api facade.
-- =t/building-performance-test.ss= establishes the first executable performance
-  gate.
-- =t/building-gxtest-stage-boundary-test.ss= protects the root test command's
-  selected-receipt Building projection.
-- =t/scenarios/building/std-builder-stage-boundary/benchmark.ss= records the
-  benchmark contract and current observed timings.
-
-** 31.01.5 API shape
-
-The primary downstream =build.ss= shape is compact:
+The library entry keeps the dependency-aware upstream declaration:
 
 #+begin_src scheme
-(import :asp-gerbil-scheme/build-api)
+(import (only-in :clan/building
+                 all-gerbil-modules
+                 init-build-environment!)
+        (only-in "./src/build-api/source-bootstrap"
+                 asp-gerbil-scheme-package-spec!
+                 asp-gerbil-scheme-library-package-prototype))
 
-(defbuild-script
-  (framework-executable-build-spec
-    "src/provider-server"
-    "asp-example"
-    '("src/runtime/provider-operation"
-      "src/runtime/provider-http-json-server"))
-  bindir: (framework-build-bindir))
+(asp-gerbil-scheme-package-spec!
+ (library-package @ asp-gerbil-scheme-library-package-prototype)
+ (spec library-spec)
+ (modules (all-gerbil-modules))
+ (product-entry-modules +product-entry-modules+))
+
+(init-build-environment!
+ name: "asp-gerbil-scheme"
+ deps: '("clan" "clan/poo")
+ spec: library-spec)
 #+end_src
 
-The downstream owns public targets and the artifact root. The Framework owns
-cache admission and recovery; =std/make= owns dependency discovery, currentness,
-compiler scheduling, and =GERBIL_BUILD_CORES=.
+=PackageSpec='s =exclude-dirs= slot starts with clan's native exclusions for
+=t/=, =run/=, =.git/=, =_darcs/=, and =.gerbil/=. A downstream POO declaration
+may extend that inherited set for a real project source layout. This project
+adds no overlay: the retired =build/workspace-provider= tree belonged to the
+deleted custom =GERBIL_PATH= route and is not part of the native layout.
 
-Homebrew Gerbil 0.18.2 does not default =GERBIL_BUILD_CORES= to available host
-cores: an unset value becomes zero and =std/make= falls back to one worker.
-Moreover, =compiler/base= captures the value at module import, so changing only
-the environment around =make= is too late.  The Framework applies the selected
-value to both =GERBIL_BUILD_CORES= and =__available-cores= before handing the
-spec to =std/make=.  A positive caller value remains authoritative; otherwise
-=##cpu-count= supplies the host value.  =std/make= remains the only worker
-scheduler.
+A downstream extension keeps the composed value in the same declarative object:
 
-** 31.01.6 Acceptance receipts
+#+begin_src scheme
+(asp-gerbil-scheme-package-spec!
+ (downstream-package @ asp-gerbil-scheme-library-package-prototype)
+ (spec downstream-spec)
+ (exclude-dirs => append '("generated"))
+ (modules (all-gerbil-modules exclude-dirs: exclude-dirs)))
+#+end_src
+=product-entry-modules= removes the complete product-owned module set from the
+library projection inside PackageSpec. The declaration includes provider-only
+runtime modules and any command/registry owner that would otherwise import
+them; removing only the executable entry file is insufficient because
+=std/make= correctly follows imports.
 
-On Homebrew Gerbil 0.18.2, the final clean provider runtime closure plus
-executable completed in 102.00 seconds; after the final API/closure
-regeneration, the same build completed in 8.44 seconds through the self-reentry
-fallback and in 5.97 seconds when the Project Harness injected cores and
-runtime prefix before =gxi=. The previous unbounded run reached
-526.74 seconds without a terminal receipt because an executable-output
-=.o.lock= was outside recovery; that path is now covered by the same build
-lease. The final admitted binary passed the HTTP JSON lifecycle, live-corpus,
-memo-bound, project-resolution, contract fail-closed, and shutdown suite. For
-128 warm service samples it measured 12 us p50, 33 us p95, 62 us p99, and
-138 us maximum. Compile/link time remains separate from provider request latency.
+There is no public =roots= option, development/production profile, alternate
+module catalog, BuildPlan cache, ASP currentness predicate, build lease, or
+toolchain mutation. =exclude-dirs= remains the POO-native extension point for
+clan's ignore set.
 
-** 31.01.6 Bazel is a thin Building API adapter
+** Testing boundary
 
-The Scheme package exposes exactly two public Building inputs: =gerbil.pkg=
-owns package identity and dependencies, and =build.ss= is the only executable
-build entry.  The Bzlmod consumer uses =gerbil-bazel= for the hermetic Gerbil
-toolchain, isolated dependency project roots, action inputs, and receipts; it
-does not reproduce the Scheme module graph or compiler scheduler in Starlark.
-The former generated 122-entry =components/poo-flow.bzl= projection is removed.
+GxTest discovery owns its explicit test closure. When compiled execution is
+needed, =src/testing/gxtest-build.ss= passes that closure to one ordinary
+=std/make= call with the package root as =srcdir=. Test receipts describe the
+completed call; they never decide whether the native executor is entered.
 
-The Bazel action graph contains the topological package boundary
-=gerbil-utils -> gerbil-poo -> asp-gerbil-scheme=.  Each package action receives
-=GERBIL_BUILD_CORES=12= from the resolved toolchain on the measured host, while
-the project =build.ss= remains the owner of its internal =std/make= scheduling.
-The first complete dependency build took 539.754 seconds because all three
-package roots were cold.  With dependency actions cached, a clean isolated
-ASP_GERBIL_SCHEME action took 132.337 seconds; the final unchanged warm
-=bazel build //:compile= took 0.980 seconds (1.04 seconds wall clock).  Package
-topology is intentionally
-serial where a real dependency edge exists; this is distinct from compiler
-parallelism inside each package action.
+** Optional Building values
+
+The public Building value library retains =BuildStage=, =BuildRequest=, and
+POO constructors where they support scenario composition and inspection. These
+values are not package profiles and do not lower =gxpkg= build modes.
+Release, optimized, and debug modes remain native Gerbil command options.
+
+** Acceptance
+
+The native boundary requires all of the following evidence:
+
+1. a dependency-only cold =build.ss compile= succeeds with zero pre-existing
+   ASP artifacts;
+2. =build.ss spec= excludes =t/=, generated build trees, and product
+   entrypoints;
+3. the provider cold build and executable test succeed independently;
+4. focused package/GxTest contracts pass;
+5. the canonical full test gate passes;
+6. CI library and provider jobs are green on Linux and macOS.

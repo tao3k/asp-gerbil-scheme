@@ -51,7 +51,7 @@ competing with them.
 | Module import/dependency graph | upstream =std/make= |
 | Native source/output currentness | upstream =std/make= |
 | Completion graph, worker pool, and scheduling | upstream =std/make= |
-| Build-script command/profile lowering | ASP Building facade over upstream native options |
+| Build-script command and mode lowering | upstream =clan/building= or =std/build-script= |
 | Pure-generator input and producer identity | downstream domain adapter |
 | Domain sidecar materialization and load validation | downstream domain adapter |
 | Generic immutable receipt, digest verification, and path containment | ASP =generated-artifact= |
@@ -158,6 +158,6 @@ overwrite each other's bytes.
 input-key separation, tamper rejection without a producer, post-materialization
 validation, immutable-key conflict, path containment, stable native =gxc:=
 projection, ambiguous-owner rejection, and PackageSpec graph preservation.
-=t/build-script-bridge-test.ss= binds the ownership fields in
-=framework-build-contract=; =t/package-build-contract-test.ss= binds the new
-module into the static package build plan.
+=t/package-build-contract-test.ss= verifies that the sole production Graph is
+declared by root =build.ss= and that package entrypoints use native Gerbil
+build surfaces.

@@ -1,18 +1,13 @@
 ;;; -*- Gerbil -*-
 ;;; Gxtest package build lifecycle helpers.
 
-(import (only-in :std/misc/path path-directory)
-        (rename-in (only-in "../build-api/native-build-spec"
-                            configure-build-root!)
-                   (configure-build-root! configure-native-build-root!))
-        (rename-in "../build-api/native-build"
-                   (compile-package-api-if-stale
-                    native-compile-package-api-if-stale))
-        (only-in "../build-api/native-build"
-                 compile-selected-gxtest-target)
+(import (only-in :std/make make)
+        (only-in "../build-api/core-capacity"
+                 initialize-native-build-core-capacity!)
+        (only-in :std/misc/path path-directory)
+        (only-in :std/srfi/13 string-prefix? string-suffix?)
         (only-in "../build-api/package-receipt"
                  asp-gerbil-scheme-package-build-receipt-status
-                 asp-gerbil-scheme-package-build-receipt-status-ref
                  asp-gerbil-scheme-package-build-receipt-write)
         (only-in "./gxtest-context"
                  package-root
@@ -21,43 +16,39 @@
                  gxtest-selected-source-module-files
                  gxtest-selected-test-files)
         (only-in "./gxtest-receipts"
-                  display-package-api-build-receipt-status
+                  display-build-receipt-status
                   ensure-directory!
-                  selected-gxtest-build-current?
                   selected-gxtest-build-receipt-status
                   write-selected-gxtest-build-receipt!)
         )
 
-(export compile-package-api-if-stale
-        compile-scoped-policy-engine-if-stale
+(export compile-scoped-policy-engine-if-stale
         scoped-policy-engine-needs-source-build?
         compile-selected-gxtest-if-stale)
 
-;; : (-> BuildReceiptStatus)
-(def (compile-package-api-if-stale)
-  (configure-native-build-root! package-root)
-  (native-compile-package-api-if-stale))
-
 ;; : (-> (List Path) Alist)
 (def (compile-selected-gxtest! files)
-  (configure-native-build-root! package-root)
-  (compile-selected-gxtest-target
-   (gxtest-selected-source-module-files files)
-   (gxtest-selected-test-files files)))
+  (initialize-native-build-core-capacity!)
+  (let (spec
+        (append
+         (map (lambda (module) (string-append "src/" module))
+              (gxtest-selected-source-module-files files))
+         (gxtest-selected-test-files files)))
+    (when (pair? spec)
+      (make spec srcdir: package-root))
+    '((executor . "std/make")
+      (freshnessOwner . "std/make"))))
 
 ;; : (-> (List Path) BuildReceiptStatus)
 (def (compile-selected-gxtest-if-stale files)
   (let (status (selected-gxtest-build-receipt-status files))
-    (display-package-api-build-receipt-status status)
-    (if (selected-gxtest-build-current? status)
-      status
-      ;; The selected source closure is already dependency ordered and is the
-      ;; complete build input for this target.  Prebuilding the package API
-      ;; here turns a one-file gxtest into a whole-package (currently hundreds
-      ;; of modules) build and defeats the lightweight provider boundary.
-      (let (metadata (compile-selected-gxtest! files))
-        (write-selected-gxtest-build-receipt! files metadata)
-        (selected-gxtest-build-receipt-status files)))))
+    (display-build-receipt-status status)
+    ;; Receipts describe the prior call but never suppress the native executor.
+    ;; std/make receives the selected closure on every invocation and owns the
+    ;; only freshness decision.
+    (let (metadata (compile-selected-gxtest! files))
+      (write-selected-gxtest-build-receipt! files metadata)
+      (selected-gxtest-build-receipt-status files))))
 
 (def +scoped-policy-engine-build-receipt-version+
   'asp-gerbil-scheme-scoped-policy-engine-build.v1)
@@ -83,19 +74,26 @@
 (def (scoped-policy-engine-needs-source-build? source-files)
   (pair? source-files))
 
+(def (package-relative-source-file file)
+  (let (prefix (if (string-suffix? "/" package-root)
+                package-root
+                (string-append package-root "/")))
+    (if (string-prefix? prefix file)
+      (substring file (string-length prefix) (string-length file))
+      (error "build source is outside package root" file))))
+
 (def (compile-scoped-policy-engine-if-stale source-files output-files receipt-path)
+  (initialize-native-build-core-capacity!)
   (let (status (scoped-policy-engine-build-receipt-status
                 receipt-path
                 source-files
                 output-files))
-    (display-package-api-build-receipt-status status)
-    (if (eq? (asp-gerbil-scheme-package-build-receipt-status-ref status 'status #f) 'current)
-      status
-      (begin
-        (when (scoped-policy-engine-needs-source-build? source-files)
-          (compile-package-api-if-stale))
-        (write-scoped-policy-engine-build-receipt! receipt-path source-files output-files)
-        (scoped-policy-engine-build-receipt-status
-         receipt-path
-         source-files
-         output-files)))))
+    (display-build-receipt-status status)
+    (when (scoped-policy-engine-needs-source-build? source-files)
+      (make (map package-relative-source-file source-files)
+            srcdir: package-root))
+    (write-scoped-policy-engine-build-receipt! receipt-path source-files output-files)
+    (scoped-policy-engine-build-receipt-status
+     receipt-path
+     source-files
+     output-files)))

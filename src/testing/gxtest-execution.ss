@@ -11,6 +11,8 @@
         (only-in :std/srfi/1 concatenate iota partition)
         (only-in :std/sugar spawn/name)
         (only-in "../support/time" monotonic-micros duration-micros)
+        (only-in "../build-api/core-capacity"
+                 native-build-available-cores)
         (only-in "./gxtest-context"
                  package-root)
         (only-in "./gxtest-expression"
@@ -61,6 +63,7 @@
         first-failure-status
         gxtest-runner-mode-label
         gxtest-result-status
+        gxtest-effective-parallelism
         gxtest-native-parallelism
         gxtest-serial-resource-groups
         run-gxtest-file/subprocess)
@@ -109,16 +112,17 @@
            (display-gxtest-stream-line line)
            (loop)))))))
 
-;; Keep test execution aligned with std/make without introducing a second
-;; public concurrency policy. Gerbil treats an unset value as one active lane.
+;; Clamp Gerbil's initialized available-core value to the runnable test graph.
+;; std/make and compiler/base remain the scheduling owners.
+(def (gxtest-effective-parallelism available-cores file-count)
+  (if file-count
+    (min (max 1 available-cores) (max 1 file-count))
+    (max 1 available-cores)))
+
 (def (gxtest-native-parallelism (file-count #f))
-  (let* ((configured
-          (let (value (string->number (getenv "GERBIL_BUILD_CORES" "0")))
-            (if (integer? value) value 0)))
-         (active (max 1 configured)))
-    (if file-count
-      (min active (max 1 file-count))
-      active)))
+  (gxtest-effective-parallelism
+   (native-build-available-cores)
+   file-count))
 
 ;; : (-> Integer Integer)
 (def (normalized-exit-status status)

@@ -2,10 +2,8 @@
 ;;; Build-time ASP source coverage declarations.
 
 (import :gerbil/gambit
-        (only-in "./builder-profile"
-                 asp-gerbil-scheme-development-builder-profile
-                 asp-gerbil-scheme-builder-profile-exclude-directories
-                 asp-gerbil-scheme-builder-profile-modules/root-roots)
+        (rename-in :clan/building
+                   (all-gerbil-modules upstream-all-gerbil-modules))
         (only-in :std/misc/path path-expand path-normalize)
         (only-in :std/sort sort))
 
@@ -47,15 +45,10 @@
   (let (owner-root (path-normalize (path-expand root)))
     (unless (and current-source-coverage-declared-files
                  (equal? owner-root current-source-coverage-owner-root))
-      (let* ((profile asp-gerbil-scheme-development-builder-profile)
-             (roots current-source-coverage-roots)
-             (files
-              (asp-gerbil-scheme-builder-profile-modules/root-roots
-               profile owner-root roots)))
+      (let (files
+            (parameterize ((current-directory owner-root))
+              (upstream-all-gerbil-modules)))
         (asp-gerbil-scheme-source-coverage
-         roots: roots
-         exclude-directories:
-         (asp-gerbil-scheme-builder-profile-exclude-directories profile)
          files: files
          owner-root: owner-root)))))
 

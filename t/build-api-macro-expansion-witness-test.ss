@@ -3,7 +3,6 @@
 ;;; bindings remain ordinary runtime values and procedures.
 
 (import (only-in :std/test test-suite test-case check)
-        (only-in :std/misc/path path-directory path-expand path-normalize)
         (only-in :asp-gerbil-scheme/src/building/commands
                  define-build-options
                  define-build-commands)
@@ -19,13 +18,7 @@
         (only-in :asp-gerbil-scheme/src/build-api/package-spec
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype
-                 asp-gerbil-scheme-package-modules
-                 asp-gerbil-scheme-package-source-roots)
-        (only-in :asp-gerbil-scheme/src/build-api/source-coverage
-                 asp-gerbil-scheme-source-coverage-declared-files
-                 asp-gerbil-scheme-source-coverage-owner-root)
-        (only-in :asp-gerbil-scheme/src/build-api/builder-profile
-                 asp-gerbil-scheme-production-builder-profile)
+                 asp-gerbil-scheme-package-modules)
         (only-in :asp-gerbil-scheme/src/testing/commands
                  define-project-test))
 
@@ -72,8 +65,6 @@
   (spec witness-package-build-spec)
   (modules ["src/parser/model.ss"])
   (role 'library)
-  (profile asp-gerbil-scheme-production-builder-profile)
-  (exclude-directories [])
   (native-spec '("src/parser/model")))
 
 ;; : TestSuite
@@ -112,14 +103,5 @@
     (test-case "package declaration lowers to a POO package spec"
       (check (asp-gerbil-scheme-package-modules witness-package-spec)
              => ["src/parser/model.ss"])
-      (check (asp-gerbil-scheme-package-source-roots witness-package-spec)
-             => ["."])
-      (check (asp-gerbil-scheme-source-coverage-declared-files)
-             => ["src/parser/model.ss"])
-      (check (asp-gerbil-scheme-source-coverage-owner-root)
-             => (path-normalize
-                 (path-directory
-                  (path-expand "t/package-spec-witness.ss"
-                               (current-directory)))))
       (check (witness-package-build-spec)
              => '("src/parser/model")))))

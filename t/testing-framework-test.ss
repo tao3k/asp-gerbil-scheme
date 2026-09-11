@@ -57,8 +57,7 @@
            'std-builder
            "testing scenario adapter builder"
            #f
-           []
-           (native-toolchain-default)))
+           []))
          (profile (make-std-builder-profile builder)))
     (make-std-builder-request
      "testing-scenario-adapter"
@@ -359,8 +358,8 @@
                         name: "lazy-poo-smoke"
                         fixture-path:
                         "t/scenarios/policy/poo-object-construction-loop-performance/benchmark.ss"
-                        runner-module: ':asp-gerbil-scheme/src/building/native-toolchain
-                        runner-symbol: 'native-toolchain-default)]))
+                        runner-module: ':asp-gerbil-scheme/src/building/std-builder
+                        runner-symbol: 'default-std-builder)]))
              (project
               (testing-project
                name: "lazy-performance-project"

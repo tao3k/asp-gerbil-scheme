@@ -3,8 +3,9 @@
 
 * Decision
 
-ASP Build API delegates one complete module catalog to one Gerbil =std/make=
-session.  Downstream projects must not reproduce =std/make='s coordinator,
+Root =build.ss= delegates one complete module catalog through
+=init-build-environment!= to one Gerbil =std/make= session. Downstream projects
+must not reproduce =std/make='s coordinator,
 completion, channel, or worker scheduler.  A lock may protect a short state
 transition, but it may not own dependency waiting or compilation.
 
@@ -16,7 +17,7 @@ supposed to schedule.
 flowchart LR
   Spec["asp-gerbil-scheme-package-spec!\none module catalog"]
   Bootstrap["source-loaded bootstrap\nno compiled ASP runtime dependency"]
-  Validation["ASP declaration validation\nprofile and owner constraints"]
+  Validation["ASP declaration validation\nnative owner constraints"]
   Make["Gerbil std/make\none upstream session"]
   Workers["GERBIL_BUILD_CORES\navailable cores or override"]
   Receipt["Scheme observability receipt\nCPU, compiler jobs, RSS, contention"]
@@ -41,9 +42,8 @@ flowchart LR
 | A verified generated sidecar is projected through native =gxc: extra-inputs:= | Accepted |
 | A sidecar cache removes a target, predicts native currentness, or schedules compilation | Rejected |
 
-Before invoking =std/make=, the Build API validates only declaration-level
-properties and resolves the profile/toolchain environment.  It passes the
-complete declared spec to one =make= call.  It does not parse imports, infer
+PackageSpec performs only its pure declaration projection. The root entry
+passes the complete declared spec to native =clan/building=. It does not parse imports, infer
 reverse dependencies, compare source/output mtimes, pre-clean an affected
 closure, or decide that a build is current.  Those operations require Gerbil
 expander and =std/make= semantics.
@@ -63,21 +63,20 @@ session.  The receipt describes what ran; it is not a freshness oracle.  A warm
 regression is established by repeated native =std/make= execution and upstream
 compiler activity, not by an ASP-predicted affected-module set.
 
-The root library and provider build scripts are also cold bootstrap entrypoints.
-They load the internal =src/build-api/source-bootstrap.ss= projection directly;
-that projection is limited to package declaration, profile, and build-script
-bindings and does not import Testing, Policy, benchmark, or product entrypoints.
-It must not import =building/std-builder= or another compiled ASP runtime
-module.  The full =:asp-gerbil-scheme/build-api= remains the sole installed
-downstream facade.  CI may remove the package's installed library before
-invoking =build.ss clean=; clean and compile still delegate directly to upstream
-=make-clean= and =make=.
+The root library build script is a cold bootstrap entrypoint. It loads the
+internal =src/build-api/source-bootstrap.ss= projection directly; that
+projection is limited to package declaration bindings and does not import
+Testing, Policy, benchmark, or product entrypoints. The provider entry instead
+source-imports its explicit PackageSpec and imports
+=:std/build-script/defbuild-script= directly. Neither may import
+=building/std-builder= or another compiled ASP runtime module. The full
+=:asp-gerbil-scheme/build-api= remains the sole installed downstream facade.
 
 There is deliberately no =verify-current= command.  ASP cannot prove Gerbil
-currentness without duplicating the upstream executor.  Native repeated-build
-scenarios retain elapsed, CPU, RSS, compiler-job, source, profile, and toolchain
-identities so regressions remain measurable without inventing a second build
-graph.
+currentness without duplicating the upstream executor. Native repeated-build
+scenarios retain elapsed, CPU, RSS, compiler-job, source, native-option, and
+toolchain identities so regressions remain measurable without inventing a
+second build graph.
 
 The rules use composite parser-owned call facts.  A mutex, completion, channel,
 or compiler call by itself is insufficient evidence and must not produce a
@@ -99,7 +98,7 @@ lower into that upstream path rather than introducing another builder loop.
 
 #+begin_src mermaid
 flowchart LR
-  Macro["ASP package macro\nroots · features · profile"]
+  Macro["ASP package macro\noptional native BuildSpec overrides"]
   Clan[":clan/building\ndiscovery · environment · options"]
   Make[":std/make\ndependency · incremental · parallel execution"]
   Observe["passive receipt\nelapsed · CPU · RSS · compiler jobs"]

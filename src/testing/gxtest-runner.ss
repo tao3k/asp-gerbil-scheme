@@ -14,7 +14,6 @@
                  gxtest-test-files
                  gxtest-test-spec)
         (only-in "./gxtest-build"
-                 compile-package-api-if-stale
                  compile-scoped-policy-engine-if-stale
                  compile-selected-gxtest-if-stale)
         (only-in "./gxtest-discovery"
@@ -41,18 +40,12 @@
                  run-gxtest-files
                  gxtest-suite-process-isolated?)
         (only-in "./gxtest-receipts"
-                 display-package-api-build-receipt-status
-                 package-api-build-current?
-                 package-api-build-output-files
-                 package-api-build-receipt-path
-                 package-api-build-receipt-status
-                 package-api-build-source-files
+                 display-build-receipt-status
                  selected-gxtest-build-current?
                  selected-gxtest-build-output-files
                  selected-gxtest-build-receipt-path
                  selected-gxtest-build-receipt-status
                  selected-gxtest-build-source-files
-                 write-package-api-build-receipt!
                  write-selected-gxtest-build-receipt!)
         (only-in "./gxtest-policy"
                  run-scoped-policy-if-stale
@@ -90,14 +83,8 @@
         gxtest-top-line
         gxtest-failure-line
         asp-gerbil-scheme-package-build-receipt-status-ref
-        package-api-build-current?
-        package-api-build-output-files
-        package-api-build-receipt-path
-        package-api-build-receipt-status
-        package-api-build-source-files
         parallel-gxtest-files
         serial-gxtest-files
-        compile-package-api-if-stale
         scoped-policy-phase-line
         scoped-policy-receipt-path
         scoped-policy-status-line
@@ -114,7 +101,7 @@
         selected-gxtest-build-source-files
         source-isolated-gxtest-file?
         gxtest-suite-process-isolated?
-        write-package-api-build-receipt!)
+        write-selected-gxtest-build-receipt!)
 
 ;; : (-> (List Path) (List ModulePath))
 (def (gxtest-files-spec files)

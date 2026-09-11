@@ -10,7 +10,6 @@
         (only-in :asp-gerbil-scheme/src/support/time
                  duration-literal->nanos
                  duration-nanos->text)
-        (only-in :asp-gerbil-scheme/src/testing/gxtest-build compile-package-api-if-stale)
         (only-in :asp-gerbil-scheme/src/testing/gxtest-context configure-build-root!)
         (only-in :asp-gerbil-scheme/src/testing/gxtest-policy
                  scoped-policy-target-files
@@ -88,10 +87,7 @@
 (def (run-scoped-policy/silent files)
   (run-policy-command/silent
    (lambda ()
-     (run-scoped-policy-if-stale
-      files
-      (lambda ()
-        (compile-package-api-if-stale)))
+     (run-scoped-policy-if-stale files)
      0)))
 
 ;; : (-> (List Path) Alist)

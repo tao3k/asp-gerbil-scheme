@@ -1,19 +1,13 @@
 (import :clan/poo/object
         :std/test
         (only-in "../provider-package-spec"
-                 asp-gerbil-scheme-provider-package-spec)
-        (only-in "../src/build-api/package-spec"
-                 asp-gerbil-scheme-package-build-profile))
+                 asp-gerbil-scheme-provider-package-spec))
 
 (export provider-package-spec-test main)
 
 (def provider-package-spec-test
   (test-suite "provider package spec"
-    (test-case "the provider projects its Builder Profile to production"
-      (check (asp-gerbil-scheme-package-build-profile
-              asp-gerbil-scheme-provider-package-spec)
-             => 'production))
-    (test-case "declared runtime modules project to one separate AOT boundary"
+    (test-case "declared runtime modules project through native BuildSpec forms"
       (let* ((runtime-modules
               (.get asp-gerbil-scheme-provider-package-spec runtime-modules))
              (native-spec
@@ -21,10 +15,11 @@
              (entry (list-ref native-spec (length runtime-modules))))
         (check (map cadr (take native-spec (length runtime-modules)))
                => runtime-modules)
-        (check (take entry 6)
+        (check (take entry 4)
                => '(exe: "src/provider-server"
-                       bin: "asp-gerbil-scheme"
-                       runtime-linkage: separate-aot))))
+                       bin: "asp-gerbil-scheme"))
+        (check (member "-cc-options" entry) ? true)
+        (check (member "-ld-options" entry) ? true)))
     (test-case "each provider module has one std make completion owner"
       (check (.get asp-gerbil-scheme-provider-package-spec library-modules)
              => '())

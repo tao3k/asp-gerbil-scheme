@@ -4,10 +4,7 @@
 (import (only-in "./src/build-api/package-spec"
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype)
-        (only-in "./src/build-api/builder-profile"
-                 asp-gerbil-scheme-production-builder-profile)
-        (only-in "./src/building/build-script"
-                 framework-executable-build-spec))
+        (only-in :std/make cppflags ldflags))
 
 ;; Build entrypoints must be self-hosting: this native Gerbil module list is
 ;; package-spec data, while the heavier source-closure analyzer remains a
@@ -55,14 +52,15 @@
  (spec asp-gerbil-scheme-provider-spec)
  (modules +provider-source-modules+)
  (role 'provider)
- (profile asp-gerbil-scheme-production-builder-profile)
  (entry "src/provider-server")
  (runtime-modules +provider-runtime-modules+)
  (library-modules +provider-library-modules+)
  (native-spec
-  (framework-executable-build-spec
-   "src/provider-server"
-   "asp-gerbil-scheme"
-   +provider-runtime-modules+
-   +provider-library-modules+
-   '(tls))))
+  (append
+   (map (lambda (module) `(gxc: ,module)) +provider-runtime-modules+)
+   `((exe: "src/provider-server"
+           bin: "asp-gerbil-scheme"
+           "-cc-options" ,(string-append (cppflags "openssl" "")
+                                          " -include openssl/kdf.h")
+           "-ld-options" ,(ldflags "openssl" "-lssl -lcrypto")))
+   +provider-library-modules+)))

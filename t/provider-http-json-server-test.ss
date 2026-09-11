@@ -38,7 +38,7 @@
   (let (artifact
         (or (getenv "ASP_PROVIDER_TEST_ARTIFACT" #f)
             (path-expand
-             "build/workspace-provider/bin/asp-gerbil-scheme"
+             ".gerbil/bin/asp-gerbil-scheme"
              package-root)))
     (unless (file-exists? artifact)
       (error

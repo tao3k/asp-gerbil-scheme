@@ -9,8 +9,6 @@
                  asp-gerbil-scheme-package-build-receipt-status-line
                  asp-gerbil-scheme-package-build-receipt-status-ref
                  asp-gerbil-scheme-package-build-receipt-write)
-        (only-in "../build-api/package-native-plan"
-                 asp-gerbil-scheme-package-api-spec)
         (only-in "./gxtest-context"
                  package-root
                  source-root
@@ -25,28 +23,13 @@
 
 (export ensure-directory!
         file-set-cache-key
-        package-api-build-current?
-        package-api-build-output-files
-        package-api-build-receipt-path
-        package-api-build-receipt-status
-        package-api-build-source-files
         selected-gxtest-build-current?
         selected-gxtest-build-output-files
         selected-gxtest-build-receipt-path
         selected-gxtest-build-receipt-status
         selected-gxtest-build-source-files
-        display-package-api-build-receipt-status
-        write-package-api-build-receipt!
+        display-build-receipt-status
         write-selected-gxtest-build-receipt!)
-
-;; : (-> Path)
-(def (package-api-output-root)
-  (path-expand (source-output-prefix)
-               (path-expand ".gerbil/lib" package-root)))
-
-;; : (-> Path)
-(def (package-api-build-receipt-path)
-  (path-expand ".gerbil/build/package-api.receipt" package-root))
 
 ;; file-set-cache-key
 ;;   : (-> (List Path) String)
@@ -82,20 +65,6 @@
                   ".receipt")
    package-root))
 
-;; : (-> (List Path))
-(def (package-api-build-source-files)
-  (map (lambda (module)
-         (path-expand module source-root))
-       (asp-gerbil-scheme-package-api-spec)))
-
-;; : (-> (List Path))
-(def (package-api-build-output-files)
-  (map (lambda (module)
-         (path-expand
-          (string-append (module-path-stem module) ".ssi")
-          (package-api-output-root)))
-       (asp-gerbil-scheme-package-api-spec)))
-
 ;; : (-> (List Path) (List Path))
 (def (selected-gxtest-build-source-files files)
   (map (lambda (file)
@@ -124,13 +93,6 @@
            (error "selected gxtest source file must be under src/ or t/" file))))
        (gxtest-selected-source-files files)))
 
-;; : (-> BuildReceiptStatus)
-(def (package-api-build-receipt-status)
-  (asp-gerbil-scheme-package-build-receipt-status
-   (package-api-build-receipt-path)
-   expected-sources: (package-api-build-source-files)
-   expected-outputs: (package-api-build-output-files)))
-
 ;; : (-> (List Path) BuildReceiptStatus)
 (def (selected-gxtest-build-receipt-status files)
   (asp-gerbil-scheme-package-build-receipt-status
@@ -139,17 +101,12 @@
    expected-outputs: (selected-gxtest-build-output-files files)))
 
 ;; : (-> BuildReceiptStatus Boolean)
-(def (package-api-build-current? status)
-  (eq? (asp-gerbil-scheme-package-build-receipt-status-ref status 'status 'unknown)
-       'current))
-
-;; : (-> BuildReceiptStatus Boolean)
 (def (selected-gxtest-build-current? status)
   (eq? (asp-gerbil-scheme-package-build-receipt-status-ref status 'status 'unknown)
        'current))
 
 ;; : (-> BuildReceiptStatus Void)
-(def (display-package-api-build-receipt-status status)
+(def (display-build-receipt-status status)
   (display (asp-gerbil-scheme-package-build-receipt-status-line status))
   (newline)
   (force-output))
@@ -172,15 +129,6 @@
                    (not (string=? parent directory)))
           (ensure-directory! parent))
         (create-directory directory)))))
-
-;; : (-> Void)
-(def (write-package-api-build-receipt!)
-  (let (stamp (package-api-build-receipt-path))
-    (ensure-directory! (path-directory stamp))
-    (asp-gerbil-scheme-package-build-receipt-write
-     stamp
-     (package-api-build-source-files)
-     (package-api-build-output-files))))
 
 ;; : (-> (List Path) [Maybe Alist] Void)
 (def (write-selected-gxtest-build-receipt! files (metadata []))

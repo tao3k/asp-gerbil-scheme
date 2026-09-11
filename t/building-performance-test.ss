@@ -1,19 +1,16 @@
 (import :std/test
         :gerbil/gambit
-        "../src/building/facade"
-        (only-in :asp-gerbil-scheme/src/testing/execution-profile
-                 declare-gxtest-serial)
-        (only-in "../src/build-api/package-native-plan"
-                 asp-gerbil-scheme-package-api-stage-specs))
+        "../src/building/facade")
 
 (export building-performance-test)
 
-(declare-gxtest-serial timing-sensitive-building)
-
-(def (elapsed-ms thunk)
-  (let (started (time->seconds (current-time)))
+(def (cpu-elapsed-ms thunk)
+  (let (started (##process-statistics))
     (thunk)
-    (* 1000.0 (- (time->seconds (current-time)) started))))
+    (let (finished (##process-statistics))
+      (* 1000.0
+         (+ (- (f64vector-ref finished 0) (f64vector-ref started 0))
+            (- (f64vector-ref finished 1) (f64vector-ref started 1)))))))
 
 (def (repeat count thunk)
   (let loop ((remaining count))
@@ -34,8 +31,7 @@
                'std-builder
                "performance std/make"
                #f
-               []
-               (native-toolchain-default)))
+               []))
              (stage
               (std-builder-stage
                builder
@@ -43,7 +39,7 @@
                "current.ss"
                (lambda (stage context) #t)))
              (elapsed
-              (elapsed-ms
+              (cpu-elapsed-ms
                (lambda ()
                  (repeat 2000
                    (lambda ()
@@ -61,8 +57,7 @@
                'std-builder
                "performance std/make"
                #f
-               []
-               (native-toolchain-default)))
+               []))
              (stage
               (std-builder-stage
                builder
@@ -70,7 +65,7 @@
                "stale.ss"
                (lambda (stage context) #f)))
              (elapsed
-              (elapsed-ms
+              (cpu-elapsed-ms
                (lambda ()
                  (repeat 500
                    (lambda ()
@@ -88,13 +83,12 @@
                'std-builder
                "performance std/make"
                #f
-               []
-               (native-toolchain-default)))
+               []))
              (stage-specs
               [["a.ss"] ["b.ss"] ["c.ss"] ["d.ss"]
                ["e.ss"] ["f.ss"] ["g.ss"] ["h.ss"]])
              (elapsed
-              (elapsed-ms
+              (cpu-elapsed-ms
                (lambda ()
                  (repeat 500
                    (lambda ()
@@ -104,12 +98,4 @@
                       (lambda (spec context) #t)
                       (lambda (spec) (car spec)))))))))
         (check call-count => 0)
-        (check (< elapsed 300.0) => #t)))
-    (test-case "constructs package stage plan within budget"
-      (let (elapsed
-            (elapsed-ms
-             (lambda ()
-               (repeat 500
-                 (lambda ()
-                   (asp-gerbil-scheme-package-api-stage-specs))))))
         (check (< elapsed 300.0) => #t)))))

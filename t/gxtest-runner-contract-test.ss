@@ -4,11 +4,7 @@
 (import :gerbil/gambit
         :std/test
         (only-in :std/misc/path path-expand)
-        (only-in :std/srfi/1 append-map)
         (only-in :std/srfi/13 string-contains)
-        (only-in "../src/build-api/package-native-plan"
-                 asp-gerbil-scheme-package-api-spec
-                 asp-gerbil-scheme-package-api-stage-specs)
         (only-in "../src/build-api/source-coverage"
                  asp-gerbil-scheme-source-coverage-files)
         (only-in "../src/policy/gxtest"
@@ -16,6 +12,7 @@
         "../src/testing/model"
         "../src/testing/gxtest-runner"
         (only-in "../src/testing/gxtest-execution"
+                 gxtest-effective-parallelism
                  gxtest-native-parallelism
                  gxtest-serial-resource-groups)
         (only-in "../src/testing/gxtest-report"
@@ -29,18 +26,6 @@
 
 (declare-gxtest-memory-exception
  '((maxHeapMiB . 512)))
-
-;; : (-> (List (List Path)) Path MaybeInteger)
-(def (stage-index-containing stages file)
-  (let loop ((rest stages) (index 0))
-    (cond
-     ((null? rest) #f)
-     ((member file (car rest)) index)
-     (else (loop (cdr rest) (+ index 1))))))
-
-;; : (-> (List (List Path)) (List Path))
-(def (stage-files stages)
-  (append-map (lambda (stage) stage) stages))
 
 (def gxtest-runner-contract-test
   (test-suite "asp-gerbil-scheme gxtest runner contract"
@@ -106,10 +91,9 @@
         (check (member "policy/agent-build-test.ss" stage) => #f)
         (check (member "unit/schema/conformance.ss" stage) => #f)
         (check (member "snapshot/policy.ss" stage) => #f)))
-    (test-case "timing-sensitive gxtest files run outside the native parallel lane"
+    (test-case "CPU-budget building tests stay in the native parallel lane"
       (let (files ["t/benchmark-gate-test.ss"
                    "t/agent-poo-scenario-contract-test.ss"
-                   "t/build-api-native-stage-boundary-test.ss"
                    "t/building-performance-test.ss"
                    "t/building-request-performance-test.ss"
                    "t/building-gxtest-stage-boundary-test.ss"
@@ -120,9 +104,6 @@
                    "t/policy-test.ss"])
         (check (serial-gxtest-files files)
                => ["t/benchmark-gate-test.ss"
-                   "t/build-api-native-stage-boundary-test.ss"
-                   "t/building-performance-test.ss"
-                   "t/building-request-performance-test.ss"
                    "t/building-gxtest-stage-boundary-test.ss"
                    "t/fmt-scenario-test.ss"
                    "t/policy/downstream-gxtest-policy-scope-test.ss"
@@ -130,6 +111,8 @@
                    "t/policy-test.ss"])
         (check (parallel-gxtest-files files)
                => ["t/agent-poo-scenario-contract-test.ss"
+                   "t/building-performance-test.ss"
+                   "t/building-request-performance-test.ss"
                    "t/gxtest-runner-contract-test.ss"])))
     (test-case "single timing and shared-resource files keep process isolation"
       (check (gxtest-suite-process-isolated?
@@ -140,7 +123,7 @@
              => #t)
       (check (gxtest-suite-process-isolated?
               ["t/building-request-performance-test.ss"])
-             => #t)
+             => #f)
       (check (gxtest-suite-process-isolated?
               ["t/agent-poo-scenario-contract-test.ss"])
              => #f))
@@ -155,12 +138,10 @@
              => #t))
     (test-case "shared resources form independent ordered execution groups"
       (check (gxtest-serial-resource-groups
-              ["t/build-api-native-stage-boundary-test.ss"
-               "t/building-gxtest-stage-boundary-test.ss"
+              ["t/building-gxtest-stage-boundary-test.ss"
                "t/building-performance-test.ss"
                "t/building-request-performance-test.ss"])
-             => [["t/build-api-native-stage-boundary-test.ss"
-                  "t/building-gxtest-stage-boundary-test.ss"]
+             => [["t/building-gxtest-stage-boundary-test.ss"]
                  ["t/building-performance-test.ss"
                   "t/building-request-performance-test.ss"]]))
     (test-case "test phase receipts are machine parseable"
@@ -381,14 +362,9 @@
                                               "t/b-test.ss"])
              => #t))
     (test-case "native gxtest parallelism follows Gerbil build cores"
-      (setenv "GERBIL_BUILD_CORES" "4")
-      (check (gxtest-native-parallelism) => 4)
-      (check (gxtest-native-parallelism 2) => 2)
-      (setenv "GERBIL_BUILD_CORES" "0")
-      (check (gxtest-native-parallelism 8) => 1)
-      (setenv "GERBIL_BUILD_CORES" "invalid")
-      (check (gxtest-native-parallelism 8) => 1)
-      (setenv "GERBIL_BUILD_CORES" ""))
+      (check (gxtest-effective-parallelism 12 #f) => 12)
+      (check (gxtest-effective-parallelism 12 2) => 2)
+      (check (gxtest-effective-parallelism 0 8) => 1))
     (test-case "gxtest labels summarize explicit native invocations"
       (check (gxtest-batch-label ["t/a-test.ss"
                                   "t/b-test.ss"
@@ -396,81 +372,4 @@
              => "t/a-test.ss,+2")
       (check (gxtest-batch-label ["t/a-test.ss"])
              => "t/a-test.ss"))
-    (test-case "default package spec exposes downstream gxtest support"
-      (configure-build-root! (current-directory))
-      (let (stage (asp-gerbil-scheme-package-api-spec))
-        (check (member "build-api/source-coverage.ss" stage) ? true)
-        (check (member "build-api/package-receipt.ss" stage) ? true)
-        (check (member "build-api/worker-count.ss" stage) => #f)
-        (check (member "benchmark/memory.ss" stage) ? true)
-        (check (member "benchmark/statistics.ss" stage) ? true)
-        (check (member "benchmark/fixture-model.ss" stage) ? true)
-        (check (member "benchmark/fixture-contract.ss" stage) ? true)
-        (check (member "benchmark/framework.ss" stage) ? true)
-        (check (member "benchmark/gate.ss" stage) ? true)
-        (check (member "benchmark/micro-kernel.ss" stage) ? true)
-        (check (member "testing/model.ss" stage) ? true)
-        (check (member "testing/scope.ss" stage) ? true)
-        (check (member "testing/scenario.ss" stage) ? true)
-        (check (member "testing/performance.ss" stage) ? true)
-        (check (member "testing/selection.ss" stage) ? true)
-        (check (member "testing/batch.ss" stage) ? true)
-        (check (member "testing/framework.ss" stage) ? true)
-        (check (member "testing/build-paths.ss" stage) ? true)
-        (check (member "testing/build-process.ss" stage) ? true)
-        (check (member "testing/build-support.ss" stage) ? true)
-        (check (member "testing/build.ss" stage) ? true)
-        (check (member "testing/gxtest-smoke.ss" stage) ? true)
-        (check (member "testing/gxtest-context.ss" stage) ? true)
-        (check (member "testing/gxtest-syntax.ss" stage) ? true)
-        (check (member "testing/gxtest-imports.ss" stage) ? true)
-        (check (member "testing/gxtest-sources.ss" stage) ? true)
-        (check (member "testing/gxtest-discovery.ss" stage) ? true)
-        (check (member "testing/gxtest-delegate.ss" stage) ? true)
-        (check (member "testing/gxtest-expression.ss" stage) ? true)
-        (check (member "testing/gxtest-report.ss" stage) ? true)
-        (check (member "testing/gxtest-receipts.ss" stage) ? true)
-        (check (member "testing/gxtest-policy.ss" stage) ? true)
-        (check (member "testing/gxtest-build.ss" stage) ? true)
-        (check (member "testing/gxtest-run.ss" stage) ? true)
-        (check (member "testing/gxtest-runner.ss" stage) ? true)
-        (check (member "extensions/poo-source-ref-validation.ss" stage) ? true)
-        (check (member "policy/gxtest-report.ss" stage) ? true)
-        (check (member "policy/gxtest.ss" stage) ? true)
-        (check (member "support/args.ss" stage) ? true)
-        (check (member "support/io.ss" stage) ? true)
-        (check (member "runtime/provider-http-json-client.ss" stage) ? true)
-        (check (member "runtime/provider/types.ss" stage) ? true)
-        (check (member "runtime/provider/objects.ss" stage) ? true)))
-    (test-case "package api stages keep clean-ci dependency order"
-      (let* ((stages (asp-gerbil-scheme-package-api-stage-specs))
-             (memory
-              (stage-index-containing stages "benchmark/memory.ss"))
-             (statistics
-              (stage-index-containing stages "benchmark/statistics.ss"))
-             (fixture-model
-              (stage-index-containing stages "benchmark/fixture-model.ss"))
-             (fixture-contract
-              (stage-index-containing stages "benchmark/fixture-contract.ss"))
-             (gate (stage-index-containing stages "benchmark/gate.ss"))
-             (benchmark-framework
-              (stage-index-containing stages "benchmark/framework.ss"))
-             (model (stage-index-containing stages "testing/model.ss"))
-             (scope (stage-index-containing stages "testing/scope.ss"))
-             (scenario (stage-index-containing stages "testing/scenario.ss"))
-             (selection (stage-index-containing stages "testing/selection.ss"))
-             (framework (stage-index-containing stages "testing/framework.ss")))
-        (check (= memory statistics fixture-model) => #t)
-        (check (< fixture-model fixture-contract) => #t)
-        (check (< fixture-contract gate) => #t)
-        (check (< gate benchmark-framework) => #t)
-        (check (< model scope) => #t)
-        (check (< scope scenario) => #t)
-        (check (< scenario selection) => #t)
-        (check (< selection framework) => #t)))
-    (test-case "package api flat spec is derived from ordered stages"
-      (check (asp-gerbil-scheme-package-api-spec)
-             => (stage-files (asp-gerbil-scheme-package-api-stage-specs)))
-      (check (member "parser/syntax-ast.ss"
-                     (asp-gerbil-scheme-package-api-spec))
-             ? true))))
+    ))

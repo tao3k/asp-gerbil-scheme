@@ -5,10 +5,7 @@
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype
                  asp-gerbil-scheme-package-native-spec
-                 asp-gerbil-scheme-package-build-profile
-                 asp-gerbil-scheme-package-modules
-                 asp-gerbil-scheme-package-source-roots
-                 asp-gerbil-scheme-production-builder-profile)
+                 asp-gerbil-scheme-package-modules)
         (only-in :std/srfi/13 string-contains))
 
 (export library-provider-boundary-test)
@@ -19,9 +16,6 @@
   (spec library-build-spec-fixture)
   (modules ["src/parser/model.ss"])
   (role 'library)
-  (profile asp-gerbil-scheme-production-builder-profile)
-  (roots ["."])
-  (exclude-directories [])
   (native-spec '("src/parser/model")))
 
 (asp-gerbil-scheme-package-spec!
@@ -29,9 +23,7 @@
   @ asp-gerbil-scheme-library-package-prototype)
   (spec conventional-root-build-spec-fixture)
   (modules ["src/library.ss" "t/library-test.ss"])
-  (role 'library)
-  (profile asp-gerbil-scheme-production-builder-profile)
-  (roots ["."]))
+  (role 'library))
 
 (def (fixture-native-spec-projector package-spec)
   (filter (lambda (module) (not (string-contains module "test")))
@@ -43,9 +35,14 @@
   (spec projected-native-build-spec-fixture)
   (modules ["src/library.ss" "src/library-test-support.ss"])
   (role 'library)
-  (profile asp-gerbil-scheme-production-builder-profile)
-  (roots ["."])
-  (native-spec-projector fixture-native-spec-projector))
+ (native-spec-projector fixture-native-spec-projector))
+
+(asp-gerbil-scheme-package-spec!
+ (extended-exclude-package-spec-fixture
+  @ asp-gerbil-scheme-library-package-prototype)
+ (spec extended-exclude-build-spec-fixture)
+ (modules [])
+ (exclude-dirs => append '("generated")))
 
 ;; : (-> (List ModuleReference))
 (def (downstream-build-api-imports)
@@ -65,33 +62,28 @@
       (check (asp-gerbil-scheme-package-native-spec
               library-package-spec-fixture)
              => '("src/parser/model"))
-      (check (asp-gerbil-scheme-package-build-profile
-              library-package-spec-fixture)
-             => 'production)
       (check (asp-gerbil-scheme-package-modules
               library-package-spec-fixture)
-             => ["src/parser/model.ss"])
-      (check (.get library-package-spec-fixture source-catalog-authority)
-             => 'project)
-      (check (asp-gerbil-scheme-package-source-roots
-              library-package-spec-fixture)
-             => ["."])
-      (check (asp-gerbil-scheme-package-build-profile
-              asp-gerbil-scheme-library-package-prototype)
-             => 'development))
-    (test-case "project root discovery excludes the profile test root natively"
+             => ["src/parser/model.ss"]))
+    (test-case "an explicit native catalog remains caller-owned"
       (check (asp-gerbil-scheme-package-native-spec
              conventional-root-package-spec-fixture)
-             => ["src/library.ss"]))
+             => ["src/library.ss" "t/library-test.ss"]))
     (test-case "named projectors receive the resolved package catalog"
       (check (asp-gerbil-scheme-package-native-spec
               projected-native-package-spec-fixture)
              => ["src/library.ss"])
       (check (projected-native-build-spec-fixture)
              => ["src/library.ss"]))
+    (test-case "exclude dirs composition extends clan native defaults"
+      (let (exclude-dirs (.get extended-exclude-package-spec-fixture
+                               exclude-dirs))
+        (check (member "t" exclude-dirs) ? pair?)
+        (check (member ".gerbil" exclude-dirs) ? pair?)
+        (check (member "generated" exclude-dirs) ? pair?)))
     (test-case "downstream Build API excludes ASP product entry modules"
       (let (imports (downstream-build-api-imports))
         (check (ormap asp-product-entry-module-reference? imports) => #f)
         (check (member "./src/build-api/package-spec" imports) ? pair?)
-        (check (member "./src/build-api/profile-build-spec" imports) ? pair?)
-        (check (member "./src/building/build-script" imports) ? pair?)))))
+        (check (member "./src/build-api/profile-build-spec" imports) => #f)
+        (check (member "./src/build-api/builder-profile" imports) => #f)))))

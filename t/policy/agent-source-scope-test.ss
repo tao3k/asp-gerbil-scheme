@@ -68,25 +68,23 @@
          (string-append root "/build.ss")
          (string-append
           ";;; -*- Gerbil -*-\n"
-          "(import :asp-gerbil-scheme/src/build-api/package-spec\n"
-          "        :asp-gerbil-scheme/src/building/build-script)\n"
-          "(def +modules+ '(\"src/core.ss\" \"t/core-test.ss\"))\n"
-          "(asp-gerbil-scheme-package-spec! sample-package-spec\n"
+          "(import :asp-gerbil-scheme/build-api\n"
+          "        (only-in :std/build-script defbuild-script))\n"
+          "(def +modules+ '(\"src/core.ss\"))\n"
+          "(asp-gerbil-scheme-package-spec!\n"
+          " (sample-package-spec @ asp-gerbil-scheme-library-package-prototype)\n"
           " (spec sample-build-spec)\n"
-          " (modules +modules+)\n"
-          " (source-catalog-authority 'project)\n"
-          " (roots [\".\"])\n"
-          " (exclude-directories [\"vendor\"]))\n"
-          "(defbuild-script\n"
-          " (sample-build-spec)\n"
-          " profile: development)\n"))
+          " (modules +modules+))\n"
+          "(defbuild-script (sample-build-spec))\n"))
         (write-text (string-append src-dir "/core.ss")
                     ";;; -*- Gerbil -*-\n(def core-value 1)\n")
         (write-text (string-append test-dir "/core-test.ss")
                     ";;; -*- Gerbil -*-\n(displayln \"explicit test script\")\n")
         (let* ((report (project-policy-report root))
                (findings (hash-get report 'findings)))
-          (check (hash-get report 'files) => 1)
+          ;; Native clan coverage admits both the declarative build.ss owner
+          ;; and its one declared library source without executing the script.
+          (check (hash-get report 'files) => 2)
           (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)
                  => []))))
     (test-case "test source scope re-expands a module reached later at a shallower depth"

@@ -4,7 +4,7 @@
 (import :std/test
         (only-in :std/misc/path path-normalize)
         "../src/build-api/source-coverage"
-        (only-in "../src/build-api/native-build-spec" configure-build-root!))
+        (only-in "../src/testing/gxtest-context" configure-build-root!))
 (export source-coverage-test)
 
 (def source-coverage-test
@@ -17,14 +17,12 @@
        files: '("t/policy-test.ss"
                 "t/policy/agent-source-scope-test.ss"
                 "src/policy/gxtest.ss"
-                "src/building/build-script-body.inc"
-                "src/build-api/native-build.ss"))
+                "src/build-api/package-spec.ss"))
       (let (files (asp-gerbil-scheme-source-coverage-files (current-directory)))
         (check (member "t/policy-test.ss" files) ? true)
         (check (member "t/policy/agent-source-scope-test.ss" files) ? true)
         (check (member "src/policy/gxtest.ss" files) ? true)
-        (check (member "src/building/build-script-body.inc" files) ? true)
-        (check (member "src/build-api/native-build.ss" files) ? true)))
+        (check (member "src/build-api/package-spec.ss" files) ? true)))
     (test-case "declared module catalog is reused without directory discovery"
       (asp-gerbil-scheme-source-coverage
        roots: '("src")

@@ -1,16 +1,16 @@
 (export building-request-performance-test)
 
 (import :std/test
-        :asp-gerbil-scheme/src/building/facade
-        (only-in :asp-gerbil-scheme/src/testing/execution-profile
-                 declare-gxtest-serial))
+        :gerbil/gambit
+        :asp-gerbil-scheme/src/building/facade)
 
-(declare-gxtest-serial timing-sensitive-building)
-
-(def (elapsed-ms thunk)
-  (let (start (time->seconds (current-time)))
+(def (cpu-elapsed-ms thunk)
+  (let (start (##process-statistics))
     (thunk)
-    (* 1000. (- (time->seconds (current-time)) start))))
+    (let (end (##process-statistics))
+      (* 1000.
+         (+ (- (f64vector-ref end 0) (f64vector-ref start 0))
+            (- (f64vector-ref end 1) (f64vector-ref start 1)))))))
 
 (def building-request-performance-test
   (test-suite
@@ -26,12 +26,11 @@
               'std-builder
               "request profile test builder"
               #f
-              []
-              (native-toolchain-default)))
+              []))
             (stage-specs
              [["alpha.ss"] ["beta.ss"] ["gamma.ss"] ["delta.ss"]])
             (elapsed
-             (elapsed-ms
+             (cpu-elapsed-ms
               (lambda ()
                 (let loop ((remaining 5000))
                   (if (> remaining 0)

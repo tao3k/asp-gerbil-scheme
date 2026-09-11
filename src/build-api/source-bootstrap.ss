@@ -4,15 +4,11 @@
 ;;; this narrow projection prevents a cold build from loading the ASP product,
 ;;; Testing, Policy, or benchmark graph before std/make owns compilation.
 
-(import (only-in "./builder-profile"
-                 asp-gerbil-scheme-development-builder-profile)
-        (only-in "./package-spec"
+(import (only-in "./package-spec"
                  asp-gerbil-scheme-package-spec!
-                 asp-gerbil-scheme-library-package-prototype)
-        (only-in "../building/build-script"
-                 defbuild-script))
+                 asp-gerbil-scheme-library-package-prototype
+                 asp-gerbil-scheme-package-modules))
 
-(export asp-gerbil-scheme-development-builder-profile
-        asp-gerbil-scheme-package-spec!
+(export asp-gerbil-scheme-package-spec!
         asp-gerbil-scheme-library-package-prototype
-        defbuild-script)
+        asp-gerbil-scheme-package-modules)

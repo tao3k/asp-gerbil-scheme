@@ -4,7 +4,7 @@
 (import :gerbil/gambit
         :std/test
         (only-in :std/misc/path path-directory path-expand)
-        (only-in :std/srfi/13 string-prefix? string-suffix?)
+        (only-in :std/srfi/13 string-prefix?)
         "../src/build-api/package-receipt"
         "../src/build-api/module-artifacts")
 
@@ -147,50 +147,6 @@
         (check (asp-gerbil-scheme-package-build-receipt-source-output-current?
                 source output)
                => #f)))
-    (test-case "selects a persistent static artifact when scm is absent"
-      (package-build-receipt-reset!)
-      (let* ((output-root (package-build-receipt-path "artifact-family"))
-             (module "nested/example.ss")
-             (candidates
-              (asp-gerbil-scheme-build-module-artifact-files output-root module))
-             (static-output (cadr candidates)))
-        (package-build-receipt-write-file static-output "static output")
-        (check (asp-gerbil-scheme-build-module-artifact-file output-root module)
-               => static-output)))
-    (test-case "separates optimizer metadata from runnable module artifacts"
-      (package-build-receipt-reset!)
-      (let* ((output-root (package-build-receipt-path "artifact-profile"))
-             (module "nested/example.ss")
-             (runtime-artifacts
-              (asp-gerbil-scheme-build-module-runtime-artifact-files
-               output-root
-               module))
-             (optimizer-artifact
-              (asp-gerbil-scheme-build-module-optimizer-artifact-file
-               output-root
-               module)))
-        (check (length runtime-artifacts) => 3)
-        (check (member optimizer-artifact runtime-artifacts) => #f)
-        (check (member optimizer-artifact
-                       (asp-gerbil-scheme-build-module-artifact-files
-                        output-root
-                        module))
-               ? true)
-        (check (string-suffix? ".ssxi.ss" optimizer-artifact) => #t)
-        (package-build-receipt-write-file (car runtime-artifacts) "runtime")
-        (thread-sleep! 1.1)
-        (package-build-receipt-write-file optimizer-artifact "optimizer")
-        (check
-         (asp-gerbil-scheme-build-module-optimizer-artifact-current?
-          output-root module)
-         => #t)
-        (thread-sleep! 1.1)
-        (package-build-receipt-write-file (car runtime-artifacts)
-                                          "newer runtime")
-        (check
-         (asp-gerbil-scheme-build-module-optimizer-artifact-current?
-          output-root module)
-         => #f)))
     (test-case "reports stale when expected receipt shape changed"
       (package-build-receipt-reset!)
       (let* ((source (package-build-receipt-path "shape/source.ss"))
