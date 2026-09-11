@@ -75,8 +75,12 @@
            "src/runtime/provider/objects"
            "src/runtime/provider/interface"
            "src/runtime/provider-operation"
-           "src/runtime/provider-http-json-server"
-           "src/runtime/provider-semantic-evidence"
+           "src/runtime/provider-http-json-server"))
+        (for-each
+         (lambda (library-owned-module)
+           (check (string-contains library-source library-owned-module)
+                  => #f))
+         '("src/protocol/provider-operation-catalog"
            "src/protocol/registry"
            "src/commands/agent"))
         (check (string-contains

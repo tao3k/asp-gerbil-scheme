@@ -30,6 +30,7 @@
     "src/commands/projection-batch.ss"
     "src/commands/project-resolution.ss"
     "src/object-family/syntax.ss"
+    "src/protocol/provider-operation-catalog.ss"
     "src/runtime/provider/types.ss"
     "src/runtime/provider/objects.ss"
     "src/runtime/provider/interface.ss"

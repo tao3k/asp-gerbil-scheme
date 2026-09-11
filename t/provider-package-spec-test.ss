@@ -24,17 +24,25 @@
       (check (.get asp-gerbil-scheme-provider-package-spec library-modules)
              => '())
       (check (member
-              "src/support/time.ss"
-              (.get asp-gerbil-scheme-provider-package-spec runtime-modules))
-             ? true)
-      (check (member
               "src/parser/syntax-ast.ss"
               (.get asp-gerbil-scheme-provider-package-spec runtime-modules))
              ? true)
       (check (member
               "src/parser/syntax-macro-family.ss"
               (.get asp-gerbil-scheme-provider-package-spec runtime-modules))
-             ? true))))
+             ? true)
+      (check (member
+              "src/protocol/provider-operation-catalog.ss"
+              (.get asp-gerbil-scheme-provider-package-spec runtime-modules))
+             ? true)
+      (check (member "src/protocol/registry.ss"
+                     (.get asp-gerbil-scheme-provider-package-spec
+                           runtime-modules))
+             => #f)
+      (check (member "src/commands/agent.ss"
+                     (.get asp-gerbil-scheme-provider-package-spec
+                           runtime-modules))
+             => #f))))
 
 (def (main . _args)
   (run-tests! provider-package-spec-test))

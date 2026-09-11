@@ -652,10 +652,18 @@ for a retired process-command surface.
 
 *** 11.13.11.1 First Landed Slice: Resident POO Operation Ownership
 
-The resident provider now uses typed POO schema references and operation
-descriptors. =src/protocol/registry.ss= projects those objects as
-provider/HTTP operation metadata, while =src/runtime/provider-operation.ss=
-dispatches through the descriptor's generic executable slot.
+The static protocol catalog now uses typed POO operation contracts without an
+executable slot. =src/protocol/registry.ss= projects that catalog as provider
+operation metadata without importing runtime code. The resident provider binds
+the same contracts to typed POO schema references and executable descriptors
+inside =src/runtime/provider-operation.ss=, then dispatches through the
+descriptor's generic executable slot.
+
+Gerbil's HTTPD accepts each connection into a distinct green thread and serves
+requests serially within that keep-alive connection. The provider bootstrap
+therefore publishes =hostProcessors=, =vmProcessors=, and =smpRuntime= with the
+concurrency model. Green-thread I/O concurrency must not be reported as CPU
+parallelism when Gerbil was built without SMP or the VM has one processor.
 
 Requests and results cross the semantic runtime as validated
 =ProviderOperationPayload= and =ProviderOperationResult= objects. The HTTP

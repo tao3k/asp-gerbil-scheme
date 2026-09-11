@@ -15,11 +15,10 @@
         (only-in :std/sugar hash hash-key?)
         (only-in :std/text/base64 base64-encode)
         (only-in :std/text/json read-json write-json)
-        (only-in :asp-gerbil-scheme/src/support/time
-                 duration-micros
-                 monotonic-micros)
         (only-in :asp-gerbil-scheme/src/testing/execution-profile
                  declare-gxtest-serial)
+        (only-in "support/provider-http-benchmark"
+                 parallel-live-corpus-samples)
         :std/test)
 
 (declare-gxtest-serial shared-native-provider)
@@ -226,9 +225,17 @@
     (let loop ((index 0) (samples '()))
       (if (= index total)
           (reverse samples)
-          (let* ((started (monotonic-micros))
+          (let* ((started (##process-statistics))
                  (response (provider-runtime-request->response request-value))
-                 (elapsed (duration-micros started (monotonic-micros))))
+                 (finished (##process-statistics))
+                 (elapsed
+                  (inexact->exact
+                   (round
+                    (* 1000000.0
+                       (+ (- (f64vector-ref finished 0)
+                             (f64vector-ref started 0))
+                          (- (f64vector-ref finished 1)
+                             (f64vector-ref started 1))))))))
             (unless (string=? (hash-ref response "outcome") "ready")
               (error "direct live corpus provider request failed" response))
             (loop (+ index 1)
@@ -328,6 +335,14 @@
            (check (hash-ref bootstrap "schemaVersion") => "1")
            (check (hash-ref bootstrap "state") => "ready")
            (check (hash-ref bootstrap "transport") => "http-json")
+           (let (concurrency (hash-ref bootstrap "concurrency"))
+             (check (hash-ref concurrency "model")
+                    => "green-thread-per-connection")
+             (check (hash-ref concurrency "requestScheduling")
+                    => "serial-within-connection")
+             (check (> (hash-ref concurrency "hostProcessors") 0) => #t)
+             (check (> (hash-ref concurrency "vmProcessors") 0) => #t)
+             (check (boolean? (hash-ref concurrency "smpRuntime")) => #t))
            (check (hash-ref health "artifactDigest") => +artifact-digest+)
            (check (hash-ref health "registrationDigest") => +registration-digest+)
            (check (hash-ref health "contractDigest") => +contract-digest+)
@@ -454,6 +469,17 @@
                     (concurrent-live-corpus-responses endpoint body 16))
                 (check (length responses) => 16)
                 (check (all-ready? responses) => #t))
+              (let* ((parallel-samples
+                      (parallel-live-corpus-samples endpoint body 16))
+                     (parallel-sorted (sort-latencies parallel-samples)))
+                (displayln
+                 (format
+                  "[provider-live-corpus-concurrent] schemaVersion=1 connections=16 samples=16 p50Micros=~a p95Micros=~a p99Micros=~a maxMicros=~a"
+                  (latency-percentile parallel-sorted 50)
+                  (latency-percentile parallel-sorted 95)
+                  (latency-percentile parallel-sorted 99)
+                  (apply max parallel-samples)))
+                (check (length parallel-samples) => 16))
               (http-post-json (string-append endpoint "shutdown") "{}")))
            (read-all-as-string process))))))
    (test-case

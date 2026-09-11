@@ -14,17 +14,13 @@
     "build-provider"
     "src/provider-server"
     "src/commands/provider-runtime"
-    ;; The library graph must also omit every provider-only module reachable
-    ;; from a retained command. std/make correctly follows imports, so leaving
-    ;; registry/agent in the library catalog would pull this runtime back in.
+    ;; Executable provider state is a sibling product. Static protocol
+    ;; discovery and command adapters remain in the reusable library graph.
     "src/runtime/provider/types"
     "src/runtime/provider/objects"
     "src/runtime/provider/interface"
     "src/runtime/provider-operation"
-    "src/runtime/provider-http-json-server"
-    "src/runtime/provider-semantic-evidence"
-    "src/protocol/registry"
-    "src/commands/agent"))
+    "src/runtime/provider-http-json-server"))
 
 (asp-gerbil-scheme-package-spec!
  (asp-gerbil-scheme-library-package-spec

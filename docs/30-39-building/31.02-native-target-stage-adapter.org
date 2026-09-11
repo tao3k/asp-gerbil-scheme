@@ -58,6 +58,6 @@ gxpkg env gxi ./build.ss clean
 
 =t/package-build-contract-test.ss= asserts that the root entry retains
 =init-build-environment!=, =deps:=, native =all-gerbil-modules= defaults, the
-POO =product-entry-modules= option for the complete provider-owned closure, and
+POO =product-entry-modules= option for the executable provider closure, and
 the internal cold source bootstrap. It
 also asserts that the retired duplicate owner files remain absent.

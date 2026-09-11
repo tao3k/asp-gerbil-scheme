@@ -279,7 +279,17 @@
         ("languageId" (required-environment "ASP_PROVIDER_LANGUAGE_ID"))
         ("transport" "http-json")
         ("state" "ready")
-        ("endpoint" endpoint)))
+        ("endpoint" endpoint)
+        ("concurrency"
+         (hash
+          ("model" "green-thread-per-connection")
+          ("requestScheduling" "serial-within-connection")
+          ("hostProcessors" (max 1 (##cpu-count)))
+          ("vmProcessors" (max 1 (##current-vm-processor-count)))
+          ("smpRuntime"
+           (cond-expand
+             (gerbil-smp #t)
+             (else #f)))))))
 
 ;; : (-> String String)
 (def (concrete-http-address requested-address)

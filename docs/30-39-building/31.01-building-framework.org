@@ -89,10 +89,11 @@ A downstream extension keeps the composed value in the same declarative object:
  (modules (all-gerbil-modules exclude-dirs: exclude-dirs)))
 #+end_src
 =product-entry-modules= removes the complete product-owned module set from the
-library projection inside PackageSpec. The declaration includes provider-only
-runtime modules and any command/registry owner that would otherwise import
-them; removing only the executable entry file is insufficient because
-=std/make= correctly follows imports.
+library projection inside PackageSpec. The declaration includes only the
+provider executable and executable runtime-state owners. Static operation
+contracts, registry projection, and command adapters remain library modules;
+they do not import runtime dispatch. Removing only the executable entry file
+would still be insufficient because =std/make= correctly follows imports.
 
 There is no public =roots= option, development/production profile, alternate
 module catalog, BuildPlan cache, ASP currentness predicate, build lease, or

@@ -10,6 +10,14 @@
                  project-provider-projection-batch)
         (only-in :asp-gerbil-scheme/src/exact-source-projection
                  project-provider-native-exact-request)
+        (only-in :asp-gerbil-scheme/src/protocol/provider-operation-catalog
+                 provider-operation-contract-memoizable?
+                 provider-operation-contract-operation
+                 provider-operation-contract-request-schema-id
+                 provider-operation-contract-request-schema-version
+                 provider-operation-contract-response-schema-id
+                 provider-operation-contract-response-schema-version
+                 provider-operation-contracts)
         (only-in :std/text/json write-json)
         "provider/interface.ss")
 
@@ -173,33 +181,40 @@
       (required-payload-string wire-value "parserIdentityDigest")
       (required-payload-string wire-value "queryPackDigest")))))
 
-;; : (-> String String ProviderSchemaReference)
-(def (schema-reference schema-id schema-version)
-  (provider-schema-reference schema-id schema-version))
+;; : (-> ProviderOperationContract Procedure ProviderOperationDescriptor)
+(def (bind-provider-operation contract execute)
+  (provider-operation-descriptor
+   (provider-operation-contract-operation contract)
+   (provider-schema-reference
+    (provider-operation-contract-request-schema-id contract)
+    (provider-operation-contract-request-schema-version contract))
+   (provider-schema-reference
+    (provider-operation-contract-response-schema-id contract)
+    (provider-operation-contract-response-schema-version contract))
+   (provider-operation-contract-memoizable? contract)
+   execute))
 
+(def +provider-operation-executors+
+  `(("projection-batch" . ,execute-projection-batch)
+    ("project-resolution" . ,execute-project-resolution)
+    ("query" . ,execute-native-exact-query)))
+
+(def (provider-operation-executor contract)
+  (let (entry (assoc (provider-operation-contract-operation contract)
+                     +provider-operation-executors+))
+    (if entry
+        (cdr entry)
+        (error "provider operation executable binding is absent"
+               (provider-operation-contract-operation contract)))))
+
+;; The runtime binds executable behavior to the protocol-owned static catalog;
+;; discovery never imports this module or any runtime state.
 ;; : [ProviderOperationDescriptor]
 (def provider-runtime-operation-descriptors
-  [(provider-operation-descriptor
-    "projection-batch"
-    (schema-reference
-     "agent.semantic-protocols.provider-language-projection-batch-request" "1")
-    (schema-reference
-     "agent.semantic-protocols.provider-language-projection-batch-response" "1")
-    #t execute-projection-batch)
-   (provider-operation-descriptor
-    "project-resolution"
-    (schema-reference
-     "agent.semantic-protocols.provider-project-resolution-request" "1")
-    (schema-reference
-     "agent.semantic-protocols.provider-project-resolution-response" "1")
-    #f execute-project-resolution)
-   (provider-operation-descriptor
-    "query"
-    (schema-reference
-     "agent.semantic-protocols.provider-native-exact-request" "1")
-    (schema-reference
-     "agent.semantic-protocols.provider-native-exact-projection" "1")
-    #f execute-native-exact-query)])
+  (map (lambda (contract)
+         (bind-provider-operation contract
+                                  (provider-operation-executor contract)))
+       provider-operation-contracts))
 
 ;; : (-> String ProviderOperationDescriptor)
 (def (provider-runtime-operation-descriptor operation)

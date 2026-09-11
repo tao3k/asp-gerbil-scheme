@@ -3,11 +3,10 @@
 
 (import :asp-gerbil-scheme/src/constants
         :asp-gerbil-scheme/src/parser/facade
-        (only-in :asp-gerbil-scheme/src/runtime/provider-operation
-                 provider-runtime-operation-descriptors)
-        (only-in :asp-gerbil-scheme/src/runtime/provider/interface
-                 provider-operation-descriptor-operation
-                 provider-operation-descriptor->json)
+        (only-in :asp-gerbil-scheme/src/protocol/provider-operation-catalog
+                 provider-operation-contract-operation
+                 provider-operation-contract->json
+                 provider-operation-contracts)
         (only-in :std/sugar hash))
 
 (export language-registry)
@@ -32,14 +31,14 @@
       (displayName +display-name+)
       (packageRoots [root])
       (methods
-       (map provider-operation-descriptor-operation
-            provider-runtime-operation-descriptors))
+       (map provider-operation-contract-operation
+            provider-operation-contracts))
       (schemas [(hash (schemaId "agent.semantic-protocols.asp-gerbil-scheme-info")
                       (schemaVersion "1")
                       (path "schemas/semantic-asp-gerbil-scheme-info.v1.schema.json"))])
       (methodDescriptors
-       (map provider-operation-descriptor->json
-            provider-runtime-operation-descriptors))
+       (map provider-operation-contract->json
+            provider-operation-contracts))
       (source (hash
                (defaultExtensions +source-extensions+)
                (defaultConfigFiles +config-files+)

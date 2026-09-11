@@ -41,9 +41,11 @@ The normal library declaration needs only a =spec= binding. Module discovery
 defaults internally to =clan/building#all-gerbil-modules=; callers supply
 =(modules ...)= only for a real specialized Graph. The explicit
 =(product-entry-modules ...)= option removes the declared product-owned closure
-when projecting the native library spec. The root declaration includes both
-provider entrypoints and provider-only runtime/registry modules; otherwise a
-retained importer would make =std/make= compile that runtime as a dependency.
+when projecting the native library spec. The root declaration includes the
+provider entrypoints and executable runtime-state modules. Static operation
+contracts and registry/command projections remain library-owned and have no
+dependency on runtime dispatch; otherwise command discovery would implicitly
+load the resident server implementation.
 
 There is no public =roots=, source catalog DSL, development/production profile,
 or alternate native plan format. =exclude-dirs= is retained as a POO-native
