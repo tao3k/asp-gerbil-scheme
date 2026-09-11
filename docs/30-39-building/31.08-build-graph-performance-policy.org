@@ -63,11 +63,15 @@ session.  The receipt describes what ran; it is not a freshness oracle.  A warm
 regression is established by repeated native =std/make= execution and upstream
 compiler activity, not by an ASP-predicted affected-module set.
 
-The root build script is also the cold bootstrap entrypoint and may depend only
-on Gerbil/std bindings already owned by the source-loaded script.  It must not
-import =building/std-builder= or another compiled ASP runtime module.  CI may
-remove the package's installed library before invoking =build.ss clean=; clean
-and compile still delegate directly to upstream =make-clean= and =make=.
+The root library and provider build scripts are also cold bootstrap entrypoints.
+They load the internal =src/build-api/source-bootstrap.ss= projection directly;
+that projection is limited to package declaration, profile, and build-script
+bindings and does not import Testing, Policy, benchmark, or product entrypoints.
+It must not import =building/std-builder= or another compiled ASP runtime
+module.  The full =:asp-gerbil-scheme/build-api= remains the sole installed
+downstream facade.  CI may remove the package's installed library before
+invoking =build.ss clean=; clean and compile still delegate directly to upstream
+=make-clean= and =make=.
 
 There is deliberately no =verify-current= command.  ASP cannot prove Gerbil
 currentness without duplicating the upstream executor.  Native repeated-build

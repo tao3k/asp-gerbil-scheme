@@ -185,6 +185,7 @@
      "building/native-toolchain.ss"
      "building/memory-anomaly-guard.ss")
     ("building/build-script.ss")
+    ("build-api/source-bootstrap.ss")
     ("building/std-builder.ss")
     ("building/observability.ss")
     ("building/facade.ss")

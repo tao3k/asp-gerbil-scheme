@@ -4,7 +4,7 @@
 ;;; changes the build graph: every projected target still reaches std/make.
 
 (import :gerbil/gambit
-        (only-in ../object-family/syntax
+        (only-in "../object-family/syntax"
                  defpoo-object-family poo-family-ref)
         (only-in :std/crypto/digest sha256)
         (only-in :std/misc/path

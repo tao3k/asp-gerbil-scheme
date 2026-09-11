@@ -3,7 +3,8 @@
 
 (import (only-in :gerbil/gambit setenv)
         (only-in :std/misc/path path-expand)
-        "./build-api"
+        (only-in "./src/build-api/source-bootstrap"
+                 defbuild-script)
         (only-in "./provider-package-spec"
                  asp-gerbil-scheme-provider-spec))
 

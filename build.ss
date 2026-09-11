@@ -5,7 +5,10 @@
 (export asp-gerbil-scheme-library-package-spec)
 
 (import (only-in :clan/building init-build-environment!)
-        "./build-api")
+        (only-in "./src/build-api/source-bootstrap"
+                 asp-gerbil-scheme-development-builder-profile
+                 asp-gerbil-scheme-package-spec!
+                 asp-gerbil-scheme-library-package-prototype))
 
 (def +product-entry-modules+
   '("build-provider"

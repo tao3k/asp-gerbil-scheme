@@ -65,13 +65,16 @@ The v1 macro surface deliberately rejects a parallel option vocabulary:
 | =before:=        | omit        | list order and =append= |
 | =after:=         | omit        | list order and =append= |
 
-The top-level =build-api.ss= module owns the single stable public address
-=:asp-gerbil-scheme/build-api=.  It is both the source-bootstrap facade used by
-this package's =build.ss= and the installed facade used by downstream packages.
-Package declarations, Building, Testing, policy, and benchmark helpers are
-explicit projections of implementation owners beneath =src/=.  There is no
-second installed facade and a downstream =build.ss= must not import internal
-=src/= modules one symbol at a time.
+The top-level =build-api.ss= module owns the single stable public and installed
+address =:asp-gerbil-scheme/build-api=.  Package declarations, Building,
+Testing, policy, and benchmark helpers are explicit projections of
+implementation owners beneath =src/=.  A narrow internal
+=src/build-api/source-bootstrap.ss= projection is used only by this package's
+root =build.ss= and =build-provider.ss= while no ASP library is installed.  It
+exports only package declaration, profile, and build-script bindings and is not
+re-exported from the public facade.  There is no second installed facade, and a
+downstream =build.ss= must import the public address rather than internal
+=src/= modules.
 
 =all-gerbil-modules= retains the native downstream call shape and
 =clan/building= remains the only source-catalog owner.  After that single
@@ -90,7 +93,7 @@ not become a package-build dependency.
 
 #+begin_src mermaid
 flowchart TD
-    Build["build.ss<br/>one bootstrap Build API import"] --> Discover["all-gerbil-modules<br/>native call shape"]
+    Build["build.ss<br/>internal source bootstrap"] --> Discover["all-gerbil-modules<br/>native call shape"]
     Discover --> UpstreamCatalog["clan/building<br/>one complete candidate scan"]
     UpstreamCatalog --> GitProject{"git rev-parse<br/>inside worktree?"}
     GitProject -->|yes| IgnoreQuery["git check-ignore --stdin<br/>one ignore query"]
@@ -184,28 +187,38 @@ does not provide. The resulting executable is an optimized =SINGLE_HOST= C
 translation unit with dynamic system/TLS linkage. Non-Darwin release keeps the
 upstream optimized static-release request.
 
-A clean Darwin release receipt for the 25-module graph completed successfully
-in about 10 minutes 43 seconds. During the final GCC 16 translation the process
+A clean Darwin release receipt for the then-current 25-module graph completed
+successfully in about 10 minutes 43 seconds. During the final GCC 16 translation the process
 identified =___SINGLE_HOST= and reached roughly 3.3 GiB RSS. The resulting
 13 MiB arm64 Mach-O links the selected OpenSSL dylibs and =libSystem=. The
 runtime-closure oracle found exactly 25 ASP project includes, all beneath the
 single =build/workspace-provider= artifact root. These are release observations,
 not static fixture values or a synthetic memory gate.
 
+The current provider graph has 26 declared modules after extracting
+=parser/syntax-macro-family= into its own owner.  Under =gxpkg env= the caller's
+default =GERBIL_PATH= is =<project>/.gerbil= (plain =gxi= leaves it unset and
+falls back to =gerbil-home=); =build-provider.ss= deliberately rebinds it to
+=build/workspace-provider=.  This keeps production provider objects and the
+executable in one artifact domain without overwriting development library
+objects.  It is isolation policy, not a substitute for a missing cwd default.
+
 #+begin_src mermaid
 flowchart LR
-    Graph[25-module provider graph] --> Choice{Provider command}
+    Graph[26-module provider graph] --> Choice{Provider command}
     Choice -->|compile| Separate[Declared separate-AOT default topology]
     Choice -->|compile --release on Darwin| Single[Optimized SINGLE_HOST C unit]
     Single --> Dynamic[Dynamic OpenSSL + libSystem linkage]
     Separate --> Root[One workspace-provider artifact root]
-    Dynamic --> Oracle[25-project-module runtime closure oracle]
+    Dynamic --> Oracle[26-project-module runtime closure oracle]
 #+end_src
 
-The ordinary library script uses upstream =init-build-environment!=. The
-provider script imports the stable Build API =defbuild-script= macro, which
-projects the Package Spec's profile and host build environment into the native
-spec before delegating one complete graph to upstream =std/make=. On macOS that
+The ordinary library script uses upstream =init-build-environment!=. This
+package's provider script imports =defbuild-script= through the narrow internal
+source bootstrap; installed downstream projects continue to import the sole
+stable =:asp-gerbil-scheme/build-api= facade. The macro projects the Package
+Spec's profile and host build environment into the native spec before
+delegating one complete graph to upstream =std/make=. On macOS that
 profile removes inherited =SDKROOT= and =DEVELOPER_DIR= selectors; workflow
 files and project CLIs do not own or reproduce that policy. Both paths leave
 compilation, dependency scheduling, and linking to upstream =std/make=. Before either

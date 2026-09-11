@@ -21,6 +21,7 @@
     "src/parser/imports.ss"
     "src/parser/formals.ss"
     "src/parser/syntax-ast.ss"
+    "src/parser/syntax-macro-family.ss"
     "src/parser/syntax-support.ss"
     "src/parser/syntax-calls.ss"
     "src/parser/syntax.ss"

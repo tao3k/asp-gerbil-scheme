@@ -4,6 +4,8 @@
 (import :gerbil/gambit
         (only-in :std/test test-suite test-case check)
         (only-in :std/misc/path path-expand)
+        (only-in :std/misc/ports read-all-as-string)
+        (only-in :std/srfi/13 string-contains)
         (only-in :std/source gerbil-home)
         (only-in "../src/build-api/package-build"
                  asp-gerbil-scheme-package-build-active-gerbil-path)
@@ -35,6 +37,7 @@
         (configure-build-root! (current-directory))))
     (test-case "package test driver dependencies remain materialized"
       (let (modules (apply append (asp-gerbil-scheme-package-api-stage-specs)))
+        (check (member "build-api/source-bootstrap.ss" modules) ? true)
         (check (member "testing/commands.ss" modules) ? true)
         (check (member "testing/project-build.ss" modules) ? true)
         (check (member "build-api/project-build.ss" modules) ? true)
@@ -57,6 +60,24 @@
                       (and (member "build-api/package-build.ss" stage) index))
                   (or native-build-index
                       (and (member "build-api/native-build.ss" stage) index)))))))
+    (test-case "root build entries use the narrow internal source bootstrap"
+      (let ((library-source
+             (call-with-input-file "build.ss" read-all-as-string))
+            (provider-source
+             (call-with-input-file "build-provider.ss" read-all-as-string))
+            (public-facade-source
+             (call-with-input-file "build-api.ss" read-all-as-string)))
+        (check (string-contains
+                library-source
+                "\"./src/build-api/source-bootstrap\"")
+               ? true)
+        (check (string-contains
+                provider-source
+                "\"./src/build-api/source-bootstrap\"")
+               ? true)
+        (check (string-contains library-source "\"./build-api\"") => #f)
+        (check (string-contains provider-source "\"./build-api\"") => #f)
+        (check (string-contains public-facade-source "source-bootstrap") => #f)))
     (test-case "package build API materializes native std/make owners only"
       (let (modules (apply append (asp-gerbil-scheme-package-api-stage-specs)))
         (for-each

@@ -176,6 +176,33 @@
                   basename (cadr form)))))))
    forms))
 
+;; Gerbil emits builtin module ownership in one of two native stub shapes:
+;; older optimized stubs use a declare clause, while current executable stubs
+;; bind a quoted builtin-modules list.  Both feed the same strict closure check.
+;; : (-> (List Form) (Maybe (List ModuleId)))
+(def (framework-stub-builtin-modules forms)
+  (let loop ((rest forms))
+    (and (pair? rest)
+         (let* ((form (car rest))
+                (declared
+                 (and (pair? form)
+                      (eq? (car form) 'declare)
+                      (assq 'builtin-modules (cdr form)))))
+           (cond
+            (declared
+             (cadr declared))
+            ((and (pair? form)
+                  (eq? (car form) 'define)
+                  (pair? (cdr form))
+                  (eq? (cadr form) 'builtin-modules)
+                  (pair? (cddr form))
+                  (pair? (caddr form))
+                  (eq? (car (caddr form)) 'quote)
+                  (pair? (cdr (caddr form))))
+             (cadr (caddr form)))
+            (else
+             (loop (cdr rest))))))))
+
 (def (framework-validate-runtime-closure! build-spec)
   (for-each
    (lambda (spec)
@@ -188,20 +215,14 @@
                    (path-expand binary (framework-build-bindir))
                    "__exe.scm"))
                  (forms (framework-read-forms stub-path))
-                 (builtin-declaration
-                  (let loop ((rest forms))
-                    (and (pair? rest)
-                         (let (form (car rest))
-                           (or (and (pair? form)
-                                    (eq? (car form) 'declare)
-                                    (assq 'builtin-modules (cdr form)))
-                               (loop (cdr rest)))))))
+                 (builtin-modules
+                  (framework-stub-builtin-modules forms))
                  (actual
-                  (if builtin-declaration
-                    (map framework-module-name (cadr builtin-declaration))
+                  (if builtin-modules
+                    (map framework-module-name builtin-modules)
                     (framework-optimized-stub-modules forms allowed))))
             (unless
-             (if builtin-declaration
+             (if builtin-modules
                (find (lambda (id)
                        (string-suffix?
                         (string-append "/" module) id))
@@ -209,7 +230,7 @@
                (member module actual))
              (error "provider executable stub omits target module"
                     module stub-path))
-            (when builtin-declaration
+            (when builtin-modules
               (let* ((target-id
                       (find (lambda (id)
                               (string-suffix?

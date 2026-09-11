@@ -35,6 +35,10 @@
       (check (member
               "src/parser/syntax-ast.ss"
               (.get asp-gerbil-scheme-provider-package-spec runtime-modules))
+             ? true)
+      (check (member
+              "src/parser/syntax-macro-family.ss"
+              (.get asp-gerbil-scheme-provider-package-spec runtime-modules))
              ? true))))
 
 (def (main . _args)
