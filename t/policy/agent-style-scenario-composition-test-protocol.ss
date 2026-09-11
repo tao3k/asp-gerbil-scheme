@@ -53,7 +53,9 @@
                     (hash-get details 'destructuringBoundarySignals))
                    => #t)
             (check (hash-get details 'destructuringBoundaryTargets)
-                   => ["render-event"])
+                   => ["summarize-agent-event"
+                       "route-agent-event"
+                       "event-archive-key"])
             (agent-style-check-r013-quality-reference!
              context
              (list 0 2 5 7)

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Gxtest package build lifecycle helpers.
 
-(import (only-in :std/misc/path path-directory path-expand path-strip-directory)
+(import (only-in :std/misc/path path-directory)
         (rename-in (only-in "../build-api/native-build-spec"
                             configure-build-root!)
                    (configure-build-root! configure-native-build-root!))
@@ -14,8 +14,6 @@
                  asp-gerbil-scheme-package-build-receipt-status
                  asp-gerbil-scheme-package-build-receipt-status-ref
                  asp-gerbil-scheme-package-build-receipt-write)
-        (only-in "../build-api/package-native-plan"
-                 asp-gerbil-scheme-package-api-spec)
         (only-in "./gxtest-context"
                  package-root
                  ensure-build-root!)
@@ -28,40 +26,12 @@
                   selected-gxtest-build-current?
                   selected-gxtest-build-receipt-status
                   write-selected-gxtest-build-receipt!)
-        :gerbil/gambit)
+        )
 
-(export clean-target
-        compile-package-api-if-stale
+(export compile-package-api-if-stale
         compile-scoped-policy-engine-if-stale
         scoped-policy-engine-needs-source-build?
-        compile-selected-gxtest-if-stale
-        compile-spec
-        dev-launcher-binpath
-         install-launcher-binpath)
-
-;; : (-> (List String))
-(def cli-bootstrap-modules
-  '("constants.ss"
-    "runtime/provider-http-json-client.ss"
-    "runtime/provider-http-json-command-client.ss"
-    "commands/agent.ss"
-    "commands/guide.ss"
-    "commands/info.ss"
-    "build-api/source-coverage.ss"
-    "build-api/package-receipt.ss"
-    "policy/gxtest-report.ss"
-    "policy/gxtest.ss"
-    "support/time.ss"
-    "benchmark/gate.ss"
-    "commands/bench-light.ss"))
-
-;; : (-> Boolean Boolean Boolean (List BuildSpec))
-(def (compile-spec full? release? binary?)
-  (cond
-   ((or full? release?)
-    (error "full and release compile specs are owned by native-build"))
-   (binary? cli-bootstrap-modules)
-   (else (asp-gerbil-scheme-package-api-spec))))
+        compile-selected-gxtest-if-stale)
 
 ;; : (-> BuildReceiptStatus)
 (def (compile-package-api-if-stale)
@@ -129,52 +99,3 @@
          receipt-path
          source-files
          output-files)))))
-
-;; : (-> Path)
-(def (dev-launcher-binpath)
-  (path-expand ".bin/asp-gerbil-scheme" package-root))
-
-;; : (-> Path)
-(def (install-launcher-binpath)
-  (path-expand "asp-gerbil-scheme" (asp-install-launcher-directory)))
-
-;; : (-> Path)
-(def (asp-state-home-directory)
-  (or (getenv "ASP_STATE_HOME" #f)
-      (path-expand ".agent-semantic-protocols" (user-home-directory))))
-
-(def (asp-install-launcher-directory)
-  (or (getenv "SEMANTIC_AGENT_BIN_DIR" #f)
-      (path-expand "runtime/bin" (asp-state-home-directory))))
-
-;; : (-> Path)
-(def (user-home-directory)
-  (or (getenv "HOME" #f)
-      (error "HOME is required when ASP_STATE_HOME is unset")))
-
-;; : (-> Path Void)
-(def (delete-file* path)
-  (with-catch
-   (lambda (_) #!void)
-   (lambda ()
-     (when (file-exists? path)
-       (delete-file path)))))
-
-;; : (-> Path Void)
-(def (cleanup-compile-exe-artifacts! binpath)
-  (let* ((bindir (path-directory binpath))
-         (name (path-strip-directory binpath))
-         (prefix (string-append name "__exe")))
-    (for-each
-     (lambda (suffix)
-       (delete-file* (path-expand (string-append prefix suffix) bindir)))
-     '(".c" "_.c" ".scm" ".o" "_.o"))))
-
-;; : (-> Void)
-(def (clean-target)
-  (ensure-build-root!)
-  (current-directory package-root)
-  (let (binpath (dev-launcher-binpath))
-    (delete-file* binpath)
-    (cleanup-compile-exe-artifacts! binpath))
-  #!void)

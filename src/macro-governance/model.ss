@@ -120,6 +120,7 @@
   (require-hygiene? #t)
   (max-pattern-count 64))
 
+;; : (-> MacroGovernanceProfile Symbol Boolean)
 (def (macro-governance-profile-rule-enabled? profile id)
   (ormap (lambda (rule)
            (eq? (macro-governance-rule-id rule) id))
@@ -154,6 +155,7 @@
   (schema-id schema-version profile status macro-count admitted-count rejected-count decisions)
   transparent: #t)
 
+;; : (-> MacroGovernanceDecision Json)
 (def (macro-governance-decision-json decision)
   (hash (macro (macro-governance-decision-macro decision))
         (selector (macro-governance-decision-selector decision))
@@ -164,6 +166,7 @@
          (map symbol->string
               (macro-governance-decision-reason-kinds decision)))))
 
+;; : (-> MacroGovernanceReceipt Json)
 (def (macro-governance-receipt-json receipt)
   (hash (schemaId (macro-governance-receipt-schema-id receipt))
         (schemaVersion (macro-governance-receipt-schema-version receipt))

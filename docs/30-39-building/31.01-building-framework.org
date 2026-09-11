@@ -199,7 +199,7 @@ The current landed evidence is:
 The primary downstream =build.ss= shape is compact:
 
 #+begin_src scheme
-(import :asp-gerbil-scheme/src/building/build-script)
+(import :asp-gerbil-scheme/build-api)
 
 (defbuild-script
   (framework-executable-build-spec

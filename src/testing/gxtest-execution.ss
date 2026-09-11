@@ -22,6 +22,9 @@
                  test-phase-receipt-line
                  display-test-phase-receipt
                  run-test-phase
+                 gxtest-progress-line
+                 display-gxtest-progress
+                 display-gxtest-stream-line
                  record-gxtest-result
                  display-gxtest-result
                  gxtest-result-file
@@ -43,6 +46,7 @@
 (export test-phase-receipt-line
         display-test-phase-receipt
         run-test-phase
+        gxtest-progress-line
         gxtest-compiled-batch-expression
         gxtest-source-load-batch-expression
         gxtest-batch-label
@@ -60,6 +64,50 @@
         gxtest-native-parallelism
         gxtest-serial-resource-groups
         run-gxtest-file/subprocess)
+
+;; A subprocess can legitimately spend a long time in expansion, policy
+;; collection, or GC without producing a line. Keep that wait observable while
+;; leaving timeout and cancellation policy with the caller.
+(def +gxtest-progress-interval-seconds+ 15)
+
+;; : (forall (a) (-> String String (-> a) [Real] a))
+(def (call-with-gxtest-progress name mode thunk
+                                (interval-seconds
+                                 +gxtest-progress-interval-seconds+))
+  (let* ((start-micros (monotonic-micros))
+         (_ (display-gxtest-progress name mode "started" 0))
+         (heartbeat
+          (spawn/name
+           `(gxtest-progress ,name)
+           (lambda ()
+             (let loop ()
+               (thread-sleep! interval-seconds)
+               (display-gxtest-progress
+                name
+                mode
+                "running"
+                (duration-micros start-micros (monotonic-micros)))
+               (loop))))))
+    (unwind-protect
+      (thunk)
+      (thread-terminate! heartbeat)
+      (with-catch void (lambda () (thread-join! heartbeat))))))
+
+;; Tee complete child lines to the caller while retaining the exact output for
+;; result inspection and failure attribution. The result's streamed marker
+;; prevents the terminal summary path from printing the captured text twice.
+;; : (-> Port String)
+(def (stream-gxtest-process-output process)
+  (call-with-output-string
+   []
+   (lambda (capture)
+     (let loop ()
+       (let (line (read-line process))
+         (unless (eof-object? line)
+           (display line capture)
+           (newline capture)
+           (display-gxtest-stream-line line)
+           (loop)))))))
 
 ;; Keep test execution aligned with std/make without introducing a second
 ;; public concurrency policy. Gerbil treats an unset value as one active lane.
@@ -86,22 +134,29 @@
         (start-micros (monotonic-micros))
         (label (gxtest-batch-label files)))
     (let (output
-          (run-process (append ["gxi"]
-                               (if (and (pair? files)
-                                        (null? (cdr files)))
-                                 (gxtest-file-memory-runtime-options (car files))
-                                 [])
-                               ["-e" expression])
-                       directory: package-root
-                       stderr-redirection: #t
-                       check-status:
-                       (lambda (exit-status _settings)
-                         (set! status
-                           (normalized-exit-status exit-status)))))
+          (call-with-gxtest-progress
+           label
+           "subprocess"
+           (lambda ()
+             (run-process
+              (append ["gxi"]
+                      (if (and (pair? files)
+                               (null? (cdr files)))
+                        (gxtest-file-memory-runtime-options (car files))
+                        [])
+                      ["-e" expression])
+              directory: package-root
+              stderr-redirection: #t
+              coprocess: stream-gxtest-process-output
+              check-status:
+              (lambda (exit-status _settings)
+                (set! status
+                  (normalized-exit-status exit-status)))))))
       (list label
             status
             output
-            (duration-micros start-micros (monotonic-micros))))))
+            (duration-micros start-micros (monotonic-micros))
+            #t))))
 
 ;; : (-> (List Path) GxTestResult)
 (def (run-gxtest-batch/subprocess files)
@@ -159,16 +214,20 @@
 (def (run-gxtest-batch/in-process files eval-thunk)
   (let ((start-micros (monotonic-micros))
         (label (gxtest-batch-label files)))
-    (call-with-values
-      (lambda ()
-        (capture-gxtest-eval
+    (call-with-gxtest-progress
+     label
+     "in-process"
+     (lambda ()
+       (call-with-values
          (lambda ()
-           (eval-thunk files))))
-      (lambda (status output)
-        (list label
-              status
-              output
-              (duration-micros start-micros (monotonic-micros)))))))
+           (capture-gxtest-eval
+            (lambda ()
+              (eval-thunk files))))
+         (lambda (status output)
+           (list label
+                 status
+                 output
+                 (duration-micros start-micros (monotonic-micros)))))))))
 
 ;; : (-> (List Path) GxTestResult)
 (def (run-gxtest-batch/compiled-in-process files)

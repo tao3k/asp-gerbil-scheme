@@ -9,7 +9,7 @@
 ;; profile-form
 ;;   : (-> Symbol ProfileForms Form Form)
 ;;   | type ProfileForms = (List Form)
-;;   | type Form = (List Any)
+;;   | type Form = (List Datum)
 ;;   | doc m%
 ;;       `profile-form key forms` returns the first profile form for `key`.
 ;;     %
@@ -23,8 +23,8 @@
     (profile-form key (cdr forms) default-value))))
 
 ;; profile-tail
-;;   : (-> Form (List Any))
-;;   | type Form = (List Any)
+;;   : (-> Form (List Datum))
+;;   | type Form = (List Datum)
 ;;   | doc m%
 ;;       `profile-tail form` removes the symbolic form tag.
 ;;     %
@@ -36,7 +36,7 @@
 ;; backend-values
 ;;   : (-> ProfileForms (Values Symbol Symbol))
 ;;   | type ProfileForms = (List Form)
-;;   | type Form = (List Any)
+;;   | type Form = (List Datum)
 ;;   | doc m%
 ;;       `backend-values forms` is the tuple projection boundary for sandbox
 ;;       backend kind and reference.
@@ -57,7 +57,7 @@
 ;; sandbox-config
 ;;   : (-> Symbol ProfileForms Config)
 ;;   | type ProfileForms = (List Form)
-;;   | type Config = (List Any)
+;;   | type Config = (List Datum)
 ;;   | doc m%
 ;;       `sandbox-config name forms` builds the public sandbox config without
 ;;       materializing an anonymous Pair result.

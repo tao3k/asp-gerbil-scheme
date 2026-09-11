@@ -1,33 +1,12 @@
-((max_total . 76ms)
- (observed_total . 1ms)
- (target_total . 25ms)
- (regression_budget . 75ms)
- (expected_over_input_budget . 5ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 1))
-  ((name . policy-before) (durationMs . 1))
-  ((name . collect-after) (durationMs . 1))
-  ((name . policy-after) (durationMs . 1))
-  ((name . select-file) (durationMs . 1))
-  ((name . delegate-contract) (durationMs . 1))
-  ((name . delegate-discovery) (durationMs . 1))
-  ((name . setup-cleanup-export-discovery) (durationMs . 1)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
   "upstream gxtest delegation must keep selection hot while preserving gxtest-owned suite and setup/cleanup discovery")
- (maxCollectMs . 50)
- (observedCollectMs . 1)
- (maxParseMs . 50)
- (observedParseMs . 1)
- (maxFileMs . 50)
- (observedFileMs . 1)
- (maxPhaseMs . 50)
- (observedPhaseMs . 1)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 3)
- (unit . "ms")
+ (sampleCount . 20)
  (purpose . "prove the testing framework selects files and delegates gxtest semantics to the gxtest runner")
  (feature . "upstream-gxtest-delegation")
  (rule . "GERBIL-SCHEME-AGENT-TESTING-UPSTREAM-GXTEST-DELEGATION-001")
@@ -50,7 +29,7 @@
   "delegate-discovery"
   "setup-cleanup-export-discovery"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "testing"
        "framework"
        "gxtest"

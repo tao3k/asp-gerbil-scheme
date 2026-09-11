@@ -92,7 +92,7 @@
         (write-text (string-append root "/gerbil.pkg")
                     "(package: sample/build-runtime-native-dispatcher)\n")
         (write-text
-         (string-append support "/provider-cli.ss")
+         (string-append support "/native-dispatcher.ss")
          ";;; -*- Gerbil -*-\n(def (native-dispatcher-source-text config)\n  \"int owner_items_native_main(int argc, char **argv);\\n\")\n(def (write-provider-native-dispatcher-source! path config)\n  (write-file! path (native-dispatcher-source-text config)))\n")
         (let* ((index (collect-project root))
                (findings (run-agent-policy index)))

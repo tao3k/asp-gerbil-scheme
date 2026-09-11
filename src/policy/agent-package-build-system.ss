@@ -82,13 +82,6 @@
     "find src"))
 
 ;; (List String)
-(def +package-build-shell-pipeline-literal-markers+
-  '("|" "xargs" "find src" "sort |" " -P "))
-
-;; (List CalleeName)
-(def +package-build-shell-dispatch-callees+
-  '("invoke" "run-process" "open-process"))
-
 ;;; Local state evidence includes cache, stamp, receipt, and worker ownership.
 ;;; It only becomes a finding when combined with package build scope and a
 ;;; native build surface, so ordinary package helper identifiers are not enough.
@@ -126,8 +119,7 @@
 ;; : (-> (List DetectionPrototype))
 (def (package-build-quality-detection-prototypes)
   [(package-build-custom-system-detection-prototype)
-   (package-build-framework-overreach-detection-prototype)
-   (package-build-shell-pipeline-detection-prototype)])
+   (package-build-framework-overreach-detection-prototype)])
 
 ;; : (-> DetectionResult Boolean)
 (def (package-build-custom-system-result? result)
@@ -177,22 +169,6 @@
     0
     +package-build-framework-overreach-required-groups+
     "package build API overreach requires package scope, native build surface evidence, and local phase/cache/stamp ownership")))
-
-;;; Shell pipeline detection stays separate from the broader custom-system
-;;; detector so sh -c pipeline repair remains precise.
-;; : (-> DetectionPrototype)
-(def (package-build-shell-pipeline-detection-prototype)
-  (detection-prototype-extend
-   +all-of-detection-prototype+
-   (poo-source-pattern-detection-overlay 'prototype-composition)
-   (detection-prototype
-    "package-build-shell-pipeline-all-of"
-    'all-of
-    [package-build-shell-dispatch-call-evidence
-     package-build-shell-pipeline-literal-evidence]
-    0
-    ["shell-dispatch-call" "shell-pipeline-literal"]
-    "package build shell-pipeline drift requires dispatch and payload evidence")))
 
 ;;; Scope guard: every package-owned build.ss, including nested workspace
 ;;; packages, is checked for custom build-system drift. Build/runtime owners
@@ -254,8 +230,9 @@
        (binding-fact-selector (car bindings))))
      (else #f))))
 
-;;; Evidence boundary: keep only parser-owned calls that prove build.ss is
-;;; coordinating compiler/process work instead of delegating to clan/building.
+;;; Evidence boundary: a process primitive is ordinary Scheme.  It becomes
+;;; build-control evidence only when its parser-owned arguments name a compiler
+;;; or build-environment operation.
 ;; : (-> SourceFile MaybeEvidenceGroup)
 (def (package-build-manual-orchestration-evidence file)
   (let (calls (filter package-build-manual-orchestration-call?
@@ -263,30 +240,6 @@
     (and (pair? calls)
          (evidence-group
           "manual-build-orchestration"
-          (length calls)
-          (call-fact-selector (car calls))))))
-
-;;; Shell dispatch evidence stays separate from literal pipeline strings so
-;;; command invocation and argument content can compose as independent signals.
-;; : (-> SourceFile MaybeEvidenceGroup)
-(def (package-build-shell-dispatch-call-evidence file)
-  (let (calls (filter package-build-shell-dispatch-call?
-                      (source-file-calls file)))
-    (and (pair? calls)
-         (evidence-group
-          "shell-dispatch-call"
-          (length calls)
-          (call-fact-selector (car calls))))))
-
-;;; Pipeline literals refine sh -c evidence so build.ss warnings focus on
-;;; pipeline orchestration instead of every shell invocation.
-;; : (-> SourceFile MaybeEvidenceGroup)
-(def (package-build-shell-pipeline-literal-evidence file)
-  (let (calls (filter package-build-shell-pipeline-literal-call?
-                      (source-file-calls file)))
-    (and (pair? calls)
-         (evidence-group
-          "shell-pipeline-literal"
           (length calls)
           (call-fact-selector (car calls))))))
 
@@ -395,10 +348,10 @@
 ;;; The marker table is policy data, so extending it does not add branch logic.
 ;; : (-> CallFact Boolean)
 (def (package-build-manual-orchestration-call? call)
-  (or (member (call-fact-callee call)
-              +package-build-manual-orchestration-callees+)
-      (ormap package-build-manual-orchestration-argument?
-             (filter string? (call-fact-arguments call)))))
+  (and (member (call-fact-callee call)
+               +package-build-manual-orchestration-callees+)
+       (ormap package-build-manual-orchestration-argument?
+              (filter string? (call-fact-arguments call)))))
 
 ;;; Marker matching is a predicate family: cut/ormap express any orchestration
 ;;; marker hit without turning the package-build rule into an open-coded branch.
@@ -406,25 +359,6 @@
 (def (package-build-manual-orchestration-argument? argument)
   (ormap (cut string-contains argument <>)
          +package-build-manual-orchestration-markers+))
-
-;;; sh -c is the risk boundary because it collapses typed argv into shell text.
-;; : (-> CallFact Boolean)
-(def (package-build-shell-dispatch-call? call)
-  (and (member (call-fact-callee call)
-               +package-build-shell-dispatch-callees+)
-       (call-arguments-contain? call "sh")
-       (call-arguments-contain? call "-c")))
-
-;;; Nested argument scanning requires the shell dispatcher and pipeline literal
-;;; to be on the same parsed call, which is stricter than source text matching.
-;; : (-> CallFact Boolean)
-(def (package-build-shell-pipeline-literal-call? call)
-  (and (package-build-shell-dispatch-call? call)
-       (ormap (lambda (argument)
-                (and (string? argument)
-                     (ormap (cut string-contains argument <>)
-                            +package-build-shell-pipeline-literal-markers+)))
-              (call-fact-arguments call))))
 
 ;;; Shared argument containment keeps signal logic data-driven: callers provide
 ;;; the marker, while parser-owned argument values remain the evidence boundary.

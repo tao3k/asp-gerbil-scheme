@@ -76,7 +76,7 @@
   (dependency-adapter-profile
    "dependency-poo-lineage"
    [(cons 'sourcePatternLineage
-          "gerbil-poo build/cli/rationaldict/table/brace/object/mop/io patterns")
+          "gerbil-poo build/runtime/rationaldict/table/brace/object/mop/io patterns")
     (cons 'macroBridgeBoundary
           "syntax forms should stay thin bridges like gerbil-poo brace.ss @method; runtime semantics belong in object/mop/protocol slots")
     (cons 'slotResolutionModel
@@ -85,13 +85,13 @@
           "json<-/<-json, marshal/unmarshal, bytes<-/<-bytes, and string<-/<-string are method/type slots")]))
 
 ;; DependencyAdapterProfile
-(def +dependency-adapter-build-cli-profile+
+(def +dependency-adapter-build-boundary-profile+
   (dependency-adapter-profile
-   "dependency-build-cli-lineage"
+   "dependency-build-boundary-lineage"
    [(cons 'buildPattern
           "use :std/make + :clan/base + :clan/building discovery, while filtering non-module policy/config files for this harness")
-    (cons 'cliOptionPattern
-          "keep src/cli.ss as a thin dispatcher; compose option objects when command option surfaces grow")]))
+    (cons 'boundaryCompositionPattern
+          "keep process entrypoints thin; compose POO-native request and configuration objects when boundary surfaces grow")]))
 
 ;; : (-> Command DependencyAdapterProfile )
 (def (dependency-adapter-repair-command-profile repair-command)
@@ -128,10 +128,10 @@
       (cons 'profileOverlays
             ["dependency-protocol-surface"
              "dependency-poo-lineage"
-             "dependency-build-cli-lineage"
+             "dependency-build-boundary-lineage"
              "dependency-repair-commands"])])
     (dependency-adapter-repair-command-profile repair-command)
-    +dependency-adapter-build-cli-profile+
+    +dependency-adapter-build-boundary-profile+
     +dependency-adapter-poo-lineage-profile+
     +dependency-adapter-protocol-surface-profile+]))
 
@@ -182,7 +182,7 @@
         (ioSerializationMethodFamily
          (dependency-adapter-profile-ref profile 'ioSerializationMethodFamily ""))
         (buildPattern (dependency-adapter-profile-ref profile 'buildPattern ""))
-        (cliOptionPattern (dependency-adapter-profile-ref profile 'cliOptionPattern ""))
+        (boundaryCompositionPattern (dependency-adapter-profile-ref profile 'boundaryCompositionPattern ""))
         (manualObjectEncodingRisk
          (dependency-adapter-quality-fact-manual-object-encoding-risk fact))
         (genericContractWitnessKind

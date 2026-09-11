@@ -8,14 +8,10 @@
         "./build-api")
 
 (def +product-entry-modules+
-  '("src/provider-server"
-    "src/cli"
-    "src/cli-dev-linker"
-    "src/cli-install-linker"
-    "src/cli-query"
-    "src/cli-release-linker"
-    "src/commands/provider-runtime"
-    "src/cli-launcher"))
+  '("build-provider"
+    "provider-package-spec"
+    "src/provider-server"
+    "src/commands/provider-runtime"))
 
 (asp-gerbil-scheme-package-spec!
  (asp-gerbil-scheme-library-package-spec

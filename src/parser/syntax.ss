@@ -3,6 +3,7 @@
 
 (import :gerbil/expander
         :asp-gerbil-scheme/src/parser/syntax-calls
+        :asp-gerbil-scheme/src/parser/syntax-macro-family
         :asp-gerbil-scheme/src/parser/syntax-support
         :asp-gerbil-scheme/src/parser/formals
         :asp-gerbil-scheme/src/parser/imports

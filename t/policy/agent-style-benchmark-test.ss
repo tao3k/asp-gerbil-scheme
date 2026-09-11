@@ -23,7 +23,10 @@
 (test-case "policy scenario fixtures declare benchmark contracts"
           (check (agent-style-policy-scenario-missing-benchmarks) => []))
 (test-case "typed-combinator-style self-apply keeps repaired owners clean"
-          (let (index (collect-project "."))
+          (let (index
+                (collect-selected-source-scope
+                 "."
+                 +agent-style-policy-self-apply-r013-clean-owners+))
             (for-each
              (lambda (path)
                (check (agent-style-policy-r013-findings-for-owner index path)
@@ -81,8 +84,8 @@
               "eq-hash-index-hot-path"
               "cut-helper-plumbing"
               "anti-ai-scaffold"])
-            (check (hash-get benchmark-contract 'observed_total)
-                   => '8.5ms)
+            (check (hash-get benchmark-contract 'target_total)
+                   => '100ms)
             (check (hash-get benchmark-contract 'optimizationFocus)
                    => "basic Scheme route scaffolding to match dispatch, one eq-hash index, and cut-specialized traversal")
             (check (agent-style-member?
@@ -138,7 +141,7 @@
             (check (hash-get details 'macroFamilyTargets)
                    => ["defpoo-flow"])
             (check (agent-style-member?
-                    "collapse repeated same-prefix thin macros into one hygienic macro family helper or table, then keep runtime behavior in ordinary functions"
+                    "collapse repeated same-prefix thin macros into one hygienic macro family helper or table; split shared parse/validate logic from syntax generation, then keep runtime behavior in ordinary functions"
                     (hash-get details 'qualityFacetSteering))
                    => #t)
             (agent-style-check-r013-quality-reference!

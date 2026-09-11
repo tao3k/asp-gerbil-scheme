@@ -120,59 +120,120 @@
                   ,@(framework-native-link-options native-capabilities)))
           library-modules))
 
+(def (framework-module-name id)
+  (if (symbol? id) (symbol->string id) id))
+
+(def (framework-module-stem module)
+  (let (module-length (string-length module))
+    (if (string-suffix? ".ss" module)
+      (substring module 0 (- module-length 3))
+      module)))
+
+(def (framework-read-forms path)
+  (call-with-input-file
+   path
+   (lambda (input)
+     (let loop ((forms []))
+       (let (form (read input))
+         (if (eof-object? form)
+           (reverse forms)
+           (loop (cons form forms))))))))
+
+(def (framework-module-static-basename module)
+  (string-append
+   "asp-gerbil-scheme__"
+   (apply string-append
+          (map (lambda (char)
+                 (case char
+                   ((#\/) "__")
+                   (else (string char))))
+               (string->list (framework-module-stem module))))
+   ".scm"))
+
+(def (framework-path-basename path)
+  (cond
+   ((string-rindex path #\/)
+    => (lambda (index)
+         (substring path (+ index 1) (string-length path))))
+   (else path)))
+
+(def (framework-optimized-stub-modules forms allowed)
+  (filter-map
+   (lambda (form)
+     (and (pair? form)
+          (eq? (car form) 'include)
+          (pair? (cdr form))
+          (string? (cadr form))
+          (let (basename (framework-path-basename (cadr form)))
+            (and
+             (string-prefix? "asp-gerbil-scheme__" basename)
+             (or (find (lambda (module)
+                         (string=? basename
+                                   (framework-module-static-basename module)))
+                       allowed)
+                 (error
+                  "provider optimized closure contains undeclared package module"
+                  basename (cadr form)))))))
+   forms))
+
 (def (framework-validate-runtime-closure! build-spec)
-  (def (module-name id)
-    (if (symbol? id) (symbol->string id) id))
-  (def (module-stem module)
-    (let (module-length (string-length module))
-      (if (string-suffix? ".ss" module)
-        (substring module 0 (- module-length 3))
-        module)))
   (for-each
    (lambda (spec)
      (match spec
        ([exe: module bin: binary . options]
         (let* ((declared (framework-modules-before-target build-spec spec))
+               (allowed (cons module declared))
                (stub-path
                   (string-append
                    (path-expand binary (framework-build-bindir))
                    "__exe.scm"))
-                 (form (call-with-input-file stub-path read))
-                 (builtin-modules (cadr (caddr form)))
-                 (module-suffix (string-append "/" module))
-                 (target-id
-                  (find (lambda (id)
-                          (string-suffix? module-suffix
-                                          (module-name id)))
-                        builtin-modules)))
-            (unless target-id
-              (error "provider executable stub omits target module"
-                     module stub-path))
-            (let* ((target-name (module-name target-id))
-                   (prefix-length (- (string-length target-name)
-                                     (string-length module)))
-                   (package-prefix (substring target-name 0 prefix-length))
-                   (actual
-                    (sort
-                     (filter-map
-                      (lambda (id)
-                        (let (name (module-name id))
-                          (and (string-prefix? package-prefix name)
-                               (substring name prefix-length
-                                          (string-length name)))))
-                      builtin-modules)
-                     string<?))
-                   (expected
-                    (sort (cons module (map module-stem declared)) string<?)))
-              (unless (equal? actual expected)
-                (error "provider runtime closure drift"
-                       expected actual stub-path))
+                 (forms (framework-read-forms stub-path))
+                 (builtin-declaration
+                  (let loop ((rest forms))
+                    (and (pair? rest)
+                         (let (form (car rest))
+                           (or (and (pair? form)
+                                    (eq? (car form) 'declare)
+                                    (assq 'builtin-modules (cdr form)))
+                               (loop (cdr rest)))))))
+                 (actual
+                  (if builtin-declaration
+                    (map framework-module-name (cadr builtin-declaration))
+                    (framework-optimized-stub-modules forms allowed))))
+            (unless
+             (if builtin-declaration
+               (find (lambda (id)
+                       (string-suffix?
+                        (string-append "/" module) id))
+                     actual)
+               (member module actual))
+             (error "provider executable stub omits target module"
+                    module stub-path))
+            (when builtin-declaration
+              (let* ((target-id
+                      (find (lambda (id)
+                              (string-suffix?
+                               (string-append "/" module) id))
+                            actual))
+                     (prefix-length (- (string-length target-id)
+                                       (string-length module)))
+                     (package-prefix (substring target-id 0 prefix-length)))
+                (for-each
+                 (lambda (id)
+                   (when (string-prefix? package-prefix id)
+                     (let (local
+                           (substring id prefix-length (string-length id)))
+                       (unless (member local (map framework-module-stem allowed))
+                         (error "provider executable closure contains undeclared package module"
+                                local stub-path)))))
+                 actual)))
+            (let (package-prefix "asp-gerbil-scheme/")
               (unless (eq? (pgetq runtime-linkage: options) 'separate-aot)
                 (error "provider executable lacks separate AOT linkage"
                        spec))
               (for-each
                (lambda (runtime-module)
-                 (let* ((stem (module-stem runtime-module))
+                 (let* ((stem (framework-module-stem runtime-module))
                         (artifact-stem
                          (path-expand
                           (string-append package-prefix stem)
@@ -284,16 +345,11 @@
     ((development)
      [optimize: #f])
     ((production)
-     ;; The provider is an AOT executable, but its HTTP/TLS boundary depends on
-     ;; the host C runtime and OpenSSL.  Gerbil's build-release option forwards
-     ;; `-static` to GCC; that produces neither a portable nor a reliably
-     ;; linkable artifact for these system libraries.  Preserve optimized
-     ;; multi-unit AOT compilation and use the platform dynamic linker on every
-     ;; supported host.
-     ;; Keep the final executable in std/make's separate-module mode. Runtime
-     ;; units carry their own optimize option in the declared build graph;
-     ;; setting this global option to true would rewrite exe: to optimized-exe:
-     ;; and invoke full-program optimization over the entire server closure.
+     ;; Production names the provider policy; optimization remains an explicit
+     ;; CLI choice. A bare compile keeps std/make's declared separate-AOT graph,
+     ;; while --release is projected below to the host-correct native release
+     ;; topology. This default prevents an ordinary compile from silently
+     ;; entering the expensive whole-program SINGLE_HOST path.
      [optimize: #f])
     (else
      (error "unsupported Scheme build profile" profile))))
@@ -519,6 +575,28 @@
     (["clean"] (clean))
     ([] (build []))))
 
+;;; BuildScript declaration boundary.  The macro projects a declarative build
+;;; spec and profile into the framework dispatcher; std/make remains the sole
+;;; compiler, dependency scheduler, and linker owner.
+(defsyntax (defbuild-script stx)
+  (syntax-case stx ()
+    ((macro build-spec keys ...)
+     (with-syntax* ((+this-source-file+
+                    (datum->syntax
+                     #'macro
+                     (path-normalize
+                      (path-expand
+                       (source-location-path (stx-source stx))))))
+                    (@main (stx-identifier #'macro 'main)))
+       #'(def (@main . arguments)
+           (let (source-file +this-source-file+)
+             (framework-apply-build-core-policy!)
+             (parameterize
+              ((current-directory
+                (path-normalize (path-directory source-file))))
+              (framework-build-main
+               arguments build-spec [keys ...] source-file))))))))
+
 (def (framework-build-contract)
   '((schemaId . "asp-gerbil-scheme.build-script-contract")
     (schemaVersion . "1")
@@ -528,7 +606,7 @@
     (buildProfileOwner . "POO-package-spec")
     (buildProfileProjection . "native-std/make-options")
     (developmentProfile . "gcc-optimize-disabled")
-    (productionProfile . "gcc-optimized-module-aot-separate-link")
+    (productionProfile . "explicit-release-with-separate-aot-default")
     (buildDepsOwner . "std/make-srcdir-default")
     (parallelismOwner . "GERBIL_BUILD_CORES")
     (verbosityOwner . "build-script-cli-to-std-make")
@@ -541,10 +619,14 @@
     (darwinNativeEnvironmentExclusions . "SDKROOT-and-DEVELOPER_DIR")
     (releaseLinkageOwner . "Building-Framework-platform-policy")
     (darwinReleaseLinkage . "optimized-dynamic")
-    (linuxReleaseLinkage . "optimized-dynamic")
-    (darwinExecutableTopology . "optimized-multi-unit")
+    (linuxReleaseLinkage . "optimized-static")
+    (darwinExecutableTopology . "optimized-single-host")
     (buildGraphProjection . "declared-compiler-runtime-closure-to-std/make")
     (buildGraphAdmission . "none-full-declared-spec-to-std/make")
+    (generatedArtifactCacheOwner . "ASP-verified-content-addressed-sidecar")
+    (generatedArtifactReuseAuthority . "receipt-plus-byte-digest-plus-domain-validator")
+    (generatedArtifactNativeFreshnessOwner . "std/make")
+    (generatedModuleProjection . "native-gxc-extra-inputs")
     (affectedOutputInvalidation . "none")
     (upstreamBuildSessionCount . "one-native-std/make-session")
     (libraryBuildProjection . "post-executable-package-modules-to-std/make")

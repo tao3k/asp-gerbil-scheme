@@ -414,7 +414,7 @@
 (def (owner-source-line-count path)
   (let (bytes (file-info-size (file-info path)))
     (when (> bytes +owner-items-max-source-bytes+)
-      (error "owner source exceeds Scheme parse budget; use asp search/query"
+      (error "owner source exceeds Scheme parse budget; use Search/Query Playbook"
              path bytes))
     (call-with-input-file path
       (lambda (port)
@@ -427,7 +427,7 @@
                   (when (char=? char #\newline)
                     (set! lines (+ lines 1)))
                   (when (> lines +owner-items-max-source-lines+)
-                    (error "owner source exceeds Scheme parse line budget; use asp search/query"
+                    (error "owner source exceeds Scheme parse line budget; use Search/Query Playbook"
                            path lines))
                   (loop))))))))))
 

@@ -11,7 +11,8 @@
         :asp-gerbil-scheme/src/testing/framework
         :asp-gerbil-scheme/src/testing/build-paths
         :asp-gerbil-scheme/src/testing/build-process
-        :asp-gerbil-scheme/src/testing/build-support)
+        :asp-gerbil-scheme/src/testing/build-support
+        (only-in :asp-gerbil-scheme/src/support/time duration-nanos->text))
 
 (export #t)
 
@@ -122,8 +123,8 @@
   (eq? (testing-build-output-mode build) 'verbose))
 
 ;; : (-> Integer Integer)
-(def (testing-build-elapsed-ms start-jiffy)
-  (quotient (* (- (current-jiffy) start-jiffy) 1000)
+(def (testing-build-elapsed-nanos start-jiffy)
+  (quotient (* (- (current-jiffy) start-jiffy) 1000000000)
             (jiffies-per-second)))
 
 ;; : (-> Exception Port Void)
@@ -147,7 +148,7 @@
     (values ok? (get-output-string port))))
 
 ;; : (-> TestingBuild String Symbol String Integer Void)
-(def (testing-build-display-inline-status build name kind status elapsed-ms)
+(def (testing-build-display-inline-status build name kind status elapsed-nanos)
   (unless (eq? (testing-build-output-mode build) 'quiet)
     (display "[asp-gerbil-scheme-test-inline] kind=")
     (display kind)
@@ -155,23 +156,25 @@
     (display name)
     (display " status=")
     (display status)
-    (display " elapsedMs=")
-    (display elapsed-ms)
+    (display " elapsedNs=")
+    (display elapsed-nanos)
+    (display " elapsed=")
+    (display (duration-nanos->text elapsed-nanos))
     (newline)
     (force-output)))
 
 ;; : (-> TestingBuild String Symbol Integer String Void)
-(def (testing-build-display-inline-result build name kind elapsed-ms output)
-  (testing-build-display-inline-status build name kind "ok" elapsed-ms)
+(def (testing-build-display-inline-result build name kind elapsed-nanos output)
+  (testing-build-display-inline-status build name kind "ok" elapsed-nanos)
   (when (and (testing-build-verbose-output? build)
              (> (string-length output) 0))
     (display output)
     (force-output)))
 
 ;; : (-> TestingBuild String Symbol Integer String Void)
-(def (testing-build-display-inline-failure build name kind elapsed-ms output)
+(def (testing-build-display-inline-failure build name kind elapsed-nanos output)
   (display output)
-  (testing-build-display-inline-status build name kind "failed" elapsed-ms)
+  (testing-build-display-inline-status build name kind "failed" elapsed-nanos)
   (force-output))
 
 ;; : (-> TestingBuild String Symbol Procedure Boolean)
@@ -179,19 +182,19 @@
   (let (start (current-jiffy))
     (let-values (((ok? output)
                   (testing-build-capture-run thunk)))
-      (let (elapsed-ms (testing-build-elapsed-ms start))
+      (let (elapsed-nanos (testing-build-elapsed-nanos start))
         (if ok?
           (testing-build-display-inline-result
            build
            name
            kind
-           elapsed-ms
+           elapsed-nanos
            output)
           (testing-build-display-inline-failure
            build
            name
            kind
-           elapsed-ms
+           elapsed-nanos
            output))
         ok?))))
 

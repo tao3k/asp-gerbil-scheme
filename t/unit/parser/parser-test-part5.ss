@@ -308,7 +308,11 @@
             (check (source-file-parse-error file) => #f)
             (check (source-file-predicate-family-facts file) => '())
             (check (source-file-field-access-pattern-facts file) => '())
-            (check (source-file-boolean-condition-facts file) => '())
+            (let (boolean-facts (source-file-boolean-condition-facts file))
+              (check (map boolean-condition-fact-name boolean-facts)
+                     => ["boolean-condition-definition?"])
+              (check (map boolean-condition-fact-condition-callees boolean-facts)
+                     => [[">=" "string-suffix?"]]))
             (check (source-file-loop-driver-facts file) => '())))
     (test-case "native reader captures quality-shape parser facts"
           (let* ((root (path-normalize "."))

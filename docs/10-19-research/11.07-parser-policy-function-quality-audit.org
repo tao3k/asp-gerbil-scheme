@@ -23,19 +23,19 @@ Gerbil-quality code.
 Commands used during this audit:
 
 #+begin_src shell
-asp org search toc docs/10-19-research
-asp org query --from-hook direct-source-read --selector docs/10-19-research/11.05-asp-gerbil-scheme-engineering-audit.org:234-478 docs/10-19-research
-asp org query --from-hook direct-source-read --selector docs/10-19-research/11.06-current-quality-gap-register.org:44-220 docs/10-19-research
+asp search playbook --documents org toc docs/10-19-research
+asp query playbook --documents org --from-hook direct-source-read --selector docs/10-19-research/11.05-asp-gerbil-scheme-engineering-audit.org:234-478 docs/10-19-research
+asp query playbook --documents org --from-hook direct-source-read --selector docs/10-19-research/11.06-current-quality-gap-register.org:44-220 docs/10-19-research
 asp rg -query 'GERBIL-SCHEME-AGENT-POLICY-016|quality-shape|predicate-family' -query 'typed-combinator|controlled-branch|comment-quality' src t docs/10-19-research
 asp rg -query 'predicateFamilyFacts|fieldAccessPatternFacts|booleanConditionFacts|loopDriverFacts' -query 'structural|snapshot|search|packet|projection' src t
 asp rg -query 'quality-profile|function-quality|multi-layer|multilayer|correlat|priority|finding group|findingGroup' src t docs/10-19-research
-asp gerbil-scheme query --selector src/parser/quality-shape.ss:1-420 --workspace . --code
-asp gerbil-scheme query --selector src/protocol/quality-shape-facts.ss:1-220 --workspace . --code
-asp gerbil-scheme query --selector src/protocol/structural-facts.ss:1-140 --workspace . --code
-asp gerbil-scheme query --selector src/snapshot/parser.ss:40-82 --workspace . --code
-asp gerbil-scheme query --selector src/policy/agent-style-shape.ss:1-140 --workspace . --code
-asp gerbil-scheme query --selector src/policy/repair.ss:1-180 --workspace . --code
-asp gerbil-scheme query --selector src/types/findings.ss:1-180 --workspace . --code
+asp query playbook --language gerbil-scheme --selector src/parser/quality-shape.ss:1-420 --workspace . --code
+asp query playbook --language gerbil-scheme --selector src/protocol/quality-shape-facts.ss:1-220 --workspace . --code
+asp query playbook --language gerbil-scheme --selector src/protocol/structural-facts.ss:1-140 --workspace . --code
+asp query playbook --language gerbil-scheme --selector src/snapshot/parser.ss:40-82 --workspace . --code
+asp query playbook --language gerbil-scheme --selector src/policy/agent-style-shape.ss:1-140 --workspace . --code
+asp query playbook --language gerbil-scheme --selector src/policy/repair.ss:1-180 --workspace . --code
+asp query playbook --language gerbil-scheme --selector src/types/findings.ss:1-180 --workspace . --code
 #+end_src
 
 Important evidence:

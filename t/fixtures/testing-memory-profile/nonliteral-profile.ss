@@ -1,4 +1,4 @@
-(import :asp-gerbil-scheme/src/testing/memory-profile)
+(import :asp-gerbil-scheme/build-api)
 
 (def profile
   '((maxHeapMiB . 512)))

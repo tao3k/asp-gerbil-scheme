@@ -11,10 +11,12 @@
 (export repairable-finding?
         repairable-findings
         agent-repair-report-json
-        agent-repair-summary-parts
         finding-agent-repair-json
-        finding-agent-repair-parts
-        finding-guide-detail-parts)
+        policy-finding-json)
+
+(def +shared-policy-diagnostic-schema-id+
+  "agent.semantic-protocols.semantic-language-policy-diagnostic")
+(def +shared-policy-diagnostic-schema-version+ "1")
 
 ;;; Repairability is protocol-driven: a finding opts in by exposing an
 ;;; agent-repair projection, not by matching rule names here.
@@ -40,7 +42,8 @@
     (hash (status (if (zero? count) "none" "active"))
           (audience "agent")
           (feedbackKind "policy-diagnostic")
-          (diagnosticSchema "gerbil-policy-diagnostic-v1")
+          (diagnosticSchemaId +shared-policy-diagnostic-schema-id+)
+          (diagnosticSchemaVersion +shared-policy-diagnostic-schema-version+)
           (diagnosticUnit "findingGroup")
           (repairableFindings count)
           (repairableWarnings warnings)
@@ -51,35 +54,14 @@
           (instruction
            "read each diagnostic location/problem/evidence/fixIntent; edit the selector owner, preserve constraints, then rerun check"))))
 
-;; : (-> (List TypeFinding) (List RepairSummaryPart) )
-(def (agent-repair-summary-parts findings)
-  (let* ((repairable (repairable-findings findings))
-         (warnings (count-finding-severity repairable "warning"))
-         (errors (count-finding-severity repairable "error"))
-         (count (length repairable)))
-    (if (zero? count)
-      []
-      [(string-append "status=active")
-       "audience=agent"
-       "feedbackKind=policy-diagnostic"
-       "diagnosticSchema=gerbil-policy-diagnostic-v1"
-       "diagnosticUnit=findingGroup"
-       (string-append "repairableFindings=" (number->string count))
-       (string-append "repairableWarnings=" (number->string warnings))
-       (string-append "repairableErrors=" (number->string errors))
-       (string-append "trigger=" (repair-trigger warnings errors))
-       (string-append "repairGroups="
-                      (number->string (length (finding-groups repairable))))
-       "focus=findingGroups[].diagnostic.location/problem/evidence/fixIntent"
-       "verify=asp-gerbil-scheme-check-findings-zero"])))
-
 ;; : (-> (List TypeFinding) Json )
 (def (repair-plan-json findings)
   (let (groups (finding-groups-json findings))
     (hash (status (if (null? groups) "none" "active"))
           (audience "agent")
           (feedbackKind "policy-diagnostic")
-          (diagnosticSchema "gerbil-policy-diagnostic-v1")
+          (diagnosticSchemaId +shared-policy-diagnostic-schema-id+)
+          (diagnosticSchemaVersion +shared-policy-diagnostic-schema-version+)
           (groupCount (length groups))
           (primaryGroups (take groups (min 4 (length groups))))
           (verification (agent-repair-success-criteria))
@@ -238,7 +220,7 @@
   (make-policy-diagnostic-location
    (type-finding-path finding)
    (or (type-finding-selector finding) "")
-   (finding-definition-name finding)))
+   (or (finding-definition-name finding) "")))
 
 ;; : (-> TypeFinding PolicyDiagnosticEvidence )
 (def (finding-diagnostic-evidence finding)
@@ -455,7 +437,8 @@
                (repairable #t)
                (trigger (type-finding-severity finding))
                (reason "policy-finding")
-               (schema "gerbil-policy-diagnostic-v1")
+               (diagnosticSchemaId +shared-policy-diagnostic-schema-id+)
+               (diagnosticSchemaVersion +shared-policy-diagnostic-schema-version+)
                (ruleId (type-finding-rule-id finding))
                (severity (type-finding-severity finding))
                (diagnostic (finding-diagnostic-json finding route))
@@ -486,33 +469,21 @@
     guideRole: "evidence-only"
     repairPhases: [])))
 
-;; : (-> TypeFinding FindingAgentRepairParts )
-(def (finding-agent-repair-parts finding)
-  (let (repair (finding-agent-repair-json finding))
-    (if repair
-      [(string-append "rule=" (hash-get repair 'ruleId))
-       (string-append "severity=" (hash-get repair 'severity))
-       "repairable=true"
-       "active=true"
-       (string-append "schema=" (hash-get repair 'schema))
-       (string-append "trigger=" (hash-get repair 'trigger))
-	       (string-append "reason=" (hash-get repair 'reason))
-	       (string-append "guideTopic=" (hash-get repair 'guideTopic))
-	       (string-append "guideIntent=" (hash-get repair 'guideIntent))
-	       (string-append "guideCommand=" (hash-get repair 'guideCommand))
-	       (string-append "guideRole=" (hash-get repair 'guideRole))
-	       (string-append "instruction=" (hash-get repair 'instruction))]
-      [])))
-
-;; : (-> TypeFinding String )
-(def (finding-guide-detail-parts finding)
-  (let (repair (finding-agent-repair-json finding))
-    (if repair
-	      [(string-append "guideTopic=" (hash-get repair 'guideTopic))
-	       (string-append "guideIntent=" (hash-get repair 'guideIntent))
-	       (string-append "guideCommand=" (hash-get repair 'guideCommand))
-	       (string-append "guideRole=" (hash-get repair 'guideRole))]
-      [])))
+;;; Provider wire boundary.  Human-readable finding lines are deliberately not
+;;; produced here; unified ASP validates and renders this structured value.
+;; : (-> TypeFinding Json )
+(def (policy-finding-json finding)
+  (let ((packet
+         (hash (ruleId (type-finding-rule-id finding))
+               (severity (type-finding-severity finding))
+               (path (type-finding-path finding))
+               (selector (or (type-finding-selector finding) ""))
+               (message (type-finding-message finding))
+               (details (or (type-finding-details finding) (hash)))))
+        (repair (finding-agent-repair-json finding)))
+    (when repair
+      (hash-put! packet 'agentRepair repair))
+    packet))
 
 ;;; Boundary:
 ;;; - finding-guide-route reads the central agent rule catalog.

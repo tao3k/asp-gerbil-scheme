@@ -1,7 +1,11 @@
 (export building-request-performance-test)
 
 (import :std/test
-        :asp-gerbil-scheme/src/building/facade)
+        :asp-gerbil-scheme/src/building/facade
+        (only-in :asp-gerbil-scheme/src/testing/execution-profile
+                 declare-gxtest-serial))
+
+(declare-gxtest-serial timing-sensitive-building)
 
 (def (elapsed-ms thunk)
   (let (start (time->seconds (current-time)))

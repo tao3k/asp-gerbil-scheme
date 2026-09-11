@@ -7,6 +7,7 @@
         asp-gerbil-scheme-package-native-spec
         asp-gerbil-scheme-package-builder-profile
         asp-gerbil-scheme-package-build-profile
+        asp-gerbil-scheme-package-generated-modules
         asp-gerbil-scheme-package-modules
         asp-gerbil-scheme-package-source-roots
         asp-gerbil-scheme-package-exclude-directories
@@ -26,6 +27,8 @@
                  +default-excluded-module-files+)
         (only-in "./source-coverage"
                  asp-gerbil-scheme-source-coverage)
+        (only-in "./generated-artifact"
+                 asp-gerbil-scheme-project-generated-modules)
         (only-in "../building/build-script"
                  framework-apply-build-core-policy!)
         (only-in :std/misc/path path-directory path-expand path-normalize)
@@ -107,28 +110,32 @@
 
 (def (asp-gerbil-scheme-package-native-spec package-spec)
   (let ((projector (.get package-spec native-spec-projector))
-        (native-spec (.get package-spec native-spec)))
-    (cond
-     ((procedure? projector)
-      (projector package-spec))
-     (projector
-      (error "Package Spec native-spec-projector must be a procedure"
-             projector))
-     (native-spec
-      native-spec)
-     (else
-      (let (test-roots
-            (asp-gerbil-scheme-builder-profile-test-roots
-             (asp-gerbil-scheme-package-builder-profile package-spec)))
-        (filter
-         (lambda (module)
-           (not
-            (ormap
-             (lambda (root)
-               (asp-gerbil-scheme-builder-profile-module-under-root?
-                module root))
-             test-roots)))
-         (asp-gerbil-scheme-package-modules package-spec)))))))
+        (native-spec (.get package-spec native-spec))
+        (generated-modules
+         (asp-gerbil-scheme-package-generated-modules package-spec)))
+    (asp-gerbil-scheme-project-generated-modules
+     (cond
+      ((procedure? projector)
+       (projector package-spec))
+      (projector
+       (error "Package Spec native-spec-projector must be a procedure"
+              projector))
+      (native-spec
+       native-spec)
+      (else
+       (let (test-roots
+             (asp-gerbil-scheme-builder-profile-test-roots
+              (asp-gerbil-scheme-package-builder-profile package-spec)))
+         (filter
+          (lambda (module)
+            (not
+             (ormap
+              (lambda (root)
+                (asp-gerbil-scheme-builder-profile-module-under-root?
+                 module root))
+              test-roots)))
+          (asp-gerbil-scheme-package-modules package-spec)))))
+     generated-modules)))
 
 ;; The macro-generated spec procedure is the direct std/make boundary used by
 ;; clan/building. A PackageSpec remains the POO owner;
@@ -171,6 +178,7 @@
              (roots ["."])
              (exclude-directories #f)
              (exclude-modules [])
+             (generated-modules [])
              (spec-projector asp-gerbil-scheme-package-native-spec)
              (native-spec-projector #f)
              (native-spec #f))
@@ -179,5 +187,6 @@
               (asp-gerbil-scheme-package-builder-profile profile)
               (asp-gerbil-scheme-package-modules modules)
               (asp-gerbil-scheme-package-source-roots roots)
+              (asp-gerbil-scheme-package-generated-modules generated-modules)
               (asp-gerbil-scheme-package-exclude-modules exclude-modules))
              (optional)))

@@ -92,7 +92,7 @@
          "(package: sample/agent-declarative-alist-metadata)\n")
         (write-text
          (string-append owner "/benchmark.ss")
-         ";;; -*- Gerbil -*-\n((max_total . 120ms)\n (maxCollectMs . 1000)\n (feature . flow-strand-registry-merge)\n (measurementPhases prepare-fixture measure-best assert-time-gate))\n")
+         ";;; -*- Gerbil -*-\n((benchmarkKind . scenario-e2e)\n (max_total . 120ms)\n (target_total . 20ms)\n (regression_budget . 100ms)\n (expected_over_input_budget . 10ms)\n (sampleCount . 20)\n (feature . flow-strand-registry-merge)\n (measurementPhases prepare-fixture measure-p95 assert-time-gate))\n")
         (let* ((index (collect-project root))
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))

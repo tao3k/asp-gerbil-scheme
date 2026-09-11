@@ -7,12 +7,6 @@ load(
 package(default_visibility = ["//visibility:private"])
 
 PROVIDER_ENTRY_SOURCES = [
-    "src/cli-dev-linker.ss",
-    "src/cli-install-linker.ss",
-    "src/cli-launcher.ss",
-    "src/cli-query.ss",
-    "src/cli-release-linker.ss",
-    "src/cli.ss",
     "src/commands/provider-runtime.ss",
     "src/provider-server.ss",
     "src/runtime/provider-http-json-server.ss",

@@ -29,9 +29,9 @@
    root))
 
 ;; : (-> PolicyReport Void)
-(def (asp-gerbil-scheme-display-project-profile-report report)
+(def (asp-gerbil-scheme-write-project-profile-packet report)
   ((eval
-    'asp-gerbil-scheme/src/policy/gxtest-report#display-project-policy-report)
+    'asp-gerbil-scheme/src/policy/gxtest-report#write-project-policy-report-packet)
    report))
 
 ;; Policy admission runs inside the same gxi process that loads build.ss. Its
@@ -66,6 +66,6 @@
              #t
              'profile-admission-start))
         (unless (equal? (hash-get report 'status) "pass")
-          (asp-gerbil-scheme-display-project-profile-report report))
+          (asp-gerbil-scheme-write-project-profile-packet report))
         (asp-gerbil-scheme-package-profile-admit-report! report))))
   (asp-gerbil-scheme-package-native-spec package-spec))

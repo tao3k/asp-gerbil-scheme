@@ -38,7 +38,7 @@
             (check (hash-get (hash-get details 'qualityReference)
                              'referencePattern)
                    => "gerbil-utils-predicate-combinator")
-            (check (not (not (member "gerbil-utils/base.ss#compose"
+            (check (not (not (member "gerbil-utils/base.ss#compose/rcompose"
                                      (hash-get (hash-get details
                                                          'qualityReference)
                                                'referenceExamples))))
@@ -47,7 +47,7 @@
             (check (not (not (member "hash-get" (hash-get details 'repeatedCallees)))) => #t)
             (check (hash-get repair 'active) => #t)
             (check (hash-get repair 'guideTopic) => "predicate-family-combinator")
-            (check (hash-get repair 'nextCommand)
+            (check (hash-get repair 'guideCommand)
                    => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-016 --intent style")))
 (test-case "agent policy keeps single-caller high-count field access advisory only"
           (let* ((root ".run/policy-field-access-single-caller-advisory")
@@ -103,14 +103,14 @@
                      => "field access helper repair requires high access count and cross-caller spread")
               (check (hash-get details 'detectionSourcePattern)
                      => "gerbil-utils-predicate-combinator")
-              (check (not (not (member "gerbil-utils/base.ss#compose"
+              (check (not (not (member "gerbil-utils/base.ss#compose/rcompose"
                                        (hash-get details 'detectionSourceOwners))))
                      => #t)
               (check (not (not (member "predicate-combinator"
                                        (hash-get details 'detectionQualitySignals))))
                      => #t)
               (check (hash-get details 'detectionWitness)
-                     => "gerbil-utils study: compose/cut/curry helpers and generator map/fold are style witnesses for bounded predicate or selector helper repair")
+                     => "gerbil-utils study: lambda-match/lambda-ematch, fun, compose/rcompose, cut/curry/rcurry, and generator map/fold are style witnesses for bounded predicate or selector repair")
               (check (hash-get details 'requiredGroups)
                      => ["high-field-access-count"
                          "cross-caller-field-access"])
@@ -125,7 +125,7 @@
               (check (hash-get details 'callerCountGate) => 3)
               (check (hash-get repair 'active) => #t)
               (check (hash-get repair 'guideTopic) => "predicate-family-combinator")
-              (check (hash-get repair 'nextCommand)
+              (check (hash-get repair 'guideCommand)
                      => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-016 --intent style")))
     (test-case "agent policy reports emitter projection burst through multiple signals"
           (let* ((root ".run/policy-emitter-projection-burst")
@@ -155,13 +155,13 @@
                    => "emitter projection repair requires access density, field spread, and output boundary evidence")
             (check (hash-get details 'detectionSourcePattern)
                    => "gerbil-utils-projection-builder")
-            (check (not (not (member "gerbil-utils/base.ss#compose"
+                (check (not (not (member "gerbil-utils/base.ss#compose"
                                      (hash-get details 'detectionSourceOwners))))
                    => #t)
             (check (not (not (member "list-builder-output-shape"
                                      (hash-get details 'detectionQualitySignals))))
                    => #t)
-            (check (not (not (member "projection-builder"
+              (check (not (not (member "gerbil-utils-projection-builder"
                                      (hash-get details 'detectionProfilePrecedence))))
                    => #t)
             (check (hash-get details 'requiredGroups)
@@ -182,7 +182,7 @@
                    => #t)
             (check (hash-get repair 'active) => #t)
             (check (hash-get repair 'guideTopic) => "predicate-family-combinator")
-            (check (hash-get repair 'nextCommand)
+            (check (hash-get repair 'guideCommand)
                    => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-016 --intent style"))))
 (test-case "agent policy reports emitter projection burst through multiple signals"
           (let* ((root ".run/policy-emitter-projection-burst")
@@ -218,7 +218,7 @@
             (check (not (not (member "list-builder-output-shape"
                                      (hash-get details 'detectionQualitySignals))))
                    => #t)
-            (check (not (not (member "projection-builder"
+            (check (not (not (member "gerbil-utils-projection-builder"
                                      (hash-get details 'detectionProfilePrecedence))))
                    => #t)
             (check (hash-get details 'requiredGroups)
@@ -239,6 +239,6 @@
                    => #t)
             (check (hash-get repair 'active) => #t)
             (check (hash-get repair 'guideTopic) => "predicate-family-combinator")
-            (check (hash-get repair 'nextCommand)
+            (check (hash-get repair 'guideCommand)
                    => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-016 --intent style")))
   ))

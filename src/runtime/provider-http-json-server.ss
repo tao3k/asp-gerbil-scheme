@@ -1,10 +1,12 @@
+;;; -*- Gerbil -*-
 ;;; The HTTP server owns transport lifecycle and JSON request/response framing.
-;;; Provider operations remain ordinary library calls, while the bounded memo
-;;; stores only validated projection responses and never source authority.
+;;; Runtime and stream state are validated POO objects; hashes exist only at
+;;; the HTTP wire boundary and never become semantic or lifecycle owners.
 (import :gerbil/gambit
         (only-in :asp-gerbil-scheme/src/runtime/provider-operation
                  provider-runtime-contract-receipt
                  provider-runtime-request->response)
+        :asp-gerbil-scheme/src/runtime/provider/interface
         (only-in :std/format format)
         (only-in :std/io
                  call-with-output-string
@@ -32,15 +34,6 @@
     "ASP_PROVIDER_ARTIFACT_DIGEST"
     "ASP_PROVIDER_REGISTRATION_DIGEST"
     "ASP_PROVIDER_RUNTIME_CONTRACT_DIGEST"))
-;; : (Maybe HttpServer)
-(def *provider-http-server* #f)
-;; : Mutex
-(def *provider-request-stream-lock* (make-mutex 'provider-request-stream))
-;; : (List (Pair String RequestStreamState))
-(def *provider-request-streams* '())
-;; : Integer
-(def +provider-request-stream-frame-limit+ 1024)
-
 ;; : (-> (-> String (Maybe String)) Void)
 (def (validate-provider-http-json-environment! lookup)
   (for-each
@@ -115,11 +108,10 @@
 
 ;; : (-> String RuntimeError JsonObject)
 (def (runtime-error-response request-id error)
-  (hash ("schemaId" "agent.semantic-protocols.provider-runtime-response-frame")
-        ("schemaVersion" "1")
-        ("requestId" request-id)
-        ("outcome" "error")
-        ("error" (runtime-error->string error))))
+  (provider-runtime-response->json
+   (provider-runtime-error-response
+    request-id
+    (runtime-error->string error))))
 
 ;; : (-> JsonObject JsonObject)
 (def (provider-runtime-request-value->response request-value)
@@ -128,55 +120,61 @@
      (lambda (error) (runtime-error-response request-id error))
      (lambda () (provider-runtime-request->response request-value)))))
 
-;;; The request table is intentionally an association list consumed through
-;;; `assoc`; quasiquote preserves that public pair protocol without an
-;;; anonymous cons-built tuple handoff between helpers.
-;; : (-> String (List (Pair String RequestStreamState))
-;;        (List (Pair String RequestStreamState)))
+;; : (-> String [ProviderRequestStreamState] [ProviderRequestStreamState])
 (def (remove-request-stream stream-id streams)
-  (match streams
-    ([] [])
-    ([[candidate-id . state] . rest]
-     (if (string=? stream-id candidate-id)
-       rest
-       `((,candidate-id . ,state)
-         . ,(remove-request-stream stream-id rest))))))
+  (filter (lambda (state)
+            (not (string=? stream-id (provider-request-stream-id state))))
+          streams))
 
-;; : (-> String Integer Integer String RequestStreamOutcome)
-(def (accept-request-stream-frame! stream-id frame-index frame-count request-chunk)
-  (dynamic-wind
-    (lambda () (mutex-lock! *provider-request-stream-lock*))
+;; : (-> String [ProviderRequestStreamState]
+;;        (Maybe ProviderRequestStreamState))
+(def (find-request-stream stream-id streams)
+  (find (lambda (state)
+          (string=? stream-id (provider-request-stream-id state)))
+        streams))
+
+;; : (-> ProviderHttpRuntimeState String Integer Integer String
+;;        (Values Symbol Object))
+(def (accept-request-stream-frame! runtime stream-id frame-index frame-count
+                                   request-chunk)
+  (let ((lock (provider-http-runtime-stream-lock runtime))
+        (streams-cell (provider-http-runtime-streams-cell runtime)))
+   (dynamic-wind
+    (lambda () (mutex-lock! lock))
     (lambda ()
       (unless (and (string? stream-id) (> (string-length stream-id) 0)
                    (fixnum? frame-index) (>= frame-index 0)
                    (fixnum? frame-count) (> frame-count 1)
-                   (<= frame-count +provider-request-stream-frame-limit+)
+                   (<= frame-count (provider-http-runtime-frame-limit runtime))
                    (string? request-chunk))
         (error "provider runtime request stream frame identity is invalid"))
-      (let* ((pair (assoc stream-id *provider-request-streams*))
+      (let* ((streams (vector-ref streams-cell 0))
              (state
               (cond
-               (pair (cdr pair))
+               ((find-request-stream stream-id streams) => values)
                ((zero? frame-index)
-                (let (fresh (vector frame-count 0 '()))
-                  (set! *provider-request-streams*
-                        (cons (cons stream-id fresh) *provider-request-streams*))
-                  fresh))
+                (provider-request-stream-state stream-id frame-count 0 '()))
                (else (error "provider runtime request stream is absent")))))
-        (unless (and (= (vector-ref state 0) frame-count)
-                     (= (vector-ref state 1) frame-index))
-          (set! *provider-request-streams*
-                (remove-request-stream stream-id *provider-request-streams*))
+        (unless (and (= (provider-request-stream-frame-count state) frame-count)
+                     (= (provider-request-stream-next-index state) frame-index))
+          (vector-set! streams-cell 0
+                       (remove-request-stream stream-id streams))
           (error "provider runtime request stream order drift"))
-        (vector-set! state 1 (+ frame-index 1))
-        (vector-set! state 2 (cons request-chunk (vector-ref state 2)))
+        (let (advanced (provider-request-stream-advance state request-chunk))
         (if (= (+ frame-index 1) frame-count)
-            (let (request-text (apply string-append (reverse (vector-ref state 2))))
-              (set! *provider-request-streams*
-                    (remove-request-stream stream-id *provider-request-streams*))
-              (cons 'complete request-text))
-            (cons 'accepted frame-index))))
-    (lambda () (mutex-unlock! *provider-request-stream-lock*))))
+            (begin
+              (vector-set! streams-cell 0
+                           (remove-request-stream stream-id streams))
+              (values 'complete
+                      (apply string-append
+                             (reverse
+                              (provider-request-stream-chunks advanced)))))
+            (begin
+              (vector-set! streams-cell 0
+                           (cons advanced
+                                 (remove-request-stream stream-id streams)))
+              (values 'accepted frame-index))))))
+    (lambda () (mutex-unlock! lock)))))
 
 ;; : (-> HttpRequest HttpResponse Void)
 (def (health-handler request response)
@@ -211,8 +209,8 @@
                            (hash ("state" "failed")
                                  ("failure" "provider runtime endpoint requires POST")))))
 
-;; : (-> HttpRequest HttpResponse Void)
-(def (provider-runtime-stream-handler request response)
+;; : (-> ProviderHttpRuntimeState HttpRequest HttpResponse Void)
+(def (provider-runtime-stream-handler runtime request response)
   (if (eq? (http-request-method request) 'POST)
       (with-catch
        (lambda (error)
@@ -236,36 +234,39 @@
                 (stream-id (hash-ref frame "streamId" #f))
                 (frame-index (hash-ref frame "frameIndex" #f))
                 (frame-count (hash-ref frame "frameCount" #f))
-                (request-chunk (hash-ref frame "requestChunk" #f))
-                (outcome (accept-request-stream-frame!
-                          stream-id frame-index frame-count request-chunk)))
-           (if (eq? (car outcome) 'complete)
-               (write-json-response
-                response 200
-                (provider-runtime-request-value->response
-                 (u8vector->json (string->utf8 (cdr outcome)))))
-               (write-json-response
-                response 200
-                (hash ("schemaId"
-                       "agent.semantic-protocols.provider-runtime-request-stream-ack")
-                      ("schemaVersion" "1")
-                      ("streamId" stream-id)
-                      ("frameIndex" frame-index)
-                      ("state" "accepted")))))))
+                (request-chunk (hash-ref frame "requestChunk" #f)))
+           (call-with-values
+            (lambda ()
+              (accept-request-stream-frame!
+               runtime stream-id frame-index frame-count request-chunk))
+            (lambda (outcome value)
+              (if (eq? outcome 'complete)
+                  (write-json-response
+                   response 200
+                   (provider-runtime-request-value->response
+                    (u8vector->json (string->utf8 value))))
+                  (write-json-response
+                   response 200
+                   (hash ("schemaId"
+                          "agent.semantic-protocols.provider-runtime-request-stream-ack")
+                         ("schemaVersion" "1")
+                         ("streamId" stream-id)
+                         ("frameIndex" value)
+                         ("state" "accepted")))))))))
       (write-json-response
        response 405
        (hash ("state" "failed")
              ("failure" "provider runtime stream endpoint requires POST")))))
 
-;; : (-> HttpRequest HttpResponse Void)
-(def (shutdown-handler request response)
+;; : (-> ProviderHttpRuntimeState HttpRequest HttpResponse Void)
+(def (shutdown-handler runtime request response)
   (if (eq? (http-request-method request) 'POST)
       (begin
         (write-json-response response 200 (hash ("state" "draining")))
         (spawn (lambda ()
                  (thread-sleep! 0.001)
-                 (when *provider-http-server*
-                   (stop-http-server! *provider-http-server*)))))
+                 (stop-http-server!
+                  (provider-http-runtime-server runtime)))))
       (write-json-response response 405
                            (hash ("state" "failed")
                                  ("failure" "shutdown endpoint requires POST")))))
@@ -299,13 +300,21 @@
                    (required-environment "ASP_CLIENT_SERVER_HOST")))
          (endpoint (format "http://~a/" address))
          (server (start-http-server! backlog: 64 address))
+         (runtime (provider-http-runtime-state
+                   server
+                   (make-mutex 'provider-request-stream)
+                   (vector '())
+                   1024))
          (output (current-output-port)))
-    (set! *provider-http-server* server)
     (http-register-handler server "/health" health-handler)
     (http-register-handler server "/v1/provider-runtime" provider-runtime-handler)
     (http-register-handler server "/v1/provider-runtime-stream"
-                           provider-runtime-stream-handler)
-    (http-register-handler server "/shutdown" shutdown-handler)
+                           (lambda (request response)
+                             (provider-runtime-stream-handler
+                              runtime request response)))
+    (http-register-handler server "/shutdown"
+                           (lambda (request response)
+                             (shutdown-handler runtime request response)))
     (write-json (runtime-bootstrap endpoint) output)
     (newline)
     (force-output output)

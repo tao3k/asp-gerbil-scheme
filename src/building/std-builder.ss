@@ -83,12 +83,16 @@
    make-options
    toolchain))
 
+;; : (-> StdBuilder (List BuildOption) (List BuildOption))
 (def (std-builder-effective-options builder extra-options)
   (append (std-builder-make-options builder) extra-options))
 
+;; : (forall (s) (-> s (List s)))
+;; : (-> BuildSpec (List BuildSpec))
 (def (std-builder-spec-list spec)
   (if (list? spec) spec [spec]))
 
+;; : (-> StdBuilder BuildSpec (List BuildOption) BuildResult)
 (def (std-builder-run-spec! builder spec (extra-options []))
   (std-builder-run-spec/raw! builder spec extra-options))
 
@@ -109,7 +113,7 @@
                       options)))))
       result)))
 
-;; : (-> StdBuilder List [BuildOption] Any)
+;; : (-> StdBuilder BuildSpec (List BuildOption) Unit)
 (def (std-builder-clean-spec! builder spec (extra-options []))
   (let ((stage (std-builder-spec-list spec))
         (options (std-builder-effective-options builder extra-options)))
@@ -136,17 +140,17 @@
    after
    (std-builder-description builder)))
 
-;; : (forall (s) (-> s String))
 ;; default-std-builder-stage-label
-;; : (-> Any String)
+;; : (forall (s) (-> s String))
+;; : (-> BuildSpec String)
 (def (default-std-builder-stage-label spec)
   (if (and (pair? spec) (string? (car spec)))
     (car spec)
     "std/make"))
 
-;; : (forall (s c) (-> StdBuilder [s] (-> s c Boolean) [BuildStage]))
 ;; std-builder-stage-plan
-;; : (-> StdBuilder List Procedure List)
+;; : (forall (s c) (-> StdBuilder (List s) (-> s c Boolean) (List BuildStage)))
+;; : (-> StdBuilder (List BuildSpec) Procedure (List BuildStage))
 (def (std-builder-stage-plan builder
                               stage-specs
                               current-pred
@@ -165,9 +169,9 @@
       after))
    stage-specs))
 
-;; : (forall (s) (-> StdBuilder (-> s String) [Any] Procedure BuildProfile))
 ;; make-std-builder-profile
-;; : (-> StdBuilder Procedure List Procedure BuildProfile)
+;; : (forall (s) (-> StdBuilder (-> s String) (List BuildOption) Procedure BuildProfile))
+;; : (-> StdBuilder Procedure (List BuildOption) Procedure BuildProfile)
 (def (make-std-builder-profile builder
                                 (label-of default-std-builder-stage-label)
                                 (extra-options [])
@@ -180,15 +184,14 @@
    after
    (std-builder-description builder)))
 
-;; : (forall (s c) (-> String BuildProfile [s] (-> s c Boolean) c BuildRequest))
 ;; make-std-builder-request
-;; : (-> String BuildProfile List Procedure Any BuildRequest)
+;; : (forall (s c) (-> String BuildProfile (List s) (-> s c Boolean) c BuildRequest))
+;; : (-> String BuildProfile (List BuildSpec) Procedure BuildContext BuildRequest)
 (def (make-std-builder-request label profile stage-specs current-pred context)
   (make-build-request label profile stage-specs current-pred context))
 
-;; : (-> BuildRequest [BuildStage])
 ;; build-request-stage-plan
-;; : (-> BuildRequest List)
+;; : (-> BuildRequest (List BuildStage))
 (def (build-request-stage-plan request)
   (let (profile (build-request-profile request))
     (std-builder-stage-plan
@@ -199,15 +202,14 @@
      (build-profile-extra-options profile)
      (build-profile-after profile))))
 
-;; : (-> BuildRequest [BuildStageReceipt])
 ;; build-request-run!
-;; : (-> BuildRequest List)
+;; : (-> BuildRequest (List BuildStageReceipt))
 (def (build-request-run! request)
   (build-plan-run!
    (build-request-stage-plan request)
    (build-request-context request)))
 
-;; : (-> BuildRequest Any)
+;; : (-> BuildRequest (List Unit))
 (def (build-request-clean! request)
   (let (profile (build-request-profile request))
     (map (lambda (spec)
@@ -221,7 +223,7 @@
 (def (build-requests-run! requests)
   (apply append (map build-request-run! requests)))
 
-;; : (-> [BuildRequest] [Any])
+;; : (-> (List BuildRequest) (List (List Unit)))
 (def (build-requests-clean! requests)
   (map build-request-clean! requests))
 
@@ -278,7 +280,7 @@
   (build-requests-run!
    (package-source-stages->requests stages options)))
 
-;; : (-> [PackageSourceStage] [Any])
+;; : (-> (List PackageSourceStage) (List (List Unit)))
 (def (package-source-stages-clean! stages)
   (build-requests-clean!
    (package-source-stages->requests stages [])))

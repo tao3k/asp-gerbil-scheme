@@ -35,10 +35,12 @@
       "languages/asp-gerbil-scheme/src/parser/exact-owner.ss",
       "languages/asp-gerbil-scheme/src/commands/projection-batch.ss",
       "languages/asp-gerbil-scheme/src/parser/package.ss",
-      "languages/asp-gerbil-scheme/src/protocol/command-catalog.ss",
       "languages/asp-gerbil-scheme/src/constants.ss",
       "languages/asp-gerbil-scheme/src/commands/project-resolution.ss",
       "languages/asp-gerbil-scheme/src/commands/provider-runtime.ss",
+      "languages/asp-gerbil-scheme/src/runtime/provider/types.ss",
+      "languages/asp-gerbil-scheme/src/runtime/provider/objects.ss",
+      "languages/asp-gerbil-scheme/src/runtime/provider/interface.ss",
       "languages/asp-gerbil-scheme/src/runtime/provider-operation.ss",
       "languages/asp-gerbil-scheme/src/runtime/provider-http-json-server.ss",
       "languages/asp-gerbil-scheme/src/provider-server.ss"

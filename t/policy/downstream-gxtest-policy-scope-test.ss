@@ -2,7 +2,6 @@
 ;;; Downstream gxtest policy-scope regression scenario.
 
 (import :std/test
-        (only-in :std/srfi/13 string-contains)
         :policy/agent-style-support
         :asp-gerbil-scheme/src/policy/gxtest
         :asp-gerbil-scheme/src/scenario/policy
@@ -53,9 +52,9 @@
         (check (hash-get input-report 'status) => "fail")
         (check (hash-get input-report 'files) => 4)
         (check (length input-r013) => 1)
-        (check (type-finding-path (car input-r013)) => "src/cli.ss")
+        (check (type-finding-path (car input-r013)) => "src/provider-entry.ss")
         (check (hash-get expected-report 'status) => "pass")))
-    (test-case "policy report output stays compact by default"
+    (test-case "policy report exposes only the shared ASP packet"
       (let* ((scenario-id +downstream-gxtest-policy-scope-scenario+)
              (scenario
               (make-policy-scenario
@@ -64,13 +63,11 @@
              (input-report
               (policy-report (policy-scenario-input-root scenario)
                              ["t/unit-tests.ss"]))
-             (output
-              (call-with-output-string
-               (lambda (out)
-                 (parameterize ((current-output-port out))
-                   (display-project-policy-report input-report))))))
-        (check (not (not (string-contains output "[gerbil-gxtest] status=fail")))
-               => #t)
-        (check (not (not (string-contains output "|agent-repair-rule "))) => #t)
-        (check (string-contains output "|agent-repair rule=") => #f)
-        (check (string-contains output "|finding-detail") => #f)))))
+             (packet (project-policy-report-packet input-report)))
+        (check (hash-get packet 'schemaId)
+               => "agent.semantic-protocols.semantic-language-policy-report")
+        (check (hash-get packet 'schemaVersion) => "1")
+        (check (hash-get packet 'languageId) => "gerbil-scheme")
+        (check (hash-get packet 'status) => "fail")
+        (check (length (hash-get packet 'findings))
+               => (gxtest-report-finding-count input-report))))))

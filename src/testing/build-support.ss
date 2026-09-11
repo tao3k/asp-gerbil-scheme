@@ -19,7 +19,10 @@
 
 ;; : (List Path)
 (def +testing-build-framework-dependency-stamps+
-  '("asp-gerbil-scheme/src/benchmark/gate.ssi"
+  '("asp-gerbil-scheme/src/benchmark/statistics.ssi"
+    "asp-gerbil-scheme/src/benchmark/fixture-model.ssi"
+    "asp-gerbil-scheme/src/benchmark/fixture-contract.ssi"
+    "asp-gerbil-scheme/src/benchmark/gate.ssi"
     "asp-gerbil-scheme/src/testing/model.ssi"
     "asp-gerbil-scheme/src/testing/scope.ssi"
     "asp-gerbil-scheme/src/testing/scenario.ssi"

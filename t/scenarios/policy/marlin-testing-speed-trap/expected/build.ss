@@ -1,7 +1,6 @@
 ;;; -*- Gerbil -*-
 (import :gerbil/gambit
-        :asp-gerbil-scheme/src/testing/build
-        :asp-gerbil-scheme/src/testing/build-runner)
+        :asp-gerbil-scheme/build-api)
 
 (export marlin-speed-project
         marlin-speed-main)

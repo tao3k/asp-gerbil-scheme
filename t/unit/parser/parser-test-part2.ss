@@ -161,7 +161,8 @@
             (check (map poo-form-fact-slots (source-file-poo-forms file))
                    => (list ["name" "count"] '() '() '()))
             (check (map poo-form-fact-options (source-file-poo-forms file))
-                   => (list ["transparent:"] '() '() '()))
+                   => (list ["transparent:"] ["dispatchSource:instance"]
+                            '() '()))
             (check (map poo-form-fact-specializers (source-file-poo-forms file))
                    => (list '() '() '() ["widget:<Widget>"]))
             (check (map poo-form-fact-specializer-types (source-file-poo-forms file))
@@ -173,22 +174,26 @@
                        "let*"
                        "let*"
                        "let*"
+                       "formal"
+                       "formal"
                        "let"
                        "formal"
-                       "formal"
-                       "formal"
+                       "def"
                        "formal"])
+            (check (map binding-fact-name (source-file-bindings file))
+                   => ["value" "body" "stx" "label" "again" "n"
+                       "name" "rest" "count" "value" "select" "x"])
             (check (map call-fact-callee (source-file-calls file))
-                   => [":render"
-                       "open-input-string"
+                   => ["displayln"
                        "read-json"
-                       "displayln"
-                       "make-<Widget>"
+                       "open-input-string"
+                       ":render"
                        "with-widget"
+                       "make-<Widget>"
                        "make-widget"
                        "make-widget"
-                       "dispatch"
-                       "make-widget"])
+                       "make-widget"
+                       "dispatch"])
             (check (map (lambda (selector)
                           (selector-owner? selector "t/fixtures/parser/complex-syntax.ss"))
                         (map call-fact-selector (source-file-calls file)))
@@ -205,11 +210,11 @@
             (check (poo-form-fact-path type-form)
                    => "t/fixtures/parser/poo-define-type.ss")
             (check (poo-form-fact-supers type-form) => ["methods.table"])
-            (check (not (not (member "Key:" (poo-form-fact-slots type-form))))
+            (check (not (not (member "Key" (poo-form-fact-slots type-form))))
                    => #t)
-            (check (not (not (member "Value:" (poo-form-fact-slots type-form))))
+            (check (not (not (member "Value" (poo-form-fact-slots type-form))))
                    => #t)
-            (check (not (not (member ".validate:" (poo-form-fact-slots type-form))))
+            (check (not (not (member ".validate" (poo-form-fact-slots type-form))))
                    => #t)
             (check (not (not (member "slots:" (poo-form-fact-options type-form))))
                    => #t)))
@@ -224,47 +229,47 @@
             (check (map poo-form-fact-name forms) => ["F_q." "F_2^n." "F_2^8"])
             (check (map poo-form-fact-role forms) => ["type" "type" "type"])
             (check (poo-form-fact-supers generic-field) => ["expt<-mul-inv."])
-            (check (not (not (member ".q:" (poo-form-fact-slots generic-field))))
+            (check (not (not (member ".q" (poo-form-fact-slots generic-field))))
                    => #t)
-            (check (not (not (member ".mul:" (poo-form-fact-slots generic-field))))
+            (check (not (not (member ".mul" (poo-form-fact-slots generic-field))))
                    => #t)
-            (check (not (not (member ".n<-:" (poo-form-fact-slots generic-field))))
+            (check (not (not (member ".n<-" (poo-form-fact-slots generic-field))))
                    => #t)
-            (check (not (not (member ".<-n:" (poo-form-fact-slots generic-field))))
+            (check (not (not (member ".<-n" (poo-form-fact-slots generic-field))))
                    => #t)
             (check (poo-form-fact-supers binary-family) => ["F_q."])
-            (check (not (not (member ".p:" (poo-form-fact-slots binary-family))))
+            (check (not (not (member ".p" (poo-form-fact-slots binary-family))))
                    => #t)
-            (check (not (not (member ".element?:" (poo-form-fact-slots binary-family))))
+            (check (not (not (member ".element?" (poo-form-fact-slots binary-family))))
                    => #t)
-            (check (not (not (member ".=?:"
+            (check (not (not (member ".=?"
                                       (poo-form-fact-slots binary-family))))
                    => #t)
             (check (poo-form-fact-supers byte-field) => ["F_2^n."])
-            (check (poo-form-fact-slots byte-field) => [".n:" ".xn:"])))
+            (check (poo-form-fact-slots byte-field) => [".n" ".xn"])))
     (test-case "native reader captures trie descriptor POO facts"
           (let* ((root (path-normalize "."))
                  (file (parse-source-file root "t/fixtures/parser/poo-trie-descriptor.ss"))
                  (forms (source-file-poo-forms file))
                  (trie (find-poo-form forms "Trie.")))
             (check (source-file-parse-error file) => #f)
-            (check (map poo-form-fact-name forms) => ["Trie."])
+            (check (map poo-form-fact-name forms) => ["Costep." "Trie."])
             (check (poo-form-fact-role trie) => "type")
             (check (poo-form-fact-supers trie) => ["Wrap." "methods.table"])
-            (check (not (not (member "Wrapper:" (poo-form-fact-slots trie))))
+            (check (not (not (member "Wrapper" (poo-form-fact-slots trie))))
                    => #t)
-            (check (not (not (member "Value:" (poo-form-fact-slots trie))))
+            (check (not (not (member "Value" (poo-form-fact-slots trie))))
                    => #t)
-            (check (not (not (member "T:" (poo-form-fact-slots trie))))
+            (check (not (not (member "T" (poo-form-fact-slots trie))))
                    => #t)
-            (check (not (not (member "Unstep:" (poo-form-fact-slots trie))))
+            (check (not (not (member "Unstep" (poo-form-fact-slots trie))))
                    => #t)
-            (check (not (not (member "Step:" (poo-form-fact-slots trie))))
+            (check (not (not (member "Step" (poo-form-fact-slots trie))))
                    => #t)
-            (check (not (not (member ".acons:" (poo-form-fact-slots trie))))
+            (check (not (not (member ".acons" (poo-form-fact-slots trie))))
                    => #t)
-            (check (not (not (member ".<-list:" (poo-form-fact-slots trie))))
+            (check (not (not (member ".<-list" (poo-form-fact-slots trie))))
                    => #t)
-            (check (not (not (member ".=?:"
+            (check (not (not (member ".=?"
                                       (poo-form-fact-slots trie))))
                    => #t)))))

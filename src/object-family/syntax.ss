@@ -8,7 +8,20 @@
 
 (def absent-poo-family-slot (cons 'absent-poo-family-slot []))
 
-;; : (-> POOObject Symbol Value Value )
+;; poo-family-ref
+;;   : (forall (a) (-> POOObject Symbol a a))
+;;   | doc m%
+;;       Read one generated POO-family slot.  Missing required slots retain the
+;;       native =.ref= failure; callers may supply an explicit default for an
+;;       optional projection.
+;;
+;;       # Examples
+;;
+;;       ```scheme
+;;       (poo-family-ref object 'status 'ready)
+;;       ;; => stored status, or 'ready when the slot is absent
+;;       ```
+;;     %
 (def (poo-family-ref value key (default absent-poo-family-slot))
   (if (.slot? value key)
     (.ref value key)
@@ -34,6 +47,7 @@
 ;;         (accessors family-ref
 ;;                    (required (job-name name))
 ;;                    (optional (job-status status 'ready))))
+;;       ;; => job-prototype, job, job-name, and job-status bindings
 ;;       ```
 ;;     %
 (defrules defpoo-object-family
@@ -66,6 +80,19 @@
                                           default-value) ...)))
    (begin
      (.def prototype-name prototype-slot ...)
+     (def (required-accessor-name value)
+       (reader value 'required-accessor-slot))
+     ...
+     (def (optional-accessor-name value)
+       (reader value 'optional-accessor-slot default-value))
+     ...))
+  ((_ (accessors reader
+                 (required
+                  (required-accessor-name required-accessor-slot) ...)
+                 (optional
+                  (optional-accessor-name optional-accessor-slot
+                                          default-value) ...)))
+   (begin
      (def (required-accessor-name value)
        (reader value 'required-accessor-slot))
      ...

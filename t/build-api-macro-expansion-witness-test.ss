@@ -7,11 +7,15 @@
         (only-in :asp-gerbil-scheme/src/building/commands
                  define-build-options
                  define-build-commands)
-        (only-in :asp-gerbil-scheme/src/building/declarative
-                 define-build-profile)
-        (only-in :asp-gerbil-scheme/src/building/facade
+        (only-in :asp-gerbil-scheme/build-api
+                 define-build-profile
+                 define-build-request
+                 std-build
+                 define-std-build
                  default-std-builder
-                 build-profile?)
+                 build-profile?
+                 build-request?
+                 build-request-label)
         (only-in :asp-gerbil-scheme/src/build-api/package-spec
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype
@@ -41,6 +45,23 @@
   extra-options: []
   after: #f)
 
+(define-build-request witness-build-request
+  label: "witness-build-request"
+  profile: witness-profile
+  stage-specs: []
+  current?: (lambda (_stage _context) #t)
+  context: 'witness-context)
+
+(define-std-build witness-std-build-request
+  label: "witness-std-build-request"
+  source: #f
+  make-options: []
+  label-of: car
+  after: #f
+  stage-specs: []
+  current?: (lambda (_stage _context) #t)
+  context: 'witness-std-context)
+
 (define-project-test witness-project-test
   project: (lambda () 'witness-project)
   run: (lambda (_project files) files)
@@ -62,6 +83,26 @@
       (check (witness-options! 'alpha 'beta) => '(alpha beta)))
     (test-case "build profile lowers to a typed profile value"
       (check (build-profile? witness-profile) => #t))
+    (test-case "request declarations lower through the stable facade"
+      (check (build-request? witness-build-request) => #t)
+      (check (build-request-label witness-build-request)
+             => "witness-build-request")
+      (check (build-request? witness-std-build-request) => #t)
+      (check (build-request-label witness-std-build-request)
+             => "witness-std-build-request")
+      (let (request
+            (std-build
+             label: "witness-expression-build-request"
+             source: #f
+             make-options: []
+             label-of: car
+             after: #f
+             stage-specs: []
+             current?: (lambda (_stage _context) #t)
+             context: 'witness-expression-context))
+        (check (build-request? request) => #t)
+        (check (build-request-label request)
+               => "witness-expression-build-request")))
     (test-case "build commands lower to ordinary procedures"
       (check (witness-spec! 'spec-options) => 'spec-options)
       (check (witness-compile! 'compile-options) => 'compile-options)

@@ -3,6 +3,7 @@
 
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/agent-poo-callees
+        :asp-gerbil-scheme/src/policy/agent-poo-loop-support
         :asp-gerbil-scheme/src/policy/agent-poo-object-literal
         :asp-gerbil-scheme/src/policy/agent-support
         :asp-gerbil-scheme/src/policy/model
@@ -56,39 +57,6 @@
 (def (poo-clone-override-loop-driver file call)
   (and (member (call-fact-callee call) +poo-clone-override-callees+)
        (poo-call-loop-driver file call)))
-
-;;; Loop lookup boundary:
-;;; - Match a POO call back to the parser-owned loop driver for the same caller.
-;;; - ormap keeps the search expression-level and stops at the first witness.
-;; : (-> SourceFile CallFact (U #f LoopDriverFact) )
-(def (poo-call-loop-driver file call)
-  (and (call-fact-caller call)
-       (ormap (lambda (loop)
-                (and (equal? (loop-driver-fact-caller loop)
-                             (call-fact-caller call))
-                     (poo-call-inside-loop-driver? call loop)
-                     loop))
-              (source-file-loop-driver-facts file))))
-
-;;; Loop locality boundary:
-;;; - Caller-level loop facts are not enough; a function can hoist one POO
-;;;   boundary value before or after the loop.
-;;; - Require the call selector to fall inside the parser-owned loop range.
-;; : (-> CallFact LoopDriverFact Boolean )
-(def (poo-call-inside-loop-driver? call loop)
-  (and (number? (call-fact-start call))
-       (number? (call-fact-end call))
-       (number? (loop-driver-fact-start loop))
-       (number? (loop-driver-fact-end loop))
-       (>= (call-fact-start call) (loop-driver-fact-start loop))
-       (<= (call-fact-end call) (loop-driver-fact-end loop))))
-
-;; : (-> LoopDriverFact String )
-(def (poo-loop-driver-agent-role loop)
-  (let (role (loop-driver-fact-role loop))
-    (if (equal? role "manual-loop-classification")
-      "manual-loop"
-      role)))
 
 ;; : (-> SourceFile CallFact LoopDriverFact TypeFinding )
 (def (poo-clone-override-loop-performance-finding file call loop)
@@ -348,7 +316,7 @@
          (trigger "loop-local repeated Lens .modify over POO object")
          (allowedUse "one-time Lens .modify and non-loop lens composition remain valid POO/MOP usage")
          (preferredConstruction "accumulate scalar lens target state and apply one final .cc outside the loop")
-         (performanceEvidence "gerbil-poo Lens .modify calls .set after .get, and slot-lens .set calls .cc; measured 2000 updates: 100 slots 1132ms, 500 slots 4489ms, scalar-final-.cc 0ms")
+         (performanceEvidence "gerbil-poo Lens .modify calls .set after .get, and slot-lens .set calls .cc; measured 2000 updates: 100 slots 1132ms, 500 slots 4489ms, scalar-final-.cc below 1ms at millisecond resolution")
          (sourceEvidence "gerbil-poo mop.ss:424-484")
          (next "replace loop-local Lens .modify with direct .ref/scalar accumulation and a final .cc boundary update"))))
 
@@ -441,7 +409,7 @@
          (trigger "loop-local repeated POO object construction")
          (allowedUse "boundary object construction and per-iteration construction with genuinely changing object shape remain valid POO usage")
          (preferredConstruction "hoist stable object construction or accumulate scalar/list/hash state and construct one final POO object")
-         (performanceEvidence "gerbil-poo object<-alist/object<-hash allocate a new object shape; measured 2000 loop constructions: object<-alist 500 slots 4114ms, object<-hash 500 slots 9522ms, hoisted object 0ms")
+         (performanceEvidence "gerbil-poo object<-alist/object<-hash allocate a new object shape; measured 2000 loop constructions: object<-alist 500 slots 4114ms, object<-hash 500 slots 9522ms, hoisted object below 1ms at millisecond resolution")
          (sourceEvidence "gerbil-poo object.ss:136-151")
          (next "move object<-alist/object<-hash/object<-fun/.o construction outside the loop or return scalar/list/hash loop state and construct once"))))
 
@@ -545,7 +513,7 @@
          (trigger "loop-local repeated POO debug instrumentation")
          (allowedUse "boundary trace-poo setup and one-off debugging remain valid POO diagnostics")
          (preferredConstruction "hoist trace-poo outside the loop and reuse the traced object")
-         (performanceEvidence "gerbil-poo trace-poo walks .all-slots and installs traced wrappers; measured 500 slots x 50 constructions 2942ms, hoisted traced object 0ms")
+         (performanceEvidence "gerbil-poo trace-poo walks .all-slots and installs traced wrappers; measured 500 slots x 50 constructions 2942ms, hoisted traced object below 1ms at millisecond resolution")
          (sourceEvidence "gerbil-poo debug.ss:57-77")
          (next "move trace-poo to a debug setup boundary before the loop, or guard it behind a one-time diagnostic flag"))))
 
@@ -597,7 +565,7 @@
          (trigger "loop-local repeated POO slot-spec mutation")
          (allowedUse "setup-time .def!/.putslot! shape definition remains valid POO usage")
          (preferredConstruction "define slots once at setup; use .put! for intentional value mutation or scalar loop state plus one final object update")
-         (performanceEvidence "gerbil-poo .putslot! mutates object slot specs; measured .def! 500 slots x 5000 at 2020ms while .put! value updates stayed 0ms")
+         (performanceEvidence "gerbil-poo .putslot! mutates object slot specs; measured .def! 500 slots x 5000 at 2020ms while .put! value updates stayed below 1ms at millisecond resolution")
          (cacheEvidence "after object instantiation, .def! changes slot specs but existing cached values remain visible until cache reset")
          (sourceEvidence "gerbil-poo object.ss:424-450")
          (next "move .def!/.putslot!/.setslot! outside the loop; if changing only the value, use .put! for mutable objects or final .cc for pure updates"))))
@@ -649,6 +617,6 @@
          (trigger "loop-local repeated POO multi-slot predicate")
          (allowedUse "single .slot? checks and boundary o?/slots predicates remain valid POO usage")
          (preferredConstruction "hoist stable o?/slots predicate results outside the loop; hoist the predicate closure when only the slot list is stable")
-         (performanceEvidence "gerbil-poo o?/slots maps .slot? across the slot list; measured 500 slots, 50 keys, 2000 loop checks 524ms, hoisted predicate result 0ms")
+         (performanceEvidence "gerbil-poo o?/slots maps .slot? across the slot list; measured 500 slots, 50 keys, 2000 loop checks 524ms, hoisted predicate result below 1ms at millisecond resolution")
          (sourceEvidence "gerbil-poo object.ss:169-217")
          (next "move o?/slots outside the loop when the object shape is stable; keep loop state to changed values only"))))

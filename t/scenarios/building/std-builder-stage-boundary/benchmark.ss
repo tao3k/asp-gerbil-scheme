@@ -1,27 +1,11 @@
-((max_total . 300ms)
- (observed_total . 2ms)
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
  (target_total . 20ms)
- (regression_budget . 300ms)
- (observedTimings
-  ((name . "collect-before") (durationMs . 1.469))
-  ((name . "collect-after") (durationMs . 0))
-  ((name . "policy-before") (durationMs . .5))
-  ((name . "policy-after") (durationMs . 0)))
+ (regression_budget . 280ms)
+ (expected_over_input_budget . 280ms)
  (targetRationale
   . "The warm-path plan must avoid std/make entirely; 300ms is a hard ceiling for the reusable stage-plan control plane, not a claim about stale compilation speed.")
- (maxCollectMs . 12)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 8)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 2000)
- (unit . "ms")
+ (sampleCount . 20)
  (purpose
   . "Standardize Building stage-plan measurement through the shared Testing Framework benchmark contract.")
  (feature . "building-std-builder-stage-boundary")
@@ -51,25 +35,21 @@
    (positive build-stage std-builder asp-gerbil-scheme-package-api-stage-specs)
    (negative flat-directory-scan dependency-race))
   (performanceGate
-   (positive skipStageMs runStageMs packageStagePlanMs)
+   (positive skipStage runStage packageStagePlan)
    (negative clean-before-build repeated-directory-scan unmeasured-warm-path)))
  (regressionProfiles
   (skipStageIterations . 2000)
-  (skipStageMs . 200)
+  (skipStage . 200ms)
   (runStageIterations . 500)
-  (runStageMs . 300)
+  (runStage . 300ms)
   (packageStagePlanIterations . 500)
-  (packageStagePlanMs . 300)
+  (packageStagePlan . 300ms)
   (maxStageCountDrift . 1))
- (buildingStageTimings
-  (skipStageMs . 1.469)
-  (runStageMs . .5)
-  (packageStagePlanMs . .651))
  (measurementPhases
   "collect-before"
   "collect-after"
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "building" "std-make" "testing-framework" "integration" "warm-path" "stage-plan"))

@@ -21,16 +21,21 @@ Current owners:
 - =src/build-api/source-coverage.ss= declares project coverage.
 - =src/build-api/package-spec.ss= declares the package API compile set.
 - =src/build-api/package-build.ss= owns warm package API compilation receipts.
-- =src/build-api/build-path-contract.ss= owns path-only build/install assertions.
-- =src/build-api/native-build.ss= owns native compile, release, and install.
+- =src/build-api/native-build.ss= owns library compilation and package-local
+  cleanup only.
+- =build-provider.ss= is the sole provider executable build owner. It imports
+  the stable Build API =defbuild-script= bridge, which projects the POO package
+  profile and host policy into one upstream =std/make= session.
 - =src/testing/gxtest-runner.ss= owns gxtest scope expansion, batching,
   benchmark-sensitive scheduling, selected-suite receipts, and phase receipts.
 - =src/testing/gxtest-smoke.ss= owns the default smoke file set.
 
 =build.ss= should only import those APIs, configure =+package-root+=, and
-dispatch =compile=, =install=, =clean=, =test=, =test-file=, and =test-full=.
-It must not carry a second copy of framework logic, compile a side runtime tree,
-or delete stale helper artifacts by hand.
+dispatch library =compile=, =clean=, =test=, =test-file=, and =test-full=.
+It must not carry a second copy of framework logic or compile the resident
+provider executable.  Provider builds run through =build-provider.ss= and the
+Build API bridge rather than a project-owned compiler, linker, scheduler, or
+receipt chain.
 
 * Scope Rules
 Policy assertions run with the same file scope as the selected =gxtest= run.
@@ -44,7 +49,7 @@ Rules:
   requires isolation
 - any full-project pass must be an explicit full/full-project target
 - unknown incremental scopes fail with a receipt instead of widening silently
-The complex guard for this rule is =testing-framework-upstream-build-improvement= plus the downstream loading scenario =downstream-testing-framework-api-loading= and the Marlin-derived =marlin-testing-speed-trap=. The first models a multi-suite project inside the framework. The second loads a scenario-owned downstream =build.ss= through package-qualified =:asp-gerbil-scheme/src/testing/*= imports. The third reproduces the agent-written Marlin build bottleneck where long gxtest lists and appended policy scope made one test action behave like a broad =gxtest-main= run. Together they prove that an explicit file selects only its suite, a manifest root expands only that suite, a scenario id runs no gxtest suites, and the framework-owned dispatch path remains under a =benchmark.ss= hot-path gate.
+The complex guard for this rule is =testing-framework-upstream-build-improvement= plus the downstream loading scenario =downstream-testing-framework-api-loading= and the Marlin-derived =marlin-testing-speed-trap=. The first models a multi-suite project inside the framework. The second loads a scenario-owned downstream =build.ss= through the stable package-qualified =:asp-gerbil-scheme/build-api= facade. The third reproduces the agent-written Marlin build bottleneck where long gxtest lists and appended policy scope made one test action behave like a broad =gxtest-main= run. Together they prove that an explicit file selects only its suite, a manifest root expands only that suite, a scenario id runs no gxtest suites, and the framework-owned dispatch path remains under a =benchmark.ss= hot-path gate.
 
 * Performance Receipt
 Warm default-smoke receipt after the framework boundary cleanup:

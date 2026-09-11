@@ -98,15 +98,19 @@
                    => ["shared-helper" "shared-helper"])))
 (test-case "agent policy accepts a test loading the exact macro case owner"
           (let* ((root ".run/policy-macro-runtime-source-linked")
-                 (_ (write-linked-macro-runtime-source-project root))
-                 (index (collect-project root))
+                 (build-graph
+                  (write-linked-macro-runtime-source-project root))
+                 (index
+                  (collect-selected-source-scope root build-graph))
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
             (check matching => [])))
 (test-case "agent policy accepts a transitive package import to the macro case owner"
           (let* ((root ".run/policy-macro-runtime-source-import-linked")
-                 (_ (write-import-linked-macro-runtime-source-project root))
-                 (index (collect-project root))
+                 (build-graph
+                  (write-import-linked-macro-runtime-source-project root))
+                 (index
+                  (collect-selected-source-scope root build-graph))
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
             (check matching => [])))

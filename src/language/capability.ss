@@ -60,7 +60,7 @@
       (package-module-posture-status package module-imports)
       "Gerbil package/module/namespace/import facts should preserve project module shape instead of flattening into small-Scheme files."
       "parser-owned-package-and-module-facts"
-      "asp search playbook --languages gerbil-scheme --rg -n -e <term> <path> --tantivy term <term>"
+      "asp search playbook --language gerbil-scheme --rg -n -e <term> <path> --tantivy 'title:<term>^2 OR body:<term>'"
       ["capability" "posture" "package" "module" "namespace" "import" "export"]
       (hash (files (length files))
             (package (capability-package-name package))

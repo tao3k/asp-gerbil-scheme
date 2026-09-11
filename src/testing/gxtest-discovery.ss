@@ -49,7 +49,9 @@
                  '(benchmark-contract-run
                    benchmark-contract-run/root
                    benchmark-run
-                   benchmark-run/result))
+                   benchmark-run/result
+                   policy-scenario-run/timed
+                   agent-style-policy-r013-scenario-context))
            (gxtest-benchmark-form? (car form))
            (gxtest-benchmark-form? (cdr form)))))
 
@@ -58,8 +60,13 @@
   (any gxtest-benchmark-form? (gxtest-file-forms file)))
 
 ;; : (-> Path Boolean)
+(def (gxtest-test-closure-benchmark? file)
+  (any gxtest-file-benchmark?
+       (gxtest-selected-test-files [file])))
+
+;; : (-> Path Boolean)
 (def (timing-sensitive-gxtest-file? file)
-  (or (gxtest-file-benchmark? file)
+  (or (gxtest-test-closure-benchmark? file)
       (gxtest-file-serial? file)))
 
 ;; : (-> Path Boolean)

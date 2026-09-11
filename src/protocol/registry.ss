@@ -3,7 +3,11 @@
 
 (import :asp-gerbil-scheme/src/constants
         :asp-gerbil-scheme/src/parser/facade
-        (only-in :asp-gerbil-scheme/src/protocol/command-catalog provider-registry-methods)
+        (only-in :asp-gerbil-scheme/src/runtime/provider-operation
+                 provider-runtime-operation-descriptors)
+        (only-in :asp-gerbil-scheme/src/runtime/provider/interface
+                 provider-operation-descriptor-operation
+                 provider-operation-descriptor->json)
         (only-in :std/sugar hash))
 
 (export language-registry)
@@ -22,48 +26,20 @@
       (languageId +language-id+)
       (providerId +provider-id+)
       (binary "asp-gerbil-scheme")
-      (execution "external-process")
+      (execution "provider")
+      (transport "http-json")
       (namespace "agent.semantic-protocols.languages.gerbil-scheme.asp-gerbil-scheme")
       (displayName +display-name+)
       (packageRoots [root])
-      (methods (provider-registry-methods))
+      (methods
+       (map provider-operation-descriptor-operation
+            provider-runtime-operation-descriptors))
       (schemas [(hash (schemaId "agent.semantic-protocols.asp-gerbil-scheme-info")
                       (schemaVersion "1")
                       (path "schemas/semantic-asp-gerbil-scheme-info.v1.schema.json"))])
       (methodDescriptors
-       [(hash (method "info")
-              (command "info")
-              (summary "Emit provider-local Gerbil package, configurable interface, agent steering, and closure command facts.")
-              (outputSchemaIds ["agent.semantic-protocols.asp-gerbil-scheme-info"]))
-         (hash (method "index/structural")
-               (command "projection --native-index --json")
-              (summary "Emit a lightweight native-parser structural interface; ASP Rust owns full index construction, graph topology, caching, and refresh planning.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-structural-index"]))
-         (hash (method "index/native-syntax-owner-facts")
-               (command "projection --native-index --owner <path> --json")
-              (summary "Emit owner-bounded native syntax facts for ASP-side fan-out and incremental structural indexing.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-native-syntax-fact-index"]))
-        (hash (method "query/exact-selector-native-v1")
-              (command "query")
-              (view "exact-selector")
-              (acceptsStdin #t)
-              (requiresQuery #t)
-              (supportsJson #t)
-              (supportsCompact #f)
-              (supportsPackageScope #f)
-              (outputSchemaIds
-               ["agent.semantic-protocols.provider-native-exact-projection"])
-              (packetSchemas
-               ["provider-native-exact-request.v1"
-                "provider-native-exact-response.v1"])
-              (invocation
-               (hash (argv
-                      ["asp-gerbil-scheme"
-                       "query"
-                       "--server-endpoint"
-                       "<resident-runtime-endpoint>"
-                       "--runtime-request-frame-stdin"]))))
-        ])
+       (map provider-operation-descriptor->json
+            provider-runtime-operation-descriptors))
       (source (hash
                (defaultExtensions +source-extensions+)
                (defaultConfigFiles +config-files+)

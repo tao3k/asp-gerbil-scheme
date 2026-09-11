@@ -12,9 +12,6 @@
                  call-with-framework-build-lease)
         (only-in :std/misc/path path-directory path-expand)
         (only-in :std/srfi/13 string-prefix?)
-        (only-in "./cli-gsc-options"
-                 asp-gerbil-scheme-cli-gsc-options
-                 asp-gerbil-scheme-cli-gsc-options-cache-key)
         (only-in "./package-build"
                  asp-gerbil-scheme-package-build-active-gerbil-path)
         (only-in "./package-receipt"
@@ -23,27 +20,16 @@
                  asp-gerbil-scheme-package-build-receipt-source-output-current?
                  asp-gerbil-scheme-package-build-receipt-status-line
                  asp-gerbil-scheme-package-build-receipt-write)
-        (only-in "./launcher-receipt"
+        (only-in "./module-artifacts"
                  asp-gerbil-scheme-build-module-source-file
                  asp-gerbil-scheme-build-module-output-file
+                 asp-gerbil-scheme-build-module-runtime-artifact-files
+                 asp-gerbil-scheme-build-module-optimizer-artifact-file
+                 asp-gerbil-scheme-build-module-optimizer-artifact-current?
                  asp-gerbil-scheme-build-module-artifact-files
-                 asp-gerbil-scheme-build-module-artifact-file
-                 asp-gerbil-scheme-cli-launcher-build-current?
-                 asp-gerbil-scheme-cli-launcher-build-receipt-status
-                 asp-gerbil-scheme-ensure-cli-launcher-inputs!
-                 asp-gerbil-scheme-ensure-install-launcher-inputs!
-                 asp-gerbil-scheme-install-launcher-build-current?
-                 asp-gerbil-scheme-install-launcher-build-receipt-status
-                 asp-gerbil-scheme-write-cli-launcher-build-receipt!
-                 asp-gerbil-scheme-write-install-launcher-build-receipt!)
-(only-in "./artifact-cleanup"
-         cleanup-compile-exe-artifacts!
-         cleanup-generated-artifacts!
-         cleanup-launcher-binary-artifacts!
-         cleanup-launcher-module-artifacts!)
-        (only-in "./build-path-contract"
-                 dev-launcher-binpath
-                 install-launcher-binpath)
+                 asp-gerbil-scheme-build-module-artifact-file)
+        (only-in "./artifact-cleanup"
+                 cleanup-generated-artifacts!)
         (only-in "./native-build-spec"
                  package-root
                  source-root
@@ -53,21 +39,13 @@
                  test-output-prefix
                  package-api-output-root
                  package-build-spec
-                 cli-binary-module-spec
-                 cli-binary-exe-spec
-                 cli-install-module-spec
-                 cli-install-spec
-                 provider-server-workspace-install-spec
-                 workspace-runtime-library-spec
-                 install-launcher-source-modules
-                 cli-launcher-source-modules
+                 library-spec
                  compile-spec)
         (only-in "./package-native-plan"
                  asp-gerbil-scheme-package-api-stage-specs)
         (only-in :gerbil/gambit current-jiffy jiffies-per-second))
 (export clean-target
         compile-target
-         install-target
         package-api-build-current?
         package-api-build-output-files
         package-api-build-receipt-path
@@ -76,24 +54,9 @@
          compile-package-api-if-stale
          run-package-api-build-request!
         compile-selected-gxtest-target
-        provider-workspace-install-target
+        prepare-unoptimized-module-set!
+        prepare-unoptimized-package-api-artifacts!
         write-package-api-build-receipt!)
-
-;; Build a relocatable ASP artifact with sibling bin/ and lib/ roots.  The
-;; launcher remains small and loads cold command modules from the library tree.
-;; : (-> Path Path)
-(def (provider-workspace-install-target artifact-root)
-  (configure-build-root! (current-directory))
-  (let (module-spec (workspace-runtime-library-spec))
-    (cleanup-launcher-module-artifacts!
-     (package-api-output-root)
-     module-spec)
-    (make-target module-spec #f #f #f #f #f)
-    (compile-binary-artifact
-     (path-expand "bin/asp-gerbil-scheme" artifact-root)
-     module-spec
-     (provider-server-workspace-install-spec)
-     #f #f #f #f #f)))
 
 ;; : (-> PackageApiReceiptPath)
 (def (package-api-build-receipt-path)
@@ -122,6 +85,12 @@
 (def (package-api-module-artifact-files module)
   (asp-gerbil-scheme-build-module-artifact-files (package-api-output-root) module))
 
+;; : (-> ModulePath (List Path))
+(def (package-api-module-runtime-artifact-files module)
+  (asp-gerbil-scheme-build-module-runtime-artifact-files
+   (package-api-output-root)
+   module))
+
 ;; : (-> ModulePath Path)
 (def (package-api-module-output-file module)
   (asp-gerbil-scheme-build-module-artifact-file (package-api-output-root) module))
@@ -129,13 +98,60 @@
 ;; : (-> ModulePath Boolean)
 (def (package-api-module-current? module)
   (let ((source (build-module-source-file module))
-        (candidates (package-api-module-artifact-files module)))
+        (candidates (package-api-module-runtime-artifact-files module)))
     (let loop ((remaining candidates))
       (and (pair? remaining)
            (or (asp-gerbil-scheme-package-build-receipt-source-output-current?
                 source
                 (car remaining))
                (loop (cdr remaining)))))))
+
+;; : (-> Path (List ModulePath) Boolean)
+(def (unoptimized-module-set-has-incoherent-optimizer-artifact?
+      output-root modules)
+  (let loop ((remaining modules))
+    (and (pair? remaining)
+         (or (let (optimizer
+                   (asp-gerbil-scheme-build-module-optimizer-artifact-file
+                    output-root
+                    (car remaining)))
+               (and (file-exists? optimizer)
+                    (not
+                     (asp-gerbil-scheme-build-module-optimizer-artifact-current?
+                      output-root
+                      (car remaining)))))
+             (loop (cdr remaining))))))
+
+;; A stale SSXI file can rewrite a consumer to a specialized runtime binding
+;; that an unoptimized producer no longer emits. Invalidate the complete
+;; selected module set at the Build API boundary so std/make rebuilds producer
+;; and consumers in one coherent artifact profile.
+;; : (-> Path (List ModulePath) Boolean)
+(def (prepare-unoptimized-module-set! output-root modules)
+  (if (unoptimized-module-set-has-incoherent-optimizer-artifact?
+       output-root
+       modules)
+    (begin
+      (cleanup-generated-artifacts!
+       (apply append
+              (map (lambda (module)
+                     (asp-gerbil-scheme-build-module-artifact-files
+                      output-root
+                      module))
+                   modules)))
+      #t)
+    #f))
+
+;; : (-> Boolean)
+(def (prepare-unoptimized-package-api-artifacts!)
+  (let (invalidated?
+        (prepare-unoptimized-module-set!
+         (package-api-output-root)
+         (package-build-spec)))
+    (when invalidated?
+      (cleanup-generated-artifacts!
+       [(package-api-build-receipt-path)]))
+    invalidated?))
 
 ;; : (-> BuildReceiptStatus)
 (def (package-api-build-receipt-status)
@@ -177,7 +193,16 @@
     (newline)
     (force-output)))
 
-;; : (-> Void)
+;; : (-> Path Void)
+(def (ensure-directory! path)
+  (unless (file-exists? path)
+    (let (parent (path-directory path))
+      (when (and parent
+                 (not (string=? parent ""))
+                 (not (string=? parent path)))
+        (ensure-directory! parent))
+      (create-directory path))))
+
 ;; : (-> (Maybe List) Void)
 (def (write-package-api-build-receipt! (receipts #f))
   (let (stamp (package-api-build-receipt-path))
@@ -213,6 +238,7 @@
 (def (compile-package-api-with-receipt verbose force?)
   (ensure-build-root!)
   (current-directory package-root)
+  (prepare-unoptimized-package-api-artifacts!)
   (let (started-jiffy (current-jiffy))
     (display-build-progress verbose "package-api/lock" started-jiffy)
     (let (result
@@ -261,6 +287,15 @@
 (def (compile-selected-gxtest-target source-modules files)
   (ensure-build-root!)
   (current-directory package-root)
+  (prepare-unoptimized-module-set!
+   (package-api-output-root)
+   (map gxtest-source-module-path source-modules))
+  (prepare-unoptimized-module-set!
+   (path-expand (test-output-prefix)
+                (path-expand "lib"
+                             (asp-gerbil-scheme-package-build-active-gerbil-path
+                              package-root)))
+   (map gxtest-test-module-path files))
   (call-with-framework-build-lease
    (lambda ()
      (let* ((source-request
@@ -284,206 +319,36 @@
                      (build-request-run! test-request)))
          `((buildPlan . ,(build-plan-receipts->alist receipts))))))))
 
-;; : (-> Boolean Boolean Boolean Boolean Boolean Boolean Boolean Boolean Void)
-(def (compile-target verbose debug no-optimize optimized release full binary force?)
+;; : (-> Boolean Boolean Boolean Void)
+(def (compile-target verbose full force?)
   (ensure-build-root!)
   (current-directory package-root)
-  (let* ((build-optimize? (and optimized (not no-optimize)))
-         (effective-release? release)
-         (effective-optimized? optimized))
-    (if (and (not full) (or release binary))
-      (begin
-        (compile-package-api-with-receipt verbose force?)
-        (compile-cli-binary-if-stale (dev-launcher-binpath)
-                                     verbose debug build-optimize?
-                                     release effective-release? effective-optimized?))
-      (if (and (not full) (not release) (not binary))
-        (compile-package-api-with-receipt verbose force?)
-        (make-target (compile-spec full release binary)
-                     verbose debug build-optimize?
-                     effective-release? effective-optimized?)))
-     #!void))
-
-;; : (-> Path Boolean Boolean Boolean Boolean Boolean Boolean BuildReceiptStatus)
-(def (compile-cli-binary-if-stale binpath verbose debug build-optimize?
-                                  release? effective-release?
-                                  effective-optimized?)
-  (let* ((inputs-path
-          (asp-gerbil-scheme-ensure-cli-launcher-inputs!
-           package-root
-           release?
-           build-optimize?
-           effective-release?
-           effective-optimized?
-           (asp-gerbil-scheme-cli-gsc-options-cache-key)
-           (asp-gerbil-scheme-cli-gsc-options package-root)))
-         (status
-          (asp-gerbil-scheme-cli-launcher-build-receipt-status
-           package-root
-           source-root
-           (package-api-output-root)
-           release?
-           binpath
-           inputs-path
-           (cli-binary-module-spec release?)
-           (cli-launcher-source-modules release?))))
-    (display-package-api-build-receipt-status status)
-    (if (asp-gerbil-scheme-cli-launcher-build-current? status)
-      status
-      (begin
-        (compile-cli-binary binpath
-                            verbose debug build-optimize?
-                            release? effective-release?
-                            effective-optimized?)
-        (asp-gerbil-scheme-write-cli-launcher-build-receipt!
-         package-root
-         source-root
-         (package-api-output-root)
-         release?
-         binpath
-         inputs-path
-         (cli-binary-module-spec release?)
-         (cli-launcher-source-modules release?))
-        (asp-gerbil-scheme-cli-launcher-build-receipt-status
-         package-root
-         source-root
-         (package-api-output-root)
-         release?
-         binpath
-         inputs-path
-         (cli-binary-module-spec release?)
-         (cli-launcher-source-modules release?))))))
+  (if full
+    (make-target (compile-spec #t) verbose #f #f #f #f)
+    (compile-package-api-with-receipt verbose force?))
+  #!void)
 
 (def (clean-target)
   (ensure-build-root!)
   (current-directory package-root)
-  (let (binpath (dev-launcher-binpath))
-    (cleanup-launcher-binary-artifacts! binpath)
-    (cleanup-generated-artifacts!
-     (cons (package-api-build-receipt-path)
-           (package-api-build-output-files))))
+  (cleanup-generated-artifacts!
+   (cons (package-api-build-receipt-path)
+         (package-api-build-output-files)))
   #!void)
-
-;; : (-> Boolean Boolean Boolean Boolean Boolean Void)
-;; : (-> Boolean Boolean Boolean Boolean Boolean Boolean Void)
-(def (install-target verbose debug _no-optimize _optimized _release full (flag #f))
-  (ensure-build-root!)
-  (current-directory package-root)
-  (compile-install-binary-with-receipt (install-launcher-binpath flag)
-                                       verbose debug #f
-                                       #f #f full)
-  #!void)
-
-;; : (-> Path Boolean Boolean Boolean Boolean Boolean Boolean BuildReceiptStatus)
-(def (compile-install-binary-with-receipt binpath verbose debug build-optimize?
-                                          effective-release? effective-optimized?
-                                          force?)
-  (let* ((inputs-path
-          (asp-gerbil-scheme-ensure-install-launcher-inputs!
-           package-root
-           build-optimize?
-           effective-release?
-           effective-optimized?
-           (asp-gerbil-scheme-cli-gsc-options-cache-key)
-           (asp-gerbil-scheme-cli-gsc-options package-root)))
-         (status
-          (asp-gerbil-scheme-install-launcher-build-receipt-status
-           package-root
-           source-root
-           (package-api-output-root)
-           binpath
-           inputs-path
-           '()
-           (install-launcher-source-modules))))
-    (display-package-api-build-receipt-status status)
-    (if (and (not force?)
-             (asp-gerbil-scheme-install-launcher-build-current? status))
-      status
-      (begin (cleanup-launcher-binary-artifacts! binpath)
-        (compile-install-binary binpath
-                                verbose debug build-optimize?
-                                effective-release? effective-optimized?)
-        (asp-gerbil-scheme-write-install-launcher-build-receipt!
-         package-root
-         source-root
-         (package-api-output-root)
-         binpath
-         inputs-path
-         '()
-         (install-launcher-source-modules))
-        (asp-gerbil-scheme-install-launcher-build-receipt-status
-         package-root
-         source-root
-         (package-api-output-root)
-         binpath
-         inputs-path
-         '()
-         (install-launcher-source-modules))))))
-
-;; : (-> Path Boolean Boolean Boolean Boolean Boolean Path)
-(def (compile-install-binary binpath verbose debug build-optimize?
-                             effective-release? effective-optimized?)
-  (compile-binary-artifact
-    binpath
-    (cli-install-module-spec)
-    (cli-install-spec build-optimize?)
-    verbose debug build-optimize?
-    effective-release? effective-optimized?))
-
-;; : (-> Path Boolean Boolean Boolean Boolean Boolean Boolean Path)
-(def (compile-cli-binary binpath verbose debug build-optimize?
-                         release? effective-release? effective-optimized?)
-  (compile-binary-artifact
-    binpath
-    (cli-binary-module-spec release?)
-    (cli-binary-exe-spec release? build-optimize?)
-    verbose debug build-optimize?
-    effective-release? effective-optimized?))
-
-;; : (-> Path (List BuildSpec) (List BuildSpec) Boolean Boolean Boolean Boolean Boolean Path)
-(def (compile-binary-artifact binpath module-spec exe-spec
-                              verbose debug build-optimize?
-                              effective-release? effective-optimized?)
-  (let (started-jiffy (current-jiffy))
-    (display-build-progress verbose "launcher/build" started-jiffy)
-    (cleanup-launcher-module-artifacts! (package-api-output-root) module-spec)
-    (make-target module-spec
-                 verbose debug build-optimize?
-                 effective-release? effective-optimized?)
-    (cleanup-compile-exe-artifacts! binpath)
-    (make-target/bindir exe-spec
-                        verbose debug build-optimize?
-                        effective-release? effective-optimized?
-                        (path-directory binpath))
-    (cleanup-compile-exe-artifacts! binpath)
-    (display-build-progress verbose "launcher/complete" started-jiffy)
-    binpath))
-
-;; : (-> Path Void)
-(def (ensure-directory! path)
-  (unless (file-exists? path)
-    (let (parent (path-directory path))
-      (when (and parent
-                 (not (string=? parent ""))
-                 (not (string=? parent path)))
-        (ensure-directory! parent))
-      (create-directory path))))
 
 ;; : (-> (List BuildSpec) Boolean Boolean Boolean Boolean Boolean Void)
-;; : (-> String List Boolean Boolean Boolean Boolean Boolean (Maybe Path) List)
+;; : (-> String List Boolean Boolean Boolean Boolean Boolean List)
 (def (run-target-build! label spec verbose debug build-optimize?
-                        effective-release? effective-optimized?
-                        (bindir #f))
+                        effective-release? effective-optimized?)
   (let* ((builder
           (default-std-builder
            source-root
-           (append [verbose: verbose
-                    debug: (and debug 'env)
-                    optimize: build-optimize?
-                    build-release: effective-release?
-                    build-optimized: effective-optimized?
-                    prefix: (source-output-prefix)]
-                   (if bindir [bindir: bindir] []))))
+           [verbose: verbose
+            debug: (and debug 'env)
+            optimize: build-optimize?
+            build-release: effective-release?
+            build-optimized: effective-optimized?
+            prefix: (source-output-prefix)]))
          (profile
           (make-std-builder-profile
            builder
@@ -503,14 +368,3 @@
                      spec
                      verbose debug build-optimize?
                      effective-release? effective-optimized?))
-
-;; : (-> (List BuildSpec) Boolean Boolean Boolean Boolean Boolean Path Void)
-(def (make-target/bindir spec verbose debug build-optimize?
-                         effective-release? effective-optimized?
-                         bindir)
-  (ensure-directory! bindir)
-  (run-target-build! "native-target/bindir"
-                     spec
-                     verbose debug build-optimize?
-                     effective-release? effective-optimized?
-                     bindir))

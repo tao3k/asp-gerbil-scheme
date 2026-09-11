@@ -4,132 +4,92 @@
 
 (import :asp-gerbil-scheme/src/benchmark/fixture-model
         :asp-gerbil-scheme/src/benchmark/fixture-contract
+        :asp-gerbil-scheme/src/benchmark/memory
+        :asp-gerbil-scheme/src/benchmark/statistics
         :asp-gerbil-scheme/src/support/time
-        (only-in :std/sugar andmap ormap foldl))
+        (only-in :clan/timestamp call-with-timing))
 
 (export benchmark-default-max-total
-        benchmark-default-max-collect-ms
-        benchmark-default-max-parse-ms
-        benchmark-default-max-file-ms
-        benchmark-default-max-phase-ms
-        benchmark-default-observed-collect-ms
-        benchmark-default-observed-parse-ms
-        benchmark-default-observed-file-ms
-        benchmark-default-observed-phase-ms
-        benchmark-default-observed-total
+        benchmark-default-kind
         benchmark-default-target-total
         benchmark-default-regression-budget
         benchmark-default-expected-over-input-budget
-        benchmark-default-max-rss-mb
-        benchmark-default-memory-metric
-        benchmark-default-memory-unit
         benchmark-fixture-required-keys
         make-benchmark-fixture
         benchmark-fixture-ref
         benchmark-fixture-missing-keys
-        benchmark-fixture-memory-contract-pass?
-        benchmark-fixture-observed-timings-contract-pass?
-        benchmark-fixture-input-expected-comparison-pass?
-        benchmark-fixture-integration-scope?
-        benchmark-fixture-timing-class-contract-pass?
+        benchmark-fixture-regression-budget-contract-pass?
+        benchmark-fixture-kind-contract-pass?
+        benchmark-fixture-scenario-duration-contract-pass?
         benchmark-fixture-contract-pass?
-        benchmark-elapsed-micros
-        benchmark-elapsed-ms
-        benchmark-best-elapsed-micros
-        benchmark-best-elapsed-ms
+        benchmark-timing-source
+        benchmark-elapsed-nanos
+        benchmark-admission-percentile
         benchmark-run
         benchmark-run/result
         benchmark-receipt-pass?)
 
-;; benchmark-elapsed-micros
+;; : String
+(def benchmark-timing-source ":clan/timestamp#call-with-timing")
+
+;; : Integer
+(def benchmark-admission-percentile 95)
+
+;; benchmark-elapsed-nanos
 ;;   : (-> (-> Value) Integer)
 ;;   | doc m%
-;;       Measure one benchmark thunk with microsecond precision.
+;;       Measure one benchmark thunk with clan's upstream nanosecond timer.
 ;;     %
-(def (benchmark-elapsed-micros thunk)
-  (let (start-micros (monotonic-micros))
-    (thunk)
-    (duration-micros start-micros (monotonic-micros))))
+(def (benchmark-elapsed-nanos thunk)
+  (##gc)
+  (let-values (((elapsed-nanos ignored-result)
+                (call-with-timing thunk)))
+    (if (and (integer? elapsed-nanos) (> elapsed-nanos 0))
+      elapsed-nanos
+      (error "benchmark timing source returned non-positive duration"
+             elapsed-nanos))))
 
-;; benchmark-elapsed-micros/result
-;;   : (-> (-> Value) (Values Integer Value))
-;;   | doc m%
-;;       Measure one benchmark thunk and preserve its result for semantic gates.
-;;     %
-(def (benchmark-elapsed-micros/result thunk)
-  (let* ((start-micros (monotonic-micros))
-         (result (thunk))
-         (elapsed-micros (duration-micros start-micros
-                                          (monotonic-micros))))
-    (values elapsed-micros result)))
-
-;; benchmark-elapsed-ms
-;;   : (-> (-> Value) Number)
-;;   | doc m%
-;;       Return elapsed milliseconds while preserving sub-millisecond observations.
-;;     %
-(def (benchmark-elapsed-ms thunk)
-  (/ (benchmark-elapsed-micros thunk) 1000.0))
-
-;; benchmark-best-elapsed-micros
-;;   : (-> Integer (-> Value) Integer)
-;;   | doc m%
-;;       Return the best elapsed microseconds across positive attempts.
-;;     %
-;; : (forall (r) (-> Integer (-> r) (Maybe Number)))
-;; benchmark-best-elapsed-micros
-;; : (-> Integer Procedure (Maybe Number))
-(def (benchmark-best-elapsed-micros attempts thunk)
-  (if (<= attempts 0)
-    (error "benchmark attempts must be positive" attempts)
-    (apply min
-           (map (lambda (_) (benchmark-elapsed-micros thunk))
-                (iota attempts)))))
-
-;; benchmark-best-elapsed-micros/result
-;;   : (-> Integer (-> Value) (Values Integer Value))
-;;   | doc m%
-;;       Return the best elapsed microseconds and its corresponding result.
-;;     %
 (def (benchmark-result-attempt thunk)
-  (let-values (((elapsed result)
-                (benchmark-elapsed-micros/result thunk)))
-    (cons elapsed result)))
+  (##gc)
+  (let (memory-before (benchmark-memory-usage))
+    (let-values (((elapsed result)
+                  (call-with-timing thunk)))
+      (unless (and (integer? elapsed) (> elapsed 0))
+        (error "benchmark timing source returned non-positive duration"
+               elapsed))
+      (let (memory-after (benchmark-memory-usage))
+        (list elapsed
+              result
+              `((timingSource . ":clan/timestamp#call-with-timing")
+                (memorySource . ,benchmark-memory-source)
+                (gcPrecondition . ":gerbil/gambit###gc")
+                (memoryBefore . ,memory-before)
+                (memoryAfter . ,memory-after)
+                (memoryDelta
+                 .
+                 ,(map (lambda (after-entry)
+                         (let (before-entry
+                               (assq (car after-entry) memory-before))
+                           (cons (car after-entry)
+                                 (- (cdr after-entry)
+                                    (if before-entry
+                                      (cdr before-entry)
+                                      0)))))
+                       memory-after))))))))
 
-;; benchmark-better-attempt
-;;   : (-> MaybePair Pair Pair)
-;;   | doc m%
-;;       Keep the attempt pair with the lower elapsed microsecond value.
-;;     %
-(def (benchmark-better-attempt best attempt)
-  (cond
-   ((not best) attempt)
-   ((< (car attempt) (car best)) attempt)
-   (else best)))
-
-;; : (forall (r) (-> Integer (-> r) (Values Number r)))
-;; benchmark-best-elapsed-micros/result
-;; : (-> Integer Procedure Values)
-(def (benchmark-best-elapsed-micros/result attempts thunk)
+(def (benchmark-attempts attempts thunk)
   (if (<= attempts 0)
     (error "benchmark attempts must be positive" attempts)
-    (let (best
-          (foldl
-           (lambda (_ best)
-             (benchmark-better-attempt
-              best
-              (benchmark-result-attempt thunk)))
-           #f
-           (iota attempts)))
-      (values (car best) (cdr best)))))
+    (map (lambda (_) (benchmark-result-attempt thunk))
+         (iota attempts))))
 
-;; benchmark-best-elapsed-ms
-;;   : (-> Integer (-> Value) Number)
-;;   | doc m%
-;;       Return the best elapsed milliseconds across positive attempts.
-;;     %
-(def (benchmark-best-elapsed-ms attempts thunk)
-  (/ (benchmark-best-elapsed-micros attempts thunk) 1000.0))
+(def (benchmark-attempt-statistics attempts)
+  (benchmark-sample-statistics (map car attempts)))
+
+(def (benchmark-admission-attempt attempts)
+  (benchmark-select-sample attempts
+                           benchmark-admission-percentile
+                           car))
 
 ;; benchmark-run
 ;;   : (-> Alist (-> Value) Alist)
@@ -149,10 +109,8 @@
 ;; : (forall (v) (-> [(Pair Symbol v)] Number [(Pair Symbol v)]))
 ;; benchmark-receipt
 ;; : (-> Alist Number Alist)
-(def (benchmark-receipt fixture elapsed-micros)
-  (let* ((elapsed-nanos (micros->nanos elapsed-micros))
-         (elapsed-ms (/ elapsed-micros 1000.0))
-         (max-total (benchmark-fixture-ref fixture 'max_total))
+(def (benchmark-receipt fixture elapsed-nanos statistics runtime-stats)
+  (let* ((max-total (benchmark-fixture-ref fixture 'max_total))
          (max-total-ns (or (duration-literal->nanos max-total)
                            (error "invalid benchmark duration literal"
                                   'max_total
@@ -160,15 +118,18 @@
     (append
      (benchmark-fixture-projection-fields
       fixture
-      +benchmark-receipt-leading-fields+)
-     (list (cons 'elapsedMs elapsed-ms)
-           (cons 'elapsedMicros elapsed-micros)
+     +benchmark-receipt-leading-fields+)
+     (list (cons 'timingSource benchmark-timing-source)
            (cons 'elapsedNs elapsed-nanos)
+           (cons 'elapsed (duration-nanos->text elapsed-nanos))
+           (cons 'admissionStatistic 'p95)
+           (cons 'runtimeStats runtime-stats)
            (cons 'max_total max-total))
+     statistics
      (benchmark-fixture-projection-fields
       fixture
       +benchmark-receipt-budget-fields+)
-     (list (cons 'status (if (< elapsed-nanos max-total-ns)
+     (list (cons 'status (if (<= elapsed-nanos max-total-ns)
                            'pass
                            'fail))))))
 
@@ -178,24 +139,30 @@
 ;;       Run a fixture benchmark and return the complete receipt expected by tests.
 ;;     %
 (def (benchmark-run fixture thunk)
-  (benchmark-receipt
-   fixture
-   (benchmark-best-elapsed-micros
-    (benchmark-fixture-ref fixture 'iterations)
-    thunk)))
+  (let* ((attempts (benchmark-attempts
+                    (benchmark-fixture-ref fixture 'sampleCount)
+                    thunk))
+         (admission-attempt (benchmark-admission-attempt attempts)))
+    (benchmark-receipt fixture
+                       (car admission-attempt)
+                       (benchmark-attempt-statistics attempts)
+                       (caddr admission-attempt))))
 
 ;; benchmark-run/result
 ;;   : (-> Alist (-> Value) (Values Alist Value))
 ;;   | doc m%
-;;       Run a fixture benchmark and preserve the best attempt's result.
+;;       Run a fixture benchmark and preserve the p95 admission attempt result.
 ;;     %
 (def (benchmark-run/result fixture thunk)
-  (let-values (((elapsed-micros result)
-                (benchmark-best-elapsed-micros/result
-                 (benchmark-fixture-ref fixture 'iterations)
-                 thunk)))
-    (values (benchmark-receipt fixture elapsed-micros)
-            result)))
+  (let* ((attempts (benchmark-attempts
+                    (benchmark-fixture-ref fixture 'sampleCount)
+                    thunk))
+         (admission-attempt (benchmark-admission-attempt attempts)))
+    (values (benchmark-receipt fixture
+                               (car admission-attempt)
+                               (benchmark-attempt-statistics attempts)
+                               (caddr admission-attempt))
+            (cadr admission-attempt))))
 
 ;; benchmark-receipt-pass?
 ;;   : (-> Alist Boolean)

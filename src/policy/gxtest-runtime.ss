@@ -5,6 +5,7 @@
         (only-in ../constants +language-id+ +provider-id+)
         (only-in ../parser/model project-index-files)
         (only-in ../parser/selectors project-definitions)
+        (only-in ../parser/core collect-selected-source-scope)
         (only-in ../parser/test-source-scope collect-test-source-scope)
         (only-in ../support/time monotonic-micros duration-micros)
         (only-in ../types/core type-status)
@@ -41,14 +42,16 @@
         result))
     (thunk)))
 
-;; : (-> Root (List Path) (Maybe PolicyPhaseObserver) PolicyReport)
-(def (policy-report root files (phase! #f))
+;; Build API supplies the complete scoped graph.  Requested files remain a
+;; separate report field and must not be re-expanded into a second graph here.
+;; : (-> Root (List Path) (List Path) (Maybe PolicyPhaseObserver) PolicyReport)
+(def (policy-report root source-files requested-files (phase! #f))
   (let* ((index
           (policy-report-phase
            phase!
            "policy-collect"
            (lambda ()
-             (collect-test-source-scope root files))))
+             (collect-selected-source-scope root source-files))))
          (findings
           (policy-report-phase
            phase!
@@ -59,7 +62,8 @@
      phase!
      "policy-json"
      (lambda ()
-       (project-policy-report-json index findings "files" files)))))
+       (project-policy-report-json
+        index findings "files" requested-files)))))
 
 ;; : (-> ProjectIndex (List TypeFinding) String (Maybe (List Path)) PolicyReport)
 (def (project-policy-report-json index findings scope requested-files)

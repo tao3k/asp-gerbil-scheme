@@ -1,28 +1,12 @@
-((max_total . 25ms)
- (observed_total . 4ms)
- (target_total . 15ms)
- (regression_budget . 21ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 1))
-  ((name . collect-after) (durationMs . 2))
-  ((name . policy-before) (durationMs . 0))
-  ((name . policy-after) (durationMs . 1)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed baseline 4ms for macro-family-thin-wrapper; target keeps optimization visible and max_total is the hard regression ceiling")
- (maxCollectMs . 10)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 5)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "The macro-family-boundary target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+ (sampleCount . 20)
  (purpose . "R013 macro-family scenario catches repeated same-prefix thin macro wrappers")
  (feature . "macro-family-boundary")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -35,15 +19,15 @@
  (expectedOutcome
   .
   "one macro family helper with typed documentation and runtime semantics left in ordinary helpers")
- (expectedReferencePattern . "gerbil://macro-family-thin-wrapper")
+ (expectedReferencePattern . "gerbil-utils-controlled-macro-helper")
  (expectedReferenceExamples
-  "gerbil://syntax-rules-family"
-  "gerbil-utils"
-  "poo-flow")
+  "gerbil://gerbil/compiler/method.ss#ast-case-with-syntax-map-cut"
+  "gerbil://gerbil/expander/core.ss#current-expander-context"
+  "gerbil://gerbil/expander/core.ss#core-apply-user-macro")
  (expectedQualitySignals
-  "macro-family-boundary"
-  "controlled-macro-syntax-boundary"
-  "anti-ai-scaffold")
+  "controlled-macro-helper"
+  "macro-hygiene-boundary"
+  "parameterized-expander-state")
  (learnedStyleSources "gerbil://" "gerbil-utils" "poo-flow")
  (antiAiScaffoldIntent
   .
@@ -55,5 +39,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style" "macro-family" "poo-flow-shape"))

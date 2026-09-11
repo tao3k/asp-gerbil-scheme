@@ -55,7 +55,7 @@
 ;;       # Examples
 ;;
 ;;       ```scheme
-;;       (pair? (gxtest-file-forms "t/build-install-test.ss"))
+;;       (pair? (gxtest-file-forms "t/package-build-contract-test.ss"))
 ;;       ;; => #t
 ;;       ```
 ;;     %
@@ -92,7 +92,7 @@
 ;;       # Examples
 ;;
 ;;       ```scheme
-;;       (symbol? (gxtest-file-exported-suite "t/build-install-test.ss"))
+;;       (symbol? (gxtest-file-exported-suite "t/package-build-contract-test.ss"))
 ;;       ;; => #t
 ;;       ```
 ;;     %

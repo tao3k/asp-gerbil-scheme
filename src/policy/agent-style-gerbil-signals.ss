@@ -257,8 +257,24 @@
 (def (typed-combinator-style-gerbil-upstream-idiom-quality-facets file)
   (if (or (pair? (typed-combinator-style-list-combinator-facts file))
           (pair? (typed-combinator-style-loop-driver-facts file)))
-    ["gerbil-upstream-idiom-boundary"]
+    (append
+     ["gerbil-upstream-idiom-boundary"]
+     (if (typed-combinator-style-gerbil-upstream-hot-index-contract? file)
+       ["gerbil-upstream-hot-index-boundary"]
+       []))
     []))
+
+;;; The upstream performance profile is more specific than generic list/loop
+;;; repair only when the contract names both the hot path and its index.
+;;; Keeping this parser-owned prevents every manual list loop from inheriting
+;;; the compiler eq-hash reference merely because both share traversal facts.
+;; : (-> SourceFile Boolean )
+(def (typed-combinator-style-gerbil-upstream-hot-index-contract? file)
+  (ormap
+   (lambda (fact)
+     (and (typed-contract-fact-mentions-any? fact ["HotPath"])
+          (typed-contract-fact-mentions-any? fact ["Index"])))
+   (source-file-typed-contract-facts file)))
 
 ;; : (-> SourceFile (List String) )
 (def (typed-combinator-style-gerbil-upstream-idiom-signals file)
@@ -491,9 +507,9 @@
 ;;; - Emit only when parser-owned loop facts prove string cursor parsing drift.
 ;; : (-> SourceFile (List QualityFacet) )
 (def (typed-combinator-style-parser-combinator-boundary-quality-facets file)
-  (typed-combinator-style-facts->quality-facet
-   (typed-combinator-style-parser-combinator-boundary-facts file)
-   "parser-combinator-boundary"))
+  (if (pair? (typed-combinator-style-parser-combinator-boundary-facts file))
+    ["parser-combinator-boundary" "manual-parser-state-machine"]
+    []))
 
 ;;; Guidance boundary:
 ;;; - Manual cursor parsing is the high-impact AI scaffold this rule repairs.

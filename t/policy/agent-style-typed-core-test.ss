@@ -43,9 +43,9 @@
               (check (hash-get (type-finding-details finding) 'styleGuide)
                      => "typed-combinator-style")
               (check (hash-get (type-finding-details finding) 'expectedCommentShape)
-                     => "adjacent Gerbil contract projection block such as ;; : (forall (a) (-> (-> a a Order) (List a) (List a) Order))")
+                     => "adjacent Gerbil contract projection block; generic helpers should keep both the polymorphic generic reasoning line ;; : (forall (k v) (-> [(Pair k v)] [(Pair k v)] [(Pair k v)])) and a readable/domain summary such as ;; : (-> List Alist Alist)")
               (check (hash-get (type-finding-details finding) 'signatureShape)
-                     => "adjacent Gerbil contract/signature projection using ;; : (forall (a) (-> Input Output)), optional ;; | type aliases, U unions, Values, and Refine predicates")
+                     => "adjacent Gerbil contract/signature projection using human-readable polymorphic generic lines plus readable/domain lines such as ;; : (-> (Maybe Type) (Maybe Type) Boolean); every ;; : line is parser-validated")
               (check (hash-get (type-finding-details finding) 'contractLinePolicy)
                      => "multi-line typed-combinator-style contracts are allowed when needed to preserve precision")
               (check (hash-get (type-finding-details finding) 'compositionShape)
@@ -216,7 +216,7 @@
               (check (length matching) => 1)
               (check (hash-get details 'invalidTypedContractCount) => 1)
               (check (agent-style-member?
-                      "type-signature:List-requires-one-parameter"
+                      "type-signature[0]:List-requires-one-parameter"
                       (hash-get details 'invalidTypedContractReasons))
                      => #t)
               (check (hash-get example 'definition) => "ready?"))))

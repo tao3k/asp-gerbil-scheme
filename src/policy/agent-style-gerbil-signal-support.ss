@@ -8,7 +8,8 @@
 (export typed-combinator-style-facts->quality-facet
         typed-combinator-style-facts->signals
         typed-combinator-style-facts->targets
-        typed-contract-fact-mentions-any?)
+        typed-contract-fact-mentions-any?
+        typed-contract-fact-doc-mentions-any?)
 
 ;;; Facet helper boundary:
 ;;; - Converts proven parser facts into one public quality facet.
@@ -42,6 +43,23 @@
   (ormap (lambda (needle)
            (typed-contract-fact-mentions? fact needle))
          needles))
+
+;;; Adjacent typed documentation is parser-owned responsibility evidence.
+;;; This helper deliberately ignores arbitrary source text and consults only
+;;; the structured `docs` projection attached to the contract fact.
+;; : (-> TypedContractFact (List String) Boolean )
+(def (typed-contract-fact-doc-mentions-any? fact needles)
+  (let (metadata (typed-contract-fact-typed-comment fact))
+    (and metadata
+         (hash-key? metadata 'docs)
+         (ormap
+          (lambda (needle)
+            (ormap
+             (lambda (doc)
+               (and (hash-key? doc 'body)
+                    (string-contains (hash-get doc 'body) needle)))
+             (hash-get metadata 'docs)))
+          needles))))
 
 ;;; Text boundary:
 ;;; - This is bounded to parser-owned typed-contract fields.

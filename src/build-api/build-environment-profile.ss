@@ -42,6 +42,7 @@
 ;; The macro-generated spec procedure runs immediately before the upstream
 ;; std/make call.  Project the declared host environment into that process;
 ;; callers and workflow files do not reproduce host-specific mutations.
+;; : (-> BuildEnvironmentProfile Unit)
 (def (asp-gerbil-scheme-apply-build-environment-profile! profile)
   (for-each
    (lambda (binding)

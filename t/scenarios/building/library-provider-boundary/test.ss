@@ -1,14 +1,21 @@
 (import :std/test
         :clan/poo/object
-        :asp-gerbil-scheme/src/parser/facade
-        :asp-gerbil-scheme/src/build-api/package-spec
-        (only-in :asp-gerbil-scheme/src/build-api/builder-profile
+        "../../../../src/parser/facade"
+        (only-in :asp-gerbil-scheme/build-api
+                 asp-gerbil-scheme-package-spec!
+                 asp-gerbil-scheme-library-package-prototype
+                 asp-gerbil-scheme-package-native-spec
+                 asp-gerbil-scheme-package-build-profile
+                 asp-gerbil-scheme-package-modules
+                 asp-gerbil-scheme-package-source-roots
                  asp-gerbil-scheme-production-builder-profile)
         (only-in :std/srfi/13 string-contains))
 
 (export library-provider-boundary-test)
 
-(asp-gerbil-scheme-package-spec! library-package-spec-fixture
+(asp-gerbil-scheme-package-spec!
+ (library-package-spec-fixture
+  @ asp-gerbil-scheme-library-package-prototype)
   (spec library-build-spec-fixture)
   (modules ["src/parser/model.ss"])
   (role 'library)
@@ -17,7 +24,9 @@
   (exclude-directories [])
   (native-spec '("src/parser/model")))
 
-(asp-gerbil-scheme-package-spec! conventional-root-package-spec-fixture
+(asp-gerbil-scheme-package-spec!
+ (conventional-root-package-spec-fixture
+  @ asp-gerbil-scheme-library-package-prototype)
   (spec conventional-root-build-spec-fixture)
   (modules ["src/library.ss" "t/library-test.ss"])
   (role 'library)
@@ -28,7 +37,9 @@
   (filter (lambda (module) (not (string-contains module "test")))
           (asp-gerbil-scheme-package-modules package-spec)))
 
-(asp-gerbil-scheme-package-spec! projected-native-package-spec-fixture
+(asp-gerbil-scheme-package-spec!
+ (projected-native-package-spec-fixture
+  @ asp-gerbil-scheme-library-package-prototype)
   (spec projected-native-build-spec-fixture)
   (modules ["src/library.ss" "src/library-test-support.ss"])
   (role 'library)
@@ -40,12 +51,12 @@
 (def (downstream-build-api-imports)
   (map module-import-fact-module
        (source-file-module-imports
-        (parse-source-file "." "src/package-build-api.ss"))))
+        (parse-source-file "." "build-api.ss"))))
 
 ;; : (-> ModuleReference Boolean)
-(def (asp-product-module-reference? reference)
+(def (asp-product-entry-module-reference? reference)
   (ormap (lambda (fragment) (string-contains reference fragment))
-         '("cli" "provider" "testing" "package-native-plan")))
+         '("cli" "provider")))
 
 (def library-provider-boundary-test
   (test-suite "library-default and explicit-provider build boundary"
@@ -61,7 +72,7 @@
               library-package-spec-fixture)
              => ["src/parser/model.ss"])
       (check (.get library-package-spec-fixture source-catalog-authority)
-             => #f)
+             => 'project)
       (check (asp-gerbil-scheme-package-source-roots
               library-package-spec-fixture)
              => ["."])
@@ -80,7 +91,7 @@
              => ["src/library.ss"]))
     (test-case "downstream Build API excludes ASP product entry modules"
       (let (imports (downstream-build-api-imports))
-        (check (ormap asp-product-module-reference? imports) => #f)
-        (check (member "./build-api/package-spec" imports) ? pair?)
-        (check (member "./build-api/profile-build-spec" imports) ? pair?)
-        (check (member "./building/build-script" imports) ? pair?)))))
+        (check (ormap asp-product-entry-module-reference? imports) => #f)
+        (check (member "./src/build-api/package-spec" imports) ? pair?)
+        (check (member "./src/build-api/profile-build-spec" imports) ? pair?)
+        (check (member "./src/building/build-script" imports) ? pair?)))))

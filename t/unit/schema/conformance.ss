@@ -241,18 +241,24 @@
     (check (not (null? (json-get comparison "qualitySignals"))) => #t)))
 ;; Integer
 (def (check-structural-index-json-schema-conformance)
-  (let* ((index (collect-project "t/fixtures"))
+  (let* ((fixture-root "t/fixtures")
+         (complex-owner "parser/complex-syntax.ss")
+         (higher-order-owner "parser/higher-order.ss")
+         (index
+          (collect-selected-source-scope
+           fixture-root
+           [complex-owner higher-order-owner]))
          (packet (packet-json (structural-index-packet-json index)))
          (owner-packet
           (packet-json
            (native-syntax-owner-facts-packet-json
             index
-            (find-owner index "parser/complex-syntax.ss"))))
+            (find-owner index complex-owner))))
          (higher-order-packet
           (packet-json
            (native-syntax-owner-facts-packet-json
             index
-            (find-owner index "parser/higher-order.ss"))))
+            (find-owner index higher-order-owner))))
          (syntax-facts (json-get owner-packet "facts"))
          (higher-order-facts (json-get higher-order-packet "facts"))
          (macro-fact (find-syntax-fact syntax-facts "macro" "capture-safe"))
@@ -286,9 +292,9 @@
     (check (length (json-get packet "syntaxFacts")) => 0)
     (check (not (null? (json-get packet "nativeSyntaxFactSummaries"))) => #t)
     (check (json-get owner-packet "scope") => "owner")
-    (check (json-get owner-packet "query") => "parser/complex-syntax.ss")
+    (check (json-get owner-packet "query") => complex-owner)
     (check (json-get higher-order-packet "scope") => "owner")
-    (check (json-get higher-order-packet "query") => "parser/higher-order.ss")
+    (check (json-get higher-order-packet "query") => higher-order-owner)
     (check (not (null? syntax-facts)) => #t)
     (check (json-get macro-fact "source") => "native-parser")
     (check (json-get macro-fact "languageKind") => "defsyntax")

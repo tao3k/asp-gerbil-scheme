@@ -15,7 +15,7 @@
 ;; : (-> Relpath Form (List ModuleExportFact) )
 (def (module-export-facts-from-form relpath form)
   (filter-map (cut module-export-fact-from-stx relpath <>)
-              (cdr (stx-list-items form))))
+              (reverse (cdr (stx-list-items form)))))
 
 ;;; Boundary:
 ;;; - Item parsing keeps wrapper syntax, source spans, and public names on one export fact.

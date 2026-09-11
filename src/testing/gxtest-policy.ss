@@ -3,10 +3,13 @@
 
 (import (only-in :gerbil/expander import-module)
         (only-in :std/misc/path path-directory path-expand)
-        (only-in :std/sort sort)
         (only-in :std/srfi/13 string-prefix? string-suffix?)
         (only-in :std/sugar foldl hash-get hash-put!)
-        (only-in "../support/time" monotonic-micros duration-micros)
+        (only-in "../support/time"
+                 monotonic-micros
+                 duration-micros
+                 micros->nanos
+                 duration-nanos->text)
         (only-in "../build-api/package-receipt"
                  asp-gerbil-scheme-package-build-receipt-status
                  asp-gerbil-scheme-package-build-receipt-status-ref
@@ -21,7 +24,10 @@
                  source-output-prefix
                  source-root)
         (only-in "./gxtest-discovery"
+                 gxtest-selected-source-files
                  gxtest-selected-test-files)
+        (only-in "./gxtest-catalog"
+                 gxtest-test-files)
         (only-in "./gxtest-receipts"
                  ensure-directory!
                  file-set-cache-key)
@@ -40,7 +46,7 @@
         run-scoped-policy-if-stale)
 
 ;; : (-> (List Path) String)
-(def +scoped-policy-receipt-version+ 'asp-gerbil-scheme-scoped-policy-receipt.v2)
+(def +scoped-policy-receipt-version+ 'asp-gerbil-scheme-scoped-policy-receipt.v3)
 
 (def (scoped-policy-cache-key files)
   (file-set-cache-key
@@ -132,15 +138,14 @@
 ;;   : (-> (List Path) (List Path))
 ;;   | doc m%
 ;;       `scoped-policy-target-files` maps the selected gxtest files to the
-;;       exact policy source scope.  It preserves incremental behavior by
-;;       expanding only the files reachable from the selected tests, plus the
-;;       tiny policy-engine witness that keeps the harness gate live.
+;;       selected test closure used for request reporting.  Policy admission
+;;       itself consumes the package graph declared by Build API.
 ;;
 ;;       # Examples
 ;;
 ;;       ```scheme
-;;       (scoped-policy-target-files ["t/build-install-test.ss"])
-;;       ;; => selected source files plus the policy witness
+;;       (scoped-policy-target-files ["t/package-build-contract-test.ss"])
+;;       ;; => selected test files
 ;;       ```
 ;;     %
 (def (scoped-policy-target-files files)
@@ -148,14 +153,36 @@
     (scoped-policy-unique-paths
      (if (null? selected) files selected))))
 
+;;; Runtime cache boundary:
+;;; - The Production Graph and Testing Graph are immutable projections of the
+;;;   loaded Build API declarations for one package root.
+;;; - Receipt validation still stats every declared source on every warm call;
+;;;   only repeated import-graph expansion is memoized here.
+(def +scoped-policy-source-graph-cache-lock+
+  (make-mutex 'scoped-policy-source-graph-cache))
+(def *scoped-policy-source-graph-cache* #f)
+
+;; : (-> Path (List Path))
+(def (scoped-policy-source-graph root)
+  (with-lock
+   +scoped-policy-source-graph-cache-lock+
+   (lambda ()
+     (if (and *scoped-policy-source-graph-cache*
+              (equal? (car *scoped-policy-source-graph-cache*) root))
+       (cdr *scoped-policy-source-graph-cache*)
+       (let (graph
+             (map (lambda (file) (path-expand file root))
+                  (scoped-policy-unique-paths
+                   (append
+                    (asp-gerbil-scheme-source-coverage-files root)
+                    (gxtest-selected-source-files (gxtest-test-files))))))
+         (set! *scoped-policy-source-graph-cache* (cons root graph))
+         graph)))))
+
 ;; : (-> (List Path) (List Path))
-(def (scoped-policy-source-files files)
-  (sort (append
-         (scoped-policy-engine-source-files)
-         (map (lambda (file)
-                (path-expand file))
-              (scoped-policy-target-files files)))
-        string<?))
+(def (scoped-policy-source-files _files)
+  (ensure-build-root!)
+  (scoped-policy-source-graph package-root))
 
 ;; : (-> (List Path) Void)
 (def (write-scoped-policy-receipt! files)
@@ -206,10 +233,11 @@
 
 ;; : (-> String Integer String)
 (def (scoped-policy-phase-line name elapsed-micros)
-  (string-append "[asp-gerbil-scheme-scoped-policy-phase] name=" name
-                 " elapsedMicros=" (number->string elapsed-micros)
-                 " elapsedMs=" (number->string (quotient elapsed-micros 1000))
-                 "\n"))
+  (let (elapsed-nanos (micros->nanos elapsed-micros))
+    (string-append "[asp-gerbil-scheme-scoped-policy-phase] name=" name
+                   " elapsedNs=" (number->string elapsed-nanos)
+                   " elapsed=" (duration-nanos->text elapsed-nanos)
+                   "\n")))
 
 ;; : (-> String Integer Void)
 (def (display-scoped-policy-phase name elapsed-micros)
@@ -237,13 +265,15 @@
 (def (run-scoped-policy! files)
   (run-scoped-policy-phase "load-policy"
                            load-compiled-gxtest-policy!)
-  (let* ((policy-report
+  (let* ((source-files (scoped-policy-source-files files))
+         (policy-report
           (eval 'asp-gerbil-scheme/src/policy/gxtest-runtime#policy-report))
          (report
           (run-scoped-policy-phase "policy-report"
                                    (lambda ()
                                      (policy-report
                                       "."
+                                      source-files
                                       files
                                       display-scoped-policy-phase)))))
     (when (pair? (or (hash-get report 'findings) []))
@@ -251,7 +281,7 @@
        "load-policy-display"
        (lambda ()
          (import-module ':asp-gerbil-scheme/src/policy/gxtest-report #f #t)))
-      ((eval 'asp-gerbil-scheme/src/policy/gxtest-report#display-project-policy-report)
+      ((eval 'asp-gerbil-scheme/src/policy/gxtest-report#write-project-policy-report-packet)
        report))
     (when (not (equal? (hash-get report 'status) "pass"))
       (exit 1))))

@@ -2,7 +2,8 @@
 ;;; ASP product-native compilation plan.
 ;;; This owner is intentionally outside the downstream Package Spec facade:
 ;;; downstream projects load only the declarative Build API, while ASP's own
-;;; CLI/provider/test product may consume this complete native plan.
+;;; library/test control plane may consume this complete native plan.  The
+;;; resident provider executable is owned solely by build-provider.ss.
 
 (import (only-in :std/srfi/1 append-map))
 
@@ -19,16 +20,19 @@
     ("build-api/source-discovery.ss"
      "constants.ss")
     ("build-api/package-receipt.ss"
-     "build-api/cli-gsc-options.ss"
-     "build-api/launcher-receipt.ss"
-     "build-api/release-modules.ss"
-     "build-api/build-path-contract.ss"
+     "build-api/module-artifacts.ss"
+     "build-api/generated-artifact.ss"
      "build-api/builder-profile.ss"
      "support/time.ss")
     ("build-api/source-coverage.ss")
     ("build-api/package-spec.ss"
      "build-api/package-native-plan.ss")
-    ("benchmark/gate.ss")
+    ("benchmark/memory.ss"
+     "benchmark/statistics.ss"
+     "benchmark/fixture-model.ss")
+    ("benchmark/fixture-contract.ss")
+    ("benchmark/gate.ss"
+     "benchmark/micro-kernel.ss")
     ("benchmark/framework.ss")
     ("testing/model.ss")
     ("testing/scope.ss")
@@ -51,6 +55,7 @@
      "parser/support.ss"
      "parser/formals.ss"
      "parser/syntax-ast.ss"
+     "parser/syntax-macro-family.ss"
      "parser/syntax-support.ss"
      "parser/definition-syntax.ss"
      "parser/exact-owner.ss"
@@ -123,9 +128,11 @@
      "policy/agent-dependency-adapter.ss"
      "policy/agent-style-gerbil-signals.ss"
      "policy/gerbil-utils-source.ss"
+     "policy/agent-poo-loop-support.ss"
      "policy/agent-poo-loop-performance.ss"
      "policy/repair.ss")
     ("policy/agent-package-build-system.ss"
+     "policy/agent-style-shape-config.ss"
      "policy/agent-style-shape.ss"
      "policy/agent-style-quality.ss"
      "policy/agent-style-details.ss"
@@ -147,6 +154,7 @@
      "testing/gxtest-smoke.ss"
      "testing/gxtest-context.ss"
      "testing/gxtest-report.ss")
+    ("testing/gxtest-catalog.ss")
     ("testing/build-process.ss")
     ("testing/gxtest-syntax.ss")
     ("testing/memory-profile.ss" "testing/execution-profile.ss")
@@ -215,7 +223,7 @@
      "parser/runtime-contract.ss" "parser/selectors.ss"
      "parser/source-class.ss" "parser/source-file.ss" "parser/source-scope.ss"
      "parser/support.ss" "parser/syntax-ast.ss" "parser/syntax-calls.ss"
-     "parser/syntax-support.ss"
+     "parser/syntax-macro-family.ss" "parser/syntax-support.ss"
      "parser/syntax.ss" "parser/test-source-scope.ss"
      "parser/typed-comment-metadata.ss"
      "parser/typed-contract-comment-index.ss"
@@ -230,7 +238,8 @@
      "policy/agent-list-growth.ss" "policy/agent-list-random-access.ss"
      "policy/agent-macro-io.ss" "policy/agent-macro-protocol.ss"
      "policy/agent-package-build-system.ss" "policy/agent-poo-callees.ss"
-     "policy/agent-poo-loop-performance.ss" "policy/agent-poo-object-literal.ss"
+     "policy/agent-poo-loop-performance.ss" "policy/agent-poo-loop-support.ss"
+     "policy/agent-poo-object-literal.ss"
      "policy/agent-poo.ss" "policy/agent-source-scope.ss"
      "policy/agent-string-growth.ss"
      "policy/agent-style-destructuring-signals.ss"
@@ -240,7 +249,8 @@
      "policy/agent-style-gerbil-signal-support.ss"
      "policy/agent-style-gerbil-signals.ss" "policy/agent-style-message.ss"
      "policy/agent-style-performance-signals.ss"
-     "policy/agent-style-quality.ss" "policy/agent-style-shape.ss"
+     "policy/agent-style-quality.ss" "policy/agent-style-shape-config.ss"
+     "policy/agent-style-shape.ss"
      "policy/agent-style-steering.ss" "policy/agent-style.ss"
      "policy/agent-support.ss" "policy/agent.ss" "policy/catalog.ss"
      "policy/core.ss" "policy/dependency-adapter-profile.ss"
@@ -252,7 +262,7 @@
      "policy/repair.ss" "policy/streaming.ss")
     ("macro-governance/admission.ss" "macro-governance/facade.ss"
      "macro-governance/model.ss")
-    ("protocol/command-catalog.ss" "protocol/function-quality-facts.ss"
+    ("protocol/function-quality-facts.ss"
      "protocol/json-output.ss" "protocol/json.ss"
      "protocol/quality-shape-facts.ss" "protocol/registry.ss"
      "protocol/structural-facts.ss" "protocol/structural-index.ss"
@@ -269,10 +279,6 @@
      "commands/guide-sections.ss" "commands/guide.ss" "commands/info.ss"
      "commands/project-resolution.ss" "commands/projection-batch.ss"
      "commands/projection.ss" "commands/provider-runtime.ss")))
-
-;; : (List (List ModulePath))
-(def +package-api-launcher-stages+
-  '(("cli-launcher.ss")))
 
 ;; : (forall (A) (-> (List (List A)) (List A)))
 (def (flatten-stages stages)
@@ -293,7 +299,6 @@
           +package-api-build-api-stages+
           +package-api-command-prologue-stages+
           +package-api-directory-stages+
-          +package-api-launcher-stages+
           +package-api-epilogue-stages+))
 
 ;; : (-> (List (List ModulePath)))

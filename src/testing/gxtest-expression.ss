@@ -57,13 +57,16 @@
      " (unless (run-test-suite! "
      (datum-string (gxtest-file-exported-suite file))
      ") (set! ok #f))"
+     " (let (elapsed-ns (quotient (* (- (current-jiffy) start) 1000000000)"
+     " (jiffies-per-second)))"
      " (display \"[asp-gerbil-scheme-test-file] name="
      file
-     " elapsedMs=\")"
-     " (display (quotient (* (- (current-jiffy) start) 1000)"
-     " (jiffies-per-second)))"
+     " elapsedNs=\")"
+     " (display elapsed-ns)"
+     " (display \" elapsed=\")"
+     " (display (duration-nanos->text elapsed-ns))"
      " (newline)"
-     " (force-output))")
+     " (force-output)))")
     " #!void"))
 
 ;; : (-> (List Path) (U #f GxTestDelegateContract) (List Path))
@@ -85,7 +88,7 @@
 ;;       # Examples
 ;;
 ;;       ```scheme
-;;       (string? (gxtest-compiled-batch-expression ["t/build-install-test.ss"]))
+;;       (string? (gxtest-compiled-batch-expression ["t/package-build-contract-test.ss"]))
 ;;       ;; => #t
 ;;       ```
 ;;     %
@@ -117,7 +120,9 @@
                    " (add-load-path! \".\")"
                    " (add-load-path! \"src\")"
                    " (add-load-path! \"t\")"
-                   " (import :std/test) "
+                   " (import :std/test"
+                   " (only-in :asp-gerbil-scheme/src/support/time"
+                   " duration-nanos->text)) "
                    (join-strings (map gxtest-source-load-clause files) " ")
                    " (let (ok #t)"
                    (join-strings (map gxtest-source-load-run-clause files) " ")

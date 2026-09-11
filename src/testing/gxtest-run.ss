@@ -38,8 +38,12 @@
 
 ;; A multi-file suite must cross a process boundary between files so loaded
 ;; modules and test state cannot accumulate for the lifetime of the full run.
+;; A timing-sensitive or shared-resource declaration also requires that
+;; boundary when it is the only selected file; otherwise the fast in-process
+;; path would silently bypass its declared execution profile.
 (def (gxtest-suite-process-isolated? files)
-  (> (length files) 1))
+  (or (> (length files) 1)
+      (pair? (serial-gxtest-files files))))
 
 ;; split-in-process-gxtest-files
 ;;   : (-> (List Path) (Values (List Path) (List Path)))

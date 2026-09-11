@@ -1,6 +1,6 @@
 (import :std/test
         :clan/poo/object
-        :asp-gerbil-scheme/provider-package-spec)
+        "../../../../provider-package-spec")
 
 (export explicit-provider-boundary-test)
 

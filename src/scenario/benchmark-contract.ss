@@ -3,6 +3,8 @@
 
 (import :gerbil/gambit
         (only-in :std/sugar hash hash-put!)
+        (only-in :asp-gerbil-scheme/src/benchmark/fixture-model
+                 benchmark-scenario-max-total)
         :asp-gerbil-scheme/src/support/time)
 
 (export scenario-benchmark-contract/path
@@ -12,34 +14,25 @@
 ;; : (List BenchmarkContractKey)
 (def +scenario-benchmark-required-duration-fields+
   '(max_total
-    observed_total
     target_total
-    regression_budget))
+    regression_budget
+    expected_over_input_budget))
 
 ;; : (List BenchmarkContractKey)
 (def +scenario-benchmark-required-value-fields+
-  '(maxCollectMs
-    observedCollectMs
-    maxParseMs
-    observedParseMs
-    maxFileMs
-    observedFileMs
-    maxPhaseMs
-    observedPhaseMs
-    observedTimings
-    targetRationale))
+  '(benchmarkKind targetRationale))
 
 ;; : (List (Cons BenchmarkContractKey BenchmarkContractValue))
 (def +scenario-benchmark-default-fields+
   '((expected_over_input_note . #f)
-    (iterations . 1)
-    (unit . "ms")
+    (sampleCount . 20)
     (purpose . "scenario timing")
     (feature . "policy-scenario")
     (rule . #f)
     (optimizationFocus . #f)
     (inputShape . #f)
     (expectedOutcome . #f)
+    (misuseGuard . #f)
     (nativePooPrimary . #f)
     (adapterBoundary . #f)
     (expectedReferencePattern . #f)
@@ -51,9 +44,6 @@
     (hotPathExemption . #f)
     (hotPathEvidence . ())
     (styleRewriteBoundary . #f)
-    (maxRssMb . 512)
-    (memoryMetric . resident-set-size)
-    (memoryUnit . "MB")
     (measurementPhases . ("collect-before"
                           "collect-after"
                           "policy-before"
@@ -85,8 +75,8 @@
 ;;; - Keep fixture syntax small and stable.
 ;;; - Timed runners receive hash data so tests and future JSON packets do not
 ;;;   depend on alist shape.
-;;; - Baseline, target, and regression budget are required so performance
-;;;   guidance exposes optimization headroom instead of only a loose timeout.
+;;; - Target and regression budget are required so performance guidance exposes
+;;;   optimization headroom instead of embedding stale observations in fixtures.
 ;; scenario-benchmark-datum->contract
 ;;   : (-> BenchmarkContractDatum BenchmarkContract)
 ;;   | doc m%
@@ -101,7 +91,7 @@
 (def (scenario-benchmark-datum->contract datum)
   (let (contract
         (hash (schemaId "agent.semantic-protocols.gerbil-scheme-policy-scenario-benchmark")
-              (schemaVersion "2")))
+              (schemaVersion "4")))
     (scenario-benchmark-put-fields!
      contract
      datum
@@ -112,17 +102,38 @@
      datum
      +scenario-benchmark-required-value-fields+
      scenario-benchmark-required-value)
-    (hash-put!
-     contract
-     'expected_over_input_budget
-     (scenario-benchmark-value
-      datum
-      'expected_over_input_budget
-      (hash-get contract 'regression_budget)))
+    (unless (eq? (hash-get contract 'benchmarkKind) 'scenario-e2e)
+      (error "policy scenario benchmark requires scenario-e2e kind"
+             (hash-get contract 'benchmarkKind)))
     (scenario-benchmark-put-defaults!
      contract
      datum
      +scenario-benchmark-default-fields+)
+    (let ((maximum
+           (duration-literal->nanos (hash-get contract 'max_total)))
+          (target
+           (duration-literal->nanos (hash-get contract 'target_total)))
+          (regression
+           (duration-literal->nanos
+            (hash-get contract 'regression_budget)))
+          (expected-over-input
+           (duration-literal->nanos
+            (hash-get contract 'expected_over_input_budget)))
+          (scenario-maximum
+           (duration-literal->nanos benchmark-scenario-max-total))
+          (sample-count (hash-get contract 'sampleCount)))
+      (unless (and (> maximum 0)
+                   (> target 0)
+                   (> regression 0)
+                   (>= expected-over-input 0)
+                   (= maximum (+ target regression))
+                   (< maximum scenario-maximum)
+                   (< target scenario-maximum))
+        (error "policy scenario benchmark has inconsistent duration budgets"
+               target regression maximum expected-over-input))
+      (unless (and (integer? sample-count) (>= sample-count 20))
+        (error "policy scenario benchmark requires at least twenty samples for p95 admission"
+               sample-count)))
     contract))
 
 ;; scenario-benchmark-put-fields!
@@ -149,8 +160,8 @@
 ;;          Alist
 ;;          BenchmarkContract)
 ;;   | doc m%
-;;       Adds optional fixture fields without weakening required benchmark
-;;       gates, preserving a stable contract for older scenario receipts.
+;;       Adds optional fixture fields before the version-four timing and sample
+;;       admission checks run.
 ;; # Examples
 ;; ```scheme
 ;; (scenario-benchmark-put-defaults! contract datum defaults)
@@ -168,7 +179,7 @@
   contract)
 
 ;;; Required benchmark field lookup:
-;;; - Missing baseline/target fields are contract errors, not optional legacy
+;;; - Missing target/headroom fields are contract errors, not optional legacy
 ;;;   defaults; otherwise new scenarios silently fall back to unhelpful gates.
 ;; : (-> BenchmarkContractDatum BenchmarkContractKey BenchmarkContractValue )
 (def (scenario-benchmark-required-value datum key)
@@ -185,8 +196,7 @@
       (error "policy scenario benchmark invalid duration literal" key value))))
 
 ;;; Datum lookup boundary:
-;;; - Missing benchmark fields fall back to contract defaults.
-;;; - This keeps older scenarios readable while new fields become testable.
+;;; - Optional benchmark metadata falls back to explicit contract defaults.
 ;; : (-> BenchmarkContractDatum BenchmarkContractKey BenchmarkContractValue BenchmarkContractValue )
 (def (scenario-benchmark-value datum key default)
   (let (entry (and (list? datum) (assoc key datum)))

@@ -64,13 +64,15 @@
 ;; : (-> String (List String) (List Path) (List Path) (List Path) ProjectIndex)
 (def (collect-source-scope/coverage root paths roots runtime-roots exclude-directories)
   (let* ((root (path-normalize root))
+         (base-package (read-project-package root))
          (package
-          (project-package-with-source-scope
-           (read-project-package root)
-           roots
-           runtime-roots
-           exclude-directories
-           "Projected from executed build.ss Build API source coverage."))
+          (and base-package
+               (project-package-with-source-scope
+                base-package
+                roots
+                runtime-roots
+                exclude-directories
+                "Projected from the Build API source coverage catalog.")))
          (files (sort (changed-source-files root package paths) string<?)))
     (make-project-index root
                         (parse-source-files root files)

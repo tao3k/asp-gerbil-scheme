@@ -7,7 +7,8 @@
         :asp-gerbil-scheme/src/policy/agent-poo-loop-performance
         :asp-gerbil-scheme/src/policy/agent-support
         :asp-gerbil-scheme/src/policy/model
-        (only-in :std/srfi/13 string-contains string-join string-prefix?)
+        (only-in :std/srfi/13
+                 string-contains string-downcase string-join string-prefix?)
         (only-in :std/sugar filter filter-map hash hash-get ormap)
         :asp-gerbil-scheme/src/types/findings)
 
@@ -140,7 +141,8 @@
     (and (manual-object-model-owner? index file)
          (manual-object-model-callee? call)
          caller
-         (manual-object-domain-constructor-caller? file caller))))
+         (manual-object-domain-constructor-caller? file caller)
+         (not (caller-declares-intentional-raw-data-record? file caller)))))
 
 ;; : (-> ProjectIndex SourceFile Boolean)
 (def (manual-object-model-owner? index file)
@@ -157,6 +159,27 @@
        (or (string-prefix? "make-" caller)
            (string-prefix? "new-" caller)
            (string-prefix? "build-" caller))))
+
+;;; Waiver boundary:
+;;; - A transport serializer may deliberately construct a JSON hash even when
+;;;   the module has no POO forms of its own.
+;;; - Admission requires an adjacent definition comment with the exact intent;
+;;;   a module-wide marker cannot suppress unrelated constructors.
+;; : (-> SourceFile Caller Boolean)
+(def (caller-declares-intentional-raw-data-record? file caller)
+  (ormap
+   (lambda (fact)
+     (and (equal? (comment-quality-fact-target-kind fact) "definition")
+          (equal? (comment-quality-fact-target-name fact) caller)
+          (ormap intentional-raw-data-record-comment?
+                 (comment-quality-fact-comment-lines fact))))
+   (source-file-comment-quality-facts file)))
+
+;; : (-> CommentLine Boolean)
+(def (intentional-raw-data-record-comment? line)
+  (and (string? line)
+       (string-contains (string-downcase line)
+                        "intentional raw data record")))
 
 ;;; A hash nested in make-type-finding is typed diagnostic evidence, not an
 ;;; alternative domain object model. Require both calls in the same caller so

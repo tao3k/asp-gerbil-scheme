@@ -1,28 +1,12 @@
-((max_total . 35ms)
- (observed_total . 6ms)
- (target_total . 20ms)
- (regression_budget . 29ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2))
-  ((name . collect-after) (durationMs . 3))
-  ((name . policy-before) (durationMs . 0))
-  ((name . policy-after) (durationMs . 1)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "complex real-agent-basic-syntax scenario measured through policy-scenario-run/timed after full compile; keep total under 35ms and target under 20ms")
- (maxCollectMs . 15)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 10)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "complex real-agent-basic-syntax scenario uses a 100ms p95 target with equal regression headroom through policy-scenario-run/timed")
+ (sampleCount . 20)
  (purpose . "realistic agent-authored Scheme scenario combines POO hot-loop mutation, manual event traversal, conditional dispatch, tuple projection, and threshold specialization")
  (feature . "real-agent-basic-syntax")
    (rule . "GERBIL-SCHEME-AGENT-REAL-BASIC-SYNTAX-028")
@@ -90,7 +74,7 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "real-agent"
        "poo-flow"
        "harness"

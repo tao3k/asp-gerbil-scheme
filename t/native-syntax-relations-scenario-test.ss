@@ -4,6 +4,7 @@
 (import :std/test
         (only-in :std/misc/list unique)
         :asp-gerbil-scheme/src/benchmark/framework
+        (only-in :asp-gerbil-scheme/src/benchmark/gate benchmark-fixture-ref)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/testing/memory-profile)
 
@@ -144,4 +145,10 @@
              (lambda ()
                (parse-source-file +native-syntax-scenario-root+
                                   +native-syntax-source+))))
+        (displayln "[asp-gerbil-scheme-scenario-benchmark] name=native-syntax-relations"
+                   " p50Ns=" (benchmark-fixture-ref receipt 'p50Ns)
+                   " p95Ns=" (benchmark-fixture-ref receipt 'p95Ns)
+                   " maxNs=" (benchmark-fixture-ref receipt 'maxNs)
+                   " target=" (benchmark-fixture-ref receipt 'target_total)
+                   " max=" (benchmark-fixture-ref receipt 'max_total))
         (check (benchmark-contract-receipt-pass? receipt) => #t)))))

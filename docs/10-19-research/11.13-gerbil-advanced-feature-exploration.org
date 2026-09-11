@@ -623,18 +623,15 @@ This research is also an audit lens for the harness itself. Apply it to current
 owners in descending return-on-risk order; do not create policy that the
 harness violates in its own command and parser layers.
 
-1. *P0 — delete ghost command surfaces.* =check=, =bench=, =test=, and
-   =snapshot= are build-era commands, not semantic provider methods. Remove
-   them from launcher recognition, registry methods, info closure receipts,
-   docs, snapshots, and tests. Keep build/test ownership on =build.ss=, =gxi=,
-   and =gxtest=. Version packet schemas when fields disappear.
-2. *P1 — one declarative command descriptor.* =constants.ss=,
-   =cli-launcher.ss=, =cli-release-linker.ss=, and =protocol/registry.ss=
-   currently repeat command names and capabilities. Replace those parallel
-   lists with one phase-safe descriptor source that generates help, dynamic
-   dispatch metadata, static linker roots, and registry projection. A macro is
-   justified only if it preserves compile-time function identity without
-   hiding runtime ownership.
+1. *P0 — keep the semantic surface HTTP-server-first.* Provider operations are
+   admitted by the POO operation descriptor catalog and served through the
+   resident HTTP JSON transport. Build/test ownership remains on the separate
+   package control plane. Do not recreate process-command dispatch inside the
+   provider.
+2. *P1 — keep one POO-native provider protocol.* Schema references, operation
+   descriptors, request/response values, memo observations, streams, and HTTP
+   lifecycle state are validated POO objects. JSON hashes appear only at the
+   transport and explicit schema-adapter projection boundaries.
 3. *P1 — one native parser projection per fact.* Split owner acquisition,
    native form reading, module-context facts, and rendering. Search, query,
    guide, and policy consume the same syntax/definition/module projection;
@@ -648,30 +645,30 @@ harness violates in its own command and parser layers.
    =agent-style-*= owner for each symptom. MOP/interfaces and contracts model
    stable domain protocols; they are not decoration for command plumbing.
 
-Each slice exits only when the old owner is deleted, public registry/help/info
-agree, focused tests exercise the real installed binary, and latency plus heap
-receipts remain bounded. A compatibility alias is not success for a legacy
-subcommand migration.
+Each slice exits only when the old owner is deleted, the provider registry and
+HTTP contract agree, focused tests exercise the real resident artifact, and
+latency plus heap receipts remain bounded. A compatibility alias is not success
+for a retired process-command surface.
 
-*** 11.13.11.1 First Landed Slice: Command Descriptor Ownership
+*** 11.13.11.1 First Landed Slice: Resident POO Operation Ownership
 
-The first P1 slice uses a transparent Gerbil =defstruct= descriptor in
-=src/protocol/command-catalog.ss=. It owns command name, dynamic module and
-binding identity, static binding key, usage lines, registry ordering, and
-registry methods. =constants.ss=, =cli-launcher.ss=, and
-=protocol/registry.ss= now consume projections from that owner.
+The resident provider now uses typed POO schema references and operation
+descriptors. =src/protocol/registry.ss= projects those objects as
+provider/HTTP operation metadata, while =src/runtime/provider-operation.ss=
+dispatches through the descriptor's generic executable slot.
 
-=cli-release-linker.ss= deliberately retains one explicit =case= from static
-binding key to imported procedure. This is the narrow compile-time identity
-boundary required by the research rule: it contains no repeated command names,
-usage text, or method lists. The release dispatch rows are generated from the
-descriptor collection and a focused test proves that every row resolves to a
-procedure.
+Requests and results cross the semantic runtime as validated
+=ProviderOperationPayload= and =ProviderOperationResult= objects. The HTTP
+transport decodes a wire hash into those objects; operation-specific adapters
+unwrap the hash only when calling an existing schema-owned function; the
+response projection performs the inverse conversion.
 
-This slice also repaired a real configuration-drift defect. =projection= was a
-tested public command and appeared in help and dynamic dispatch, but it was
-absent from the release static closure. It is not legacy; the descriptor now
-drives its release root and the native release binary exercises it directly.
+The provider executable has one owner: =build-provider.ss= declares its full
+runtime closure through the Build API's inherited =defbuild-script= bridge;
+that bridge delegates one complete graph to upstream =std/make=. Package
+library compile and gxtest remain a separate control plane and do not own a
+provider compiler, linker, scheduler, launcher, install path, or executable
+receipt.
 
 *** 11.13.11.2 Second Landed Slice: Delete Unreachable Indexed Search
 
@@ -700,7 +697,7 @@ search behavior behind the exact-read command.
 Scheme =query --selector= now accepts only owner-bearing structural selectors
 and explicit file/range selectors. Bare symbols fail before source collection
 with a compact Rust-owned next action. Symbol discovery belongs to the indexed
-=asp gerbil-scheme search symbol= route; its result supplies the parser-owned
+=asp search playbook --language gerbil-scheme symbol= route; its result supplies the parser-owned
 owner selector for the subsequent exact query. The obsolete scanner, manual GC,
 and its compatibility test are deleted rather than retained behind an alias.
 

@@ -3,7 +3,7 @@
 
 (import :std/make
         :clan/building
-        (only-in :asp-gerbil-scheme/src/build-api/source-coverage
+        (only-in :asp-gerbil-scheme/build-api
                  asp-gerbil-scheme-source-coverage))
 
 (asp-gerbil-scheme-source-coverage

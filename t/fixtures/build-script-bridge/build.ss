@@ -1,5 +1,5 @@
 #!/usr/bin/env gxi
-(import :asp-gerbil-scheme/src/building/build-script)
+(import :asp-gerbil-scheme/build-api)
 
 (defbuild-script
   []

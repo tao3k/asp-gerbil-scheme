@@ -20,6 +20,7 @@
              (timing (policy-scenario-run/timed scenario))
              (result (hash-get timing 'result))
              (timings (hash-get timing 'timings))
+             (samples (hash-get timing 'samples))
              (before-matching
               (policy-scenario-findings
                result
@@ -32,6 +33,15 @@
                "GERBIL-SCHEME-AGENT-POLICY-043"))
              )
         (check (length timings) => 4)
+        (check (hash-get timing 'admissionStatistic) => 'p95)
+        (check (hash-get timing 'gcPrecondition)
+               => ":gerbil/gambit###gc")
+        (check (hash-get timing 'sampleCount) => 20)
+        (check (length samples) => 20)
+        (check (hash-get (car samples) 'measurementOrder)
+               => '(input expected))
+        (check (hash-get (cadr samples) 'measurementOrder)
+               => '(expected input))
         (check (policy-scenario-timing-steps-measured? timings) => #t)
         (check (policy-scenario-benchmark-constrained? timing) => #t)
         (check before-matching => [])

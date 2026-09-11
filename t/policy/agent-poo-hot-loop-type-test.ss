@@ -173,7 +173,7 @@
                  (timing (policy-scenario-run/timed scenario))
                  (result (hash-get timing 'result))
                  (timings (hash-get timing 'timings))
-                 (total-ms (hash-get timing 'totalMs))
+                 (total-ns (hash-get timing 'totalNs))
                  (before-matching
                   (policy-scenario-findings
                    result
@@ -189,7 +189,7 @@
               (check (length timings) => 4)
               (check (policy-scenario-timing-steps-measured? timings)
                      => #t)
-              (check (poo-policy-performance-timing-status total-ms)
+              (check (poo-policy-performance-timing-status total-ns)
                      => "pass")
               (check (policy-scenario-benchmark-constrained? timing)
                      => #t)
@@ -210,7 +210,7 @@
                  (timing (policy-scenario-run/timed scenario))
                  (result (hash-get timing 'result))
                  (timings (hash-get timing 'timings))
-                 (total-ms (hash-get timing 'totalMs))
+                 (total-ns (hash-get timing 'totalNs))
                  (before-matching
                   (policy-scenario-findings
                    result
@@ -226,7 +226,7 @@
               (check (length timings) => 4)
               (check (policy-scenario-timing-steps-measured? timings)
                      => #t)
-              (check (poo-policy-performance-timing-status total-ms)
+              (check (poo-policy-performance-timing-status total-ns)
                      => "pass")
               (check (policy-scenario-benchmark-constrained? timing)
                      => #t)
@@ -247,7 +247,7 @@
                  (timing (policy-scenario-run/timed scenario))
                  (result (hash-get timing 'result))
                  (timings (hash-get timing 'timings))
-                 (total-ms (hash-get timing 'totalMs))
+                 (total-ns (hash-get timing 'totalNs))
                  (before-matching
                   (policy-scenario-findings
                    result
@@ -263,7 +263,7 @@
               (check (length timings) => 4)
               (check (policy-scenario-timing-steps-measured? timings)
                      => #t)
-              (check (poo-policy-performance-timing-status total-ms)
+              (check (poo-policy-performance-timing-status total-ns)
                      => "pass")
               (check (policy-scenario-benchmark-constrained? timing)
                      => #t)

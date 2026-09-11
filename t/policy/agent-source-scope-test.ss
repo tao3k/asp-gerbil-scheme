@@ -53,7 +53,7 @@
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-021" findings)))
           (check matching => []))))
-    (test-case "project policy consumes executed package-spec source coverage"
+    (test-case "project policy uses native coverage without executing fixture build.ss"
       (let* ((root ".run/policy-source-scope-package-spec")
              (src-dir (string-append root "/src"))
              (test-dir (string-append root "/t")))
@@ -86,7 +86,7 @@
                     ";;; -*- Gerbil -*-\n(displayln \"explicit test script\")\n")
         (let* ((report (project-policy-report root))
                (findings (hash-get report 'findings)))
-          (check (hash-get report 'files) => 2)
+          (check (hash-get report 'files) => 1)
           (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)
                  => []))))
     (test-case "test source scope re-expands a module reached later at a shallower depth"

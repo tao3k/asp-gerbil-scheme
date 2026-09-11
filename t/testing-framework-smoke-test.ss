@@ -25,6 +25,11 @@
    suites: [+smoke-suite+]
    roots: ["t/fixtures/testing-framework"]))
 
+(define-project-test smoke-project-test
+  project: (lambda () +smoke-project+)
+  run: (lambda (_project files) files)
+  ok?: pair?)
+
 (def testing-framework-smoke-test
   (test-suite "gerbil scheme testing framework smoke"
     (test-case "testing project and suite are POO-shaped objects"
@@ -43,4 +48,10 @@
         (check (testing-selection-ok? selection) => #t)
         (check (testing-receipt-ok? receipt) => #t)
         (check (testing-receipt-files suite-receipt)
-               => ["t/fixtures/testing-framework/alpha-test.ss"])))))
+               => ["t/fixtures/testing-framework/alpha-test.ss"])))
+
+    (test-case "project test macro lowers to receipt-based exit status"
+      (check (smoke-project-test
+              ["t/fixtures/testing-framework/alpha-test.ss"])
+             => 0)
+      (check (smoke-project-test []) => 1))))

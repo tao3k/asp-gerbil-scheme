@@ -4,8 +4,7 @@
 (import :std/test
         (only-in "../src/build-api/native-build-spec"
                  configure-build-root!
-                 compile-spec
-                 cli-binary-build-spec)
+                 compile-spec)
         (only-in "../src/build-api/package-native-plan"
                  asp-gerbil-scheme-package-api-stage-specs)
         (only-in "../src/build-api/source-coverage"
@@ -32,13 +31,15 @@
         (check (integer? spec-index) => #t)
         (check (integer? execution-index) => #t)
         (check (< spec-index execution-index) => #t)))
-    (test-case "pure specs expose package and binary projections"
+    (test-case "pure specs expose package and complete library projections"
       (asp-gerbil-scheme-load-source-coverage ".")
       (configure-build-root! (current-directory))
-      (let ((package-spec (compile-spec #f #f #f))
-            (binary-spec (cli-binary-build-spec #f)))
+      (let ((package-spec (compile-spec #f))
+            (library-spec (compile-spec #t)))
         (check (member "build-api/native-build-spec.ss" package-spec) ? true)
         (check (member "build-api/native-build.ss" package-spec) ? true)
-        (check (member "constants.ss" binary-spec) ? true)))))
+        (check (member "constants.ss" library-spec) ? true)
+        (check (member "provider-server.ss" library-spec) => #f)
+        (check (member "commands/provider-runtime.ss" library-spec) => #f)))))
 
 (run-tests! native-build-spec-test)

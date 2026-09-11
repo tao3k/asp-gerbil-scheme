@@ -151,6 +151,9 @@
 ;; Formal receipt metadata excludes the runner's arbitrary Scheme result.  A
 ;; status and metrics projection is portable JSON; the raw result remains on
 ;; the in-process receipt for Scheme callers only.
+;;; Intentional raw data record:
+;;; - This hash is the final JSON transport projection of a typed observation.
+;;; - Runtime semantics remain in build-stage-observation before this boundary.
 (def (build-stage-observation->json-object observation)
   (let ((receipt (build-stage-observation-receipt observation)))
     (hash ("schema" "asp-gerbil-scheme.build-stage-observation.v1")
@@ -183,6 +186,9 @@
           ("control-plane-allocated-bytes"
            (build-stage-observation-control-plane-allocated-bytes observation)))))
 
+;;; Intentional raw data record:
+;;; - This envelope is serialized immediately and owns no runtime behavior.
+;;; - Stage values remain typed observations until this transport projection.
 (def (build-plan-observations->json-object observations)
   (hash ("schema" "asp-gerbil-scheme.build-observations.v1")
         ("version" 1)
@@ -191,6 +197,9 @@
         ("stages" (map build-stage-observation->json-object observations))))
 
 
+;;; Intentional raw data record:
+;;; - Summary fields form a stable JSON evidence packet, not a domain object.
+;;; - Aggregation consumes typed observations before constructing this envelope.
 (def (build-plan-observations-summary->json-object observations)
   (let* ((wall-seconds
           (sum-observation-field build-stage-observation-wall-seconds

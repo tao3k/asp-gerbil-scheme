@@ -79,10 +79,10 @@
                           'pass)
                    'ok
                    'failed))
-         (elapsed-micros (testing-performance-benchmark-ref
-                          receipt
-                          'elapsedMicros
-                          0))
+         (elapsed-nanos (testing-performance-benchmark-ref
+                         receipt
+                         'elapsedNs
+                         0))
          (phase (testing-performance-benchmark-ref details
                                                    'phase
                                                    'benchmark-body))
@@ -91,14 +91,15 @@
      kind: 'testing-phase
      status: status
      suite: name
-     elapsed-micros: elapsed-micros
+     elapsed-micros: (quotient elapsed-nanos 1000)
      details: (append
                `((phase . ,phase)
                  (name . ,name)
-                 (elapsedMs . ,(testing-performance-benchmark-ref
-                                receipt
-                                'elapsedMs
-                                0))
+                 (elapsedNs . ,elapsed-nanos)
+                 (elapsed . ,(testing-performance-benchmark-ref
+                              receipt
+                              'elapsed
+                              "0ns"))
                  (feature . ,(testing-performance-benchmark-ref
                               receipt
                               'feature

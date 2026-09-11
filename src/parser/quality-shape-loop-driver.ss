@@ -105,11 +105,23 @@
 (def (caller-has-reader-collection-projection? calls caller)
   (ormap (cut reader-collection-projection-call? <> caller) calls))
 
+;; : (-> CallFact Caller Boolean)
+(def (call-owned-by-caller? call caller)
+  (equal? (or (call-fact-caller call) "") (or caller "")))
+
+;; : (-> CallFact Caller Boolean)
+(def (call-recurses-into-caller? call caller)
+  (equal? (call-fact-callee call) (or caller "")))
+
+;; : (-> CallFact Boolean)
+(def (reader-collection-infrastructure-call? call)
+  (member (call-fact-callee call)
+          +reader-collection-infrastructure-callees+))
+
 (def (reader-collection-projection-call? call caller)
-  (and (equal? (or (call-fact-caller call) "") (or caller ""))
-       (not (equal? (call-fact-callee call) (or caller "")))
-       (not (member (call-fact-callee call)
-                    +reader-collection-infrastructure-callees+))))
+  (and (call-owned-by-caller? call caller)
+       (not (call-recurses-into-caller? call caller))
+       (not (reader-collection-infrastructure-call? call))))
 
 (def (caller-has-higher-order? facts caller)
   (ormap (lambda (fact)

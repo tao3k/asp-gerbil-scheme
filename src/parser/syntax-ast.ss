@@ -5,7 +5,7 @@
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/support
         (only-in :std/misc/list unique)
-        (only-in :std/sugar hash))
+        (only-in :std/sugar foldl hash))
 
 (export +syntax-ast-version+
         syntax-ast-from-form
@@ -74,13 +74,10 @@
            (head-stx (and (pair? items) (car items)))
            (head (and head-stx (identifier? head-stx) (stx-e head-stx)))
            (head-name (and head (datum->string head)))
-           (head-out
-            (if head-name
-              (cons (syntax-ast-head-relation relpath head-stx owner phase
-                                              context structural-path)
-                    out)
-              out))
-           (children (if (pair? items) (cdr items) '())))
+           (head-out (syntax-relations-with-head/acc
+                      relpath head-stx head-name owner phase context
+                      structural-path out))
+           (children (syntax-ast-tail items)))
       (cond
        ((not head)
         (syntax-relations-from-children/acc
@@ -141,6 +138,20 @@
         (syntax-relations-from-children/acc
          relpath children owner phase context structural-path 1
          resume-phase resume-context head-out))))))
+
+;; : (-> Relpath Syntax (Or String False) (Or String False) Integer Symbol
+;;        (List Integer) (List SyntaxRelation) (List SyntaxRelation))
+(def (syntax-relations-with-head/acc relpath head-stx head-name owner phase
+                                     context structural-path out)
+  (if head-name
+    (cons (syntax-ast-head-relation relpath head-stx owner phase
+                                    context structural-path)
+          out)
+    out))
+
+;; : (forall (a) (-> (List a) (List a)))
+(def (syntax-ast-tail items)
+  (if (pair? items) (cdr items) '()))
 
 ;; : (-> Relpath Syntax (Or String False) Integer Symbol (List Integer)
 ;;        SyntaxRelation)
@@ -204,51 +215,67 @@
          (binding-index (if named? 2 1))
          (bindings-tail (if named? (cdr children) children))
          (bindings (and (pair? bindings-tail) (car bindings-tail)))
-         (body (if (pair? bindings-tail) (cdr bindings-tail) '()))
-         (binding-out
-          (if bindings
-            (syntax-relations-from-let-bindings/acc
-             relpath (syntax-ast-list-items bindings) owner phase context
-             (cons binding-index structural-path) out)
-            out)))
+         (body (syntax-ast-tail bindings-tail))
+         (binding-out (syntax-relations-from-optional-let-bindings/acc
+                       relpath bindings owner phase context binding-index
+                       structural-path out)))
     (syntax-relations-from-children/acc
      relpath body owner phase context structural-path (+ binding-index 1)
      phase context binding-out)))
+
+;; : (-> Relpath (Or Syntax False) (Or String False) Integer Symbol Integer
+;;        (List Integer) (List SyntaxRelation) (List SyntaxRelation))
+(def (syntax-relations-from-optional-let-bindings/acc
+      relpath bindings owner phase context binding-index structural-path out)
+  (if bindings
+    (syntax-relations-from-let-bindings/acc
+     relpath (syntax-ast-list-items bindings) owner phase context
+     (cons binding-index structural-path) out)
+    out))
 
 ;; : (-> Relpath (List Syntax) (Or String False) Integer Symbol
 ;;        (List Integer) (List SyntaxRelation) (List SyntaxRelation))
 (def (syntax-relations-from-let-bindings/acc relpath bindings owner phase context
                                              structural-path out)
-  (let loop ((rest bindings) (index 0) (out out))
-    (if (null? rest)
-      out
-      (let* ((items (syntax-ast-list-items (car rest)))
+  (car
+   (foldl
+    (lambda (binding state)
+      (let* ((index (cdr state))
+             (prior-out (car state))
+             (items (syntax-ast-list-items binding))
              (name-out
               (if (null? items)
-                out
+                prior-out
                 (syntax-relations-from-stx/acc
                  relpath (car items) owner phase 'binding
-                 (cons 0 (cons index structural-path)) phase context out)))
+                 (cons 0 (cons index structural-path)) phase context
+                 prior-out)))
              (value-out
               (syntax-relations-from-children/acc
-               relpath (if (null? items) '() (cdr items)) owner phase context
+               relpath (syntax-ast-tail items) owner phase context
                (cons index structural-path) 1 phase context name-out)))
-        (loop (cdr rest) (+ index 1) value-out)))))
+        (cons value-out (+ index 1))))
+    (cons out 0)
+    bindings)))
 
 ;; : (-> Relpath (List Syntax) (Or String False) Integer String
 ;;        (List Integer) Integer Integer String (List SyntaxRelation))
 (def (syntax-relations-from-children/acc relpath children owner phase context
                                          structural-path start-index
                                          resume-phase resume-context out)
-  (let loop ((rest children) (index start-index) (out out))
-    (if (null? rest)
-      out
-      (loop (cdr rest)
-            (+ index 1)
-            (syntax-relations-from-stx/acc
-             relpath (car rest) owner phase context
-             (cons index structural-path)
-             resume-phase resume-context out)))))
+  (car
+   (foldl
+    (lambda (child state)
+      (let ((prior-out (car state))
+            (index (cdr state)))
+        (cons
+         (syntax-relations-from-stx/acc
+          relpath child owner phase context
+          (cons index structural-path)
+          resume-phase resume-context prior-out)
+         (+ index 1))))
+    (cons out start-index)
+    children)))
 
 ;; : (-> Relpath Symbol (List Syntax) (Or String False) (List Integer)
 ;;        (List SyntaxRelation))
@@ -287,14 +314,18 @@
 ;;        Integer (List SyntaxRelation))
 (def (syntax-relations-from-rule-list/acc relpath rules owner phase
                                           structural-path start-index out)
-  (let loop ((rest rules) (index start-index) (out out))
-    (if (null? rest)
-      out
-      (loop (cdr rest)
-            (+ index 1)
-            (syntax-relations-from-rule/acc
-             relpath (car rest) owner phase
-             (cons index structural-path) out)))))
+  (car
+   (foldl
+    (lambda (rule state)
+      (let ((prior-out (car state))
+            (index (cdr state)))
+        (cons
+         (syntax-relations-from-rule/acc
+          relpath rule owner phase
+          (cons index structural-path) prior-out)
+         (+ index 1))))
+    (cons out start-index)
+    rules)))
 
 ;; syntax-rules/defrules clauses have a pattern, an optional fender, and an
 ;; emitted template.  This mirrors the public form boundary, not Gerbil's
@@ -354,27 +385,29 @@
         (syntax-relations-from-children/acc
          relpath (syntax-ast-take children 2) owner phase 'transformer
          structural-path 1 resume-phase resume-context out))
-    (let loop ((clauses (syntax-ast-drop children 2))
-               (index 3)
-               (out prefix-out))
-      (if (null? clauses)
-        out
-        (let* ((items (syntax-ast-list-items (car clauses)))
+    (car
+     (foldl
+      (lambda (clause state)
+        (let* ((index (cdr state))
+               (prior-out (car state))
+               (items (syntax-ast-list-items clause))
                (pattern-out
                 (if (null? items)
-                  out
+                  prior-out
                   (syntax-relations-from-stx/acc
                    relpath (car items) owner phase 'pattern
                    (cons 0 (cons index structural-path))
-                   phase 'transformer out)))
+                   phase 'transformer prior-out)))
                (body-out
                 (if (null? items)
                   pattern-out
                   (syntax-relations-from-children/acc
-                   relpath (cdr items) owner phase 'transformer
+                   relpath (syntax-ast-tail items) owner phase 'transformer
                    (cons index structural-path) 1
                    phase 'transformer pattern-out))))
-          (loop (cdr clauses) (+ index 1) body-out))))))
+          (cons body-out (+ index 1))))
+      (cons prefix-out 3)
+      (syntax-ast-drop children 2)))))
 
 ;; : (-> Syntax (List Syntax))
 (def (syntax-ast-list-items stx)

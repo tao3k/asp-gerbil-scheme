@@ -103,17 +103,17 @@
             (check (hash-get details 'profileOverlays)
                    => ["dependency-protocol-surface"
                        "dependency-poo-lineage"
-                       "dependency-build-cli-lineage"
+                       "dependency-build-boundary-lineage"
                        "dependency-repair-commands"])
             (check (hash-get details 'profilePrecedence)
                    => ["dependency-adapter-standard"
                        "dependency-profile-composition"
                        "dependency-repair-commands"
-                       "dependency-build-cli-lineage"
+                       "dependency-build-boundary-lineage"
                        "dependency-poo-lineage"
                        "dependency-protocol-surface"])
             (check (hash-get details 'sourcePatternLineage)
-                   => "gerbil-poo build/cli/rationaldict/table/brace/object/mop/io patterns")
+                   => "gerbil-poo build/runtime/rationaldict/table/brace/object/mop/io patterns")
             (check (hash-get details 'protocolSurface)
                    => "minimal protocol slots first; derive table/set/list/iteration/lens/sexp/json/bytes/marshal-facing capabilities from the slot surface")
             (check (hash-get details 'protocolSurfaceReference)
@@ -142,8 +142,8 @@
                    => "json<-/<-json, marshal/unmarshal, bytes<-/<-bytes, and string<-/<-string are method/type slots")
             (check (hash-get details 'buildPattern)
                    => "use :std/make + :clan/base + :clan/building discovery, while filtering non-module policy/config files for this harness")
-            (check (hash-get details 'cliOptionPattern)
-                   => "keep src/cli.ss as a thin dispatcher; compose option objects when command option surfaces grow")
+            (check (hash-get details 'boundaryCompositionPattern)
+                   => "keep process entrypoints thin; compose POO-native request and configuration objects when boundary surfaces grow")
             (check (not (not (string-contains
                               (hash-get details 'adapterRepairShape)
                               "inspect provider-native dependency facts first")))

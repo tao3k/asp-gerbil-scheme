@@ -384,8 +384,8 @@
                    root: "."))
         (check (testing-build-import->file
                 build
-                ':poo-flow/t/cli-test)
-               => "./t/cli-test.ss")))
+                ':poo-flow/t/provider-entry-test)
+               => "./t/provider-entry-test.ss")))
 
     (test-case "testing build prefers compiled gxtest module shape"
       (let (build (testing-build

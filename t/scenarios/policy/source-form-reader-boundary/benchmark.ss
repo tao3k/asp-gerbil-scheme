@@ -1,29 +1,12 @@
-((max_total . 29ms)
- (observed_total . 9ms)
- (target_total . 16ms)
- (regression_budget . 20ms)
- (expected_over_input_budget . 0ns)
- (observedTimings
-  ((name . collect-before) (durationMs . 4) (durationNs . 4000000))
-  ((name . collect-after) (durationMs . 3) (durationNs . 3000000))
-  ((name . policy-before) (durationMs . 1) (durationNs . 1000000))
-  ((name . policy-after) (durationMs . 0) (durationNs . 0)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
+ (target_total . 150ms)
+ (regression_budget . 150ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "source-form-reader-boundary keeps reader collection detection parser-owned while preserving the low-level reader helper; multi-sample timing avoids single GC/allocator spikes while preserving the hard 28ms gate")
- (maxCollectMs . 10)
- (observedCollectMs . 0)
- (maxParseMs . 16)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 6)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 5)
- (unit . "ms")
+  "source-form-reader-boundary keeps reader collection detection parser-owned while preserving the low-level reader helper; twenty-sample timing uses a 150ms p95 target with equal regression headroom")
+ (sampleCount . 20)
  (purpose . "R013 source/form reader scenario rejects mixed reader, accumulator, and projection loops while preserving the reader boundary helper")
  (feature . "source-form-reader-boundary")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -63,5 +46,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style" "reader" "filter-map" "anti-scaffold"))

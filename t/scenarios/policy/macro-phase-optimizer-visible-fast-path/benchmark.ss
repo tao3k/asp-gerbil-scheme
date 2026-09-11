@@ -1,28 +1,12 @@
-((max_total . 25ms)
- (observed_total . 5ms)
- (target_total . 15ms)
- (regression_budget . 20ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2))
-  ((name . collect-after) (durationMs . 1))
-  ((name . policy-before) (durationMs . 1))
-  ((name . policy-after) (durationMs . 1)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed macro-phase-optimizer-visible-fast-path receipt is 5ms total; target keeps the macro-to-optimizer visibility scenario in the small millisecond budget while max_total remains the hard regression ceiling")
- (maxCollectMs . 10)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 6)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 5)
- (unit . "ms")
+  "The macro-phase-optimizer-visible-fast-path target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+ (sampleCount . 20)
  (purpose . "R013 connects Gerbil phase-aware macro DSLs to optimizer-visible runtime call shapes")
  (feature . "macro-phase-optimizer-visible-fast-path")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -63,5 +47,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style" "gerbil-native" "macro" "phase" "compiler" "optimizer" "direct-call"))

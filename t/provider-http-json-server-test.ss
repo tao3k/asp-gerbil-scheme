@@ -6,6 +6,7 @@
         :asp-gerbil-scheme/src/commands/projection-batch
         :asp-gerbil-scheme/src/runtime/provider-http-json-server
         :asp-gerbil-scheme/src/runtime/provider-operation
+        :asp-gerbil-scheme/src/runtime/provider/interface
         (only-in :std/format format)
         (only-in :std/misc/path path-expand)
         (only-in :std/misc/ports read-all-as-string)
@@ -17,7 +18,11 @@
         (only-in :asp-gerbil-scheme/src/support/time
                  duration-micros
                  monotonic-micros)
+        (only-in :asp-gerbil-scheme/src/testing/execution-profile
+                 declare-gxtest-serial)
         :std/test)
+
+(declare-gxtest-serial shared-native-provider)
 
 (def +artifact-digest+
   "blake3-256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
@@ -268,6 +273,40 @@
 (def provider-http-json-server-test
   (test-suite
    "provider HTTP JSON server"
+   (test-case
+    "runtime operations exchange validated POO payload and result objects"
+    (let* ((schema (provider-schema-reference "test.schema" "1"))
+           (descriptor
+            (provider-operation-descriptor
+             "test-operation" schema schema #f
+             (lambda (payload)
+               (provider-operation-result
+                "test-operation"
+                (hash ("echo"
+                       (hash-ref
+                        (provider-operation-payload->json payload)
+                        "value")))))))
+           (wire-payload (hash ("value" 42)))
+           (payload (provider-operation-payload
+                     "test-operation" wire-payload))
+           (request (provider-runtime-request "poo-boundary" descriptor payload))
+           (result (provider-operation-execute descriptor payload))
+           (response (provider-runtime-ready-response
+                      (provider-runtime-request-id request)
+                      result))
+           (wire-response (provider-runtime-response->json response)))
+      (check (provider-runtime-request? request) => #t)
+      (check (provider-operation-payload?
+              (provider-runtime-request-payload request)) => #t)
+      (check (hash-table? (provider-runtime-request-payload request)) => #f)
+      (check (provider-operation-result? result) => #t)
+      (check (hash-ref (hash-ref wire-response "payload") "echo") => 42)
+      (check-exception
+       (provider-runtime-request
+        "poo-mismatch"
+        descriptor
+        (provider-operation-payload "other-operation" wire-payload))
+       true)))
    (test-case
    "bootstrap health runtime request and shutdown share one server lifecycle"
 (let* ((package-root (current-directory))

@@ -7,13 +7,16 @@
 
 (export #t)
 
-;;; Schema names are wire-level compatibility boundaries for repair clients.
-(def +policy-diagnostic-schema+ "gerbil-policy-diagnostic-v1")
+;;; Shared ASP owns the wire contract and its human presentation.  The Scheme
+;;; provider only projects values conforming to that versioned contract.
+(def +policy-diagnostic-schema-id+
+  "agent.semantic-protocols.semantic-language-policy-diagnostic")
+(def +policy-diagnostic-schema-version+ "1")
 
 (defstruct policy-diagnostic-location-state (path selector definition-name))
 (defstruct policy-diagnostic-evidence-state (rule-id severity message details))
 (defstruct policy-repair-intent-state (strategy fix-intent constraints repair-phases guide-command guide-role comment-repair-order))
-(defstruct policy-diagnostic-state (schema kind unit rule-id severity location problem evidence fix-intent constraints guide-command guide-role repair-phases))
+(defstruct policy-diagnostic-state (schema-id schema-version kind unit rule-id severity location problem evidence fix-intent constraints guide-command guide-role repair-phases))
 
 ;;; POO projection boundary:
 ;;; - Diagnostic helpers build object slots first, then project through .json<-.
@@ -113,7 +116,8 @@
                              guideCommand: guide-command
                              guideRole: guide-role
                              repairPhases: repair-phases)
-  (make-policy-diagnostic-state +policy-diagnostic-schema+
+  (make-policy-diagnostic-state +policy-diagnostic-schema-id+
+                                +policy-diagnostic-schema-version+
                                 kind
                                 unit
                                 rule-id
@@ -131,7 +135,8 @@
 ;;; explicit so schema drift is visible in review.
 ;; : (-> PolicyDiagnostic Json )
 (def (policy-diagnostic-json-projection diagnostic)
-  (hash (schema (policy-diagnostic-state-schema diagnostic))
+  (hash (schemaId (policy-diagnostic-state-schema-id diagnostic))
+        (schemaVersion (policy-diagnostic-state-schema-version diagnostic))
         (kind (policy-diagnostic-state-kind diagnostic))
         (unit (policy-diagnostic-state-unit diagnostic))
         (ruleId (policy-diagnostic-state-rule-id diagnostic))

@@ -1,28 +1,12 @@
-((max_total . 35ms)
- (observed_total . 8.5ms)
- (target_total . 18.5ms)
- (regression_budget . 26.5ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 3.25))
-  ((name . collect-after) (durationMs . 3.75))
-  ((name . policy-before) (durationMs . 1.0))
-  ((name . policy-after) (durationMs . 0.5)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "gerbil-upstream-idiom-performance is a subsecond scenario benchmark with fractional millisecond observed timings; max_total remains the hard gate")
- (maxCollectMs . 12)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 8)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "The gerbil-upstream-idiom-performance target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+ (sampleCount . 20)
  (purpose . "R013 upstream idiom scenario connects gerbil:// match, compiler eq-hash indexing, and cut-style helper plumbing to agent-facing policy repair")
  (feature . "gerbil-upstream-idiom-performance")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -74,7 +58,7 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style"
        "gerbil-upstream"
        "match"

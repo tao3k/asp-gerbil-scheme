@@ -73,7 +73,7 @@
               (check (source-scope-roots scope) => [])
               (check (source-scope-runtime-roots scope) => ["lib" "."])
               (check (source-scope-explanation scope)
-                     => "Projected from executed build.ss Build API source coverage."))))
+                     => "Projected from the Build API source coverage catalog."))))
     (test-case "project package dependency activates poo extension"
           (let* ((root (path-normalize ".run/parser-poo-dependency"))
                  (source-dir (string-append root "/src"))

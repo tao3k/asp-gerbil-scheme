@@ -5,13 +5,11 @@
  project-clean-target
  project-compile-target
  project-compile-spec
- configure-project-build-root!
- project-install-target)
+ configure-project-build-root!)
 
 (import (only-in :asp-gerbil-scheme/src/build-api/native-build
                  clean-target
-                 compile-target
-                 install-target)
+                 compile-target)
         (only-in :asp-gerbil-scheme/src/build-api/native-build-spec
                  compile-spec
                  configure-build-root!))
@@ -20,19 +18,14 @@
 (def (project-clean-target)
   (clean-target))
 
-;; : (-> Boolean Boolean Boolean Boolean Boolean Boolean Boolean Boolean Void)
-(def (project-compile-target verbose debug no-optimize optimized release full binary
-                             force?: (force? #f))
-  (compile-target verbose debug no-optimize optimized release full binary force?))
+;; : (-> Boolean Boolean Boolean Void)
+(def (project-compile-target verbose full force?)
+  (compile-target verbose full force?))
 
-;; : (-> Boolean Boolean Boolean BuildSpec)
-(def (project-compile-spec full? release? binary?)
-  (compile-spec full? release? binary?))
+;; : (-> Boolean BuildSpec)
+(def (project-compile-spec full?)
+  (compile-spec full?))
 
 ;; : (-> Root Void)
 (def (configure-project-build-root! root)
   (configure-build-root! root))
-
-;; : (-> Boolean Boolean Boolean Boolean Boolean Boolean (Maybe Symbol) Void)
-(def (project-install-target verbose debug no-optimize optimized release full (flag #f))
-  (install-target verbose debug no-optimize optimized release full flag))

@@ -9,7 +9,8 @@
         (only-in :std/srfi/13 string-prefix? string-suffix?)
         (only-in :std/sugar cut filter find foldl ormap))
 
-(export function-quality-profiles-from-source)
+(export function-quality-profiles-from-source
+        function-quality-poo-profile-facets)
 
 ;; (List Callee)
 ;;; Profile fan-out is a pure definition-to-profile transform.

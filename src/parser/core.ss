@@ -436,7 +436,12 @@
 (def (collect-selected-source-scope root paths)
   (let* ((root (path-normalize root))
          (package (read-project-package root))
-         (files (sort (map path-normalize paths) string<?)))
+         ;; Build API graph owners are rooted at the declared project root, not
+         ;; at the caller's current directory.  Absolute owners remain stable
+         ;; through source-full-path while relative owners resolve under root.
+         (files
+          (sort (map (lambda (path) (source-full-path root path)) paths)
+                string<?)))
     (make-project-index root
                         (parse-source-files root files)
                         package)))

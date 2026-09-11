@@ -9,8 +9,8 @@ the Scheme provider does not own a second search planner or ranking surface.
 The first public surface is:
 
 #+begin_src sh
-asp gerbil-scheme search 'std/srfi/13 string-prefix export'
-asp gerbil-scheme query --selector 'gerbil:/std/srfi/13#export/string-prefix?' --code
+asp search playbook --language gerbil-scheme 'std/srfi/13 string-prefix export'
+asp query playbook --language gerbil-scheme --selector 'gerbil:/std/srfi/13#export/string-prefix?' --code
 #+end_src
 
 * Namespace
@@ -42,7 +42,7 @@ namespace=gerbil authority=active-gxi module=:std/srfi/13 scope=standard-library
 #+end_example
 
 The import is emitted once for the result set. Items keep stable selectors that
-can be passed directly to =asp gerbil-scheme query --selector ... --code=.
+can be passed directly to =asp query playbook --language gerbil-scheme --selector ... --code=.
 
 * Query Contract
 

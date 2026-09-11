@@ -22,8 +22,8 @@
   (test-suite "asp-gerbil-scheme build api native stage boundary"
     (test-case "ordinary target projects a package build plan"
       (configure-build-root! ".")
-      (compile-target #f #f #t #f #f #f #f #f)
-      (compile-target #f #f #t #f #f #f #f #f)
+      (compile-target #f #f #f)
+      (compile-target #f #f #f)
       (let* ((receipt (read-package-api-build-receipt))
              (plan (alist-value receipt 'buildPlan))
              (stages (alist-value plan 'stages))

@@ -35,7 +35,7 @@ strictly =Testing -> Building=.
 * Downstream Form
 
 #+begin_src scheme
-(import :asp-gerbil-scheme/src/building/build-script)
+(import :asp-gerbil-scheme/build-api)
 
 (defbuild-script
   (framework-executable-build-spec
@@ -68,8 +68,7 @@ For typed plan inspection and Testing projection, downstream libraries may also
 compose the declarative API:
 
 #+begin_src scheme
-(import :asp-gerbil-scheme/src/building/declarative
-        :asp-gerbil-scheme/src/testing/building)
+(import :asp-gerbil-scheme/build-api)
 
 (define-std-build project-build
   label: "project-build"

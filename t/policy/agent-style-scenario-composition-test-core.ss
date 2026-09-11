@@ -116,8 +116,8 @@
                    => ["total"])
             (agent-style-check-r013-quality-reference!
              context
-             (list 0 2 3)
-             (list 1 2 3 5 6))))
+             (list 0 1 2 3 4)
+             (list 0 1 2 3 4))))
 (test-case "agent policy validates wrapper lambda function factory scenario under performance gate"
           (let* ((context
                   (agent-style-policy-r013-scenario-context

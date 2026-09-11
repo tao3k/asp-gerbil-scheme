@@ -38,6 +38,8 @@ flowchart LR
 | Global-lock, dependency-completion wait, and work-channel calls occur in one build/runtime owner | =GERBIL-SCHEME-AGENT-POLICY-020= emits =build-runtime-shadow-scheduler= |
 | A short state-table lock and compilation live in different callers | Accepted |
 | One declarative module catalog reaches one =std/make= invocation | Accepted |
+| A verified generated sidecar is projected through native =gxc: extra-inputs:= | Accepted |
+| A sidecar cache removes a target, predicts native currentness, or schedules compilation | Rejected |
 
 Before invoking =std/make=, the Build API validates only declaration-level
 properties and resolves the profile/toolchain environment.  It passes the
@@ -45,6 +47,16 @@ complete declared spec to one =make= call.  It does not parse imports, infer
 reverse dependencies, compare source/output mtimes, pre-clean an affected
 closure, or decide that a build is current.  Those operations require Gerbil
 expander and =std/make= semantics.
+
+One narrow cache boundary is compatible with that rule.  A pure expensive
+expansion generator may restore a previously materialized domain artifact only
+after ASP verifies its immutable receipt, contract key, artifact byte digests,
+and parser-owned/domain-owned validator.  PackageSpec then adds the resulting
+paths to the matching native =gxc:= target's =extra-inputs:= plist.  It does not
+remove the target or withhold any part of the declared BuildSpec.  =std/make=
+still imports the target, observes the extra inputs, decides currentness, owns
+the dependency graph, and schedules compilation.  The full contract and
+adoption protocol are in [[file:31.09-verified-generated-module-artifacts.org][31.09 Verified Generated Module Artifacts]].
 
 Every invocation emits the memory/CPU/compiler observation for the one upstream
 session.  The receipt describes what ran; it is not a freshness oracle.  A warm
@@ -143,6 +155,7 @@ flowchart TD
   D["Compile while caller owns global lock"] --> D1["Policy finding"]
   E["Import lock + completion wait + private channel"] --> E1["Policy finding"]
   F["Source parser + mtime pre-clean"] --> F1["Rejected second authority"]
+  G["Verified pure-generator sidecar"] --> G1["Native gxc extra-input; full spec preserved"]
 #+end_src
 
 The focused tests live in =t/policy/agent-build-test.ss=.  The declaration-only

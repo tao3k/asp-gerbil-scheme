@@ -162,9 +162,12 @@
             (write-text ignored-path "(package: sample/scope/ignored)\n(def ignored 0)\n")
             (write-text flat-path "(package: sample/scope/flat)\n(def flat 1)\n")
             (check (project-package-source-scope (read-project-package root)) => #f)
-            (check (not (not (member "scratch/ignored.ss"
-                                     (map source-file-path
-                                          (project-index-files (collect-project root)))))) => #t)
+            ;; Without Build API coverage the native fallback admits only src
+            ;; and t, never arbitrary root or scratch trees.
+            (check (not (member "scratch/ignored.ss"
+                                (map source-file-path
+                                     (project-index-files (collect-project root)))))
+                   => #t)
             (let* ((index (collect-source-scope/coverage
                            root ["build.ss" "flat.ss" "gerbil.pkg" "lib/main.ss" "scratch/ignored.ss"]
                            ["lib" "."] ["lib"] ["scratch"]))

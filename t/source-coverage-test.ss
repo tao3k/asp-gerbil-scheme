@@ -4,7 +4,7 @@
 (import :std/test
         (only-in :std/misc/path path-normalize)
         "../src/build-api/source-coverage"
-        "../src/build-api/build-path-contract")
+        (only-in "../src/build-api/native-build-spec" configure-build-root!))
 (export source-coverage-test)
 
 (def source-coverage-test

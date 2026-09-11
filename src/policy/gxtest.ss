@@ -7,7 +7,6 @@
                     :std/stxutil)
         (only-in :std/test check test-case test-suite)
         (only-in "./gxtest-report"
-                 display-project-policy-report
                  gxtest-report-agent-repair
                  gxtest-report-definitions
                  gxtest-report-files
@@ -20,7 +19,9 @@
                  policy-status
                  project-policy-findings
                  project-policy-report
-                 project-policy-status)
+                 project-policy-report-packet
+                 project-policy-status
+                 write-project-policy-report-packet)
         (rename-in "./gxtest-report"
                    (policy-report gxtest-report-policy-report)
                    (policy-source-report gxtest-report-policy-source-report)))
@@ -44,7 +45,8 @@
         project-policy-findings
         project-policy-status
         project-policy-report
-        display-project-policy-report)
+        project-policy-report-packet
+        write-project-policy-report-packet)
 
 ;; : (-> Root (List Path) Json )
 (def (policy-report root files (phase! #f))
@@ -143,7 +145,7 @@
     (test-case "package policy passes for test scope"
       (let (report (policy-report root files))
         (when (not (equal? (hash-get report 'status) "pass"))
-          (display-project-policy-report report))
+          (write-project-policy-report-packet report))
         (check (hash-get report 'status) => "pass")))))
 
 ;; : (-> Root Path TestSuite )
@@ -161,5 +163,5 @@
     (test-case "package policy has no findings"
       (let (report (project-policy-report root))
         (when (not (equal? (hash-get report 'status) "pass"))
-          (display-project-policy-report report))
+          (write-project-policy-report-packet report))
         (check (hash-get report 'status) => "pass")))))

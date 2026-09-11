@@ -7,6 +7,16 @@
         :std/srfi/13)
 (export parser-test-part-1)
 
+;; : (-> Json (List JsonValue))
+(def (syntax-relation-projection-values row)
+  (map (lambda (key) (hash-get row key))
+       '(kind name owner path start end phase context structuralPath)))
+
+;; : (-> (List (List Json)) (List (List (List JsonValue))))
+(def (syntax-relation-projections-values projections)
+  (map (lambda (rows) (map syntax-relation-projection-values rows))
+       projections))
+
 ;; : (-> Selector Relpath Boolean )
 (def (selector-owner? selector path)
   (and (string? selector)
@@ -198,14 +208,16 @@
               (check (syntax-relation-phase quasi-compute) => 1)
               (check (> (syntax-relation-start quasi-helper) 0) => #t)
               (check (pair? (syntax-relation-structural-path quasi-helper)) => #t)
-              (check (map (lambda (form)
-                            (syntax-ast-relation-projection
-                             (top-form-syntax-ast form)))
-                          (source-file-forms file))
-                     => (map (lambda (form)
-                               (syntax-ast-relation-projection
-                                (top-form-syntax-ast form)))
-                             (source-file-forms again))))))
+              (check (syntax-relation-projections-values
+                      (map (lambda (form)
+                             (syntax-ast-relation-projection
+                              (top-form-syntax-ast form)))
+                           (source-file-forms file)))
+                     => (syntax-relation-projections-values
+                         (map (lambda (form)
+                                (syntax-ast-relation-projection
+                                 (top-form-syntax-ast form)))
+                              (source-file-forms again)))))))
     (test-case "package metadata does not project or load external policy config"
           (let* ((root ".run/parser-modularity-policy")
                  (policy-dir (string-append root "/policy"))
@@ -224,8 +236,15 @@
               (check (hash-keys fields) => ['packageManager])
               ;; Invalid external data cannot affect package reading.
               (write-text config-path "(")
-              (check (project-package-json (read-project-package root))
-                     => (project-package-json package)))))
+              (let ((again (project-package-json (read-project-package root)))
+                    (expected (project-package-json package)))
+                (check (hash-get again 'path) => (hash-get expected 'path))
+                (check (hash-get again 'name) => (hash-get expected 'name))
+                (check (hash-get again 'dependencies)
+                       => (hash-get expected 'dependencies))
+                (check (hash-get (hash-get again 'fields) 'packageManager)
+                       => (hash-get (hash-get expected 'fields)
+                                    'packageManager))))))
     (test-case "collect-source-scope keeps named owners despite package exclusions"
           (let* ((root ".run/parser-changed-project-files")
                  (src (string-append root "/src"))

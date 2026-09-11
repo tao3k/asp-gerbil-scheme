@@ -6,6 +6,7 @@
         :std/misc/ports
         :std/misc/process
         :std/sort
+        (only-in :std/text/json read-json)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/agent-style
         :asp-gerbil-scheme/src/policy/facade
@@ -74,7 +75,7 @@
             (check (not (not (string-contains
                               (hash-get (type-finding-details finding)
                                         'learnedFrom)
-                              ".data/gerbil-poo/fun.ss")))
+                              "gerbil-poo/fun.ss")))
                    => #t)
             (check (hash-get (type-finding-details finding) 'preserveNamedLetWhen)
                    => ["local recursion without accumulator boilerplate"
@@ -104,54 +105,40 @@
             (match (policy-check-output [root])
               ([exit-code . output]
                (check exit-code => 1)
-            (check (not (not (string-contains
-                              output
-                              "|agent-repair-info status=active repairableFindings=3 repairableWarnings=3 repairableErrors=0 trigger=warning")))
-                   => #t)
-            (check (not (not (string-contains
-                              output
-                              "|agent-repair rule=GERBIL-SCHEME-AGENT-POLICY-009 severity=warning repairable=true active=true trigger=warning")))
-                   => #t)
-            (check (not (not (string-contains
-                              output
-                              "guideTopic=functional-data-transform")))
-                   => #t)
-            (check (not (not (string-contains
-                              output
-                              "guideIntent=repair")))
-                   => #t)
-            (check (not (not (string-contains
-                              output
-                              "nextCommand=asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-009 --intent repair")))
-                   => #t)
-            (check (not (not (string-contains
-                              output
-                              "action=apply-policy-triggered-repair")))
-                   => #t)
-            (check (not (not (string-contains
-                              output
-                              "guideCodeFlag=--code")))
-                   => #t)
-            (check (not (not (string-contains
-                              output
-                              "nextCommand=asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-015 --intent style")))
-                   => #t)
-            (check (not (not (string-contains
-                              output
-                              "styleGuide=typed-combinator-style")))
-                   => #t)
-            (check (not (not (string-contains
-                              output
-                              "styleCommand=asp gerbil-scheme guide --code --topic typed-combinator-style --intent style")))
-                   => #t)
-            (check (not (not (string-contains
-                              output
-                              "qualityFacets=")))
-                   => #t)
-            (check (not (not (string-contains
-                              output
-                              "qualityFacetSteering=")))
-                   => #t)))))
+               (let* ((packet (call-with-input-string output read-json))
+                      (repair (hash-get packet "agentRepair"))
+                      (findings (hash-get packet "findings"))
+                      (r009 (hash-get
+                             (json-finding-by-rule
+                              findings "GERBIL-SCHEME-AGENT-POLICY-009")
+                             "agentRepair"))
+                      (r013 (hash-get
+                             (json-finding-by-rule
+                              findings "GERBIL-SCHEME-AGENT-POLICY-013")
+                             "agentRepair"))
+                      (r015 (hash-get
+                             (json-finding-by-rule
+                              findings "GERBIL-SCHEME-AGENT-POLICY-015")
+                             "agentRepair")))
+                 (check (hash-get packet "schemaId")
+                        => "agent.semantic-protocols.semantic-language-policy-report")
+                 (check (hash-get repair "repairableFindings") => 3)
+                 (check (hash-get repair "repairableWarnings") => 3)
+                 (check (hash-get repair "repairableErrors") => 0)
+                 (check (hash-get repair "trigger") => "warning")
+                 (check (hash-get r009 "guideTopic")
+                        => "functional-data-transform")
+                 (check (hash-get r009 "guideIntent") => "repair")
+                 (check (hash-get r009 "guideCommand")
+                        => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-009 --intent repair")
+                 (check (hash-get r009 "guideRole") => "evidence-only")
+                 (check (hash-get r015 "guideCommand")
+                        => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-015 --intent style")
+                 (check (hash-get r013 "guideTopic")
+                        => "typed-combinator-style")
+                 (check (hash-get r013 "guideCommand")
+                        => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-013 --intent style"))
+            ))))
 (test-case "agent policy reports repeated match branch shape before style repair"
           (let* ((root ".run/policy-controlled-branch-shape")
                  (_ (write-controlled-branch-shape-project root))
@@ -166,8 +153,14 @@
                    => "controlled-branch-shape")
             (check (hash-get (type-finding-details finding) 'rewriteScope)
                    => "same caller or extracted helper only")
-            (check (hash-get (type-finding-details finding) 'qualityReference)
-                   => "gerbil-utils")
+            (let (quality-reference
+                  (hash-get (type-finding-details finding) 'qualityReference))
+              (check (hash-get quality-reference 'referencePattern)
+                     => "gerbil-utils-higher-order-expression")
+              (check (not (not (member
+                                "gerbil-utils/base.ss#lambda-match/lambda-ematch"
+                                (hash-get quality-reference 'referenceExamples))))
+                     => #t))
             (check (hash-get (type-finding-details finding) 'functionShape)
                    => "source-backed Gerbil idioms first: lambda-match/lambda-ematch for unary match destructuring, fun for reusable local lambdas, cut/curry/rcurry for specialization, compose/rcompose/!>/!!> for pipelines")
             (check (hash-get (type-finding-details finding) 'expressionLevelRewrite)
@@ -183,6 +176,13 @@
             (match (policy-check-output [root])
               ([exit-code . output]
                (check exit-code => 1)
-               (check (not (not (string-contains output "guideTopic=controlled-branch-shape"))) => #t)
-               (check (not (not (string-contains output "nextCommand=asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-014 --intent style"))) => #t)))))
+               (let* ((packet (call-with-input-string output read-json))
+                      (finding (json-finding-by-rule
+                                (hash-get packet "findings")
+                                "GERBIL-SCHEME-AGENT-POLICY-014"))
+                      (repair (hash-get finding "agentRepair")))
+                 (check (hash-get repair "guideTopic")
+                        => "controlled-branch-shape")
+                 (check (hash-get repair "guideCommand")
+                        => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-014 --intent style"))))))
   ))

@@ -4,18 +4,26 @@
 (import (only-in :std/sort sort)
         (only-in :std/srfi/1 filter find iota)
         (only-in :std/sugar foldl)
-        (only-in "../support/time" monotonic-micros duration-micros)
+        (only-in "../support/time"
+                 monotonic-micros
+                 duration-micros
+                 micros->nanos
+                 duration-nanos->text)
         :gerbil/gambit)
 
 (export test-phase-receipt-line
         display-test-phase-receipt
         run-test-phase
+        gxtest-progress-line
+        display-gxtest-progress
+        display-gxtest-stream-line
         record-gxtest-result
         display-gxtest-result
         gxtest-result-file
         gxtest-result-status
         gxtest-result-output
         gxtest-result-elapsed-micros
+        gxtest-result-streamed?
         gxtest-summary-line
         gxtest-top-line
         gxtest-failure-line
@@ -26,10 +34,11 @@
 
 ;; : (-> String Integer String)
 (def (test-phase-receipt-line name elapsed-micros)
-  (string-append "[asp-gerbil-scheme-test-phase] name=" name
-                 " elapsedMicros=" (number->string elapsed-micros)
-                 " elapsedMs=" (number->string (quotient elapsed-micros 1000))
-                 "\n"))
+  (let (elapsed-nanos (micros->nanos elapsed-micros))
+    (string-append "[asp-gerbil-scheme-test-phase] name=" name
+                   " elapsedNs=" (number->string elapsed-nanos)
+                   " elapsed=" (duration-nanos->text elapsed-nanos)
+                   "\n")))
 
 ;; : (-> String Integer Void)
 (def (display-test-phase-receipt name elapsed-micros)
@@ -58,6 +67,36 @@
        (duration-micros start-micros (monotonic-micros)))
       result)))
 
+;; Keep concurrent subprocess output line-atomic. The test runner may own more
+;; than one native lane, so an unguarded sequence of display/newline calls can
+;; otherwise splice two independently useful traces into one unreadable line.
+(def +gxtest-report-output-lock+ (make-mutex 'gxtest-report-output))
+
+;; : (-> String String String Integer String)
+(def (gxtest-progress-line name mode state elapsed-micros)
+  (let (elapsed-nanos (micros->nanos elapsed-micros))
+    (string-append "[asp-gerbil-scheme-test-progress] name=" name
+                   " mode=" mode
+                   " state=" state
+                   " elapsedNs=" (number->string elapsed-nanos)
+                   " elapsed=" (duration-nanos->text elapsed-nanos)
+                   "\n")))
+
+;; : (-> String String String Integer Void)
+(def (display-gxtest-progress name mode state elapsed-micros)
+  (with-lock +gxtest-report-output-lock+
+    (lambda ()
+      (display (gxtest-progress-line name mode state elapsed-micros))
+      (force-output))))
+
+;; : (-> String Void)
+(def (display-gxtest-stream-line line)
+  (with-lock +gxtest-report-output-lock+
+    (lambda ()
+      (display line)
+      (newline)
+      (force-output))))
+
 ;; : (-> GxTestResult Path)
 (def (gxtest-result-file result)
   (list-ref result 0))
@@ -74,6 +113,14 @@
 (def (gxtest-result-elapsed-micros result)
   (list-ref result 3))
 
+;; The fifth field is an internal delivery marker. Older four-field results are
+;; intentionally treated as buffered so existing in-process callers preserve
+;; their output behavior.
+;; : (-> GxTestResult Boolean)
+(def (gxtest-result-streamed? result)
+  (and (> (length result) 4)
+       (list-ref result 4)))
+
 ;; : (-> GxTestResult GxTestResult)
 (def (record-gxtest-result result)
   (display-test-phase-receipt
@@ -83,11 +130,12 @@
 
 ;; : (-> GxTestResult Void)
 (def (display-gxtest-result result)
-  (display (gxtest-result-output result)))
+  (unless (gxtest-result-streamed? result)
+    (display (gxtest-result-output result))))
 
 ;; : (-> Integer Integer)
-(def (gxtest-micros->ms micros)
-  (quotient micros 1000))
+(def (gxtest-micros->nanos micros)
+  (micros->nanos micros))
 
 ;; : (-> (List GxTestResult) Integer)
 (def (gxtest-results-elapsed-micros-sum results)
@@ -128,13 +176,15 @@
 
 ;; : (-> String Integer Integer Integer String)
 (def (gxtest-summary-line kind count sum-micros wall-micros)
-  (string-append "[asp-gerbil-scheme-test-summary] kind=" kind
-                 " count=" (number->string count)
-                 " sumMs="
-                 (number->string (gxtest-micros->ms sum-micros))
-                 " wallMs="
-                 (number->string (gxtest-micros->ms wall-micros))
-                 "\n"))
+  (let ((sum-nanos (gxtest-micros->nanos sum-micros))
+        (wall-nanos (gxtest-micros->nanos wall-micros)))
+    (string-append "[asp-gerbil-scheme-test-summary] kind=" kind
+                   " count=" (number->string count)
+                   " sumNs=" (number->string sum-nanos)
+                   " sum=" (duration-nanos->text sum-nanos)
+                   " wallNs=" (number->string wall-nanos)
+                   " wall=" (duration-nanos->text wall-nanos)
+                   "\n")))
 
 ;; : (-> Integer GxTestResult Void)
 (def (display-gxtest-top-result rank result)
@@ -144,11 +194,12 @@
 
 ;; : (-> Integer String Integer String)
 (def (gxtest-top-line rank name elapsed-micros)
-  (string-append "[asp-gerbil-scheme-test-top] rank=" (number->string rank)
-                 " name=" name
-                 " elapsedMs="
-                 (number->string (gxtest-micros->ms elapsed-micros))
-                 "\n"))
+  (let (elapsed-nanos (gxtest-micros->nanos elapsed-micros))
+    (string-append "[asp-gerbil-scheme-test-top] rank=" (number->string rank)
+                   " name=" name
+                   " elapsedNs=" (number->string elapsed-nanos)
+                   " elapsed=" (duration-nanos->text elapsed-nanos)
+                   "\n")))
 
 ;; : (-> String Integer String)
 (def (gxtest-failure-line name status)

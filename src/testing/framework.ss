@@ -116,13 +116,13 @@
      (asp-gerbil-scheme-load-source-coverage ".")
      (let* ((policy-source-report
              (eval 'asp-gerbil-scheme/src/policy/gxtest-report#policy-source-report))
-            (display-project-policy-report
-             (eval 'asp-gerbil-scheme/src/policy/gxtest-report#display-project-policy-report))
+            (write-project-policy-report-packet
+             (eval 'asp-gerbil-scheme/src/policy/gxtest-report#write-project-policy-report-packet))
             (report (policy-source-report
                      "."
                      (asp-gerbil-scheme-source-coverage-files "."))))
        (when (pair? (or (hash-get report 'findings) []))
-         (display-project-policy-report report))))))
+         (write-project-policy-report-packet report))))))
 
 ;; : (-> TestingSuite List List Integer TestingReceipt)
 (def (testing-expand-manifest-phase-receipt suite files args elapsed-micros)

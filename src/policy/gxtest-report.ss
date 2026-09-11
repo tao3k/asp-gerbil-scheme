@@ -17,11 +17,10 @@
                  duration-micros
                  monotonic-micros)
         (only-in "./facade"
-                 agent-repair-summary-parts
                  agent-repair-report-json
-                 finding-agent-repair-parts
-                 finding-guide-detail-parts
+                 policy-finding-json
                  run-policy-checks)
+        (only-in "../protocol/json-output" write-json-line)
         (only-in "../types/facade"
                  type-finding-details
                  type-finding-message
@@ -46,7 +45,8 @@
         project-policy-findings
         project-policy-status
         project-policy-report
-        display-project-policy-report)
+        project-policy-report-packet
+        write-project-policy-report-packet)
 
 ;; : (-> Root (List Path) (List TypeFinding) )
 (def (policy-findings root files)
@@ -222,119 +222,24 @@
         (definitions (gxtest-report-definitions report))
         (findingCount (gxtest-report-finding-count report))))
 
-;;; Boundary:
-;;; - display-project-policy-report mirrors check output for failing gxtest runs.
-;;; - Keep the line protocol compact so downstream CI logs stay readable.
+;;; Provider wire boundary.  This is the only public output projection for a
+;;; policy report.  Unified ASP validates this shared packet and owns every
+;;; human-readable presentation.
+;; : (-> PolicyReport Json )
+(def (project-policy-report-packet report)
+  (hash (schemaId "agent.semantic-protocols.semantic-language-policy-report")
+        (schemaVersion "1")
+        (languageId (hash-get report 'languageId))
+        (providerId (hash-get report 'providerId))
+        (status (hash-get report 'status))
+        (scope (hash-get report 'scope))
+        (requestedFiles (or (hash-get report 'requestedFiles) []))
+        (files (hash-get report 'files))
+        (definitions (hash-get report 'definitions))
+        (agentRepair (hash-get report 'agentRepair))
+        (findings (map policy-finding-json
+                       (gxtest-report-findings report)))))
+
 ;; : (-> PolicyReport Unit )
-(def (display-project-policy-report report)
-  (let (findings (gxtest-report-findings report))
-    (displayln "[gerbil-gxtest] status=" (gxtest-report-status report)
-               " files=" (gxtest-report-files report)
-               " definitions=" (gxtest-report-definitions report)
-               " findings=" (gxtest-report-finding-count report))
-    (display-project-policy-agent-repair-summary findings)
-    (display-project-policy-agent-repair-rules findings)
-    (for-each display-project-policy-finding findings)))
-
-;; : (-> (List TypeFinding) Unit )
-(def (display-project-policy-agent-repair-summary findings)
-  (display-project-policy-line "|agent-repair-info"
-                               (agent-repair-summary-parts findings)))
-
-;; : (-> (List TypeFinding) Unit )
-(def (display-project-policy-agent-repair-rules findings)
-  (let (seen [])
-    (for-each
-     (lambda (finding)
-       (let* ((rule-id (type-finding-rule-id finding))
-              (already-seen? (member rule-id seen)))
-         (unless already-seen?
-           (display-project-policy-line "|agent-repair-rule"
-                                        (finding-agent-repair-parts finding))
-           (set! seen (cons rule-id seen)))))
-     findings)))
-
-;;; Boundary:
-;;; - Finding lines expose the same selector/message/detail fields as check.
-;;; - Per-rule repair hints stay compact by default; full detail is opt-in.
-;; : (-> TypeFinding Unit )
-(def (display-project-policy-finding finding)
-  (displayln "|finding rule=" (type-finding-rule-id finding)
-             " severity=" (type-finding-severity finding)
-             " path=" (type-finding-path finding)
-             " selector=" (or (type-finding-selector finding) "")
-             " message=" (type-finding-message finding))
-  (when (project-policy-detail-output?)
-    (display-project-policy-line "|agent-repair"
-                                 (finding-agent-repair-parts finding))
-    (display-project-policy-line
-     "|finding-detail"
-     (append (project-policy-finding-detail-parts finding)
-             (finding-guide-detail-parts finding)))))
-
-;; : (-> Boolean)
-(def (project-policy-detail-output?)
-  (let (value (with-catch (lambda (_) #f)
-               (lambda () (getenv "ASP_GERBIL_SCHEME_POLICY_DETAIL"))))
-    (or (equal? value "1")
-        (equal? value "true")
-        (equal? value "full"))))
-
-;;; Render each part with a shared prefix so gxtest failure logs stay line-oriented.
-;;; The one-argument lambda is safe because repair/detail parts are already display-ready strings.
-;; : (-> Prefix (List String) Unit )
-(def (display-project-policy-line prefix parts)
-  (when (and parts (pair? parts))
-    (display prefix)
-    (for-each (lambda (part)
-                (display " ")
-                (display part))
-              parts)
-    (newline)))
-
-;; : (List Key)
-(def +project-policy-finding-detail-keys+
-  '(advice next keepNamedLetWhen styleGuide styleCommand
-    expectedCommentShape signatureShape
-    expectedDocShape typedDocRequiredWhen typedDocMissing
-    typedDocMissingCount typedDocMissingTargets
-    invalidTypedContractCount invalidTypedContractReasons
-    invalidTypedContractExamples
-    repairAction guideCodeFlag factProjectionCommand repairCodeCommand
-    codeShapeExemplar adapterRepairShape agentRepairStandard
-    qualityFacets qualityFacetSteering requiredWitness rewriteScope
-    evidence kind name selector))
-
-;;; Preserve detail key order with map, then filter absent policy-specific fields.
-;;; This keeps compact output stable without forcing every finding to carry every detail slot.
-;; : (-> TypeFinding (List String) )
-(def (project-policy-finding-detail-parts finding)
-  (let (details (type-finding-details finding))
-    (if details
-      (filter (lambda (part) part)
-              (map (lambda (key)
-                     (project-policy-finding-detail-part details key))
-                   +project-policy-finding-detail-keys+))
-      [])))
-
-;; : (-> Details Key MaybeString )
-(def (project-policy-finding-detail-part details key)
-  (let (value (project-policy-finding-detail-value details key))
-    (and value
-         (string-append (symbol->string key)
-                        "="
-                        (project-policy-datum->display-string value)))))
-
-;;; Finding details are optional and policy-specific, so missing keys should not hide the original failure.
-;;; The protected lookup keeps custom downstream reports usable across mixed harness versions.
-;; : (-> Details Key MaybeDatum )
-(def (project-policy-finding-detail-value details key)
-  (with-catch
-   (lambda (_) #f)
-   (lambda () (hash-get details key))))
-
-;;; Use a display port conversion so symbols, lists, and strings keep their Scheme-readable shape.
-;;; A one-argument port lambda keeps the resource scope local to the conversion.
-;; : (-> Datum String )
-(def (project-policy-datum->display-string value)
-  (call-with-output-string "" (lambda (port) (display value port))))
+(def (write-project-policy-report-packet report)
+  (write-json-line (project-policy-report-packet report)))

@@ -376,12 +376,25 @@
 
 ;; : (-> Policy (List String) )
 (def (configured-source-roots policy)
-  (let (roots (and policy (source-scope-roots policy)))
-    (if (and roots (pair? roots)) roots ["."])))
+  (let* ((roots (and policy (source-scope-roots policy)))
+         (runtime-roots (and policy (source-scope-runtime-roots policy)))
+         (declared-roots
+          (and policy (unique (append (or roots [])
+                                      (or runtime-roots []))))))
+    ;; Native development fallback is source-owned. Scanning the workspace
+    ;; root would admit generated trees and build-system directory links before
+    ;; the parser has any package-owned scope evidence.  Once Build API coverage
+    ;; exists, runtime roots are also parseable source roots rather than merely
+    ;; descriptive metadata.
+    (if (and declared-roots (pair? declared-roots))
+      declared-roots
+      ["src" "bin"])))
 
 ;; : (-> MaybePackage (List String) )
 (def (configured-test-roots package)
-  ["t"])
+  ;; Retired test roots remain discoverable so modularity policy can report
+  ;; them; discovery does not make them accepted layout.
+  ["t" "test" "tests"])
 
 ;; root-config-files
 ;;   : (-> String (List String))

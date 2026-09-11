@@ -2,7 +2,7 @@
 ;;; Input anti-pattern: downstream gxtest builds benchmark timing directly.
 
 (import :std/test
-        (only-in :asp-gerbil-scheme/src/benchmark/gate
+        (only-in :asp-gerbil-scheme/build-api
                  benchmark-receipt-pass?
                  benchmark-run/result))
 
@@ -10,24 +10,11 @@
 
 (def +downstream-performance-fixture+
   '((max_total . 100ms)
-    (observed_total . 1ms)
     (target_total . 25ms)
     (regression_budget . 75ms)
-    (observedTimings ((name . benchmark-body) (durationMs . 1)))
+    (expected_over_input_budget . 75ms)
     (targetRationale . "input demonstrates direct benchmark glue")
-    (maxCollectMs . 50)
-    (observedCollectMs . 1)
-    (maxParseMs . 50)
-    (observedParseMs . 1)
-    (maxFileMs . 50)
-    (observedFileMs . 1)
-    (maxPhaseMs . 50)
-    (observedPhaseMs . 1)
-    (maxRssMb . 512)
-    (memoryMetric . resident-set-size)
-    (memoryUnit . "MB")
-    (iterations . 1)
-    (unit . "ms")
+    (sampleCount . 20)
     (feature . "downstream-testing-framework-api-loading")
     (rule . "GERBIL-SCHEME-AGENT-TESTING-DOWNSTREAM-BENCHMARK-HELPER-001")
     (optimizationFocus . "detect downstream direct benchmark glue before it becomes user API")

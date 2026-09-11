@@ -6,7 +6,8 @@
                  typed-combinator-style-facts->quality-facet
                  typed-combinator-style-facts->signals
                  typed-combinator-style-facts->targets
-                 typed-contract-fact-mentions-any?)
+                 typed-contract-fact-mentions-any?
+                 typed-contract-fact-doc-mentions-any?)
         (only-in :std/misc/list unique)
         (only-in :std/sugar filter ormap))
 
@@ -333,6 +334,14 @@
    (source-file-macros file)
    macro-fact-name))
 
+;;; Macro responsibility evidence may live in either the compact arrow or its
+;;; adjacent structured doc block. Both projections are parser-owned; arbitrary
+;;; implementation text remains outside this detector.
+;; : (-> TypedContractFact (List String) Boolean )
+(def (typed-contract-fact-boundary-mentions-any? fact needles)
+  (or (typed-contract-fact-mentions-any? fact needles)
+      (typed-contract-fact-doc-mentions-any? fact needles)))
+
 ;;; Gerbil core/match.ss supports match-specific extension macros through
 ;;; defsyntax-for-match, syntax-local match macro lookup, applicative
 ;;; destructuring, and struct/class accessor extraction.  Detection stays
@@ -376,35 +385,35 @@
 ;; : (-> TypedContractFact (List String) )
 (def (typed-combinator-style-match-extension-boundary-categories fact)
   (filter (lambda (category) category)
-          [(and (typed-contract-fact-mentions-any?
+          [(and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Match" "match" "Pattern" "pattern"])
                 "match-pattern")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Macro" "macro" "Syntax" "syntax"])
                 "macro-syntax")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["SyntaxLocal" "syntax-local" "syntax local" "Expander" "expander"])
                 "syntax-local")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Struct" "struct" "Class" "class"])
                 "struct-class")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Accessor" "accessor" "Field" "field" "Slot" "slot"])
                 "accessor")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Apply" "apply" "Applicative" "applicative"])
                 "applicative")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Parse" "parse" "Parser" "parser"])
                 "parser")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Error" "error" "Source" "source"])
                 "source-error")]))
@@ -451,39 +460,39 @@
 ;; : (-> TypedContractFact (List String) )
 (def (typed-combinator-style-mop-class-macro-boundary-categories fact)
   (filter (lambda (category) category)
-          [(and (typed-contract-fact-mentions-any?
+          [(and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["MOP" "mop" "Metaobject" "metaobject"])
                 "mop")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Class" "class" "Defclass" "defclass"])
                 "class")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Descriptor" "descriptor" "TypeInfo" "type-info"])
                 "descriptor")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Slot" "slot" "Layout" "layout"])
                 "slot")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Mixin" "mixin" "Super" "super"])
                 "mixin")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Accessor" "accessor" "Mutator" "mutator"])
                 "accessor-mutator")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Method" "method" "Bind" "bind"])
                 "method")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Constructor" "constructor" "Predicate" "predicate"])
                 "constructor-predicate")
-           (and (typed-contract-fact-mentions-any?
+           (and (typed-contract-fact-boundary-mentions-any?
                  fact
                  ["Metaclass" "metaclass" "Contract" "contract" "Default" "default"])
                 "metadata")]))

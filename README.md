@@ -29,6 +29,10 @@ gxtest t/...
 The harness building framework is documented in `docs/30-39-building/31.01-building-framework.org`.
 It keeps Gerbil `std/make` as the compile executor while adding explicit build stages,
 receipts, package stage ordering, and performance gates.
+Pure expansion-time generators can use the verified content-addressed sidecar
+extension documented in `docs/30-39-building/31.09-verified-generated-module-artifacts.org`;
+the extension projects only native `gxc:` `extra-inputs:` and never replaces
+`std/make` freshness, dependency, or scheduling decisions.
 ## Downstream gxtest Quickstart
 Build this harness from its checkout into the global Gerbil package store:
 ```sh
@@ -43,7 +47,7 @@ Add a small `gxtest` fixture, for example `t/project-policy-test.ss`:
 ```scheme
 ;;; -*- Gerbil -*-
 (import :std/test
-        :asp-gerbil-scheme/src/policy/gxtest)
+        :asp-gerbil-scheme/build-api)
 (export project-policy-test)
 (def project-policy-test
   (make-project-policy-test "."))
@@ -59,7 +63,7 @@ This first native version aligns the common provider surface:
 - `agent doctor --json` provider metadata for protocol consumers
 - Runtime-owned Search Playbook discovery with Gerbil-native facts
 - ASP-owned exact projection backed by the provider-native typed request
-- exact source and callable skeletons via `asp gerbil-scheme query --selector ... --projection source|callable-skeleton`
+- exact source and callable skeletons via `asp query playbook --language gerbil-scheme --selector ... --projection source|callable-skeleton`
 - `agent doctor --json`
 - `agent guide`
 The next implementation layer should enrich this with expanded module exports, phase-aware import/export facts, and compiler/type facts from Gerbil's expander and compiler modules.

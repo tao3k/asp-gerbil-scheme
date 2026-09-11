@@ -6,6 +6,8 @@
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/detection
         :asp-gerbil-scheme/src/policy/prototype
+        (only-in :asp-gerbil-scheme/src/policy/agent-style-gerbil-signal-support
+                 typed-contract-fact-mentions-any?)
         (only-in :std/srfi/1 find)
         (only-in :std/sugar ormap))
 
@@ -327,6 +329,18 @@
      "reader-writer-symmetry"]
    "gerbil-poo/mop.ss study: slot quality comes from local descriptor/lens boundaries that centralize get/set/modify, validation, and serialization symmetry without requiring a gerbil-poo dependency")
    (make-gerbil-utils-source-profile
+    'gerbil-native-interface-contract-boundary
+    "gerbil-native-interface-contract-boundary"
+    ["gerbil://gerbil/core/contract.ss#using-class-interface-boundary"
+     "gerbil://gerbil/core/contract.ss#slot-contract-normalize"
+     "gerbil://gerbil/compiler/optimize-call.ss#using-class-slot-access"
+     "gerbil://gerbil/compiler/optimize-base.ss#class-method-table"]
+    ["slot-lens-boundary"
+     "gerbil-native-using-boundary"
+     "typed-descriptor-slot-access"
+     "contract-projection-boundary"]
+    "gerbil:// contract/compiler study: known local class or interface descriptors should use native using and slot-contract projections while validation remains at the update boundary")
+   (make-gerbil-utils-source-profile
     'typeclass-wrapper-adapter
     "typeclass-wrapper-adapter"
     ["gerbil-poo/fun.ss#Category."
@@ -409,7 +423,20 @@
      "actor-shutdown-boundary"
      "actor-parameter-propagation"
      "supervision-cleanup-boundary"]
-    "gerbil:// actor/runtime study: actor quality comes from explicit mailbox protocol, lifecycle, shutdown, supervision, and parameter propagation helpers instead of a single collapsed handler loop")
+   "gerbil:// actor/runtime study: actor quality comes from explicit mailbox protocol, lifecycle, shutdown, supervision, and parameter propagation helpers instead of a single collapsed handler loop")
+   (make-gerbil-utils-source-profile
+    'mop-c3-linearization-boundary
+    "gerbil-runtime-c3-linearization-boundary"
+    ["gerbil://gerbil/runtime/c3.ss#c4-linearize"
+     "gerbil://gerbil/runtime/c3.ss#merge-sis!"
+     "gerbil://gerbil/runtime/c3.ss#precedence-list"
+     "gerbil://gerbil/runtime/interface.ss#interface-descriptor"]
+    ["mop-c3-linearization-boundary"
+     "c3-precedence-boundary"
+     "mop-descriptor-boundary"
+     "linearization-tail-merge-helper"
+     "single-export-orchestration"]
+    "gerbil:// runtime C3/interface study: descriptor construction, precedence lists, compatible head selection, and tail merging belong to separate helpers around one small linearization orchestrator")
    (make-gerbil-utils-source-profile
     'exception-continuation-boundary
     "exception-continuation-boundary"
@@ -640,6 +667,16 @@
   (cond
    ((gerbil-utils-source-quality-facet-any?
      quality-facets
+     ["mop-class-macro-boundary"
+      "class-descriptor-macro-boundary"])
+    'mop-class-macro-boundary)
+   ((gerbil-utils-source-quality-facet-any?
+     quality-facets
+     ["match-extension-boundary"
+      "match-macro-destructuring-boundary"])
+    'match-extension-boundary)
+   ((gerbil-utils-source-quality-facet-any?
+     quality-facets
      ["macro-phase-optimizer-visible-fast-path"
       "phase-macro-generated-wrapper"
       "optimizer-visible-call-shape"])
@@ -649,11 +686,6 @@
      ["phase-aware-macro-boundary"
       "meta-syntactic-tower-boundary"])
     'phase-aware-macro-boundary)
-   ((gerbil-utils-source-quality-facet-any?
-     quality-facets
-     ["mop-class-macro-boundary"
-      "class-descriptor-macro-boundary"])
-    'mop-class-macro-boundary)
    ((gerbil-utils-source-quality-facet-any?
      quality-facets
      ["macro-metaprogramming-decision-boundary"
@@ -669,30 +701,32 @@
      ["syntax-local-registry-boundary"
       "manual-syntax-registry-table"])
     'syntax-local-registry-boundary)
-   ((gerbil-utils-source-quality-facet-any?
-     quality-facets
-     ["match-extension-boundary"
-      "match-macro-destructuring-boundary"])
-    'match-extension-boundary)
    ((pair? (source-file-macros file)) 'macro-helper)
-   ((gerbil-utils-source-quality-facet-any?
-     quality-facets
-     ["protocol-serialization-boundary"])
-    'protocol-serialization-boundary)
-   ((gerbil-utils-source-quality-facet-any?
-     quality-facets
-     ["slot-lens-boundary"])
-    'slot-lens-boundary)
    ((gerbil-utils-source-quality-facet-any?
      quality-facets
      ["poo-typeclass-algebra-boundary"])
     'typeclass-wrapper-adapter)
    ((gerbil-utils-source-quality-facet-any?
      quality-facets
+     ["protocol-serialization-boundary"])
+    'protocol-serialization-boundary)
+   ((typed-combinator-style-native-interface-contract-boundary? file)
+    'gerbil-native-interface-contract-boundary)
+   ((gerbil-utils-source-quality-facet-any?
+     quality-facets
+     ["slot-lens-boundary"])
+    'slot-lens-boundary)
+   ((gerbil-utils-source-quality-facet-any?
+     quality-facets
      ["method-table-combinator-body"
       "method-table-lambda-drift"
       "method-table-low-level-body"])
     'compiler-method-pass-boundary)
+   ((gerbil-utils-source-quality-facet-any?
+     quality-facets
+     ["actor-runtime-boundary"
+      "mailbox-protocol-boundary"])
+    'actor-runtime-boundary)
    ((gerbil-utils-source-quality-facet-any?
      quality-facets
      ["concurrency-control-boundary"])
@@ -704,17 +738,22 @@
     'dynamic-scope-cleanup-boundary)
    ((gerbil-utils-source-quality-facet-any?
      quality-facets
-     ["actor-runtime-boundary"
-      "mailbox-protocol-boundary"])
-    'actor-runtime-boundary)
-   ((gerbil-utils-source-quality-facet-any?
-     quality-facets
      ["exception-continuation-boundary"])
     'exception-continuation-boundary)
    ((gerbil-utils-source-quality-facet-any?
      quality-facets
      ["generator-combinator-boundary"])
     'generator-control)
+   ((gerbil-utils-source-quality-facet-any?
+     quality-facets
+     ["mop-c3-linearization-boundary"
+      "c3-precedence-boundary"])
+    'mop-c3-linearization-boundary)
+   ((gerbil-utils-source-quality-facet-any?
+     quality-facets
+     ["parser-combinator-boundary"
+      "manual-parser-state-machine"])
+    'parser-combinator-boundary)
    ((gerbil-utils-source-quality-facet-any?
      quality-facets
      ["gerbil-inline-rule-call-shape"
@@ -732,6 +771,10 @@
      ["ssxi-optimizer-metadata-boundary"
       "optimizer-metadata-contract"])
     'ssxi-optimizer-metadata-boundary)
+   ((gerbil-utils-source-quality-facet-any?
+     quality-facets
+     ["gerbil-upstream-hot-index-boundary"])
+    'gerbil-upstream-idiom-performance)
    ((gerbil-utils-source-quality-facet-any?
      quality-facets
      ["list-combinator-boundary"])
@@ -763,6 +806,17 @@
           "function-pipeline-abstraction"]))
     'higher-order-expression)
    (else 'default)))
+
+;;; Native interface selection is narrower than the general slot/lens facet:
+;;; the same parser-owned contract must explicitly name both Interface and
+;;; Contract responsibilities before Gerbil core/compiler sources are chosen.
+;; : (-> SourceFile Boolean )
+(def (typed-combinator-style-native-interface-contract-boundary? file)
+  (ormap
+   (lambda (fact)
+     (and (typed-contract-fact-mentions-any? fact ["Interface" "interface"])
+          (typed-contract-fact-mentions-any? fact ["Contract" "contract"])))
+   (source-file-typed-contract-facts file)))
 
 ;;; Facet helper stays local so this source bridge does not depend on the main
 ;;; R013 policy owner's private predicate vocabulary.
