@@ -77,7 +77,9 @@ This entrypoint calls =clan/testing#find-test-files= first and filters only the
 declared directories. It then delegates every remaining path to a fresh native
 =gerbil test= process. The process boundary projects the selected per-test POO
 memory Profile before that suite loads; the aggregate discovery process itself
-is not constrained by a single suite's heap budget.
+is not constrained by a single suite's heap budget. Child stdout is inherited,
+so native gxtest progress, failures, and project benchmark receipts remain
+visible instead of being captured by the adapter.
 
 ** Source scope
 

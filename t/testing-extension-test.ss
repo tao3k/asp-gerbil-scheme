@@ -7,6 +7,16 @@
 
 (export testing-extension-test)
 
+(def +testing-entry-witness+
+  (testing-interface-add-profile
+   +asp-testing-interface+
+   (.cc +testing-discovery-profile+
+        ignoreDirectories: '("nested-package"))))
+
+;; Executable source witness for the public package-entry macro. The generated
+;; entry remains clan-owned and is not invoked while gxtest loads this module.
+(init-profiled-test-environment! +testing-entry-witness+)
+
 (def testing-extension-test
   (test-suite "POO extensions for upstream testing"
     (test-case "the object names the upstream executor without replacing it"
@@ -57,6 +67,12 @@
                 "unit-tests.ss"
                 "vendor/generated/t/generated-test.ss")
                => #f)))
+
+    (test-case "the profiled package entry is backed by executable test data"
+      (check (testing-interface-ignore-directories-for
+              +testing-entry-witness+
+              "unit-tests.ss")
+             => '("nested-package")))
 
     (test-case "invalid discovery boundaries fail closed"
       (let (testing

@@ -185,15 +185,19 @@
               +testing-serial-resource-profile+
               +testing-discovery-profile+]))
 
+(def (invalid-ignore-directory-matchers)
+  (list (cut equal? <> ".")
+        (cut equal? <> "..")
+        (cut string-prefix? "/" <>)
+        (cut string-prefix? "./" <>)
+        (cut string-prefix? "../" <>)
+        (cut string-contains <> "/../")))
+
 (def (valid-ignore-directory? directory)
   (and (string? directory)
        (> (string-length directory) 0)
-       (not (equal? directory "."))
-       (not (equal? directory ".."))
-       (not (string-prefix? "/" directory))
-       (not (string-prefix? "./" directory))
-       (not (string-prefix? "../" directory))
-       (not (string-contains directory "/../"))))
+       (not (ormap (lambda (matcher) (matcher directory))
+                   (invalid-ignore-directory-matchers)))))
 
 (def (testing-discovery-profile-ignore-directories profile)
   (unless (testing-profile-matches? profile 'discovery)
@@ -235,8 +239,23 @@
   (filter (cut testing-interface-test-file-included? testing test <>)
           (find-test-files pkgdir regex)))
 
-;;; Preserve clan/testing's command surface and suite execution. The only
-;;; extension is selection of its already-discovered files through a POO value.
+;; init-profiled-test-environment!
+;;   : (-> TestingInterface TestEntryPoint)
+;;   | rationale m%
+;;       Preserve clan/testing discovery and execution while projecting the
+;;       selected POO profiles only at each fresh test-process boundary.
+;;     %
+;;   | doc m%
+;;       Install the normal package unit-test entrypoint after clan discovers
+;;       its native test files and the POO discovery profile subtracts ignored
+;;       child-package paths.
+;;
+;;       # Examples
+;;       ```scheme
+;;       (init-profiled-test-environment! +asp-testing-interface+)
+;;       ;; => installs the asp-profiled-unit-tests entrypoint
+;;       ```
+;;     %
 (defrules init-profiled-test-environment! ()
   ((ctx testing)
    (begin
@@ -286,7 +305,8 @@
                                   arguments: (arguments [])
                                   directory: (directory (current-directory)))
   (run-process (testing-interface-command-for testing test arguments)
-               directory: directory))
+               directory: directory
+               stdout-redirection: #f))
 
 ;;; Apply the selected POO memory profile to the current Gambit runtime.  This
 ;;; uses the upstream heap API directly; callers never construct startup argv.
