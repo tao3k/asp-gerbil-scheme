@@ -19,7 +19,8 @@
         "./src/testing/performance"
         "./src/policy/gxtest"
         "./src/policy/modularity"
-        "./src/benchmark/gate")
+        "./src/benchmark/gate"
+        "./src/benchmark/micro-kernel")
 
 (export (import: "./src/build-api/generated-artifact")
         (import: "./src/build-api/framework")
@@ -37,4 +38,5 @@
         (import: "./src/testing/performance")
         (import: "./src/policy/gxtest")
         (import: "./src/policy/modularity")
-        (import: "./src/benchmark/gate"))
+        (import: "./src/benchmark/gate")
+        (import: "./src/benchmark/micro-kernel"))

@@ -140,6 +140,7 @@
                    (benchmark-fixture-ref receipt 'maxNsPerOp))
         (check result => 42)
         (check (micro-kernel-receipt-pass? receipt) => #t)
+        (check (benchmark-fixture-ref receipt 'schemaVersion) => "1")
         (check (benchmark-fixture-ref receipt 'benchmarkKind)
                => 'micro-kernel)
         (check (benchmark-fixture-ref receipt 'timingSource)

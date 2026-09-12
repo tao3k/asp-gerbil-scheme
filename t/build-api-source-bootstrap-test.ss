@@ -10,7 +10,9 @@
                  testing-build-main
                  make-project-policy-test
                  run-modularity-policy
-                 benchmark-run/result))
+                 benchmark-run/result
+                 make-micro-kernel-fixture
+                 micro-kernel-run/result))
 
 (export build-api-source-bootstrap-test)
 
@@ -27,4 +29,6 @@
       (check (procedure? testing-build-main) => #t)
       (check (procedure? make-project-policy-test) => #t)
       (check (procedure? run-modularity-policy) => #t)
-      (check (procedure? benchmark-run/result) => #t))))
+      (check (procedure? benchmark-run/result) => #t)
+      (check (procedure? make-micro-kernel-fixture) => #t)
+      (check (procedure? micro-kernel-run/result) => #t))))

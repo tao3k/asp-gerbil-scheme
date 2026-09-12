@@ -192,7 +192,7 @@
          (max-ns-per-op (micro-kernel-ref fixture 'maxNsPerOp)))
     (append
      `((schemaId . "agent.semantic-protocols.gerbil-scheme-micro-kernel")
-       (schemaVersion . "2")
+       (schemaVersion . "1")
        (benchmarkKind . micro-kernel)
        (name . ,(micro-kernel-ref fixture 'name))
        (timingSource . ":gerbil/gambit#cpu-time")
