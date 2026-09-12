@@ -261,11 +261,11 @@
    (begin
      (def here (this-source-file ctx))
      (with-id ctx (main)
-       (define-multicall-main ctx)
-       (%set-test-environment! here))
+       (define-multicall-main ctx))
      (define-entry-point (asp-profiled-unit-tests)
        (help: "Run clan unit tests through ASP POO profiles"
         getopt: [])
+       (%set-test-environment! here)
        (for-each
         (cut testing-interface-run-test! testing <>)
         (testing-interface-test-files testing "unit-tests.ss")))
