@@ -15,15 +15,25 @@ The full policy direction is documented in `docs/50-59-policy/51.00-policy-philo
 The macro/module research root is `docs/10-19-research/11.12-gerbil-macro-module-system-research.org`; use it before turning advanced Gerbil macro or module features into parser facts, policy warnings, or scenarios.
 The broader advanced-feature backlog is `docs/10-19-research/11.13-gerbil-advanced-feature-exploration.org`.
 ## Package Workflow
-Build the declared library modules through Gerbil's upstream build script:
+Use the thin justfile recipes, backed by Gerbil's native commands:
 ```sh
-gxi build.ss compile
+just deps
+just build
+just test
+just clean
 ```
-When a Nix SDK is inherited into a Homebrew Gerbil process, use the same command
-with a process-local SDK override: `env SDKROOT= gxi build.ss compile`.
-Run package tests through upstream `gxtest`:
+`just rebuild` runs clean, dependencies, build, and the semantic library tests
+sequentially and stops at the first failure. `just clean-provider` and
+`just build-provider` select the sibling provider build script.
+Both scripts use `std/build-script` directly for spec, compile, clean, and meta;
+no package-specific command dispatcher is needed. Link options remain owned by
+PackageSpec and upstream pkg-config resolution, not by just.
+When a Nix development shell exports an incompatible SDK into Homebrew Gerbil,
+use a process-local override, `env SDKROOT= just build`; do not rewrite the
+global toolchain or bake a host-specific SDK into the recipes.
+Run selected tests through the same native environment:
 ```sh
-gxtest t/...
+just test-files t/package-build-contract-test.ss
 ```
 ## Building Framework
 The harness building framework is documented in `docs/30-39-building/31.01-building-framework.org`.
@@ -36,7 +46,7 @@ the extension projects only native `gxc:` `extra-inputs:` and never replaces
 ## Downstream gxtest Quickstart
 Build this harness from its checkout into the global Gerbil package store:
 ```sh
-gxi build.ss compile
+gerbil build
 ```
 Downstream packages should depend on the installed harness package in `gerbil.pkg`:
 ```scheme
@@ -54,9 +64,11 @@ Add a small `gxtest` fixture, for example `t/project-policy-test.ss`:
 ```
 Then run:
 ```sh
-gxtest t/project-policy-test.ss
+gerbil test t/project-policy-test.ss
 ```
-Gerbil package-manager state belongs under the global `~/.gerbil` store. Do not create or commit a repository-local `.gerbil` directory for this harness. For the full onboarding contract, see `docs/60-69-user/60.01-downstream-gxtest-onboarding.org`.
+Gerbil owns package-environment selection; use its native commands rather than
+hardcoding another package store. Never commit generated `.gerbil` state.
+For the full onboarding contract, see `docs/60-69-user/60.01-downstream-gxtest-onboarding.org`.
 ## Alignment Target
 This first native version aligns the common provider surface:
 - compact text by default

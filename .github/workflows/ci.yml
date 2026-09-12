@@ -145,10 +145,10 @@ jobs:
       - name: Activate Gerbil
         run: |
           echo "$GERBIL_PREFIX/bin" >> "$GITHUB_PATH"
-          "$GERBIL_PREFIX/bin/gxi" --version
-          "$GERBIL_PREFIX/bin/gxpkg" version
-          "$GERBIL_PREFIX/bin/gxi" -e '(displayln "gerbil-ready")'
-          "$GERBIL_PREFIX/bin/gxpkg" list
+          "$GERBIL_PREFIX/bin/gerbil" --version
+          "$GERBIL_PREFIX/bin/gerbil" pkg version
+          "$GERBIL_PREFIX/bin/gerbil" interactive -e '(displayln "gerbil-ready")'
+          "$GERBIL_PREFIX/bin/gerbil" pkg list
 
       - name: Restore Gerbil package dependency cache
         id: gerbil-pkg-cache
@@ -166,10 +166,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.gerbil/pkg"
-          gxpkg dir --add git.cons.io/mighty-gerbils/gerbil-directory
+          gerbil pkg dir --add git.cons.io/mighty-gerbils/gerbil-directory
           package_cache_ready=false
           if [ -d .gerbil/lib ]; then
-            if gxpkg env gxi -e '(begin (import :clan/base :clan/poo/object) (displayln "gerbil-package-cache-ready"))'; then
+            if gerbil env gerbil interactive -e '(begin (import :clan/base :clan/poo/object) (displayln "gerbil-package-cache-ready"))'; then
               package_cache_ready=true
             else
               echo "Cached Gerbil packages are missing compiled dependency libraries; rebuilding"
@@ -178,13 +178,13 @@ jobs:
           if [ "$package_cache_ready" = "true" ]; then
             echo "Using cached Gerbil package dependency build products"
           else
-            gxpkg deps --install
+            gerbil deps --install
           fi
           if [ ! -e .gerbil/pkg/asp-gerbil-scheme ]; then
-            gxpkg link asp-gerbil-scheme .
+            gerbil pkg link asp-gerbil-scheme .
           fi
           rm -rf .gerbil/lib/asp-gerbil-scheme .gerbil/build
-          gxpkg list
+          gerbil pkg list
 
       - name: Save Gerbil package dependency cache
         if: steps.gerbil-pkg-cache.outputs.cache-hit != 'true'
@@ -200,22 +200,24 @@ jobs:
         if: matrix.target == 'library'
         timeout-minutes: 10
         run: |
-          gxpkg env gxi ./build.ss compile
+          gerbil clean
+          gerbil build
 
       - name: Build canonical provider target
         if: matrix.target == 'provider'
         timeout-minutes: 10
         run: |
-          gxpkg env gxi ./build-provider.ss clean
-          gxpkg env gxi ./build-provider.ss
+          gerbil env gerbil interactive ./build-provider.ss clean
+          gerbil env gerbil interactive ./build-provider.ss compile
           test -x .gerbil/bin/asp-gerbil-scheme
 
       - name: Run canonical semantic library tests
         if: matrix.target == 'library'
         run: |
-          gxpkg env gxtest \
+          gerbil test \
+            t/build-script-command-test.ss \
             t/package-build-contract-test.ss \
-            t/source-coverage-test.ss \
+            t/package-native-declaration-test.ss \
             t/build-api-source-bootstrap-test.ss \
             t/provider-owned-schema-registry-test.ss \
             t/exact-source-projection-test.ss \
@@ -227,7 +229,7 @@ jobs:
         if: matrix.target == 'library'
         timeout-minutes: 20
         run: |
-          gxpkg env gxi -:max-heap=1024M -e '
+          gerbil env gerbil interactive -:max-heap=1024M -e '
            (begin
             (import :asp-gerbil-scheme/src/testing/gxtest-execution)
             (for-each
@@ -250,10 +252,10 @@ jobs:
           # The provider artifact is already complete. The library build below
           # supplies only the Gerbil-side test client and shared semantic test
           # modules; it does not participate in producing the executable.
-          gxpkg env gxi ./build.ss compile
-          gxpkg env gxtest \
+          gerbil build
+          gerbil test \
             t/provider-package-spec-test.ss
           # The HTTP suite owns a sub-millisecond service gate. Run it at full
           # machine performance without unrelated test processes competing for
           # its samples; do not lower native build/test capacity.
-          gxpkg env gxtest t/provider-http-json-server-test.ss
+          gerbil test t/provider-http-json-server-test.ss

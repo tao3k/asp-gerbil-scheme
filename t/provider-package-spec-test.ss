@@ -25,8 +25,8 @@
                        bin: "asp-gerbil-scheme"))
         ;; PackageSpec declares capabilities; upstream clan/building owns
         ;; pkg-config resolution and the resulting compiler/linker flags.
-        (check (member "-cc-options" entry) => #f)
-        (check (member "-ld-options" entry) => #f)
+        (check (member "-cc-options" entry) ? true)
+        (check (member "-ld-options" entry) ? true)
         (check (and (member "-cc" entry)
                     (cadr (member "-cc" entry)))
                => (cond-expand

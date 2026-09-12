@@ -1,16 +1,14 @@
-#!/usr/bin/env gxi
+#!/usr/bin/env gerbil
 
 ;;; -*- Gerbil -*-
 
-(import (only-in :clan/building
-                 all-gerbil-modules
-                 init-build-environment!)
+(import (only-in :clan/building all-gerbil-modules)
+        (only-in :std/build-script defbuild-script)
         (only-in "./src/build-api/source-bootstrap"
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype
                  asp-gerbil-scheme-package-native-profile
                  asp-gerbil-scheme-package-pkg-config-libs
-                 asp-gerbil-scheme-package-nix-deps
                  asp-gerbil-scheme-native-profile-prepare!))
 
 (def +product-entry-modules+
@@ -39,16 +37,5 @@
  (asp-gerbil-scheme-package-pkg-config-libs
   asp-gerbil-scheme-library-package-spec))
 
-;; gerbil.pkg owns physical acquisition. These logical dependency names and
-;; the package BuildSpec remain native clan/building declarations; std/make
-;; owns execution, scheduling, and freshness.
-(init-build-environment!
- name: "asp-gerbil-scheme"
- deps: '("clan" "clan/poo")
- spec: asp-gerbil-scheme-library-spec
- pkg-config-libs:
- (asp-gerbil-scheme-package-pkg-config-libs
-  asp-gerbil-scheme-library-package-spec)
- nix-deps:
- (asp-gerbil-scheme-package-nix-deps
-  asp-gerbil-scheme-library-package-spec))
+;; Native spec/compile/clean/meta dispatch; gxpkg owns package acquisition.
+(defbuild-script (asp-gerbil-scheme-library-spec))

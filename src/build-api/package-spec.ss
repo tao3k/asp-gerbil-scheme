@@ -18,7 +18,7 @@
         (rename-in :clan/building
                    (all-gerbil-modules upstream-all-gerbil-modules)
                    (default-exclude-dirs upstream-default-exclude-dirs))
-        (only-in :clan/building remove-build-file normalize-spec)
+        (only-in :clan/building remove-build-file normalize-spec pkg-config-options)
         (only-in "./generated-artifact"
                  asp-gerbil-scheme-project-generated-modules)
         (only-in "./core-capacity"
@@ -92,7 +92,13 @@
    (.get package-spec extra-spec)))
 
 (def (asp-gerbil-scheme-package-native-spec package-spec)
-  (let ((projector (.get package-spec native-spec-projector))
+  (let* ((libraries (asp-gerbil-scheme-package-pkg-config-libs package-spec))
+        (native-options
+         (if libraries
+           (pkg-config-options libraries
+             (asp-gerbil-scheme-package-nix-deps package-spec))
+           []))
+        (projector (.get package-spec native-spec-projector))
         (native-spec (.get package-spec native-spec))
         (generated-modules
          (asp-gerbil-scheme-package-generated-modules package-spec)))
@@ -101,8 +107,13 @@
              ([(? (cut member <> '(exe: static-exe:))) . _]
               (normalize-spec
                item
-               (asp-gerbil-scheme-native-profile-executable-gsc-options
-                (asp-gerbil-scheme-package-native-profile package-spec))))
+               (append
+                (asp-gerbil-scheme-native-profile-executable-gsc-options
+                 (asp-gerbil-scheme-package-native-profile package-spec))
+                native-options)))
+             ((or (? string?) [(? (cut member <> '(gxc: gsc:))) . _])
+              (if (null? native-options) item
+                (normalize-spec item native-options)))
              (else item)))
          (asp-gerbil-scheme-project-generated-modules
           (cond
