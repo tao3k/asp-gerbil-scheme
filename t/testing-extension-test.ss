@@ -16,7 +16,7 @@
 
     (test-case "scenario profiles are enabled by default"
       (check (testing-interface-profile-names +asp-testing-interface+)
-             => '(memory performance debug-trace serial-resource))
+             => '(memory performance debug-trace serial-resource discovery))
       (check (testing-interface-profile-enabled?
               +asp-testing-interface+
               'performance)
@@ -30,6 +30,44 @@
       (check (.ref +testing-performance-profile+ 'metrics)
              => '(wall-time cpu-time allocation gc managed-heap)))
 
+    (test-case "clan discovery results can be filtered by a POO profile"
+      (let* ((discovery
+              (.cc +testing-discovery-profile+
+                   ignoreDirectories: '("lambda-episteme" "vendor/generated")))
+             (testing
+              (testing-interface-add-profile
+               +asp-testing-interface+
+               discovery)))
+        (check (testing-interface-ignore-directories-for
+                testing
+                "unit-tests.ss")
+               => '("lambda-episteme" "vendor/generated"))
+        (check (testing-interface-test-file-included?
+                testing
+                "unit-tests.ss"
+                "./t/core-test.ss")
+               => #t)
+        (check (testing-interface-test-file-included?
+                testing
+                "unit-tests.ss"
+                "./lambda-episteme/t/sdlc-test.ss")
+               => #f)
+        (check (testing-interface-test-file-included?
+                testing
+                "unit-tests.ss"
+                "vendor/generated/t/generated-test.ss")
+               => #f)))
+
+    (test-case "invalid discovery boundaries fail closed"
+      (let (testing
+            (testing-interface-add-profile
+             +asp-testing-interface+
+             (.cc +testing-discovery-profile+
+                  ignoreDirectories: '("../outside"))))
+        (check-exception
+         (testing-interface-ignore-directories-for testing "unit-tests.ss")
+         true)))
+
     (test-case "POO remove returns a new interface without mutating defaults"
       (let (without-performance
             (testing-interface-remove-profile
@@ -41,7 +79,7 @@
                 'performance)
                => #f)
         (check (testing-interface-profile-names without-performance)
-               => '(memory debug-trace serial-resource))
+               => '(memory debug-trace serial-resource discovery))
         (check (testing-interface-profile-enabled?
                 +asp-testing-interface+
                 'performance)

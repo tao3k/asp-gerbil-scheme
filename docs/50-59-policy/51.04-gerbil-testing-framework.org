@@ -11,10 +11,11 @@
 
 ** Authority boundary
 
-=gerbil test= and =:clan/testing= are the only test framework. They own file
-and directory selection, recursive discovery, suite loading, filtering,
-setup/cleanup, execution, progress, and summaries. ASP does not provide a
-second runner, catalog, selector, scope collector, report format, or test DSL.
+=gerbil test= and =:clan/testing= are the only test framework. They own recursive
+discovery, suite loading, setup/cleanup, execution, progress, and summaries.
+ASP does not provide a second runner, catalog, scope collector, report format,
+or test DSL. Its discovery extension may only remove paths from the file list
+already returned by clan; it never adds or independently discovers tests.
 
 The ordinary package entry is the upstream form:
 
@@ -52,12 +53,29 @@ with =.remove=.
 
 (def +without-trace+
   (testing-interface-remove-profile +tests+ 'debug-trace))
+
+(def +without-child-package-tests+
+  (testing-interface-add-profile
+   +tests+
+   (.cc +testing-discovery-profile+
+        ignoreDirectories: '("lambda-episteme"))))
 #+end_src
 
 The declaration is data, not another command-line language. Runtime adapters
 may project these values into process limits and observations before the
 upstream test process is loaded, but they may not rediscover tests or replace
 =gerbil test=.
+
+For a package-level negative discovery boundary, initialize the same clan
+environment through the profiled entrypoint:
+
+#+begin_src scheme
+(init-profiled-test-environment! +without-child-package-tests+)
+#+end_src
+
+This entrypoint calls =clan/testing#find-test-files= first and filters only the
+declared directories. The clan =test= entrypoint still imports and runs every
+remaining suite.
 
 ** Source scope
 

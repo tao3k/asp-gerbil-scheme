@@ -1,14 +1,21 @@
 ;;; -*- Gerbil -*-
 ;;; POO-native extensions for the upstream clan/testing interface.
 ;;;
-;;; This module describes optional test instrumentation.  It deliberately does
-;;; not discover files, parse gxtest arguments, or execute suites: `gerbil test`
-;;; and clan/testing remain the sole owners of those behaviours.
+;;; This module describes optional test instrumentation and negative discovery
+;;; filters. It delegates file discovery and suite execution to clan/testing.
 
 (import :gerbil/gambit
         (only-in :clan/poo/object .call .cc .o .ref .slot? object?)
         (only-in :clan/poo/debug trace-poo)
-        (only-in :std/srfi/1 find filter))
+        (only-in :clan/testing
+                 find-test-files
+                 init-test-environment!
+                 test)
+        (only-in :std/cli/multicall
+                 define-entry-point
+                 set-default-entry-point!)
+        (only-in :std/srfi/1 find filter)
+        (only-in :std/srfi/13 string-contains string-prefix?))
 
 (export testing-profile
         testing-profile?
@@ -25,10 +32,16 @@
         testing-interface-max-heap-mib-for
         testing-interface-apply-runtime-profile!
         testing-interface-trace-poo-for
+        testing-discovery-profile-ignore-directories
+        testing-interface-ignore-directories-for
+        testing-interface-test-file-included?
+        testing-interface-test-files
+        init-profiled-test-environment!
         +testing-memory-profile+
         +testing-performance-profile+
         +testing-debug-trace-profile+
         +testing-serial-resource-profile+
+        +testing-discovery-profile+
         +asp-testing-interface+)
 
 (def (testing-profile profile-name profile-capability)
@@ -154,12 +167,79 @@
 (def +testing-serial-resource-profile+
   (testing-profile 'serial-resource 'shared-resource-declaration))
 
+(def +testing-discovery-profile+
+  (.cc (testing-profile 'discovery 'clan-test-file-filter)
+       ignoreDirectories: []))
+
 (def +asp-testing-interface+
   (testing-interface
    profiles: [+testing-memory-profile+
               +testing-performance-profile+
               +testing-debug-trace-profile+
-              +testing-serial-resource-profile+]))
+              +testing-serial-resource-profile+
+              +testing-discovery-profile+]))
+
+(def (valid-ignore-directory? directory)
+  (and (string? directory)
+       (> (string-length directory) 0)
+       (not (equal? directory "."))
+       (not (equal? directory ".."))
+       (not (string-prefix? "/" directory))
+       (not (string-prefix? "./" directory))
+       (not (string-prefix? "../" directory))
+       (not (string-contains directory "/../"))))
+
+(def (testing-discovery-profile-ignore-directories profile)
+  (unless (testing-profile-matches? profile 'discovery)
+    (error "not a testing discovery profile" profile))
+  (let (directories (.ref profile 'ignoreDirectories))
+    (unless (and (list? directories)
+                 (andmap valid-ignore-directory? directories))
+      (error "invalid testing discovery ignoreDirectories" directories))
+    directories))
+
+(def (testing-interface-ignore-directories-for testing test)
+  (let (discovery
+        (find (lambda (profile)
+                (testing-profile-matches? profile 'discovery))
+              (testing-interface-profiles-for testing test)))
+    (if discovery
+      (testing-discovery-profile-ignore-directories discovery)
+      [])))
+
+(def (strip-current-directory-prefix path)
+  (if (string-prefix? "./" path)
+    (substring path 2 (string-length path))
+    path))
+
+(def (path-in-directory? path directory)
+  (let (relative-path (strip-current-directory-prefix path))
+    (or (equal? relative-path directory)
+        (string-prefix? (string-append directory "/") relative-path))))
+
+(def (testing-interface-test-file-included? testing test test-file)
+  (not (ormap (cut path-in-directory? test-file <>)
+              (testing-interface-ignore-directories-for testing test))))
+
+;;; Delegate discovery to clan/testing, then apply only the POO-declared
+;;; negative directory boundary. ASP does not maintain a second catalog.
+(def (testing-interface-test-files testing test
+                                   pkgdir: (pkgdir ".")
+                                   regex: (regex "-test.ss$"))
+  (filter (cut testing-interface-test-file-included? testing test <>)
+          (find-test-files pkgdir regex)))
+
+;;; Preserve clan/testing's command surface and suite execution. The only
+;;; extension is selection of its already-discovered files through a POO value.
+(defrules init-profiled-test-environment! ()
+  ((_ testing)
+   (begin
+     (init-test-environment!)
+     (define-entry-point (asp-profiled-unit-tests)
+       (help: "Run clan unit tests through ASP POO profiles"
+        getopt: [])
+       (apply test (testing-interface-test-files testing "unit-tests.ss")))
+     (set-default-entry-point! 'asp-profiled-unit-tests))))
 
 (def (testing-memory-profile-max-heap-mib profile)
   (and (testing-profile-matches? profile 'memory)
