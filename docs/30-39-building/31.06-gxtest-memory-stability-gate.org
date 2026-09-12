@@ -24,10 +24,10 @@ with ordinary gerbil-poo composition:
    (.cc +testing-memory-profile+ maxHeapMiB: 2048)))
 #+end_src
 
-The user does not pass =max-heap= on the command line. The POO slot is
-projected at the explicit process boundary before the upstream test loads.
-=testing-interface-run-test!= delegates the exact path to =gerbil test= and
-does not discover files, load suites, schedule batches, or report results.
+The user does not pass =max-heap= on the command line. The POO slot is applied
+to the current process through Gambit's upstream =##set-max-heap!= runtime API
+before =clan/testing= loads the package tests. ASP does not discover files,
+load suites, schedule batches, or report results.
 
 * Machine performance
 
@@ -39,16 +39,16 @@ profile entirely with =.remove=.
 
 * Failure semantics
 
-A positive =maxHeapMiB= is translated internally to Gambit's startup-time
-=-:max-heap=<N>M= option. Heap exhaustion terminates the native test process
+A positive =maxHeapMiB= is translated internally to bytes for Gambit's native
+runtime heap API. Heap exhaustion terminates the native test process
 instead of allowing an agent-written test to consume the host indefinitely.
 Observation receipts do not pretend to be limits: the limit is applied at
-process startup, while metrics describe the completed native operation.
+runtime, while metrics describe the completed native operation.
 
 * Acceptance
 
-- default 1024 MiB and per-test overrides project to exact native argv;
+- default 1024 MiB and per-test overrides apply to the native runtime;
 - POO removal deletes both the default profile and its test bindings;
-- the adapter delegates one explicit path to =gerbil test=;
+- the adapter uses Gambit's heap API without replacing =clan/testing=;
 - a clean native build contains no source-metadata profile parser;
 - extension and project policy tests pass through native gxtest.

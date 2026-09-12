@@ -74,27 +74,27 @@
                 small-memory)
                "t/large-test.ss"
                large-memory)))
-        (check (testing-interface-runtime-options-for
+        (check (testing-interface-max-heap-mib-for
                 testing
                 "t/small-test.ss")
-               => ["-:max-heap=256M"])
-        (check (testing-interface-runtime-options-for
+               => 256)
+        (check (testing-interface-max-heap-mib-for
                 testing
                 "t/large-test.ss")
-               => ["-:max-heap=2048M"])
-        (check (testing-interface-runtime-options-for
+               => 2048)
+        (check (testing-interface-max-heap-mib-for
                 testing
                 "t/default-test.ss")
-               => ["-:max-heap=1024M"])
-        (check (testing-interface-command-for
-                testing
-                "t/large-test.ss"
-                ["-q"])
-               => ["gerbil"
-                   "-:max-heap=2048M"
-                   "test"
-                   "-q"
-                   "t/large-test.ss"])))
+               => 1024)))
+
+    (test-case "the POO profile configures the current upstream runtime"
+      (let (previous-max-heap (##get-max-heap))
+        (check (testing-interface-apply-runtime-profile!
+                +asp-testing-interface+
+                "t/default-test.ss")
+               => (* 1024 1024 1024))
+        (check (##get-max-heap) => (* 1024 1024 1024))
+        (##set-max-heap! previous-max-heap)))
 
     (test-case "removing memory removes its default and test bindings"
       (let* ((mapped
@@ -104,10 +104,10 @@
                (.cc +testing-memory-profile+ maxHeapMiB: 256)))
              (without-memory
               (testing-interface-remove-profile mapped 'memory)))
-        (check (testing-interface-runtime-options-for
+        (check (testing-interface-max-heap-mib-for
                 without-memory
                 "t/small-test.ss")
-               => [])))
+               => #f)))
 
     (test-case "invalid POO memory specializations fail closed"
       (let (testing
@@ -116,7 +116,7 @@
              "t/invalid-memory-test.ss"
              (.cc +testing-memory-profile+ maxHeapMiB: 0)))
         (check-exception
-         (testing-interface-runtime-options-for
+         (testing-interface-max-heap-mib-for
           testing
           "t/invalid-memory-test.ss")
          true)))

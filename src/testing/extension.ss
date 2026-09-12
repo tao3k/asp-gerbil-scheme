@@ -8,7 +8,6 @@
 (import :gerbil/gambit
         (only-in :clan/poo/object .call .cc .o .ref .slot? object?)
         (only-in :clan/poo/debug trace-poo)
-        (only-in :std/misc/process run-process)
         (only-in :std/srfi/1 find filter))
 
 (export testing-profile
@@ -23,9 +22,8 @@
         testing-interface-remove-profile
         testing-interface-add-profile
         testing-memory-profile-max-heap-mib
-        testing-interface-runtime-options-for
-        testing-interface-command-for
-        testing-interface-run-test!
+        testing-interface-max-heap-mib-for
+        testing-interface-apply-runtime-profile!
         testing-interface-trace-poo-for
         +testing-memory-profile+
         +testing-performance-profile+
@@ -170,36 +168,23 @@
            (error "invalid testing memory profile maxHeapMiB" value))
          value)))
 
-(def (testing-interface-runtime-options-for testing test)
+(def (testing-interface-max-heap-mib-for testing test)
   (let (memory
         (find (lambda (profile) (testing-profile-matches? profile 'memory))
               (testing-interface-profiles-for testing test)))
-    (if memory
-      [(string-append "-:max-heap="
-                      (number->string
-                       (testing-memory-profile-max-heap-mib memory))
-                      "M")]
-      [])))
+    (and memory (testing-memory-profile-max-heap-mib memory))))
 
-;;; The user-facing contract is the POO profile. This argv projection is the
-;;; explicit process boundary required to apply a Gambit heap cap before the
-;;; upstream test module is loaded.
-;; : (-> TestingInterface Path (List String) (List String))
-(def (testing-interface-command-for testing test (arguments []))
-  (append ["gerbil"]
-          (testing-interface-runtime-options-for testing test)
-          ["test"]
-          arguments
-          [test]))
-
-;;; Delegate one explicit test path to the native Gerbil test command. This
-;;; adapter does not discover files, load suites, or construct reports.
-;; : (-> TestingInterface Path (List String) Path Value)
-(def (testing-interface-run-test! testing test
-                                  arguments: (arguments [])
-                                  directory: (directory (current-directory)))
-  (run-process (testing-interface-command-for testing test arguments)
-               directory: directory))
+;;; Apply the selected POO memory profile to the current Gambit runtime.  This
+;;; uses the upstream heap API directly; callers never construct startup argv.
+;;; Removing the memory profile restores Gambit's unbounded value (zero).
+;; : (-> TestingInterface Path Integer)
+(def (testing-interface-apply-runtime-profile! testing test)
+  (let* ((max-heap-mib
+          (testing-interface-max-heap-mib-for testing test))
+         (max-heap-bytes
+          (if max-heap-mib (* max-heap-mib 1024 1024) 0)))
+    (##set-max-heap! max-heap-bytes)
+    max-heap-bytes))
 
 (def (testing-interface-trace-poo-for testing test poo
                                       name: (name 'testing-profile-target))
