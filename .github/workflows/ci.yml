@@ -229,7 +229,7 @@ jobs:
         if: matrix.target == 'library'
         timeout-minutes: 20
         run: |
-          gerbil env gerbil interactive -:max-heap=1024M -e '
+          gerbil env gerbil -:max-heap=1024M interactive -e '
            (begin
             (import :asp-gerbil-scheme/src/testing/gxtest-execution)
             (for-each
