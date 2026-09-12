@@ -16,8 +16,9 @@
                  policy-finding-json)
         (only-in :asp-gerbil-scheme/src/protocol/json write-json-line)
         (only-in :asp-gerbil-scheme/src/types/core type-status)
-        :asp-gerbil-scheme/src/types/facade
-        ./fixture-support)
+        :asp-gerbil-scheme/src/types/facade)
+
+(include "fixture-support.ss")
 (export filter-rule
         json-finding-by-rule
         policy-check-output

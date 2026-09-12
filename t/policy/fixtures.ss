@@ -1,6 +1,5 @@
 ;;; -*- Gerbil -*-
-;;; Stable policy-fixture facade. Implementations are split into modular leaves.
+;;; Stable policy-fixture facade. Implementations remain source-visible leaves,
+;;; but test support is included rather than installed as production modules.
 
-(import ./fixture-policy-projects)
-
-(export (import: ./fixture-policy-projects))
+(include "fixture-policy-projects.ss")
