@@ -10,15 +10,11 @@
         :asp-gerbil-scheme/src/policy/facade
         :asp-gerbil-scheme/src/policy/gxtest
         :asp-gerbil-scheme/src/scenario/policy
-        :asp-gerbil-scheme/src/testing/memory-profile
         :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios
         :policy/fixtures)
 (import :policy/agent-poo-support)
 (export agent-poo-hot-loop-type-policy-test)
-
-(declare-gxtest-memory-exception
- '((maxHeapMiB . 512)))
 
 ;; PolicyTest
 (def agent-poo-hot-loop-type-policy-test

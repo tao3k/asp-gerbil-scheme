@@ -6,8 +6,9 @@
         :std/test
         (only-in :asp-gerbil-scheme/build-api
                  asp-gerbil-scheme-package-native-spec
-                 testing-build
-                 testing-build-main
+                 testing-interface-command-for
+                 testing-interface-run-test!
+                 testing-benchmark-run/result
                  make-project-policy-test
                  run-modularity-policy
                  benchmark-run/result
@@ -24,9 +25,10 @@
     (test-case "exports the compile-mode-neutral native-spec projection"
       (check (procedure? asp-gerbil-scheme-package-native-spec)
              => #t))
-    (test-case "projects downstream Building, Testing, policy, and benchmark APIs"
-      (check (procedure? testing-build) => #t)
-      (check (procedure? testing-build-main) => #t)
+    (test-case "projects native build, testing extensions, policy, and benchmark APIs"
+      (check (procedure? testing-interface-command-for) => #t)
+      (check (procedure? testing-interface-run-test!) => #t)
+      (check (procedure? testing-benchmark-run/result) => #t)
       (check (procedure? make-project-policy-test) => #t)
       (check (procedure? run-modularity-policy) => #t)
       (check (procedure? benchmark-run/result) => #t)

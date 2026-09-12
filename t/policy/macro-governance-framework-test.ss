@@ -9,13 +9,9 @@
         :asp-gerbil-scheme/src/macro-governance/facade
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/scenario/policy
-        :asp-gerbil-scheme/src/testing/memory-profile
         :asp-gerbil-scheme/src/types/facade)
 
 (export macro-governance-framework-policy-test)
-
-(declare-gxtest-memory-exception
- '((maxHeapMiB . 512)))
 
 (def (macro-governance-reset-root root)
   (when (file-exists? root)

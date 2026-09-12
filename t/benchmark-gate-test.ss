@@ -9,13 +9,9 @@
                  duration-nanos->text)
         :asp-gerbil-scheme/src/benchmark/gate
         :asp-gerbil-scheme/src/benchmark/statistics
-        :asp-gerbil-scheme/src/benchmark/framework
-        :asp-gerbil-scheme/src/testing/memory-profile)
+        :asp-gerbil-scheme/src/benchmark/framework)
 
 (export benchmark-gate-test)
-
-(declare-gxtest-memory-exception
- '((maxHeapMiB . 512)))
 
 ;; : Alist
 (def benchmark-gate-fixture

@@ -7,8 +7,8 @@
         :policy/fixtures
         (only-in :asp-gerbil-scheme/src/policy/gxtest-report
                  project-policy-report)
-        (only-in :asp-gerbil-scheme/src/testing/gxtest-catalog
-                 gxtest-project-policy-files)
+        (only-in "../src/policy/test-scope"
+                 project-policy-source-files)
         :asp-gerbil-scheme/src/policy/repair-calibration
         :asp-gerbil-scheme/src/snapshot/facade
         :std/sugar
@@ -57,7 +57,7 @@
         (reset-fixture-root +self-apply-agent-repair-probe-root+)
         (let (index (collect-selected-source-scope
                      "."
-                     (gxtest-project-policy-files)))
+                     (project-policy-source-files)))
         (set! +self-apply-index-cache+ index)
           index))))
 ;; : (-> (List PolicyFinding) )

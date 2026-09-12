@@ -3,8 +3,8 @@
 
 (import :std/test
         :asp-gerbil-scheme/src/policy/gxtest
-        (only-in :asp-gerbil-scheme/src/testing/gxtest-catalog
-                 gxtest-project-policy-files))
+        (only-in "../src/policy/test-scope"
+                 project-policy-source-files))
 (export project-policy-test)
 
 ;; : TestSuite
@@ -13,7 +13,7 @@
 
 ;; : TestSuite
 (def project-policy-full-test
-  (make-project-policy-test "." (gxtest-project-policy-files)))
+  (make-project-policy-test "." (project-policy-source-files)))
 
 ;; : TestSuite
 (def project-policy-test

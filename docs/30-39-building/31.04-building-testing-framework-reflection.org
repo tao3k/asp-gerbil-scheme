@@ -1,136 +1,45 @@
-#+TITLE: 31.04 Building and Testing Framework Reflection
-#+AUTHOR: POO Flow / Gerbil Scheme Project Harness
-#+OPTIONS: toc:3 num:nil
+#+TITLE: 31.04 Building and Native Testing Boundary
+#+AUTHOR: ASP Gerbil Scheme
+#+OPTIONS: toc:2 num:nil
 
-* 31.04 Building and Testing Framework Reflection
+* 31.04 Building and Native Testing Boundary
 :PROPERTIES:
 :JD_ID: 31.04
 :STATUS: implemented
-:OWNER: src/building/testing.ss
-:RELATED: 31.01, 31.02, 31.03, 51.04
+:OWNER: clan/building and clan/testing
+:RELATED: 31.01, 51.04, 51.06
 :END:
 
-** Core Claim
+** Boundary
 
-Building is not a replacement compiler and must not claim to make a stale
-=std/make= compilation faster.  Gerbil remains authoritative for compilation
-and =gxpkg= remains authoritative for package management.  The improvement is
-above that layer: typed policy values make a build request inspectable before
-execution, testable through a shared framework, and observable after execution.
+=std/make= owns the production module graph and compilation. =gerbil test= and
+=:clan/testing= own test discovery and execution. ASP does not bridge them
+through a private testing-build model.
 
-** Shared Model
+Optional Building values remain pure POO/functional descriptions. Optional
+Testing values remain POO instrumentation profiles. A benchmark observes a
+caller-supplied thunk and can attach the performance profile; it never decides
+which suites exist or invokes a second source collector.
+
+** Composition
 
 #+begin_src mermaid
 flowchart LR
-  Scenario["Existing building scenario benchmark"] --> Contract["Benchmark contract"]
-  Request["BuildRequest"] --> Adapter["src/building/testing.ss"]
-  Adapter --> Case["Testing performance-case"]
-  Contract --> Case
-  Case --> Suite["Testing performance-suite"]
-  Suite --> Receipt["Testing receipt"]
-  Request --> Plan["pure BuildStage plan"]
-  Plan --> Warm["zero std/make calls when planning"]
+  Package["gerbil.pkg"] --> Building["clan/building"]
+  Building --> Make["std/make graph"]
+  CLI["gerbil test"] --> Testing["clan/testing"]
+  Profiles["ASP POO profiles"] -. limits and observations .-> CLI
+  Debug["clan/poo/debug"] -. trace-poo .-> Profiles
 #+end_src
 
-The adapter reuses =t/scenarios/building/std-builder-stage-boundary/benchmark.ss=.
-There is one scenario fixture and one benchmark contract; Building does not
-create a parallel performance format.  It projects a =BuildRequest= into the
-Testing Framework's POO =performance-case=, =performance-suite=, and
-=testing-project= objects.
+The shared invariant is upstream ownership: ASP may compose declarative values
+around a native operation, but does not replace native compilation, testing,
+selection, cleanup, or reporting.
 
-** What Improves Upstream
+** Acceptance
 
-1. *Incremental work elimination.* A current request is represented by a
-   predicate and projects =skipped= receipts without calling =std/make=.  The
-   speed gain is avoiding unnecessary compiler work, not optimizing the
-   compiler's stale path by assertion.
-2. *Reusable policy.* =BuildProfile= moves builder options, labels, and hooks
-   out of a package script and into a value that many requests can share.
-3. *Standardized feedback.* Testing receives a validated benchmark fixture and
-   returns a structured receipt.  Agents can distinguish fixture failure,
-   runner failure, invalid result, and elapsed time instead of parsing shell
-   text.
-4. *One quality gate.* Scenario contract validation, runner result validation,
-   warm-path no-make assertion, and existing building performance budgets are
-   exercised together.
-
-** Improvement Matrix
-
-| Layer | Upstream authority | Framework addition | Developer and agent evidence |
-|-------+--------------------+--------------------+------------------------------|
-| =std/make= | Compile stale sources | None: it remains the compiler | No false compiler-speed claim |
-| =gxpkg= | Resolve and build packages | None: it remains package authority | Normal package build receipt remains valid |
-| Build API | Currentness and durable receipts | Package-stage planning boundary | Agent can tell current, stale, and skipped states |
-| Building | No shared request policy value | Reusable =BuildProfile= and pure =BuildRequest= plan | One warm request projects ordered =BuildStage= values with zero =std/make= calls |
-| Testing | Generic scenario runner and receipt | Adapter from =BuildRequest= to =performance-case= | One existing scenario validates fixture, result, timing, and receipt together |
-
-This is a standards and feedback improvement for downstream projects: they keep one scenario contract, receive one structured receipt vocabulary, and can gate the actual warm control path without manufacturing a second benchmark format. The performance claim is therefore measurable work avoidance and earlier diagnostic feedback, never a claim to replace or out-run upstream compilation.
-
-** Boundary and Non-Claims
-
-- =std/make= executes real compilation; =gxpkg= resolves and builds packages.
-- Build API owns package currentness and durable package receipts.
-- Building owns profile/request values and pure stage-plan construction.
-- Testing owns benchmark fixture validation, measurement, performance receipts,
-  and suite-level status.
-
-The framework therefore adds control-plane standardization and warm-path
-efficiency.  It does not duplicate Gerbil's compilation algorithm or promise
-that a real stale compilation is inherently faster than upstream.
-
-** Downstream Surface
-
-#+begin_src scheme
-(import :asp-gerbil-scheme/build-api)
-
-(def suite
-  (make-build-request-performance-suite
-   request
-   "t/scenarios/building/std-builder-stage-boundary/benchmark.ss"))
-
-(def project
-  (make-build-request-performance-project
-   request
-   "t/scenarios/building/std-builder-stage-boundary/benchmark.ss"))
-#+end_src
-
-No raw alist DSL is introduced at the user boundary: callers compose ordinary
-BuildRequest and Testing Framework POO objects.  The scenario fixture remains
-the declarative contract and can be selected by the existing test runner.
-
-** Bootstrap and Native Toolchain Boundary
-#+begin_src mermaid
-flowchart LR
-  Bootstrap["serial bootstrap"] --> Model["building/model"]
-  Model --> Builder["building/std-builder"]
-  Builder --> Facade["building/facade"]
-  Facade --> Declarative["building/declarative"]
-  Declarative --> Requests["BuildRequest admission"]
-  Requests --> Make["one upstream std/make executor"]
-  Make --> Receipt["active gxpkg environment receipt"]
-#+end_src
-The package entrypoints pass their complete native BuildSpec directly through
-=:clan/building= or =:std/build-script=. ASP does not set another worker budget,
-acquire a package-build lease, repair compiler locks, or decide native
-freshness. =GERBIL_BUILD_CORES=, =GERBIL_PATH=, dependency scheduling, and
-artifact locking remain owned by Gerbil and =std/make=.
-
-ASP does not wrap =std/make= with a project-owned compiler cohort or mutate the
-native compiler environment. Toolchain selection belongs to the invoking host
-or CI job. Receipts and output roots are resolved from the active =gxpkg=
-environment, so a linked dependency never writes state into the Harness source
-checkout.
-
-** Performance Gates
-
-1. The existing building scenario fixture supplies benchmark contract fields,
-   resource limits, measurement phases, and quality axes.
-2. The canonical Testing Framework scenario test selects =building-stage-plan=
-   by case name, consumes the fixture through the shared runner, and yields one
-   valid performance receipt.
-3. The runner only invokes =build-request-stage-plan=; its validator requires
-   every output to be a =BuildStage=, and the test asserts zero =std/make=
-   calls.
-4. Building's existing warm, stale, stage-plan, package-plan, and request-plan
-   budgets remain separate micro gates.  The integration suite prevents those
-   micro gates from drifting away from the user-facing scenario contract.
+1. clean native package build;
+2. focused native =gerbil test= execution;
+3. POO profile override/removal tests;
+4. policy source scope derived from =all-gerbil-modules=;
+5. no import of a retired testing framework or runner.

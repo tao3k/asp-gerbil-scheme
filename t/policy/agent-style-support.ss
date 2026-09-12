@@ -12,8 +12,8 @@
         :asp-gerbil-scheme/src/policy/gxtest
         :asp-gerbil-scheme/src/scenario/policy
         :asp-gerbil-scheme/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
 (export #t)
 
 

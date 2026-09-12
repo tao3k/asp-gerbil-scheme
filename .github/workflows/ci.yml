@@ -223,28 +223,22 @@ jobs:
             t/exact-source-projection-test.ss \
             t/projection-batch-test.ss \
             t/projection-batch-scenario-test.ss \
-            t/language-projection-test.ss
+            t/language-projection-test.ss \
+            t/testing-extension-test.ss \
+            t/project-policy-test.ss
 
       - name: Run package policy boundary regressions
         if: matrix.target == 'library'
         timeout-minutes: 20
         run: |
-          gerbil env gerbil -:max-heap=1024M interactive -e '
-           (begin
-            (import :asp-gerbil-scheme/src/testing/gxtest-execution)
-            (for-each
-             (lambda (file)
-               (let (result (run-gxtest-file/subprocess file))
-                 (display-gxtest-result result)
-                 (unless (zero? (gxtest-result-status result))
-                   (exit (gxtest-result-status result)))))
-             ["t/policy/macro-governance-framework-test.ss"
-              "t/policy/modularity-test.ss"
-              "t/policy/agent-basic-core-test.ss"
-              "t/policy/agent-style-comment-doc-test.ss"
-              "t/unit/parser/parser-test-part1.ss"
-              "t/unit/parser/parser-test-part7.ss"
-              "t/unit/parser/parser-test-part8-package-scope.ss"]))'
+          gerbil test \
+            t/policy/macro-governance-framework-test.ss \
+            t/policy/modularity-test.ss \
+            t/policy/agent-basic-core-test.ss \
+            t/policy/agent-style-comment-doc-test.ss \
+            t/unit/parser/parser-test-part1.ss \
+            t/unit/parser/parser-test-part7.ss \
+            t/unit/parser/parser-test-part8-package-scope.ss
 
       - name: Run canonical provider tests
         if: matrix.target == 'provider'

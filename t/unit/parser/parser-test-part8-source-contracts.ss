@@ -24,7 +24,7 @@
           (check (source-path-class "bindings/example/build.ss") => "package-build")
           (check (source-path-class "src/build-api/package-spec.ss")
                  => "build-runtime")
-          (check (source-path-class "src/testing/gxtest-runner.ss")
+          (check (source-path-class "src/testing/extension.ss")
                  => "build-runtime")
           (check (source-path-class "t/scenarios/policy/functional-idiom/input/src/orders/core.ss")
                  => "policy-scenario")

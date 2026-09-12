@@ -7,33 +7,31 @@
   .
   "upstream gxtest delegation must keep selection hot while preserving gxtest-owned suite and setup/cleanup discovery")
  (sampleCount . 20)
- (purpose . "prove the testing framework selects files and delegates gxtest semantics to the gxtest runner")
+ (purpose . "prove upstream Gerbil owns selection while ASP only declares POO instrumentation")
  (feature . "upstream-gxtest-delegation")
  (rule . "GERBIL-SCHEME-AGENT-TESTING-UPSTREAM-GXTEST-DELEGATION-001")
  (optimizationFocus
   .
-  "keep selection and receipt construction in the framework while leaving suite export and setup/cleanup semantics to gxtest-compatible delegates")
+  "remove ASP selection and execution ownership while preserving per-test POO profile mapping")
  (inputShape
   .
-  "scenario build.ss declares one gxtest manifest suite with files that export test-setup!, test-cleanup!, and *-test suites")
+  "scenario input manually selects files instead of using gerbil test")
  (expectedOutcome
   .
-  "use testing-select-project for scope selection, pass selected files to the gxtest delegate, and inspect gxtest exports through the runner")
+  "use gerbil test for selection and execution; bind optional instrumentation to the explicit test path")
  (measurementPhases
   "collect-before"
   "policy-before"
   "collect-after"
   "policy-after"
-  "select-file"
-  "delegate-contract"
-  "delegate-discovery"
-  "setup-cleanup-export-discovery"
+  "profile-compose"
+  "upstream-boundary"
   "assert-time-gate"
   )
  (tags "testing"
-       "framework"
+       "profile-extension"
        "gxtest"
-       "delegation"
+       "upstream-ownership"
        "setup-cleanup"
        "scenario"
        "performance"

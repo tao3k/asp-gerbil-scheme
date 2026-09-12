@@ -7,7 +7,7 @@
   . "The warm-path plan must avoid std/make entirely; 300ms is a hard ceiling for the reusable stage-plan control plane, not a claim about stale compilation speed.")
  (sampleCount . 20)
  (purpose
-  . "Standardize Building stage-plan measurement through the shared Testing Framework benchmark contract.")
+  . "Measure Building stage-plan projection through the shared benchmark contract.")
  (feature . "building-std-builder-stage-boundary")
  (rule . "BUILDING-TESTING-INTEGRATION")
  (optimizationFocus . "warm request projection and skipped-stage planning")
@@ -22,7 +22,7 @@
   "shared-benchmark-contract"
   "zero-warm-path-std-make"
   "ordered-build-stage-plan"
-  "structured-testing-receipt")
+  "structured-benchmark-receipt")
  (learnedStyleSources
   "std/make"
   "asp-gerbil-scheme/src/building"
@@ -52,4 +52,4 @@
   "policy-after"
   "assert-time-gate"
   )
- (tags "building" "std-make" "testing-framework" "integration" "warm-path" "stage-plan"))
+ (tags "building" "std-make" "benchmark-extension" "integration" "warm-path" "stage-plan"))

@@ -1,23 +1,17 @@
 ;;; -*- Gerbil -*-
-(import :gerbil/gambit
+;;; Marlin keeps its file selection in gerbil test. ASP only maps POO profiles
+;;; onto the explicit files that need different resource envelopes.
+
+(import :clan/poo/object
         :asp-gerbil-scheme/build-api)
 
-(export marlin-speed-project
-        marlin-speed-main)
+(export marlin-testing)
 
-(def +marlin-speed-scenario-root+
-  "t/scenarios/policy/marlin-testing-speed-trap/expected")
-
-(def marlin-speed-project
-  (testing-build
-   name: "marlin-testing-speed-trap"
-   root: +marlin-speed-scenario-root+
-   contract-root: "t/scenarios/policy/marlin-testing-speed-trap"
-   gxtest: [["deck-runtime" "t/deck-runtime-tests.ss"]
-            ["config-interface" "t/config-interface-tests.ss"]]
-   scenarios: ["large-config-object"
-               "policy-pack-routing"]
-   roots: ["src" "t" "policy-scenarios"]))
-
-(def (marlin-speed-main args (run-files #f))
-  (testing-build-main marlin-speed-project args run-files))
+(def marlin-testing
+  (!> +asp-testing-interface+
+      (cut testing-interface-map-profile
+           <> "t/deck-runtime-tests.ss"
+           (.cc +testing-memory-profile+ maxHeapMiB: 2048))
+      (cut testing-interface-map-profile
+           <> "t/config-interface-tests.ss"
+           (.cc +testing-memory-profile+ maxHeapMiB: 512))))

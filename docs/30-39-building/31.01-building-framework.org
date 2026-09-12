@@ -110,10 +110,11 @@ second scheduler or forcing downstream code to copy capacity selection.
 
 ** Testing boundary
 
-GxTest discovery owns its explicit test closure. When compiled execution is
-needed, =src/testing/gxtest-build.ss= passes that closure to one ordinary
-=std/make= call with the package root as =srcdir=. Test receipts describe the
-completed call; they never decide whether the native executor is entered.
+=gerbil test= and =:clan/testing= own test selection, discovery, loading,
+execution, and reporting. Test compilation follows their native Gerbil path;
+ASP does not pass a private closure through a second build adapter. Optional
+POO profiles describe memory, performance, debug-trace, or shared-resource
+instrumentation without becoming another runner.
 
 ** Optional Building values
 

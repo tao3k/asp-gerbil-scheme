@@ -18,9 +18,7 @@
         (only-in :asp-gerbil-scheme/src/build-api/package-spec
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype
-                 asp-gerbil-scheme-package-modules)
-        (only-in :asp-gerbil-scheme/src/testing/commands
-                 define-project-test))
+                 asp-gerbil-scheme-package-modules))
 
 (export build-api-macro-expansion-witness-test)
 
@@ -54,11 +52,6 @@
   stage-specs: []
   current?: (lambda (_stage _context) #t)
   context: 'witness-std-context)
-
-(define-project-test witness-project-test
-  project: (lambda () 'witness-project)
-  run: (lambda (_project files) files)
-  ok?: pair?)
 
 (asp-gerbil-scheme-package-spec!
   (witness-package-spec @ asp-gerbil-scheme-library-package-prototype)
@@ -98,8 +91,6 @@
       (check (witness-spec! 'spec-options) => 'spec-options)
       (check (witness-compile! 'compile-options) => 'compile-options)
       (check (witness-clean!) => 'cleaned))
-    (test-case "project test lowers to receipt-based exit status"
-      (check (witness-project-test ["t/witness.ss"]) => 0))
     (test-case "package declaration lowers to a POO package spec"
       (check (asp-gerbil-scheme-package-modules witness-package-spec)
              => ["src/parser/model.ss"])

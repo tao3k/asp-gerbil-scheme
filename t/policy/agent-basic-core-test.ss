@@ -14,8 +14,8 @@
         :asp-gerbil-scheme/src/policy/gxtest
         :asp-gerbil-scheme/src/policy/streaming
         :asp-gerbil-scheme/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
 (export agent-basic-core-policy-test)
 
 ;; PolicyTest

@@ -234,7 +234,7 @@
              "source-form-reader-boundary")
             (agent-style-check-r013-scenario-learning!
              context
-             ["gerbil://src/testing/gxtest-runner.ss"
+             ["gerbil-utils/testing.ss"
               "harness-self-apply"]
              ["reader-collection-boundary"
               "source-form-reader-boundary"

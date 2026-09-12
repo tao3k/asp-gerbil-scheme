@@ -1,81 +1,41 @@
-#+title: Gerbil Upstream Testing Audit
+#+TITLE: 51.06 Upstream Gerbil Testing Audit
+#+AUTHOR: ASP Gerbil Scheme
+#+OPTIONS: toc:2 num:nil
 
-* Purpose
-This audit compares the harness testing framework against the upstream Gerbil build and test system under =.data/gerbil=. The goal is not to copy upstream internals. The goal is to keep the harness as a user-layer improvement that delegates the right work to upstream Gerbil while preventing agent-written downstream build files from widening one selected test into a slow whole-project run.
+* 51.06 Upstream Gerbil Testing Audit
+:PROPERTIES:
+:JD_ID: 51.06
+:STATUS: implemented
+:OWNER: gerbil test / clan/testing
+:END:
 
-* Upstream Evidence
-** =std/make= Owns Build Graph Execution
-Upstream =src/std/make.ss= keeps build execution graph-oriented. =make= configures the source directory and compiling context, calls =make-build=, then flushes pending compile jobs when parallelization is enabled. =make-build= normalizes the buildspec, computes module ids and outputs, tracks dependency timestamps, creates a completion table, starts coordinator threads, feeds build work through a channel, and joins worker threads through a barrier.
+** Finding
 
-This matters for the harness because build dependency ordering, output freshness, and worker coordination are upstream responsibilities. A harness build/test API should not rebuild a parallel dependency graph outside =std/make=.
+The upstream stack already owns the complete testing lifecycle. The
+=gerbil-poo= package demonstrates the minimal =unit-tests.ss= entry:
+=:clan/testing= initializes the test environment and imports the package
+version module. Current Gerbil exposes the same lifecycle through
+=gerbil test=.
 
-** =gxtest= Owns Test Module Discovery And Suite Execution
-Upstream =src/tools/gxtest.ss= has a narrow job. =gxtest-main= prepares the local environment and delegates to =run-tests=. =run-tests= collects files from explicit paths, directories, or =/...= recursive arguments, imports each test module, finds runtime exports whose names end in =-test=, honors =test-setup!= and =test-cleanup!= exports, applies the optional suite-name filter, and runs the suites.
+The prior ASP framework duplicated discovery, selection, execution, report,
+receipt, and build responsibilities. Those owners are retired. The stable ASP
+surface now exports only POO instrumentation profiles and small observation
+helpers.
 
-This means the harness should not reimplement gxtest suite discovery. The harness should select the file set and phase intent, then delegate execution to gxtest-compatible runners.
+** Current contract
 
-** Compiler Driver Owns Per-Module Compilation
-Upstream =src/gerbil/compiler/driver.ss= exposes =compile-module= as a parameterized per-module compile operation. It sets output directory, target, optimization, debug, generated ssxi, gsc invocation, and parallel flags before compiling the imported top module.
+| Concern | Owner |
+|---------+-------|
+| test arguments and recursive directories | =gerbil test= |
+| suite loading, setup/cleanup, filtering, summary | =:clan/testing= |
+| package/module graph | =clan/building= and =std/make= |
+| memory/performance/debug/resource declaration | ASP POO profiles |
+| POO method tracing | =:clan/poo/debug= |
 
-This is lower-level than the testing framework should normally touch. If a downstream build target needs compilation, the harness should route through upstream build APIs rather than call compiler-driver primitives directly.
+** Audit gates
 
-** External APIs Must Not Be Treated As Gerbil Upstream
-The audit did not find =clan/building= or =all-gerbil-modules= inside =.data/gerbil=. They may be useful downstream APIs, but they are not evidence from this upstream checkout. Future design notes must label them as external/downstream helpers rather than upstream Gerbil build-system facts.
-
-* Closed Implementation Plan
-** 1. Native POO Is The Public Model
-All public framework values are POO objects: projects, suites, gates, selections, receipts, and =testing-build= declarations. Tests assert =object?=, =.slot?=, =.ref=, selection object identity, selected suites, rejected scopes, and receipt fields before execution-specific checks. Downstream projection accepts real POO objects and reads fields through native POO accessors.
-
-** 2. Selection And Delegation Are Split
-=testing-select-project= returns a POO =testing-selection=. =testing-run-selection= consumes that object through injected delegates. =testing-run-project= remains a thin wrapper around selection plus execution. Scenario tests prove that explicit files, manifest roots, and scenario ids do not widen into unrelated suites.
-
-** 3. Upstream Gxtest Delegation Scenario Exists
-The =upstream-gxtest-delegation= scenario covers the boundary between pure model tests and downstream build tests:
-- its =expected/build.ss= imports only the stable =:asp-gerbil-scheme/build-api= facade
-- it uses real test modules exporting =test-setup!=, =test-cleanup!=, and =alpha-test=
-- it proves selected files are computed before delegate execution
-- it checks gxtest-compatible export discovery through =gxtest-file-exported-symbols= and =gxtest-file-exported-suite=
-- its =benchmark.ss= records separate hot-path, delegate-contract, and delegate-discovery timings
-
-** 4. Phase Receipts And Gates Are Machine Readable
-Framework receipts expose phase receipts under the receipt =details= field:
-- project receipts include =select-scope=
-- gxtest suite receipts include =expand-manifest= and =delegate-gxtest=
-- scenario suite receipts include =delegate-policy=
-- suite receipts include =benchmark-assert= phases for gate-bearing suites
-
-Tests assert these phase names directly through =testing-receipt-phases= while preserving existing =children= semantics for suite and batch receipts. The build runner separately emits =asp-gerbil-scheme-test-phase= lines for package compile and gxtest execution phases.
-
-** 5. Downstream Build API Is Thin
-The target downstream shape is now the fixture shape:
-
-#+begin_src scheme
-(import :gerbil/gambit
-        :asp-gerbil-scheme/build-api)
-
-(export project
-        test)
-
-(def project
-  (testing-build
-   name: "downstream"
-   root: "."
-   gxtest: [["unit" "t/unit-tests.ss"]]))
-
-(def (test args)
-  (testing-build-main project args))
-#+end_src
-
-The scenario fixtures no longer export reset helpers, run-log helpers, path helpers, selection wrappers, or gxtest discovery wrappers. Tests and benchmarks observe downstream projects through the public =testing-build-*= API instead.
-
-* Acceptance Status
-- [X] A new =upstream-gxtest-delegation= scenario exists.
-- [X] Its expected =build.ss= uses package-qualified harness imports.
-- [X] It verifies gxtest-compatible suite exports, setup/cleanup exports, and selected-file behavior.
-- [X] It includes a =benchmark.ss= with separate hot-path and delegate-discovery timings.
-- [X] The Marlin speed-trap scenario stays green and proves that one selected file does not become one broad =gxtest-main= run.
-- [X] Receipts expose =select-scope=, =expand-manifest=, =delegate-gxtest=, =delegate-policy=, and =benchmark-assert= phase records.
-- [X] =gxtest-delegate-contract= supports suite filtering and returns a failed receipt for unsupported =quiet= and =features= switches.
-
-* Remaining Boundary
-The framework still does not claim full gxtest CLI option compatibility. Suite filtering is contract-visible now. =quiet= and =features= are intentionally rejected with machine-readable diagnostics instead of silently drifting. If downstream projects need real quiet/features pass-through, that should become a narrow follow-up on the existing =gxtest-delegate-contract= surface.
+- focused extension tests execute through =gerbil test=;
+- public Build API contains no retired framework owner;
+- a clean =gerbil build= compiles only the current extension modules;
+- policy scope derives from the upstream module graph;
+- repository tests contain no runtime dependency on the retired runner.

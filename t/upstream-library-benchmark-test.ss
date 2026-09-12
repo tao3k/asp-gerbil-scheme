@@ -16,13 +16,9 @@
                  make-micro-kernel-fixture
                  micro-kernel-fixture-contract-pass?
                  micro-kernel-receipt-pass?
-                 micro-kernel-run/result)
-        :asp-gerbil-scheme/src/testing/memory-profile)
+                 micro-kernel-run/result))
 
 (export upstream-library-benchmark-test)
-
-(declare-gxtest-memory-exception
- '((maxHeapMiB . 512)))
 
 (def +upstream-debug-reference-sources+
   '(".data/gerbil-utils/debug.ss#traced-function"

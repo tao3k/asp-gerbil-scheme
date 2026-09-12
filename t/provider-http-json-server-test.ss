@@ -15,13 +15,9 @@
         (only-in :std/sugar hash hash-key?)
         (only-in :std/text/base64 base64-encode)
         (only-in :std/text/json read-json write-json)
-        (only-in :asp-gerbil-scheme/src/testing/execution-profile
-                 declare-gxtest-serial)
         (only-in "support/provider-http-benchmark"
                  parallel-live-corpus-samples)
         :std/test)
-
-(declare-gxtest-serial shared-native-provider)
 
 (def +artifact-digest+
   "blake3-256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")

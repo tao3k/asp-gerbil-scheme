@@ -291,7 +291,6 @@
     "begin-syntax"
     "use-module"
     "use-live-case"
-    "declare-gxtest-memory-exception"
     "define-entry-point"
     "define-multicall-main"
     "defpoo-object-family"

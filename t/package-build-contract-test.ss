@@ -10,8 +10,7 @@
         (only-in "../src/build-api/package-build"
                  asp-gerbil-scheme-package-build-active-gerbil-path)
         (only-in "../src/build-api/core-capacity"
-                 native-build-core-count)
-        (only-in "../src/testing/gxtest-context" configure-build-root!))
+                 native-build-core-count))
 
 (export package-build-contract-test)
 
@@ -24,22 +23,13 @@
       (check (native-build-core-count "invalid" 12) => 12)
       (check (native-build-core-count "0" 12) => 12)
       (check (native-build-core-count #f 0) => 1))
-    (test-case "build root preserves the caller Gerbil path"
-      (let ((caller-gerbil-path (getenv "GERBIL_PATH" #f))
-            (sentinel "/tmp/asp-gerbil-scheme-caller-path-sentinel"))
-        (setenv "GERBIL_PATH" sentinel)
-        (configure-build-root! (current-directory))
-        (check (getenv "GERBIL_PATH" #f) => sentinel)
-        (setenv "GERBIL_PATH" (or caller-gerbil-path ""))
-        (configure-build-root! (current-directory))))
     (test-case "empty caller Gerbil path resolves to the Gerbil default"
       (let (caller-gerbil-path (getenv "GERBIL_PATH" #f))
         (setenv "GERBIL_PATH" "")
         (check (asp-gerbil-scheme-package-build-active-gerbil-path
                 (current-directory))
                => (path-expand (gerbil-home)))
-        (setenv "GERBIL_PATH" (or caller-gerbil-path ""))
-        (configure-build-root! (current-directory))))
+        (setenv "GERBIL_PATH" (or caller-gerbil-path ""))))
     (test-case "root build owns the native library graph and dependencies"
       (let ((library-source
              (call-with-input-file "build.ss" read-all-as-string))
@@ -124,12 +114,24 @@
         (check (string-contains public-facade-source
                                 "./src/build-api/source-coverage")
                => #f)
-        (check (string-contains public-facade-source
-                                "./src/testing/build")
-               ? true)
-        (check (string-contains public-facade-source
-                                "./src/testing/framework")
-               ? true)))
+        (for-each
+         (lambda (duplicate-owner)
+           (check (string-contains public-facade-source duplicate-owner)
+                  => #f))
+         '("./src/testing/build-runner"
+           "./src/testing/build"
+           "./src/testing/framework"
+           "./src/testing/model"
+           "./src/testing/gxtest-runner"
+           "./src/testing/gxtest-discovery"
+           "./src/testing/selection"
+           "./src/testing/scope"))
+        (for-each
+         (lambda (extension-owner)
+           (check (string-contains public-facade-source extension-owner)
+                  ? true))
+         '("./src/testing/extension"
+           "./src/testing/performance"))))
     (test-case "retired duplicate native owners stay absent"
       (for-each
        (lambda (path)

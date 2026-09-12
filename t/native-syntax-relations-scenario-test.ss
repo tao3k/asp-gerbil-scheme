@@ -5,13 +5,9 @@
         (only-in :std/misc/list unique)
         :asp-gerbil-scheme/src/benchmark/framework
         (only-in :asp-gerbil-scheme/src/benchmark/gate benchmark-fixture-ref)
-        :asp-gerbil-scheme/src/parser/facade
-        :asp-gerbil-scheme/src/testing/memory-profile)
+        :asp-gerbil-scheme/src/parser/facade)
 
 (export native-syntax-relations-scenario-test)
-
-(declare-gxtest-memory-exception
- '((maxHeapMiB . 512)))
 
 (def +native-syntax-scenario-root+
   "t/scenarios/parser/native-syntax-relations")

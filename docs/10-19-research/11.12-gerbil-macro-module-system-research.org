@@ -432,18 +432,19 @@ source collector, list walker, phase classifier, or module cache.
 
 *** 11.12.11.4 Scenario And Gate Plan
 
-Each scenario is a normal =gxtest= module. A resource-sensitive scenario opts
-in with its own literal profile:
+Each scenario is a normal =gxtest= module. A resource-sensitive scenario is
+mapped to a specialized POO profile:
 
 #+begin_src scheme
-(declare-gxtest-memory-exception
- '((maxHeapMiB . <scenario-budget>)))
+(testing-interface-map-profile
+ +asp-testing-interface+
+ "t/scenario-test.ss"
+ (.cc +testing-memory-profile+ maxHeapMiB: <scenario-budget>))
 #+end_src
 
-=gxi= enforces the declared managed-heap ceiling. A heap overflow exits the
-child nonzero and the outer =gxtest= assertion fails. No scenario polls =ps= or
-uses an outer timeout wrapper. Scenario construction stays on the existing
-testing/build-support macro surface; it does not create a benchmark or build
+The testing extension projects the managed-heap ceiling before =gerbil test=
+loads the module. A heap overflow exits the native child nonzero. No scenario
+polls =ps=, scans source files for metadata, or creates a benchmark or build
 subcommand.
 
 Required scenario sequence:
@@ -473,8 +474,8 @@ gate fails only against the scenario's own declared budget.
   path substring when a parser fact exists.
 - No build/test helper may import/evaluate a module outside the native registry
   path merely to obtain metadata.
-- No global memory threshold is introduced; each exceptional scenario owns its
-  own literal =maxHeapMiB= configuration.
+- The default memory profile is a POO value; an exceptional scenario owns its
+  own =.cc= specialization and explicit test-path mapping.
 - No =asp-gerbil-scheme= benchmark or build passthrough command is added. Build stays on
   the upstream =gxi= / =gxtest= foundation.
 

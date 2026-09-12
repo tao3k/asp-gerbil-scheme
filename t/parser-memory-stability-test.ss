@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Intent:
 ;;; - This suite protects the parser's repeated-project memory boundary.
-;;; - The runner reads its declaration before execution and applies the heap cap.
+;;; - The POO testing profile applies the heap cap before execution.
 (import (only-in :gerbil/gambit getenv setenv thread-receive thread-send)
         (only-in :std/test test-suite test-case check)
         (only-in :std/srfi/1 foldl iota)
@@ -12,14 +12,9 @@
         (only-in :asp-gerbil-scheme/src/parser/parse-workers parse-source-files)
         :asp-gerbil-scheme/src/parser/profile
         (only-in :asp-gerbil-scheme/src/policy/gxtest-report
-                 policy-source-report)
-        (only-in :asp-gerbil-scheme/src/testing/memory-profile
-                 declare-gxtest-memory-exception))
+                 policy-source-report))
 
 (export parser-memory-stability-test)
-
-(declare-gxtest-memory-exception
- '((maxHeapMiB . 512)))
 
 ;;; Boundary:
 ;;; - Map owns fixed repetition while each receipt is released before the next input.

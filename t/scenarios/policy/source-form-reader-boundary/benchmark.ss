@@ -21,8 +21,7 @@
   "read-forms owns port/read state; source-forms passes that helper to call-with-input-file; local-def-symbols composes filter-map with def-symbol")
  (expectedReferencePattern . "source-form-reader-boundary")
  (expectedReferenceExamples
-  "gerbil://src/testing/gxtest-runner.ss#gxtest-file-forms"
-  "gerbil://src/testing/gxtest-runner.ss#gxtest-file-local-def-symbols")
+  "gerbil-utils/testing.ss#find-test-files")
  (expectedQualitySignals
   "inline-file-reader-boundary"
   "reader-collection-boundary"
@@ -30,7 +29,7 @@
   "filter-map-selection-projection"
   "preserve-reader-state-helper")
  (learnedStyleSources
-  "gerbil://src/testing/gxtest-runner.ss"
+  "gerbil-utils/testing.ss"
   "harness-self-apply")
  (antiAiScaffoldIntent
   .

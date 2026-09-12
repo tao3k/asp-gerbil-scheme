@@ -11,8 +11,8 @@
         :asp-gerbil-scheme/src/policy/facade
         :asp-gerbil-scheme/src/policy/gxtest
         :asp-gerbil-scheme/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
 (export modularity-policy-test)
 ;; PolicyTest
 (def modularity-policy-test

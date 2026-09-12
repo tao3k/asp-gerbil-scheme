@@ -10,12 +10,7 @@
         "./src/build-api/package-spec"
         "./src/building/facade"
         "./src/building/declarative"
-        "./src/testing/build-runner"
-        "./src/testing/build"
-        "./src/testing/building"
-        "./src/testing/framework"
-        "./src/testing/memory-profile"
-        "./src/testing/model"
+        "./src/testing/extension"
         "./src/testing/performance"
         "./src/policy/gxtest"
         "./src/policy/modularity"
@@ -29,12 +24,7 @@
         (import: "./src/build-api/package-spec")
         (import: "./src/building/facade")
         (import: "./src/building/declarative")
-        (import: "./src/testing/build-runner")
-        (import: "./src/testing/build")
-        (import: "./src/testing/building")
-        (import: "./src/testing/framework")
-        (import: "./src/testing/memory-profile")
-        (import: "./src/testing/model")
+        (import: "./src/testing/extension")
         (import: "./src/testing/performance")
         (import: "./src/policy/gxtest")
         (import: "./src/policy/modularity")

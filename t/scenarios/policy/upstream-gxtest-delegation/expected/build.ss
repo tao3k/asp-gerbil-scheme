@@ -1,20 +1,14 @@
 ;;; -*- Gerbil -*-
-(import :gerbil/gambit
+;;; Upstream owns test selection and execution; this file declares only the
+;;; optional instrumentation bound to an explicit upstream test file.
+
+(import :clan/poo/object
         :asp-gerbil-scheme/build-api)
 
-(export upstream-gxtest-project
-        upstream-gxtest-main)
+(export upstream-testing)
 
-(def +upstream-gxtest-root+
-  "t/scenarios/policy/upstream-gxtest-delegation/expected")
-
-(def upstream-gxtest-project
-  (testing-build
-   name: "upstream-gxtest-delegation"
-   root: +upstream-gxtest-root+
-   contract-root: "t/scenarios/policy/upstream-gxtest-delegation"
-   gxtest: [["upstream" "t/upstream-tests.ss"]]
-   roots: ["t"]))
-
-(def (upstream-gxtest-main args (run-files #f))
-  (testing-build-main upstream-gxtest-project args run-files))
+(def upstream-testing
+  (testing-interface-map-profile
+   +asp-testing-interface+
+   "t/upstream-tests.ss"
+   (.cc +testing-memory-profile+ maxHeapMiB: 512)))
