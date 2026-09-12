@@ -123,7 +123,16 @@
         (check (testing-interface-max-heap-mib-for
                 testing
                 "t/default-test.ss")
-               => 1024)))
+               => 1024)
+        (check (testing-interface-command-for
+                testing
+                "t/large-test.ss"
+                ["-q"])
+               => ["gerbil"
+                   "-:max-heap=2048M"
+                   "test"
+                   "-q"
+                   "t/large-test.ss"])))
 
     (test-case "the POO profile configures the current upstream runtime"
       (let (previous-max-heap (##get-max-heap))

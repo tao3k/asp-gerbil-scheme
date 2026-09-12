@@ -9,13 +9,13 @@
         (only-in :clan/poo/debug trace-poo)
         (only-in :clan/testing
                  find-test-files
-                 %set-test-environment!
-                 test)
+                 %set-test-environment!)
         (only-in :std/cli/multicall
                  define-entry-point
                  define-multicall-main
                  set-default-entry-point!)
         (only-in :std/source this-source-file)
+        (only-in :std/misc/process run-process)
         (only-in :std/srfi/1 find filter)
         (only-in :std/srfi/13 string-contains string-prefix?)
         (only-in :std/sugar with-id))
@@ -34,6 +34,9 @@
         testing-memory-profile-max-heap-mib
         testing-interface-max-heap-mib-for
         testing-interface-apply-runtime-profile!
+        testing-interface-runtime-options-for
+        testing-interface-command-for
+        testing-interface-run-test!
         testing-interface-trace-poo-for
         testing-discovery-profile-ignore-directories
         testing-interface-ignore-directories-for
@@ -241,12 +244,12 @@
      (with-id ctx (main)
        (define-multicall-main ctx)
        (%set-test-environment! here))
-     (testing-interface-apply-runtime-profile! testing "unit-tests.ss")
      (define-entry-point (asp-profiled-unit-tests)
        (help: "Run clan unit tests through ASP POO profiles"
         getopt: [])
-       (apply test
-              (testing-interface-test-files testing "unit-tests.ss")))
+       (for-each
+        (cut testing-interface-run-test! testing <>)
+        (testing-interface-test-files testing "unit-tests.ss")))
      (set-default-entry-point! 'asp-profiled-unit-tests))))
 
 (def (testing-memory-profile-max-heap-mib profile)
@@ -261,6 +264,29 @@
         (find (lambda (profile) (testing-profile-matches? profile 'memory))
               (testing-interface-profiles-for testing test)))
     (and memory (testing-memory-profile-max-heap-mib memory))))
+
+(def (testing-interface-runtime-options-for testing test)
+  (let (max-heap-mib (testing-interface-max-heap-mib-for testing test))
+    (if max-heap-mib
+      [(string-append "-:max-heap="
+                      (number->string max-heap-mib)
+                      "M")]
+      [])))
+
+;;; The public declaration is the POO profile. This is its private projection
+;;; at the fresh-process boundary, before the upstream test module is loaded.
+(def (testing-interface-command-for testing test (arguments []))
+  (append ["gerbil"]
+          (testing-interface-runtime-options-for testing test)
+          ["test"]
+          arguments
+          [test]))
+
+(def (testing-interface-run-test! testing test
+                                  arguments: (arguments [])
+                                  directory: (directory (current-directory)))
+  (run-process (testing-interface-command-for testing test arguments)
+               directory: directory))
 
 ;;; Apply the selected POO memory profile to the current Gambit runtime.  This
 ;;; uses the upstream heap API directly; callers never construct startup argv.

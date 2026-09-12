@@ -74,9 +74,10 @@ environment through the profiled entrypoint:
 #+end_src
 
 This entrypoint calls =clan/testing#find-test-files= first and filters only the
-declared directories. The clan =test= entrypoint still imports and runs every
-remaining suite. It also applies the selected runtime Profile before clan loads
-those suites, so downstream entrypoints do not repeat heap setup.
+declared directories. It then delegates every remaining path to a fresh native
+=gerbil test= process. The process boundary projects the selected per-test POO
+memory Profile before that suite loads; the aggregate discovery process itself
+is not constrained by a single suite's heap budget.
 
 ** Source scope
 
