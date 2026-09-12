@@ -6,6 +6,7 @@
 (import :gerbil/gambit
         (only-in :clan/poo/object .ref .slot? object?)
         (only-in :clan/poo/mop Type. define-type element? validate)
+        (only-in :std/misc/lru lru-cache? lru-cache-capacity)
         (only-in :std/srfi/1 every))
 
 (export ProviderSchemaReference
@@ -186,23 +187,25 @@
 (def (provider-memo-state-element? value)
   (and (provider-object-slots?
         value
-        '(kind lock entries-cell hits-cell misses-cell entry-limit
+        '(kind lock cache hits-cell misses-cell entry-limit
                key-byte-limit value-byte-limit))
        (eq? (.ref value 'kind) 'provider/memo-state)
        (mutex? (.ref value 'lock))
        (every single-cell?
               (map (lambda (slot) (.ref value slot))
-                   '(entries-cell hits-cell misses-cell)))
-       (list? (vector-ref (.ref value 'entries-cell) 0))
+                   '(hits-cell misses-cell)))
+       (lru-cache? (.ref value 'cache))
        (natural? (vector-ref (.ref value 'hits-cell) 0))
        (natural? (vector-ref (.ref value 'misses-cell) 0))
        (every positive-natural?
               (map (lambda (slot) (.ref value slot))
-                   '(entry-limit key-byte-limit value-byte-limit)))))
+                   '(entry-limit key-byte-limit value-byte-limit)))
+       (= (lru-cache-capacity (.ref value 'cache))
+          (.ref value 'entry-limit))))
 
 ;;; Memo-state ownership boundary:
-;;; - One mutex protects the three mutable cells, while positive limits bound
-;;;   every admitted cache entry and serialized value.
+;;; - One mutex protects the upstream std/misc/lru cache and counters, while
+;;;   positive limits bound every admitted cache entry and serialized value.
 ;;; - Memo tests exercise state validation and bounded update behavior.
 (define-type (ProviderMemoState @ Type.)
   .element?: provider-memo-state-element?)

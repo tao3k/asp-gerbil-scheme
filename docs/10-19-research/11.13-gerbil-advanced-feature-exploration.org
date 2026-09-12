@@ -671,6 +671,15 @@ transport decodes a wire hash into those objects; operation-specific adapters
 unwrap the hash only when calling an existing schema-owned function; the
 response projection performs the inverse conversion.
 
+Projection memoization uses the upstream =std/misc/lru= cache behind one short
+state lock. Its structural key retains the protocol-owned workspace,
+generation, parser, query-pack, ordered owner path, and source-leaf identities,
+plus the immutable source witness carried by each owner. A caller that reuses a
+declared digest with different source bytes therefore cannot alias an admitted
+projection. Warm lookup delegates hashing and equality to the upstream cache;
+=std/text/json= runs only when a miss is published and the existing key/value
+byte limits are checked. Native parser work remains outside the lock.
+
 The provider executable has one owner: =build-provider.ss= declares its full
 runtime closure through the Build API's inherited =defbuild-script= bridge;
 that bridge delegates one complete graph to upstream =std/make=. Package

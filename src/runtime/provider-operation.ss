@@ -18,6 +18,10 @@
                  provider-operation-contract-response-schema-id
                  provider-operation-contract-response-schema-version
                  provider-operation-contracts)
+        (only-in :std/misc/lru
+                 lru-cache-get
+                 lru-cache-put!
+                 lru-cache-size)
         (only-in :std/text/json write-json)
         "provider/interface.ss")
 
@@ -49,30 +53,23 @@
       thunk
       (lambda () (mutex-unlock! lock)))))
 
-;; : (forall (a) (-> [a] Integer [a]))
-(def (take-prefix values count)
-  (if (or (zero? count) (null? values))
-      '()
-      (cons (car values) (take-prefix (cdr values) (- count 1)))))
-
-;; : (-> ProviderMemoState String (Maybe ProviderOperationResult))
+;; : (-> ProviderMemoState Object (Maybe ProviderOperationResult))
 (def (projection-memo-ref state key)
   (call-with-projection-memo-lock
    state
    (lambda ()
-     (let* ((entries-cell (provider-memo-state-entries-cell state))
-            (entry (assoc key (vector-ref entries-cell 0))))
-       (if entry
+     (let (value (lru-cache-get (provider-memo-state-cache state) key))
+       (if value
            (let (hits-cell (provider-memo-state-hits-cell state))
              (vector-set! hits-cell 0 (+ 1 (vector-ref hits-cell 0)))
-             (cdr entry))
+             value)
            (let (misses-cell (provider-memo-state-misses-cell state))
              (vector-set! misses-cell 0 (+ 1 (vector-ref misses-cell 0)))
              #f))))))
 
-;; : (-> ProviderMemoState String ProviderOperationResult Void)
+;; : (-> ProviderMemoState Object ProviderOperationResult Void)
 (def (projection-memo-put! state key value)
-  (when (and (<= (string-length key)
+  (when (and (<= (string-length (json->string key))
                  (provider-memo-state-key-byte-limit state))
              (<= (string-length
                   (json->string (provider-operation-result->json value)))
@@ -80,14 +77,7 @@
     (call-with-projection-memo-lock
      state
      (lambda ()
-       (let* ((entries-cell (provider-memo-state-entries-cell state))
-              (entries (vector-ref entries-cell 0)))
-         (vector-set!
-          entries-cell 0
-          (cons (cons key value)
-                (take-prefix
-                 entries
-                 (- (provider-memo-state-entry-limit state) 1)))))))))
+       (lru-cache-put! (provider-memo-state-cache state) key value)))))
 
 ;; : (-> ProviderMemoObservation)
 (def (provider-runtime-projection-memo-observation)
@@ -96,7 +86,7 @@
      state
      (lambda ()
        (provider-memo-observation
-        (length (vector-ref (provider-memo-state-entries-cell state) 0))
+        (lru-cache-size (provider-memo-state-cache state))
         (provider-memo-state-entry-limit state)
         (provider-memo-state-key-byte-limit state)
         (provider-memo-state-value-byte-limit state)
@@ -114,10 +104,7 @@
   (if (provider-operation-descriptor-memoizable? descriptor)
       (let* ((operation
               (provider-operation-descriptor-operation descriptor))
-             (key
-              (string-append
-               operation ":"
-               (json->string (provider-operation-payload->json payload))))
+             (key (provider-operation-memo-key operation payload))
              (cached (projection-memo-ref +provider-projection-memo+ key)))
         (or cached
             (let (computed (provider-operation-execute descriptor payload))
@@ -126,6 +113,51 @@
               (projection-memo-put! +provider-projection-memo+ key computed)
               computed)))
       (provider-operation-execute descriptor payload)))
+
+;; : (-> JsonObject JsonValue)
+(def (projection-batch-owner-cache-key owner)
+  ;; sourceLeafDigest is the protocol identity; source text/base64 is retained
+  ;; as its immutable witness so an untrusted caller cannot alias forged bytes
+  ;; onto a previously admitted projection.
+  (vector (hash-ref owner "ownerPath" "")
+          (hash-ref owner "sourceLeafDigest" "")
+          (hash-ref owner "sourceEncoding" "")
+          (hash-ref owner "sourceText" "")
+          (hash-ref owner "sourceBytesBase64" "")))
+
+;; : (-> JsonObject String [JsonValue])
+(def (projection-batch-owner-cache-keys wire-value field)
+  (map projection-batch-owner-cache-key
+       (let (owners (hash-ref wire-value field '()))
+         (cond
+          ((vector? owners) (vector->list owners))
+          ((list? owners) owners)
+          (else
+           (error "provider projection owner array is invalid" field))))))
+
+;; : (-> String ProviderOperationPayload Object)
+(def (provider-operation-memo-key operation payload)
+  (let (wire-value (provider-operation-payload->json payload))
+    (if (string=? operation "projection-batch")
+        ;; std/misc/lru owns hashing, structural equality, and eviction for the
+        ;; protocol-shaped key. std/text/json is reserved for bounded admission
+        ;; on cache publication, rather than repeated on every warm lookup.
+        (vector operation
+                (hash-ref wire-value "schemaId" "")
+                (hash-ref wire-value "schemaVersion" "")
+                (hash-ref wire-value "languageId" "")
+                (hash-ref wire-value "providerId" "")
+                (hash-ref wire-value "workspaceIdentity" "")
+                (hash-ref wire-value "generationRootDigest" "")
+                (hash-ref wire-value "baseGenerationRootDigest" "")
+                (hash-ref wire-value "parserIdentityDigest" "")
+                (hash-ref wire-value "queryPackDigest" "")
+                (list->vector
+                 (projection-batch-owner-cache-keys wire-value "owners"))
+                (list->vector
+                 (projection-batch-owner-cache-keys
+                  wire-value "auxiliaryOwners")))
+        (string-append operation ":" (json->string wire-value)))))
 
 ;; : (-> String String)
 (def (required-environment name)

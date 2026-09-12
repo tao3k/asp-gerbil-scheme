@@ -483,38 +483,52 @@
               (http-post-json (string-append endpoint "shutdown") "{}")))
            (read-all-as-string process))))))
    (test-case
-    "projection memo is bounded and evicts old content identities"
+    "projection memo uses bounded least-recently-used eviction"
     (let* ((package-root (current-directory))
-           (before
-            (asp-gerbil-scheme/src/runtime/provider-operation#provider-runtime-projection-memo-stats))
-           (first-body
-            (live-corpus-request package-root "memo-0" "memo-generation-0")))
-      (let populate ((index 0))
-        (when (< index 6)
-          (provider-runtime-request->response
-           (read-json
-            (open-input-string
-             (live-corpus-request
-              package-root
-              (format "memo-~a" index)
-              (format "memo-generation-~a" index)))))
-          (populate (+ index 1))))
-      (let (after
-            (asp-gerbil-scheme/src/runtime/provider-operation#provider-runtime-projection-memo-stats))
+           (body (lambda (index)
+                   (live-corpus-request
+                    package-root (format "memo-~a" index)
+                    (format "memo-generation-~a" index))))
+           (execute (lambda (index)
+                      (provider-runtime-request->response
+                       (read-json (open-input-string (body index)))))))
+      (for-each execute (iota 4))
+      (execute 0)
+      (execute 4)
+      (let* ((after (provider-runtime-projection-memo-stats))
+             (hits-before (hash-ref after "hits")))
         (check (hash-ref after "entries") => 4)
-        (check (>= (- (hash-ref after "misses")
-                      (hash-ref before "misses"))
-                   6)
-               => #t)
-        (let (misses-before-replay (hash-ref after "misses"))
-          (provider-runtime-request->response
-           (read-json (open-input-string first-body)))
-          (check
-           (> (hash-ref
-               (asp-gerbil-scheme/src/runtime/provider-operation#provider-runtime-projection-memo-stats)
-               "misses")
-              misses-before-replay)
-           => #t))))
+        (execute 0)
+        (check (> (hash-ref (provider-runtime-projection-memo-stats) "hits")
+                  hits-before)
+               => #t))
+      (let (misses-before
+            (hash-ref (provider-runtime-projection-memo-stats) "misses"))
+        (execute 1)
+        (check (> (hash-ref (provider-runtime-projection-memo-stats) "misses")
+                  misses-before)
+               => #t))))
+   (test-case
+    "projection memo rejects forged bytes under the same declared identity"
+    (let* ((package-root (current-directory))
+           (body (live-corpus-request
+                  package-root "memo-source" "memo-source-generation"))
+           (original (read-json (open-input-string body)))
+           (forged (read-json (open-input-string body)))
+           (forged-owner
+            (car (hash-ref (hash-ref forged "payload") "owners"))))
+      (provider-runtime-request->response original)
+      (hash-put! forged-owner "sourceText" "(def forged-cache-witness 1)\n")
+      (let* ((misses-before
+              (hash-ref (provider-runtime-projection-memo-stats) "misses"))
+             (response (provider-runtime-request->response forged))
+             (owner (vector-ref
+                     (hash-ref (hash-ref response "payload") "owners") 0))
+             (item (vector-ref (hash-ref owner "items") 0)))
+        (check (hash-ref item "name") => "forged-cache-witness")
+        (check (> (hash-ref (provider-runtime-projection-memo-stats) "misses")
+                  misses-before)
+               => #t))))
    (test-case
    "project-resolution uses the canonical provider identity"
     (let* ((package-root (current-directory))
@@ -605,4 +619,4 @@
      (asp-gerbil-scheme/src/runtime/provider-http-json-server#validate-provider-http-json-environment!
       (lambda (_) #f))
         #f))
-     => #t)))))
+     => #t))))

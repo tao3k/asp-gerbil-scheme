@@ -4,6 +4,7 @@
 
 (import :gerbil/gambit
         (only-in :clan/poo/object .cc .def .o .ref)
+        (only-in :std/misc/lru make-lru-cache)
         (only-in :std/sugar hash)
         (only-in "../../object-family/syntax"
                  defpoo-object-family
@@ -59,7 +60,7 @@
         provider-runtime-contract-transport
         provider-runtime-contract-operations
         provider-memo-state-lock
-        provider-memo-state-entries-cell
+        provider-memo-state-cache
         provider-memo-state-hits-cell
         provider-memo-state-misses-cell
         provider-memo-state-entry-limit
@@ -164,7 +165,7 @@
     (provider-runtime-contract-transport transport)
     (provider-runtime-contract-operations operations)
     (provider-memo-state-lock lock)
-    (provider-memo-state-entries-cell entries-cell)
+    (provider-memo-state-cache cache)
     (provider-memo-state-hits-cell hits-cell)
     (provider-memo-state-misses-cell misses-cell)
     (provider-memo-state-entry-limit entry-limit)
@@ -265,7 +266,7 @@
   (provider-require-memo-state!
    (.o (:: @ [provider-memo-state-prototype])
        lock: (make-mutex 'provider-projection-memo)
-       entries-cell: (vector '())
+       cache: (make-lru-cache entry-limit-value)
        hits-cell: (vector 0)
        misses-cell: (vector 0)
        entry-limit: entry-limit-value
