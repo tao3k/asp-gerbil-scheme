@@ -75,7 +75,8 @@ environment through the profiled entrypoint:
 
 This entrypoint calls =clan/testing#find-test-files= first and filters only the
 declared directories. The clan =test= entrypoint still imports and runs every
-remaining suite.
+remaining suite. It also applies the selected runtime Profile before clan loads
+those suites, so downstream entrypoints do not repeat heap setup.
 
 ** Source scope
 

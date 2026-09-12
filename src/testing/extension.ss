@@ -235,6 +235,7 @@
   ((_ testing)
    (begin
      (init-test-environment!)
+     (testing-interface-apply-runtime-profile! testing "unit-tests.ss")
      (define-entry-point (asp-profiled-unit-tests)
        (help: "Run clan unit tests through ASP POO profiles"
         getopt: [])
