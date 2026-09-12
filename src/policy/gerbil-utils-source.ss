@@ -401,8 +401,7 @@
     ["gerbil://gerbil/runtime/control.ss#dynamic-wind"
      "gerbil://gerbil/runtime/control.ss#with-unwind-protect"
      "gerbil://gerbil/runtime/control.ss#call-with-parameters"
-     "poo-flow/build.ss#poo-flow-with-directory"
-     "asp-gerbil-scheme/src/build-api/source-coverage.ss#with-directory"]
+     "poo-flow/build.ss#poo-flow-with-directory"]
     ["dynamic-scope-cleanup-boundary"
      "manual-dynamic-scope-restore"
      "dynamic-wind-cleanup-boundary"

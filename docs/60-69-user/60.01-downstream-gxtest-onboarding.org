@@ -7,10 +7,12 @@
 This document is the downstream user contract for packages that consume the
 Gerbil Scheme language project harness through =gerbil.pkg= and =gxtest=.
 
-The harness owns policy discovery, reporting, and repair hints. Downstream
-projects supply source coverage through the Build API and configure optional
-thresholds through explicit native POO profiles. =gerbil.pkg= owns only package
-identity and dependency acquisition.
+The harness owns policy evaluation, reporting, and repair hints. A downstream
+=PackageSpec= supplies the native module graph through clan/building and
+=std/make=; explicit test/query entries may extend that scope. The parser never
+rescans roots or follows imports to rebuild it. Optional thresholds use explicit
+native POO profiles. =gerbil.pkg= owns only package identity and dependency
+acquisition.
 
 * Install Boundary
 Install the harness from its checkout into the global Gerbil package store:
@@ -56,7 +58,8 @@ For a custom modularity audit, derive and pass a native POO profile explicitly:
 
 The profile does not mutate provider defaults or disable rules. The hard owner
 line cap still applies. Macro admission likewise accepts an explicit POO
-=profile:=; executable witnesses come only from the parser-owned test graph.
+=profile:=; executable witnesses come only from the caller-projected native and
+test source set.
 
 * gxtest Fixture
 Create a small test owner such as =t/project-policy-test.ss=:
@@ -121,10 +124,10 @@ The downstream test surface is:
 | =gxtest-report-findings= | Stable report accessor for raw =TypeFinding= values. |
 | =gxtest-report-finding-count= | Stable report accessor for compact custom failure summaries. |
 | =gxtest-report-summary= | Stable compact summary with status, files, definitions, and finding count. |
-| =make-project-policy-test= | Explicit full-project audit suite following the build-declared source coverage. |
-| =project-policy-findings= | Raw =TypeFinding= values for custom tests. |
-| =project-policy-status= | =pass= or =fail= status for a project root. |
-| =project-policy-report= | Structured report with status, file count, definition count, agent repair, and raw findings. |
+| =make-project-policy-test= | Audit suite over an explicit caller-owned project file set. |
+| =project-policy-findings= | Raw =TypeFinding= values for an explicit project file set. |
+| =project-policy-status= | =pass= or =fail= status for an explicit project file set. |
+| =project-policy-report= | Structured report for an explicit project file set. |
 | =project-policy-report-packet= | Project a report into the shared, schema-conformant JSON value consumed by unified ASP. |
 | =write-project-policy-report-packet= | Write exactly one shared JSON packet; it performs no human-oriented rendering. |
 
@@ -132,8 +135,8 @@ Use =make-gxtest-policy-test= for the package's default =gxtest= integration
 when the runner entry files are known, for example =(make-gxtest-policy-test "."
 ["t/unit-tests.ss"])=.
 Use =policy-report= when a downstream package intentionally wants custom
-assertions over an explicit file scope. Use =project-policy-report= only for an
-explicit full-project audit.
+assertions over an explicit file scope. =project-policy-report= also requires
+that explicit file set; it never discovers or reconstructs a build graph.
 Do not destructure reports with alist helpers such as =assq=. Treat report
 container details as private and use the =gxtest-report-*= accessors.
 

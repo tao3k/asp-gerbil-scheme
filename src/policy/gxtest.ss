@@ -153,15 +153,15 @@
   (make-policy-test root [file]))
 
 ;;; Boundary:
-;;; - make-project-policy-test is the explicit full-project policy gate.
+;;; - make-project-policy-test is an explicit policy evidence gate.
 ;;; - Project-level warning backlog fails through the same status contract as
 ;;;   check/report, so downstream packages do not need wrapper tests.
 ;;; - Regular gxtest targets should use make-policy-test with their file scope.
-;; : (-> Root TestSuite )
-(def (make-project-policy-test root)
+;; : (-> Root (List Path) TestSuite )
+(def (make-project-policy-test root files)
   (test-suite "gerbil scheme project policy"
     (test-case "package policy has no findings"
-      (let (report (project-policy-report root))
+      (let (report (project-policy-report root files))
         (when (not (equal? (hash-get report 'status) "pass"))
           (write-project-policy-report-packet report))
         (check (hash-get report 'status) => "pass")))))

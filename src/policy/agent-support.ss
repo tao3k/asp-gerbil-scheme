@@ -12,7 +12,6 @@
         poo-capability-dependency?
         source-runtime-file-path?
         index-source-runtime-file-path?
-        configured-runtime-roots
         source-path-under-root?
         project-poo-forms
         poo-class-fact-exists?
@@ -29,6 +28,7 @@
 ;; and generated evidence consume those classes independently.
 (def +non-runtime-source-classes+
   '("config"
+    "package-version"
     "package-build"
     "snapshot-output"
     "policy-scenario"
@@ -79,21 +79,12 @@
   (and (string-suffix? ".ss" path)
        (not (member (source-path-class path)
                     +non-runtime-source-classes+))
-       (let* ((package (project-index-package index))
-              (policy (and package
-                           (project-package-source-scope package)))
-              (roots (configured-runtime-roots policy)))
-         (ormap (lambda (root)
-                  (source-path-under-root? path root))
-                roots))))
-;; : (-> Policy (List String) )
-(def (configured-runtime-roots policy)
-  (cond
-   ((and policy (pair? (source-scope-runtime-roots policy)))
-    (source-scope-runtime-roots policy))
-   ((and policy (pair? (source-scope-roots policy)))
-    (source-scope-roots policy))
-   (else ["src"])))
+       ;; The ProjectIndex is already an exact native/test graph projection.
+       ;; Runtime admission trusts membership plus parser-owned source class;
+       ;; package roots must not create a second, approximate graph.
+       (ormap (lambda (file)
+                (equal? (source-file-path file) path))
+              (project-index-files index))))
 ;; : (-> String String Boolean )
 (def (source-path-under-root? path root)
   (or (equal? root ".")

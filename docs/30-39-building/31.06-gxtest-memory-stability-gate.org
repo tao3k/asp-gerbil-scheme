@@ -141,19 +141,17 @@ flowchart TD
   Catalog --> Native --> Compile
 #+end_src
 
-Loading the absolute ASP =build.ss= path while the process current directory
-was the POO Flow repository returned the ASP repository path from
-=asp-gerbil-scheme-source-coverage-owner-root=.  This regression proves that
-the launcher cwd is no longer source-catalog authority and requires no =cd=
-contract from downstream projects.
+Build and policy now have separate authority domains. The package's real
+=PackageSpec= and upstream =std/make= own native source selection; policy and
+gxtest receive explicit evidence/entry files and never conditionally load
+=build.ss= to infer a second graph.
 
 The 2026-09-03 native admission receipt scanned =406= Scheme files and =5,149=
 definitions in =24.79 s= with a maximum resident set of =1,128,316,928 bytes=
 (about =1.05 GiB=).  Expanding policy coverage from the earlier runtime-only
 projection did not add another parse pass: wall time remained about 25 seconds.
-The receipt also proved that the test-owned =SlotPrototypeTable.= contract
-witness became visible to policy, clearing the former false missing-witness
-finding while leaving tests outside the native package spec.
+Test-owned witnesses enter policy only through the explicit test request and
+remain outside the native package spec.
 
 The executable regression in =t/parser-memory-stability-test.ss= captures the
 native parser trace for one =policy-source-report= invocation and requires

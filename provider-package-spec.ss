@@ -3,12 +3,10 @@
 
 (import (only-in "./src/build-api/package-spec"
                  asp-gerbil-scheme-package-spec!
-                 asp-gerbil-scheme-library-package-prototype)
-        (only-in :std/make cppflags ldflags))
+                 asp-gerbil-scheme-library-package-prototype))
 
 ;; Build entrypoints must be self-hosting: this native Gerbil module list is
-;; package-spec data, while the heavier source-closure analyzer remains a
-;; test/receipt oracle and is not imported by a fresh provider build.
+;; package-spec data consumed directly by the upstream std/make projection.
 (def +provider-runtime-modules+
   '("src/utilities/functional.ss"
     "src/parser/model.ss"
@@ -56,12 +54,12 @@
  (entry "src/provider-server")
  (runtime-modules +provider-runtime-modules+)
  (library-modules +provider-library-modules+)
+ (native-capabilities '(tls))
+ (pkg-config-libs '("openssl"))
+ (nix-deps '("openssl"))
  (native-spec
   (append
    (map (lambda (module) `(gxc: ,module)) +provider-runtime-modules+)
-   `((exe: "src/provider-server"
-           bin: "asp-gerbil-scheme"
-           "-cc-options" ,(string-append (cppflags "openssl" "")
-                                          " -include openssl/kdf.h")
-           "-ld-options" ,(ldflags "openssl" "-lssl -lcrypto")))
+   '((exe: "src/provider-server"
+           bin: "asp-gerbil-scheme"))
    +provider-library-modules+)))

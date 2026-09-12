@@ -161,7 +161,6 @@ flowchart TD
   G["Verified pure-generator sidecar"] --> G1["Native gxc extra-input; full spec preserved"]
 #+end_src
 
-The focused tests live in =t/policy/agent-build-test.ss=.  The declaration-only
-build lifecycle is separately covered by =t/source-coverage-query-test.ss= so a
-policy query cannot accidentally start a native build or suppress a later real
-build in the same process.
+The focused tests live in =t/policy/agent-build-test.ss=. The declaration-only
+build lifecycle is separately covered by =t/package-build-contract-test.ss=.
+Policy receives explicit files and cannot start or suppress a native build.

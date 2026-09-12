@@ -9,7 +9,6 @@
 (def +asp-gerbil-scheme-default-gxtest-smoke-files+
   '("t/agent-poo-scenario-contract-test.ss"
     "t/package-build-contract-test.ss"
-    "t/source-closure-test.ss"
     "t/poo-object-validation-test.ss"
     "t/parser-memory-stability-test.ss"
     "t/support-test.ss"

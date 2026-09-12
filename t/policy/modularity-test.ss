@@ -7,8 +7,6 @@
         :std/misc/ports
         :std/misc/process
         (only-in :std/text/json read-json)
-        (only-in :asp-gerbil-scheme/src/build-api/source-coverage
-                 asp-gerbil-scheme-source-coverage)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
         :asp-gerbil-scheme/src/policy/gxtest
@@ -55,7 +53,7 @@
             (check (type-finding-rule-id finding)
                    => "GERBIL-SCHEME-MOD-R001")
             (check (type-finding-path finding) => "src/foo/facade.ss")))
-    (test-case "modularity follows explicit Build API source coverage"
+    (test-case "modularity follows an explicit policy evidence set"
           (let* ((root ".run/policy-source-scope-modularity")
                  (lib (string-append root "/lib"))
                  (owner (string-append lib "/foo")))
@@ -69,15 +67,14 @@
                         ";;; -*- Gerbil -*-\n;;; Foo facade.\n(export answer)\n(def answer 42)\n")
             (write-text (string-append owner "/core.ss")
                         ";;; -*- Gerbil -*-\n;;; Foo core.\n(def core-answer 42)\n")
-            (let* ((index (collect-source-scope/coverage
-                           root ["lib/foo/facade.ss" "lib/foo/core.ss"]
-                           ["lib"] ["lib"] []))
+            (let* ((index (collect-selected-source-scope
+                           root ["lib/foo/facade.ss" "lib/foo/core.ss"]))
                    (findings (run-modularity-policy index))
                    (matching (filter-rule "GERBIL-SCHEME-MOD-R001" findings))
                    (finding (car matching)))
               (check (length matching) => 1)
               (check (type-finding-path finding) => "lib/foo/facade.ss"))))
-    (test-case "modularity policy follows explicit build runtime coverage"
+    (test-case "modularity policy does not infer a package build graph"
           (let* ((root ".run/policy-build-scope-modularity")
                  (lib (string-append root "/lib"))
                  (owner (string-append lib "/foo")))
@@ -87,15 +84,12 @@
             (ensure-dir owner)
             (write-text (string-append root "/gerbil.pkg")
                         "(package: sample/build-scope)\n")
-            (write-text (string-append root "/build.ss")
-                        ";;; -*- Gerbil -*-\n(asp-gerbil-scheme-source-coverage roots: '(\"lib\") runtime-roots: '(\"lib\") explanation: \"Runtime modules live under lib for this package.\")\n")
             (write-text (string-append owner "/facade.ss")
                         ";;; -*- Gerbil -*-\n;;; Foo facade.\n(export answer)\n(def answer 42)\n")
             (write-text (string-append owner "/core.ss")
                         ";;; -*- Gerbil -*-\n;;; Foo core.\n(def core-answer 42)\n")
-            (let* ((index (collect-source-scope/coverage
-                           root ["build.ss" "lib/foo/facade.ss" "lib/foo/core.ss"]
-                           ["lib"] ["lib"] []))
+            (let* ((index (collect-selected-source-scope
+                           root ["lib/foo/facade.ss" "lib/foo/core.ss"]))
                    (findings (run-modularity-policy index))
                    (matching (filter-rule "GERBIL-SCHEME-MOD-R001" findings))
                    (finding (car matching)))
@@ -290,14 +284,8 @@
                         "(package: sample/gxtest-policy\n  policy: ((modularity-policy config: \"policy/modularity.ss\")))\n")
             (write-text (string-append policy-dir "/modularity.ss")
                         "(modularity-policy max-test-lines: 700 explanation: \"Downstream gxtest policy helper keeps replay thresholds in package config.\")\n")
-            ;; project-policy-findings runs after downstream build.ss has
-            ;; declared the package-owned source catalog.  Reproduce that
-            ;; execution boundary without widening back to directory scans.
-            (asp-gerbil-scheme-source-coverage
-             roots: '("t")
-             files: '("t/search-test.ss")
-             owner-root: root)
             (let (matching (filter-rule
                             "GERBIL-SCHEME-MOD-R007"
-                            (project-policy-findings root)))
+                            (project-policy-findings
+                             root ["t/search-test.ss"])))
               (check (length matching) => 1))))))

@@ -7,8 +7,17 @@
 (import (only-in "./package-spec"
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype
-                 asp-gerbil-scheme-package-modules))
+                 asp-gerbil-scheme-package-modules
+                 asp-gerbil-scheme-package-native-profile
+                 asp-gerbil-scheme-package-pkg-config-libs
+                 asp-gerbil-scheme-package-nix-deps)
+        (only-in "./native-profile"
+                 asp-gerbil-scheme-native-profile-prepare!))
 
 (export asp-gerbil-scheme-package-spec!
         asp-gerbil-scheme-library-package-prototype
-        asp-gerbil-scheme-package-modules)
+        asp-gerbil-scheme-package-modules
+        asp-gerbil-scheme-package-native-profile
+        asp-gerbil-scheme-package-pkg-config-libs
+        asp-gerbil-scheme-package-nix-deps
+        asp-gerbil-scheme-native-profile-prepare!)

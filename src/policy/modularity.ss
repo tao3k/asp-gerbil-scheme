@@ -190,45 +190,28 @@
 (def (project-gerbil-source-path? index path)
   (and (string-suffix? ".ss" path)
        (not (config-file-path? path))
-       (ormap (lambda (root)
-                (source-path-under-root? path root))
-              (project-source-roots index))))
+       ;; Membership in ProjectIndex is already the caller's native graph
+       ;; projection. Classify that member; do not infer admission from roots.
+       (member (source-path-class path)
+               '("source"
+                 "runtime-source"
+                 "native-fast-runtime"
+                 "build-runtime"))))
 ;;; Boundary:
 ;;; - config-file-path? composes first-class procedures.
 ;;; - Keep data-flow evidence visible.
 ;; : (-> String Boolean )
 (def (config-file-path? path)
   (find (lambda (candidate) (string=? path candidate)) +config-files+))
-;; : (-> ProjectIndex (List String) )
-(def (project-source-roots index)
-  (let* ((package (project-index-package index))
-         (policy (and package
-                      (project-package-source-scope package)))
-         (roots (and policy (source-scope-roots policy))))
-    (cond
-     ((and roots (pair? roots)) roots)
-     ((and policy (pair? (source-scope-runtime-roots policy)))
-      (source-scope-runtime-roots policy))
-     (else ["src"]))))
-;; : (-> String String Boolean )
-(def (source-path-under-root? path root)
-  (or (equal? root ".")
-      (equal? path root)
-      (string-prefix? (source-root-prefix root) path)))
 ;;; Boundary:
-;;; - source-root-parent-prefix? composes first-class procedures.
-;;; - Keep data-flow evidence visible.
+;;; - A one-segment directory is a layout root, not a repeated owner name.
+;;; - This is path classification after graph admission, never source discovery.
 ;; : (-> ProjectIndex Parent Boolean )
 (def (source-root-parent-prefix? index parent)
-  (ormap (lambda (root)
-           (equal? parent (source-root-prefix root)))
-         (project-source-roots index)))
-;; : (-> String String )
-(def (source-root-prefix root)
-  (cond
-   ((equal? root ".") "")
-   ((string-suffix? "/" root) root)
-   (else (string-append root "/"))))
+  (let (directory
+        (path-strip-trailing-directory-separator parent))
+    (and (not (string-empty? directory))
+         (not (string-contains directory "/")))))
 ;; : (-> SourceFile Boolean )
 (def (bin-entrypoint-source-file? file)
   (let (path (source-file-path file))

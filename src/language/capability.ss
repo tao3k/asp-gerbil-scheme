@@ -139,8 +139,8 @@
       "configurable-interface-posture"
       "configurable-interface"
       (configurable-interface-status package)
-      "Build API coverage supplies source scope; explicit POO profiles own policy configuration, with all rules enabled by default."
-      "build-api-coverage-and-native-poo-profiles"
+      "Explicit caller evidence supplies source scope; native POO profiles own policy configuration, with all rules enabled by default."
+      "explicit-source-scope-and-native-poo-profiles"
       "info --json ."
       ["capability" "posture" "configurable" "interface" "source-scope" "agent-policy" "build.ss"]
       (hash (sourceScope (source-scope-status package))

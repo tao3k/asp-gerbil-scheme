@@ -1,12 +1,14 @@
 ;;; -*- Gerbil -*-
 ;;; Explicit slow self-apply policy gate for this harness.
 
-(import :asp-gerbil-scheme/src/build-api/source-coverage
-        :std/test
+(import :std/test
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
         :policy/fixtures
-        :asp-gerbil-scheme/src/policy/gxtest
+        (only-in :asp-gerbil-scheme/src/policy/gxtest-report
+                 project-policy-report)
+        (only-in :asp-gerbil-scheme/src/testing/gxtest-catalog
+                 gxtest-project-policy-files)
         :asp-gerbil-scheme/src/policy/repair-calibration
         :asp-gerbil-scheme/src/snapshot/facade
         :std/sugar
@@ -53,10 +55,9 @@
   (or +self-apply-index-cache+
       (begin
         (reset-fixture-root +self-apply-agent-repair-probe-root+)
-        (asp-gerbil-scheme-load-source-coverage ".")
-        (let (index (collect-source-scope
+        (let (index (collect-selected-source-scope
                      "."
-                     (asp-gerbil-scheme-source-coverage-files ".")))
+                     (gxtest-project-policy-files)))
         (set! +self-apply-index-cache+ index)
           index))))
 ;; : (-> (List PolicyFinding) )
@@ -136,7 +137,10 @@
          (_ (write-self-apply-agent-repair-probe!
              +self-apply-agent-repair-probe-root+))
          (before-report
-          (project-policy-report +self-apply-agent-repair-probe-root+))
+          (project-policy-report
+           +self-apply-agent-repair-probe-root+
+           ["src/types/validation.ss"
+            "src/policy/repair-calibration.ss"]))
          (calibration
           (agent-repair-calibration-report
            before-report

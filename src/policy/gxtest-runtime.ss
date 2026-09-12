@@ -6,7 +6,6 @@
         (only-in ../parser/model project-index-files)
         (only-in ../parser/selectors project-definitions)
         (only-in ../parser/core collect-selected-source-scope)
-        (only-in ../parser/test-source-scope collect-test-source-scope)
         (only-in ../support/time monotonic-micros duration-micros)
         (only-in ../types/core type-status)
         (only-in ./core run-policy-checks))
@@ -26,7 +25,7 @@
 
 ;; : (-> Root (List Path) (List TypeFinding))
 (def (policy-findings root files)
-  (run-policy-checks (collect-test-source-scope root files)))
+  (run-policy-checks (collect-selected-source-scope root files)))
 
 ;; : (-> Root (List Path) Status)
 (def (policy-status root files)

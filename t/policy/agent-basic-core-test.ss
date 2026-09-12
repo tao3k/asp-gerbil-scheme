@@ -74,7 +74,11 @@
                  (expected
                   (append (generic-owner-findings index)
                           (vague-definition-findings index)))
-                 (actual (run-basic-agent-policy/streaming root 1))
+                 (actual
+                  (run-basic-agent-policy/streaming/selected
+                   root
+                   (map source-file-path (project-index-files index))
+                   1))
                  (project-finding
                   (lambda (finding)
                     (list (type-finding-rule-id finding)

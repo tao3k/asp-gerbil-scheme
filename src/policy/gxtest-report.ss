@@ -2,15 +2,9 @@
 ;;; Runtime gxtest policy report API.
 
 (import :gerbil/gambit
-        (only-in "../build-api/source-coverage"
-                 asp-gerbil-scheme-source-coverage-exclude-directories
-                 asp-gerbil-scheme-source-coverage-files
-                 asp-gerbil-scheme-source-coverage-roots)
         (only-in "../constants" +language-id+ +provider-id+)
         (only-in "../parser/facade"
-                 collect-source-scope/coverage
                  collect-selected-source-scope
-                 collect-test-source-scope
                  project-definitions
                  project-index-files)
         (only-in "../support/time"
@@ -50,7 +44,7 @@
 
 ;; : (-> Root (List Path) (List TypeFinding) )
 (def (policy-findings root files)
-  (run-policy-checks (collect-test-source-scope root files)))
+  (run-policy-checks (collect-selected-source-scope root files)))
 
 ;; : (-> Root (List Path) String )
 (def (policy-status root files)
@@ -59,8 +53,8 @@
 ;;; Boundary:
 ;;; - policy-report is the stable files-scoped downstream gxtest data surface.
 ;;; - Package metadata is read for policy configuration, but execution parses
-;;;   only files supplied by the test runner and package-local imports those
-;;;   files actually reach. Full-project coverage stays an explicit project gate.
+;;;   exactly the source projection supplied by the test runner. The parser
+;;;   never follows imports to manufacture a second build graph.
 ;; : (forall (a) (-> (Maybe (-> String Integer Void)) String (-> a) a))
 (def (policy-report-phase phase! name thunk)
   (if phase!
@@ -77,7 +71,7 @@
            phase!
            "policy-collect"
            (lambda ()
-             (collect-test-source-scope root files))))
+             (collect-selected-source-scope root files))))
          (findings
           (policy-report-phase
            phase!
@@ -91,9 +85,8 @@
        (project-policy-report-json index findings "files" files)))))
 
 ;;; Boundary:
-;;; - gxtest runner passes an already expanded source scope, so this entry
-;;;   parses exactly that scope and does not chase imports a second time.
-;;; - policy-report keeps the downstream test-file API that expands imports.
+;;; - gxtest runner passes an already selected source scope, so this entry
+;;;   parses exactly that scope and does not chase imports.
 ;; : (-> Root (List Path) Json )
 (def (policy-source-report root files (phase! #f))
   (let* ((index
@@ -137,36 +130,28 @@
           normalized-root)
          (else (loop parent)))))))
 
-;; : (-> Root (List TypeFinding) )
-(def (project-policy-findings root)
-  (run-policy-checks (project-policy-index root)))
+;; Full-project policy is explicit evidence selection. The caller provides the
+;; source set; this API never loads build.ss or manufactures a BuildSpec.
+;; : (-> Root (List Path) (List TypeFinding) )
+(def (project-policy-findings root files)
+  (run-policy-checks (project-policy-index root files)))
 
-;; : (-> Root String )
-(def (project-policy-status root)
-  (type-status (project-policy-findings root)))
+;; : (-> Root (List Path) String )
+(def (project-policy-status root files)
+  (type-status (project-policy-findings root files)))
 
 ;;; Boundary:
 ;;; - project-policy-report is the stable downstream gxtest data surface.
-;;; - Coverage follows the build.ss source coverage declaration instead of a
-;;;   separate whole-repository scan.
-;; : (-> Root Json )
-(def (project-policy-report root)
-  (let* ((index (project-policy-index root))
+;;; - The caller owns the explicit policy evidence set.
+;; : (-> Root (List Path) Json )
+(def (project-policy-report root files)
+  (let* ((index (project-policy-index root files))
          (findings (run-policy-checks index)))
-    (project-policy-report-json index findings "project" #f)))
+    (project-policy-report-json index findings "project" files)))
 
-;; : (-> Root ProjectIndex)
-(def (project-policy-index root)
-  (let* ((policy-root (project-policy-root root))
-         ;; source-coverage-files owns the only conditional build.ss load and
-         ;; returns the macro-declared owner catalog without directory discovery.
-         (files (asp-gerbil-scheme-source-coverage-files policy-root)))
-    (collect-source-scope/coverage
-     policy-root
-     files
-     (asp-gerbil-scheme-source-coverage-roots)
-     (asp-gerbil-scheme-source-coverage-roots)
-     (asp-gerbil-scheme-source-coverage-exclude-directories))))
+;; : (-> Root (List Path) ProjectIndex)
+(def (project-policy-index root files)
+  (collect-selected-source-scope (project-policy-root root) files))
 
 ;; : (-> ProjectIndex (List TypeFinding) String MaybePaths Json )
 (def (project-policy-report-json index findings scope requested-files)

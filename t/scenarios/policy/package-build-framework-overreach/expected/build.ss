@@ -1,23 +1,15 @@
 #!/usr/bin/env gxi
 ;;; -*- Gerbil -*-
 
-(import :std/make
-        :clan/building
+(import (only-in :std/build-script defbuild-script)
+        (only-in :clan/building all-gerbil-modules)
         (only-in :asp-gerbil-scheme/build-api
-                 asp-gerbil-scheme-source-coverage))
+                 asp-gerbil-scheme-package-spec!
+                 asp-gerbil-scheme-library-package-prototype))
 
-(asp-gerbil-scheme-source-coverage
- roots: '("src" "t")
- explanation: "build.ss declares source coverage; acceleration and receipts stay in reusable harness APIs.")
+(asp-gerbil-scheme-package-spec!
+ (sample-package-spec @ asp-gerbil-scheme-library-package-prototype)
+ (spec sample-package-build-spec)
+ (modules (all-gerbil-modules)))
 
-(def (spec)
-  (all-gerbil-modules))
-
-(%set-build-environment!
- "build.ss"
- name: "sample"
- deps: '("asp-gerbil-scheme")
- spec: spec)
-
-(def (compile-package! options)
-  (apply make (spec) options))
+(defbuild-script (sample-package-build-spec))

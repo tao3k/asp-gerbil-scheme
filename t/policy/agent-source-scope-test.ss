@@ -53,7 +53,7 @@
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-021" findings)))
           (check matching => []))))
-    (test-case "project policy uses native coverage without executing fixture build.ss"
+    (test-case "project policy uses explicit files without executing fixture build.ss"
       (let* ((root ".run/policy-source-scope-package-spec")
              (src-dir (string-append root "/src"))
              (test-dir (string-append root "/t")))
@@ -80,14 +80,15 @@
                     ";;; -*- Gerbil -*-\n(def core-value 1)\n")
         (write-text (string-append test-dir "/core-test.ss")
                     ";;; -*- Gerbil -*-\n(displayln \"explicit test script\")\n")
-        (let* ((report (project-policy-report root))
+        (let* ((report (project-policy-report
+                        root ["build.ss" "src/core.ss"]))
                (findings (hash-get report 'findings)))
-          ;; Native clan coverage admits both the declarative build.ss owner
-          ;; and its one declared library source without executing the script.
+          ;; Explicit policy evidence admits the declarative build.ss owner and
+          ;; its declared library source without executing the script.
           (check (hash-get report 'files) => 2)
           (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)
                  => []))))
-    (test-case "test source scope re-expands a module reached later at a shallower depth"
+    (test-case "selected source scope never reconstructs an import graph"
       (let* ((root ".run/policy-source-scope-depth-order")
              (src-dir (string-append root "/src"))
              (test-dir (string-append root "/t")))
@@ -111,11 +112,13 @@
         (let (paths
               (map source-file-path
                    (project-index-files
-                    (collect-test-source-scope
+                    (collect-selected-source-scope
                      root
                      ["t/deep-test.ss" "t/shallow-test.ss"]))))
-          (check (not (not (member "src/reader.ss" paths))) => #t))))
-    (test-case "gxtest scoped policy intersects test files with source coverage"
+          (check paths => ["t/deep-test.ss" "t/shallow-test.ss"])
+          (check (member "src/core.ss" paths) => #f)
+          (check (member "src/reader.ss" paths) => #f))))
+    (test-case "gxtest scoped policy uses explicit files"
       (let* ((root ".run/policy-source-scope-gxtest-files")
              (src-dir (string-append root "/src")))
         (reset-fixture-root root)
@@ -124,8 +127,6 @@
         (ensure-dir src-dir)
         (write-text (string-append root "/gerbil.pkg")
                     "(package: sample/gxtest-file-scope)\n")
-        (write-text (string-append root "/build.ss")
-                    ";;; -*- Gerbil -*-\n(import :asp-gerbil-scheme/src/build-api/source-coverage)\n(asp-gerbil-scheme-source-coverage roots: '(\"src\"))\n")
         (write-text (string-append src-dir "/target.ss")
                     ";;; -*- Gerbil -*-\n(def target-value 1)\n")
         (write-text (string-append src-dir "/other.ss")

@@ -11,8 +11,6 @@
 
 (import (only-in :std/srfi/1 partition any)
         (only-in "../support/time" monotonic-micros duration-micros)
-        (only-in "./gxtest-build"
-                 compile-selected-gxtest-if-stale)
         (only-in "./gxtest-discovery"
                  compiled-in-process-gxtest-file?
                  gxtest-files-local-suite?
@@ -27,8 +25,6 @@
                  first-failure-status
                  gxtest-runner-mode-label
                  gxtest-native-parallelism)
-        (only-in "./gxtest-receipts"
-                 selected-gxtest-build-current?)
         (only-in "./memory-profile"
                  gxtest-file-memory-exception?)
         :gerbil/gambit)
@@ -66,14 +62,7 @@
 (def (run-compiled-in-process-gxtest-files files)
   (if (null? files)
     []
-    (let* ((selected-status
-            (compile-selected-gxtest-if-stale files))
-           (compiled-in-process?
-            (selected-gxtest-build-current? selected-status)))
-      (run-gxtest-parallel-phase files
-                                 files
-                                 #t
-                                 compiled-in-process?))))
+    (run-gxtest-parallel-phase files files #t #t)))
 
 ;; : (-> (List Path) (List GxTestResult))
 (def (run-source-only-in-process-gxtest-files files)

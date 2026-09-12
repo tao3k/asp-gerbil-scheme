@@ -17,7 +17,10 @@
   (test-suite "gerbil scheme harness parser part 8 source contracts"
 (test-case "source path class owns build policy scope"
           (check (source-path-class "gerbil.pkg") => "config")
+          (check (source-path-class "version.ss") => "package-version")
           (check (source-path-class "build.ss") => "package-build")
+          (check (source-path-class "provider-package-spec.ss")
+                 => "package-build")
           (check (source-path-class "bindings/example/build.ss") => "package-build")
           (check (source-path-class "src/build-api/package-spec.ss")
                  => "build-runtime")

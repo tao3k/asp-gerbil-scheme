@@ -50,7 +50,7 @@ Add a small `gxtest` fixture, for example `t/project-policy-test.ss`:
         :asp-gerbil-scheme/build-api)
 (export project-policy-test)
 (def project-policy-test
-  (make-project-policy-test "."))
+  (make-project-policy-test "." ["src/core.ss" "t/core-test.ss"]))
 ```
 Then run:
 ```sh

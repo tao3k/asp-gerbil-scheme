@@ -1,12 +1,16 @@
 ;;; Package-spec declarations are the sole bridge from downstream build.ss
 ;;; syntax to POO-owned package objects and their source/native projections.
-;;; Preserve native module ownership; policy may observe the catalog but must
-;;; never make tests into production compilation units.
+;;; Preserve native module ownership; tests and policy receive explicit inputs
+;;; and never infer a second production graph from this projection.
 (export asp-gerbil-scheme-package-spec!
         asp-gerbil-scheme-library-package-prototype
         asp-gerbil-scheme-package-native-spec
         asp-gerbil-scheme-package-generated-modules
         asp-gerbil-scheme-package-product-entry-modules
+        asp-gerbil-scheme-package-native-profile
+        asp-gerbil-scheme-package-native-capabilities
+        asp-gerbil-scheme-package-pkg-config-libs
+        asp-gerbil-scheme-package-nix-deps
         asp-gerbil-scheme-package-modules)
 
 (import (only-in :clan/poo/object .cc .def .get)
@@ -14,11 +18,14 @@
         (rename-in :clan/building
                    (all-gerbil-modules upstream-all-gerbil-modules)
                    (default-exclude-dirs upstream-default-exclude-dirs))
-        (only-in :clan/building remove-build-file)
+        (only-in :clan/building remove-build-file normalize-spec)
         (only-in "./generated-artifact"
                  asp-gerbil-scheme-project-generated-modules)
         (only-in "./core-capacity"
                  initialize-native-build-core-capacity!)
+        (only-in "./native-profile"
+                 asp-gerbil-scheme-default-native-profile
+                 asp-gerbil-scheme-native-profile-executable-gsc-options)
         (only-in :std/srfi/1 fold)
         (only-in :std/srfi/13 string-prefix?))
 
@@ -27,8 +34,7 @@
 ;;   | defaults modules to clan/building's native package catalog
 ;;   | doc m%
 ;;       Declare a downstream Gerbil package without importing ASP product
-;;       entrypoints.  The native-spec slot remains an ordinary std/make value;
-;;       source coverage is a second projection of the same POO object.
+;;       entrypoints.  The native-spec slot remains an ordinary std/make value.
 ;;
 ;;       # Examples
 ;;
@@ -86,18 +92,26 @@
         (native-spec (.get package-spec native-spec))
         (generated-modules
          (asp-gerbil-scheme-package-generated-modules package-spec)))
-    (asp-gerbil-scheme-project-generated-modules
-     (cond
-      ((procedure? projector)
-       (projector package-spec))
-      (projector
-       (error "Package Spec native-spec-projector must be a procedure"
-              projector))
-      (native-spec
-       native-spec)
-      (else
-       (asp-gerbil-scheme-package-default-native-spec package-spec)))
-     generated-modules)))
+    (map (lambda (item)
+           (match item
+             ([(? (cut member <> '(exe: static-exe:))) . _]
+              (normalize-spec
+               item
+               (asp-gerbil-scheme-native-profile-executable-gsc-options
+                (asp-gerbil-scheme-package-native-profile package-spec))))
+             (else item)))
+         (asp-gerbil-scheme-project-generated-modules
+          (cond
+           ((procedure? projector)
+            (projector package-spec))
+           (projector
+            (error "Package Spec native-spec-projector must be a procedure"
+                   projector))
+           (native-spec
+            native-spec)
+           (else
+            (asp-gerbil-scheme-package-default-native-spec package-spec)))
+          generated-modules))))
 
 ;; The macro-generated spec procedure is the direct std/make boundary used by
 ;; clan/building. A PackageSpec remains the POO owner;
@@ -119,6 +133,10 @@
              (exclude-dirs upstream-default-exclude-dirs)
              (product-entry-modules [])
              (generated-modules [])
+             (native-profile asp-gerbil-scheme-default-native-profile)
+             (native-capabilities [])
+             (pkg-config-libs #f)
+             (nix-deps #f)
              (spec-projector asp-gerbil-scheme-package-native-spec)
              (native-spec-projector #f)
              (native-spec #f))
@@ -128,5 +146,10 @@
               (asp-gerbil-scheme-package-exclude-dirs exclude-dirs)
               (asp-gerbil-scheme-package-product-entry-modules
                product-entry-modules)
-              (asp-gerbil-scheme-package-generated-modules generated-modules))
+              (asp-gerbil-scheme-package-generated-modules generated-modules)
+              (asp-gerbil-scheme-package-native-profile native-profile)
+              (asp-gerbil-scheme-package-native-capabilities
+               native-capabilities)
+              (asp-gerbil-scheme-package-pkg-config-libs pkg-config-libs)
+              (asp-gerbil-scheme-package-nix-deps nix-deps))
              (optional)))

@@ -281,9 +281,9 @@
                                 (cdr (assoc 'type slot)))
                               slot-alists))
              (report-slot-names
-              (map (lambda (row)
+             (map (lambda (row)
                      (cdr (assoc 'slot row)))
-                   (type-spec-contract-report-rows))))
+                   (type-spec-contract-report-rows number-type))))
         (check (require-type-spec-slots! number-type) => number-type)
         (check (type-spec-contract-valid? number-type) => #t)
         (check (type-spec-contract-issues number-type) => '())

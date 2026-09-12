@@ -70,9 +70,6 @@
         (import: :asp-gerbil-scheme/src/testing/commands))
 
 ;; : (-> Symbol Symbol MaybeString List List TestingReceipt)
-(import :asp-gerbil-scheme/src/build-api/source-coverage
-        )
-
 (def (testing-phase-receipt phase status: (status 'ok)
                             suite: (suite #f)
                             files: (files [])
@@ -113,14 +110,13 @@
      (add-load-path! "t")
      (add-load-path! ".gerbil/lib")
      (import-module ':asp-gerbil-scheme/src/policy/gxtest-report #f #t)
-     (asp-gerbil-scheme-load-source-coverage ".")
-     (let* ((policy-source-report
-             (eval 'asp-gerbil-scheme/src/policy/gxtest-report#policy-source-report))
+     (let* ((policy-report
+             (eval 'asp-gerbil-scheme/src/policy/gxtest-report#policy-report))
             (write-project-policy-report-packet
              (eval 'asp-gerbil-scheme/src/policy/gxtest-report#write-project-policy-report-packet))
-            (report (policy-source-report
+            (report (policy-report
                      "."
-                     (asp-gerbil-scheme-source-coverage-files "."))))
+                     files)))
        (when (pair? (or (hash-get report 'findings) []))
          (write-project-policy-report-packet report))))))
 

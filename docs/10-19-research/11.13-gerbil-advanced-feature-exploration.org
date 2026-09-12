@@ -916,11 +916,12 @@ cleanup should displace it.
 
 The first bounded engine slice now runs =generic-owner= and =vague-definition=
 as file-local rules. Their existing project-index entry points delegate to new
-file-list entry points, while =policy/streaming.ss= performs sorted source
-discovery once, parses at most one configured batch concurrently, evaluates
-both rules, retains only lightweight findings, and forces release before the
-next batch. Separate finding accumulators preserve the existing rule-major
-public order.
+file-list entry points. The historical prototype originally performed its own
+sorted source discovery; the current implementation accepts only the exact
+PackageSpec/test projection, parses at most one configured batch concurrently,
+evaluates both rules, retains only lightweight findings, and forces release
+before the next batch. Separate finding accumulators preserve the existing
+rule-major public order.
 
 A focused fixture with findings from both rule families produced identical
 =(rule-id path selector)= projections for the retained and batch-size-one

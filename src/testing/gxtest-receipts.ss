@@ -3,7 +3,7 @@
 
 (import (only-in :std/misc/path path-directory path-expand)
         (only-in :std/sort sort)
-        (only-in :std/srfi/13 string-join string-prefix? string-suffix?)
+        (only-in :std/srfi/13 string-join string-suffix?)
         (only-in "../build-api/package-receipt"
                  asp-gerbil-scheme-package-build-receipt-status
                  asp-gerbil-scheme-package-build-receipt-status-line
@@ -11,14 +11,10 @@
                  asp-gerbil-scheme-package-build-receipt-write)
         (only-in "./gxtest-context"
                  package-root
-                 source-root
-                 source-output-prefix
                  test-output-prefix
                  module-path-stem
-                 gxtest-test-module-path
-                 gxtest-source-module-path)
-        (only-in "./gxtest-discovery"
-                 gxtest-selected-source-files)
+                 gxtest-test-module-path)
+        (only-in "./gxtest-discovery" gxtest-selected-test-files)
         :gerbil/gambit)
 
 (export ensure-directory!
@@ -69,29 +65,18 @@
 (def (selected-gxtest-build-source-files files)
   (map (lambda (file)
          (path-expand file package-root))
-       (gxtest-selected-source-files files)))
+       (gxtest-selected-test-files files)))
 
 ;; : (-> (List Path) (List Path))
 (def (selected-gxtest-build-output-files files)
   (map (lambda (file)
-         (cond
-          ((string-prefix? "src/" file)
-           (path-expand
-            (string-append
-             (module-path-stem (gxtest-source-module-path file))
-             ".ssi")
-            (path-expand (source-output-prefix)
-                         (path-expand ".gerbil/lib" package-root))))
-          ((string-prefix? "t/" file)
-           (path-expand
-            (string-append
-             (module-path-stem (gxtest-test-module-path file))
-             ".ssi")
-            (path-expand (test-output-prefix)
-                         (path-expand ".gerbil/lib" package-root))))
-          (else
-           (error "selected gxtest source file must be under src/ or t/" file))))
-       (gxtest-selected-source-files files)))
+         (path-expand
+          (string-append
+           (module-path-stem (gxtest-test-module-path file))
+           ".ssi")
+          (path-expand (test-output-prefix)
+                       (path-expand ".gerbil/lib" package-root))))
+       (gxtest-selected-test-files files)))
 
 ;; : (-> (List Path) BuildReceiptStatus)
 (def (selected-gxtest-build-receipt-status files)

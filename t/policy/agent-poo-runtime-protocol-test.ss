@@ -172,10 +172,13 @@
 (test-case "gxtest adapter exposes downstream policy report"
           (let* ((root ".run/policy-downstream-poo-agent-gxtest")
                  (_ (write-downstream-poo-agent-positive-project root))
-                 (report (project-policy-report root))
+                 (files ["build.ss"
+                         "src/orders/core.ss"
+                         "src/orders/methods.ss"])
+                 (report (project-policy-report root files))
                  (agent-repair (hash-get report 'agentRepair)))
-            (check (project-policy-status root) => "pass")
-            (check (project-policy-findings root) => [])
+            (check (project-policy-status root files) => "pass")
+            (check (project-policy-findings root files) => [])
             (check (hash-get report 'schemaId)
                    => "agent.semantic-protocols.asp-gerbil-scheme-gxtest-report")
             (check (hash-get report 'status) => "pass")

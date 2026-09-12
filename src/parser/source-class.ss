@@ -15,12 +15,17 @@
   (cond
    ((equal? path "gerbil.pkg")
     "config")
+   ;; clan/building owns this generated package-layer registration module.
+   ;; It is part of the native graph but not an agent-authored runtime owner.
+   ((equal? path "version.ss")
+    "package-version")
    ((or (equal? path "build.ss")
         (string-suffix? "/build.ss" path))
     "package-build")
    ((and (not (string-contains path "/"))
-         (or (string-prefix? "build-" path)
-             (string-suffix? "-build.ss" path)))
+        (or (string-prefix? "build-" path)
+            (string-suffix? "-build.ss" path)
+            (string-suffix? "-package-spec.ss" path)))
     "package-build")
    ((and (or (string-prefix? "src/build-api/" path)
              (string-prefix? "src/testing/" path))

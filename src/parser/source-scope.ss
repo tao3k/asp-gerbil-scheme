@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned source scope and filesystem discovery helpers.
 ;;; Boundary:
-;;; - Executed Build API coverage owns source roots and exclusions.
+;;; - Callers own explicit source roots and exclusions.
 ;;; - This module turns scope evidence into concrete parser file sets.
 
 (import :gerbil/gambit
@@ -383,7 +383,7 @@
                                       (or runtime-roots []))))))
     ;; Native development fallback is source-owned. Scanning the workspace
     ;; root would admit generated trees and build-system directory links before
-    ;; the parser has any package-owned scope evidence.  Once Build API coverage
+    ;; the parser has any caller-owned scope evidence. Once explicit scope
     ;; exists, runtime roots are also parseable source roots rather than merely
     ;; descriptive metadata.
     (if (and declared-roots (pair? declared-roots))

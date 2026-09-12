@@ -42,9 +42,7 @@
         collect-project
         collect-project/profile
         collect-source-scope
-        collect-source-scope/coverage
         collect-selected-source-scope
-        collect-test-source-scope
         collect-project-package-only
         collect-source-files
         gerbil-source-path?
@@ -390,13 +388,13 @@
         project-index-root
         project-index-files
         project-index-package)
-;;; Project collection boundary: source discovery is sorted once before the
-;;; `map`, and `cut` threads the normalized root into every file parser call.
+;;; Workspace-analysis boundary only. Build and policy entrypoints must consume
+;;; collect-selected-source-scope with the PackageSpec/std/make projection.
 ;; collect-project
 ;;   : (-> String ProjectIndex)
 ;;   | doc m%
-;;       `collect-project root` reads package metadata, discovers source files,
-;;       and returns a fully parsed project index rooted at `root`.
+;;       `collect-project root` discovers a fixture or analysis workspace and
+;;       returns a fully parsed index. It is not a package build-graph API.
 ;;       # Examples
 ;;       ```scheme
 ;;       (project-index-root (collect-project "."))
@@ -433,6 +431,9 @@
 ;;       `collect-project/profile root` returns a parsed index plus profile
 ;;       telemetry for package, source-scope, and parse phases.
 ;;     %
+;; Parse the exact source projection supplied by the owner of the native build
+;; spec or by an explicit test/query request. This function performs no root
+;; discovery, exclusion filtering, or import-closure reconstruction.
 (def (collect-selected-source-scope root paths)
   (let* ((root (path-normalize root))
          (package (read-project-package root))

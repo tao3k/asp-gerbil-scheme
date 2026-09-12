@@ -48,6 +48,9 @@
             (package-spec-source
              (call-with-input-file "src/build-api/package-spec.ss"
                                    read-all-as-string))
+            (provider-package-spec-source
+             (call-with-input-file "provider-package-spec.ss"
+                                   read-all-as-string))
             (public-facade-source
              (call-with-input-file "build-api.ss" read-all-as-string)))
         (check (string-contains library-source "init-build-environment!")
@@ -96,15 +99,31 @@
         (check (string-contains package-spec-source
                                 "initialize-native-build-core-capacity!")
                ? true)
-        (check (string-contains provider-source ":std/build-script") ? true)
+        (check (string-contains provider-source "init-build-environment!")
+               ? true)
+        (check (string-contains library-source "pkg-config-libs:") ? true)
+        (check (string-contains library-source "nix-deps:") ? true)
+        (check (string-contains provider-source "pkg-config-libs:") ? true)
+        (check (string-contains provider-source "nix-deps:") ? true)
+        (check (string-contains provider-package-spec-source "cppflags")
+               => #f)
+        (check (string-contains provider-package-spec-source "ldflags")
+               => #f)
+        (check (string-contains provider-package-spec-source "-cc-options")
+               => #f)
+        (check (string-contains provider-package-spec-source "-ld-options")
+               => #f)
         (check (string-contains library-source "\"./build-api\"") => #f)
         (check (string-contains provider-source "\"./build-api\"") => #f)
-        (check (string-contains provider-source "source-bootstrap") => #f)
+        (check (string-contains provider-source "source-bootstrap") ? true)
         (check (string-contains public-facade-source "source-bootstrap")
                => #f)
         (check (string-contains public-facade-source
                                 "./src/build-api/source-closure")
-               ? true)
+               => #f)
+        (check (string-contains public-facade-source
+                                "./src/build-api/source-coverage")
+               => #f)
         (check (string-contains public-facade-source
                                 "./src/testing/build")
                ? true)

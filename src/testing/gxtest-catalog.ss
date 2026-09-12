@@ -16,7 +16,8 @@
 
 (export gxtest-test-files
         default-gxtest-test-files
-        gxtest-test-spec)
+        gxtest-test-spec
+        gxtest-project-policy-files)
 
 ;; : (-> Path Boolean)
 (def (explicit-project-policy-test-file? entry)
@@ -45,6 +46,13 @@
          (and (test-file-entry? entry)
               (policy-agent-poo-test-file? entry)))))
 
+;; The aggregate t/policy-test.ss imports these suites as native test modules.
+;; They are policy evidence even when they are not independent runner entries.
+(def (project-policy-subdir-test-file? path)
+  (and (equal? (path-directory path) "t/policy/")
+       (test-file-entry?
+        (substring path 9 (string-length path)))))
+
 ;; : (-> Path (List (List Path)) (List (List Path)))
 (def (gxtest-catalog-test-file-step path buckets)
   (cond
@@ -56,6 +64,18 @@
 
 (def +native-test-roots+ ["t" "test"])
 
+;; : (-> (List Path))
+(def (native-test-catalog-files)
+  (append-map
+   (lambda (root)
+     (let (directory (path-expand root package-root))
+       (if (file-exists? directory)
+         (parameterize ((current-directory directory))
+           (map (cut string-append root "/" <>)
+                (upstream-all-gerbil-modules)))
+         [])))
+   +native-test-roots+))
+
 ;; Test discovery applies clan/building's native catalog independently under
 ;; each conventional test directory. This is Testing data, not a package
 ;; BuildSpec or a source-root option on PackageSpec.
@@ -65,15 +85,7 @@
   (let (buckets
         (fold gxtest-catalog-test-file-step
               (list [] [])
-              (append-map
-               (lambda (root)
-                 (let (directory (path-expand root package-root))
-                   (if (file-exists? directory)
-                     (parameterize ((current-directory directory))
-                       (map (cut string-append root "/" <>)
-                            (upstream-all-gerbil-modules)))
-                     [])))
-               +native-test-roots+)))
+              (native-test-catalog-files)))
     (append (reverse (car buckets))
             (reverse (cadr buckets)))))
 
@@ -84,3 +96,15 @@
 ;; : (-> (List ModulePath))
 (def (gxtest-test-spec)
   (map gxtest-test-module-path (gxtest-test-files)))
+
+;; Project policy consumes clan/building's native package module catalog, the
+;; same upstream catalog used by PackageSpec to project the std/make graph, plus
+;; the native test-module catalog selected by Testing conventions. The parser
+;; receives this list unchanged and never discovers roots or expands imports.
+;; : (-> (List Path))
+(def (gxtest-project-policy-files)
+  (append (upstream-all-gerbil-modules)
+          (filter (lambda (path)
+                    (or (top-level-test-file? path)
+                        (project-policy-subdir-test-file? path)))
+                  (native-test-catalog-files))))

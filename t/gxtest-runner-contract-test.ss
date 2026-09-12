@@ -5,8 +5,6 @@
         :std/test
         (only-in :std/misc/path path-expand)
         (only-in :std/srfi/13 string-contains)
-        (only-in "../src/build-api/source-coverage"
-                 asp-gerbil-scheme-source-coverage-files)
         (only-in "../src/policy/gxtest"
                  make-gxtest-policy-test)
         "../src/testing/model"
@@ -17,10 +15,6 @@
                  gxtest-serial-resource-groups)
         (only-in "../src/testing/gxtest-report"
                  display-gxtest-result)
-        (only-in "../src/testing/gxtest-build"
-                 scoped-policy-engine-needs-source-build?)
-        (only-in "../src/testing/gxtest-policy"
-                 scoped-policy-engine-owned-by-project?)
         :asp-gerbil-scheme/src/testing/memory-profile)
 (export gxtest-runner-contract-test)
 
@@ -50,10 +44,9 @@
     (test-case "default gxtest files stay on the smoke gate"
       (configure-build-root! (current-directory))
       (let (files (default-gxtest-test-files))
-        (check (length files) => 8)
+        (check (length files) => 7)
         (check (member "t/agent-poo-scenario-contract-test.ss" files) ? true)
         (check (member "t/package-build-contract-test.ss" files) ? true)
-        (check (member "t/source-closure-test.ss" files) ? true)
         (check (member "t/parser-memory-stability-test.ss" files) ? true)
         (check (member "t/self-apply-full-gate.ss" files) => #f)
         (check (member "t/package-build-receipt-test.ss" files) => #f)
@@ -73,13 +66,13 @@
         (check (member "t/benchmark-gate-test.ss" files) => #f)
         (check (member "t/self-apply-test.ss" files) => #f)
         (check (member "t/snapshot-test.ss" files) => #f)))
-    (test-case "default gxtest selected closure stays bounded"
+    (test-case "default gxtest receipts contain explicit entries only"
       (configure-build-root! (current-directory))
       (let (files (default-gxtest-test-files))
-        (check (<= (length (selected-gxtest-build-source-files files)) 160)
-               => #t)
-        (check (<= (length (selected-gxtest-build-output-files files)) 160)
-               => #t)))
+        (check (length (selected-gxtest-build-source-files files))
+               => (length files))
+        (check (length (selected-gxtest-build-output-files files))
+               => (length files))))
     (test-case "gxtest build spec includes top-level entries and POO policy subdir suites"
       (configure-build-root! (current-directory))
       (let (stage (gxtest-test-spec))
@@ -176,14 +169,6 @@
     (test-case "scoped policy phase receipts are machine parseable"
       (check (scoped-policy-phase-line "policy-report" 9876)
              => "[asp-gerbil-scheme-scoped-policy-phase] name=policy-report elapsedNs=9876000 elapsed=9.876ms\n"))
-    (test-case "downstream policy uses the installed ASP engine"
-      (check (scoped-policy-engine-owned-by-project? "asp-gerbil-scheme")
-             => #t)
-      (check (scoped-policy-engine-owned-by-project? "poo-flow") => #f)
-      (check (scoped-policy-engine-needs-source-build? []) => #f)
-      (check (scoped-policy-engine-needs-source-build?
-              ["src/policy/gxtest-runtime.ss"])
-             => #t))
     (test-case "gxtest timing summaries are machine parseable"
       (check (gxtest-summary-line "serial" 13 29643000 3624000)
              => "[asp-gerbil-scheme-test-summary] kind=serial count=13 sumNs=29643000000 sum=29.643s wallNs=3624000000 wall=3.624s\n")
@@ -199,7 +184,7 @@
     (test-case "gxtest policy macro expands literal file scope"
       (let (suite (make-gxtest-policy-test "." ["t/package-build-contract-test.ss"]))
         (check (not (not suite)) => #t)))
-    (test-case "scoped policy admits the Build API declared graph"
+    (test-case "scoped policy observes only explicit runner entries"
       (configure-build-root! (current-directory))
       (let ((sources (scoped-policy-source-files ["t/package-build-contract-test.ss"]))
             (build-receipt
@@ -208,35 +193,11 @@
              (scoped-policy-receipt-path ["t/benchmark-gate-test.ss"])))
         (check (not (equal? build-receipt bench-receipt)) => #t)
         (check sources
-               => (scoped-policy-source-files
-                   ["t/benchmark-gate-test.ss"]))
-        (check
-         (andmap
-          (lambda (file)
-            (member (path-expand file (current-directory)) sources))
-          (asp-gerbil-scheme-source-coverage-files (current-directory)))
-         => #t)
-        (check
-         (andmap
-          (lambda (file) (member file sources))
-          (selected-gxtest-build-source-files (gxtest-test-files)))
-         => #t)
-        (check (member (path-expand "src/policy/gxtest.ss"
-                                    (current-directory))
-                       sources)
-               ? true)
-        (check (member (path-expand "t/policy/agent-dependency-adapter-test.ss"
-                                    (current-directory))
-                       sources)
-               ? true)
-        (check (member (path-expand "src/testing/gxtest-runner.ss"
-                                    (current-directory))
-                       sources)
-               ? true)
-        (check (member (path-expand "t/package-build-contract-test.ss"
-                                    (current-directory))
-                       sources)
-               ? true)))
+               => [(path-expand "t/package-build-contract-test.ss"
+                                (current-directory))])
+        (check (scoped-policy-source-files ["t/benchmark-gate-test.ss"])
+               => [(path-expand "t/benchmark-gate-test.ss"
+                                (current-directory))])))
     (test-case "selected gxtest receipts are keyed by selected file set"
       (configure-build-root! (current-directory))
       (let ((default-receipt
@@ -297,63 +258,18 @@
              ? true)
       (check (gxtest-file-local-suite? "t/testing-framework-test.ss")
              ? true))
-    (test-case "selected gxtest receipt includes imported test support files"
+    (test-case "selected gxtest receipt contains explicit test targets only"
       (configure-build-root! (current-directory))
       (let (sources (selected-gxtest-build-source-files
                      ["t/policy/agent-poo-guidance-test.ss"]))
-        (check (member (path-expand "t/policy/agent-poo-guidance-test.ss"
-                                    (current-directory))
-                       sources)
-               ? true)
-        (check (member (path-expand "t/policy/agent-poo-guidance-support.ss"
-                                    (current-directory))
-                       sources)
-               ? true)))
-    (test-case "selected gxtest compile target includes imported test support"
+        (check sources
+               => [(path-expand "t/policy/agent-poo-guidance-test.ss"
+                                (current-directory))])))
+    (test-case "selected gxtest compile targets remain explicit"
       (configure-build-root! (current-directory))
       (let (files (gxtest-selected-test-files
                    ["t/policy/agent-poo-guidance-test.ss"]))
-        (check (member "t/policy/agent-poo-guidance-test.ss" files)
-               ? true)
-        (check (member "t/policy/agent-poo-guidance-support.ss" files)
-               ? true)
-        (check (member "src/policy/agent-style.ss" files)
-               => #f)))
-    (test-case "selected gxtest closure orders imported support before consumer"
-      (configure-build-root! (current-directory))
-      (let* ((support
-              (path-expand "t/policy/agent-poo-support.ss"
-                           (current-directory)))
-             (consumer
-              (path-expand "t/policy/agent-poo-generated-boundary-test.ss"
-                           (current-directory)))
-             (sources
-              (selected-gxtest-build-source-files
-               ["t/policy/agent-poo-generated-boundary-test.ss"]))
-             (support-tail (member support sources))
-             (consumer-tail (member consumer sources)))
-        (check support-tail ? true)
-        (check consumer-tail ? true)
-        (check (and support-tail
-                    consumer-tail
-                    (> (length support-tail) (length consumer-tail)))
-               ? true)))
-    (test-case "selected gxtest receipt includes imported source modules"
-      (configure-build-root! (current-directory))
-      (let (sources (selected-gxtest-build-source-files
-                     ["t/extensions-test.ss"]))
-        (check (member (path-expand "t/extensions-test.ss"
-                                    (current-directory))
-                       sources)
-               ? true)
-        (check (member (path-expand "src/extensions/facade.ss"
-                                    (current-directory))
-                       sources)
-               ? true)
-        (check (member (path-expand "src/parser/facade.ss"
-                                    (current-directory))
-                       sources)
-               ? true)))
+        (check files => ["t/policy/agent-poo-guidance-test.ss"])))
     (test-case "multi-file gxtest suites require process isolation"
       (check (gxtest-suite-process-isolated?
               ["t/agent-poo-scenario-contract-test.ss"])

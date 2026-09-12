@@ -27,11 +27,11 @@
       ["|cmd downstream-install=from harness checkout run: gxpkg build"
        "|downstream gerbil.pkg-depend=(depend: (\"github.com/tao3k/asp-gerbil-scheme\"))"
        "|downstream gxtest-import=(import :asp-gerbil-scheme/src/policy/gxtest)"
-       "|downstream gxtest-fixture=(def project-policy-test (make-project-policy-test \".\"))"
+       "|downstream gxtest-fixture=(def project-policy-test (make-project-policy-test \".\" explicit-files))"
        "|cmd downstream-test=gxtest t/project-policy-test.ss"
        "|policy downstream-state-boundary=gxpkg package state belongs under ~/.gerbil; do not create, depend on, or commit repository-local .gerbil"
        "|policy downstream-policy-ownership=gerbil.pkg owns package identity and dependency acquisition only; explicit POO profiles own policy; gxtest calls the harness"
-       "|policy downstream-reporting=make-project-policy-test emits semantic-language-policy-report.v1 JSON on failure; unified ASP owns human rendering; use project-policy-report plus gxtest-report-* accessors for in-process status/files/definitions/findings"]))
+       "|policy downstream-reporting=make-project-policy-test requires an explicit file set and emits semantic-language-policy-report.v1 JSON on failure; unified ASP owns human rendering; use project-policy-report plus gxtest-report-* accessors for in-process status/files/definitions/findings"]))
 (def +guide-extension-section+
      (make-guide-section
       "extensions"
@@ -41,7 +41,7 @@
       "policy"
       (append ["|policy structural-fact-boundary=Gerbil publishes parser/interface facts through typed provider evidence; no provider-local search command owns them"
        "|policy structural-index-owner=Gerbil Scheme provider-local parser facts; ASP Server may route the packet, while graph topology, caching, and ranking are separate contracts"
-               "|policy configurable-interface=Build API coverage supplies roots/runtime-roots/exclude-directories; explicit POO profiles configure policy; gerbil.pkg cannot disable rules"
+               "|policy configurable-interface=PackageSpec/clan-building supplies the native std/make graph; parser consumes exact projected paths; explicit test/query entries may extend scope; explicit POO profiles configure policy; gerbil.pkg cannot disable rules"
                "|policy package-build-canonical-lanes=build.ss has three native Gerbil lanes: :clan/building plus all-gerbil-modules for src-root package discovery, :std/build-script defbuild-script for simple gxpkg package templates, and :std/make build-spec for ssi:/gsc:/FFI/static/native build forms"
                "|policy package-build-forbidden-control=R025 should target handwritten GERBIL_LOADPATH/srcdir setup, manual compiler ownership, and runtime routing in build.ss; ordinary shell/process use is not a violation, and valid std/make ssi:/gsc:/FFI builds must not be canonicalized into clan/building"
                "|policy boundary-composition=keep process entrypoints thin with precise only-in imports; when boundary surfaces grow, compose POO-native request and configuration objects"

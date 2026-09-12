@@ -47,7 +47,7 @@
             (check (map source-file-path
                         (project-index-files (collect-project root)))
                    => ["gerbil.pkg" "src/main.ss" "t/main-test.ss"])))
-    (test-case "Build API coverage supplies runtime roots without package inference"
+    (test-case "selected source scope preserves the native graph projection"
           (let* ((root (path-normalize ".run/parser-build-scope"))
                  (lib-dir (string-append root "/lib"))
                  (package-path (string-append root "/gerbil.pkg"))
@@ -63,17 +63,13 @@
                         ";;; -*- Gerbil -*-\n(defbuild-script '(\"lib/main\" \"cli\"))\n")
             (write-text lib-path "(package: sample/build-scope/main)\n(def answer 42)\n")
             (write-text flat-path "(package: sample/build-scope/cli)\n(def (main . args) args)\n")
-            (let* ((index (collect-source-scope/coverage
-                           root ["build.ss" "cli.ss" "gerbil.pkg" "lib/main.ss"]
-                           [] ["lib" "."] []))
+            (let* ((index (collect-selected-source-scope
+                           root ["build.ss" "cli.ss" "gerbil.pkg" "lib/main.ss"]))
                    (package (project-index-package index))
                    (scope (project-package-source-scope package)))
               (check (map source-file-path (project-index-files index))
                      => ["build.ss" "cli.ss" "gerbil.pkg" "lib/main.ss"])
-              (check (source-scope-roots scope) => [])
-              (check (source-scope-runtime-roots scope) => ["lib" "."])
-              (check (source-scope-explanation scope)
-                     => "Projected from the Build API source coverage catalog."))))
+              (check scope => #f))))
     (test-case "project package dependency activates poo extension"
           (let* ((root (path-normalize ".run/parser-poo-dependency"))
                  (source-dir (string-append root "/src"))

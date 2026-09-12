@@ -5,9 +5,8 @@
 
 (import "./src/build-api/generated-artifact"
         "./src/build-api/framework"
+        "./src/build-api/native-profile"
         "./src/build-api/package-spec"
-        "./src/build-api/source-closure"
-        "./src/build-api/source-coverage"
         "./src/building/facade"
         "./src/building/declarative"
         "./src/testing/build-runner"
@@ -24,9 +23,8 @@
 
 (export (import: "./src/build-api/generated-artifact")
         (import: "./src/build-api/framework")
+        (import: "./src/build-api/native-profile")
         (import: "./src/build-api/package-spec")
-        (import: "./src/build-api/source-closure")
-        (import: "./src/build-api/source-coverage")
         (import: "./src/building/facade")
         (import: "./src/building/declarative")
         (import: "./src/testing/build-runner")

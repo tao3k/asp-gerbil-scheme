@@ -6,6 +6,7 @@
 (import :std/test
         :asp-gerbil-scheme/src/policy/gxtest
         :asp-gerbil-scheme/src/testing/memory-profile
+        :asp-gerbil-scheme/src/testing/execution-profile
   "./policy/modularity-test"
   "./policy/agent-basic-test"
   "./policy/agent-list-growth-test"
@@ -30,6 +31,8 @@
 
 (declare-gxtest-memory-exception
  '((maxHeapMiB . 512)))
+
+(declare-gxtest-serial policy-aggregate)
 
 ;; : TestSuite
 (def policy-test

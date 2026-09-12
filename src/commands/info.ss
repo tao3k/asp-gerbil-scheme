@@ -41,12 +41,12 @@
 ;; Json
 (def (configurable-interface-json)
   (hash (sourceScope
-         (hash (owner "executed build.ss Build API coverage")
-               (fields ["roots" "runtime-roots" "exclude-directories" "explanation"])
-               (default "built-in source discovery")))
+         (hash (owner "PackageSpec native spec")
+               (projection "clan/building module catalog consumed exactly")
+               (additionalScope "explicit test or query entries")))
         (buildScope
          (hash (owner "build.ss")
-               (projection "executed Build API source coverage")))
+               (projection "native PackageSpec module catalog")))
         (agentPolicy
          (hash (owner "explicit POO profile")
                (default "all-rules-enabled")))))
@@ -76,9 +76,9 @@
         (line-field "name" (hash-get package 'name))
         (line-field "manager" (hash-get package 'packageManager))])))
   (emit-text-line
-   "|interface source-scope=executed-build-api-coverage fields=roots,runtime-roots,exclude-directories")
+   "|interface source-scope=PackageSpec-native-spec parser=exact-projection additional=test-or-query-entries")
   (emit-text-line
-   "|interface build-scope=build.ss Build API execution supplies source coverage; parser build facts remain evidence")
+   "|interface build-scope=clan/building-std/make parser-discovery=disabled")
   (emit-text-line
    "|interface agent-policy=explicit-poo-profile default=all-rules-enabled package-overrides=unsupported")
   (emit-field-line

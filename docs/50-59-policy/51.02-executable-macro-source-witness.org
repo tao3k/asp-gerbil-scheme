@@ -38,8 +38,9 @@ flowchart LR
 
 - The Gerbil parser owns macro, call, top-form, path, and selector facts.
 - The Policy 011 implementation only composes those immutable facts.
-- =build.ss= and the ASP Build API own source coverage and invoke the policy
-  once for the complete build graph.
+- =PackageSpec= projects the production module set through clan/building and
+  =std/make=; policy consumes that exact set, with explicit test/query entries
+  added by their caller. The parser never reconstructs the graph.
 - =gerbil.pkg= continues to own package identity and dependency acquisition.
 - Gerbil's upstream compiler and =std/make= retain compilation and scheduling
   authority.
@@ -55,7 +56,7 @@ flowchart LR
 
 * Performance constraint
 
-Source discovery and parser extraction remain single-pass Build API work.  The
-policy builds one in-memory witness index from the resulting facts and must not
-rescan the filesystem, spawn a compiler, or evaluate Scheme source during
-admission.
+Native source discovery remains clan/building/PackageSpec work. The parser
+extracts one in-memory witness index from the projected paths, and policy must
+not rescan roots, follow imports, spawn a compiler, or evaluate Scheme source
+during admission.

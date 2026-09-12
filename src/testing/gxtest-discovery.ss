@@ -4,7 +4,7 @@
 (import (only-in :std/misc/path path-strip-directory)
         (only-in :std/srfi/1 any)
         (only-in :std/srfi/13 string-prefix? string-suffix?)
-        (only-in :std/sugar foldl hash-get hash-key? hash-put!)
+        (only-in :std/sugar filter foldl hash-get hash-key? hash-put!)
         (only-in "./gxtest-syntax"
                  gxtest-export-symbols
                  gxtest-file-forms-path
@@ -16,12 +16,6 @@
                  gxtest-file-local-suite?
                  gxtest-files-local-suite?
                  gxtest-file-module-symbol)
-        (only-in "./gxtest-sources"
-                 compiled-in-process-gxtest-file?
-                 gxtest-import-files
-                 gxtest-selected-source-files
-                 gxtest-selected-source-module-files
-                 gxtest-selected-test-files)
         :gerbil/gambit)
 
 (export gxtest-export-symbols
@@ -32,8 +26,6 @@
         gxtest-files-local-suite?
         gxtest-file-module-symbol
         compiled-in-process-gxtest-file?
-        gxtest-selected-source-files
-        gxtest-selected-source-module-files
         gxtest-selected-test-files
         source-isolated-gxtest-file?
         parallel-gxtest-files
@@ -41,6 +33,16 @@
 
 (import :asp-gerbil-scheme/src/testing/memory-profile)
 (import :asp-gerbil-scheme/src/testing/execution-profile)
+
+;; The package build has already established the native source graph. Test
+;; planning classifies only explicit runner entries and never reparses imports
+;; to manufacture a second build graph.
+(def (compiled-in-process-gxtest-file? file)
+  (and (gxtest-file-exported-suite? file)
+       (not (gxtest-file-self-running? file))))
+
+(def (gxtest-selected-test-files files)
+  (filter (lambda (file) (string-prefix? "t/" file)) files))
 
 ;; : (-> Form Boolean)
 (def (gxtest-benchmark-form? form)
@@ -60,13 +62,9 @@
   (any gxtest-benchmark-form? (gxtest-file-forms file)))
 
 ;; : (-> Path Boolean)
-(def (gxtest-test-closure-benchmark? file)
-  (any gxtest-file-benchmark?
-       (gxtest-selected-test-files [file])))
-
 ;; : (-> Path Boolean)
 (def (timing-sensitive-gxtest-file? file)
-  (or (gxtest-test-closure-benchmark? file)
+  (or (gxtest-file-benchmark? file)
       (gxtest-file-serial? file)))
 
 ;; : (-> Path Boolean)

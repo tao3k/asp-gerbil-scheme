@@ -14,14 +14,12 @@
                  gxtest-test-files
                  gxtest-test-spec)
         (only-in "./gxtest-build"
-                 compile-scoped-policy-engine-if-stale
                  compile-selected-gxtest-if-stale)
         (only-in "./gxtest-discovery"
                  gxtest-file-exported-symbols
                  gxtest-file-exported-suite
                  gxtest-file-local-suite?
                  gxtest-file-module-symbol
-                 gxtest-selected-source-module-files
                  gxtest-selected-test-files
                  source-isolated-gxtest-file?
                  parallel-gxtest-files
@@ -51,9 +49,6 @@
                  run-scoped-policy-if-stale
                  scoped-policy-phase-line
                  scoped-policy-receipt-path
-                 scoped-policy-engine-output-files
-                 scoped-policy-engine-receipt-path
-                 scoped-policy-engine-source-files
                  scoped-policy-source-files
                  scoped-policy-status-line
                  scoped-policy-target-files)
@@ -116,13 +111,11 @@
   (run-test-phase
    "run-scoped-policy"
    (lambda ()
-     (run-scoped-policy-if-stale
-      tests
-      (lambda ()
-        (compile-scoped-policy-engine-if-stale
-         (scoped-policy-engine-source-files)
-         (scoped-policy-engine-output-files)
-         (scoped-policy-engine-receipt-path))))))
+     (run-scoped-policy-if-stale tests)))
+  (run-test-phase
+   "compile-selected-gxtest"
+   (lambda ()
+     (compile-selected-gxtest-if-stale tests)))
   (run-test-phase
    "run-gxtest"
    (lambda ()

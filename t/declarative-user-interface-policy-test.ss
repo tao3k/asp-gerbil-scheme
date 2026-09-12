@@ -64,9 +64,8 @@
             (equal? (type-finding-path finding) path))
           findings))
 
-;; This is the exact Build API coverage shape that makes a root-level Gerbil
-;; project both the source catalog and runtime-root authority.
-(def +project-coverage-files+
+;; Exact policy evidence projected by the caller; no parser-owned root scan.
+(def +project-policy-files+
   '("gerbil.pkg"
     "domain.ss"
     "domain-build.ss"
@@ -80,8 +79,8 @@
     (test-case "case and profile projections are not runtime entrypoints"
       (let* ((root ".run/declarative-user-interface-policy")
              (_ (write-user-interface-project root))
-             (index (collect-source-scope/coverage
-                     root +project-coverage-files+ ["."] ["."] []))
+             (index (collect-selected-source-scope
+                     root +project-policy-files+))
              (findings (top-level-executable-findings index)))
         (check (source-path-class
                 "user-interface/custom/domain/cases/artifact.ss")

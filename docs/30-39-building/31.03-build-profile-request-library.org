@@ -14,8 +14,15 @@
 =src/building/= provides POO-native, functional values for tests, scenario
 composition, receipt formatting, and experiments. =BuildProfile= and
 =BuildRequest= in this library describe those values only. They are not a
-package build profile and are not consulted by root =build.ss=,
-=build-provider.ss=, =gxpkg=, or =std/make=.
+package-native profile.
+
+The separate =NativeProfile= in =src/build-api/native-profile.ss= is consulted
+by root =build.ss= and =build-provider.ss=. It selects concrete current-system
+facts such as macOS/Linux and architecture, prepares the platform pkg-config
+search path, and supplies only platform compiler selection for final executable
+forms. PackageSpec declares =pkg-config-libs= and =nix-deps=; upstream
+=:clan/building= resolves and normalizes the actual compiler/linker flags, and
+=std/make= remains the executor.
 
 ** Non-ownership rule
 
@@ -53,7 +60,7 @@ This API is additive data modelling. It is not the normal package build route.
 ** Acceptance
 
 - Pure value and scenario tests remain green.
-- Root and provider cold builds do not import this value layer before
-  =std/make= owns compilation.
+- Root and provider cold builds use =NativeProfile= only for current-system
+  preparation and delegate dependency flag resolution to =:clan/building=.
 - Package build contracts contain no ASP development/production profile,
   BuildPlan admission, or alternate native executor.
