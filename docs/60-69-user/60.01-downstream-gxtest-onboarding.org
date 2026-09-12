@@ -14,6 +14,25 @@ rescans roots or follows imports to rebuild it. Optional thresholds use explicit
 native POO profiles. =gerbil.pkg= owns only package identity and dependency
 acquisition.
 
+Testing support compilation also calls =std/make= for the explicitly selected
+targets. Native make owns output placement, dependency ordering, and freshness;
+=support-output-root= and =compile-dependency-stamps= are retired. An enabled
+=compile-selected-tests= run compiles through native make before loading its
+compiled test module.
+
+Timing helpers are exported by =:asp-gerbil-scheme/build-api=:
+=benchmark-elapsed-ms/us= measures one invocation, and
+=benchmark-p95-elapsed-ms/us= takes a positive sample count and a thunk. The
+latter uses nearest-rank p95; for fewer than twenty samples this can be the
+maximum sample. Full performance gates should retain =benchmark-run= receipts
+and their scenario budgets. Downstream packages need no private clock or
+fastest-sample implementation.
+
+For the native clan test command surface, import =init-test-environment!= from
+=:asp-gerbil-scheme/build-api= and call it in a root test script. This is the
+original =clan/testing= macro, with its upstream discovery, command registration,
+and test lifecycle. Existing =gxtest= files remain supported without conversion.
+
 * Install Boundary
 Install the harness from its checkout into the global Gerbil package store:
 

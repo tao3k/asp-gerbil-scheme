@@ -24,6 +24,10 @@
         benchmark-fixture-contract-pass?
         benchmark-timing-source
         benchmark-elapsed-nanos
+        benchmark-elapsed-ms
+        benchmark-elapsed-us
+        benchmark-p95-elapsed-ms
+        benchmark-p95-elapsed-us
         benchmark-admission-percentile
         benchmark-run
         benchmark-run/result
@@ -48,6 +52,30 @@
       elapsed-nanos
       (error "benchmark timing source returned non-positive duration"
              elapsed-nanos))))
+
+;; : (-> (-> Value) Rational)
+(def (benchmark-elapsed-ms thunk)
+  (/ (benchmark-elapsed-nanos thunk) 1000000))
+
+;; : (-> (-> Value) Rational)
+(def (benchmark-elapsed-us thunk)
+  (/ (benchmark-elapsed-nanos thunk) 1000))
+
+;; : (-> Integer (-> Value) Integer)
+(def (benchmark-p95-elapsed-nanos count thunk)
+  (unless (and (integer? count) (> count 0))
+    (error "benchmark sample count must be a positive integer" count))
+  (benchmark-sample-percentile
+   (map (lambda (_) (benchmark-elapsed-nanos thunk)) (iota count))
+   benchmark-admission-percentile))
+
+;; : (-> Integer (-> Value) Rational)
+(def (benchmark-p95-elapsed-ms count thunk)
+  (/ (benchmark-p95-elapsed-nanos count thunk) 1000000))
+
+;; : (-> Integer (-> Value) Rational)
+(def (benchmark-p95-elapsed-us count thunk)
+  (/ (benchmark-p95-elapsed-nanos count thunk) 1000))
 
 (def (benchmark-result-attempt thunk)
   (##gc)

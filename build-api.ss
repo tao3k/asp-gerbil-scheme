@@ -3,7 +3,8 @@
 ;;; Implementation owners remain under src/; callers import only
 ;;; :asp-gerbil-scheme/build-api, so repository layout never becomes API.
 
-(import "./src/build-api/generated-artifact"
+(import (only-in :clan/testing init-test-environment!)
+        "./src/build-api/generated-artifact"
         "./src/build-api/framework"
         "./src/build-api/native-profile"
         "./src/build-api/package-spec"
@@ -21,7 +22,8 @@
         "./src/benchmark/gate"
         "./src/benchmark/micro-kernel")
 
-(export (import: "./src/build-api/generated-artifact")
+(export init-test-environment!
+        (import: "./src/build-api/generated-artifact")
         (import: "./src/build-api/framework")
         (import: "./src/build-api/native-profile")
         (import: "./src/build-api/package-spec")

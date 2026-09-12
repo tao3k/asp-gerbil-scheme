@@ -113,6 +113,12 @@
 ;; : TestSuite
 (def benchmark-gate-test
   (test-suite "gerbil scheme benchmark gate"
+    (test-case "public p95 timing executes every sample and rejects empty measurements"
+      (let (calls 0)
+        (check (> (benchmark-p95-elapsed-us
+                   3 (lambda () (set! calls (1+ calls)))) 0) => #t)
+        (check calls => 3))
+      (check-exception (benchmark-p95-elapsed-ms 0 void) exception?))
     (test-case "duration literals parse to exact nanoseconds"
       (check (duration-literal->nanos '800ns) => 800)
       (check (duration-literal->nanos '75us) => 75000)

@@ -426,48 +426,6 @@
                    "gxtest"
                    "t/unit-b-test.ss"])))
 
-    (test-case "testing build treats equal source and output time as stale"
-      (check (testing-build-file-current?
-              "t/fixtures/testing-framework/alpha-test.ss"
-              "t/fixtures/testing-framework/alpha-test.ss")
-             => #f))
-
-    (test-case "testing build cache tracks dependency stamps"
-      (let (build (testing-build
-                   name: "poo-flow"
-                   root: "."
-                   compile-dependency-stamps:
-                   ["t/fixtures/testing-framework/alpha-test.ss"]))
-        (check (testing-build-compile-dependencies-current?
-                build
-                "t/fixtures/testing-framework/alpha-test.ss")
-               => #f)))
-
-    (test-case "testing build cache tracks split framework dependency stamps"
-      (let* ((build (testing-build name: "poo-flow" root: "."))
-             (stamps (testing-build-compile-dependency-stamp-paths build)))
-        (check (testing-any?
-                (lambda (stamp)
-                  (testing-string-suffix?
-                   "asp-gerbil-scheme/src/testing/scope.ssi"
-                   stamp))
-                stamps)
-               => #t)
-        (check (testing-any?
-                (lambda (stamp)
-                  (testing-string-suffix?
-                   "asp-gerbil-scheme/src/testing/selection.ssi"
-                   stamp))
-                stamps)
-               => #t)
-        (check (testing-any?
-                (lambda (stamp)
-                  (testing-string-suffix?
-                   "asp-gerbil-scheme/src/testing/batch.ssi"
-                   stamp))
-                stamps)
-               => #t)))
-
     (test-case "testing build guards gxtest textual failures"
       (check (testing-build-gxtest-failure-line?
               "*** FAILED: (check equal? x y)")
@@ -530,21 +488,6 @@
                    "GERBIL_LOADPATH=.:.gerbil/lib"
                    "gxtest"
                    "t/unit-a-test.ss"])))
-
-    (test-case "testing build declares support modules without build.ss expansion"
-      (let (build (testing-build
-                   name: "poo-flow"
-                   root: "."
-                   support-files: ["t/support/performance.ss"]
-                   support-output-root: ".gerbil/lib/poo-flow"))
-        (check (testing-build-support-command
-                build
-                "t/support/performance.ss")
-               => ["gxc" "./t/support/performance.ss"])
-        (check (testing-build-support-output-directory
-                build
-                "t/support/performance.ss")
-               => "./.gerbil/lib/poo-flow/t/support/")))
 
     (test-case "testing build compiles only selected suite support"
       (let* ((build (testing-build

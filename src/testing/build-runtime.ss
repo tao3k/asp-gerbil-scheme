@@ -101,9 +101,12 @@
 
 ;; : (-> TestingBuild Path Boolean)
 (def (testing-build-gxtest-file-compiled-runnable? build file)
-  (and (testing-build-gxtest-file-exported-suite-option build file)
+  (and (testing-object-ref build 'compileSelectedTests #f)
+       (testing-build-gxtest-file-exported-suite-option build file)
        (not (testing-build-gxtest-file-self-running? build file))
-       (testing-build-gxtest-compiled-current? build file)))
+       (begin
+         (testing-build-compile-support-files! build [file])
+         #t)))
 
 ;; : (-> TestingBuild Path Boolean)
 (def (testing-build-run-gxtest-file/source build file)

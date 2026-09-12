@@ -152,7 +152,6 @@
                     suite-support-files: (suite-support-files [])
                     support-directories: (support-directories [])
                     suite-support-directories: (suite-support-directories [])
-                    support-output-root: (support-output-root #f)
                     scenarios: (scenarios [])
                     improvement-scenarios: (improvement-scenarios #f)
                     scenario-metadata: (scenario-metadata [])
@@ -168,7 +167,6 @@
                     loadpath: (loadpath #f)
                     output: (output 'summary)
                     compile-selected-tests: (compile-selected-tests #f)
-                    compile-dependency-stamps: (compile-dependency-stamps [])
                     receipt-prefix: (receipt-prefix #f))
   (testing-object
    'testing-build
@@ -182,7 +180,6 @@
      (suiteSupportFiles . ,suite-support-files)
      (supportDirectories . ,support-directories)
      (suiteSupportDirectories . ,suite-support-directories)
-     (supportOutputRoot . ,support-output-root)
      (scenarios . ,(or improvement-scenarios scenarios))
      (scenarioMetadata . ,scenario-metadata)
      (scenarioRoot . ,scenario-root)
@@ -197,7 +194,6 @@
      (loadpath . ,loadpath)
      (output . ,output)
      (compileSelectedTests . ,compile-selected-tests)
-     (compileDependencyStamps . ,compile-dependency-stamps)
      (receiptPrefix . ,(or receipt-prefix name))
      (gxtestRuns . ,(vector []))
      (scenarioRuns . ,(vector [])))))
