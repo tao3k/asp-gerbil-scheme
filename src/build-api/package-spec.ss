@@ -82,10 +82,14 @@
 
 ;; : (-> PackageSpec (List NativeBuildItem))
 (def (asp-gerbil-scheme-package-default-native-spec package-spec)
-  (fold (lambda (module current)
+  (append
+   (fold (lambda (module current)
           (remove-build-file current module))
         (asp-gerbil-scheme-package-modules package-spec)
-        (asp-gerbil-scheme-package-product-entry-modules package-spec)))
+        (append
+         (.get package-spec exclude-modules)
+         (asp-gerbil-scheme-package-product-entry-modules package-spec)))
+   (.get package-spec extra-spec)))
 
 (def (asp-gerbil-scheme-package-native-spec package-spec)
   (let ((projector (.get package-spec native-spec-projector))
@@ -131,6 +135,8 @@
              (role 'library)
              (modules #f)
              (exclude-dirs upstream-default-exclude-dirs)
+             (exclude-modules [])
+             (extra-spec [])
              (product-entry-modules [])
              (generated-modules [])
              (native-profile asp-gerbil-scheme-default-native-profile)

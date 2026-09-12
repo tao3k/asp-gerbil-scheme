@@ -33,6 +33,16 @@ For the native clan test command surface, import =init-test-environment!= from
 original =clan/testing= macro, with its upstream discovery, command registration,
 and test lifecycle. Existing =gxtest= files remain supported without conversion.
 
+* Native package declarations
+For the default library PackageSpec, =exclude-modules= removes declared paths
+from the upstream catalog with clan/building's native removal helper, and
+=extra-spec= appends ordinary =std/make= targets unchanged. Use these POO slots
+for interface-only targets, FFI, and additional public entry modules, without a
+downstream catalog scan or =native-spec-projector=. Exclusions apply before
+additions, so replacing a catalog target requires excluding its original path.
+An explicit =native-spec= or =native-spec-projector= still replaces this default
+declaration; the extra slots do not patch those explicit overrides.
+
 * Install Boundary
 Install the harness from its checkout into the global Gerbil package store:
 
