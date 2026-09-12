@@ -9,13 +9,16 @@
         (only-in :clan/poo/debug trace-poo)
         (only-in :clan/testing
                  find-test-files
-                 init-test-environment!
+                 %set-test-environment!
                  test)
         (only-in :std/cli/multicall
                  define-entry-point
+                 define-multicall-main
                  set-default-entry-point!)
+        (only-in :std/source this-source-file)
         (only-in :std/srfi/1 find filter)
-        (only-in :std/srfi/13 string-contains string-prefix?))
+        (only-in :std/srfi/13 string-contains string-prefix?)
+        (only-in :std/sugar with-id))
 
 (export testing-profile
         testing-profile?
@@ -232,14 +235,18 @@
 ;;; Preserve clan/testing's command surface and suite execution. The only
 ;;; extension is selection of its already-discovered files through a POO value.
 (defrules init-profiled-test-environment! ()
-  ((_ testing)
+  ((ctx testing)
    (begin
-     (init-test-environment!)
+     (def here (this-source-file ctx))
+     (with-id ctx (main)
+       (define-multicall-main ctx)
+       (%set-test-environment! here))
      (testing-interface-apply-runtime-profile! testing "unit-tests.ss")
      (define-entry-point (asp-profiled-unit-tests)
        (help: "Run clan unit tests through ASP POO profiles"
         getopt: [])
-       (apply test (testing-interface-test-files testing "unit-tests.ss")))
+       (apply test
+              (testing-interface-test-files testing "unit-tests.ss")))
      (set-default-entry-point! 'asp-profiled-unit-tests))))
 
 (def (testing-memory-profile-max-heap-mib profile)
