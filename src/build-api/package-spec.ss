@@ -14,6 +14,7 @@
         asp-gerbil-scheme-package-pkg-config-libs
         asp-gerbil-scheme-package-nix-deps
         asp-gerbil-scheme-package-native-options-resolver
+        asp-gerbil-scheme-package-public-entry-modules
         asp-gerbil-scheme-package-modules)
 
 (import (only-in :clan/poo/object .cc .def .get)
@@ -28,6 +29,8 @@
                  normalize-spec)
         (only-in "./generated-module-projection"
                  asp-gerbil-scheme-project-generated-modules)
+        (only-in "./native-import-closure"
+                 asp-gerbil-scheme-native-import-closure)
         (only-in "./core-capacity"
                  initialize-native-build-core-capacity!)
         (only-in "./native-profile"
@@ -83,10 +86,14 @@
         (asp-gerbil-scheme-package-declared-modules package-spec))
     (or (and (procedure? declared) (declared))
         declared
-      ;; Exactly match clan/building: gxpkg invokes build.ss in the package
-      ;; directory, and the native catalog reads that current directory. The
-      ;; library projection is internally bounded to public top-level modules
-      ;; and src/; tests and generated build trees are never user options.
+        (alet (entries
+               (asp-gerbil-scheme-package-public-entry-modules package-spec))
+          (and (pair? entries)
+               (asp-gerbil-scheme-native-import-closure
+                (current-directory) entries)))
+      ;; Without declared public entries, exactly match clan/building: gxpkg
+      ;; invokes build.ss in the package directory and the native catalog reads
+      ;; that current directory. Tests and generated build trees stay excluded.
         (filter native-library-module?
                 (upstream-all-gerbil-modules
                  exclude-dirs:
@@ -169,6 +176,7 @@
   (prototype asp-gerbil-scheme-library-package-prototype
              (role 'library)
              (modules #f)
+             (public-entry-modules [])
              (exclude-dirs upstream-default-exclude-dirs)
              (exclude-modules [])
              (extra-spec [])
@@ -185,6 +193,8 @@
   (accessors poo-family-ref
              (required
               (asp-gerbil-scheme-package-declared-modules modules)
+              (asp-gerbil-scheme-package-public-entry-modules
+               public-entry-modules)
               (asp-gerbil-scheme-package-exclude-dirs exclude-dirs)
               (asp-gerbil-scheme-package-product-entry-modules
                product-entry-modules)

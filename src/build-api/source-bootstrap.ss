@@ -9,6 +9,7 @@
                  all-gerbil-modules
                  asp-gerbil-scheme-library-package-prototype
                  asp-gerbil-scheme-package-modules
+                 asp-gerbil-scheme-package-public-entry-modules
                  asp-gerbil-scheme-package-native-profile
                  asp-gerbil-scheme-package-pkg-config-libs
                  asp-gerbil-scheme-package-nix-deps)
@@ -19,6 +20,7 @@
         all-gerbil-modules
         asp-gerbil-scheme-library-package-prototype
         asp-gerbil-scheme-package-modules
+        asp-gerbil-scheme-package-public-entry-modules
         asp-gerbil-scheme-package-native-profile
         asp-gerbil-scheme-package-pkg-config-libs
         asp-gerbil-scheme-package-nix-deps
