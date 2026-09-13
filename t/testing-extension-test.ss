@@ -76,7 +76,7 @@
       (check (testing-interface-batch-size-for
               +testing-entry-witness+
               "unit-tests.ss")
-             => 1))
+             => 16))
 
     (test-case "invalid discovery boundaries fail closed"
       (let (testing
@@ -177,7 +177,7 @@
       (check (testing-interface-test-file-batches
               +asp-testing-interface+
               '("t/a-test.ss" "t/b-test.ss"))
-             => '(("t/a-test.ss") ("t/b-test.ss")))
+             => '(("t/a-test.ss" "t/b-test.ss")))
       (let (batched
             (testing-interface-add-profile
              +asp-testing-interface+
@@ -189,8 +189,15 @@
                 '("t/a-test.ss" "t/b-test.ss"))
                => '(("t/a-test.ss" "t/b-test.ss"))))
       (check (testing-interface-worker-count 0) => 0)
-      (check (testing-interface-worker-count (+ (##cpu-count) 1))
-             => (max (##cpu-count) 1)))
+      (let (previous-build-cores (getenv "GERBIL_BUILD_CORES" #f))
+        (dynamic-wind
+          (lambda () (setenv "GERBIL_BUILD_CORES" "2"))
+          (lambda ()
+            (check (testing-interface-worker-count 8) => 2)
+            (check (testing-interface-worker-count 1) => 1))
+          (lambda ()
+            (setenv "GERBIL_BUILD_CORES"
+                    (or previous-build-cores ""))))))
 
     (test-case "the POO profile configures the current upstream runtime"
       (let (previous-max-heap (##get-max-heap))

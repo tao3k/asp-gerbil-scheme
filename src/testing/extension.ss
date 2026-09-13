@@ -21,7 +21,8 @@
         (only-in :std/misc/process run-process)
         (only-in :std/srfi/1 find filter)
         (only-in :std/srfi/13 string-contains string-prefix?)
-        (only-in :std/sugar with-id))
+        (only-in :std/sugar with-id)
+        (only-in ../build-api/core-capacity native-build-core-count))
 
 (export testing-profile
         testing-profile?
@@ -182,11 +183,11 @@
 (def +testing-serial-resource-profile+
   (testing-profile 'serial-resource 'shared-resource-declaration))
 
-;;; Memory and module isolation are per test file.  A fresh upstream `gerbil
-;;; test` process is therefore the default execution unit; projects may opt in
-;;; to a larger discovery-profile batch only when their files are proven safe
-;;; to share one Gambit heap and module namespace.
-(def +testing-test-batch-size+ 1)
+;;; A bounded native batch amortizes Gerbil process and module startup while
+;;; releasing the Gambit heap between batches.  This is an ASP testing-policy
+;;; default, not a project-owned concurrency setting; worker concurrency is
+;;; inherited separately from GERBIL_BUILD_CORES.
+(def +testing-test-batch-size+ 16)
 
 (def +testing-discovery-profile+
   (.cc (testing-profile 'discovery 'clan-test-file-filter)
@@ -409,7 +410,10 @@
                 (cons (reverse batch-rev) batches-rev))))))))
 
 (def (testing-interface-worker-count batch-count)
-  (min batch-count (max (##cpu-count) 1)))
+  (min batch-count
+       (native-build-core-count
+        (getenv "GERBIL_BUILD_CORES" #f)
+        (##cpu-count))))
 
 (def (testing-interface-command-for-files testing test-files)
   (append ["gerbil"]
