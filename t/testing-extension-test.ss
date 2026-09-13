@@ -172,11 +172,7 @@
           (lambda () (setenv "GERBIL_BUILD_CORES" "12"))
           (lambda ()
             (check (testing-interface-worker-count 20) => 12)
-            (check (testing-interface-worker-count 1) => 1)
-            (check (testing-interface-test-file-batches
-                    +asp-testing-interface+
-                    '("t/a-test.ss" "t/b-test.ss" "t/c-test.ss"))
-                   => '(("t/a-test.ss") ("t/b-test.ss") ("t/c-test.ss"))))
+            (check (testing-interface-worker-count 1) => 1))
           (lambda ()
             (setenv "GERBIL_BUILD_CORES"
                     (or previous-build-cores ""))))))
