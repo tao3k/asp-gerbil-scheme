@@ -167,8 +167,19 @@
                 "t/graph-test.ss")
                => #f))
       (check (testing-interface-worker-count 0) => 0)
-      (check (testing-interface-worker-count (+ (##cpu-count) 1))
-             => (max (##cpu-count) 1)))
+      (let (previous-build-cores (getenv "GERBIL_BUILD_CORES" #f))
+        (dynamic-wind
+          (lambda () (setenv "GERBIL_BUILD_CORES" "12"))
+          (lambda ()
+            (check (testing-interface-worker-count 20) => 12)
+            (check (testing-interface-worker-count 1) => 1)
+            (check (testing-interface-test-file-batches
+                    +asp-testing-interface+
+                    '("t/a-test.ss" "t/b-test.ss" "t/c-test.ss"))
+                   => '(("t/a-test.ss") ("t/b-test.ss") ("t/c-test.ss"))))
+          (lambda ()
+            (setenv "GERBIL_BUILD_CORES"
+                    (or previous-build-cores ""))))))
 
     (test-case "the POO profile configures the current upstream runtime"
       (let (previous-max-heap (##get-max-heap))
