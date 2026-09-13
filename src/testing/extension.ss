@@ -50,6 +50,7 @@
         testing-interface-test-file-serial?
         testing-interface-test-file-batches
         testing-interface-worker-count
+        testing-interface-run-test-batch!
         testing-interface-run-test-files!
         init-profiled-test-environment!
         +testing-memory-profile+
