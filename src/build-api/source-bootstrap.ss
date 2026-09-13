@@ -6,6 +6,7 @@
 
 (import (only-in "./package-spec"
                  asp-gerbil-scheme-package-spec!
+                 all-gerbil-modules
                  asp-gerbil-scheme-library-package-prototype
                  asp-gerbil-scheme-package-modules
                  asp-gerbil-scheme-package-native-profile
@@ -15,6 +16,7 @@
                  asp-gerbil-scheme-native-profile-prepare!))
 
 (export asp-gerbil-scheme-package-spec!
+        all-gerbil-modules
         asp-gerbil-scheme-library-package-prototype
         asp-gerbil-scheme-package-modules
         asp-gerbil-scheme-package-native-profile

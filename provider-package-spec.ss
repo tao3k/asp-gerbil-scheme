@@ -3,7 +3,8 @@
 
 (import (only-in "./src/build-api/package-spec"
                  asp-gerbil-scheme-package-spec!
-                 asp-gerbil-scheme-library-package-prototype))
+                 asp-gerbil-scheme-library-package-prototype)
+        (only-in :clan/building pkg-config-options))
 
 ;; Build entrypoints must be self-hosting: this native Gerbil module list is
 ;; package-spec data consumed directly by the upstream std/make projection.
@@ -57,6 +58,8 @@
  (native-capabilities '(tls))
  (pkg-config-libs '("openssl"))
  (nix-deps '("openssl"))
+ (native-options-resolver
+  (lambda () (pkg-config-options '("openssl") '("openssl"))))
  (native-spec
   (append
    (map (lambda (module) `(gxc: ,module)) +provider-runtime-modules+)

@@ -1,7 +1,7 @@
 ((scenarioKind . process-startup)
  (attemptCount . 1)
- (maxNanoseconds . 5000000000)
- (targetNanoseconds . 2500000000)
+ (maxNanoseconds . 3000000000)
+ (targetNanoseconds . 1500000000)
  (targetRationale
   . "a PackageSpec-only downstream build script must start in a few seconds")
  (feature . "build-api-startup-closure")
@@ -9,5 +9,5 @@
  (optimizationFocus
   . "keep optional Policy testing runtime and benchmark graphs out of PackageSpec startup")
  (inputShape . "fresh Gerbil process projects an empty downstream PackageSpec")
- (expectedOutcome . "spec projection exits successfully within five seconds")
+ (expectedOutcome . "spec projection exits successfully within three seconds")
  (measurementPhases "process-start" "module-expand" "package-spec-project"))

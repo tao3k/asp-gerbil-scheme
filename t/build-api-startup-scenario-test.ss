@@ -32,7 +32,7 @@
            "src/policy"
            "src/benchmark"
            ":clan/testing"))))
-    (test-case "fresh downstream PackageSpec process starts within five seconds"
+    (test-case "fresh downstream PackageSpec process starts within three seconds"
       (let (contract
             (call-with-input-file +build-api-startup-contract+ read))
         (check (startup-contract-ref contract 'scenarioKind)

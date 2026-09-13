@@ -3,6 +3,8 @@
 ;;; Preserve native module ownership; tests and policy receive explicit inputs
 ;;; and never infer a second production graph from this projection.
 (export asp-gerbil-scheme-package-spec!
+        all-gerbil-modules
+        default-exclude-dirs
         asp-gerbil-scheme-library-package-prototype
         asp-gerbil-scheme-package-native-spec
         asp-gerbil-scheme-package-generated-modules
@@ -11,14 +13,19 @@
         asp-gerbil-scheme-package-native-capabilities
         asp-gerbil-scheme-package-pkg-config-libs
         asp-gerbil-scheme-package-nix-deps
+        asp-gerbil-scheme-package-native-options-resolver
         asp-gerbil-scheme-package-modules)
 
 (import (only-in :clan/poo/object .cc .def .get)
         (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
-        (rename-in :clan/building
+        (rename-in "./native-spec-support"
                    (all-gerbil-modules upstream-all-gerbil-modules)
                    (default-exclude-dirs upstream-default-exclude-dirs))
-        (only-in :clan/building remove-build-file normalize-spec pkg-config-options)
+        (only-in "./native-spec-support"
+                 all-gerbil-modules
+                 default-exclude-dirs
+                 remove-build-file
+                 normalize-spec)
         (only-in "./generated-module-projection"
                  asp-gerbil-scheme-project-generated-modules)
         (only-in "./core-capacity"
@@ -97,11 +104,11 @@
    (.get package-spec extra-spec)))
 
 (def (asp-gerbil-scheme-package-native-spec package-spec)
-  (let* ((libraries (asp-gerbil-scheme-package-pkg-config-libs package-spec))
+  (let* ((native-options-resolver
+          (asp-gerbil-scheme-package-native-options-resolver package-spec))
         (native-options
-         (if libraries
-           (pkg-config-options libraries
-             (asp-gerbil-scheme-package-nix-deps package-spec))
+         (if native-options-resolver
+           (native-options-resolver)
            []))
         (projector (.get package-spec native-spec-projector))
         (native-spec (.get package-spec native-spec))
@@ -159,6 +166,7 @@
              (native-capabilities [])
              (pkg-config-libs #f)
              (nix-deps #f)
+             (native-options-resolver #f)
              (spec-projector asp-gerbil-scheme-package-native-spec)
              (native-spec-projector #f)
              (native-spec #f))
@@ -173,5 +181,7 @@
               (asp-gerbil-scheme-package-native-capabilities
                native-capabilities)
               (asp-gerbil-scheme-package-pkg-config-libs pkg-config-libs)
-              (asp-gerbil-scheme-package-nix-deps nix-deps))
+              (asp-gerbil-scheme-package-nix-deps nix-deps)
+              (asp-gerbil-scheme-package-native-options-resolver
+               native-options-resolver))
              (optional)))

@@ -100,7 +100,10 @@
         (check (string-contains provider-source "defbuild-script")
                ? true)
         (check (string-contains provider-source "init-build-environment!") => #f)
-        (check (string-contains package-spec-source "pkg-config-options") ? true)
+        (check (string-contains package-spec-source "pkg-config-options") => #f)
+        (check (string-contains provider-package-spec-source
+                                "pkg-config-options")
+               ? true)
         (check (string-contains library-source "define-entry-point") => #f)
         (check (string-contains provider-source "define-entry-point") => #f)
         (check (string-contains provider-package-spec-source "cppflags")

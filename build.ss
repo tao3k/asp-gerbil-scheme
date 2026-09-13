@@ -2,10 +2,10 @@
 
 ;;; -*- Gerbil -*-
 
-(import (only-in :clan/building all-gerbil-modules)
-        (only-in :std/build-script defbuild-script)
+(import (only-in :std/build-script defbuild-script)
         (only-in "./src/build-api/source-bootstrap"
                  asp-gerbil-scheme-package-spec!
+                 all-gerbil-modules
                  asp-gerbil-scheme-library-package-prototype
                  asp-gerbil-scheme-package-native-profile
                  asp-gerbil-scheme-package-pkg-config-libs
