@@ -1,0 +1,5 @@
+((scenarioKind . native-clan-testing-process-comparison)
+ (attemptCount . 1)
+ (fixtureCount . 4)
+ (maxBatchNanoseconds . 10000000000)
+ (maxBatchToSerialPercent . 75))

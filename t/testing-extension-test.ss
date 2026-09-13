@@ -150,7 +150,7 @@
                    "-q"
                    "t/large-test.ss"])))
 
-    (test-case "uniform runtime profiles use one upstream batch"
+    (test-case "uniform runtime profiles share bounded upstream batches"
       (check (testing-interface-test-files-share-runtime-options?
               +asp-testing-interface+
               '("t/a-test.ss" "t/b-test.ss"))
@@ -163,7 +163,15 @@
         (check (testing-interface-test-files-share-runtime-options?
                 mapped
                 '("t/a-test.ss" "t/b-test.ss"))
-               => #f)))
+               => #f))
+      (check (testing-interface-test-file-batches
+              +asp-testing-interface+
+              '("t/a-test.ss" "t/b-test.ss" "t/c-test.ss")
+              2)
+             => '(("t/a-test.ss" "t/b-test.ss")
+                  ("t/c-test.ss")))
+      (check (testing-interface-worker-count 0) => 0)
+      (check (> (testing-interface-worker-count 8) 1) => #t))
 
     (test-case "the POO profile configures the current upstream runtime"
       (let (previous-max-heap (##get-max-heap))

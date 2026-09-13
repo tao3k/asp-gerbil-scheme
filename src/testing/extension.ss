@@ -9,7 +9,6 @@
         (only-in :clan/poo/debug trace-poo)
         (only-in :clan/testing
                  find-test-files
-                 run-tests
                  %set-test-environment!)
         (only-in :std/cli/multicall
                  define-entry-point
@@ -17,6 +16,7 @@
                  set-default-entry-point!)
         (only-in :std/cli/print-exit silent-exit)
         (only-in :std/source this-source-file)
+        (only-in :std/misc/wg make-wg wg-add! wg-wait!)
         (only-in :std/misc/process run-process)
         (only-in :std/srfi/1 find filter)
         (only-in :std/srfi/13 string-contains string-prefix?)
@@ -45,6 +45,8 @@
         testing-interface-test-file-included?
         testing-interface-test-files
         testing-interface-test-files-share-runtime-options?
+        testing-interface-test-file-batches
+        testing-interface-worker-count
         testing-interface-run-test-files!
         init-profiled-test-environment!
         +testing-memory-profile+
@@ -251,10 +253,9 @@
 ;;   | doc m%
 ;;       Install the normal package unit-test entrypoint after clan discovers
 ;;       its native test files and the POO discovery profile subtracts ignored
-;;       child-package paths. Tests with one process-level runtime profile run
-;;       in a single upstream clan/testing batch, so module loading and runtime
-;;       startup are shared. Only heterogeneous runtime profiles require the
-;;       isolated compatibility path.
+;;       child-package paths. Tests run as bounded multi-file batches through
+;;       the upstream Gerbil/clan testing command, so each worker shares module
+;;       loading while large suites release their heap between batches.
 ;;
 ;;       # Examples
 ;;       ```scheme
@@ -315,8 +316,11 @@
                directory: directory
                stdout-redirection: #f))
 
-;;; The normal path is one upstream clan/testing batch. Process isolation is
-;;; retained only when callers explicitly map incompatible runtime options.
+;;; Files with the same process-level runtime options share an upstream test
+;;; process. The fixed batch bound prevents a large test catalog from retaining
+;;; every imported module and benchmark fixture in one Gambit heap.
+(def +testing-test-batch-size+ 16)
+
 (def (testing-interface-test-files-share-runtime-options? testing test-files)
   (or (null? test-files)
       (let (options (testing-interface-runtime-options-for
@@ -327,15 +331,62 @@
                            testing test-file)))
                 (cdr test-files)))))
 
+(def (testing-interface-test-file-batches testing test-files
+                                          (batch-size +testing-test-batch-size+))
+  (unless (and (integer? batch-size) (> batch-size 0))
+    (error "test batch size must be a positive integer" batch-size))
+  (let loop ((remaining test-files)
+             (batch-rev [])
+             (batch-options #f)
+             (batch-count 0)
+             (batches-rev []))
+    (cond
+     ((null? remaining)
+      (reverse (if (null? batch-rev)
+                 batches-rev
+                 (cons (reverse batch-rev) batches-rev))))
+     (else
+      (let* ((test-file (car remaining))
+             (options (testing-interface-runtime-options-for
+                       testing test-file)))
+        (if (and (< batch-count batch-size)
+                 (or (not batch-options) (equal? options batch-options)))
+          (loop (cdr remaining) (cons test-file batch-rev)
+                options (+ batch-count 1) batches-rev)
+          (loop remaining [] #f 0
+                (cons (reverse batch-rev) batches-rev))))))))
+
+(def (testing-interface-worker-count batch-count)
+  (let* ((configured (string->number (getenv "GERBIL_TEST_CORES" "")))
+         (capacity (if (and configured (integer? configured) (> configured 0))
+                     configured
+                     (min (max (##cpu-count) 1) 4))))
+    (min batch-count capacity)))
+
+(def (testing-interface-command-for-files testing test-files)
+  (append ["gerbil"]
+          (if (null? test-files)
+            []
+            (testing-interface-runtime-options-for testing (car test-files)))
+          ["test"]
+          test-files))
+
+(def (testing-interface-run-test-batch! testing test-files)
+  (run-process (testing-interface-command-for-files testing test-files)
+               directory: (current-directory)
+               stdout-redirection: #f))
+
 (def (testing-interface-run-test-files! testing test-files)
-  (cond
-   ((testing-interface-test-files-share-runtime-options? testing test-files)
-    (unless (null? test-files)
-      (testing-interface-apply-runtime-profile! testing (car test-files)))
-    (run-tests "." test-files: test-files))
-   (else
-    (for-each (cut testing-interface-run-test! testing <>) test-files)
-    #t)))
+  (let* ((batches (testing-interface-test-file-batches testing test-files))
+         (worker-count (testing-interface-worker-count (length batches)))
+         (workgroup (and (> worker-count 0) (make-wg worker-count))))
+    (for-each
+     (lambda (batch)
+       (wg-add! workgroup
+                (cut testing-interface-run-test-batch! testing batch)))
+     batches)
+    (wg-wait! workgroup)
+    #t))
 
 ;;; Apply the selected POO memory profile to the current Gambit runtime.  This
 ;;; uses the upstream heap API directly; callers never construct startup argv.
