@@ -10,6 +10,7 @@
         (only-in :clan/testing
                  find-test-files
                  %set-test-environment!)
+        (only-in :clan/timestamp call-with-timing)
         (only-in :std/cli/multicall
                  define-entry-point
                  define-multicall-main
@@ -273,10 +274,19 @@
        (help: "Run clan unit tests through ASP POO profiles"
         getopt: [])
        (%set-test-environment! here)
+       (displayln "[asp-testing] phase=entry-ready")
+       (force-output)
        (silent-exit
-        (testing-interface-run-test-files!
-         testing
-         (testing-interface-test-files testing "unit-tests.ss"))))
+        (let-values (((discovery-nanoseconds test-files)
+                      (call-with-timing
+                       (lambda ()
+                         (testing-interface-test-files
+                          testing "unit-tests.ss")))))
+          (displayln "[asp-testing] phase=discovery-complete elapsedNs="
+                     discovery-nanoseconds
+                     " fileCount=" (length test-files))
+          (force-output)
+          (testing-interface-run-test-files! testing test-files))))
      (set-default-entry-point! 'asp-profiled-unit-tests))))
 
 (def (testing-memory-profile-max-heap-mib profile)
@@ -372,20 +382,47 @@
           test-files))
 
 (def (testing-interface-run-test-batch! testing test-files)
-  (run-process (testing-interface-command-for-files testing test-files)
-               directory: (current-directory)
-               stdout-redirection: #f))
+  (displayln "[asp-testing] phase=batch-start fileCount="
+             (length test-files)
+             " firstFile=" (and (pair? test-files) (car test-files)))
+  (force-output)
+  (let-values (((elapsed-nanoseconds result)
+                (call-with-timing
+                 (lambda ()
+                   (run-process
+                    (testing-interface-command-for-files testing test-files)
+                    directory: (current-directory)
+                    stdout-redirection: #f)))))
+    (displayln "[asp-testing] phase=batch-complete elapsedNs="
+               elapsed-nanoseconds
+               " fileCount=" (length test-files)
+               " firstFile=" (and (pair? test-files) (car test-files)))
+    (force-output)
+    result))
 
 (def (testing-interface-run-test-files! testing test-files)
   (let* ((batches (testing-interface-test-file-batches testing test-files))
          (worker-count (testing-interface-worker-count (length batches)))
          (workgroup (and (> worker-count 0) (make-wg worker-count))))
+    ;; Emit the parent-side handoff before any test module is imported.  This
+    ;; bounds time-to-first-observation independently of slow child imports and
+    ;; leaves clan/testing and `gerbil test` as the execution authority.
+    (displayln "[asp-testing] phase=batch-dispatch fileCount="
+               (length test-files)
+               " batchCount=" (length batches)
+               " workerCount=" worker-count)
+    (force-output)
     (for-each
      (lambda (batch)
        (wg-add! workgroup
                 (cut testing-interface-run-test-batch! testing batch)))
      batches)
-    (wg-wait! workgroup)
+    (let-values (((elapsed-nanoseconds _result)
+                  (call-with-timing (lambda () (wg-wait! workgroup)))))
+      (displayln "[asp-testing] phase=all-batches-complete elapsedNs="
+                 elapsed-nanoseconds
+                 " batchCount=" (length batches))
+      (force-output))
     #t))
 
 ;;; Apply the selected POO memory profile to the current Gambit runtime.  This

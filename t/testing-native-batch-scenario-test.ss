@@ -4,7 +4,10 @@
 (import (only-in :std/test test-suite test-case check)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
-        (only-in :clan/timestamp call-with-timing))
+        (only-in :clan/timestamp call-with-timing)
+        (only-in :asp-gerbil-scheme/testing-api
+                 +asp-testing-interface+
+                 testing-interface-test-files))
 
 (export testing-native-batch-scenario-test)
 
@@ -13,6 +16,9 @@
 
 (def +native-batch-scenario-contract+
   "t/scenarios/policy/upstream-gxtest-delegation/native-batch-contract.ss")
+
+(def +native-batch-scenario-entrypoint+
+  "t/scenarios/policy/upstream-gxtest-delegation/native-batch-entrypoint.ss")
 
 (def +native-batch-scenario-files+
   (map (lambda (name)
@@ -30,8 +36,46 @@
 (def (run-native-test-files/serial files)
   (for-each (lambda (file) (run-native-test-files [file])) files))
 
+(def (native-batch-entrypoint-first-output)
+  (let ((first-output-nanoseconds #f)
+        (first-output-line #f)
+        (process-output #f))
+    (run-process
+     ["gerbil" "interactive" +native-batch-scenario-entrypoint+]
+     stderr-redirection: #t
+     coprocess:
+     (lambda (process)
+       (let-values (((elapsed-nanoseconds line)
+                     (call-with-timing (lambda () (read-line process)))))
+         (set! first-output-nanoseconds elapsed-nanoseconds)
+         (set! first-output-line line)
+         ;; Drain the native process so run-process can retain its normal
+         ;; status checking and resource cleanup semantics.
+         (set! process-output
+               (string-append line "\n" (read-all-as-string process))))))
+    (values first-output-nanoseconds first-output-line process-output)))
+
 (def testing-native-batch-scenario-test
   (test-suite "native clan/testing batch process scenario"
+    (test-case "native discovery of a large catalog is not the silent minute"
+      (let (contract
+            (call-with-input-file +native-batch-scenario-contract+ read))
+        (let-values (((discovery-nanoseconds test-files)
+                      (call-with-timing
+                       (lambda ()
+                         (testing-interface-test-files
+                          +asp-testing-interface+ "unit-tests.ss")))))
+          (displayln "[native-clan-testing-discovery-scenario] elapsedNs="
+                     discovery-nanoseconds
+                     " fileCount=" (length test-files))
+          (check (>= (length test-files)
+                     (native-batch-contract-ref
+                      contract 'minDiscoveryFileCount))
+                 => #t)
+          (check (< discovery-nanoseconds
+                    (native-batch-contract-ref
+                     contract 'maxDiscoveryNanoseconds))
+                 => #t))))
     (test-case "multi-file upstream execution removes per-file startup cost"
       (let (contract
             (call-with-input-file +native-batch-scenario-contract+ read))
@@ -63,4 +107,29 @@
                     (* serial-nanoseconds
                        (native-batch-contract-ref
                         contract 'maxBatchToSerialPercent)))
+                 => #t))))
+    (test-case "batch handoff is observable without a sixty-second silence"
+      (let (contract
+            (call-with-input-file +native-batch-scenario-contract+ read))
+        (let-values (((first-output-nanoseconds first-output-line
+                       process-output)
+                      (native-batch-entrypoint-first-output)))
+          (displayln "[native-clan-testing-ttfo-scenario] firstOutputNs="
+                     first-output-nanoseconds
+                     " firstLine=" first-output-line)
+          (check (and (string? first-output-line)
+                      (string-prefix? "[asp-testing] phase=batch-dispatch"
+                                      first-output-line))
+                 => #t)
+          (check (and (string-contains process-output
+                                       "phase=batch-start")
+                      (string-contains process-output
+                                       "phase=batch-complete")
+                      (string-contains process-output
+                                       "phase=all-batches-complete")
+                      #t)
+                 => #t)
+          (check (< first-output-nanoseconds
+                    (native-batch-contract-ref
+                     contract 'maxFirstOutputNanoseconds))
                  => #t))))))
