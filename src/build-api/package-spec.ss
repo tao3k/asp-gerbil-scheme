@@ -14,7 +14,6 @@
         asp-gerbil-scheme-package-pkg-config-libs
         asp-gerbil-scheme-package-nix-deps
         asp-gerbil-scheme-package-native-options-resolver
-        asp-gerbil-scheme-package-std-make-input-closure
         asp-gerbil-scheme-package-modules)
 
 (import (only-in :clan/poo/object .cc .def .get)
@@ -29,9 +28,6 @@
                  normalize-spec)
         (only-in "./generated-module-projection"
                  asp-gerbil-scheme-project-generated-modules)
-        (only-in "./std-make-input-closure"
-                 asp-gerbil-scheme-default-std-make-input-closure
-                 asp-gerbil-scheme-project-std-make-input-closure)
         (only-in "./core-capacity"
                  initialize-native-build-core-capacity!)
         (only-in "./native-profile"
@@ -118,9 +114,7 @@
         (native-spec (.get package-spec native-spec))
         (generated-modules
          (asp-gerbil-scheme-package-generated-modules package-spec)))
-    (asp-gerbil-scheme-project-std-make-input-closure
-     (asp-gerbil-scheme-package-std-make-input-closure package-spec)
-     (map (lambda (item)
+    (map (lambda (item)
            (match item
              ([(? (cut member <> '(exe: static-exe:))) . _]
               (normalize-spec
@@ -144,7 +138,7 @@
             native-spec)
            (else
             (asp-gerbil-scheme-package-default-native-spec package-spec)))
-          generated-modules)))))
+          generated-modules))))
 
 ;; The macro-generated spec procedure is the direct std/make boundary used by
 ;; clan/building. A PackageSpec remains the POO owner;
@@ -185,8 +179,6 @@
              (pkg-config-libs #f)
              (nix-deps #f)
              (native-options-resolver #f)
-             (std-make-input-closure
-              asp-gerbil-scheme-default-std-make-input-closure)
              (spec-projector asp-gerbil-scheme-package-native-spec)
              (native-spec-projector #f)
              (native-spec #f))
@@ -203,7 +195,5 @@
               (asp-gerbil-scheme-package-pkg-config-libs pkg-config-libs)
               (asp-gerbil-scheme-package-nix-deps nix-deps)
               (asp-gerbil-scheme-package-native-options-resolver
-               native-options-resolver)
-              (asp-gerbil-scheme-package-std-make-input-closure
-               std-make-input-closure))
+               native-options-resolver))
              (optional)))
