@@ -50,4 +50,19 @@
           (check result => '())
           (check (< elapsed-nanoseconds
                     (startup-contract-ref contract 'maxNanoseconds))
-                 => #t))))))
+                 => #t))))
+    (test-case "verbose inheritance exposes the pre-std/make handoff"
+      (let (output
+            (run-process
+             ["env" "GERBIL_BUILD_VERBOSE=1"
+              "gerbil" "interactive"
+              +build-api-startup-scenario+ "spec"]
+             coprocess: read-all-as-string))
+        (check
+         (and (string-contains
+               output
+               "[asp-gerbil-scheme-build] phase=spec-projected")
+              #t)
+         => #t)
+        (check (and (string-contains output "executor=std/make") #t)
+               => #t)))))

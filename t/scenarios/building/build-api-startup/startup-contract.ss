@@ -7,7 +7,8 @@
  (feature . "build-api-startup-closure")
  (rule . "ASP-GERBIL-SCHEME-BUILD-API-STARTUP-001")
  (optimizationFocus
-  . "keep optional Policy testing runtime and benchmark graphs out of PackageSpec startup")
+  . "keep optional Policy testing runtime and benchmark graphs out of PackageSpec startup and expose the std/make planning handoff when verbose is inherited")
  (inputShape . "fresh Gerbil process projects an empty downstream PackageSpec")
  (expectedOutcome . "spec projection exits successfully within three seconds")
- (measurementPhases "process-start" "module-expand" "package-spec-project"))
+ (measurementPhases "process-start" "module-expand" "package-spec-project"
+                    "std-make-handoff"))
