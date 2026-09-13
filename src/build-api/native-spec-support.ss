@@ -11,6 +11,7 @@
 (export all-gerbil-modules
         default-exclude-dirs
         remove-build-file
+        remove-build-files
         normalize-spec)
 
 (def +default-exclude-files+ '("main.ss" "manifest.ss"))
@@ -44,12 +45,29 @@
 ;; remove-build-file
 ;; : (-> (List BuildSpec) Path (List BuildSpec))
 (def (remove-build-file files file)
-  (let (file? (source-file-matcher file))
-    (filter (match <>
-              ((? file?) #f)
-              ([gxc: (? file?) . _] #f)
-              (_ #t))
-            files)))
+  (remove-build-files files [file]))
+
+;;; Build-spec exclusion is a hot package-planning boundary. Index both native
+;;; path spellings once so many exclusions do not rescan the target list.
+;; : (forall (p s) (-> (List s) (List p) (List s)))
+;; remove-build-files
+;; : (-> (List BuildSpec) (List Path) (List BuildSpec))
+(def (remove-build-files files excluded-files)
+  (let (excluded (make-hash-table))
+    (for-each
+     (lambda (file)
+       (let* ((with-extension (path-default-extension file ".ss"))
+              (without-extension (path-strip-extension with-extension)))
+         (hash-put! excluded with-extension #t)
+         (hash-put! excluded without-extension #t)))
+     excluded-files)
+    (filter
+     (match <>
+       ((? string? file) (not (hash-get excluded file)))
+       ([gxc: (? string? file) . _]
+        (not (hash-get excluded file)))
+       (_ #t))
+     files)))
 
 ;; : (forall (s o) (-> s (List o) s))
 ;; normalize-spec

@@ -9,6 +9,7 @@
         asp-gerbil-scheme-package-native-spec
         asp-gerbil-scheme-package-generated-modules
         asp-gerbil-scheme-package-product-entry-modules
+        asp-gerbil-scheme-package-native-prelude-spec
         asp-gerbil-scheme-package-native-profile
         asp-gerbil-scheme-package-native-capabilities
         asp-gerbil-scheme-package-pkg-config-libs
@@ -25,7 +26,7 @@
         (only-in "./native-spec-support"
                  all-gerbil-modules
                  default-exclude-dirs
-                 remove-build-file
+                 remove-build-files
                  normalize-spec)
         (only-in "./generated-module-projection"
                  asp-gerbil-scheme-project-generated-modules)
@@ -36,7 +37,6 @@
         (only-in "./native-profile"
                  asp-gerbil-scheme-default-native-profile
                  asp-gerbil-scheme-native-profile-executable-gsc-options)
-        (only-in :std/srfi/1 fold)
         (only-in :std/srfi/13 string-prefix?))
 
 ;; asp-gerbil-scheme-package-spec!
@@ -102,12 +102,12 @@
 ;; : (-> PackageSpec (List NativeBuildItem))
 (def (asp-gerbil-scheme-package-default-native-spec package-spec)
   (append
-   (fold (lambda (module current)
-          (remove-build-file current module))
-        (asp-gerbil-scheme-package-modules package-spec)
-        (append
-         (.get package-spec exclude-modules)
-         (asp-gerbil-scheme-package-product-entry-modules package-spec)))
+   (asp-gerbil-scheme-package-native-prelude-spec package-spec)
+   (remove-build-files
+    (asp-gerbil-scheme-package-modules package-spec)
+    (append
+     (.get package-spec exclude-modules)
+     (asp-gerbil-scheme-package-product-entry-modules package-spec)))
    (.get package-spec extra-spec)))
 
 (def (asp-gerbil-scheme-package-native-spec package-spec)
@@ -179,6 +179,7 @@
              (public-entry-modules [])
              (exclude-dirs upstream-default-exclude-dirs)
              (exclude-modules [])
+             (native-prelude-spec [])
              (extra-spec [])
              (product-entry-modules [])
              (generated-modules [])
@@ -198,6 +199,8 @@
               (asp-gerbil-scheme-package-exclude-dirs exclude-dirs)
               (asp-gerbil-scheme-package-product-entry-modules
                product-entry-modules)
+              (asp-gerbil-scheme-package-native-prelude-spec
+               native-prelude-spec)
               (asp-gerbil-scheme-package-generated-modules generated-modules)
               (asp-gerbil-scheme-package-native-profile native-profile)
               (asp-gerbil-scheme-package-native-capabilities

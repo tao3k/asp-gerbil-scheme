@@ -10,6 +10,7 @@
 
 (export asp-gerbil-scheme-native-import-closure)
 
+;; : (-> ImportBinding (Maybe ExpanderContext))
 (def (import-context value)
   (cond
    ((or (module-context? value) (prelude-context? value)) value)
@@ -18,6 +19,7 @@
    ((import-set? value) (import-context (import-set-source value)))
    (else #f)))
 
+;; : (-> ExpanderContext String (Maybe Path))
 (def (local-module-source context package-prefix)
   (let* ((id (expander-context-id context))
          (name (and id (symbol->string id))))
@@ -30,6 +32,7 @@
 ;; Visit each native module context once.  Importing only the declared roots
 ;; lets Gerbil resolve wrappers, phases, preludes, and relative paths itself;
 ;; the projection neither reparses source nor imports every catalog member.
+;; : (-> Path (List Path) (List Path))
 (def (asp-gerbil-scheme-native-import-closure root entries)
   (let* ((package-name
           (or (asp-gerbil-scheme-package-build-package-name root)

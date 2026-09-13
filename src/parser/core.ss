@@ -25,7 +25,7 @@
         :asp-gerbil-scheme/src/parser/syntax-ast
         :asp-gerbil-scheme/src/parser/typed-contract
         :asp-gerbil-scheme/src/support/time
-        (only-in :std/misc/list unique)
+        (only-in :std/misc/list delete-duplicates/hash)
         (only-in :std/misc/ports open-output-string read-file-lines)
         (only-in :std/sort sort)
         (only-in :std/srfi/1 foldl iota take)
@@ -441,7 +441,9 @@
          ;; at the caller's current directory.  Absolute owners remain stable
          ;; through source-full-path while relative owners resolve under root.
          (files
-          (sort (map (lambda (path) (source-full-path root path)) paths)
+          (sort (delete-duplicates/hash
+                 (map (lambda (path) (source-full-path root path)) paths)
+                 from-end?: #t)
                 string<?)))
     (make-project-index root
                         (parse-source-files root files)

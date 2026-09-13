@@ -23,6 +23,9 @@
   @ asp-gerbil-scheme-library-package-prototype)
   (spec conventional-root-build-spec-fixture)
   (modules ["src/library.ss" "t/library-test.ss"])
+  (native-prelude-spec
+   '((gsc: "ffi/_native" "-cc-options" "-Iffi")
+     (ssi: "ffi/_native")))
   (role 'library))
 
 (def (fixture-native-spec-projector package-spec)
@@ -68,7 +71,10 @@
     (test-case "an explicit native catalog remains caller-owned"
       (check (asp-gerbil-scheme-package-native-spec
              conventional-root-package-spec-fixture)
-             => ["src/library.ss" "t/library-test.ss"]))
+             => '((gsc: "ffi/_native" "-cc-options" "-Iffi")
+                  (ssi: "ffi/_native")
+                  "src/library.ss"
+                  "t/library-test.ss")))
     (test-case "named projectors receive the resolved package catalog"
       (check (asp-gerbil-scheme-package-native-spec
               projected-native-package-spec-fixture)

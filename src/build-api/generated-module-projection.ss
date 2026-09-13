@@ -7,7 +7,9 @@
 (import :gerbil/gambit
         (only-in "../object-family/syntax"
                  defpoo-object-family poo-family-ref)
-        (only-in :std/misc/plist pgetq psetq))
+        (only-in :std/misc/list delete-duplicates/hash)
+        (only-in :std/misc/plist pgetq psetq)
+        (only-in :std/sugar hash-key?))
 
 (export asp-gerbil-scheme-verified-generated-module-prototype
         asp-gerbil-scheme-verified-generated-module
@@ -34,25 +36,15 @@
                extra-inputs))
              (optional)))
 
-(def (generated-module-ordered-unique values)
-  (reverse
-   (foldl (lambda (value result)
-            (if (member value result)
-              result
-              (cons value result)))
-          []
-          values)))
-
+;; generated-module-spec-module
+;;   : (-> BuildSpec (Maybe Path))
 (def (generated-module-spec-module spec)
-  (cond
-   ((string? spec) spec)
-   ((and (pair? spec)
-         (eq? (car spec) gxc:)
-         (pair? (cdr spec))
-         (string? (cadr spec)))
-    (cadr spec))
-   (else #f)))
+  (match spec
+    ((? string? module) module)
+    ([gxc: module . _] (and (string? module) module))
+    (else #f)))
 
+;; : (-> BuildSpec (List Path) BuildSpec)
 (def (generated-module-project-extra-inputs spec extra-inputs)
   (match spec
     ((? string? module)
@@ -60,32 +52,36 @@
     ([gxc: module [plist ...] . options]
      [gxc: module
            (psetq plist extra-inputs:
-                  (generated-module-ordered-unique
-                   (append (pgetq extra-inputs: plist []) extra-inputs)))
+                  (delete-duplicates/hash
+                   (append (pgetq extra-inputs: plist []) extra-inputs)
+                   from-end?: #t))
            . options])
     ([gxc: module . options]
      [gxc: module [extra-inputs: extra-inputs] . options])
     (else
      (error "verified generated module must project to a gxc target" spec))))
 
-(def (generated-module-project declaration build-spec)
-  (let* ((module
-          (asp-gerbil-scheme-verified-generated-module-name declaration))
-         (matches
-          (filter (lambda (spec)
-                    (equal? (generated-module-spec-module spec) module))
-                  build-spec)))
-    (unless (= (length matches) 1)
-      (error "verified generated module must own exactly one native target"
-             module))
-    (map (lambda (spec)
-           (if (equal? (generated-module-spec-module spec) module)
-             (generated-module-project-extra-inputs
-              spec
+;;; Declaration validation and duplicate detection share one index construction.
+;; : (-> (List VerifiedGeneratedModule) HashTable)
+(def (generated-module-declaration-index declarations)
+  (let (index (make-hash-table))
+    (for-each
+     (lambda (declaration)
+       (let ((module
+              (asp-gerbil-scheme-verified-generated-module-name declaration))
+             (extra-inputs
               (asp-gerbil-scheme-verified-generated-module-extra-inputs
-               declaration))
-             spec))
-         build-spec)))
+               declaration)))
+         (unless (and (string? module)
+                      (> (string-length module) 0)
+                      (list? extra-inputs)
+                      (andmap string? extra-inputs)
+                      (not (hash-key? index module)))
+           (error "invalid or duplicate verified generated module declaration"
+                  module))
+         (hash-put! index module declaration)))
+     declarations)
+    index))
 
 ;; : (-> (List BuildSpec) (List VerifiedGeneratedModule) (List BuildSpec))
 (def (asp-gerbil-scheme-project-generated-modules build-spec declarations)
@@ -93,24 +89,32 @@
                (list? declarations))
     (error "generated module projection requires list contracts"
            build-spec declarations))
-  (let (modules
-        (map asp-gerbil-scheme-verified-generated-module-name declarations))
-    (unless
-     (and
-      (andmap
-       (lambda (declaration)
-         (let ((module
-                (asp-gerbil-scheme-verified-generated-module-name declaration))
-               (extra-inputs
-                (asp-gerbil-scheme-verified-generated-module-extra-inputs
-                 declaration)))
-           (and (string? module)
-                (> (string-length module) 0)
-                (list? extra-inputs)
-                (andmap string? extra-inputs))))
-       declarations)
-      (= (length modules)
-         (length (generated-module-ordered-unique modules))))
-     (error "invalid or duplicate verified generated module declaration"
-            modules)))
-  (foldl generated-module-project build-spec declarations))
+  (let* ((declarations-by-module
+          (generated-module-declaration-index declarations))
+         (target-counts (make-hash-table))
+         (projected
+          (map
+           (lambda (spec)
+             (let* ((module (generated-module-spec-module spec))
+                    (declaration
+                     (and module
+                          (hash-get declarations-by-module module))))
+               (if declaration
+                 (begin
+                   (hash-put! target-counts module
+                              (+ 1 (or (hash-get target-counts module) 0)))
+                   (generated-module-project-extra-inputs
+                    spec
+                    (asp-gerbil-scheme-verified-generated-module-extra-inputs
+                     declaration)))
+                 spec)))
+           build-spec)))
+    (for-each
+     (lambda (declaration)
+       (let (module
+             (asp-gerbil-scheme-verified-generated-module-name declaration))
+         (unless (= (or (hash-get target-counts module) 0) 1)
+           (error "verified generated module must own exactly one native target"
+                  module))))
+     declarations)
+    projected))

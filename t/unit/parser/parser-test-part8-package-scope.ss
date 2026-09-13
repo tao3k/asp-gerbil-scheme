@@ -64,7 +64,8 @@
             (write-text lib-path "(package: sample/build-scope/main)\n(def answer 42)\n")
             (write-text flat-path "(package: sample/build-scope/cli)\n(def (main . args) args)\n")
             (let* ((index (collect-selected-source-scope
-                           root ["build.ss" "cli.ss" "gerbil.pkg" "lib/main.ss"]))
+                           root ["build.ss" "cli.ss" "gerbil.pkg" "cli.ss"
+                                 "lib/main.ss"]))
                    (package (project-index-package index))
                    (scope (project-package-source-scope package)))
               (check (map source-file-path (project-index-files index))
