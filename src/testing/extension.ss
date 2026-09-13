@@ -19,14 +19,14 @@
         (only-in :std/source this-source-file)
         (only-in :std/misc/wg make-wg wg-add! wg-wait!)
         (only-in :std/misc/process run-process)
-        (only-in :std/srfi/1 find filter)
+        (only-in :std/srfi/1 find filter partition)
         (only-in :std/srfi/13 string-contains string-prefix?)
-        (only-in :std/sugar with-id)
-        (only-in ../build-api/core-capacity native-build-core-count))
+        (only-in :std/sugar with-id))
 
 (export testing-profile
         testing-profile?
         testing-profile-name
+        testing-test-selector
         testing-interface
         testing-interface-profile
         testing-interface-profile-names
@@ -43,13 +43,10 @@
         testing-interface-run-test!
         testing-interface-trace-poo-for
         testing-discovery-profile-ignore-directories
-        testing-discovery-profile-batch-size
-        testing-interface-batch-size-for
         testing-interface-ignore-directories-for
         testing-interface-test-file-included?
         testing-interface-test-files
-        testing-interface-test-files-share-runtime-options?
-        testing-interface-test-file-batches
+        testing-interface-test-file-serial?
         testing-interface-worker-count
         testing-interface-run-test-files!
         init-profiled-test-environment!
@@ -83,6 +80,40 @@
   (.o kind: 'testing-profile-binding
       test: test-path
       profile: bound-profile))
+
+(def (testing-test-selector relation-value selector-value)
+  (unless (and (memq relation-value '(exact contains))
+               (string? selector-value)
+               (> (string-length selector-value) 0))
+    (error "invalid testing test selector" relation-value selector-value))
+  (.o kind: 'testing-test-selector
+      relation: relation-value
+      value: selector-value))
+
+(def (testing-test-selector? value)
+  (and (object? value)
+       (.slot? value 'kind)
+       (eq? (.ref value 'kind) 'testing-test-selector)))
+
+(def (testing-test-selector-equal? left right)
+  (cond
+   ((and (string? left) (string? right))
+    (equal? left right))
+   ((and (testing-test-selector? left) (testing-test-selector? right))
+    (and (eq? (.ref left 'relation) (.ref right 'relation))
+         (equal? (.ref left 'value) (.ref right 'value))))
+   (else #f)))
+
+(def (testing-test-selector-matches? selector test)
+  (if (string? selector)
+    (equal? selector test)
+    (begin
+      (unless (testing-test-selector? selector)
+        (error "not a testing test selector" selector))
+      (case (.ref selector 'relation)
+        ((exact) (equal? (.ref selector 'value) test))
+        ((contains) (and (string-contains test (.ref selector 'value)) #t))
+        (else (error "unsupported testing test selector" selector))))))
 
 (def (testing-profile-replace profiles profile)
   (cons profile
@@ -132,7 +163,8 @@
          bindings:
          (cons (testing-profile-binding test profile)
                (filter (lambda (binding)
-                         (not (and (equal? (.ref binding 'test) test)
+                         (not (and (testing-test-selector-equal?
+                                    (.ref binding 'test) test)
                                    (testing-profile-matches?
                                     (.ref binding 'profile)
                                     (testing-profile-name profile)))))
@@ -153,7 +185,7 @@
 
 (def (testing-interface-profiles-for testing test)
   (foldl (lambda (binding profiles)
-           (if (equal? (.ref binding 'test) test)
+           (if (testing-test-selector-matches? (.ref binding 'test) test)
              (testing-profile-replace profiles (.ref binding 'profile))
              profiles))
          (.ref testing 'profiles)
@@ -183,16 +215,9 @@
 (def +testing-serial-resource-profile+
   (testing-profile 'serial-resource 'shared-resource-declaration))
 
-;;; A bounded native batch amortizes Gerbil process and module startup while
-;;; releasing the Gambit heap between batches.  This is an ASP testing-policy
-;;; default, not a project-owned concurrency setting; worker concurrency is
-;;; inherited separately from GERBIL_BUILD_CORES.
-(def +testing-test-batch-size+ 16)
-
 (def +testing-discovery-profile+
   (.cc (testing-profile 'discovery 'clan-test-file-filter)
-       ignoreDirectories: []
-       batchSize: +testing-test-batch-size+))
+       ignoreDirectories: []))
 
 (def +asp-testing-interface+
   (testing-interface
@@ -223,23 +248,6 @@
                  (andmap valid-ignore-directory? directories))
       (error "invalid testing discovery ignoreDirectories" directories))
     directories))
-
-(def (testing-discovery-profile-batch-size profile)
-  (unless (testing-profile-matches? profile 'discovery)
-    (error "not a testing discovery profile" profile))
-  (let (batch-size (.ref profile 'batchSize))
-    (unless (and (integer? batch-size) (> batch-size 0))
-      (error "invalid testing discovery batchSize" batch-size))
-    batch-size))
-
-(def (testing-interface-batch-size-for testing test)
-  (let (discovery
-        (find (lambda (profile)
-                (testing-profile-matches? profile 'discovery))
-              (testing-interface-profiles-for testing test)))
-    (if discovery
-      (testing-discovery-profile-batch-size discovery)
-      +testing-test-batch-size+)))
 
 (def (testing-interface-ignore-directories-for testing test)
   (let (discovery
@@ -281,9 +289,9 @@
 ;;   | doc m%
 ;;       Install the normal package unit-test entrypoint after clan discovers
 ;;       its native test files and the POO discovery profile subtracts ignored
-;;       child-package paths. Tests run as bounded multi-file batches through
-;;       the upstream Gerbil/clan testing command, so each worker shares module
-;;       loading while large suites release their heap between batches.
+;;       child-package paths. Every discovered file runs through one fresh
+;;       upstream `gerbil test` process, so its declared heap limit and module
+;;       namespace are isolated from every other file.
 ;;
 ;;       # Examples
 ;;       ```scheme
@@ -353,119 +361,56 @@
                directory: directory
                stdout-redirection: #f))
 
-(def (testing-interface-test-files-share-runtime-options? testing test-files)
-  (or (null? test-files)
-      (let (options (testing-interface-runtime-options-for
-                     testing (car test-files)))
-        (andmap (lambda (test-file)
-                  (equal? options
-                          (testing-interface-runtime-options-for
-                           testing test-file)))
-                (cdr test-files)))))
+(def (testing-interface-test-file-serial? testing test-file)
+  (and (find (lambda (profile)
+               (testing-profile-matches? profile 'serial-resource))
+             (testing-interface-profiles-for testing test-file))
+       #t))
 
-;; testing-interface-test-file-batches
-;;   : (-> TestingInterface (List Path) (List (List Path)))
-;;   | requires optional batch-size is a positive integer
-;;   | rationale bounds native process startup count without retaining the
-;;       entire project catalog in one Gambit heap
-;;   | doc m%
-;;       Partition upstream clan/testing files into bounded native Gerbil test
-;;       invocations. Adjacent files share a batch only when their process-level
-;;       runtime options are equal.
-;;
-;;       # Examples
-;;
-;;       ```scheme
-;;       (testing-interface-test-file-batches
-;;        +asp-testing-interface+ '("t/a-test.ss" "t/b-test.ss") 1)
-;;       ;; => (("t/a-test.ss") ("t/b-test.ss"))
-;;       ```
-;;     %
-(def (testing-interface-test-file-batches testing test-files
-                                          (configured-batch-size #f))
-  (def batch-size
-    (or configured-batch-size
-        (testing-interface-batch-size-for testing "unit-tests.ss")))
-  (unless (and (integer? batch-size) (> batch-size 0))
-    (error "test batch size must be a positive integer" batch-size))
-  (let loop ((remaining test-files)
-             (batch-rev [])
-             (batch-options #f)
-             (batch-count 0)
-             (batches-rev []))
-    (cond
-     ((null? remaining)
-      (reverse (if (null? batch-rev)
-                 batches-rev
-                 (cons (reverse batch-rev) batches-rev))))
-     (else
-      (let* ((test-file (car remaining))
-             (options (testing-interface-runtime-options-for
-                       testing test-file)))
-        (if (and (< batch-count batch-size)
-                 (or (not batch-options) (equal? options batch-options)))
-          (loop (cdr remaining) (cons test-file batch-rev)
-                options (+ batch-count 1) batches-rev)
-          (loop remaining [] #f 0
-                (cons (reverse batch-rev) batches-rev))))))))
+(def (testing-interface-worker-count test-count)
+  (min test-count (max (##cpu-count) 1)))
 
-(def (testing-interface-worker-count batch-count)
-  (min batch-count
-       (native-build-core-count
-        (getenv "GERBIL_BUILD_CORES" #f)
-        (##cpu-count))))
-
-(def (testing-interface-command-for-files testing test-files)
-  (append ["gerbil"]
-          (if (null? test-files)
-            []
-            (testing-interface-runtime-options-for testing (car test-files)))
-          ["test"]
-          test-files))
-
-(def (testing-interface-run-test-batch! testing test-files)
-  (displayln "[asp-testing] phase=batch-start fileCount="
-             (length test-files)
-             " firstFile=" (and (pair? test-files) (car test-files)))
+(def (testing-interface-run-test-file! testing test-file)
+  (displayln "[asp-testing] phase=test-start file=" test-file)
   (force-output)
   (let-values (((elapsed-nanoseconds result)
                 (call-with-timing
                  (lambda ()
-                   (run-process
-                    (testing-interface-command-for-files testing test-files)
-                    directory: (current-directory)
-                    stdout-redirection: #f)))))
-    (displayln "[asp-testing] phase=batch-complete elapsedNs="
+                   (testing-interface-run-test! testing test-file)))))
+    (displayln "[asp-testing] phase=test-complete elapsedNs="
                elapsed-nanoseconds
-               " fileCount=" (length test-files)
-               " firstFile=" (and (pair? test-files) (car test-files)))
+               " file=" test-file)
     (force-output)
     result))
 
 (def (testing-interface-run-test-files! testing test-files)
-  (let* ((batches (testing-interface-test-file-batches testing test-files))
-         (worker-count (testing-interface-worker-count (length batches)))
-         (workgroup (and (> worker-count 0) (make-wg worker-count))))
-    ;; Emit the parent-side handoff before any test module is imported.  This
-    ;; bounds time-to-first-observation independently of slow child imports and
-    ;; leaves clan/testing and `gerbil test` as the execution authority.
-    (displayln "[asp-testing] phase=batch-dispatch fileCount="
-               (length test-files)
-               " batchCount=" (length batches)
-               " workerCount=" worker-count)
-    (force-output)
-    (for-each
-     (lambda (batch)
-       (wg-add! workgroup
-                (cut testing-interface-run-test-batch! testing batch)))
-     batches)
-    (let-values (((elapsed-nanoseconds _result)
-                  (call-with-timing (lambda () (wg-wait! workgroup)))))
-      (displayln "[asp-testing] phase=all-batches-complete elapsedNs="
-                 elapsed-nanoseconds
-                 " batchCount=" (length batches))
-      (force-output))
-    #t))
+  (let-values (((serial-files parallel-files)
+                (partition (cut testing-interface-test-file-serial?
+                                testing <>)
+                           test-files)))
+    (let* ((worker-count
+            (testing-interface-worker-count (length parallel-files)))
+           (workgroup (and (> worker-count 0) (make-wg worker-count))))
+      (displayln "[asp-testing] phase=test-dispatch fileCount="
+                 (length test-files)
+                 " parallelFileCount=" (length parallel-files)
+                 " serialFileCount=" (length serial-files)
+                 " workerCount=" worker-count)
+      (force-output)
+      (when workgroup
+        (for-each
+         (lambda (test-file)
+           (wg-add! workgroup
+                    (cut testing-interface-run-test-file! testing test-file)))
+         parallel-files)
+        (wg-wait! workgroup))
+      ;; Shared-resource profiles run only after the parallel lane has fully
+      ;; quiesced. Each file still owns one fresh upstream Gerbil process.
+      (for-each (cut testing-interface-run-test-file! testing <>) serial-files)
+      (displayln "[asp-testing] phase=all-tests-complete fileCount="
+                 (length test-files))
+      (force-output)
+      #t)))
 
 ;;; Apply the selected POO memory profile to the current Gambit runtime.  This
 ;;; uses the upstream heap API directly; callers never construct startup argv.

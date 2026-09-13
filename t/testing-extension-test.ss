@@ -72,11 +72,7 @@
       (check (testing-interface-ignore-directories-for
               +testing-entry-witness+
               "unit-tests.ss")
-             => '("nested-package"))
-      (check (testing-interface-batch-size-for
-              +testing-entry-witness+
-              "unit-tests.ss")
-             => 16))
+             => '("nested-package")))
 
     (test-case "invalid discovery boundaries fail closed"
       (let (testing
@@ -154,50 +150,25 @@
                    "-q"
                    "t/large-test.ss"])))
 
-    (test-case "uniform runtime profiles share bounded upstream batches"
-      (check (testing-interface-test-files-share-runtime-options?
-              +asp-testing-interface+
-              '("t/a-test.ss" "t/b-test.ss"))
-             => #t)
-      (let (mapped
-            (testing-interface-map-profile
-             +asp-testing-interface+
-             "t/b-test.ss"
-             (.cc +testing-memory-profile+ maxHeapMiB: 256)))
-        (check (testing-interface-test-files-share-runtime-options?
+    (test-case "resource profiles select a serial lane declaratively"
+      (let* ((performance-tests
+              (testing-test-selector 'contains "performance-test"))
+             (mapped
+              (testing-interface-map-profile
+               +asp-testing-interface+
+               performance-tests
+               +testing-serial-resource-profile+)))
+        (check (testing-interface-test-file-serial?
                 mapped
-                '("t/a-test.ss" "t/b-test.ss"))
+                "t/graph-performance-test.ss")
+               => #t)
+        (check (testing-interface-test-file-serial?
+                mapped
+                "t/graph-test.ss")
                => #f))
-      (check (testing-interface-test-file-batches
-              +asp-testing-interface+
-              '("t/a-test.ss" "t/b-test.ss" "t/c-test.ss")
-              2)
-             => '(("t/a-test.ss" "t/b-test.ss")
-                  ("t/c-test.ss")))
-      (check (testing-interface-test-file-batches
-              +asp-testing-interface+
-              '("t/a-test.ss" "t/b-test.ss"))
-             => '(("t/a-test.ss" "t/b-test.ss")))
-      (let (batched
-            (testing-interface-add-profile
-             +asp-testing-interface+
-             (.cc +testing-discovery-profile+
-                  ignoreDirectories: []
-                  batchSize: 2)))
-        (check (testing-interface-test-file-batches
-                batched
-                '("t/a-test.ss" "t/b-test.ss"))
-               => '(("t/a-test.ss" "t/b-test.ss"))))
       (check (testing-interface-worker-count 0) => 0)
-      (let (previous-build-cores (getenv "GERBIL_BUILD_CORES" #f))
-        (dynamic-wind
-          (lambda () (setenv "GERBIL_BUILD_CORES" "2"))
-          (lambda ()
-            (check (testing-interface-worker-count 8) => 2)
-            (check (testing-interface-worker-count 1) => 1))
-          (lambda ()
-            (setenv "GERBIL_BUILD_CORES"
-                    (or previous-build-cores ""))))))
+      (check (testing-interface-worker-count (+ (##cpu-count) 1))
+             => (max (##cpu-count) 1)))
 
     (test-case "the POO profile configures the current upstream runtime"
       (let (previous-max-heap (##get-max-heap))
