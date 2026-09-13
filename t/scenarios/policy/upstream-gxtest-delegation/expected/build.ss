@@ -3,7 +3,7 @@
 ;;; optional instrumentation bound to an explicit upstream test file.
 
 (import :clan/poo/object
-        :asp-gerbil-scheme/build-api)
+        :asp-gerbil-scheme/testing-api)
 
 (export upstream-testing)
 

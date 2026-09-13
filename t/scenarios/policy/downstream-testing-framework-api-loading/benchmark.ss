@@ -15,7 +15,7 @@
   "keep gerbil test and clan/testing authoritative while composing bounded POO instrumentation")
  (inputShape
   .
-  "downstream build.ss declares gxtest, performance, and policy scenario suites through the stable :asp-gerbil-scheme/build-api facade; the input performance test builds benchmark timing directly")
+  "downstream tests opt into :asp-gerbil-scheme/testing-api; PackageSpec loading remains isolated in :asp-gerbil-scheme/build-api")
  (expectedOutcome
   .
   "map optional profiles to explicit upstream test paths and keep benchmark timing as a POO observation receipt")

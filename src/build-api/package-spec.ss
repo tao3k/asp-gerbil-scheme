@@ -19,7 +19,7 @@
                    (all-gerbil-modules upstream-all-gerbil-modules)
                    (default-exclude-dirs upstream-default-exclude-dirs))
         (only-in :clan/building remove-build-file normalize-spec pkg-config-options)
-        (only-in "./generated-artifact"
+        (only-in "./generated-module-projection"
                  asp-gerbil-scheme-project-generated-modules)
         (only-in "./core-capacity"
                  initialize-native-build-core-capacity!)
@@ -63,7 +63,12 @@
           (else #f)))
     (and path
          (or (string-prefix? "src/" path)
-             (member path '("build-api.ss" "version.ss"))))))
+             (member path '("build-api.ss"
+                            "building-api.ss"
+                            "testing-api.ss"
+                            "policy-api.ss"
+                            "benchmark-api.ss"
+                            "version.ss"))))))
 
 ;; : (-> PackageSpec (List NativeBuildItem))
 (def (asp-gerbil-scheme-package-modules package-spec)

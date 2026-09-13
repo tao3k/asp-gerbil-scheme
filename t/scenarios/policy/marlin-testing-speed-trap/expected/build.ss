@@ -3,7 +3,7 @@
 ;;; onto the explicit files that need different resource envelopes.
 
 (import :clan/poo/object
-        :asp-gerbil-scheme/build-api)
+        :asp-gerbil-scheme/testing-api)
 
 (export marlin-testing)
 

@@ -42,7 +42,15 @@
              (call-with-input-file "provider-package-spec.ss"
                                    read-all-as-string))
             (public-facade-source
-             (call-with-input-file "build-api.ss" read-all-as-string)))
+             (call-with-input-file "build-api.ss" read-all-as-string))
+            (building-api-source
+             (call-with-input-file "building-api.ss" read-all-as-string))
+            (testing-api-source
+             (call-with-input-file "testing-api.ss" read-all-as-string))
+            (policy-api-source
+             (call-with-input-file "policy-api.ss" read-all-as-string))
+            (benchmark-api-source
+             (call-with-input-file "benchmark-api.ss" read-all-as-string)))
         (check (string-contains library-source "defbuild-script")
                ? true)
         (check (string-contains library-source "init-build-environment!") => #f)
@@ -115,6 +123,26 @@
                                 "./src/build-api/source-coverage")
                => #f)
         (for-each
+         (lambda (forbidden-owner)
+           (check (string-contains public-facade-source forbidden-owner)
+                  => #f))
+         '("./src/building/"
+           "./src/testing/"
+           "./src/policy/"
+           "./src/benchmark/"
+           ":clan/testing"))
+        (check (string-contains public-facade-source
+                                "./src/build-api/package-spec")
+               ? true)
+        (check (string-contains building-api-source "./src/building/facade")
+               ? true)
+        (check (string-contains testing-api-source "./src/testing/extension")
+               ? true)
+        (check (string-contains policy-api-source "./src/policy/gxtest")
+               ? true)
+        (check (string-contains benchmark-api-source "./src/benchmark/gate")
+               ? true)
+        (for-each
          (lambda (duplicate-owner)
            (check (string-contains public-facade-source duplicate-owner)
                   => #f))
@@ -126,12 +154,7 @@
            "./src/testing/gxtest-discovery"
            "./src/testing/selection"
            "./src/testing/scope"))
-        (for-each
-         (lambda (extension-owner)
-           (check (string-contains public-facade-source extension-owner)
-                  ? true))
-         '("./src/testing/extension"
-           "./src/testing/performance"))))
+        ))
     (test-case "retired duplicate native owners stay absent"
       (for-each
        (lambda (path)

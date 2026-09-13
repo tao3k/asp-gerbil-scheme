@@ -10,11 +10,11 @@
         (only-in :std/misc/path
                  path-directory path-expand path-maybe-normalize
                  path-simplify subpath?)
-        (only-in :std/misc/plist pgetq psetq)
         (only-in :std/misc/ports read-all-as-u8vector)
         (only-in :std/srfi/13 string-prefix?)
         (only-in :std/sugar with-catch)
-        (only-in :std/text/utf8 string->utf8))
+        (only-in :std/text/utf8 string->utf8)
+        "./generated-module-projection")
 
 (export asp-gerbil-scheme-generated-artifact-member-prototype
         asp-gerbil-scheme-generated-artifact-member
@@ -37,15 +37,11 @@
         asp-gerbil-scheme-generated-artifact-resolution-key
         asp-gerbil-scheme-generated-artifact-resolution-locators
         asp-gerbil-scheme-generated-artifact-resolution-receipt
-        asp-gerbil-scheme-verified-generated-module-prototype
-        asp-gerbil-scheme-verified-generated-module
-        asp-gerbil-scheme-verified-generated-module-name
-        asp-gerbil-scheme-verified-generated-module-extra-inputs
         asp-gerbil-scheme-generated-artifact-receipt-schema
         asp-gerbil-scheme-generated-artifact-key
         asp-gerbil-scheme-generated-artifact-receipt-path
         asp-gerbil-scheme-resolve-generated-artifact-bundle!
-        asp-gerbil-scheme-project-generated-modules)
+        (import: "./generated-module-projection"))
 
 (def asp-gerbil-scheme-generated-artifact-receipt-schema
   'asp-gerbil-scheme.generated-artifact-receipt.v1)
@@ -148,25 +144,6 @@
               (asp-gerbil-scheme-generated-artifact-resolution-key key)
               (asp-gerbil-scheme-generated-artifact-resolution-locators locators)
               (asp-gerbil-scheme-generated-artifact-resolution-receipt receipt))
-             (optional)))
-
-;; A package-level declaration projects only to std/make's native
-;; extra-inputs: plist. It does not remove, split, or mark a target current.
-(defpoo-object-family
-  (prototype asp-gerbil-scheme-verified-generated-module-prototype
-             (module #f)
-             (extra-inputs []))
-  (constructor
-   (asp-gerbil-scheme-verified-generated-module
-    module: (module-name #f)
-    extra-inputs: (module-extra-inputs []))
-   (module module-name)
-   (extra-inputs module-extra-inputs))
-  (accessors poo-family-ref
-             (required
-              (asp-gerbil-scheme-verified-generated-module-name module)
-              (asp-gerbil-scheme-verified-generated-module-extra-inputs
-               extra-inputs))
              (optional)))
 
 (def (generated-artifact-alist-ref value key (default #f))
@@ -513,99 +490,3 @@
            key: (asp-gerbil-scheme-generated-artifact-key bundle)
            locators: locators
            receipt: receipt)))))
-
-(def (generated-artifact-ordered-unique values)
-  (reverse
-   (foldl (lambda (value result)
-            (if (member value result)
-              result
-              (cons value result)))
-          []
-          values)))
-
-(def (generated-artifact-spec-module spec)
-  (cond
-   ((string? spec) spec)
-   ((and (pair? spec)
-         (eq? (car spec) gxc:)
-         (pair? (cdr spec))
-         (string? (cadr spec)))
-    (cadr spec))
-   (else #f)))
-
-(def (generated-artifact-project-extra-inputs spec extra-inputs)
-  (match spec
-    ((? string? module)
-     [gxc: module [extra-inputs: extra-inputs]])
-    ([gxc: module [plist ...] . options]
-     [gxc: module
-           (psetq plist extra-inputs:
-                  (generated-artifact-ordered-unique
-                   (append (pgetq extra-inputs: plist []) extra-inputs)))
-           . options])
-    ([gxc: module . options]
-     [gxc: module [extra-inputs: extra-inputs] . options])
-    (else
-     (error "verified generated module must project to a gxc target" spec))))
-
-(def (generated-artifact-project-module declaration build-spec)
-  (let* ((module
-          (asp-gerbil-scheme-verified-generated-module-name declaration))
-         (matches
-          (filter (lambda (spec)
-                    (equal? (generated-artifact-spec-module spec) module))
-                  build-spec)))
-    (unless (= (length matches) 1)
-      (error "verified generated module must own exactly one native target"
-             module))
-    (map (lambda (spec)
-           (if (equal? (generated-artifact-spec-module spec) module)
-             (generated-artifact-project-extra-inputs
-              spec
-              (asp-gerbil-scheme-verified-generated-module-extra-inputs
-               declaration))
-             spec))
-         build-spec)))
-
-;; asp-gerbil-scheme-project-generated-modules
-;;   : (forall (s d) (-> [s] [d] [s]))
-;;   : (-> (List BuildSpec) (List VerifiedGeneratedModule) (List BuildSpec))
-;;   | doc m%
-;;       Project verified generated-module declarations onto their uniquely
-;;       owned native `gxc:` targets while preserving target order and options.
-;;
-;;       # Examples
-;;
-;;       ```scheme
-;;       (asp-gerbil-scheme-project-generated-modules
-;;        ["plain.ss" "generated.ss"]
-;;        [generated-module])
-;;       ;; => native BuildSpec with generated-module extra-inputs
-;;       ```
-;;     %
-(def (asp-gerbil-scheme-project-generated-modules build-spec declarations)
-  (unless (and (list? build-spec)
-               (list? declarations))
-    (error "generated module projection requires list contracts"
-           build-spec declarations))
-  (let (modules
-        (map asp-gerbil-scheme-verified-generated-module-name declarations))
-    (unless
-     (and
-      (andmap
-       (lambda (declaration)
-         (let ((module
-                (asp-gerbil-scheme-verified-generated-module-name declaration))
-               (extra-inputs
-                (asp-gerbil-scheme-verified-generated-module-extra-inputs
-                 declaration)))
-           (and (string? module)
-                (> (string-length module) 0)
-                (list? extra-inputs)
-                (andmap string? extra-inputs))))
-       declarations)
-      (= (length modules)
-         (length (generated-artifact-ordered-unique modules))))
-     (error "invalid or duplicate verified generated module declaration"
-            modules)))
-  (foldl generated-artifact-project-module build-spec declarations))

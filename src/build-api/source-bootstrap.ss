@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Internal source bootstrap for this package's root build entrypoints.
-;;; Downstream packages continue to import only :asp-gerbil-scheme/build-api;
-;;; this narrow projection prevents a cold build from loading the ASP product,
-;;; Testing, Policy, or benchmark graph before std/make owns compilation.
+;;; The public :asp-gerbil-scheme/build-api facade has the same narrow closure;
+;;; this source-relative owner additionally bootstraps this package's own cold
+;;; build before the public facade has been compiled.
 
 (import (only-in "./package-spec"
                  asp-gerbil-scheme-package-spec!

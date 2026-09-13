@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-(import :asp-gerbil-scheme/build-api)
+(import :asp-gerbil-scheme/policy-api)
 
 (export project-policy-test)
 

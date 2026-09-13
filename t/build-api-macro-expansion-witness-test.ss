@@ -6,7 +6,7 @@
         (only-in :asp-gerbil-scheme/src/building/commands
                  define-build-options
                  define-build-commands)
-        (only-in :asp-gerbil-scheme/build-api
+        (only-in :asp-gerbil-scheme/building-api
                  define-build-profile
                  define-build-request
                  std-build

@@ -3,7 +3,7 @@
 ;;; gerbil test and clan/testing remain the downstream testing interface.
 
 (import :clan/poo/object
-        :asp-gerbil-scheme/build-api)
+        :asp-gerbil-scheme/testing-api)
 
 (export downstream-testing)
 
