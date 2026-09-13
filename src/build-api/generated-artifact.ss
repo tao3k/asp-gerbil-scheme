@@ -146,15 +146,24 @@
               (asp-gerbil-scheme-generated-artifact-resolution-receipt receipt))
              (optional)))
 
+;; : (forall (k v) (-> [(Pair k v)] k v v))
+;; generated-artifact-alist-ref
+;; : (-> Alist Symbol Datum Datum)
 (def (generated-artifact-alist-ref value key (default #f))
   (let (entry (and (list? value) (assq key value)))
     (if entry (cdr entry) default)))
 
+;; : (forall (n) (-> n String))
+;; generated-artifact-byte->hex
+;; : (-> Byte String)
 (def (generated-artifact-byte->hex byte)
   (let (digits "0123456789abcdef")
     (string (string-ref digits (quotient byte 16))
             (string-ref digits (modulo byte 16)))))
 
+;; : (forall (b) (-> b String))
+;; generated-artifact-sha256
+;; : (-> U8Vector Digest)
 (def (generated-artifact-sha256 bytes)
   (string-append
    "sha256:"
@@ -162,21 +171,33 @@
           (map generated-artifact-byte->hex
                (u8vector->list (sha256 bytes))))))
 
+;; : (forall (a) (-> a String))
+;; generated-artifact-datum-digest
+;; : (-> Datum Digest)
 (def (generated-artifact-datum-digest value)
   (generated-artifact-sha256
    (string->utf8 (object->string value))))
 
+;; : (forall (p) (-> p String))
+;; generated-artifact-file-digest
+;; : (-> Path Digest)
 (def (generated-artifact-file-digest path)
   (call-with-input-file
    path
    (lambda (input)
      (generated-artifact-sha256 (read-all-as-u8vector input)))))
 
+;; : (forall (p) (-> p Boolean))
+;; generated-artifact-valid-relative-path?
+;; : (-> Path Boolean)
 (def (generated-artifact-valid-relative-path? path)
   (and (string? path)
        (> (string-length path) 0)
        (not (string-prefix? "/" path))))
 
+;; : (forall (a) (-> a Boolean))
+;; generated-artifact-canonical-datum?
+;; : (-> Datum Boolean)
 (def (generated-artifact-canonical-datum? value)
   (cond
    ((or (null? value)
@@ -193,11 +214,17 @@
     (andmap generated-artifact-canonical-datum? (vector->list value)))
    (else #f)))
 
+;; : (forall (p) (-> p p))
+;; generated-artifact-normalized-root
+;; : (-> Path Path)
 (def (generated-artifact-normalized-root root)
   (unless (and (string? root) (> (string-length root) 0))
     (error "generated artifact root must be a non-empty path" root))
   (path-maybe-normalize (path-expand root (current-directory))))
 
+;; : (forall (p r) (-> p r p))
+;; generated-artifact-resolve-owned-path
+;; : (-> Path RelativePath Path)
 (def (generated-artifact-resolve-owned-path root relative)
   (unless (generated-artifact-valid-relative-path? relative)
     (error "generated artifact path must be root-relative" relative))
@@ -210,14 +237,23 @@
       (error "generated artifact path escapes its root" relative root))
     resolved))
 
+;; : (forall (p) (-> p Void))
+;; generated-artifact-ensure-directory!
+;; : (-> Path Void)
 (def (generated-artifact-ensure-directory! path)
   (unless (file-exists? path)
     (create-directory* path)))
 
+;; : (forall (m) (-> m Alist))
+;; generated-artifact-member-signature
+;; : (-> GeneratedArtifactMember Alist)
 (def (generated-artifact-member-signature member)
   `((name . ,(asp-gerbil-scheme-generated-artifact-member-name member))
     (schema . ,(asp-gerbil-scheme-generated-artifact-member-schema member))))
 
+;; : (forall (b) (-> b Alist))
+;; generated-artifact-contract-identity
+;; : (-> GeneratedArtifactBundle Alist)
 (def (generated-artifact-contract-identity bundle)
   `((namespace
      . ,(asp-gerbil-scheme-generated-artifact-bundle-namespace bundle))
@@ -230,10 +266,16 @@
      . ,(map generated-artifact-member-signature
              (asp-gerbil-scheme-generated-artifact-bundle-members bundle)))))
 
+;; : (forall (b) (-> b String))
+;; asp-gerbil-scheme-generated-artifact-key
+;; : (-> GeneratedArtifactBundle Digest)
 (def (asp-gerbil-scheme-generated-artifact-key bundle)
   (generated-artifact-datum-digest
    (generated-artifact-contract-identity bundle)))
 
+;; : (forall (b) (-> b Void))
+;; generated-artifact-validate-bundle!
+;; : (-> GeneratedArtifactBundle Void)
 (def (generated-artifact-validate-bundle! bundle)
   (let ((namespace
          (asp-gerbil-scheme-generated-artifact-bundle-namespace bundle))
@@ -289,6 +331,9 @@
             (error "invalid generated artifact member contract" name))
           (loop (cdr remaining) (cons name names)))))))
 
+;; : (forall (b) (-> b String))
+;; asp-gerbil-scheme-generated-artifact-receipt-path
+;; : (-> GeneratedArtifactBundle Path)
 (def (asp-gerbil-scheme-generated-artifact-receipt-path bundle)
   (generated-artifact-resolve-owned-path
    (asp-gerbil-scheme-generated-artifact-bundle-receipt-root bundle)
@@ -298,6 +343,9 @@
     (asp-gerbil-scheme-generated-artifact-key bundle)
     ".ss")))
 
+;; : (forall (b r) (-> b (Maybe r)))
+;; generated-artifact-receipt-read
+;; : (-> GeneratedArtifactBundle (Maybe Alist))
 (def (generated-artifact-receipt-read bundle)
   (let (path (asp-gerbil-scheme-generated-artifact-receipt-path bundle))
     (and (file-exists? path)
@@ -314,6 +362,9 @@
                            asp-gerbil-scheme-generated-artifact-receipt-schema)
                       receipt)))))))))
 
+;; : (forall (b r p) (-> b r (List p)))
+;; generated-artifact-existing-paths
+;; : (-> GeneratedArtifactBundle RelativePath (List Path))
 (def (generated-artifact-existing-paths bundle relative)
   (filter file-exists?
           (map (lambda (root)
@@ -321,6 +372,9 @@
                (asp-gerbil-scheme-generated-artifact-bundle-artifact-roots
                 bundle))))
 
+;; : (forall (b r a) (-> b r a))
+;; generated-artifact-current-file-record
+;; : (-> GeneratedArtifactBundle RelativePath Alist)
 (def (generated-artifact-current-file-record bundle relative)
   (let (paths (generated-artifact-existing-paths bundle relative))
     (and (pair? paths)
@@ -333,6 +387,9 @@
            (and matching?
                 `((path . ,relative) (digest . ,digest)))))))
 
+;; : (forall (b m l a) (-> b m l (List a)))
+;; generated-artifact-current-file-records
+;; : (-> GeneratedArtifactBundle GeneratedArtifactMember Locator (List Alist))
 (def (generated-artifact-current-file-records bundle member locator)
   (let (relative-paths
         ((asp-gerbil-scheme-generated-artifact-bundle-artifact-paths bundle)

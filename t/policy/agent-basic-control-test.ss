@@ -122,7 +122,7 @@
          ";;; -*- Gerbil -*-\n(export relative-value)\n(def relative-value 1)\n")
         (write-text
          (string-append relative "/interface.ss")
-         ";;; -*- Gerbil -*-\n(import ./core)\n(export (import: ./core))\n")
+         ";;; -*- Gerbil -*-\n(import \"./core\")\n(export (import: \"./core\"))\n")
         (let* ((index (collect-project root))
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-018" findings)))

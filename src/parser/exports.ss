@@ -70,11 +70,22 @@
        (member (car datum) '(import: only-in except-out phi:))
        (let (found
              (find (lambda (item)
-                     (and (symbol? item)
-                          (module-reference-text?
-                           (symbol->string item))))
+                     (let (text (export-module-reference-text item))
+                       (and text (module-reference-text? text))))
                    (flatten datum)))
-         (and found (symbol->string found)))))
+         (and found (export-module-reference-text found)))))
+
+;;; Gerbil admits both symbolic and quoted-string module references. Normalize
+;;; them before the export/import join so public string-path facades retain the
+;;; same parser-owned re-export identity as symbolic module references.
+;; : (forall (a) (-> a (Maybe String)))
+;; export-module-reference-text
+;; : (-> Datum (Maybe ModuleRef))
+(def (export-module-reference-text item)
+  (cond
+   ((string? item) item)
+   ((symbol? item) (symbol->string item))
+   (else #f)))
 
 ;;; Re-export module references use the same absolute or owner-relative forms
 ;;; as imports; recognizing both keeps facade facts joined without text scans.

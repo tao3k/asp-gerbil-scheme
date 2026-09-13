@@ -16,6 +16,9 @@
 (def +default-exclude-files+ '("main.ss" "manifest.ss"))
 (def default-exclude-dirs '("run" "t" ".git" "_darcs" ".gerbil"))
 
+;; : (forall (p) (-> (List p) (List p) (List p)))
+;; all-gerbil-modules
+;; : (-> (List Path) (List Path) (List Path))
 (def (all-gerbil-modules exclude: (exclude +default-exclude-files+)
                          exclude-dirs: (exclude-dirs default-exclude-dirs))
   ((cut lset-difference equal? <> exclude)
@@ -27,6 +30,9 @@
                (lambda (path)
                  (not (member (path-strip-directory path) exclude-dirs))))))
 
+;; : (forall (p) (-> p String (-> p Boolean)))
+;; source-file-matcher
+;; : (-> Path String (-> Path Boolean))
 (def (source-file-matcher file (extension ".ss"))
   (let* ((with-extension (path-default-extension file extension))
          (without-extension (path-strip-extension with-extension)))
@@ -34,6 +40,9 @@
       (or (equal? with-extension candidate)
           (equal? without-extension candidate)))))
 
+;; : (forall (p s) (-> (List s) p (List s)))
+;; remove-build-file
+;; : (-> (List BuildSpec) Path (List BuildSpec))
 (def (remove-build-file files file)
   (let (file? (source-file-matcher file))
     (filter (match <>
@@ -42,6 +51,9 @@
               (_ #t))
             files)))
 
+;; : (forall (s o) (-> s (List o) s))
+;; normalize-spec
+;; : (-> BuildSpec (List BuildOption) BuildSpec)
 (def (normalize-spec spec gsc-options)
   (match spec
     ((? string?) [gxc: spec . gsc-options])
