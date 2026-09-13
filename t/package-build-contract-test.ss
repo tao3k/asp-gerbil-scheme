@@ -54,15 +54,13 @@
         (check (string-contains library-source "defbuild-script")
                ? true)
         (check (string-contains library-source "init-build-environment!") => #f)
-        (check (string-contains library-source "all-gerbil-modules")
-               ? true)
+        ;; Source discovery is the PackageSpec prototype's default projection;
+        ;; build.ss declares only project-specific product boundaries.
+        (check (string-contains library-source "all-gerbil-modules") => #f)
         (check (string-contains library-source
                                 "(exclude-dirs => append '(\"build\"))")
                => #f)
-        (check (string-contains
-                library-source
-                "(modules (all-gerbil-modules))")
-               ? true)
+        (check (string-contains library-source "(modules ") => #f)
         (check (string-contains package-spec-source
                                 "upstream-default-exclude-dirs")
                ? true)
