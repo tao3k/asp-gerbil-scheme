@@ -6,10 +6,10 @@
         :std/misc/ports
         :std/misc/process
         (only-in :std/text/json read-json)
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios
         :policy/fixtures)
 (export agent-basic-declarative-policy-test)
@@ -31,6 +31,31 @@
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
             (check matching => [])))
+(test-case "agent policy treats the native POO family macro as declarative"
+      (let* ((root ".run/policy-poo-object-family-declarative")
+             (src (string-append root "/src")))
+        (reset-fixture-root root)
+        (ensure-dir ".run")
+        (ensure-dir root)
+        (ensure-dir src)
+        (write-text
+         (string-append root "/gerbil.pkg")
+         "(package: sample/poo-object-family-declarative)\n")
+        (write-text
+         (string-append src "/objects.ss")
+         (string-append
+          ";;; -*- Gerbil -*-\n"
+          "(import (only-in :asp-gerbil-scheme/src/object-family/syntax defpoo-object-family poo-family-ref))\n"
+          "(defpoo-object-family\n"
+          "  (prototype sample-prototype (sample? #t))\n"
+          "  (constructor (make-sample value-value) (value value-value))\n"
+          "  (accessors poo-family-ref\n"
+          "             (required (sample-value value))\n"
+          "             (optional)))\n"))
+        (let* ((index (collect-project root))
+               (findings (run-agent-policy index))
+               (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
+          (check matching => []))))
 (test-case "agent policy treats user config and module object fragments as declarative"
       (let* ((root ".run/policy-agent-declarative-config")
              (src (string-append root "/src"))
@@ -67,7 +92,7 @@
          "(package: sample/agent-declarative-alist-metadata)\n")
         (write-text
          (string-append owner "/benchmark.ss")
-         ";;; -*- Gerbil -*-\n((max_total . 120ms)\n (maxCollectMs . 1000)\n (feature . flow-strand-registry-merge)\n (measurementPhases prepare-fixture measure-best assert-time-gate))\n")
+         ";;; -*- Gerbil -*-\n((benchmarkKind . scenario-e2e)\n (max_total . 120ms)\n (target_total . 20ms)\n (regression_budget . 100ms)\n (expected_over_input_budget . 10ms)\n (sampleCount . 20)\n (feature . flow-strand-registry-merge)\n (measurementPhases prepare-fixture measure-p95 assert-time-gate))\n")
         (let* ((index (collect-project root))
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
@@ -91,4 +116,79 @@
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
           (check matching => []))))
+(test-case "agent policy treats native multicall macros as declarative entrypoints"
+      (let* ((root ".run/policy-native-multicall-declarative")
+             (src (string-append root "/src")))
+        (reset-fixture-root root)
+        (ensure-dir ".run")
+        (ensure-dir root)
+        (ensure-dir src)
+        (write-text
+         (string-append root "/gerbil.pkg")
+         "(package: sample/native-multicall-declarative)\n")
+        (write-text
+         (string-append src "/cli.ss")
+         ";;; -*- Gerbil -*-\n(import :std/cli/getopt :std/cli/multicall)\n(define-entry-point (compile verbose: (verbose #f))\n  (help: \"Compile the package\" getopt: [])\n  (displayln verbose))\n(define-multicall-main)\n")
+        (let* ((index (collect-project root))
+               (findings (run-agent-policy index))
+               (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
+          (check matching => []))))
+(test-case "agent policy accepts exact local definition-lowering macros"
+      (let* ((root ".run/policy-definition-lowering-macro")
+             (src (string-append root "/src")))
+        (reset-fixture-root root)
+        (ensure-dir ".run")
+        (ensure-dir root)
+        (ensure-dir src)
+        (write-text
+         (string-append root "/gerbil.pkg")
+         "(package: sample/definition-lowering-macro)\n")
+        (write-text
+         (string-append src "/objects.ss")
+         (string-append
+          ";;; -*- Gerbil -*-\n"
+          "(defsyntax define-value\n"
+          "  (syntax-rules ()\n"
+          "    ((_ (name field ...) kind)\n"
+          "     (def (name field ...)\n"
+          "       (list (cons 'kind kind) (cons 'field field) ...)))))\n"
+          "(define-value (sample-object name count) 'sample)\n"))
+        (let* ((index (collect-project root))
+               (file (find-owner index "src/objects.ss"))
+               (macro (car (source-file-macros file)))
+               (findings (run-agent-policy index))
+               (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
+          (check (macro-fact-pattern-count macro) => 1)
+          (check (not (not (member "definition-lowering-macro"
+                                   (macro-fact-quality-facets macro))))
+                 => #t)
+          (check matching => []))))
+(test-case "agent policy rejects effectful local syntax-rules macros"
+      (let* ((root ".run/policy-effectful-local-macro")
+             (src (string-append root "/src")))
+        (reset-fixture-root root)
+        (ensure-dir ".run")
+        (ensure-dir root)
+        (ensure-dir src)
+        (write-text
+         (string-append root "/gerbil.pkg")
+         "(package: sample/effectful-local-macro)\n")
+        (write-text
+         (string-append src "/effects.ss")
+         (string-append
+          ";;; -*- Gerbil -*-\n"
+          "(defsyntax emit-now\n"
+          "  (syntax-rules () ((_ value) (displayln value))))\n"
+          "(emit-now \"module-load-effect\")\n"))
+        (let* ((index (collect-project root))
+               (file (find-owner index "src/effects.ss"))
+               (macro (car (source-file-macros file)))
+               (findings (run-agent-policy index))
+               (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
+          (check (member "definition-lowering-macro"
+                         (macro-fact-quality-facets macro))
+                 => #f)
+          (check (length matching) => 1)
+          (check (type-finding-selector (car matching))
+                 => "src/effects.ss:4-4"))))
   ))

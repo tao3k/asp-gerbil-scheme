@@ -6,16 +6,16 @@
         :std/misc/ports
         :std/misc/process
         (only-in :std/text/json read-json)
-        :gslph/src/parser/facade
-        (only-in :gslph/src/policy/agent-basic
+        :asp-gerbil-scheme/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/policy/agent-basic
                  generic-owner-findings
                  vague-definition-findings)
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/policy/streaming
-        :gslph/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/policy/streaming
+        :asp-gerbil-scheme/src/types/facade
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
 (export agent-basic-core-policy-test)
 
 ;; PolicyTest
@@ -74,7 +74,11 @@
                  (expected
                   (append (generic-owner-findings index)
                           (vague-definition-findings index)))
-                 (actual (run-basic-agent-policy/streaming root 1))
+                 (actual
+                  (run-basic-agent-policy/streaming/selected
+                   root
+                   (map source-file-path (project-index-files index))
+                   1))
                  (project-finding
                   (lambda (finding)
                     (list (type-finding-rule-id finding)
@@ -82,7 +86,7 @@
                           (type-finding-selector finding)))))
             (check (map project-finding actual)
                    => (map project-finding expected))))
-    (test-case "package agent-policy disables selected rules"
+    (test-case "package metadata cannot suppress agent findings"
           (let* ((root ".run/policy-agent-disabled-rule")
                  (src (string-append root "/src"))
                  (owner (string-append src "/orders")))
@@ -98,7 +102,7 @@
             (let* ((index (collect-project root))
                    (findings (run-policy-checks index))
                    (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-004" findings)))
-              (check matching => []))))
+              (check (length matching) => 1))))
     (test-case "agent policy rejects top-level executable calls in src"
           (let* ((root ".run/policy-top-level-executable")
                  (_ (write-top-level-executable-project root))

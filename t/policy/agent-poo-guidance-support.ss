@@ -2,8 +2,8 @@
 ;;; Lightweight support for agent POO guidance policy tests.
 
 (import :gerbil/gambit
-        :gslph/src/parser/facade
-        (only-in :gslph/src/policy/agent-poo
+        :asp-gerbil-scheme/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/policy/agent-poo
                  poo-direct-writeenv-findings
                  poo-io-runtime-witness-findings
                  poo-object-model-findings
@@ -21,7 +21,7 @@
                  poo-slot-spec-mutation-loop-performance-findings
                  poo-slot-predicate-loop-performance-findings
                  poo-documentation-usage-findings)
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/types/facade)
 
 (export #t)
 

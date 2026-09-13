@@ -2,12 +2,12 @@
 ;;; gerbil scheme harness parser part 8 source contracts.
 
 (import :std/test
-        :gslph/src/extensions/facade
-        :gslph/src/parser/facade
-        :gslph/src/parser/formals
-        :gslph/src/parser/typed-contract-scheme
-        :gslph/src/protocol/json
-        :gslph/src/protocol/structural-facts
+        :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/parser/formals
+        :asp-gerbil-scheme/src/parser/typed-contract-scheme
+        :asp-gerbil-scheme/src/protocol/json
+        :asp-gerbil-scheme/src/protocol/structural-facts
         :std/srfi/13)
 (import :unit/parser/parser-test-part8-support)
 (export parser-test-part-8-source-contracts)
@@ -17,10 +17,14 @@
   (test-suite "gerbil scheme harness parser part 8 source contracts"
 (test-case "source path class owns build policy scope"
           (check (source-path-class "gerbil.pkg") => "config")
+          (check (source-path-class "version.ss") => "package-version")
           (check (source-path-class "build.ss") => "package-build")
-          (check (source-path-class "src/build-api/native-build.ss")
+          (check (source-path-class "provider-package-spec.ss")
+                 => "package-build")
+          (check (source-path-class "bindings/example/build.ss") => "package-build")
+          (check (source-path-class "src/build-api/package-spec.ss")
                  => "build-runtime")
-          (check (source-path-class "src/testing/gxtest-runner.ss")
+          (check (source-path-class "src/testing/extension.ss")
                  => "build-runtime")
           (check (source-path-class "t/scenarios/policy/functional-idiom/input/src/orders/core.ss")
                  => "policy-scenario")

@@ -4,7 +4,7 @@
 ;;; module owns runtime contract arrows and their TypeSpec validation bridge.
 
 (import :gerbil/gambit
-        (only-in :gslph/src/parser/typed-contract-scheme
+        (only-in :asp-gerbil-scheme/src/parser/typed-contract-scheme
                  scheme-type-expression-text-json
                  split-top-level-type-exprs)
         (only-in :std/srfi/1 drop-right last)

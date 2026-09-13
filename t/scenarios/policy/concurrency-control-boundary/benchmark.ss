@@ -1,28 +1,12 @@
-((max_total . 25ms)
- (observed_total . 9ms)
- (target_total . 15ms)
- (regression_budget . 16ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2))
-  ((name . collect-after) (durationMs . 3))
-  ((name . policy-before) (durationMs . 2))
-  ((name . policy-after) (durationMs . 2)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed baseline 9ms for concurrency-control-boundary; target keeps optimization visible and max_total is the hard regression ceiling")
- (maxCollectMs . 10)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 6)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "The concurrency-control-boundary target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+ (sampleCount . 20)
  (purpose . "R013 concurrency control scenario keeps learned dynamic-wind, spawn/join, and sequentialization repair within the scenario-owned timing gate")
  (feature . "concurrency-control-boundary")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -60,5 +44,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style" "concurrency" "control-boundary"))

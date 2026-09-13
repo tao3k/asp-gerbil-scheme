@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 (import :std/test
-        :gslph/src/extensions/facade
-        :gslph/src/parser/facade
-        :gslph/src/protocol/json
+        :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/json
         :std/srfi/13)
 (export parser-test-part-6)
 
@@ -132,9 +132,12 @@
                  (print-method (find-poo-form-role forms ":pr" "method")))
             (check (source-file-parse-error file) => #f)
             (check (map poo-form-fact-name forms)
-                   => ["object" ":pr" ":wr" ":json" ":write-json" ":pr" ":wr" ":json" ":write-json"])
+                   => ["object" ":pr" ":wr" ":json" ":write-json"
+                       ":pr" ":wr" ":json" ":write-json"
+                       "methods.string<-json" "methods.bytes<-marshal"])
             (check (map poo-form-fact-role forms)
-                   => ["protocol" "generic" "generic" "generic" "generic" "method" "method" "method" "method"])
+                   => ["protocol" "generic" "generic" "generic" "generic"
+                       "method" "method" "method" "method" "type" "type"])
             (check (poo-form-fact-specializers json-method) => ["object"])
             (check (poo-form-fact-specializer-types json-method) => ["object"])
             (check (poo-form-fact-specializers write-json-method) => ["object"])

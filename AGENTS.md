@@ -1,4 +1,4 @@
-# Gerbil Scheme Harness Agent Instructions
+# ASP Gerbil Scheme Agent Instructions
 
 This directory maintains the Gerbil Scheme language project harness. In addition to the repository root instructions, agents working here must follow the local style contract:
 

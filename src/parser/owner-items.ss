@@ -3,25 +3,14 @@
 
 (import :gerbil/expander
         :gerbil/gambit
-        (only-in :gslph/src/parser/definition-syntax definitions-from-form)
-        :gslph/src/parser/exports
-        :gslph/src/parser/model
-        (only-in :gslph/src/parser/package
-                 agent-policy-disabled-rules
-                 package-agent-policy
-                 package-dependencies
-                 package-form?
-                 package-macro-governance-policy
-                 package-source-scope-policy
-                 package-test-directory-policy
-                 read-package-forms
-                 source-scope-policy-exclude-directories
-                 source-scope-policy-roots
-                 source-scope-policy-runtime-roots
-                 test-directory-policy-allowed-directories)
-        :gslph/src/parser/selectors
-        :gslph/src/parser/support
-        :gslph/src/parser/syntax
+        (only-in :asp-gerbil-scheme/src/parser/definition-syntax definitions-from-form)
+        :asp-gerbil-scheme/src/parser/exports
+        :asp-gerbil-scheme/src/parser/model
+        (only-in :asp-gerbil-scheme/src/parser/package
+                 package-dependencies package-form? read-package-forms)
+        :asp-gerbil-scheme/src/parser/selectors
+        :asp-gerbil-scheme/src/parser/support
+        :asp-gerbil-scheme/src/parser/syntax
         (only-in :std/misc/list unique)
         (only-in :std/misc/ports open-output-string read-file-lines)
         (only-in :std/sort sort)
@@ -275,10 +264,8 @@
                             "package"
                             "package:"
                             name
-                            "depend:"
-                            "policy:"]
-                           dependencies
-                           (owner-package-policy-query-keys form))))))
+                            "depend:"]
+                           dependencies)))))
     (hash (id (owner-syntax-fact-id "package" path name 1))
           (kind "package")
           (source "native-parser")
@@ -288,47 +275,7 @@
           (location (owner-fact-location-json path 1 1))
           (queryKeys query-keys)
           (fields (hash (role "package")
-                        (dependencies (string-join dependencies ","))
-                        (sourceRoots
-                         (string-join
-                          (owner-package-source-roots form) ","))
-                        (runtimeRoots
-                         (string-join
-                          (owner-package-runtime-roots form) ","))
-                        (excludeDirectories
-                         (string-join
-                          (owner-package-exclude-directories form) ","))
-                        (agentDisabledRules
-                         (string-join
-                          (owner-package-agent-disabled-rules form) ",")))))))
-
-;; : (-> Boolean (List String) (List String) )
-(def (owner-package-policy-key-group enabled? keys)
-  (if enabled? keys '()))
-;; : (-> PackageForm (List String) )
-(def (owner-package-policy-query-key-groups form)
-  [(owner-package-policy-key-group
-    (package-test-directory-policy form)
-    ["test-directory" "test-directories" "allowed-test-directories"])
-   (owner-package-policy-key-group
-    (package-macro-governance-policy form)
-    ["macro-governance" "allow-generated"])
-   (owner-package-policy-key-group
-    (package-source-scope-policy form)
-    ["source-scope" "source-roots" "runtime-roots" "exclude-directories"])
-   (owner-package-policy-key-group
-    (package-agent-policy form)
-    ["agent-policy" "disabled-rules"])])
-;; : (-> PackageForm (List String) )
-(def (owner-package-policy-query-keys form)
-  (apply append
-         (append
-          (owner-package-policy-query-key-groups form)
-          [(owner-package-test-directories form)
-           (owner-package-source-roots form)
-           (owner-package-runtime-roots form)
-           (owner-package-exclude-directories form)
-           (owner-package-agent-disabled-rules form)])))
+                        (dependencies (string-join dependencies ",")))))))
 
 ;; : (-> PackageForm MaybeString )
 (def (owner-package-form-name form)
@@ -337,41 +284,6 @@
      ((symbol? name) (symbol->string name))
      ((string? name) name)
      (else #f))))
-
-;; : (-> PackageForm (List String) )
-(def (owner-package-test-directories form)
-  (let (policy (package-test-directory-policy form))
-    (if policy
-      (test-directory-policy-allowed-directories policy)
-      '())))
-
-;; : (-> PackageForm (List String) )
-(def (owner-package-source-roots form)
-  (let (policy (package-source-scope-policy form))
-    (if policy
-      (source-scope-policy-roots policy)
-      '())))
-
-;; : (-> PackageForm (List String) )
-(def (owner-package-runtime-roots form)
-  (let (policy (package-source-scope-policy form))
-    (if policy
-      (source-scope-policy-runtime-roots policy)
-      '())))
-
-;; : (-> PackageForm (List String) )
-(def (owner-package-exclude-directories form)
-  (let (policy (package-source-scope-policy form))
-    (if policy
-      (source-scope-policy-exclude-directories policy)
-      '())))
-
-;; : (-> PackageForm (List String) )
-(def (owner-package-agent-disabled-rules form)
-  (let (policy (package-agent-policy form))
-    (if policy
-      (agent-policy-disabled-rules policy)
-      '())))
 
 ;;; Stability boundary:
 ;;; - Syntax facts may be gathered from several parser surfaces.
@@ -502,7 +414,7 @@
 (def (owner-source-line-count path)
   (let (bytes (file-info-size (file-info path)))
     (when (> bytes +owner-items-max-source-bytes+)
-      (error "owner source exceeds Scheme parse budget; use asp search/query"
+      (error "owner source exceeds Scheme parse budget; use Search/Query Playbook"
              path bytes))
     (call-with-input-file path
       (lambda (port)
@@ -515,7 +427,7 @@
                   (when (char=? char #\newline)
                     (set! lines (+ lines 1)))
                   (when (> lines +owner-items-max-source-lines+)
-                    (error "owner source exceeds Scheme parse line budget; use asp search/query"
+                    (error "owner source exceeds Scheme parse line budget; use Search/Query Playbook"
                            path lines))
                   (loop))))))))))
 

@@ -1,9 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; Provider registry projection.
 
-(import :gslph/src/constants
-        :gslph/src/parser/facade
-        (only-in :gslph/src/protocol/command-catalog provider-registry-methods)
+(import :asp-gerbil-scheme/src/constants
+        :asp-gerbil-scheme/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/protocol/provider-operation-catalog
+                 provider-operation-contract-operation
+                 provider-operation-contract->json
+                 provider-operation-contracts)
         (only-in :std/sugar hash))
 
 (export language-registry)
@@ -22,100 +25,20 @@
       (languageId +language-id+)
       (providerId +provider-id+)
       (binary "asp-gerbil-scheme")
-      (execution "external-process")
-      (namespace "agent.semantic-protocols.languages.gerbil-scheme.gerbil-scheme-harness")
+      (execution "provider")
+      (transport "http-json")
+      (namespace "agent.semantic-protocols.languages.gerbil-scheme.asp-gerbil-scheme")
       (displayName +display-name+)
       (packageRoots [root])
-      (methods (provider-registry-methods))
-      (schemas [(hash (schemaId "agent.semantic-protocols.semantic-extension-pattern-mapping")
+      (methods
+       (map provider-operation-contract-operation
+            provider-operation-contracts))
+      (schemas [(hash (schemaId "agent.semantic-protocols.asp-gerbil-scheme-info")
                       (schemaVersion "1")
-                      (path "schemas/semantic-extension-pattern-mapping.v1.schema.json"))
-                (hash (schemaId "agent.semantic-protocols.gerbil-scheme-harness-info")
-                      (schemaVersion "1")
-                      (path "schemas/semantic-gerbil-scheme-harness-info.v1.schema.json"))
-                (hash (schemaId "agent.semantic-protocols.semantic-runtime-source-acquisition")
-                      (schemaVersion "1")
-                      (path "schemas/semantic-runtime-source-acquisition.v1.schema.json"))
-                (hash (schemaId "agent.semantic-protocols.semantic-language-evidence")
-                      (schemaVersion "1")
-                      (path "schemas/semantic-language-evidence.v1.schema.json"))
-                (hash (schemaId "agent.semantic-protocols.semantic-type-proof")
-                      (schemaVersion "1")
-                      (path "schemas/semantic-type-proof.v1.schema.json"))
-                (hash (schemaId "agent.semantic-protocols.semantic-compare-packet")
-                      (schemaVersion "1")
-                      (path "schemas/semantic-compare-packet.v1.schema.json"))
-                (hash (schemaId "agent.semantic-protocols.semantic-structural-index")
-                      (schemaVersion "1")
-                      (path "schemas/semantic-structural-index.v1.schema.json"))
-                (hash (schemaId "agent.semantic-protocols.semantic-native-syntax-fact-index")
-                      (schemaVersion "1")
-                      (path "schemas/semantic-native-syntax-fact-index.v1.schema.json"))
-                (hash (schemaId "agent.semantic-protocols.semantic-evidence-graph")
-                      (schemaVersion "1")
-                      (path "schemas/semantic-evidence-graph.v1.schema.json"))
-                (hash (schemaId "agent.semantic-protocols.semantic-graph-turbo-request")
-                      (schemaVersion "1")
-                      (path "schemas/semantic-graph-turbo-request.v1.schema.json"))])
+                      (path "schemas/semantic-asp-gerbil-scheme-info.v1.schema.json"))])
       (methodDescriptors
-       [(hash (method "info")
-              (command "info")
-              (summary "Emit provider-local Gerbil package, configurable interface, agent steering, and closure command facts.")
-              (outputSchemaIds ["agent.semantic-protocols.gerbil-scheme-harness-info"]))
-        (hash (method "search/pattern")
-              (command "search pattern")
-              (summary "Emit extension-backed executable pattern mappings for agent-facing framework or language usage guidance.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-extension-pattern-mapping"]))
-        (hash (method "search/runtime-source")
-              (command "search runtime-source")
-              (summary "Emit active-runtime-to-source acquisition facts before answering version-sensitive language or runtime-boundary questions.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-runtime-source-acquisition"]))
-        (hash (method "search/compiler-evidence")
-              (command "search compiler-evidence")
-              (summary "Emit schema-backed Gerbil compiler evidence facts that bound medium-weight proof claims.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-language-evidence"]))
-        (hash (method "search/proof")
-              (command "search proof")
-              (summary "Emit medium-weight TypeSpec proof witnesses with recursive proof trees and compiler-evidence boundary links.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-type-proof"]))
-        (hash (method "search/compare")
-              (command "search compare")
-              (summary "Compare active runtime facts with documented or remembered claims before version-sensitive guidance.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-compare-packet"]))
-        (hash (method "index/structural")
-              (command "search structural --json")
-              (summary "Emit a lightweight native-parser structural interface; ASP Rust owns full index construction, graph topology, caching, and refresh planning.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-structural-index"]))
-        (hash (method "index/native-syntax-owner-facts")
-              (command "search structural --owner <path> --json")
-              (summary "Emit owner-bounded native syntax facts for ASP-side fan-out and incremental structural indexing.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-native-syntax-fact-index"]))
-        (hash (method "query/exact-selector-native-v1")
-              (command "query")
-              (view "exact-selector")
-              (acceptsStdin #t)
-              (requiresQuery #t)
-              (supportsJson #t)
-              (supportsCompact #f)
-              (supportsPackageScope #f)
-              (outputSchemaIds
-               ["agent.semantic-protocols.provider-native-exact-projection"])
-              (packetSchemas
-               ["provider-native-exact-request.v1"
-                "provider-native-exact-response.v1"])
-              (invocation
-               (hash (argv
-                      ["gslph"
-                       "query"
-                       "--asp-exact-request-stdin"]))))
-        (hash (method "evidence/graph")
-              (command "evidence")
-              (summary "Emit a portable semantic evidence graph for Gerbil Scheme provider evidence.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-evidence-graph"]))
-        (hash (method "evidence/analyze")
-              (command "evidence")
-              (summary "Emit a graph-turbo request for evidence-quality ranking.")
-              (outputSchemaIds ["agent.semantic-protocols.semantic-graph-turbo-request"]))])
+       (map provider-operation-contract->json
+            provider-operation-contracts))
       (source (hash
                (defaultExtensions +source-extensions+)
                (defaultConfigFiles +config-files+)

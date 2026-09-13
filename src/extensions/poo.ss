@@ -4,12 +4,12 @@
 ;;; - Owns direct gerbil-poo activation from gerbil.pkg dependencies.
 ;;; - Delegates inherited gerbil-utils pattern facts to poo-inheritance.
 
-(import :gslph/src/extensions/model
-        :gslph/src/extensions/poo-inheritance
-        :gslph/src/extensions/poo-patterns
-        :gslph/src/extensions/poo-validation
-        :gslph/src/package-manager/facade
-        :gslph/src/parser/facade
+(import :asp-gerbil-scheme/src/extensions/model
+        :asp-gerbil-scheme/src/extensions/poo-inheritance
+        :asp-gerbil-scheme/src/extensions/poo-patterns
+        :asp-gerbil-scheme/src/extensions/poo-validation
+        :asp-gerbil-scheme/src/package-manager/facade
+        :asp-gerbil-scheme/src/parser/facade
         (only-in :std/srfi/13 string-join string-suffix?)
         (only-in :std/sugar filter hash ormap))
 

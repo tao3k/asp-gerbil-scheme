@@ -74,8 +74,7 @@
             (agent-style-check-r013-scenario-learning!
              context
              ["gerbil://gerbil/runtime/control.ss"
-              "poo-flow/build.ss"
-              "gerbil-scheme-harness/src/build-api/source-coverage.ss"]
+              "poo-flow/build.ss"]
              ["dynamic-scope-cleanup-boundary"
               "anti-ai-dynamic-state-restore"])
             (check (hash-get benchmark-contract 'optimizationFocus)

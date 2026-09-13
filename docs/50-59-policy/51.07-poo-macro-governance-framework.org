@@ -1,0 +1,160 @@
+#+title: POO Macro Governance Framework v1
+#+startup: overview
+
+* Status
+
+Implemented as a default hard admission profile independent of package
+metadata. Executable-witness, expansion-I/O, hygiene, phase, and pattern-family
+checks all run without requiring a declaration in =gerbil.pkg=. Callers supply
+an explicit POO profile through =profile:= when a boundary needs configuration.
+
+This design governs macros without creating another macro expander.  Gerbil's
+expander owns syntax semantics, and =std/make= owns native build scheduling and
+freshness.  ASP only admits parser-owned evidence before those owners run.
+
+* Decision
+
+Macro governance is a two-level contract:
+
+1. POO values own stable, composable policy configuration.  A profile contains
+   rule objects plus admitted phases, a hygiene requirement, and a maximum
+   declarative pattern count.  =.cc= derives a narrower profile without
+   mutating the shared strict profile.
+2. A closed admission engine compiles those objects to a flat rule-id plan once
+   and evaluates that plan over the existing =MacroFact= sequence.  Results are
+   closed typed decisions and one typed receipt, not extensible objects whose
+   methods could change after admission.
+
+#+begin_src mermaid
+flowchart LR
+  Source["Gerbil source"] --> Parser["native parser\nMacroFact + call + owner facts"]
+  Contract["POO governance contract"]
+  Profile["POO profile\nrule objects + budgets"] --> Compile["compile once\nflat rule-id plan"]
+  Parser --> Contract
+  Contract --> Admission["single admission composition"]
+  Compile --> Admission
+  R011["R011 executable witness"] --> Admission
+  R040["R040 expansion I/O"] --> Admission
+  Admission --> Receipt["typed v1 receipt\nadmitted or rejected + all reasons"]
+  Receipt --> Gate{"admitted?"}
+  Gate -- yes --> Expander["Gerbil expander"]
+  Gate -- no --> Repair["source-owned repair"]
+  Expander --> Make["std/make"]
+#+end_src
+
+* Policy Model
+
+The strict v1 profile is =asp-strict-v1= and composes five rule descriptors:
+
+| Rule id | Evidence owner | Rejection reason |
+|---------+----------------+------------------|
+| =hygiene= | =MacroFact.hygienic= | =hygiene-required= |
+| =phase= | =MacroFact.phase= and profile phases | =phase-not-admitted= |
+| =pattern-budget= | =MacroFact.pattern-count= and profile budget | =pattern-budget-exceeded= |
+| =runtime-witness= | collected test/owner graph | =executable-witness-required= |
+| =expansion-io= | parser-owned call facts in a macro owner | =expansion-io-denied= |
+
+The strict profile admits the native Gerbil macro phases =syntax=, =match=,
+=import=, =export=, and =import-export=; requires parser-visible hygiene; and
+limits one declarative family to 64 patterns.  A package may derive a narrower
+POO profile for a boundary, but v1 does not load arbitrary executable rule code
+from package metadata.  Extensibility changes configuration and composition;
+it does not grant an unreviewed policy plugin execution capability.
+
+#+begin_src scheme
+(def narrow-profile
+  (.cc asp-strict-macro-governance-profile
+       'allowed-phases ["syntax"]
+       'max-pattern-count 16))
+
+(macro-governance-admit project-index profile: narrow-profile)
+#+end_src
+
+* Evidence and Authority
+
+=MacroFact= remains the sole owner for macro name, kind, source span,
+transformer kind, phase, pattern count, hygiene, and quality facets.  The
+framework does not rescan source text, invoke expansion, infer policy from file
+names, or inspect a downstream project name.
+
+=gerbil.pkg= owns only package identity and dependency acquisition. Its former
+=policy:= DSL, external modularity config loading, rule switches, directory
+exceptions, and macro witness declarations have been removed. Legacy entries
+are inert package data and cannot alter findings or appear as policy facts.
+
+R011 requires the collected owner graph to reach an asserting test and its
+exact macro invocation or macro-owner edge. No manifest declaration satisfies
+that requirement. Source coverage comes from executed Build API evidence,
+not package policy. Modularity thresholds use =default-modularity-profile=
+and explicit =run-modularity-policy index profile: profile= calls; native POO
+composition does not remove the hard owner-line cap.
+
+R040 and R011 are called only through =macro-governance-findings= in the normal
+agent-policy path.  They are not also called by a second policy owner.  This
+preserves one finding stream and one typed admission receipt while keeping the
+existing rule identifiers stable.
+
+* Receipt Contract
+
+The receipt schema id is
+=agent.semantic-protocols.gerbil-scheme-macro-governance-admission= with version
+=1=.  It records profile identity, aggregate status, macro/admitted/rejected
+counts, and source-ordered decisions.  Each decision carries macro name,
+selector, projected purpose, capabilities, status, and every applicable typed
+reason.  Multiple profile failures on the same macro are retained; the receipt
+does not collapse them to the first error.
+
+#+begin_src typst
+#table(
+  columns: 3,
+  [*Receipt field*], [*Authority*], [*Invariant*],
+  [profile], [POO profile], [immutable identity for this admission],
+  [selector], [MacroFact], [exact source span retained],
+  [reasonKinds], [composed rules], [all applicable reasons, stable order],
+  [status], [admission engine], [rejected iff any decision is rejected],
+)
+#+end_src
+
+* Repair Ladder
+
+The framework teaches the smallest Gerbil mechanism that carries the required
+structure:
+
+1. Use =defrule= or =defrules= for fixed structural rewrites.
+2. Use =defsyntax= with =syntax-case= when validation, binding-aware literals,
+   identifier generation, or source-aware errors are required.
+3. Use syntax parameters or =syntax-local-value= for phase-owned shared
+   metadata instead of mutable phase globals.
+4. Keep business behavior in ordinary functions, POO methods, generics, or
+   functional combinators; keep the macro as the thin syntax boundary.
+5. Move filesystem and path work to an explicit source-backed build artifact or
+   caller payload.  Do not perform hidden I/O while expanding syntax.
+
+* Executable Acceptance
+
+The focused framework test proves:
+
+- strict profile inheritance is immutable under =.cc=;
+- absent package files and legacy package policy declarations cannot bypass admission;
+- a bounded hygienic macro with an executable witness is admitted;
+- an opaque function-shaped transformer is rejected with
+  =hygiene-required=;
+- a narrowed profile retains both phase and pattern-budget reasons for one
+  macro; and
+- the =macro-governance-admission= scenario has one finding before repair and
+  zero after replacing the transformer with a small =defrules= form.
+
+The scenario owns benchmark timing and RSS limits.  Admission consumes the
+parser collection already required by policy, compiles one rule plan, and maps
+source-ordered macro facts to closed decisions while retaining all matching
+findings.  It does not expand or compile the fixture during policy evaluation.
+
+* Non-goals
+
+- No second macro language or custom package-manifest DSL.
+- No replacement for Gerbil hygiene, phase, or expansion semantics.
+- No source-text or filesystem scan inside policy.
+- No manifest allow-list that bypasses executable evidence.
+- No runtime mutation of admitted decisions or receipts.
+- No claim that a green policy receipt proves native compilation; policy and
+  =std/make= remain separate acceptance gates.

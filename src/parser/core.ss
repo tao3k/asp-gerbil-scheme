@@ -3,27 +3,28 @@
 
 (import :gerbil/expander
         :gerbil/gambit
-        :gslph/src/parser/comment-quality
-        :gslph/src/parser/control-flow
-        :gslph/src/parser/dependency-adapter-quality
-        :gslph/src/parser/exports
-        :gslph/src/parser/function-quality
-        :gslph/src/parser/higher-order
-        :gslph/src/parser/model
-        :gslph/src/parser/package
-        :gslph/src/parser/parse-workers
-        :gslph/src/parser/profile
-        :gslph/src/parser/poo
-        :gslph/src/parser/quality-shape
-        :gslph/src/parser/reader
-        :gslph/src/parser/selectors
-        :gslph/src/parser/source-file
-        :gslph/src/parser/source-scope
-        :gslph/src/parser/test-source-scope
-        :gslph/src/parser/support
-        :gslph/src/parser/syntax
-        :gslph/src/parser/typed-contract
-        :gslph/src/support/time
+        :asp-gerbil-scheme/src/parser/comment-quality
+        :asp-gerbil-scheme/src/parser/control-flow
+        :asp-gerbil-scheme/src/parser/dependency-adapter-quality
+        :asp-gerbil-scheme/src/parser/exports
+        :asp-gerbil-scheme/src/parser/function-quality
+        :asp-gerbil-scheme/src/parser/higher-order
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/package
+        :asp-gerbil-scheme/src/parser/parse-workers
+        :asp-gerbil-scheme/src/parser/profile
+        :asp-gerbil-scheme/src/parser/poo
+        :asp-gerbil-scheme/src/parser/quality-shape
+        :asp-gerbil-scheme/src/parser/reader
+        :asp-gerbil-scheme/src/parser/selectors
+        :asp-gerbil-scheme/src/parser/source-file
+        :asp-gerbil-scheme/src/parser/source-scope
+        :asp-gerbil-scheme/src/parser/test-source-scope
+        :asp-gerbil-scheme/src/parser/support
+        :asp-gerbil-scheme/src/parser/syntax
+        :asp-gerbil-scheme/src/parser/syntax-ast
+        :asp-gerbil-scheme/src/parser/typed-contract
+        :asp-gerbil-scheme/src/support/time
         (only-in :std/misc/list unique)
         (only-in :std/misc/ports open-output-string read-file-lines)
         (only-in :std/sort sort)
@@ -42,7 +43,6 @@
         collect-project/profile
         collect-source-scope
         collect-selected-source-scope
-        collect-test-source-scope
         collect-project-package-only
         collect-source-files
         gerbil-source-path?
@@ -326,11 +326,25 @@
         comment-quality-fact-context
         comment-quality-fact-evidence
         comment-quality-fact-selector
+        syntax-relation-kind
+        syntax-relation-name
+        syntax-relation-start
+        syntax-relation-end
+        syntax-relation-phase
+        syntax-relation-context
+        syntax-relation-structural-path
+        syntax-ast-version
+        syntax-ast-path
+        syntax-ast-owner
+        syntax-ast-relations
+        syntax-ast-template-callees
+        syntax-ast-relation-projection
         top-form-kind
         top-form-head
         top-form-path
         top-form-start
         top-form-end
+        top-form-syntax-ast
         top-form-selector
         declarative-top-form?
         source-file-path
@@ -366,27 +380,21 @@
         project-package-name
         project-package-dependencies
         project-package-manager
-        project-package-test-directory-policy
-        project-package-source-scope-policy
-        project-package-agent-policy
-        test-directory-policy-allowed-directories
-        test-directory-policy-explanation
-        source-scope-policy-roots
-        source-scope-policy-runtime-roots
-        source-scope-policy-exclude-directories
-        source-scope-policy-explanation
-        agent-policy-disabled-rules
-        agent-policy-explanation
+        project-package-source-scope
+        source-scope-roots
+        source-scope-runtime-roots
+        source-scope-exclude-directories
+        source-scope-explanation
         project-index-root
         project-index-files
         project-index-package)
-;;; Project collection boundary: source discovery is sorted once before the
-;;; `map`, and `cut` threads the normalized root into every file parser call.
+;;; Workspace-analysis boundary only. Build and policy entrypoints must consume
+;;; collect-selected-source-scope with the PackageSpec/std/make projection.
 ;; collect-project
 ;;   : (-> String ProjectIndex)
 ;;   | doc m%
-;;       `collect-project root` reads package metadata, discovers source files,
-;;       and returns a fully parsed project index rooted at `root`.
+;;       `collect-project root` discovers a fixture or analysis workspace and
+;;       returns a fully parsed index. It is not a package build-graph API.
 ;;       # Examples
 ;;       ```scheme
 ;;       (project-index-root (collect-project "."))
@@ -423,10 +431,18 @@
 ;;       `collect-project/profile root` returns a parsed index plus profile
 ;;       telemetry for package, source-scope, and parse phases.
 ;;     %
+;; Parse the exact source projection supplied by the owner of the native build
+;; spec or by an explicit test/query request. This function performs no root
+;; discovery, exclusion filtering, or import-closure reconstruction.
 (def (collect-selected-source-scope root paths)
   (let* ((root (path-normalize root))
          (package (read-project-package root))
-         (files (sort (map path-normalize paths) string<?)))
+         ;; Build API graph owners are rooted at the declared project root, not
+         ;; at the caller's current directory.  Absolute owners remain stable
+         ;; through source-full-path while relative owners resolve under root.
+         (files
+          (sort (map (lambda (path) (source-full-path root path)) paths)
+                string<?)))
     (make-project-index root
                         (parse-source-files root files)
                         package)))

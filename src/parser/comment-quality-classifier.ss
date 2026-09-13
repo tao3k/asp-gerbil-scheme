@@ -2,7 +2,7 @@
 ;;; Comment quality classification and source-line helpers.
 
 (import :gerbil/gambit
-        :gslph/src/parser/model
+        :asp-gerbil-scheme/src/parser/model
         (only-in :std/srfi/13 string-contains string-downcase string-empty? string-prefix?)
         (only-in :std/sugar cut filter find ormap))
 

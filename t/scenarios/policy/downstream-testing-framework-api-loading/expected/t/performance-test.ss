@@ -1,50 +1,35 @@
 ;;; -*- Gerbil -*-
-;;; Expected repair: downstream gxtest consumes Testing Framework body timing.
+;;; Expected repair: downstream gxtest consumes a POO benchmark observation.
 
 (import :std/test
-        (only-in :gslph/src/benchmark/gate
-                 benchmark-receipt-pass?)
-        (only-in :gslph/src/testing/model
-                 testing-receipt-detail
-                 testing-receipt-ok?)
-        (only-in :gslph/src/testing/performance
+        (only-in :clan/poo/object .ref object?)
+        (only-in :asp-gerbil-scheme/testing-api
+                 benchmark-receipt-pass?
                  testing-benchmark-run/result))
 
 (export downstream-performance-test)
 
 (def +downstream-performance-fixture+
-  '((max_total . 100ms)
-    (observed_total . 1ms)
+  '((benchmarkKind . scenario-e2e)
+    (max_total . 100ms)
     (target_total . 25ms)
     (regression_budget . 75ms)
-    (observedTimings ((name . benchmark-body) (durationMs . 1)))
-    (targetRationale . "expected repair delegates benchmark body timing to Testing Framework")
-    (maxCollectMs . 50)
-    (observedCollectMs . 1)
-    (maxParseMs . 50)
-    (observedParseMs . 1)
-    (maxFileMs . 50)
-    (observedFileMs . 1)
-    (maxPhaseMs . 50)
-    (observedPhaseMs . 1)
-    (maxRssMb . 512)
-    (memoryMetric . resident-set-size)
-    (memoryUnit . "MB")
-    (iterations . 1)
-    (unit . "ms")
+    (expected_over_input_budget . 75ms)
+    (targetRationale . "expected repair projects benchmark body timing as a POO receipt")
+    (sampleCount . 20)
     (feature . "downstream-testing-framework-api-loading")
     (rule . "GERBIL-SCHEME-AGENT-TESTING-DOWNSTREAM-BENCHMARK-HELPER-001")
-    (optimizationFocus . "expose downstream benchmark body timing through Testing Framework receipts")
-    (inputShape . "gxtest performance case asks the framework for raw receipt, result, and body phase")
+    (optimizationFocus . "expose downstream benchmark body timing through a POO profile receipt")
+    (inputShape . "gxtest performance case asks the extension for raw receipt, result, and body phase")
     (expectedOutcome . "route the benchmark through testing-benchmark-run/result")
     (measurementPhases "benchmark-body")
-    (tags "testing" "framework" "downstream" "benchmark-body" "hot")))
+    (tags "testing" "profile-extension" "downstream" "benchmark-body" "hot")))
 
 (def (downstream-performance-work)
   1)
 
 (def downstream-performance-test
-  (test-suite "downstream performance framework benchmark helper"
+  (test-suite "downstream performance POO benchmark extension"
     (test-case "exposes benchmark body phase receipt"
       (let-values (((receipt result body-phase)
                     (testing-benchmark-run/result
@@ -54,5 +39,7 @@
                      '((case . downstream-performance)))))
         (check result => 1)
         (check (benchmark-receipt-pass? receipt) => #t)
-        (check (testing-receipt-detail body-phase 'phase) => 'benchmark-body)
-        (check (testing-receipt-ok? body-phase) => #t)))))
+        (check (object? body-phase) => #t)
+        (check (.ref body-phase 'status) => 'ok)
+        (check (assq 'phase (.ref body-phase 'details))
+               => '(phase . benchmark-body))))))

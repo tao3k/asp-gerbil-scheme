@@ -1,7 +1,7 @@
 (import :std/test
-        :gslph/src/benchmark/framework
-        :gslph/src/format/facade
-        :gslph/src/support/io)
+        :asp-gerbil-scheme/src/benchmark/framework
+        :asp-gerbil-scheme/src/format/facade
+        :asp-gerbil-scheme/src/support/io)
 
 (export fmt-scenario-test)
 

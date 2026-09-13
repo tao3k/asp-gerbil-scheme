@@ -6,19 +6,15 @@
         :std/misc/ports
         :std/misc/process
         (only-in :std/text/json read-json)
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/scenario/policy
-        :gslph/src/testing/memory-profile
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios
         :policy/fixtures)
 (import :policy/agent-poo-support)
 (export agent-poo-hot-loop-type-policy-test)
-
-(declare-gxtest-memory-exception
- '((maxHeapMiB . 512)))
 
 ;; PolicyTest
 (def agent-poo-hot-loop-type-policy-test
@@ -173,7 +169,7 @@
                  (timing (policy-scenario-run/timed scenario))
                  (result (hash-get timing 'result))
                  (timings (hash-get timing 'timings))
-                 (total-ms (hash-get timing 'totalMs))
+                 (total-ns (hash-get timing 'totalNs))
                  (before-matching
                   (policy-scenario-findings
                    result
@@ -189,7 +185,7 @@
               (check (length timings) => 4)
               (check (policy-scenario-timing-steps-measured? timings)
                      => #t)
-              (check (poo-policy-performance-timing-status total-ms)
+              (check (poo-policy-performance-timing-status total-ns)
                      => "pass")
               (check (policy-scenario-benchmark-constrained? timing)
                      => #t)
@@ -210,7 +206,7 @@
                  (timing (policy-scenario-run/timed scenario))
                  (result (hash-get timing 'result))
                  (timings (hash-get timing 'timings))
-                 (total-ms (hash-get timing 'totalMs))
+                 (total-ns (hash-get timing 'totalNs))
                  (before-matching
                   (policy-scenario-findings
                    result
@@ -226,7 +222,7 @@
               (check (length timings) => 4)
               (check (policy-scenario-timing-steps-measured? timings)
                      => #t)
-              (check (poo-policy-performance-timing-status total-ms)
+              (check (poo-policy-performance-timing-status total-ns)
                      => "pass")
               (check (policy-scenario-benchmark-constrained? timing)
                      => #t)
@@ -247,7 +243,7 @@
                  (timing (policy-scenario-run/timed scenario))
                  (result (hash-get timing 'result))
                  (timings (hash-get timing 'timings))
-                 (total-ms (hash-get timing 'totalMs))
+                 (total-ns (hash-get timing 'totalNs))
                  (before-matching
                   (policy-scenario-findings
                    result
@@ -263,7 +259,7 @@
               (check (length timings) => 4)
               (check (policy-scenario-timing-steps-measured? timings)
                      => #t)
-              (check (poo-policy-performance-timing-status total-ms)
+              (check (poo-policy-performance-timing-status total-ns)
                      => "pass")
               (check (policy-scenario-benchmark-constrained? timing)
                      => #t)

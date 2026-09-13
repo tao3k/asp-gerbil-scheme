@@ -3,10 +3,10 @@
 
 (import :std/test
         (only-in :std/text/json read-json)
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/policy/repair-calibration
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/policy/repair-calibration
         :policy/fixtures)
 
 (export agent-repair-policy-test)
@@ -43,6 +43,9 @@
              (finding-diagnostic (hash-get finding-repair "diagnostic"))
              (finding-location (hash-get finding-diagnostic "location")))
         (check (car result) => 1)
+        (check (hash-get packet "schemaId")
+               => "agent.semantic-protocols.semantic-language-policy-report")
+        (check (hash-get packet "schemaVersion") => "1")
         (check (hash-get agent-repair "status") => "active")
         (check (hash-get agent-repair "repairableFindings") => 3)
         (check (hash-get agent-repair "repairableWarnings") => 3)
@@ -51,15 +54,17 @@
         (check (hash-get agent-repair "audience") => "agent")
         (check (hash-get agent-repair "feedbackKind")
                => "policy-diagnostic")
-        (check (hash-get agent-repair "diagnosticSchema")
-               => "gerbil-policy-diagnostic-v1")
+        (check (hash-get agent-repair "diagnosticSchemaId")
+               => "agent.semantic-protocols.semantic-language-policy-diagnostic")
+        (check (hash-get agent-repair "diagnosticSchemaVersion") => "1")
         (check (hash-get agent-repair "diagnosticUnit") => "findingGroup")
         (check (hash-get repair-plan "status") => "active")
         (check (hash-get repair-plan "audience") => "agent")
         (check (hash-get repair-plan "feedbackKind")
                => "policy-diagnostic")
-        (check (hash-get repair-plan "diagnosticSchema")
-               => "gerbil-policy-diagnostic-v1")
+        (check (hash-get repair-plan "diagnosticSchemaId")
+               => "agent.semantic-protocols.semantic-language-policy-diagnostic")
+        (check (hash-get repair-plan "diagnosticSchemaVersion") => "1")
         (check (not (not (member "editing without guide code evidence"
                                   (hash-get repair-plan "antiPatterns"))))
                => #t)
@@ -77,8 +82,9 @@
         (check (not (not (member "functionQualityProfile"
                                   (hash-get comment-group "requiredWitnesses"))))
                => #t)
-        (check (hash-get comment-diagnostic "schema")
-               => "gerbil-policy-diagnostic-v1")
+        (check (hash-get comment-diagnostic "schemaId")
+               => "agent.semantic-protocols.semantic-language-policy-diagnostic")
+        (check (hash-get comment-diagnostic "schemaVersion") => "1")
         (check (hash-get comment-diagnostic "unit") => "findingGroup")
         (check (hash-get comment-diagnostic "guideRole") => "evidence-only")
         (check (hash-get comment-location "path")
@@ -102,8 +108,9 @@
                => "comment-quality repairs run after structural/style repairs when both hit the same group")
         (check (hash-get finding-repair "repairable") => #t)
         (check (hash-get finding-repair "active") => #t)
-        (check (hash-get finding-repair "schema")
-               => "gerbil-policy-diagnostic-v1")
+        (check (hash-get finding-repair "diagnosticSchemaId")
+               => "agent.semantic-protocols.semantic-language-policy-diagnostic")
+        (check (hash-get finding-repair "diagnosticSchemaVersion") => "1")
         (check (hash-get finding-repair "trigger") => "warning")
         (check (hash-get finding-repair "guideTopic")
                => "functional-data-transform")
@@ -111,8 +118,9 @@
         (check (hash-get finding-repair "guideRole") => "evidence-only")
         (check (hash-get finding-repair "guideCommand")
                => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-009 --intent repair")
-        (check (hash-get finding-diagnostic "schema")
-               => "gerbil-policy-diagnostic-v1")
+        (check (hash-get finding-diagnostic "schemaId")
+               => "agent.semantic-protocols.semantic-language-policy-diagnostic")
+        (check (hash-get finding-diagnostic "schemaVersion") => "1")
         (check (hash-get finding-diagnostic "unit") => "finding")
         (check (hash-get finding-location "path")
                => "src/orders/core.ss")
@@ -124,7 +132,9 @@
              (after-root ".run/policy-agent-repair-replay-after")
              (_ (write-functional-idiom-project before-root))
              (_ (write-functional-idiom-calibrated-project after-root))
-             (report (project-policy-report before-root))
+             (report (policy-report before-root
+                                    ["src/orders/core.ss"
+                                     "src/orders/facade.ss"]))
              (report-summary (gxtest-report-summary report))
              (after-index (collect-project after-root))
              (after-findings (run-policy-checks after-index))

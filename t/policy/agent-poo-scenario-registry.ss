@@ -52,4 +52,4 @@
     "poo-validation-loop-performance"))
 
 (def +poo-generated-boundary-scenario-ids+
-  '("poo-generated-receipt-boundary-performance"))
+  '())

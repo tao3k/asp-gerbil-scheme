@@ -1,7 +1,6 @@
 ;;; -*- Gerbil -*-
 (import :gerbil/gambit
-        :gslph/src/testing/build
-        :gslph/src/testing/build-runner)
+        :asp-gerbil-scheme/build-api)
 
 (export downstream-testing-project
         downstream-testing-main)

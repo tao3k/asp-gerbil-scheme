@@ -2,9 +2,9 @@
 ;;; Native Gerbil call extraction from syntax forms.
 
 (import :gerbil/expander
-        :gslph/src/parser/model
-        :gslph/src/parser/support
-        :gslph/src/parser/syntax-support
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/support
+        :asp-gerbil-scheme/src/parser/syntax-support
         (only-in :std/srfi/1 drop)
         (only-in :std/sugar cut))
 

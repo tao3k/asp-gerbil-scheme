@@ -2,7 +2,7 @@
 ;;; Parser profile helpers.
 
 (import :gerbil/gambit
-        :gslph/src/support/time
+        :asp-gerbil-scheme/src/support/time
         (only-in :std/sort sort)
         (only-in :std/srfi/1 take))
 
@@ -12,9 +12,6 @@
         optional-environment-variable
         collect-project-default-worker-count
         collect-project-worker-count)
-
-;; Integer
-(def +collect-project-default-worker-cap+ 4)
 
 ;; profile-row
 ;;   : (-> String Integer HashTable)
@@ -74,23 +71,24 @@
     (lambda (_) #f)
     (lambda () (getenv name))))
 
-;;; Default collection concurrency is memory-bounded because every worker owns
-;;; a full source/syntax/fact packet before it hands the result to foreground.
+;;; Default collection concurrency follows the host's available CPU capacity.
+;;; Memory anomaly detection belongs to the build/runtime guard; a fixed parser
+;;; cap would hide available parallelism on larger hosts and is not a memory
+;;; safety mechanism.
 ;; : (-> Integer Integer Integer)
 (def (collect-project-default-worker-count file-count host-cores)
   (max 1 (min file-count
-              host-cores
-              +collect-project-default-worker-cap+)))
+              host-cores)))
 
 ;; collect-project-worker-count
 ;;   : (-> Integer Integer)
 ;;   | doc m%
-;;       `collect-project-worker-count file-count` caps default parser workers
-;;       by file count, host CPU count, and a memory-safe ceiling. An explicit
-;;       `GSLPH_COLLECT_CORES` override remains available for controlled hosts.
+;;       `collect-project-worker-count file-count` derives default parser workers
+;;       from file count and the host CPU count. The Build API's single
+;;       `GERBIL_BUILD_CORES` override applies to parsing and std/make alike.
 ;;     %
 (def (collect-project-worker-count file-count)
-  (let* ((raw (optional-environment-variable "GSLPH_COLLECT_CORES"))
+  (let* ((raw (optional-environment-variable "GERBIL_BUILD_CORES"))
          (configured (and raw (string->number raw)))
          (configured? (and configured
                            (integer? configured)

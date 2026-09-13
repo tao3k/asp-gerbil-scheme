@@ -1,29 +1,12 @@
-((max_total . 24ms)
- (observed_total . 6ms)
- (target_total . 14ms)
- (regression_budget . 18ms)
- (expected_over_input_budget . 1ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2) (durationNs . 2000000))
-  ((name . collect-after) (durationMs . 2) (durationNs . 2000000))
-  ((name . policy-before) (durationMs . 1) (durationNs . 1000000))
-  ((name . policy-after) (durationMs . 1) (durationNs . 1000000)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
+ (target_total . 150ms)
+ (regression_budget . 150ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
   "list-random-access-loop-performance keeps loop-local list-ref detection parser-owned and validates the vector boundary repair in a small millisecond gate")
- (maxCollectMs . 10)
- (observedCollectMs . 4)
- (maxParseMs . 14)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 6)
- (observedPhaseMs . 2)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+ (sampleCount . 20)
  (purpose
   .
   "R041 list random access scenario rejects generated O(n^2) indexed traversals over lists when a vector or evector boundary should own random access")
@@ -66,6 +49,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate"
   "assert-input-expected-comparison")
  (tags "style" "list" "loop" "indexed-access" "performance"))

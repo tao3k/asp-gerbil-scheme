@@ -14,7 +14,7 @@
            (allowedShape
             "canonical build.ss: use clan/building for src-root source discovery, std/build-script defbuild-script for the official gxpkg package template, or std/make build-spec when the package needs ssi:/gsc:/FFI build forms")
            (disallowedShape
-            "hand-written srcdir/loadpath setup, manual compiler/process orchestration, shell pipelines, or CLI/runtime routing that replaces Gerbil's package build entrypoints")
+            "hand-written srcdir/loadpath setup, manual compiler orchestration, or runtime routing that replaces Gerbil's package build entrypoints")
            (sourceEvidence
             ("gerbil://tools/gxpkg.ss:1224-1234"
              "gerbil://std/build-script.ss:9-43"

@@ -1,70 +1,20 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing branch-shape and predicate-family style policy checks.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-support
-        :gslph/src/policy/detection
-        :gslph/src/policy/gerbil-utils-source
-        :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-support
+        :asp-gerbil-scheme/src/policy/agent-style-shape-config
+        :asp-gerbil-scheme/src/policy/detection
+        :asp-gerbil-scheme/src/policy/gerbil-utils-source
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/srfi/1 take)
         (only-in :std/sugar cut filter filter-map foldl hash ormap)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export controlled-branch-shape-findings
         controlled-branch-shape-finding
         predicate-family-combinator-findings
         predicate-family-combinator-finding)
-;; Integer
-(def +field-access-helper-evidence-min-access-count+ 8)
-;; Integer
-(def +field-access-helper-evidence-min-caller-count+ 3)
-;; Integer
-(def +projection-burst-min-access-count+ 12)
-;; Integer
-(def +projection-burst-min-field-count+ 4)
-;; Integer
-(def +projection-burst-min-emitter-count+ 2)
-;; Integer
-(def +boolean-condition-combinator-min-condition-count+ 5)
-;; Integer
-(def +controlled-branch-shape-conditional-dispatch-min-count+ 4)
-;; (List CalleeName)
-(def +controlled-branch-shape-stateful-callees+
-  '("set!" "set-car!" "set-cdr!" "vector-set!" "hash-put!" "hash-remove!"
-    "hash-clear!" "table-set!" "table-delete!" ".put!" ".slot-set!"))
-;;; Source-backed repair vocabulary:
-;;; - These candidates come from .data/gerbil-utils/base.ss and generator.ss evidence.
-;;; - R014 may steer an agent toward this vocabulary, but the parser facts still
-;;;   decide whether lambda-match, specialization, pipeline, fold, generator, or
-;;;   plain helper extraction is actually applicable.
-;;; Source owner anchors:
-;;; - Keep these as human-readable owner strings until gerbil-utils:// selectors
-;;;   are provider-owned facts.
-;;; - They are emitted in details so an agent can trace the guidance to the
-;;;   reference corpus instead of treating it as a local preference.
-;; (List SourceOwner)
-(def +controlled-branch-shape-source-backed-owners+
-  ["gerbil-utils/base.ss#lambda-match/lambda-ematch"
-   "gerbil-utils/base.ss#fun"
-   "gerbil-utils/base.ss#cut/curry/rcurry"
-   "gerbil-utils/base.ss#compose/rcompose/!>/!!>"
-   "gerbil-utils/base.ss#case-lambda specializers"
-   "gerbil-utils/generator.ss#compose-backed-generating-map"])
-;;; Repair candidate contract:
-;;; - Candidate order matters: start from the most syntax-specific idiom and
-;;;   fall back to plain helpers only after parser facts rule out higher-order
-;;;   Gerbil syntax.
-;;; - The policy exposes choices; it does not prescribe one rewrite shape for
-;;;   every R014 finding.
-;; (List RepairMove)
-(def +controlled-branch-shape-source-backed-repair-candidates+
-  ["lambda-match/lambda-ematch for unary match destructuring"
-   "fun for reusable local named lambda boundaries"
-   "cut/curry/rcurry for first-class argument specialization"
-   "compose/rcompose/!>/!!> for reusable expression pipelines"
-   "case-lambda only when there are real arity specializations"
-   "plain named helpers only when no higher-order Gerbil idiom fits"])
-
 ;;; Branch-shape entrypoint:
 ;;; - Emit findings only after parser-owned control-flow facts group repeated shapes.
 ;;; - Keep style repair bounded to one source owner at a time.

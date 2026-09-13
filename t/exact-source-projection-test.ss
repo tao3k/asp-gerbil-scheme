@@ -4,7 +4,7 @@
         (only-in :std/srfi/1 find)
         (only-in :std/srfi/13 string-contains)
         (only-in :std/text/base64 base64-encode)
-        :gslph/src/exact-source-projection)
+        :asp-gerbil-scheme/src/exact-source-projection)
 
 (export exact-source-projection-test)
 

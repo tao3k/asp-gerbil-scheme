@@ -1,18 +1,20 @@
 ;;; -*- Gerbil -*-
 ;;; Intent:
 ;;; - This suite protects the parser's repeated-project memory boundary.
-;;; - The runner reads its declaration before execution and applies the heap cap.
-(import (only-in :std/test test-suite test-case check)
-        (only-in :std/srfi/1 iota)
-        :gslph/src/parser/core
-        :gslph/src/parser/profile
-        (only-in :gslph/src/testing/memory-profile
-                 declare-gxtest-memory-exception))
+;;; - The POO testing profile applies the heap cap before execution.
+(import (only-in :gerbil/gambit getenv setenv thread-receive thread-send)
+        (only-in :std/test test-suite test-case check)
+        (only-in :std/srfi/1 foldl iota)
+        (only-in :std/srfi/13 string-prefix? string-split)
+        (only-in :std/misc/path path-expand)
+        (only-in :std/sort sort)
+        :asp-gerbil-scheme/src/parser/core
+        (only-in :asp-gerbil-scheme/src/parser/parse-workers parse-source-files)
+        :asp-gerbil-scheme/src/parser/profile
+        (only-in :asp-gerbil-scheme/src/policy/gxtest-report
+                 policy-source-report))
 
 (export parser-memory-stability-test)
-
-(declare-gxtest-memory-exception
- '((maxHeapMiB . 512)))
 
 ;;; Boundary:
 ;;; - Map owns fixed repetition while each receipt is released before the next input.
@@ -31,14 +33,86 @@
            definition-count))
        (iota 32)))
 
+;; : (-> ProjectIndex Integer)
+(def (project-native-syntax-relation-count index)
+  (foldl
+   (lambda (file total)
+     (+ total
+        (foldl
+         (lambda (form file-total)
+           (+ file-total
+              (length
+               (syntax-ast-relations (top-form-syntax-ast form)))))
+         0
+         (source-file-forms file))))
+   0
+   (project-index-files index)))
+
+;; : (forall (A) (-> String (-> A) A))
+(def (with-parser-trace value thunk)
+  (let (previous (getenv "ASP_GERBIL_SCHEME_PARSE_TRACE" #f))
+    (dynamic-wind
+      (lambda () (setenv "ASP_GERBIL_SCHEME_PARSE_TRACE" value))
+      thunk
+      (lambda ()
+        (if previous
+          (setenv "ASP_GERBIL_SCHEME_PARSE_TRACE" previous)
+          (setenv "ASP_GERBIL_SCHEME_PARSE_TRACE"))))))
+
+;; : (-> (List String) (List String))
+(def (policy-parse-start-lines files)
+  (let (output
+        (call-with-output-string
+         (lambda (out)
+           (parameterize ((current-output-port out))
+             (with-parser-trace
+              "1"
+              (lambda ()
+                (policy-source-report "." files)))))))
+    (sort
+     (filter (cut string-prefix?
+                  "[asp-gerbil-scheme-parse-worker] event=start path=" <>)
+             (string-split output #\newline))
+     string<?)))
+
+;; : (-> (List String) (List String))
+(def (expected-policy-parse-start-lines files)
+  (sort
+   (map (cut string-append
+             "[asp-gerbil-scheme-parse-worker] event=start path=" <>)
+        (map (cut path-expand <> (current-directory)) files))
+   string<?))
+
 ;;; Boundary:
 ;;; - The repeated profile test compares parser facts without retaining source receipts.
 ;; : TestSuite
 (def parser-memory-stability-test
   (test-suite "parser profile memory stability"
-    (test-case "caps default parser concurrency below full source packet pressure"
-      (check (collect-project-default-worker-count 277 12) => 4)
+    (test-case "uses available parser concurrency without a fixed host cap"
+      (check (collect-project-default-worker-count 277 12) => 12)
       (check (collect-project-default-worker-count 3 12) => 3))
+    (test-case "parses each policy owner exactly once"
+      (let (files ["t/fixtures/parser/boolean-condition.ss"
+                   "t/fixtures/parser/poo-method-dispatch.ss"
+                   "t/fixtures/parser/poo-trie-descriptor.ss"])
+        (check (policy-parse-start-lines files)
+               =>
+               (expected-policy-parse-start-lines files))))
+    (test-case "isolates concurrent parse replies from the caller mailbox"
+      ;; A caller mailbox may already contain an unrelated runtime message.
+      ;; Project parsing owns a private reply channel and must neither consume
+      ;; nor interpret that message as a parser-worker result.
+      (let* ((caller (current-thread))
+             (stale (vector 'ok caller 9999 #f 0 #f)))
+        (thread-send caller stale)
+        (check (length (parse-source-files "." ["build.ss" "gerbil.pkg"])) => 2)
+        (check (thread-receive) => stale)))
+    (test-case "materializes the repository syntax index within the declared heap"
+      (let* ((index (collect-project "."))
+             (relation-count (project-native-syntax-relation-count index)))
+        (check (> (length (project-index-files index)) 0) => #t)
+        (check (> relation-count 0) => #t)
+        (##gc)))
     (test-case "releases repeated fixture profile receipts"
       (let ((counts (parser-profile-definition-counts)))
         (for-each (lambda (definition-count)

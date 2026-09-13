@@ -2,7 +2,7 @@
 ;;; Source-range transport helpers.
 
 (import :gerbil/gambit
-        (only-in :gslph/src/parser/model
+        (only-in :asp-gerbil-scheme/src/parser/model
                  definition-path
                  definition-start
                  definition-end)

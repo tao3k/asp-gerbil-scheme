@@ -3,8 +3,8 @@
 
 (import :std/test
         :policy/agent-style-support
-        :gslph/src/scenario/policy
-        :gslph/src/parser/facade)
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/parser/facade)
 (export agent-style-scenario-control-higher-order-policy-test)
 
 ;; PolicyTest

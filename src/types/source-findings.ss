@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Reader diagnostics for parser-owned source files.
 
-(import :gslph/src/parser/model
+(import :asp-gerbil-scheme/src/parser/model
         (only-in :std/sugar hash)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export source-file-type-findings)
 
@@ -59,4 +59,4 @@
            "read errors block parser facts; repair this syntax issue before semantic checks")
           (nextAction "open selector and fix reader syntax")
           (successCriteria ["parse-source-file returns no parse-error"
-                            "asp gerbil-scheme check reports no GERBIL-SCHEME-READ-R001"]))))
+                            "the dependency-owned policy receipt reports no GERBIL-SCHEME-READ-R001"]))))

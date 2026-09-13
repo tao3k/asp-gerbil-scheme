@@ -18,7 +18,7 @@
 
 This note audits the local =.data/gerbil-utils= checkout for high-quality
 Gerbil/Scheme engineering patterns that can improve
-=gerbil-scheme-language-project-harness=.
+=asp-gerbil-scheme=.
 
 The goal is not to copy a utility library wholesale. The useful part is the
 engineering shape: small named protocols, clear lifecycle boundaries, stable

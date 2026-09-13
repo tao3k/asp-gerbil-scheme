@@ -2,8 +2,8 @@
 ;;; Native parser projection contract tests.
 
 (import :gerbil/gambit
-        :gslph/src/commands/projection
-        :gslph/src/parser/language-projection
+        :asp-gerbil-scheme/src/commands/projection
+        :asp-gerbil-scheme/src/parser/language-projection
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/srfi/13 string-contains string-prefix?)
         (only-in :std/sugar hash-get hash-key?)

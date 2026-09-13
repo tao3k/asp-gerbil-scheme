@@ -7,7 +7,6 @@
                     :std/stxutil)
         (only-in :std/test check test-case test-suite)
         (only-in "./gxtest-report"
-                 display-project-policy-report
                  gxtest-report-agent-repair
                  gxtest-report-definitions
                  gxtest-report-files
@@ -20,7 +19,9 @@
                  policy-status
                  project-policy-findings
                  project-policy-report
-                 project-policy-status)
+                 project-policy-report-packet
+                 project-policy-status
+                 write-project-policy-report-packet)
         (rename-in "./gxtest-report"
                    (policy-report gxtest-report-policy-report)
                    (policy-source-report gxtest-report-policy-source-report)))
@@ -44,7 +45,8 @@
         project-policy-findings
         project-policy-status
         project-policy-report
-        display-project-policy-report)
+        project-policy-report-packet
+        write-project-policy-report-packet)
 
 ;; : (-> Root (List Path) Json )
 (def (policy-report root files (phase! #f))
@@ -124,7 +126,7 @@
                                      (gxtest-policy-resolve-root #'root)))
                      (resolved-files
                       (datum->syntax (stx-car stx) resolved-files)))
-         #'(gslph/src/policy/gxtest#make-policy-test
+         #'(asp-gerbil-scheme/src/policy/gxtest#make-policy-test
             resolved-root
             resolved-files))))
     (_
@@ -143,7 +145,7 @@
     (test-case "package policy passes for test scope"
       (let (report (policy-report root files))
         (when (not (equal? (hash-get report 'status) "pass"))
-          (display-project-policy-report report))
+          (write-project-policy-report-packet report))
         (check (hash-get report 'status) => "pass")))))
 
 ;; : (-> Root Path TestSuite )
@@ -151,15 +153,15 @@
   (make-policy-test root [file]))
 
 ;;; Boundary:
-;;; - make-project-policy-test is the explicit full-project policy gate.
+;;; - make-project-policy-test is an explicit policy evidence gate.
 ;;; - Project-level warning backlog fails through the same status contract as
 ;;;   check/report, so downstream packages do not need wrapper tests.
 ;;; - Regular gxtest targets should use make-policy-test with their file scope.
-;; : (-> Root TestSuite )
-(def (make-project-policy-test root)
+;; : (-> Root (List Path) TestSuite )
+(def (make-project-policy-test root files)
   (test-suite "gerbil scheme project policy"
     (test-case "package policy has no findings"
-      (let (report (project-policy-report root))
+      (let (report (project-policy-report root files))
         (when (not (equal? (hash-get report 'status) "pass"))
-          (display-project-policy-report report))
+          (write-project-policy-report-packet report))
         (check (hash-get report 'status) => "pass")))))

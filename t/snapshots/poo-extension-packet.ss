@@ -3,11 +3,7 @@
   (path "gerbil.pkg")
   (name "sample/app")
   (dependencies ("git.cons.io/mighty-gerbils/gerbil-poo"))
-   (fields
-    (packageManager "gxpkg")
-    (sourceScopePolicy ())
-    (modularityPolicy ())
-    (agentPolicy ())))
+  (fields (packageManager "gxpkg")))
  (extensions
   ((providerExtension
     (name "poo")

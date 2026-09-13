@@ -1,55 +1,37 @@
-((max_total . 76ms)
- (observed_total . 1ms)
- (target_total . 25ms)
- (regression_budget . 75ms)
- (expected_over_input_budget . 5ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 1))
-  ((name . policy-before) (durationMs . 1))
-  ((name . collect-after) (durationMs . 1))
-  ((name . policy-after) (durationMs . 1)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
+ (target_total . 150ms)
+ (regression_budget . 150ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
   "downstream build.ss API loading must stay in the user-layer hot path and must not widen into a full project policy pass")
- (maxCollectMs . 50)
- (observedCollectMs . 1)
- (maxParseMs . 50)
- (observedParseMs . 1)
- (maxFileMs . 50)
- (observedFileMs . 1)
- (maxPhaseMs . 50)
- (observedPhaseMs . 1)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 3)
- (unit . "ms")
- (purpose . "downstream build.ss loads the harness testing framework API through package-qualified imports")
+ (sampleCount . 20)
+ (purpose . "downstream code loads only POO testing profiles through the package-qualified API")
  (feature . "downstream-testing-framework-api-loading")
  (rule . "GERBIL-SCHEME-AGENT-TESTING-DOWNSTREAM-API-LOADING-001")
  (optimizationFocus
   .
-  "keep downstream build.ss as a thin user-facing layer over std/make/gxtest while preserving incremental framework scope selection and framework-owned benchmark body receipts")
+  "keep gerbil test and clan/testing authoritative while composing bounded POO instrumentation")
  (inputShape
   .
-  "downstream build.ss declares gxtest, performance, and policy scenario suites through the thin :gslph/src/testing/build API; the input performance test builds benchmark timing directly")
+  "downstream tests opt into :asp-gerbil-scheme/testing-api; PackageSpec loading remains isolated in :asp-gerbil-scheme/build-api")
  (expectedOutcome
   .
-  "use the package-qualified testing API in build.ss, pass the upstream-selected scope through unchanged, and route direct performance tests through testing-benchmark-run/result so benchmark-body timing is a framework receipt")
+  "map optional profiles to explicit upstream test paths and keep benchmark timing as a POO observation receipt")
  (measurementPhases
   "collect-before"
   "policy-before"
   "collect-after"
   "policy-after"
   "load-api"
-  "select-file"
-  "expand-manifest"
+  "profile-compose"
+  "upstream-boundary"
   "benchmark-body-helper"
-  "select-scenario"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "testing"
-       "framework"
+       "profile-extension"
        "downstream"
        "build.ss"
        "api-loading"

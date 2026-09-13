@@ -1,4 +1,4 @@
 (package: sample/orders
-  depend: ("github.com/tao3k/agent-semantic-protocols/languages/gerbil-scheme-language-project-harness")
+  depend: ("github.com/tao3k/agent-semantic-protocols/languages/asp-gerbil-scheme")
   policy: ((agent-policy
             disabled-rules: ("GERBIL-SCHEME-AGENT-POLICY-013"))))

@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Type-check dispatch for Gerbil source projects.
 
-(import :gslph/src/parser/model
+(import :asp-gerbil-scheme/src/parser/model
         (only-in :std/sugar hash ormap)
-        :gslph/src/types/env
-        :gslph/src/types/findings
-        :gslph/src/types/source-findings)
+        :asp-gerbil-scheme/src/types/env
+        :asp-gerbil-scheme/src/types/findings
+        :asp-gerbil-scheme/src/types/source-findings)
 
 (export type-status
         run-type-checks

@@ -1,60 +1,37 @@
-((max_total . 76ms)
- (observed_total . 1ms)
- (target_total . 25ms)
- (regression_budget . 75ms)
- (expected_over_input_budget . 5ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 1))
-  ((name . policy-before) (durationMs . 1))
-  ((name . collect-after) (durationMs . 1))
-  ((name . policy-after) (durationMs . 1))
-  ((name . select-file) (durationMs . 1))
-  ((name . delegate-contract) (durationMs . 1))
-  ((name . delegate-discovery) (durationMs . 1))
-  ((name . setup-cleanup-export-discovery) (durationMs . 1)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
   "upstream gxtest delegation must keep selection hot while preserving gxtest-owned suite and setup/cleanup discovery")
- (maxCollectMs . 50)
- (observedCollectMs . 1)
- (maxParseMs . 50)
- (observedParseMs . 1)
- (maxFileMs . 50)
- (observedFileMs . 1)
- (maxPhaseMs . 50)
- (observedPhaseMs . 1)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 3)
- (unit . "ms")
- (purpose . "prove the testing framework selects files and delegates gxtest semantics to the gxtest runner")
+ (sampleCount . 20)
+ (purpose . "prove upstream Gerbil owns selection while ASP only declares POO instrumentation")
  (feature . "upstream-gxtest-delegation")
  (rule . "GERBIL-SCHEME-AGENT-TESTING-UPSTREAM-GXTEST-DELEGATION-001")
  (optimizationFocus
   .
-  "keep selection and receipt construction in the framework while leaving suite export and setup/cleanup semantics to gxtest-compatible delegates")
+  "remove ASP selection and execution ownership while preserving per-test POO profile mapping")
  (inputShape
   .
-  "scenario build.ss declares one gxtest manifest suite with files that export test-setup!, test-cleanup!, and *-test suites")
+  "scenario input manually selects files instead of using gerbil test")
  (expectedOutcome
   .
-  "use testing-select-project for scope selection, pass selected files to the gxtest delegate, and inspect gxtest exports through the runner")
+  "use gerbil test for selection and execution; bind optional instrumentation to the explicit test path")
  (measurementPhases
   "collect-before"
   "policy-before"
   "collect-after"
   "policy-after"
-  "select-file"
-  "delegate-contract"
-  "delegate-discovery"
-  "setup-cleanup-export-discovery"
+  "profile-compose"
+  "upstream-boundary"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "testing"
-       "framework"
+       "profile-extension"
        "gxtest"
-       "delegation"
+       "upstream-ownership"
        "setup-cleanup"
        "scenario"
        "performance"

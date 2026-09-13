@@ -2,7 +2,7 @@
 ;;; Functional utility tests for fold and list helpers.
 
 (import :std/test
-        :gslph/src/utilities/functional)
+        :asp-gerbil-scheme/src/utilities/functional)
 
 (export utilities-functional-test)
 

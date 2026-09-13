@@ -6,12 +6,12 @@
         :std/misc/ports
         :std/misc/process
         :std/sort
-        :gslph/src/parser/facade
-        :gslph/src/policy/agent-style
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-style
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios
         :policy/fixtures)
 (import :policy/agent-style-support)
@@ -75,7 +75,7 @@
             (check (agent-style-policy-scenario-timing-steps-measured?
                     timings)
                    => #t)
-            (check (hash-get benchmark-contract 'max_total) => '1s)
+            (check (hash-get benchmark-contract 'max_total) => '200ms)
             (check (hash-get benchmark-contract 'feature)
                    => "typed-combinator-style")
             (check (hash-get benchmark-contract 'rule)
@@ -88,7 +88,7 @@
                    => "GERBIL-SCHEME-AGENT-POLICY-014")
             (check (hash-get timing 'optimizationFocus)
                    => "higher-order branch repair")
-            (check max-total => '1s)
+            (check max-total => '200ms)
             (check (hash-get timing 'performanceStatus) => "pass")
             (check (length before-matching) => 1)
             (check after-matching => [])

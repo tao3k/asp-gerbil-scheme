@@ -2,10 +2,10 @@
 ;;; Parallel source-file parse scheduling.
 
 (import :gerbil/gambit
-        :gslph/src/parser/model
-        :gslph/src/parser/profile
-        :gslph/src/parser/source-file
-        :gslph/src/support/time
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/profile
+        :asp-gerbil-scheme/src/parser/source-file
+        :asp-gerbil-scheme/src/support/time
         (only-in :std/srfi/1 iota)
         (only-in :std/sugar cut while))
 
@@ -13,9 +13,10 @@
         parse-source-files
         parse-source-files/profile)
 
+;; : (-> String String Unit)
 (def (parse-worker-trace event path)
-  (when (getenv "GSLPH_PARSE_TRACE" #f)
-    (display (string-append "[gslph-parse-worker] event=" event
+  (when (getenv "ASP_GERBIL_SCHEME_PARSE_TRACE" #f)
+    (display (string-append "[asp-gerbil-scheme-parse-worker] event=" event
                             " path=" path "\n"))
     (force-output)))
 
@@ -81,12 +82,14 @@
 ;;     %
 (def (parse-source-worker-batch! foreground-thread root file-vector
                                  start-index stride)
-  (let loop ((index start-index))
-    (when (< index (vector-length file-vector))
-      (let (path (vector-ref file-vector index))
-        (parse-worker-trace "start" path)
-        (when (parse-source-worker! foreground-thread root path index)
-          (loop (+ index stride)))))))
+  (let* ((remaining (- (vector-length file-vector) start-index))
+         (count (quotient (+ remaining (fx1- stride)) stride)))
+    (andmap
+     (lambda (index)
+       (let (path (vector-ref file-vector index))
+         (parse-worker-trace "start" path)
+         (parse-source-worker! foreground-thread root path index)))
+     (iota count start-index stride))))
 
 ;;; Spawn boundary:
 ;;; - The foreground scheduler chooses indexes; this helper only maps an index
@@ -116,10 +119,12 @@
 ;;       receives one worker message, records it, and returns completed count.
 ;;     %
 (def (receive-parse-worker! file-vector source-vector timing?)
-  (let (message (thread-receive))
-    (unless (vector? message)
-      (error "unexpected parse worker message" message))
-    (let (status (vector-ref message 0))
+  (let* ((message (thread-receive))
+         (fields (and (vector? message) (vector->list message))))
+    (match fields
+      ([error _worker _index exception]
+       (raise exception))
+      ([status _worker _index _payload _elapsed _reserved]
       (case status
         ((ok)
          (let (profile-row
@@ -131,10 +136,9 @@
            ;; the SourceFile. This bounds queued AST payloads by worker count.
            (thread-send (vector-ref message 1) 'continue)
            (cons 1 profile-row)))
-        ((error)
-         (raise (vector-ref message 3)))
         (else
-         (error "unexpected parse worker status" status))))))
+         (error "unexpected parse worker status" status))))
+      (else (error "unexpected parse worker message" message)))))
 
 ;; record-parse-worker-success!
 ;;   : (-> Vector Vector Boolean Vector (Maybe HashTable))
@@ -173,10 +177,23 @@
     (hash-put! row 'backpressure "bounded-active-workers")
     row))
 
-;;; Parallel parse boundary:
-;;; - The foreground thread owns scheduling counters and result vectors.
-;;; - The only local mutation left is the bounded worker loop; parser work,
-;;;   mailbox packets, and profile rows are top-level helpers.
+;; : (-> Thread Unit)
+(def (stop-parse-worker! worker)
+  (with-catch
+   (lambda (_error) #!void)
+   (lambda () (thread-send worker 'stop))))
+
+;; : (-> Thread Unit)
+(def (join-parse-worker! worker)
+  (with-catch
+   (lambda (_error) #!void)
+   (lambda () (thread-join! worker))))
+
+;;; Request-owner boundary:
+;;; - This function always runs in a dedicated coordinator thread. Worker
+;;;   replies therefore cannot consume or contaminate the caller mailbox.
+;;; - On failure, every worker receives a stop acknowledgement and is joined
+;;;   before the typed error crosses back through `thread-join!`.
 ;; parse-source-files/concurrent
 ;;   : (-> String (List String) Boolean (Or (Values (List SourceFile) HashTable (List HashTable)) (List SourceFile)))
 ;;   | doc m%
@@ -191,7 +208,10 @@
 ;;       ;; => source files in input order
 ;;       ```
 ;;     %
-(def (parse-source-files/concurrent* root files timing? retain-source?)
+;; : (-> String (List String) Boolean Boolean
+;;       (Or (List SourceFile)
+;;           (Values (Maybe (List SourceFile)) HashTable (List HashTable) Integer)))
+(def (parse-source-files/concurrent-owned* root files timing? retain-source?)
   (let* ((file-count (length files))
          (worker-count (collect-project-worker-count file-count))
          (file-vector (list->vector files))
@@ -208,25 +228,31 @@
                                       worker-count))
                (iota worker-count)))
          (start (monotonic-ms)))
-    (let receive-loop ((completed 0))
-      (if (= completed file-count)
-        #!void
-        (let* ((result (receive-parse-worker! file-vector
-                                              source-vector
-                                              timing?))
-               (count (car result))
-               (profile-row (cdr result)))
-          (when profile-row
-            (set! definition-count
-              (+ definition-count
-                 (or (hash-get profile-row 'definitions) 0)))
-            (set! profile-frontier
-              (slowest-profile-rows
-               (cons profile-row profile-frontier)
-               10)))
-          (set! result #f)
-          (set! profile-row #f)
-          (receive-loop (+ completed count)))))
+    (with-catch
+     (lambda (error)
+       (for-each stop-parse-worker! workers)
+       (for-each join-parse-worker! workers)
+       (raise error))
+     (lambda ()
+       (let receive-loop ((completed 0))
+         (if (= completed file-count)
+           #!void
+           (let* ((result (receive-parse-worker! file-vector
+                                                 source-vector
+                                                 timing?))
+                  (count (car result))
+                  (profile-row (cdr result)))
+             (when profile-row
+               (set! definition-count
+                 (+ definition-count
+                    (or (hash-get profile-row 'definitions) 0)))
+               (set! profile-frontier
+                 (slowest-profile-rows
+                  (cons profile-row profile-frontier)
+                  10)))
+             (set! result #f)
+             (set! profile-row #f)
+             (receive-loop (+ completed count)))))))
     (for-each thread-join! workers)
     (let* ((source-files (and retain-source? (vector->list source-vector)))
            (parse-phase (parse-worker-phase-row start worker-count)))
@@ -237,13 +263,32 @@
                 definition-count)
         source-files))))
 
+;;; Parallel parse boundary:
+;;; - Each request owns one private coordinator mailbox and bounded worker set.
+;;; - A caller cancellation can abandon its join without redirecting worker
+;;;   replies into another request; the coordinator still drains its workers.
+;; : (-> String (List String) Boolean Boolean
+;;       (Or (List SourceFile)
+;;           (Values (Maybe (List SourceFile)) HashTable (List HashTable) Integer)))
+(def (parse-source-files/concurrent* root files timing? retain-source?)
+  (thread-join!
+   (spawn/name
+    'parse-request-owner
+    (lambda ()
+      (parse-source-files/concurrent-owned*
+       root files timing? retain-source?)))))
+
 ;; `profile?` preserves the public parser contract.  The implementation keeps
 ;; all-file parsing on the ordinary concurrent path and profiles only its
 ;; bounded timing frontier.
+;; : (-> String (List String) Boolean (List SourceFile))
 (def (parse-source-files/concurrent root files profile?)
   (if profile?
     (parse-source-files/profile root files)
-    (parse-source-files/concurrent* root files #f #t)))
+    (match files
+      ([] [])
+      ([path] [(parse-source-file root path)])
+      (else (parse-source-files/concurrent* root files #f #t)))))
 
 ;; parse-source-files
 ;;   : (-> String (List String) (List SourceFile))

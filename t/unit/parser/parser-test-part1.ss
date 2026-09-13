@@ -1,10 +1,21 @@
 ;;; -*- Gerbil -*-
 (import :std/test
-        :gslph/src/extensions/facade
-        :gslph/src/parser/facade
-        :gslph/src/protocol/json
+        (only-in :asp-gerbil-scheme/src/parser/package read-project-package)
+        :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/json
         :std/srfi/13)
 (export parser-test-part-1)
+
+;; : (-> Json (List JsonValue))
+(def (syntax-relation-projection-values row)
+  (map (lambda (key) (hash-get row key))
+       '(kind name owner path start end phase context structuralPath)))
+
+;; : (-> (List (List Json)) (List (List (List JsonValue))))
+(def (syntax-relation-projections-values projections)
+  (map (lambda (rows) (map syntax-relation-projection-values rows))
+       projections))
 
 ;; : (-> Selector Relpath Boolean )
 (def (selector-owner? selector path)
@@ -79,6 +90,18 @@
           (and (equal? (poo-form-fact-name fact) name)
                (equal? (poo-form-fact-role fact) role)))
         facts))
+;; : (-> SourceFile String TopForm)
+(def (find-syntax-owner-form file owner)
+  (find (lambda (form)
+          (equal? (syntax-ast-owner (top-form-syntax-ast form)) owner))
+        (source-file-forms file)))
+
+;; : (-> TopForm Symbol Symbol (List SyntaxRelation))
+(def (syntax-owner-relations form name context)
+  (filter (lambda (relation)
+            (and (eq? (syntax-relation-name relation) name)
+                 (eq? (syntax-relation-context relation) context)))
+          (syntax-ast-relations (top-form-syntax-ast form))))
 ;; ParsedData
 ;; : (-> String EnsureDir )
 (def (ensure-dir path)
@@ -130,7 +153,72 @@
                      => ["declarative" "definition"])
               (check (map call-fact-callee (source-file-calls file))
                      => []))))
-    (test-case "package modularity policy supports external config files"
+    (test-case "native syntax AST preserves phase, context, source, and deterministic projection"
+          (let* ((root ".run/parser-native-syntax-ast")
+                 (src (string-append root "/src"))
+                 (path (string-append src "/macros.ss")))
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/native-syntax)\n")
+            (write-text
+             path
+             (string-append
+              "(defrules emitted-helper () ((_ value) value))\n"
+              "(defrules declarative-public () ((_ value) (emitted-helper value)))\n"
+              "(defsyntax (procedural-public stx)\n"
+              "  (syntax-case stx () ((_ value) (syntax (emitted-helper value)))))\n"
+              "(defsyntax identifier-public\n"
+              "  (identifier-rules (id (emitted-helper id))))\n"
+              "(defsyntax (quoted-only stx)\n"
+              "  (let ((datum '(emitted-helper 1)))\n"
+              "    (syntax-case stx () ((_ ) (syntax datum)))))\n"
+              "(defsyntax (quasi-public stx)\n"
+              "  (quasisyntax (emitted-helper (unsyntax (compute stx)))))\n"))
+            (let* ((file (parse-source-file root "src/macros.ss"))
+                   (again (parse-source-file root "src/macros.ss"))
+                   (declarative (find-syntax-owner-form file "declarative-public"))
+                   (procedural (find-syntax-owner-form file "procedural-public"))
+                   (identifier (find-syntax-owner-form file "identifier-public"))
+                   (quoted (find-syntax-owner-form file "quoted-only"))
+                   (quasi (find-syntax-owner-form file "quasi-public"))
+                   (quasi-helper (car (syntax-owner-relations
+                                       quasi 'emitted-helper
+                                       'quasisyntax-template)))
+                   (quasi-compute (car (syntax-owner-relations
+                                        quasi 'compute 'transformer))))
+              (check (map (lambda (form)
+                            (syntax-ast-version (top-form-syntax-ast form)))
+                          (source-file-forms file))
+                     => (make-list 6 "gerbil-native-syntax-relations.v2"))
+              (check (syntax-ast-template-callees
+                      (top-form-syntax-ast declarative))
+                     => ["emitted-helper"])
+              (check (syntax-ast-template-callees
+                      (top-form-syntax-ast procedural))
+                     => ["emitted-helper"])
+              (check (syntax-ast-template-callees
+                      (top-form-syntax-ast identifier))
+                     => ["emitted-helper"])
+              (check (syntax-ast-template-callees
+                      (top-form-syntax-ast quoted))
+                     => [])
+              (check (syntax-relation-phase quasi-helper) => 0)
+              (check (syntax-relation-phase quasi-compute) => 1)
+              (check (> (syntax-relation-start quasi-helper) 0) => #t)
+              (check (pair? (syntax-relation-structural-path quasi-helper)) => #t)
+              (check (syntax-relation-projections-values
+                      (map (lambda (form)
+                             (syntax-ast-relation-projection
+                              (top-form-syntax-ast form)))
+                           (source-file-forms file)))
+                     => (syntax-relation-projections-values
+                         (map (lambda (form)
+                                (syntax-ast-relation-projection
+                                 (top-form-syntax-ast form)))
+                              (source-file-forms again)))))))
+    (test-case "package metadata does not project or load external policy config"
           (let* ((root ".run/parser-modularity-policy")
                  (policy-dir (string-append root "/policy"))
                  (config-path (string-append policy-dir "/modularity.ss")))
@@ -141,19 +229,23 @@
                         "(package: sample/parser-policy\n  policy: ((modularity-policy config: \"policy/modularity.ss\" max-source-lines: 700)))\n")
             (write-text config-path
                         "(modularity-policy max-test-lines: 1000 min-test-definitions: 2 disabled-rules: (\"GERBIL-SCHEME-MOD-R007\") explanation: \"Large generated replay tests stay package-local while policy config remains out of the test owner.\")\n")
-            (let* ((index (collect-project root))
-                   (package (project-index-package index))
-                   (policy (project-package-modularity-policy package)))
-              (check (modularity-policy-config-path policy)
-                     => "policy/modularity.ss")
-              (check (modularity-policy-max-source-line-count policy) => 700)
-              (check (modularity-policy-max-test-line-count policy) => 1000)
-              (check (modularity-policy-min-test-definition-count policy) => 2)
-              (check (modularity-policy-disabled-rules policy)
-                     => ["GERBIL-SCHEME-MOD-R007"])
-              (check (modularity-policy-explanation policy)
-                     => "Large generated replay tests stay package-local while policy config remains out of the test owner."))))
-    (test-case "collect-source-scope parses only named changed owners"
+            (let* ((package (read-project-package root))
+                   (fields (hash-get (project-package-json package) 'fields)))
+              (check (project-package-name package) => "sample/parser-policy")
+              (check (project-package-source-scope package) => #f)
+              (check (hash-keys fields) => ['packageManager])
+              ;; Invalid external data cannot affect package reading.
+              (write-text config-path "(")
+              (let ((again (project-package-json (read-project-package root)))
+                    (expected (project-package-json package)))
+                (check (hash-get again 'path) => (hash-get expected 'path))
+                (check (hash-get again 'name) => (hash-get expected 'name))
+                (check (hash-get again 'dependencies)
+                       => (hash-get expected 'dependencies))
+                (check (hash-get (hash-get again 'fields) 'packageManager)
+                       => (hash-get (hash-get expected 'fields)
+                                    'packageManager))))))
+    (test-case "collect-source-scope keeps named owners despite package exclusions"
           (let* ((root ".run/parser-changed-project-files")
                  (src (string-append root "/src"))
                  (generated (string-append root "/src/generated")))
@@ -179,33 +271,10 @@
                       "src/missing.ss"
                       "README.md"]))
                    (files (project-index-files index)))
-              (check (map source-file-path files) => ["src/changed.ss"])
+              (check (map source-file-path files)
+                     => ["src/changed.ss" "src/generated/ignored.ss"])
               (check (map definition-name (project-definitions index))
-                     => ["changed"]))))
-    (test-case "collect-test-source-scope deduplicates shared import closure"
-          (let* ((root ".run/parser-test-source-scope-dedup")
-                 (src (string-append root "/src"))
-                 (tests (string-append root "/t")))
-            (ensure-dir ".run")
-            (ensure-dir root)
-            (ensure-dir src)
-            (ensure-dir tests)
-            (write-text (string-append root "/gerbil.pkg")
-                        "(package: sample/parser-test-scope\n  policy: ((source-scope roots: (\"src\"))))\n")
-            (write-text (string-append src "/core.ss")
-                        ";;; -*- Gerbil -*-\n(export shared)\n(def (shared value) value)\n")
-            (write-text (string-append tests "/a-test.ss")
-                        ";;; -*- Gerbil -*-\n(import :core)\n(def (a) (shared 1))\n")
-            (write-text (string-append tests "/b-test.ss")
-                        ";;; -*- Gerbil -*-\n(import :core)\n(def (b) (shared 2))\n")
-            (let* ((index
-                    (collect-test-source-scope
-                     root
-                     ["t/a-test.ss" "t/b-test.ss" "src/core.ss"]))
-                   (files (map source-file-path
-                               (project-index-files index))))
-              (check files => ["src/core.ss" "t/a-test.ss" "t/b-test.ss"])
-              (check (length files) => 3))))
+                     => ["changed" "ignored"]))))
     (test-case "native reader captures definition formals"
           (let* ((root (path-normalize "."))
                  (file (parse-source-file root "t/fixtures/formals.ss")))

@@ -4,15 +4,15 @@
 (import :gerbil/gambit
         :std/test
         :policy/agent-poo-support
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade)
 
 (export agent-poo-generated-boundary-policy-test)
 
 ;; PolicyTest
 (def agent-poo-generated-boundary-policy-test
   (test-suite "gerbil scheme harness generated POO boundary policy"
-    (test-case "agent policy moves generated receipt adapters to defstruct boundary projection"
+    (test-case "P043 does not infer representation defects from receipt names"
       (let* ((scenario
               (make-policy-scenario
                "poo-generated-receipt-boundary-performance"
@@ -20,6 +20,7 @@
              (timing (policy-scenario-run/timed scenario))
              (result (hash-get timing 'result))
              (timings (hash-get timing 'timings))
+             (samples (hash-get timing 'samples))
              (before-matching
               (policy-scenario-findings
                result
@@ -30,15 +31,19 @@
                result
                'after
                "GERBIL-SCHEME-AGENT-POLICY-043"))
-             (finding (car before-matching))
-             (details (type-finding-details finding)))
+             )
         (check (length timings) => 4)
+        (check (hash-get timing 'admissionStatistic) => 'p95)
+        (check (hash-get timing 'gcPrecondition)
+               => ":gerbil/gambit###gc")
+        (check (hash-get timing 'sampleCount) => 20)
+        (check (length samples) => 20)
+        (check (hash-get (car samples) 'measurementOrder)
+               => '(input expected))
+        (check (hash-get (cadr samples) 'measurementOrder)
+               => '(expected input))
         (check (policy-scenario-timing-steps-measured? timings) => #t)
         (check (policy-scenario-benchmark-constrained? timing) => #t)
-        (check (length before-matching) => 1)
+        (check before-matching => [])
         (check after-matching => [])
-        (check (type-finding-path finding) => "src/runtime/receipt.ss")
-        (check (hash-get details 'kind) => "poo-generated-receipt-boundary")
-        (check (hash-get details 'callee) => "object<-alist")
-        (check (hash-get details 'preferredConstruction)
-               => "defstruct for generated receipt state plus explicit receipt->alist projection at presentation/runtime ABI boundary")))))
+        ))))

@@ -4,7 +4,8 @@
 (import (only-in ./commands/provider-runtime provider-runtime-main))
 (export main)
 
-(def (main command)
-  (unless (string=? command "serve")
-    (error "usage: asp-gerbil-scheme serve" command))
-  (provider-runtime-main '()))
+;; : (-> String ... Integer)
+(def (main . args)
+  (if (and (pair? args) (string=? (car args) "serve"))
+    (provider-runtime-main (cdr args))
+    (error "resident provider accepts only the serve command" args)))

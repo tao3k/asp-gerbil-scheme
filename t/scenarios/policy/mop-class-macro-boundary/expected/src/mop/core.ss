@@ -6,7 +6,7 @@
 (export model-record record-value update-record-value)
 
 ;; model-record
-;;   : (Name Value -> ModelRecord)
+;;   : (-> Name Value ModelRecord)
 ;;   | type Name = Symbol
 ;;   | type Value = Any
 ;;   | doc m%

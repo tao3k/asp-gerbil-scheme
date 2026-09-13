@@ -2,15 +2,17 @@
 ;;; Shared ASP projection-batch adapter backed by the native Gerbil parser.
 
 (import :gerbil/gambit
-        (only-in :gslph/src/parser/exact-owner
+        (only-in :asp-gerbil-scheme/src/parser/exact-owner
                  parse-exact-owner-definitions)
-        (only-in :gslph/src/parser/selectors item-structural-selector)
-        (only-in :gslph/src/parser/model
+        (only-in :asp-gerbil-scheme/src/parser/selectors item-structural-selector)
+        (only-in :asp-gerbil-scheme/src/parser/model
                  definition-name
                  definition-kind
                  definition-start
                  definition-end)
-        (only-in :gslph/src/parser/selectors definition-selector)
+        (only-in :asp-gerbil-scheme/src/parser/selectors definition-selector)
+        (only-in :asp-gerbil-scheme/src/utilities/functional
+                 u8vector-line-start-offsets)
         (only-in :std/srfi/13 string-contains)
         (only-in :std/sugar hash))
 
@@ -79,11 +81,7 @@
              (next-source-total (+ source-total byte-length)))
         (validate-owner-byte-length path byte-length next-source-total)
         (let* ((projected
-                (with-catch
-                 (lambda (failure)
-                   (error "projection batch owner failed" path failure))
-                 (lambda ()
-                   (project-owner path digest source-text source-bytes))))
+                (project-owner path digest source-text source-bytes))
                (next-item-total
                 (validated-next-item-total projected item-total path)))
           (loop (cdr rest) next-source-total next-item-total
@@ -109,23 +107,55 @@
     next-item-total))
 
 (def (project-owner path digest source-text source-bytes)
-  (with-parsed-definitions
-   source-text path
-   (lambda (definitions)
-     (let* ((starts (line-start-offsets source-bytes))
-            (byte-length (u8vector-length source-bytes))
-            (_ (when (> (length definitions) +max-owner-items+)
-                 (error "projection batch owner exceeds the item limit"
-                        path (length definitions) +max-owner-items+)))
-            (items
-             (map (lambda (definition)
-                    (project-definition path definition starts byte-length))
-                  definitions)))
-       (hash
-        ("ownerPath" path)
-        ("sourceLeafDigest" digest)
-        ("items" (list->vector items))
-        ("relations" []))))))
+  (let (parsed
+        (with-catch
+         (lambda (failure) (vector 'syntax-unavailable failure))
+         (lambda ()
+           (with-parsed-definitions
+            source-text path
+            (lambda (definitions) (vector 'ready definitions))))))
+    (if (eq? (vector-ref parsed 0) 'syntax-unavailable)
+      (syntax-unavailable-owner path digest (vector-ref parsed 1))
+      (project-parsed-owner
+       path digest source-bytes (vector-ref parsed 1)))))
+
+(def (syntax-unavailable-owner path digest failure)
+  (hash
+   ("ownerPath" path)
+   ("sourceLeafDigest" digest)
+   ("projectionState" "syntax-unavailable")
+   ("diagnostic"
+    (hash
+     ("schemaId" "agent.semantic-protocols.provider-language-projection-diagnostic")
+     ("schemaVersion" "1")
+     ("reasonKind" "source-syntax-unavailable")
+     ("message" (bounded-diagnostic-message failure))))
+   ("items" (vector))
+   ("relations" (vector))))
+
+(def (bounded-diagnostic-message failure)
+  (let (message (projection-string failure))
+    (if (> (string-length message) 4096)
+      (substring message 0 4096)
+      message)))
+
+(def (project-parsed-owner path digest source-bytes definitions)
+  (let* ((starts (u8vector-line-start-offsets source-bytes))
+         (byte-length (u8vector-length source-bytes))
+         (_ (when (> (length definitions) +max-owner-items+)
+              (error "projection batch owner exceeds the item limit"
+                     path (length definitions) +max-owner-items+)))
+         (items
+          (map (lambda (definition)
+                 (project-definition path definition starts byte-length))
+               definitions)))
+    (hash
+     ("ownerPath" path)
+     ("sourceLeafDigest" digest)
+     ("projectionState" "ready")
+     ("diagnostic" #!void)
+     ("items" (list->vector items))
+     ("relations" []))))
 
 (def (project-definition path definition starts byte-length)
   (let* ((name (projection-string (definition-name definition)))
@@ -179,7 +209,7 @@
    (else kind)))
 
 (def (with-parsed-definitions source-text owner-path proc)
-  (let* ((name (string-append "gslph-projection-"
+  (let* ((name (string-append "asp-gerbil-scheme-projection-"
                               (symbol->string (gensym)) ".ss"))
          (path (string-append "/tmp/" name)))
     (with-catch
@@ -193,15 +223,6 @@
              (proc (parse-exact-owner-definitions path owner-path)))
          (delete-file path)
          result)))))
-
-(def (line-start-offsets bytes)
-  (let loop ((index 0) (starts '(0)))
-    (cond
-     ((= index (u8vector-length bytes))
-      (list->vector (reverse starts)))
-     ((= (u8vector-ref bytes index) 10)
-      (loop (+ index 1) (cons (+ index 1) starts)))
-     (else (loop (+ index 1) starts)))))
 
 (def (line-range->byte-range starts byte-length start-line end-line)
   (let* ((start-index (- start-line 1))

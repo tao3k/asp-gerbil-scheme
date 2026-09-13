@@ -273,7 +273,7 @@ deferred.
 | Cached parameterized types | =type.ss= | Some constructors use explicit caches, for example =hash-ensure-ref= style constructors. | Excluded from broad type-construction warnings; R034 stays narrow. |
 | Intentional mutation | =object.ss= | =.put!= is the direct mutation boundary and can be efficient when mutation is intentional. | Allowed by policy text; R028 only warns on repeated pure =.cc= clone overrides. |
 
-The reference checkout did not contain =.bin/gslph=, so ASP owner-item queries
+The reference checkout did not contain =.bin/asp-gerbil-scheme=, so ASP owner-item queries
 against =.data/gerbil-poo= could not use the package-local provider. This is a
 tooling/install boundary, not a POO performance conclusion. The walk therefore
 used ASP =rg=, =fd=, and selector queries for source evidence.

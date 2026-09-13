@@ -6,17 +6,17 @@
 
 (def (marlinRealRepair001LoopProgramCompilerReceipt)
   (.o receipt-id: "real-repair-001"
-      compiler: "gslph"
+      compiler: "asp-gerbil-scheme"
       status: 'accepted))
 
 (def (marlinRealRepair002LoopProgramCompilerReceipt)
   (.o receipt-id: "real-repair-002"
-      compiler: "gslph"
+      compiler: "asp-gerbil-scheme"
       status: 'accepted))
 
 (def (marlinRealRepair003LoopProgramCompilerReceipt)
   (.o receipt-id: "real-repair-003"
-      compiler: "gslph"
+      compiler: "asp-gerbil-scheme"
       status: 'accepted))
 
 (def (user-interface-contract-field contract key)

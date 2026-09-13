@@ -1,26 +1,17 @@
 ;;; -*- Gerbil -*-
-(import :gerbil/gambit
-        :gslph/src/testing/build
-        :gslph/src/testing/build-runner)
+;;; Package-qualified ASP API usage is limited to optional POO profiles.
+;;; gerbil test and clan/testing remain the downstream testing interface.
 
-(export downstream-testing-project
-        downstream-testing-main)
+(import :clan/poo/object
+        :asp-gerbil-scheme/testing-api)
 
-(def +downstream-scenario-root+
-  "t/scenarios/policy/downstream-testing-framework-api-loading/expected")
+(export downstream-testing)
 
-(def downstream-testing-project
-  (testing-build
-   name: "downstream-api-loading"
-   root: +downstream-scenario-root+
-   contract-root: "t/scenarios/policy/downstream-testing-framework-api-loading"
-   gxtest: [["unit" "t/unit-tests.ss"]
-            ["scenario-a" "t/scenario-a-test.ss"]
-            ["scenario-b" "t/scenario-b-test.ss"]
-            ["performance" "t/performance-test.ss"]]
-   scenarios: ["style-large-object"]
-   scenario-suite-name: "policy"
-   roots: ["src" "t" "policy-scenarios"]))
-
-(def (downstream-testing-main args (run-files #f))
-  (testing-build-main downstream-testing-project args run-files))
+(def downstream-testing
+  (!> +asp-testing-interface+
+      (cut testing-interface-map-profile
+           <> "t/performance-test.ss"
+           (.cc +testing-memory-profile+ maxHeapMiB: 1024))
+      (cut testing-interface-map-profile
+           <> "t/scenario-a-test.ss"
+           +testing-performance-profile+)))

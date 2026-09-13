@@ -7,9 +7,41 @@
 This document is the downstream user contract for packages that consume the
 Gerbil Scheme language project harness through =gerbil.pkg= and =gxtest=.
 
-The harness owns policy discovery, reporting, and repair hints. Downstream
-projects own their =gerbil.pkg= policy stanza, source-scope roots, runtime roots,
-and optional threshold configuration.
+The harness owns policy evaluation, reporting, and repair hints. A downstream
+=PackageSpec= supplies the native module graph through clan/building and
+=std/make=; explicit test/query entries may extend that scope. The parser never
+rescans roots or follows imports to rebuild it. Optional thresholds use explicit
+native POO profiles. =gerbil.pkg= owns only package identity and dependency
+acquisition.
+
+Testing support compilation also calls =std/make= for the explicitly selected
+targets. Native make owns output placement, dependency ordering, and freshness;
+=support-output-root= and =compile-dependency-stamps= are retired. An enabled
+=compile-selected-tests= run compiles through native make before loading its
+compiled test module.
+
+Timing helpers are exported by =:asp-gerbil-scheme/build-api=:
+=benchmark-elapsed-ms/us= measures one invocation, and
+=benchmark-p95-elapsed-ms/us= takes a positive sample count and a thunk. The
+latter uses nearest-rank p95; for fewer than twenty samples this can be the
+maximum sample. Full performance gates should retain =benchmark-run= receipts
+and their scenario budgets. Downstream packages need no private clock or
+fastest-sample implementation.
+
+For the native clan test command surface, import =init-test-environment!= from
+=:asp-gerbil-scheme/build-api= and call it in a root test script. This is the
+original =clan/testing= macro, with its upstream discovery, command registration,
+and test lifecycle. Existing =gxtest= files remain supported without conversion.
+
+* Native package declarations
+For the default library PackageSpec, =exclude-modules= removes declared paths
+from the upstream catalog with clan/building's native removal helper, and
+=extra-spec= appends ordinary =std/make= targets unchanged. Use these POO slots
+for interface-only targets, FFI, and additional public entry modules, without a
+downstream catalog scan or =native-spec-projector=. Exclusions apply before
+additions, so replacing a catalog target requires excluding its original path.
+An explicit =native-spec= or =native-spec-projector= still replaces this default
+declaration; the extra slots do not patch those explicit overrides.
 
 * Install Boundary
 Install the harness from its checkout into the global Gerbil package store:
@@ -21,7 +53,7 @@ gxpkg build
 The expected installed command is:
 
 #+begin_src shell
-gerbil-scheme-harness guide --downstream
+asp-gerbil-scheme guide --downstream
 #+end_src
 
 Gerbil package-manager state belongs under =~/.gerbil=. Do not create, depend
@@ -34,22 +66,29 @@ Downstream packages should declare the harness dependency in =gerbil.pkg=:
 
 #+begin_src scheme
 (package: your/package
- depend: ("github.com/tao3k/gerbil-scheme-language-project-harness"))
+ depend: ("github.com/tao3k/asp-gerbil-scheme"))
 #+end_src
 
-Project-specific policy remains package-owned. A downstream package can keep
-its own policy stanza, for example:
+Do not put =policy:= in =gerbil.pkg=. Legacy source-scope, test-directory,
+modularity, agent-rule switches, and macro-witness declarations are ignored;
+external policy files are not loaded. Defaults remain active.
+
+For a custom modularity audit, derive and pass a native POO profile explicitly:
 
 #+begin_src scheme
-(package: your/package
- depend: ("github.com/tao3k/gerbil-scheme-language-project-harness")
- policy: ((source-scope
-           roots: (".")
-           runtime-roots: ("src")
-           explanation: "The harness covers every .ss file in this package.")
-          (modularity-policy
-           config: "harness-policy/gerbil.ss")))
+(import (only-in :clan/poo/object .cc)
+        :asp-gerbil-scheme/build-api)
+
+(def focused-profile
+  (.cc default-modularity-profile 'max-source-lines 500))
+
+(run-modularity-policy project-index profile: focused-profile)
 #+end_src
+
+The profile does not mutate provider defaults or disable rules. The hard owner
+line cap still applies. Macro admission likewise accepts an explicit POO
+=profile:=; executable witnesses come only from the caller-projected native and
+test source set.
 
 * gxtest Fixture
 Create a small test owner such as =t/project-policy-test.ss=:
@@ -57,7 +96,7 @@ Create a small test owner such as =t/project-policy-test.ss=:
 #+begin_src scheme
 ;;; -*- Gerbil -*-
 (import :std/test
-        :gslph/src/policy/gxtest)
+        :asp-gerbil-scheme/build-api)
 
 (export project-policy-test)
 
@@ -71,14 +110,13 @@ Run it with:
 gxtest t/project-policy-test.ss
 #+end_src
 
-On failure, the adapter prints a compact line protocol:
+On failure, the adapter emits one JSON packet conforming to the shared
+=semantic-language-policy-report.v1= schema.  The Scheme provider does not own
+text, Org, or terminal presentation; pass the packet to unified ASP when a
+human-readable rendering is needed:
 
 #+begin_example
-[gerbil-gxtest] status=fail files=<n> definitions=<n> findings=<n>
-|agent-repair-info ...
-|finding rule=<rule-id> severity=<severity> path=<path> selector=<selector> message=<message>
-|agent-repair ...
-|finding-detail ...
+{"schemaId":"agent.semantic-protocols.semantic-language-policy-report","schemaVersion":"1",...}
 #+end_example
 
 * Harness Self-Apply Gates
@@ -115,18 +153,19 @@ The downstream test surface is:
 | =gxtest-report-findings= | Stable report accessor for raw =TypeFinding= values. |
 | =gxtest-report-finding-count= | Stable report accessor for compact custom failure summaries. |
 | =gxtest-report-summary= | Stable compact summary with status, files, definitions, and finding count. |
-| =make-project-policy-test= | Explicit full-project audit suite following the build-declared source coverage. |
-| =project-policy-findings= | Raw =TypeFinding= values for custom tests. |
-| =project-policy-status= | =pass= or =fail= status for a project root. |
-| =project-policy-report= | Structured report with status, file count, definition count, agent repair, and raw findings. |
-| =display-project-policy-report= | Compact human-readable report for custom failure paths. |
+| =make-project-policy-test= | Audit suite over an explicit caller-owned project file set. |
+| =project-policy-findings= | Raw =TypeFinding= values for an explicit project file set. |
+| =project-policy-status= | =pass= or =fail= status for an explicit project file set. |
+| =project-policy-report= | Structured report for an explicit project file set. |
+| =project-policy-report-packet= | Project a report into the shared, schema-conformant JSON value consumed by unified ASP. |
+| =write-project-policy-report-packet= | Write exactly one shared JSON packet; it performs no human-oriented rendering. |
 
 Use =make-gxtest-policy-test= for the package's default =gxtest= integration
 when the runner entry files are known, for example =(make-gxtest-policy-test "."
 ["t/unit-tests.ss"])=.
 Use =policy-report= when a downstream package intentionally wants custom
-assertions over an explicit file scope. Use =project-policy-report= only for an
-explicit full-project audit.
+assertions over an explicit file scope. =project-policy-report= also requires
+that explicit file set; it never discovers or reconstructs a build graph.
 Do not destructure reports with alist helpers such as =assq=. Treat report
 container details as private and use the =gxtest-report-*= accessors.
 
@@ -137,14 +176,16 @@ Agents integrating the harness downstream should follow this order:
    harness checkout or an equivalent global package install.
 2. Add the =gerbil.pkg= dependency without creating a repository-local
    =.gerbil= directory.
-3. Add =t/project-policy-test.ss= using =:gslph/src/policy/gxtest=.
+3. Add =t/project-policy-test.ss= using the stable
+   =:asp-gerbil-scheme/build-api= facade.
 4. Run =gxtest t/project-policy-test.ss=.
-5. If policy fails, follow the primary =|agent-repair= next command before
-   editing downstream source.
+5. If policy fails, inspect the structured =agentRepair.findingGroups= packet
+   or render it through unified ASP before editing downstream source.
 
-The harness CLI remains available for direct checks:
+Policy runs through the dependency-owned gxtest API. Resident language
+operations are served separately by the HTTP JSON provider built from
+=build-provider.ss=:
 
 #+begin_src shell
-gerbil-scheme-harness check --full .
-gerbil-scheme-harness guide --downstream
+gxtest t/project-policy-test.ss
 #+end_src

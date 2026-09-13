@@ -2,8 +2,8 @@
 ;;; Parser-owned export DSL fact extraction.
 
 (import :gerbil/expander
-        :gslph/src/parser/model
-        :gslph/src/parser/support
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/support
         (only-in :std/misc/list unique)
         (only-in :std/srfi/13 string-prefix?))
 
@@ -15,7 +15,7 @@
 ;; : (-> Relpath Form (List ModuleExportFact) )
 (def (module-export-facts-from-form relpath form)
   (filter-map (cut module-export-fact-from-stx relpath <>)
-              (cdr (stx-list-items form))))
+              (reverse (cdr (stx-list-items form)))))
 
 ;;; Boundary:
 ;;; - Item parsing keeps wrapper syntax, source spans, and public names on one export fact.
@@ -70,10 +70,30 @@
        (member (car datum) '(import: only-in except-out phi:))
        (let (found
              (find (lambda (item)
-                     (and (symbol? item)
-                          (string-prefix? ":" (symbol->string item))))
+                     (let (text (export-module-reference-text item))
+                       (and text (module-reference-text? text))))
                    (flatten datum)))
-         (and found (symbol->string found)))))
+         (and found (export-module-reference-text found)))))
+
+;;; Gerbil admits both symbolic and quoted-string module references. Normalize
+;;; them before the export/import join so public string-path facades retain the
+;;; same parser-owned re-export identity as symbolic module references.
+;; : (forall (a) (-> a (Maybe String)))
+;; export-module-reference-text
+;; : (-> Datum (Maybe ModuleRef))
+(def (export-module-reference-text item)
+  (cond
+   ((string? item) item)
+   ((symbol? item) (symbol->string item))
+   (else #f)))
+
+;;; Re-export module references use the same absolute or owner-relative forms
+;;; as imports; recognizing both keeps facade facts joined without text scans.
+;; : (-> String Boolean)
+(def (module-reference-text? text)
+  (or (string-prefix? ":" text)
+      (string-prefix? "./" text)
+      (string-prefix? "../" text)))
 
 ;;; Symbol projection: filter-map keeps only public names and leaves modifier
 ;;; tokens behind, preserving deterministic export facts for search packets.

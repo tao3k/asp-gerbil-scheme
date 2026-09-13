@@ -1,180 +1,98 @@
-* Purpose
-The Gerbil Scheme harness testing framework is a user-layer improvement over raw =std/make=, =std/building=, and =gxtest= entrypoints. It keeps the upstream build/test system as the execution owner, but gives downstream projects a single POO-shaped model for declaring suites, file expansion, batch execution, receipts, and gates.
+#+TITLE: 51.04 Gerbil Testing Profile Extensions
+#+AUTHOR: ASP Gerbil Scheme
+#+OPTIONS: toc:3 num:nil
 
-=benchmark.ss= remains the canonical performance contract format. It is a gate fixture under the testing framework, not the framework itself.
+* 51.04 Gerbil Testing Profile Extensions
+:PROPERTIES:
+:JD_ID: 51.04
+:STATUS: implemented
+:OWNER: src/testing/extension.ss
+:END:
 
-* Scenario Responsibility
-Scenarios are the repair bridge from harness evidence to downstream Scheme code. They are not a place to showcase syntax in isolation. Their job is to reproduce a real agent-written Scheme problem, encode the improved Gerbil/Scheme idiom as the expected repair, attach =benchmark.ss= phases that protect performance, and then make that repair available through the normal testing framework.
-The scenario suite therefore belongs inside the testing system. It must be selectable like a =gxtest= suite, emit the same receipt shape, and stay incremental when a downstream project selects one scenario id or one fixture root. Downstream projects enable this capability from =testing-build= with =improvement-scenarios:=; they should not need a second command path, a shell wrapper, or a separate policy pass.
-A scenario that cannot identify a downstream repair target, a concrete Gerbil/Scheme idiom, and a performance or quality gate should stay research material rather than becoming a testing-framework scenario.
-#+begin_src scheme
-(def +testing+
-  (testing-build
-   name: "poo-flow"
-   root: "."
-   gxtest: [["unit" "t/unit-tests.ss"]]
-   scenario-root: "t/scenarios/policy"
-   scenario-suite-name: "improvement-scenarios"
-   improvement-scenarios: ["poo-construction-performance"
-                           "poo-marlin-config-interface-large-object-performance"]
-   scenario-metadata:
-   '(("poo-construction-performance"
-      . ((downstreamRepairTarget . "poo-flow")
-         (idiom . "native-poo-construction")
-         (expectedOutcome . "preserve native POO object syntax while optimizing runner mechanics")
-         (benchmarkPhases . ("batch-split" "scenario-root-projection"))
-         (nextRepairAction . "apply the native POO construction idiom to the downstream object builder"))))))
-#+end_src
-* Why This Improves The Upstream Build System
-The upstream Gerbil build system already owns compilation, dependency tracking, module loading, and =gxtest= execution. The harness must not replace those responsibilities. Its improvement is a user-layer contract around the upstream system:
-- selection: turn no args, explicit files, suite roots, and scenario ids into a precise test scope
-- scheduling: split ordinary tests from timing-sensitive gates and choose safe serial or parallel execution
-- receipts: expose machine-readable phase, batch, suite, and project results
-- gates: attach =benchmark.ss= and policy checks to the same selected test flow
-- portability: let downstream =build.ss= files declare project shape instead of copying shell scripts, directory walkers, or ad hoc timers
+** Authority boundary
 
-This is the same improvement pattern used by =poo-flow=: keep the low-level runner simple, but provide a user-facing layer that validates inputs, expands manifests, batches work, and emits receipts. The harness version must be a library API rather than a CLI-only helper so =poo-flow=, =marlin-agent-core=, and other downstream Gerbil projects can consume it from their normal =build.ss= targets.
-The core question is: what does the framework improve that upstream should not own? The answer is the boundary around user intent. Upstream should not guess whether an agent meant one file, one manifest root, one scenario id, or a full-project policy pass. The harness framework makes that intent explicit, keeps it incremental, and returns receipts when an input would otherwise widen silently.
-This is guarded by the =testing-framework-upstream-build-improvement=, =downstream-testing-framework-api-loading=, and =marlin-testing-speed-trap= scenarios. The first exercises the framework model directly with multiple gxtest suites plus a policy scenario suite. The second is the downstream-user contract: a scenario-owned =build.ss= imports =:gslph/src/testing/build=, declares a thin test project, and proves explicit file selection, manifest-root expansion, scenario-id selection, and benchmark gating through the public package-qualified API. The third captures the real Marlin downstream speed trap: an agent-written build file with long gxtest lists, appended policy scope, and a single =gxtest-main= entrypoint. Its expected fixture rewrites the same shape as explicit suites and policy scenarios, then gates the incremental dispatch path. These fixtures prevent the framework from regressing into a broad project scan, an API that only works inside this package's short import context, or a downstream build pattern that turns one selected test into a slow whole-project run.
+=gerbil test= and =:clan/testing= are the only test framework. They own recursive
+discovery, suite loading, setup/cleanup, execution, progress, and summaries.
+ASP does not provide a second runner, catalog, scope collector, report format,
+or test DSL. Its discovery extension may only remove paths from the file list
+already returned by clan; it never adds or independently discovers tests.
 
-* Library Boundary
-The reusable downstream API lives in:
-- =src/testing/model.ss=
-- =src/testing/framework.ss=
-- =src/testing/build.ss=
-- =src/benchmark/gate.ss=
-- =src/benchmark/framework.ss=
-
-The testing model intentionally follows the user-interface shape learned from =poo-flow=: declare a project once, let the framework expand manifests and selected files, run batches through the native gxtest/build entrypoint, and emit machine-readable receipts.
-
-The testing model must not stay at a thin file-runner helper. Improvement scenarios, policy checks, benchmark gates, and native POO source contracts are suites and gates in the same project model. A downstream build target should declare the project shape once, then let the framework decide whether a suite is a normal gxtest manifest suite or a scenario suite with repair guidance, policy, and benchmark contracts.
-
-The design boundary is:
-- model modules declare projects, suites, gates, selections, receipts, and downstream POO projections
-- framework modules expand scopes, select suites, batch work, run adapters, and assemble receipts
-- build API modules bridge this library model into =std/make=, =std/building=, and =gxtest=
-- benchmark modules own =benchmark.ss= parsing, timing, memory fields, and gate receipts
-
-Downstream projects should not need to know which internal file walker, benchmark helper, or subprocess runner is used.
-Test fixtures and benchmark scenarios should observe a downstream project through the public =testing-build-*= API. They must not require user =build.ss= files to export reset, run-log, path-helper, or selection-wrapper functions just to make the harness testable.
-
-* POO-Shaped User Interface
-Downstream projects should be able to declare testing like this:
+The ordinary package entry is the upstream form:
 
 #+begin_src scheme
-(def +testing+
-  (testing-build
-   name: "poo-flow"
-   root: "."
-   contract-root: "t/benchmarks/unit"
-   gxtest: [["unit" "t/unit-tests.ss"]
-            ["contract" "t/contract-tests.ss"]
-            ["integration" "t/integration-tests.ss"]]))
-
-(def (test . args)
-  (testing-build-main +testing+ args))
+#!/usr/bin/env gxi
+(import :gerbil/expander :clan/testing)
+(init-test-environment!)
+(import-module ':sample/version #t #t)
 #+end_src
 
-Native POO syntax can project into this model; the contract boundary is the POO object field shape, not a separate shell command. Projection accepts a real POO object and reads slots through the native POO accessors. Do not flatten the source or add adapter-based compatibility; that reintroduces a non-POO layer.
+The native CLI remains:
 
-Improvement scenarios use the same testing model. Policy checks are one kind of scenario, but the public downstream contract is repair-oriented: a scenario should name the downstream repair target, the Gerbil/Scheme idiom, the expected repair, benchmark phases, and the next repair action exposed to the agent receipt.
+#+begin_src shell
+gerbil test t/example-test.ss
+gerbil test -r example t/...
+#+end_src
+
+** POO profile extension
+
+ASP adds immutable POO values that describe instrumentation around an upstream
+test. Default profiles cover managed-heap observation, benchmark receipts,
+=:clan/poo/debug= tracing, and shared-resource serialization. A project may
+replace a profile with =.cc=, bind it to one test with =.map=, or remove it
+with =.remove=.
 
 #+begin_src scheme
-(def +testing+
-  (testing-build
-   name: "gerbil-harness"
-   root: "."
-   contract-root: "t/benchmarks/poo-scenario-contract"
-   gxtest: [["unit" "t/unit-tests.ss"]]
-   scenario-root: "t/scenarios/policy"
-   scenario-suite-name: "improvement-scenarios"
-   improvement-scenarios: ["poo-construction-performance"
-                           "poo-marlin-config-interface-large-object-performance"]
-   scenario-metadata:
-   '(("poo-construction-performance"
-      . ((downstreamRepairTarget . "poo-flow")
-         (idiom . "native-poo-construction")
-         (expectedOutcome . "preserve native POO object syntax while optimizing runner mechanics")
-         (benchmarkPhases . ("batch-split" "scenario-root-projection"))
-         (nextRepairAction . "apply the native POO construction idiom to the downstream object builder"))))))
+(import :clan/poo/object
+        :asp-gerbil-scheme/build-api)
+
+(def +tests+
+  (testing-interface-map-profile
+   +asp-testing-interface+
+   "t/large-graph-test.ss"
+   (.cc +testing-memory-profile+ maxHeapMiB: 2048)))
+
+(def +without-trace+
+  (testing-interface-remove-profile +tests+ 'debug-trace))
+
+(def +without-child-package-tests+
+  (testing-interface-add-profile
+   +tests+
+   (.cc +testing-discovery-profile+
+        ignoreDirectories: '("lambda-episteme"))))
 #+end_src
 
-This is the migration target for existing =t/scenarios/policy/*= fixtures: scenario metadata, benchmark receipts, and policy checks should be managed through the thin =testing-build= API instead of scattered hand-written test loops.
-Projects that need custom delegates can still use lower-level =testing-project=, =testing-select-project=, and =testing-run-selection=, but normal downstream =build.ss= files should not need to hand-write path helpers, import-to-file mapping, run logs, gates, or receipt plumbing.
+The declaration is data, not another command-line language. Runtime adapters
+may project these values into process limits and observations before the
+upstream test process is loaded, but they may not rediscover tests or replace
+=gerbil test=.
 
-* Incremental Selection Contract
-Incremental testing is not a separate command. It is a scope-selection rule on the same project model:
-- empty args select every declared suite
-- a declared gxtest root selects that gxtest suite and expands its manifest
-- an explicit =.ss= file selects only the gxtest suite whose roots or default expansion contain that file
-- a declared scenario root selects that scenario suite
-- a declared scenario id selects the scenario suite and expands only that scenario
-- an unknown scope returns a failed POO selection and then a failed project receipt with the same reason instead of silently passing
+For a package-level negative discovery boundary, initialize the same clan
+environment through the profiled entrypoint:
 
-This keeps the downstream interface small while preserving flexibility. A downstream build target can pass through selected file paths from =gxtest=, changed-file hooks, or CI shard inputs without creating a second policy pass over the whole project.
+#+begin_src scheme
+(init-profiled-test-environment! +without-child-package-tests+)
+#+end_src
 
-* Performance Design
-The framework should optimize the hot path that it owns:
-- cache scenario fixture metadata and expected source text inside one test process when several gates inspect the same scenario
-- keep benchmark-sensitive tests process-isolated while ordinary suites remain parallel and batchable
-- emit phase receipts so slowdowns can be assigned to selection, compile/load, fixture collection, policy evaluation, assertion rendering, or subprocess execution
-- keep full-project collection behind explicit full scopes, never as the default behavior for a selected file
-- preserve native POO source shapes and optimize runner mechanics underneath
+This entrypoint calls =clan/testing#find-test-files= first and filters only the
+declared directories. It then delegates every remaining path to a fresh native
+=gerbil test= process. The process boundary projects the selected per-test POO
+memory Profile before that suite loads; the aggregate discovery process itself
+is not constrained by a single suite's heap budget. Child stdout is inherited,
+so native gxtest progress, failures, and project benchmark receipts remain
+visible instead of being captured by the adapter.
 
-The performance gate belongs to the measured phase. A subsecond policy gate is valid when it measures fixture/policy work. A broader integration gate is valid only when it labels the integration scope explicitly.
+** Source scope
 
-Benchmark body timing is a framework receipt, not downstream glue. Tests that need a direct benchmark around one hot path should call =testing-benchmark-run/result= so they receive the raw =benchmark.ss= receipt, the business result, and a =benchmark-body= phase receipt with elapsed micros. Downstream projects must not duplicate ad hoc timers or hand-built phase alists just to expose the same information.
+Production scope comes from =clan/building#all-gerbil-modules=, which is the
+same std/make graph used by the package build. Policy tests obtain their
+=t/=-rooted modules through that same upstream graph and filter the explicit
+=-test.ss= module set. ASP does not walk the repository or expand imports to
+manufacture a second source graph.
 
-Selected =gxtest= compilation is also a framework-owned optimization. The cache decision must consider both the selected test source and framework dependency stamps such as =benchmark/gate= and =testing/performance=. If the source and output have the same filesystem timestamp, the framework treats the output as stale. This protects fast edit/test loops and linked harness upgrades from accidentally running an old compiled test module.
+** Acceptance
 
-* Compile Debug Tracking
-Compile debugging is a Testing Framework responsibility, not downstream shell glue. When a downstream project asks the framework to compile or run a selected test scope, the framework should be able to explain why each compile phase ran, skipped, or became stale.
-
-The debug surface should remain receipt-native and machine-readable. A debug receipt should expose the phase name, command, command directory, input files, output files, cache key, cache status, stale reason, elapsed micros, and affected scope. Cache status should distinguish at least =current=, =missing=, =stale=, =forced=, and =unsupported=.
-
-The receipt must make root-cause tracking explicit. A downstream user should be able to see whether a slow compile came from a changed source, missing output, older output, changed framework stamp, changed package spec, cache-key drift, extensionless target normalization, or a broad selected scope. The framework may summarize the slowest targets, but it must retain enough per-target evidence for a downstream build owner to reproduce the decision without rerunning a full compile.
-
-The default text output should stay compact. Debug tracking may be gated behind a debug flag or a receipt artifact path, but the implementation should not require downstream packages to invent ad hoc timers, grep build logs, or wrap framework commands just to answer which file or cache decision caused a compile slowdown.
-
-* Performance Gate API
-- =benchmark-contract-read/root= loads a fixture from a benchmark root.
-- =benchmark-contract-valid/root?= checks the shared fixture contract.
-- =benchmark-contract-run/root= runs a thunk and returns a machine-readable receipt.
-- =benchmark-contract-paths/root= discovers nested =benchmark.ss= fixtures.
-- =benchmark-contract-input-expected-pass?= checks scenario fixture shape.
-- =testing-benchmark-run/result= adapts a =benchmark.ss= fixture into the Testing Framework receipt model and emits a =benchmark-body= phase for ordinary =gxtest= tests.
-
-Downstream projects such as =poo-flow= and =marlin-agent-core= should consume these APIs through their normal gxtest/build targets instead of duplicating shell timers, directory walkers, or ad hoc max-time constants.
-
-* Build-System Rule
-Keep Gerbil build targets aligned with upstream =std/make= and =std/building=. Benchmark gates are test-library contracts, not separate shell test passes. The normal gxtest entry should run the semantic assertion and the benchmark receipt gate in the same test flow, so a project does not test the same source tree twice.
-
-* Fixture Rule
-Every performance-sensitive scenario needs a =benchmark.ss= fixture with:
-- time limits and observed timing baselines
-- memory metric fields
-- measurement phases
-- feature, rule, purpose, input shape, and expected repair metadata
-
-Subsecond targets are valid and expected for hot policy checks. Integration gates may use looser limits, but that integration scope must be explicit in the fixture metadata.
-
-* Runner Optimization Rule
-Whole =gxtest= wall time is not a policy performance receipt. The framework should first separate source-runner import/expand cost from fixture collection and policy execution.
-
-The POO guidance test field receipt showed that scenario collect/policy work was subsecond while source-file =gxtest= execution still took tens of seconds. The framework response is:
-- keep guidance support modules light and intent-specific
-- run POO guidance assertions through a scoped policy runner
-- classify benchmark-sensitive tests by scanning imported test modules for benchmark gate APIs
-- keep benchmark gate suites process-isolated; serial execution alone is not enough when =gxtest= prepares multiple suites in one process
-- batch only non-sensitive =gxtest= files when the file count exceeds the worker count
-- leave compiled-module execution as the next explicit optimization lane, not an accidental side effect of compiling selected test files
-* Optimizer Feedback Loop
-The language-feature scenarios are not showcase fixtures. They are evidence for when the testing framework itself should stop looking like basic Scheme and use Gerbil/Scheme mechanisms that improve a hot path or sharpen a boundary.
-The rule is:
-- use a language feature only when it removes a real pass, allocation, subprocess, or ambiguous interface
-- keep the public downstream API POO-shaped and thin
-- prefer native Scheme mechanisms such as multiple values, closures, precise delegates, and phase receipts before adding macro layers
-- reject changes that merely make source look clever without a benchmark phase or scenario that proves the benefit
-The first fixed framework example is batch splitting. Older code computed the batch head and tail through separate list walks. =testing-split-batch= returns both values in one traversal and =testing-batches= consumes them with =let-values=. Existing =testing-batch-head= and =testing-batch-tail= remain thin helpers over the same single split primitive, so downstream callers keep their surface while the framework hot path gets the optimizer-friendly implementation.
-The second fixed framework example is scenario root projection. Scenario suite execution computes the selected source roots once and reuses the same list for the suite receipt, delegate-policy phase, and benchmark gate phases. This avoids repeated =filter-map= passes over the same scenario list while keeping the receipt contract unchanged.
-These optimizations are guarded by the =batch-split= and =scenario-root-projection= measurement phases in the testing framework benchmark fixtures. Future language-feature work should follow the same path: scenario evidence, benchmark phase, framework implementation, and then source-quality repair in real downstream code.
+- the extension and every profile are native POO objects;
+- per-test overrides are immutable and do not mutate defaults;
+- removing a profile also removes its per-test bindings;
+- upstream =gerbil test= executes focused tests directly;
+- a clean native package build succeeds without any retired runner module.

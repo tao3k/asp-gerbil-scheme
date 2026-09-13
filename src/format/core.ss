@@ -3,8 +3,8 @@
 ;;; duplicate lexical scanner or suffix ownership rules.
 ;;; Parser reader facts decide where whitespace may change.
 (import :gerbil/gambit
-        :gslph/src/parser/reader
-        :gslph/src/utilities/functional)
+        :asp-gerbil-scheme/src/parser/reader
+        :asp-gerbil-scheme/src/utilities/functional)
 
 (export fmt-source-file?
         fmt-format-text

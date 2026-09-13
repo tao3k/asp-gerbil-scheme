@@ -1,12 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned source scope and filesystem discovery helpers.
 ;;; Boundary:
-;;; - Package policy owns source/test roots and exclusions.
-;;; - This module turns that policy into concrete parser file sets.
+;;; - Callers own explicit source roots and exclusions.
+;;; - This module turns scope evidence into concrete parser file sets.
 
 (import :gerbil/gambit
-        :gslph/src/parser/package
-        (only-in :gslph/src/parser/selectors relative-path source-full-path)
+        :asp-gerbil-scheme/src/parser/package
+        (only-in :asp-gerbil-scheme/src/parser/selectors relative-path source-full-path)
         (only-in :std/iter for/fold)
         (only-in :std/misc/list unique)
         (only-in :std/misc/ports read-file-lines)
@@ -30,7 +30,7 @@
         read-source-lines)
 
 ;; ConfigConstant
-(def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld"))
+(def +source-extensions+ '(".ss" ".ssi" ".scm" ".sld" ".inc"))
 ;; ConfigConstant
 (def +config-files+ '("gerbil.pkg" "build.ss"))
 ;; Boolean
@@ -54,7 +54,7 @@
 ;;   : (-> String MaybePackage (List String))
 ;;   | doc m%
 ;;       `collect-source-files root package` returns config files plus configured
-;;       runtime/test source files after applying package-owned source scope.
+;;       runtime/test source files after applying Build API source scope.
 ;;
 ;;       # Examples
 ;;
@@ -66,14 +66,14 @@
 (def (collect-source-files root . maybe-package)
   (let* ((package (and (pair? maybe-package) (car maybe-package)))
          (scope-policy (and package
-                            (project-package-source-scope-policy package)))
+                            (project-package-source-scope package)))
          (source-roots (configured-source-roots scope-policy))
          (test-roots (configured-test-roots package))
          (scan-roots
           (minimal-scan-roots (unique (append source-roots test-roots))))
          (ignored-dirs (append +ignored-dirs+
                                (if scope-policy
-                                 (source-scope-policy-exclude-directories scope-policy)
+                                 (source-scope-exclude-directories scope-policy)
                                  '()))))
     (unique
      (map path-normalize
@@ -95,14 +95,14 @@
 (def (collect-source-files-preview root limit . maybe-package)
   (let* ((package (and (pair? maybe-package) (car maybe-package)))
          (scope-policy (and package
-                            (project-package-source-scope-policy package)))
+                            (project-package-source-scope package)))
          (source-roots (configured-source-roots scope-policy))
          (test-roots (configured-test-roots package))
          (scan-roots
           (minimal-scan-roots (unique (append source-roots test-roots))))
          (ignored-dirs (append +ignored-dirs+
                                (if scope-policy
-                                 (source-scope-policy-exclude-directories scope-policy)
+                                 (source-scope-exclude-directories scope-policy)
                                  '())))
          (configs (take-up-to (root-config-files root) limit))
          (remaining (- limit (length configs))))
@@ -173,13 +173,13 @@
 ;; : (-> Root MaybePackage (List Path) (List Path) )
 (def (changed-source-files root package paths)
   (let* ((scope-policy (and package
-                            (project-package-source-scope-policy package)))
+                            (project-package-source-scope package)))
          (source-roots (configured-source-roots scope-policy))
          (test-roots (configured-test-roots package))
          (scan-roots (unique (append source-roots test-roots)))
          (ignored-dirs (append +ignored-dirs+
                                (if scope-policy
-                                 (source-scope-policy-exclude-directories scope-policy)
+                                 (source-scope-exclude-directories scope-policy)
                                  '())))
          (config-files (root-config-files root)))
     (unique
@@ -376,17 +376,25 @@
 
 ;; : (-> Policy (List String) )
 (def (configured-source-roots policy)
-  (let (roots (and policy (source-scope-policy-roots policy)))
-    (if (and roots (pair? roots)) roots ["."])))
+  (let* ((roots (and policy (source-scope-roots policy)))
+         (runtime-roots (and policy (source-scope-runtime-roots policy)))
+         (declared-roots
+          (and policy (unique (append (or roots [])
+                                      (or runtime-roots []))))))
+    ;; Native development fallback is source-owned. Scanning the workspace
+    ;; root would admit generated trees and build-system directory links before
+    ;; the parser has any caller-owned scope evidence. Once explicit scope
+    ;; exists, runtime roots are also parseable source roots rather than merely
+    ;; descriptive metadata.
+    (if (and declared-roots (pair? declared-roots))
+      declared-roots
+      ["src" "bin"])))
 
 ;; : (-> MaybePackage (List String) )
 (def (configured-test-roots package)
-  (let* ((policy (and package (project-package-test-directory-policy package)))
-         (roots (and policy
-                     (test-directory-policy-allowed-directories policy))))
-    (if policy
-      (or roots '())
-      ["t"])))
+  ;; Retired test roots remain discoverable so modularity policy can report
+  ;; them; discovery does not make them accepted layout.
+  ["t" "test" "tests"])
 
 ;; root-config-files
 ;;   : (-> String (List String))

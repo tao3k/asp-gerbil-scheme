@@ -1,15 +1,16 @@
 ;;; -*- Gerbil -*-
 ;;; Stable policy facade for Gerbil project rules.
 
-(import :gslph/src/policy/agent
-        :gslph/src/policy/agent-poo
-        :gslph/src/policy/agent-build
-        :gslph/src/policy/core
-        :gslph/src/policy/model
-        :gslph/src/policy/modularity
-        :gslph/src/policy/repair)
+(import :asp-gerbil-scheme/src/policy/agent
+        :asp-gerbil-scheme/src/policy/agent-poo
+        :asp-gerbil-scheme/src/policy/agent-build
+        :asp-gerbil-scheme/src/policy/core
+        :asp-gerbil-scheme/src/policy/model
+        :asp-gerbil-scheme/src/policy/modularity
+        :asp-gerbil-scheme/src/policy/repair)
 
-(export make-policy-rule
+(export default-modularity-profile
+        make-policy-rule
         policy-rule-id
         policy-rule-severity
         +modularity-facade-rule+
@@ -61,13 +62,12 @@
         +agent-macro-expansion-io-boundary-rule+
         +agent-list-random-access-loop-performance-rule+
         +agent-string-growth-loop-performance-rule+
+        +macro-governance-admission-rule+
         repairable-finding?
         repairable-findings
         agent-repair-report-json
-        agent-repair-summary-parts
         finding-agent-repair-json
-        finding-agent-repair-parts
-        finding-guide-detail-parts
+        policy-finding-json
         run-policy-checks
         run-modularity-policy
         +max-source-line-count+

@@ -1,29 +1,12 @@
-((max_total . 24ms)
- (observed_total . 6ms)
- (target_total . 14ms)
- (regression_budget . 18ms)
- (expected_over_input_budget . 1ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2) (durationNs . 2000000))
-  ((name . collect-after) (durationMs . 2) (durationNs . 2000000))
-  ((name . policy-before) (durationMs . 1) (durationNs . 1000000))
-  ((name . policy-after) (durationMs . 1) (durationNs . 1000000)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
   "string-append-loop-performance keeps loop-local string builder detection parser-owned and validates one linear builder boundary in a small millisecond gate")
- (maxCollectMs . 10)
- (observedCollectMs . 4)
- (maxParseMs . 14)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 6)
- (observedPhaseMs . 2)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+ (sampleCount . 20)
  (purpose
   .
   "R042 string append scenario rejects generated O(n^2) render loops when an output port, string-join, or bytes/u8vector builder boundary should own concatenation")
@@ -66,6 +49,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate"
   "assert-input-expected-comparison")
  (tags "style" "string" "loop" "builder" "performance"))

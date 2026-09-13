@@ -2,9 +2,9 @@
 ;;; Typed contract signature diagnostics and token projection helpers.
 
 (import :gerbil/gambit
-        :gslph/src/parser/model
-        :gslph/src/parser/typed-comment-metadata
-        :gslph/src/parser/typed-contract-scheme
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/typed-comment-metadata
+        :asp-gerbil-scheme/src/parser/typed-contract-scheme
         (only-in :std/misc/list unique)
         (only-in :std/srfi/13
                  string-contains

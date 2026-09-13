@@ -6,14 +6,14 @@
         :std/misc/ports
         :std/misc/process
         :std/sort
-        :gslph/src/parser/facade
-        :gslph/src/policy/agent-style
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-style
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
 (export #t)
 
 
@@ -69,8 +69,14 @@
 (def (agent-style-policy-scenario-timing-steps-measured? timings)
   (cond
    ((null? timings) #t)
-   ((and (number? (hash-get (car timings) 'durationMs))
-         (>= (hash-get (car timings) 'durationMs) 0))
+   ((and (integer? (hash-get (car timings) 'durationNs))
+         (> (hash-get (car timings) 'durationNs) 0)
+         (string? (hash-get (car timings) 'duration))
+         (integer? (hash-get (car timings) 'cpuDurationNs))
+         (> (hash-get (car timings) 'cpuDurationNs) 0)
+         (string? (hash-get (car timings) 'cpuDuration))
+         (integer? (hash-get (car timings) 'schedulerDelayNs))
+         (>= (hash-get (car timings) 'schedulerDelayNs) 0))
     (agent-style-policy-scenario-timing-steps-measured? (cdr timings)))
    (else #f)))
 
@@ -172,6 +178,8 @@
     (check (hash-get timing 'schemaId)
            => +agent-style-policy-scenario-timing-schema-id+)
     (check (hash-get timing 'scenarioId) => scenario-id)
+    (check (hash-get timing 'gcPrecondition)
+           => ":gerbil/gambit###gc")
     (check (length timings) => 4)
     (check (agent-style-policy-scenario-timing-steps-measured? timings)
            => #t)
@@ -179,6 +187,13 @@
     (check (hash-get benchmark-contract 'rule)
            => +agent-style-policy-r013-rule-id+)
     (check (hash-get timing 'performanceStatus) => "pass")
+    (check (hash-get timing 'admissionClock) => 'process-cpu)
+    (check (string? (hash-get timing 'wallPerformanceStatus)) => #t)
+    (check (hash-get timing 'inputExpectedStatistic) => 'independent-p95)
+    (check (hash-get timing 'inputExpectedClock) => 'process-cpu)
+    (check (hash-get input-expected-comparison 'statistic)
+           => 'independent-p95)
+    (check (hash-get input-expected-comparison 'clock) => 'process-cpu)
     (check (or (equal? (hash-get timing 'inputExpectedStatus) "pass")
                (equal? (hash-get timing 'inputExpectedStatus)
                        "pass annotated"))

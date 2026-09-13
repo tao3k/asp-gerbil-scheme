@@ -2,8 +2,8 @@
 ;;; Parser-owned import facts for Gerbil module forms.
 
 (import :gerbil/expander
-        :gslph/src/parser/model
-        :gslph/src/parser/support
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/support
         (only-in :std/misc/list unique)
         (only-in :std/srfi/13 string-prefix?))
 
@@ -14,8 +14,11 @@
 ;;; - Keep data-flow evidence visible.
 ;; : (-> Relpath Form ModuleImportFactsFromForm )
 (def (module-import-facts-from-form relpath form)
+  ;; Gambit's native syntax pair traversal exposes this import tail in reverse
+  ;; source order.  Normalize it here so every consumer receives the same
+  ;; source-ordered module facts as the datum projection.
   (filter-map (cut module-import-fact-from-stx relpath <>)
-              (cdr (stx-list-items form))))
+              (reverse (cdr (stx-list-items form)))))
 
 ;; : (-> Relpath Item ModuleImportFactFromStx )
 (def (module-import-fact-from-stx relpath item)

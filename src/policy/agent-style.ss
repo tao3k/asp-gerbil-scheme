@@ -1,23 +1,23 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing style policy checks.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-style-steering
-        :gslph/src/policy/agent-style-details
-        :gslph/src/policy/agent-style-quality
-        :gslph/src/policy/agent-style-gerbil-signals
-        :gslph/src/policy/agent-style-destructuring-signals
-        :gslph/src/policy/agent-style-docs
-        :gslph/src/policy/agent-style-message
-        :gslph/src/policy/agent-style-performance-signals
-        :gslph/src/policy/gerbil-utils-source
-        :gslph/src/policy/agent-support
-        :gslph/src/policy/agent-style-shape
-        :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-style-steering
+        :asp-gerbil-scheme/src/policy/agent-style-details
+        :asp-gerbil-scheme/src/policy/agent-style-quality
+        :asp-gerbil-scheme/src/policy/agent-style-gerbil-signals
+        :asp-gerbil-scheme/src/policy/agent-style-destructuring-signals
+        :asp-gerbil-scheme/src/policy/agent-style-docs
+        :asp-gerbil-scheme/src/policy/agent-style-message
+        :asp-gerbil-scheme/src/policy/agent-style-performance-signals
+        :asp-gerbil-scheme/src/policy/gerbil-utils-source
+        :asp-gerbil-scheme/src/policy/agent-support
+        :asp-gerbil-scheme/src/policy/agent-style-shape
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/misc/list unique)
         (only-in :std/srfi/13 string-empty?)
         (only-in :std/sugar cut filter filter-map foldl hash hash-get ormap)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export typed-combinator-style-findings
         typed-combinator-style-finding

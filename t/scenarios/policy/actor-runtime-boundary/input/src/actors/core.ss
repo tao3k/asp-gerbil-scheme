@@ -18,7 +18,7 @@
                    (if done?
                      (loop (cdr rest) out)
                      (loop (cdr rest)
-                           (cons (receive mailbox) out)))))))))))
+                           (cons (receive mailbox) out))))))))))
     (for-each (lambda (message) (send mailbox message)) messages)
     (set! done? #t)
     (thread-join! worker)))

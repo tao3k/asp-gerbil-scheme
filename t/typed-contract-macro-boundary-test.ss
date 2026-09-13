@@ -1,5 +1,5 @@
 (import :std/test
-        :gslph/src/parser/facade)
+        :asp-gerbil-scheme/src/parser/facade)
 
 (export typed-contract-macro-boundary-test)
 

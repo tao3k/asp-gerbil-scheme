@@ -19,11 +19,7 @@
 ;;       ```
 ;;     %
 (def (fold-generated combine seed source)
-  (let loop ((acc seed))
-    (let (value (source))
-      (if (eof-object? value)
-        acc
-        (loop (combine acc value))))))
+  (foldl combine seed (list<-generating source)))
 
 ;; sum-generated
 ;;   : (-> (Generating Number) Number)

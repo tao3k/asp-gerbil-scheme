@@ -46,9 +46,11 @@ internal parser namespace can keep splitting without forcing broad import churn.
 ** 21.02.3 Protocol Boundary
 
 =src/protocol/json.ss= owns JSON projection for parser-owned facts.
-=src/protocol/registry.ss= owns registry projection. Search and query commands
-can reuse these projections, but the parser core remains Scheme data first and
-does not depend on JSON output.
+=src/protocol/provider-operation-catalog.ss= owns static POO operation/schema
+contracts. =src/protocol/registry.ss= owns their registry projection. Command
+discovery imports only these protocol owners; executable dispatch, memo state,
+and HTTP lifecycle remain under =src/runtime/=. The parser core stays Scheme
+data first and does not depend on JSON output.
 
 =src/snapshot/core.ss= owns stable test projections for schema-facing facts.
 Snapshot fixtures use =.ss= files because they are Gerbil-native Scheme data

@@ -1,106 +1,54 @@
-#+TITLE: 31.06 Gxtest Memory Stability Gate
+#+TITLE: 31.06 POO Testing Resource Profiles
 #+STARTUP: overview
 
 * Purpose
 
-Memory stability is a property of a library operation exercised by an ordinary
-=gxtest= test.  It is not a =gslph= product command, a benchmark subcommand,
-or a second test runner.
+Memory stability and machine performance are optional POO extensions around
+ordinary upstream =gerbil test=. They are not source macros, a second testing
+framework, or metadata inferred by scanning test files.
 
-* Contract
+* Declaration
 
-A memory exception is an explicit test-only declaration, not a framework
-default. The source module configures its own static profile with:
+The ASP testing interface enables memory, performance, debug-trace, and
+shared-resource profiles by default. A project specializes and maps profiles
+with ordinary gerbil-poo composition:
 
 #+begin_src scheme
-(declare-gxtest-memory-exception
- '((maxHeapMiB . 512)))
+(import :clan/poo/object
+        :asp-gerbil-scheme/build-api)
+
+(def +testing+
+  (testing-interface-map-profile
+   +asp-testing-interface+
+   "t/large-project-test.ss"
+   (.cc +testing-memory-profile+ maxHeapMiB: 2048)))
 #+end_src
 
-The profile remains a literal because the parent process selects the =gxi=
-runtime arguments before the test module loads. The test body repeats the
-library API whose retained working set is under test. =maxHeapMiB= must be a
-positive integer. A malformed declaration fails the test run rather than
-silently falling back to an unrestricted process.
+The user does not pass =max-heap= on the command line. The POO slot is applied
+to the current process through Gambit's upstream =##set-max-heap!= runtime API
+before =clan/testing= loads the package tests. ASP does not discover files,
+load suites, schedule batches, or report results.
 
-There is no framework-wide memory default. Each exceptional scenario declares
-the ceiling appropriate to its own workload; =gxi= enforces that managed-heap
-ceiling directly. The gate does not poll RSS or depend on an external process
-watcher.
+* Machine performance
 
-* Execution
+The default performance profile identifies upstream wall timing through
+=:clan/timestamp= and managed-heap observation through ASP's benchmark memory
+library. Its metric set includes wall time, CPU time, allocation, GC, and
+managed heap. A test may use =.cc= to add scenario budgets or remove the
+profile entirely with =.remove=.
 
-The normal =gxtest= assertion flow remains authoritative. Upstream =gxtest=
-does not consume project-private memory metadata itself. Instead, the ordinary
-outer test reuses the testing library's existing =run-gxtest-file/subprocess=
-lane for the exception fixture. That lane reads the declaration and launches
-=gxi -:max-heap=<N>M= before the fixture loads. No product command, wrapper,
-or alternate test runner is introduced.
+* Failure semantics
 
-A declared memory exception is isolated from the in-process fast path. A child
-heap overflow is an ordinary test failure: the child exits nonzero and the outer
-=gxtest= assertion fails. The runtime limit is an execution profile, not CLI
-behavior and not benchmark output.
+A positive =maxHeapMiB= is translated internally to bytes for Gambit's native
+runtime heap API. Heap exhaustion terminates the native test process
+instead of allowing an agent-written test to consume the host indefinitely.
+Observation receipts do not pretend to be limits: the limit is applied at
+runtime, while metrics describe the completed native operation.
 
-* Execution Verification
+* Acceptance
 
-The project-index scenario passes with its declared =512 MiB= budget. Lowering
-the same declaration to =256 MiB= makes the child exit with status =42=, and
-the outer =gxtest= case fails. This confirms that the macro declaration reaches
-the actual child workload rather than only being parsed as metadata.
-
-* Regression Module
-
-=t/testing-memory-profile-collect-project-test.ss= is the ordinary outer
-allocation regression gate. It invokes
-=t/memory-profile-collect-project-exception.ss= through the existing subprocess
-library API. The exception fixture declares =maxHeapMiB = 512= and repeats
-=collect-project/profile= four times, checking scalar profile receipt fields
-before collecting. =t/testing-memory-profile-test.ss= remains the declaration
-parser unit test; it does not exercise the bounded workload.
-
-* First Regression
-
-The first exception test repeatedly calls =collect-project/profile= for this
-package.  Each iteration validates the returned project index, releases the
-previous result, and collects before the next iteration.  This detects retained
-parser/index graphs under a fixed Gambit managed-heap budget without keeping a
-command-layer loop alive solely for measurement.
-
-* Root Cause And Invariant
-The initial failure was not a retained =SourceFile= graph. The profile receipt
-computed =definitionCount= through =project-definitions=, which materialized
-the full aggregate definition collection just to produce a scalar. Repeated
-calls overflowed the managed heap even after the caller released each receipt.
-
-=collect-project/profile= now uses =project-definition-count=, which sums the
-already-owned per-file definition lists without building that aggregate. The
-full-project profile performs one materializing parse and returns scalar Top-K
-timing evidence. Stage timings remain an explicit selected-owner operation;
-they are not hidden work in a full-project receipt.
-
-The exception test repeats this exact receipt four times under its declared
-=512 MiB= budget and asserts both the scalar definition count and bounded Top-K
-result. It therefore protects the allocation invariant rather than merely
-checking that a command returns.
-* CLI Boundary
-There is no =gslph bench= or =bench --full= product command. Memory stability
-is exercised only through the ordinary =gxtest= discovery and subprocess path.
-The library-level test owns its workload and heap limit; the CLI does not own a
-second benchmark loop.
-* Boundaries
-
-This gate proves bounded Gambit managed-heap behavior for a repeated library
-operation.  It does not claim to measure operating-system RSS, native allocator
-retention, or a general-purpose leak proof.  Those require platform probes with
-an explicit availability contract and must not be represented as an enforced
-gate until implemented.
-
-* Tooling Feedback
-
-The Gerbil selector query currently renders normalized code that is not always
-byte-identical to the source accepted by =apply_patch=.  The implementation must
-therefore retain parser-owned owner and item discovery, then use a narrowly
-bounded source read only when applying a verified selector-level change.  This is
-an ASP editing-contract gap to close; it is not permission to substitute broad
-text search or =git diff= for evidence routing.
+- default 1024 MiB and per-test overrides apply to the native runtime;
+- POO removal deletes both the default profile and its test bindings;
+- the adapter uses Gambit's heap API without replacing =clan/testing=;
+- a clean native build contains no source-metadata profile parser;
+- extension and project policy tests pass through native gxtest.

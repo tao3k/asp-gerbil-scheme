@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Formatting facade for command and library callers.
 
-(import :gslph/src/format/core
-        :gslph/src/format/files)
+(import :asp-gerbil-scheme/src/format/core
+        :asp-gerbil-scheme/src/format/files)
 
 (export fmt-target-files
         fmt-file
