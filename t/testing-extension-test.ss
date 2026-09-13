@@ -26,7 +26,7 @@
 
     (test-case "scenario profiles are enabled by default"
       (check (testing-interface-profile-names +asp-testing-interface+)
-             => '(memory performance debug-trace serial-resource discovery))
+             => '(memory performance debug-trace discovery))
       (check (testing-interface-profile-enabled?
               +asp-testing-interface+
               'performance)
@@ -95,7 +95,7 @@
                 'performance)
                => #f)
         (check (testing-interface-profile-names without-performance)
-               => '(memory debug-trace serial-resource discovery))
+               => '(memory debug-trace discovery))
         (check (testing-interface-profile-enabled?
                 +asp-testing-interface+
                 'performance)
@@ -149,6 +149,21 @@
                    "test"
                    "-q"
                    "t/large-test.ss"])))
+
+    (test-case "uniform runtime profiles use one upstream batch"
+      (check (testing-interface-test-files-share-runtime-options?
+              +asp-testing-interface+
+              '("t/a-test.ss" "t/b-test.ss"))
+             => #t)
+      (let (mapped
+            (testing-interface-map-profile
+             +asp-testing-interface+
+             "t/b-test.ss"
+             (.cc +testing-memory-profile+ maxHeapMiB: 256)))
+        (check (testing-interface-test-files-share-runtime-options?
+                mapped
+                '("t/a-test.ss" "t/b-test.ss"))
+               => #f)))
 
     (test-case "the POO profile configures the current upstream runtime"
       (let (previous-max-heap (##get-max-heap))

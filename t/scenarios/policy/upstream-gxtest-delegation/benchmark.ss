@@ -12,13 +12,13 @@
  (rule . "GERBIL-SCHEME-AGENT-TESTING-UPSTREAM-GXTEST-DELEGATION-001")
  (optimizationFocus
   .
-  "remove ASP selection and execution ownership while preserving per-test POO profile mapping")
+  "reuse one upstream clan/testing batch while preserving explicit heterogeneous runtime-profile isolation")
  (inputShape
   .
   "scenario input manually selects files instead of using gerbil test")
  (expectedOutcome
   .
-  "use gerbil test for selection and execution; bind optional instrumentation to the explicit test path")
+  "load and execute the ordinary test set once through clan/testing instead of starting one Gerbil process per file")
  (measurementPhases
   "collect-before"
   "policy-before"

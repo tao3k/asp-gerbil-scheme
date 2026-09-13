@@ -9,11 +9,13 @@
         (only-in :clan/poo/debug trace-poo)
         (only-in :clan/testing
                  find-test-files
+                 run-tests
                  %set-test-environment!)
         (only-in :std/cli/multicall
                  define-entry-point
                  define-multicall-main
                  set-default-entry-point!)
+        (only-in :std/cli/print-exit silent-exit)
         (only-in :std/source this-source-file)
         (only-in :std/misc/process run-process)
         (only-in :std/srfi/1 find filter)
@@ -42,6 +44,8 @@
         testing-interface-ignore-directories-for
         testing-interface-test-file-included?
         testing-interface-test-files
+        testing-interface-test-files-share-runtime-options?
+        testing-interface-run-test-files!
         init-profiled-test-environment!
         +testing-memory-profile+
         +testing-performance-profile+
@@ -182,7 +186,6 @@
    profiles: [+testing-memory-profile+
               +testing-performance-profile+
               +testing-debug-trace-profile+
-              +testing-serial-resource-profile+
               +testing-discovery-profile+]))
 
 (def (invalid-ignore-directory-matchers)
@@ -248,7 +251,10 @@
 ;;   | doc m%
 ;;       Install the normal package unit-test entrypoint after clan discovers
 ;;       its native test files and the POO discovery profile subtracts ignored
-;;       child-package paths.
+;;       child-package paths. Tests with one process-level runtime profile run
+;;       in a single upstream clan/testing batch, so module loading and runtime
+;;       startup are shared. Only heterogeneous runtime profiles require the
+;;       isolated compatibility path.
 ;;
 ;;       # Examples
 ;;       ```scheme
@@ -266,9 +272,10 @@
        (help: "Run clan unit tests through ASP POO profiles"
         getopt: [])
        (%set-test-environment! here)
-       (for-each
-        (cut testing-interface-run-test! testing <>)
-        (testing-interface-test-files testing "unit-tests.ss")))
+       (silent-exit
+        (testing-interface-run-test-files!
+         testing
+         (testing-interface-test-files testing "unit-tests.ss"))))
      (set-default-entry-point! 'asp-profiled-unit-tests))))
 
 (def (testing-memory-profile-max-heap-mib profile)
@@ -307,6 +314,28 @@
   (run-process (testing-interface-command-for testing test arguments)
                directory: directory
                stdout-redirection: #f))
+
+;;; The normal path is one upstream clan/testing batch. Process isolation is
+;;; retained only when callers explicitly map incompatible runtime options.
+(def (testing-interface-test-files-share-runtime-options? testing test-files)
+  (or (null? test-files)
+      (let (options (testing-interface-runtime-options-for
+                     testing (car test-files)))
+        (andmap (lambda (test-file)
+                  (equal? options
+                          (testing-interface-runtime-options-for
+                           testing test-file)))
+                (cdr test-files)))))
+
+(def (testing-interface-run-test-files! testing test-files)
+  (cond
+   ((testing-interface-test-files-share-runtime-options? testing test-files)
+    (unless (null? test-files)
+      (testing-interface-apply-runtime-profile! testing (car test-files)))
+    (run-tests "." test-files: test-files))
+   (else
+    (for-each (cut testing-interface-run-test! testing <>) test-files)
+    #t)))
 
 ;;; Apply the selected POO memory profile to the current Gambit runtime.  This
 ;;; uses the upstream heap API directly; callers never construct startup argv.
