@@ -467,7 +467,7 @@
     (let* ((parallel-batches
             (testing-interface-test-file-batches testing parallel-files))
            (serial-batches
-            (testing-interface-test-file-batches testing serial-files))
+            (map list serial-files))
            (worker-count
             (testing-interface-worker-count (length parallel-batches)))
            (workgroup (and (> worker-count 0) (make-wg worker-count))))
@@ -484,8 +484,8 @@
                     (cut testing-interface-run-test-batch! testing test-files)))
          parallel-batches)
         (wg-wait! workgroup))
-      ;; Shared-resource profiles run only after the parallel lane has fully
-      ;; quiesced; compatible files retain the same native grouping rule.
+      ;; Shared-resource profiles run one process at a time only after the
+      ;; parallel lane has fully quiesced.
       (for-each (cut testing-interface-run-test-batch! testing <>)
                 serial-batches)
       (displayln "[asp-testing] phase=all-batches-complete fileCount="
