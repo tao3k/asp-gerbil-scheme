@@ -19,7 +19,7 @@
         (only-in :std/source this-source-file)
         (only-in :std/misc/wg make-wg wg-add! wg-wait!)
         (only-in :std/misc/process run-process)
-        (only-in :std/srfi/1 drop find filter partition take unfold)
+        (only-in :std/srfi/1 find filter partition)
         (only-in :std/srfi/13 string-contains string-prefix?)
         (only-in :std/sugar with-id)
         (only-in ../build-api/core-capacity native-build-core-count))
@@ -48,7 +48,6 @@
         testing-interface-test-file-included?
         testing-interface-test-files
         testing-interface-test-file-serial?
-        testing-interface-test-file-batches
         testing-interface-worker-count
         testing-interface-run-test-files!
         init-profiled-test-environment!
@@ -291,9 +290,8 @@
 ;;   | doc m%
 ;;       Install the normal package unit-test entrypoint after clan discovers
 ;;       its native test files and the POO discovery profile subtracts ignored
-;;       child-package paths. Compatible files are balanced across the native
-;;       capacity inherited from `GERBIL_BUILD_CORES`; projects do not declare
-;;       a separate batch-size setting.
+;;       child-package paths. Every file runs in a fresh Gerbil process, while
+;;       `GERBIL_BUILD_CORES` bounds the number of concurrent processes.
 ;;
 ;;       # Examples
 ;;       ```scheme
@@ -375,87 +373,16 @@
         (getenv "GERBIL_BUILD_CORES" #f)
         (##cpu-count))))
 
-;;; Divide one compatible runtime group across the native capacity. The group
-;;; widths are derived from file count and GERBIL_BUILD_CORES; projects do not
-;;; configure a second batch-size control.
-(def (testing-interface-balanced-file-groups test-files worker-count)
-  (if (null? test-files)
-    []
-    (let* ((file-count (length test-files))
-           (group-count (min file-count worker-count))
-           (base-width (quotient file-count group-count))
-           (wide-group-count (modulo file-count group-count)))
-      (unfold
-       (lambda (state) (= (cdr state) group-count))
-       (lambda (state)
-         (take (car state)
-               (+ base-width (if (< (cdr state) wide-group-count) 1 0))))
-       (lambda (state)
-         (let (width
-               (+ base-width (if (< (cdr state) wide-group-count) 1 0)))
-           (cons (drop (car state) width) (+ (cdr state) 1))))
-       (cons test-files 0)))))
-
-;; testing-interface-test-file-batches
-;;   : (-> TestingInterface (List Path) (List (List Path)))
-;;   | rationale derive grouping from GERBIL_BUILD_CORES without a second
-;;       project-owned concurrency or batch-size setting
-;;   | doc m%
-;;       Group files by compatible process options, then distribute each group
-;;       across the native core capacity.
-;;
-;;       # Examples
-;;       ```scheme
-;;       ;; GERBIL_BUILD_CORES=12
-;;       (length
-;;        (testing-interface-test-file-batches
-;;         +asp-testing-interface+ test-files))
-;;       ;; => at most 12
-;;       ```
-;;     %
-(def (testing-interface-test-file-batches testing test-files)
-  (let loop ((remaining test-files) (batches-rev []))
-    (if (null? remaining)
-      (reverse batches-rev)
-      (let (options
-            (testing-interface-runtime-options-for testing (car remaining)))
-        (let-values (((compatible other)
-                      (partition
-                       (lambda (test-file)
-                         (equal? options
-                                 (testing-interface-runtime-options-for
-                                  testing test-file)))
-                       remaining)))
-          (let (groups
-                (testing-interface-balanced-file-groups
-                 compatible
-                 (testing-interface-worker-count (length compatible))))
-            (loop other (foldl cons batches-rev groups))))))))
-
-(def (testing-interface-command-for-files testing test-files)
-  (append ["gerbil"]
-          (if (null? test-files)
-            []
-            (testing-interface-runtime-options-for testing (car test-files)))
-          ["test"]
-          test-files))
-
-(def (testing-interface-run-test-batch! testing test-files)
-  (displayln "[asp-testing] phase=batch-start fileCount="
-             (length test-files)
-             " firstFile=" (and (pair? test-files) (car test-files)))
+(def (testing-interface-run-test-file! testing test-file)
+  (displayln "[asp-testing] phase=test-start file=" test-file)
   (force-output)
   (let-values (((elapsed-nanoseconds result)
                 (call-with-timing
                  (lambda ()
-                   (run-process
-                    (testing-interface-command-for-files testing test-files)
-                    directory: (current-directory)
-                    stdout-redirection: #f)))))
-    (displayln "[asp-testing] phase=batch-complete elapsedNs="
+                   (testing-interface-run-test! testing test-file)))))
+    (displayln "[asp-testing] phase=test-complete elapsedNs="
                elapsed-nanoseconds
-               " fileCount=" (length test-files)
-               " firstFile=" (and (pair? test-files) (car test-files)))
+               " file=" test-file)
     (force-output)
     result))
 
@@ -464,31 +391,26 @@
                 (partition (cut testing-interface-test-file-serial?
                                 testing <>)
                            test-files)))
-    (let* ((parallel-batches
-            (testing-interface-test-file-batches testing parallel-files))
-           (serial-batches
-            (map list serial-files))
-           (worker-count
-            (testing-interface-worker-count (length parallel-batches)))
+    (let* ((worker-count
+            (testing-interface-worker-count (length parallel-files)))
            (workgroup (and (> worker-count 0) (make-wg worker-count))))
-      (displayln "[asp-testing] phase=batch-dispatch fileCount="
+      (displayln "[asp-testing] phase=test-dispatch fileCount="
                  (length test-files)
-                 " parallelBatchCount=" (length parallel-batches)
-                 " serialBatchCount=" (length serial-batches)
+                 " parallelFileCount=" (length parallel-files)
+                 " serialFileCount=" (length serial-files)
                  " workerCount=" worker-count)
       (force-output)
       (when workgroup
         (for-each
-         (lambda (test-files)
+         (lambda (test-file)
            (wg-add! workgroup
-                    (cut testing-interface-run-test-batch! testing test-files)))
-         parallel-batches)
+                    (cut testing-interface-run-test-file! testing test-file)))
+         parallel-files)
         (wg-wait! workgroup))
       ;; Shared-resource profiles run one process at a time only after the
       ;; parallel lane has fully quiesced.
-      (for-each (cut testing-interface-run-test-batch! testing <>)
-                serial-batches)
-      (displayln "[asp-testing] phase=all-batches-complete fileCount="
+      (for-each (cut testing-interface-run-test-file! testing <>) serial-files)
+      (displayln "[asp-testing] phase=all-tests-complete fileCount="
                  (length test-files))
       (force-output)
       #t)))
