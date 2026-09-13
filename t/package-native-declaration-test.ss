@@ -17,6 +17,13 @@
  (extra-spec '("ui/init.ss"))
  (native-spec '((ssi: "standalone.ss"))))
 
+(asp-gerbil-scheme-package-spec!
+ (input-closure-fixture @ asp-gerbil-scheme-library-package-prototype)
+ (spec input-closure-spec)
+ (modules '("t/scenarios/building/std-make-transitive-input-closure/a.ss"
+            "t/scenarios/building/std-make-transitive-input-closure/b.ss"
+            "t/scenarios/building/std-make-transitive-input-closure/c.ss")))
+
 (def package-native-declaration-test
   (test-suite "declarative native package targets"
     (test-case "exclusions and native additions preserve target forms and order"
@@ -28,4 +35,15 @@
              => '("src/a.ss" "src/b.ss" "src/main.ss"))
       (check (fixture-spec) => (fixture-spec)))
     (test-case "explicit native spec still replaces the default declaration"
-      (check (explicit-spec) => '((ssi: "standalone.ss"))))))
+      (check (explicit-spec) => '((ssi: "standalone.ss"))))
+    (test-case "POO profile projects transitive imports to std/make extra inputs"
+      (check (input-closure-spec)
+             => '((gxc: "t/scenarios/building/std-make-transitive-input-closure/a.ss"
+                      (extra-inputs: ()))
+                  (gxc: "t/scenarios/building/std-make-transitive-input-closure/b.ss"
+                      (extra-inputs:
+                       ("t/scenarios/building/std-make-transitive-input-closure/a.ss")))
+                  (gxc: "t/scenarios/building/std-make-transitive-input-closure/c.ss"
+                      (extra-inputs:
+                       ("t/scenarios/building/std-make-transitive-input-closure/b.ss"
+                        "t/scenarios/building/std-make-transitive-input-closure/a.ss"))))))))

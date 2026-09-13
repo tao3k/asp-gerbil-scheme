@@ -168,6 +168,7 @@
          "src/build-api/builder-profile.ss"
          "src/build-api/native-build.ss"
          "src/build-api/native-build-spec.ss"
+         "src/build-api/package-receipt.ss"
          "src/build-api/package-native-plan.ss"
          "src/build-api/profile-build-spec.ss"
          "src/build-api/project-build.ss"
