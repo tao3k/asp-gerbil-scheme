@@ -225,6 +225,7 @@ jobs:
             t/projection-batch-scenario-test.ss \
             t/language-projection-test.ss \
             t/testing-extension-test.ss \
+            t/testing-native-batch-scenario-test.ss \
             t/project-policy-test.ss
 
       - name: Run package policy boundary regressions

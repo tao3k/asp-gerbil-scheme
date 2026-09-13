@@ -341,6 +341,24 @@
                            testing test-file)))
                 (cdr test-files)))))
 
+;; testing-interface-test-file-batches
+;;   : (-> TestingInterface (List Path) (List (List Path)))
+;;   | requires optional batch-size is a positive integer
+;;   | rationale bounds native process startup count without retaining the
+;;       entire project catalog in one Gambit heap
+;;   | doc m%
+;;       Partition upstream clan/testing files into bounded native Gerbil test
+;;       invocations. Adjacent files share a batch only when their process-level
+;;       runtime options are equal.
+;;
+;;       # Examples
+;;
+;;       ```scheme
+;;       (testing-interface-test-file-batches
+;;        +asp-testing-interface+ '("t/a-test.ss" "t/b-test.ss") 1)
+;;       ;; => (("t/a-test.ss") ("t/b-test.ss"))
+;;       ```
+;;     %
 (def (testing-interface-test-file-batches testing test-files
                                           (batch-size +testing-test-batch-size+))
   (unless (and (integer? batch-size) (> batch-size 0))
