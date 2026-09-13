@@ -42,6 +42,8 @@
         testing-interface-run-test!
         testing-interface-trace-poo-for
         testing-discovery-profile-ignore-directories
+        testing-discovery-profile-batch-size
+        testing-interface-batch-size-for
         testing-interface-ignore-directories-for
         testing-interface-test-file-included?
         testing-interface-test-files
@@ -180,9 +182,16 @@
 (def +testing-serial-resource-profile+
   (testing-profile 'serial-resource 'shared-resource-declaration))
 
+;;; Memory and module isolation are per test file.  A fresh upstream `gerbil
+;;; test` process is therefore the default execution unit; projects may opt in
+;;; to a larger discovery-profile batch only when their files are proven safe
+;;; to share one Gambit heap and module namespace.
+(def +testing-test-batch-size+ 1)
+
 (def +testing-discovery-profile+
   (.cc (testing-profile 'discovery 'clan-test-file-filter)
-       ignoreDirectories: []))
+       ignoreDirectories: []
+       batchSize: +testing-test-batch-size+))
 
 (def +asp-testing-interface+
   (testing-interface
@@ -213,6 +222,23 @@
                  (andmap valid-ignore-directory? directories))
       (error "invalid testing discovery ignoreDirectories" directories))
     directories))
+
+(def (testing-discovery-profile-batch-size profile)
+  (unless (testing-profile-matches? profile 'discovery)
+    (error "not a testing discovery profile" profile))
+  (let (batch-size (.ref profile 'batchSize))
+    (unless (and (integer? batch-size) (> batch-size 0))
+      (error "invalid testing discovery batchSize" batch-size))
+    batch-size))
+
+(def (testing-interface-batch-size-for testing test)
+  (let (discovery
+        (find (lambda (profile)
+                (testing-profile-matches? profile 'discovery))
+              (testing-interface-profiles-for testing test)))
+    (if discovery
+      (testing-discovery-profile-batch-size discovery)
+      +testing-test-batch-size+)))
 
 (def (testing-interface-ignore-directories-for testing test)
   (let (discovery
@@ -326,11 +352,6 @@
                directory: directory
                stdout-redirection: #f))
 
-;;; Files with the same process-level runtime options share an upstream test
-;;; process. The fixed batch bound prevents a large test catalog from retaining
-;;; every imported module and benchmark fixture in one Gambit heap.
-(def +testing-test-batch-size+ 16)
-
 (def (testing-interface-test-files-share-runtime-options? testing test-files)
   (or (null? test-files)
       (let (options (testing-interface-runtime-options-for
@@ -360,7 +381,10 @@
 ;;       ```
 ;;     %
 (def (testing-interface-test-file-batches testing test-files
-                                          (batch-size +testing-test-batch-size+))
+                                          (configured-batch-size #f))
+  (def batch-size
+    (or configured-batch-size
+        (testing-interface-batch-size-for testing "unit-tests.ss")))
   (unless (and (integer? batch-size) (> batch-size 0))
     (error "test batch size must be a positive integer" batch-size))
   (let loop ((remaining test-files)
@@ -385,11 +409,7 @@
                 (cons (reverse batch-rev) batches-rev))))))))
 
 (def (testing-interface-worker-count batch-count)
-  (let* ((configured (string->number (getenv "GERBIL_TEST_CORES" "")))
-         (capacity (if (and configured (integer? configured) (> configured 0))
-                     configured
-                     (min (max (##cpu-count) 1) 4))))
-    (min batch-count capacity)))
+  (min batch-count (max (##cpu-count) 1)))
 
 (def (testing-interface-command-for-files testing test-files)
   (append ["gerbil"]

@@ -72,7 +72,11 @@
       (check (testing-interface-ignore-directories-for
               +testing-entry-witness+
               "unit-tests.ss")
-             => '("nested-package")))
+             => '("nested-package"))
+      (check (testing-interface-batch-size-for
+              +testing-entry-witness+
+              "unit-tests.ss")
+             => 1))
 
     (test-case "invalid discovery boundaries fail closed"
       (let (testing
@@ -170,8 +174,23 @@
               2)
              => '(("t/a-test.ss" "t/b-test.ss")
                   ("t/c-test.ss")))
+      (check (testing-interface-test-file-batches
+              +asp-testing-interface+
+              '("t/a-test.ss" "t/b-test.ss"))
+             => '(("t/a-test.ss") ("t/b-test.ss")))
+      (let (batched
+            (testing-interface-add-profile
+             +asp-testing-interface+
+             (.cc +testing-discovery-profile+
+                  ignoreDirectories: []
+                  batchSize: 2)))
+        (check (testing-interface-test-file-batches
+                batched
+                '("t/a-test.ss" "t/b-test.ss"))
+               => '(("t/a-test.ss" "t/b-test.ss"))))
       (check (testing-interface-worker-count 0) => 0)
-      (check (> (testing-interface-worker-count 8) 1) => #t))
+      (check (testing-interface-worker-count (+ (##cpu-count) 1))
+             => (max (##cpu-count) 1)))
 
     (test-case "the POO profile configures the current upstream runtime"
       (let (previous-max-heap (##get-max-heap))
