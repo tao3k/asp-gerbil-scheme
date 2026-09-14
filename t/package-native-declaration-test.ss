@@ -1,4 +1,5 @@
 (import :std/test
+        (only-in :std/misc/path path-expand)
         :asp-gerbil-scheme/build-api)
 (export package-native-declaration-test)
 
@@ -58,6 +59,21 @@
  (extra-spec '("ui/init.ss"))
  (native-spec '((ssi: "standalone.ss"))))
 
+(asp-gerbil-scheme-package-spec!
+ (catalog-root-fixture @ asp-gerbil-scheme-library-package-prototype)
+ (spec catalog-root-spec))
+
+(def +catalog-root-fixture-directory+
+  (path-expand "t/scenarios/building/native-package-catalog-roots"
+               (current-directory)))
+
+(def (catalog-root-modules)
+  (let (previous-directory (current-directory))
+    (dynamic-wind
+      (lambda () (current-directory +catalog-root-fixture-directory+))
+      (lambda () (asp-gerbil-scheme-package-modules catalog-root-fixture))
+      (lambda () (current-directory previous-directory)))))
+
 (def package-native-declaration-test
   (test-suite "declarative native package targets"
     (test-case "Gerbil begin-ffi modules remain ordinary native gxc targets"
@@ -73,5 +89,10 @@
       (check (asp-gerbil-scheme-package-modules raw-ffi-fixture)
              => '("src/a.ss" "src/b.ss" "src/c.ss" "src/main.ss"))
       (check (raw-ffi-spec) => (raw-ffi-spec)))
+    (test-case "native clan catalog preserves every downstream source root"
+      (let (modules (catalog-root-modules))
+        (check (length modules) => 2)
+        (check (member "src/core.ss" modules) ? values)
+        (check (member "user-interface/init.ss" modules) ? values)))
     (test-case "explicit native spec still replaces the default declaration"
       (check (explicit-spec) => '((ssi: "standalone.ss"))))))

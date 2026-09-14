@@ -36,8 +36,7 @@
                  initialize-native-build-core-capacity!)
         (only-in "./native-profile"
                  asp-gerbil-scheme-default-native-profile
-                 asp-gerbil-scheme-native-profile-executable-gsc-options)
-        (only-in :std/srfi/13 string-prefix?))
+                 asp-gerbil-scheme-native-profile-executable-gsc-options))
 
 ;; asp-gerbil-scheme-package-spec!
 ;;   : (-> Syntax Syntax)
@@ -64,22 +63,6 @@
      (def (spec-name)
        (asp-gerbil-scheme-package-build-spec name)))))
 
-;; : (-> NativeBuildItem Boolean)
-(def (native-library-module? item)
-  (let (path
-        (match item
-          ((? string?) item)
-          ([gxc: (? string?) . _] (cadr item))
-          (else #f)))
-    (and path
-         (or (string-prefix? "src/" path)
-             (member path '("build-api.ss"
-                            "building-api.ss"
-                            "testing-api.ss"
-                            "policy-api.ss"
-                            "benchmark-api.ss"
-                            "version.ss"))))))
-
 ;; : (-> PackageSpec (List NativeBuildItem))
 (def (asp-gerbil-scheme-package-modules package-spec)
   (let (declared
@@ -94,10 +77,9 @@
       ;; Without declared public entries, exactly match clan/building: gxpkg
       ;; invokes build.ss in the package directory and the native catalog reads
       ;; that current directory. Tests and generated build trees stay excluded.
-        (filter native-library-module?
-                (upstream-all-gerbil-modules
-                 exclude-dirs:
-                 (asp-gerbil-scheme-package-exclude-dirs package-spec))))))
+        (upstream-all-gerbil-modules
+         exclude-dirs:
+         (asp-gerbil-scheme-package-exclude-dirs package-spec)))))
 
 ;; : (-> PackageSpec (List NativeBuildItem))
 (def (asp-gerbil-scheme-package-default-native-spec package-spec)
