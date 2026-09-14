@@ -181,6 +181,37 @@
             (setenv "GERBIL_BUILD_CORES"
                     (or previous-build-cores ""))))))
 
+    (test-case "process isolation keeps singleton batches in the parallel lane"
+      (let* ((isolated-selector
+              (testing-test-selector 'contains "registry-test"))
+             (mapped
+              (testing-interface-map-profile
+               +asp-testing-interface+
+               isolated-selector
+               +testing-process-isolation-profile+))
+             (previous-build-cores (getenv "GERBIL_BUILD_CORES" #f)))
+        (dynamic-wind
+          (lambda () (setenv "GERBIL_BUILD_CORES" "2"))
+          (lambda ()
+            (check (testing-interface-test-file-isolated?
+                    mapped "t/registry-test.ss")
+                   => #t)
+            (check (testing-interface-test-file-serial?
+                    mapped "t/registry-test.ss")
+                   => #f)
+            (check (testing-interface-test-file-batches
+                    mapped
+                    '("t/a-test.ss"
+                      "t/registry-test.ss"
+                      "t/b-test.ss"
+                      "t/c-test.ss"))
+                   => '(("t/a-test.ss" "t/b-test.ss")
+                        ("t/c-test.ss")
+                        ("t/registry-test.ss"))))
+          (lambda ()
+            (setenv "GERBIL_BUILD_CORES"
+                    (or previous-build-cores ""))))))
+
     (test-case "the POO profile configures the current upstream runtime"
       (let (previous-max-heap (##get-max-heap))
         (check (testing-interface-apply-runtime-profile!

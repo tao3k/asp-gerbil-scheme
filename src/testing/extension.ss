@@ -47,6 +47,7 @@
         testing-interface-ignore-directories-for
         testing-interface-test-file-included?
         testing-interface-test-files
+        testing-interface-test-file-isolated?
         testing-interface-test-file-serial?
         testing-interface-test-file-batches
         testing-interface-worker-count
@@ -56,6 +57,7 @@
         +testing-memory-profile+
         +testing-performance-profile+
         +testing-debug-trace-profile+
+        +testing-process-isolation-profile+
         +testing-serial-resource-profile+
         +testing-discovery-profile+
         +asp-testing-interface+)
@@ -215,6 +217,9 @@
        library: ':clan/poo/debug
        operation: 'trace-poo))
 
+(def +testing-process-isolation-profile+
+  (testing-profile 'process-isolation 'fresh-test-process-declaration))
+
 (def +testing-serial-resource-profile+
   (testing-profile 'serial-resource 'shared-resource-declaration))
 
@@ -370,6 +375,12 @@
              (testing-interface-profiles-for testing test-file))
        #t))
 
+(def (testing-interface-test-file-isolated? testing test-file)
+  (and (find (lambda (profile)
+               (testing-profile-matches? profile 'process-isolation))
+             (testing-interface-profiles-for testing test-file))
+       #t))
+
 (def (testing-interface-worker-count test-count)
   (min test-count
        (native-build-core-count
@@ -418,20 +429,25 @@
   (let loop ((remaining test-files) (batches-rev []))
     (if (null? remaining)
       (reverse batches-rev)
-      (let (options
-            (testing-interface-runtime-options-for testing (car remaining)))
+      (if (testing-interface-test-file-isolated? testing (car remaining))
+        (loop (cdr remaining) (cons (list (car remaining)) batches-rev))
+        (let (options
+              (testing-interface-runtime-options-for testing (car remaining)))
         (let-values (((compatible other)
                       (partition
                        (lambda (test-file)
-                         (equal? options
-                                 (testing-interface-runtime-options-for
-                                  testing test-file)))
+                         (and
+                          (not (testing-interface-test-file-isolated?
+                                testing test-file))
+                          (equal? options
+                                  (testing-interface-runtime-options-for
+                                   testing test-file))))
                        remaining)))
           (let (groups
                 (testing-interface-balanced-file-groups
                  compatible
                  (testing-interface-worker-count (length compatible))))
-            (loop other (foldl cons batches-rev groups))))))))
+            (loop other (foldl cons batches-rev groups)))))))))
 
 (def (testing-interface-command-for-files testing test-files)
   (append ["gerbil"]
