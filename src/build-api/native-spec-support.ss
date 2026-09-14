@@ -17,6 +17,17 @@
 (def +default-exclude-files+ '("main.ss" "manifest.ss"))
 (def default-exclude-dirs '("run" "t" ".git" "_darcs" ".gerbil"))
 
+;; A basename keeps clan/building's native recursive exclusion behavior.  A
+;; relative path scopes the same exclusion to one package subtree, allowing a
+;; package to keep compilable modules beside loader-owned source fragments.
+(def (excluded-gerbil-directory? path exclude-dirs)
+  (let (basename (path-strip-directory path))
+    (ormap (lambda (excluded)
+             (if (string-index excluded #\/)
+               (equal? path excluded)
+               (equal? basename excluded)))
+           exclude-dirs)))
+
 ;; : (forall (p) (-> (List p) (List p) (List p)))
 ;; all-gerbil-modules
 ;; : (-> (List Path) (List Path) (List Path))
@@ -29,7 +40,7 @@
                       (not (path-is-script? path))))
                recurse?:
                (lambda (path)
-                 (not (member (path-strip-directory path) exclude-dirs))))))
+                 (not (excluded-gerbil-directory? path exclude-dirs))))))
 
 ;; : (forall (p) (-> p String (-> p Boolean)))
 ;; source-file-matcher

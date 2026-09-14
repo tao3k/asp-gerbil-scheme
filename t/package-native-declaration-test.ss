@@ -61,7 +61,8 @@
 
 (asp-gerbil-scheme-package-spec!
  (catalog-root-fixture @ asp-gerbil-scheme-library-package-prototype)
- (spec catalog-root-spec))
+ (spec catalog-root-spec)
+ (exclude-dirs (cons "user-interface/cases" default-exclude-dirs)))
 
 (def +catalog-root-fixture-directory+
   (path-expand "t/scenarios/building/native-package-catalog-roots"
@@ -91,8 +92,11 @@
       (check (raw-ffi-spec) => (raw-ffi-spec)))
     (test-case "native clan catalog preserves every downstream source root"
       (let (modules (catalog-root-modules))
-        (check (length modules) => 2)
+        (check (length modules) => 3)
         (check (member "src/core.ss" modules) ? values)
-        (check (member "user-interface/init.ss" modules) ? values)))
+        (check (member "user-interface/init.ss" modules) ? values)
+        (check (member "user-interface/custom/demo/cases/module.ss" modules)
+               ? values)
+        (check (member "user-interface/cases/fragment.ss" modules) => #f)))
     (test-case "explicit native spec still replaces the default declaration"
       (check (explicit-spec) => '((ssi: "standalone.ss"))))))
