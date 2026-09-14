@@ -74,6 +74,23 @@
               "unit-tests.ss")
              => '("nested-package")))
 
+    (test-case "a downstream POO extension can observe without ASP semantics"
+      (let* ((events '())
+             (testing
+              (.cc +asp-testing-interface+
+                   around-operation:
+                   (lambda (operation thunk)
+                     (set! events (cons operation events))
+                     (thunk)))))
+        (check (call-with-values
+                 (lambda ()
+                   (testing-interface-call-with-operation
+                    testing 'native-test-batch
+                    (lambda () (values 'left 'right))))
+                 list)
+               => '(left right))
+        (check events => '(native-test-batch))))
+
     (test-case "invalid discovery boundaries fail closed"
       (let (testing
             (testing-interface-add-profile

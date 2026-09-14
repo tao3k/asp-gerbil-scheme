@@ -2,9 +2,7 @@
 ;;; Process-level regression for root-only native Import Model projection.
 
 (import (only-in :std/test test-suite test-case check)
-        (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
-        (only-in :std/srfi/13 string-contains)
         (only-in :clan/timestamp call-with-timing))
 
 (export native-import-public-closure-scenario-test)
@@ -49,14 +47,4 @@
           (check (< elapsed-nanoseconds
                     (native-import-public-closure-contract-ref
                      contract 'maxNanoseconds))
-                 => #t))))
-    (test-case "verbose receipt preserves the std/make handoff"
-      (let (output
-            (run-process
-             ["env" "GERBIL_BUILD_VERBOSE=1"
-              "gerbil" "interactive"
-              +native-import-public-closure-build+ "spec"]
-             directory: +native-import-public-closure-root+
-             coprocess: read-all-as-string))
-        (check (and (string-contains output "target-count=3") #t) => #t)
-        (check (and (string-contains output "executor=std/make") #t) => #t)))))
+                 => #t))))))

@@ -24,6 +24,9 @@
                    (path-expand ".gerbil/lib" (getenv "HOME")))
     (string-append "GERBIL_BUILD_CORES="
                    (getenv "GERBIL_BUILD_CORES" "4"))]
+   ;; Keep performance sampling at std/make's ordinary message level.  Level 9
+   ;; intentionally emits the compiler driver's large diagnostic stream and is
+   ;; covered independently by build-api-startup-scenario-test.ss.
    (if verbose? ["GERBIL_BUILD_VERBOSE=1"] [])
    ["timeout" "--signal=TERM" "--kill-after=3s" "30s"
     "gerbil" "interactive" build action]))

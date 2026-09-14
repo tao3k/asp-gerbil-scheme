@@ -42,6 +42,7 @@
         testing-interface-runtime-options-for
         testing-interface-command-for
         testing-interface-run-test!
+        testing-interface-call-with-operation
         testing-interface-trace-poo-for
         testing-discovery-profile-ignore-directories
         testing-interface-ignore-directories-for
@@ -369,6 +370,18 @@
                directory: directory
                stdout-redirection: #f))
 
+;;; ASP owns only the optional invocation point.  A downstream POO extension
+;;; owns observation policy, receipts, presentation, and enablement.  The
+;;; callback must preserve the thunk's values and exception unchanged.
+(def (testing-interface-call-with-operation testing operation thunk)
+  (let (around
+        (and (.slot? testing 'around-operation)
+             (.ref testing 'around-operation)))
+    (cond
+     ((not around) (thunk))
+     ((procedure? around) (around operation thunk))
+     (else (error "testing around-operation must be a procedure" around)))))
+
 (def (testing-interface-test-file-serial? testing test-file)
   (and (find (lambda (profile)
                (testing-profile-matches? profile 'serial-resource))
@@ -465,10 +478,13 @@
   (let-values (((elapsed-nanoseconds result)
                 (call-with-timing
                  (lambda ()
-                   (run-process
-                    (testing-interface-command-for-files testing test-files)
-                    directory: (current-directory)
-                    stdout-redirection: #f)))))
+                   (testing-interface-call-with-operation
+                    testing 'native-test-batch
+                    (lambda ()
+                      (run-process
+                       (testing-interface-command-for-files testing test-files)
+                       directory: (current-directory)
+                       stdout-redirection: #f)))))))
     (displayln "[asp-testing] phase=batch-complete elapsedNs="
                elapsed-nanoseconds
                " fileCount=" (length test-files)

@@ -139,19 +139,9 @@
   (let (projector (.get package-spec spec-projector))
     (unless (procedure? projector)
       (error "Package Spec spec-projector must be a procedure" projector))
-    (let (projection (projector package-spec))
-      ;; GERBIL_BUILD_VERBOSE is inherited normally by std/make.  Its own
-      ;; target diagnostics begin only after dependency planning, so publish
-      ;; the ASP -> std/make handoff before that potentially expensive phase.
-      (let (verbose (getenv "GERBIL_BUILD_VERBOSE" #f))
-        (when (and verbose
-                   (not (equal? verbose ""))
-                   (not (equal? verbose "0")))
-          (display "[asp-gerbil-scheme-build] phase=spec-projected target-count=")
-          (display (length projection))
-          (displayln " executor=std/make")
-          (force-output)))
-      projection)))
+    ;; std/make owns GERBIL_BUILD_VERBOSE and all of its output semantics.
+    ;; PackageSpec only supplies the native projection.
+    (projector package-spec)))
 
 ;; Import-safe semantic base for concrete project library and provider specs.
 ;; Script entrypoints remain in top-level build.ss files; this module owns only
