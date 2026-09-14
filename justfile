@@ -34,3 +34,7 @@ rebuild:
     just deps
     just build
     just test
+
+# Run the bounded same-source native std/make versus PackageSpec A/B scenario.
+benchmark-build-api-native-ab:
+    gerbil interactive t/scenarios/building/package-spec-native-ab/run-ab.ss
