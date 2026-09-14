@@ -92,6 +92,7 @@
      (asp-gerbil-scheme-package-product-entry-modules package-spec)))
    (.get package-spec extra-spec)))
 
+;; : (-> PackageSpec (List NativeBuildItem))
 (def (asp-gerbil-scheme-package-native-spec package-spec)
   (let* ((native-options-resolver
           (asp-gerbil-scheme-package-native-options-resolver package-spec))
@@ -132,6 +133,7 @@
 ;; The macro-generated spec procedure is the direct std/make boundary used by
 ;; clan/building. A PackageSpec remains the POO owner;
 ;; spec-projector selects its native or policy-admitted projection.
+;; : (-> PackageSpec (List NativeBuildItem))
 (def (asp-gerbil-scheme-package-build-spec package-spec)
   (initialize-native-build-core-capacity!)
   (let (projector (.get package-spec spec-projector))
