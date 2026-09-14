@@ -109,7 +109,7 @@
 ;; : TestSuite
 (def benchmark-gate-test
   (test-suite "gerbil scheme benchmark gate"
-    (test-case "public p95 timing executes every sample and rejects empty measurements"
+    (test-case "public p95 timing executes every sample in one preconditioned series"
       (let (calls 0)
         (check (> (benchmark-p95-elapsed-us
                    3 (lambda () (set! calls (1+ calls)))) 0) => #t)
@@ -241,6 +241,8 @@
         (for-each
          (lambda (path)
            (let (fixture (benchmark-contract-read path))
+             (unless (benchmark-fixture-contract-pass? fixture)
+               (displayln "invalid benchmark scenario contract: " path))
              (check (benchmark-fixture-missing-keys fixture) => [])
              (check (benchmark-fixture-regression-budget-contract-pass?
                      fixture)

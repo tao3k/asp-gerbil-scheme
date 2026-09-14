@@ -1,24 +1,24 @@
 ((benchmarkKind . scenario-e2e)
- (max_total . 10s)
- (target_total . 3s)
- (regression_budget . 7s)
- (expected_over_input_budget . 3s)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "native multi-file clan/testing must beat four warmed per-file Gerbil processes while preserving suite discovery")
+  "policy selection stays subsecond; native process timing remains owned by native-batch-contract.ss")
  (sampleCount . 20)
  (purpose . "prove upstream Gerbil owns selection while ASP only declares POO instrumentation")
  (feature . "upstream-gxtest-delegation")
  (rule . "GERBIL-SCHEME-AGENT-TESTING-UPSTREAM-GXTEST-DELEGATION-001")
  (optimizationFocus
   .
-  "reuse bounded multi-file Gerbil/clan testing batches with host-capacity workers")
+  "keep policy analysis separate from native multi-file process execution")
  (inputShape
   .
   "scenario input manually selects files instead of using gerbil test")
  (expectedOutcome
   .
-  "execute ordinary tests in bounded concurrent batches instead of one process per file or one unbounded heap")
+  "select the native batch delegation policy without charging process startup to the policy benchmark")
  (measurementPhases
   "collect-before"
   "policy-before"

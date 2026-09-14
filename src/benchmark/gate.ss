@@ -44,14 +44,19 @@
 ;;   | doc m%
 ;;       Measure one benchmark thunk with clan's upstream nanosecond timer.
 ;;     %
-(def (benchmark-elapsed-nanos thunk)
-  (##gc)
+(def (benchmark-elapsed-nanos/preconditioned thunk)
   (let-values (((elapsed-nanos ignored-result)
                 (call-with-timing thunk)))
-    (if (and (integer? elapsed-nanos) (> elapsed-nanos 0))
-      elapsed-nanos
-      (error "benchmark timing source returned non-positive duration"
+    (if (and (integer? elapsed-nanos) (>= elapsed-nanos 0))
+      ;; An operation faster than the timer resolution is a valid observation,
+      ;; but the public receipt domain is strictly positive.
+      (max 1 elapsed-nanos)
+      (error "benchmark timing source returned invalid duration"
              elapsed-nanos))))
+
+(def (benchmark-elapsed-nanos thunk)
+  (##gc)
+  (benchmark-elapsed-nanos/preconditioned thunk))
 
 ;; : (-> (-> Value) Rational)
 (def (benchmark-elapsed-ms thunk)
@@ -65,8 +70,13 @@
 (def (benchmark-p95-elapsed-nanos count thunk)
   (unless (and (integer? count) (> count 0))
     (error "benchmark sample count must be a positive integer" count))
+  ;; A benchmark series has one heap precondition, not one full-heap pause per
+  ;; observation.  Automatic collections remain inside each timed sample and
+  ;; therefore remain visible to the admitted p95.
+  (##gc)
   (benchmark-sample-percentile
-   (map (lambda (_) (benchmark-elapsed-nanos thunk)) (iota count))
+   (map (lambda (_) (benchmark-elapsed-nanos/preconditioned thunk))
+        (iota count))
    benchmark-admission-percentile))
 
 ;; : (-> Integer (-> Value) Rational)
