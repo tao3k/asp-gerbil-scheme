@@ -10,7 +10,7 @@
         (only-in :clan/testing
                  find-test-files
                  %set-test-environment!)
-        (only-in :clan/timestamp call-with-timing)
+        (only-in :clan/timestamp call-with-timing current-tai-timestamp)
         (only-in :std/cli/multicall
                  define-entry-point
                  define-multicall-main
@@ -475,22 +475,30 @@
              (length test-files)
              " firstFile=" (and (pair? test-files) (car test-files)))
   (force-output)
-  (let-values (((elapsed-nanoseconds result)
-                (call-with-timing
-                 (lambda ()
-                   (testing-interface-call-with-operation
-                    testing 'native-test-batch
-                    (lambda ()
-                      (run-process
-                       (testing-interface-command-for-files testing test-files)
-                       directory: (current-directory)
-                       stdout-redirection: #f)))))))
-    (displayln "[asp-testing] phase=batch-complete elapsedNs="
-               elapsed-nanoseconds
-               " fileCount=" (length test-files)
-               " firstFile=" (and (pair? test-files) (car test-files)))
-    (force-output)
-    result))
+  (let (started-at (current-tai-timestamp))
+    (with-exception-catcher
+     (lambda (failure)
+       (displayln "[asp-testing] phase=batch-failed elapsedNs="
+                  (- (current-tai-timestamp) started-at)
+                  " fileCount=" (length test-files)
+                  " firstFile=" (and (pair? test-files) (car test-files)))
+       (force-output)
+       (raise failure))
+     (lambda ()
+       (let (result
+             (testing-interface-call-with-operation
+              testing 'native-test-batch
+              (lambda ()
+                (run-process
+                 (testing-interface-command-for-files testing test-files)
+                 directory: (current-directory)
+                 stdout-redirection: #f))))
+         (displayln "[asp-testing] phase=batch-complete elapsedNs="
+                    (- (current-tai-timestamp) started-at)
+                    " fileCount=" (length test-files)
+                    " firstFile=" (and (pair? test-files) (car test-files)))
+         (force-output)
+         result)))))
 
 (def (testing-interface-run-test-files! testing test-files)
   (let-values (((serial-files parallel-files)

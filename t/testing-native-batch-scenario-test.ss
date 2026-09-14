@@ -7,6 +7,7 @@
         (only-in :clan/timestamp call-with-timing)
         (only-in :asp-gerbil-scheme/testing-api
                  +asp-testing-interface+
+                 testing-interface-run-test-batch!
                  testing-interface-test-files))
 
 (export testing-native-batch-scenario-test)
@@ -132,4 +133,21 @@
           (check (< first-output-nanoseconds
                     (native-batch-contract-ref
                      contract 'maxFirstOutputNanoseconds))
+                 => #t))))
+    (test-case "failed native batch retains an elapsed terminal receipt"
+      (let ((port (open-output-string))
+            (raised? #f))
+        (parameterize ((current-output-port port))
+          (with-catch
+           (lambda (_failure) (set! raised? #t))
+           (lambda ()
+             (testing-interface-run-test-batch!
+              +asp-testing-interface+
+              '("t/scenarios/policy/upstream-gxtest-delegation/missing.ss")))))
+        (let (output (get-output-string port))
+          (check raised? => #t)
+          (check (and (string-contains output "phase=batch-start") #t) => #t)
+          (check (and (string-contains output
+                                       "phase=batch-failed elapsedNs=")
+                      #t)
                  => #t))))))
