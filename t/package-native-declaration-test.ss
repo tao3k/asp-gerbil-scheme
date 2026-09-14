@@ -18,6 +18,12 @@
     "src/a.ss" (ssi: "src/b.ss")
     (gsc: "foreign.c") "ui/init.ss"))
 
+;; Package-local test support is a normal library dependency of test entry
+;; modules.  Like gerbil-poo's t/table-testing target, it belongs in the one
+;; native build spec; the test runner must not invent a source loader for it.
+(def +test-support-native-control+
+  '("src/api.ss" "t/support/table-testing.ss"))
+
 (asp-gerbil-scheme-package-spec!
  (managed-ffi-fixture @ asp-gerbil-scheme-library-package-prototype)
  (spec managed-ffi-spec)
@@ -53,6 +59,12 @@
   (list +platform-ffi-target+ '(ssi: "ffi/platform"))))
 
 (asp-gerbil-scheme-package-spec!
+ (test-support-fixture @ asp-gerbil-scheme-library-package-prototype)
+ (spec test-support-spec)
+ (modules '("src/api.ss"))
+ (extra-spec '("t/support/table-testing.ss")))
+
+(asp-gerbil-scheme-package-spec!
  (explicit-fixture @ asp-gerbil-scheme-library-package-prototype)
  (spec explicit-spec)
  (modules '("src/a.ss"))
@@ -86,6 +98,8 @@
     (test-case "platform-selected external-library flags remain native data"
       (check (platform-ffi-spec)
              => (list +platform-ffi-target+ '(ssi: "ffi/platform"))))
+    (test-case "package-local test support remains a native build target"
+      (check (test-support-spec) => +test-support-native-control+))
     (test-case "declarations do not mutate the catalog or accumulate targets"
       (check (asp-gerbil-scheme-package-modules raw-ffi-fixture)
              => '("src/a.ss" "src/b.ss" "src/c.ss" "src/main.ss"))
