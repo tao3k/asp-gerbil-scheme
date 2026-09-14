@@ -210,6 +210,16 @@ local experiment, not in the harness policy.
   optimized option path while policy receipts remain harness-owned.
 
 ** Scenario And Gate Additions
+- Keep separate neutral FFI fixtures for (1) a Gerbil =begin-ffi= module built
+  by =gxc:=, (2) checked-in raw Gambit =.scm/.ssi= sources built by paired
+  =gsc:/ssi:= targets, and (3) platform- or configure-selected external-library
+  flags.  PackageSpec must preserve each native BuildSpec exactly; it must not
+  collapse them into an ASP-specific FFI abstraction.
+- For each FFI fixture, record native =defbuild-script/std/make= as the control.
+  An ASP extension is admitted only when it proves declaration compression,
+  reusable profile composition, or a typed receipt that the native declaration
+  does not provide.  Equal behavior with an extra namespace or dispatcher is a
+  rejection, not an extension.
 - Extend =package-build-framework-overreach= with cases for local freshness
   stamps, local worker queues, and local release/optimized compiler invocation.
 - Extend =downstream-gxtest-policy-scope= with a multi-root fixture whose warning
