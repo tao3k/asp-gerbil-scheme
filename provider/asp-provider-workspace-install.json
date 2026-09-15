@@ -7,10 +7,10 @@
   "providerId": "asp-gerbil-scheme",
   "binary": "asp-gerbil-scheme",
   "providerRegistration": "asp-provider-registration.json",
-  "schemaBundleReceipt": "schemas/.asp-schema-manager-receipt.json",
+  "schemaBundleReceipt": "../schemas/.asp-schema-manager-receipt.json",
   "workspaceArtifact": {
-    "root": "languages/asp-gerbil-scheme/.gerbil",
-    "entrypoint": "bin/asp-gerbil-scheme"
+    "root": "languages/asp-gerbil-scheme/.gerbil/bin/asp-gerbil-scheme",
+    "entrypoint": "."
   },
   "workspaceBuild": {
     "program": "/usr/bin/env",
@@ -50,7 +50,8 @@
     ],
     "env": {
       "GERBIL_PATH": "${ASP_WORKSPACE_ROOT}/languages/asp-gerbil-scheme/.gerbil",
-      "GERBIL_LOADPATH": "${ASP_WORKSPACE_ROOT}/languages/asp-gerbil-scheme/.gerbil/lib"
+      "GERBIL_LOADPATH": "${ASP_WORKSPACE_ROOT}/languages/asp-gerbil-scheme/.gerbil/lib",
+      "SDKROOT": ""
     }
   }
 }
