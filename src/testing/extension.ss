@@ -129,52 +129,26 @@
                         (testing-profile-name profile))))
                 profiles)))
 
-;;; The methods close over the immutable profile value, so `.call` has the
-;;; normal object-oriented shape: `(.call testing .remove 'memory)` while each
-;;; update still returns a fresh POO object.
+;;; Resolve transformation methods against the current POO receiver.  A
+;;; downstream `.cc` extension therefore remains the receiver when `.call`
+;;; delegates to the canonical immutable transformations below.
 (def (testing-interface profiles: (initial-profiles [])
                         bindings: (initial-bindings []))
-  (.o kind: 'testing-interface-extension
+  (.o (:: self)
+      kind: 'testing-interface-extension
       upstream: ':clan/testing
       command: 'gerbil-test
       profiles: initial-profiles
       bindings: initial-bindings
       .remove:
       (lambda (name)
-        (testing-interface
-         profiles:
-         (filter (lambda (profile)
-                   (not (testing-profile-matches? profile name)))
-                 initial-profiles)
-         bindings:
-         (filter (lambda (binding)
-                   (not (testing-profile-matches?
-                         (.ref binding 'profile)
-                         name)))
-                 initial-bindings)))
+        (testing-interface-remove-profile self name))
       .add:
       (lambda (profile)
-        (unless (testing-profile? profile)
-          (error "not a testing profile" profile))
-        (testing-interface
-         profiles:
-         (testing-profile-replace initial-profiles profile)
-         bindings: initial-bindings))
+        (testing-interface-add-profile self profile))
       .map:
       (lambda (test profile)
-        (unless (testing-profile? profile)
-          (error "not a testing profile" profile))
-        (testing-interface
-         profiles: initial-profiles
-         bindings:
-         (cons (testing-profile-binding test profile)
-               (filter (lambda (binding)
-                         (not (and (testing-test-selector-equal?
-                                    (.ref binding 'test) test)
-                                   (testing-profile-matches?
-                                    (.ref binding 'profile)
-                                    (testing-profile-name profile)))))
-                       initial-bindings))))))
+        (testing-interface-map-profile self test profile))))
 
 (def (testing-interface-profile testing name)
   (find (lambda (profile) (testing-profile-matches? profile name))
@@ -187,7 +161,20 @@
   (and (testing-interface-profile testing name) #t))
 
 (def (testing-interface-map-profile testing test profile)
-  (.call testing .map test profile))
+  (unless (testing-profile? profile)
+    (error "not a testing profile" profile))
+  ;; Clone the received POO value so downstream extension slots such as
+  ;; around-operation survive the profile transformation.
+  (.cc testing
+       bindings:
+       (cons (testing-profile-binding test profile)
+             (filter (lambda (binding)
+                       (not (and (testing-test-selector-equal?
+                                  (.ref binding 'test) test)
+                                 (testing-profile-matches?
+                                  (.ref binding 'profile)
+                                  (testing-profile-name profile)))))
+                     (.ref testing 'bindings)))))
 
 (def (testing-interface-profiles-for testing test)
   (foldl (lambda (binding profiles)
@@ -198,10 +185,24 @@
          (reverse (.ref testing 'bindings))))
 
 (def (testing-interface-remove-profile testing name)
-  (.call testing .remove name))
+  (.cc testing
+       profiles:
+       (filter (lambda (profile)
+                 (not (testing-profile-matches? profile name)))
+               (.ref testing 'profiles))
+       bindings:
+       (filter (lambda (binding)
+                 (not (testing-profile-matches?
+                       (.ref binding 'profile)
+                       name)))
+               (.ref testing 'bindings))))
 
 (def (testing-interface-add-profile testing profile)
-  (.call testing .add profile))
+  (unless (testing-profile? profile)
+    (error "not a testing profile" profile))
+  (.cc testing
+       profiles:
+       (testing-profile-replace (.ref testing 'profiles) profile)))
 
 (def +testing-memory-profile+
   (.cc (testing-profile 'memory 'managed-heap-observation)

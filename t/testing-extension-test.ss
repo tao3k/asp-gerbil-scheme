@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 
 (import :std/test
-        (only-in :clan/poo/object .cc .ref object?)
+        (only-in :clan/poo/object .call .cc .ref object?)
         "../src/testing/extension"
         "../src/testing/performance")
 
@@ -90,6 +90,44 @@
                  list)
                => '(left right))
         (check events => '(native-test-batch))))
+
+    (test-case "profile transforms preserve downstream POO observation slots"
+      (let* ((events '())
+             (observed
+              (.cc +asp-testing-interface+
+                   around-operation:
+                   (lambda (operation thunk)
+                     (set! events (cons operation events))
+                     (thunk))))
+             (added
+              (testing-interface-add-profile
+               observed
+               (.cc +testing-memory-profile+ maxHeapMiB: 256)))
+             (mapped
+              (testing-interface-map-profile
+               added
+               (testing-test-selector 'contains "slow-test.ss")
+               +testing-serial-resource-profile+))
+             (transformed
+              (testing-interface-remove-profile mapped 'performance)))
+        (check
+         (testing-interface-call-with-operation
+          transformed 'native-test-batch (lambda () 'completed))
+         => 'completed)
+        (check events => '(native-test-batch))
+        (check (testing-interface-profile-enabled? transformed 'memory) => #t)
+        (check (testing-interface-profile-enabled? transformed 'performance) => #f)
+        (check (testing-interface-test-file-serial?
+                transformed "suite/slow-test.ss")
+               => #t)
+        (set! events '())
+        (let (called
+              (.call transformed .add +testing-performance-profile+))
+          (check
+           (testing-interface-call-with-operation
+            called 'native-test-batch (lambda () 'called))
+           => 'called)
+          (check events => '(native-test-batch)))))
 
     (test-case "invalid discovery boundaries fail closed"
       (let (testing
