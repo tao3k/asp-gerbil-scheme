@@ -91,6 +91,53 @@
                => '(left right))
         (check events => '(native-test-batch))))
 
+    (test-case "prepared source admission is an explicit POO profile method"
+      (let* ((calls '())
+             (testing
+              (.cc (testing-interface-add-profile
+                    +asp-testing-interface+
+                    +testing-source-admission-profile+)
+                   .admit-prepared-source-graph:
+                   (lambda (test roots)
+                     (set! calls (cons (list test roots) calls))
+                     'admitted))))
+        (check (testing-interface-profile-enabled?
+                +asp-testing-interface+
+                'source-admission)
+               => #f)
+        (check (testing-interface-profile-enabled?
+                testing
+                'source-admission)
+               => #t)
+        (check (testing-interface-call-with-prepared-source-graph
+                testing
+                "t/source-admission-test.ss"
+                '("src/domain.ss" "src/policy.ss"))
+               => 'admitted)
+        (check calls
+               => '(("t/source-admission-test.ss"
+                     ("src/domain.ss" "src/policy.ss"))))))
+
+    (test-case "prepared source admission fails closed without its profile"
+      (check-exception
+       (testing-interface-call-with-prepared-source-graph
+        +asp-testing-interface+
+        "t/source-admission-test.ss"
+        '("src/domain.ss"))
+       true))
+
+    (test-case "prepared source admission rejects an empty root declaration"
+      (let (testing
+            (.cc (testing-interface-add-profile
+                  +asp-testing-interface+
+                  +testing-source-admission-profile+)
+                 .admit-prepared-source-graph:
+                 (lambda (_test _roots) 'unreachable)))
+        (check-exception
+         (testing-interface-call-with-prepared-source-graph
+          testing "t/source-admission-test.ss" '())
+         true)))
+
     (test-case "profile transforms preserve downstream POO observation slots"
       (let* ((events '())
              (observed

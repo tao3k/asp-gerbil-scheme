@@ -11,6 +11,7 @@
                  find-test-files
                  %set-test-environment!)
         (only-in :clan/timestamp call-with-timing current-tai-timestamp)
+        (only-in :std/test test-suite test-case)
         (only-in :std/cli/multicall
                  define-entry-point
                  define-multicall-main
@@ -43,6 +44,8 @@
         testing-interface-command-for
         testing-interface-run-test!
         testing-interface-call-with-operation
+        testing-interface-call-with-prepared-source-graph
+        testing-interface-prepared-source-admission-suite
         testing-interface-trace-poo-for
         testing-discovery-profile-ignore-directories
         testing-interface-ignore-directories-for
@@ -61,6 +64,7 @@
         +testing-process-isolation-profile+
         +testing-serial-resource-profile+
         +testing-discovery-profile+
+        +testing-source-admission-profile+
         +asp-testing-interface+)
 
 (def (testing-profile profile-name profile-capability)
@@ -229,6 +233,13 @@
   (.cc (testing-profile 'discovery 'clan-test-file-filter)
        ignoreDirectories: []))
 
+;;; Opt-in lifecycle contract for source admission that must reuse the module
+;;; contexts prepared by the enclosing native gxtest harness.  The profile is
+;;; deliberately not enabled by default: a downstream extension supplies the
+;;; POO method that owns its policy and receipt.
+(def +testing-source-admission-profile+
+  (testing-profile 'source-admission 'prepared-native-test-graph))
+
 (def +asp-testing-interface+
   (testing-interface
    profiles: [+testing-memory-profile+
@@ -382,6 +393,35 @@
      ((not around) (thunk))
      ((procedure? around) (around operation thunk))
      (else (error "testing around-operation must be a procedure" around)))))
+
+;;; Invoke a downstream POO admission method with roots selected by the test
+;;; owner.  ASP neither discovers another graph nor computes another import
+;;; closure here; gxtest has already prepared every module before it executes
+;;; exported suites.
+(def (testing-interface-call-with-prepared-source-graph testing test roots)
+  (unless (testing-interface-profile-enabled? testing 'source-admission)
+    (error "testing source-admission profile is not enabled" test))
+  (unless (and (list? roots)
+               (pair? roots)
+               (andmap (lambda (root)
+                         (and (string? root) (> (string-length root) 0)))
+                       roots))
+    (error "invalid testing prepared source roots" roots))
+  (unless (.slot? testing '.admit-prepared-source-graph)
+    (error "testing interface has no prepared source graph admission method"
+           test))
+  (.call testing .admit-prepared-source-graph test roots))
+
+;;; Produce an ordinary std/test suite.  Native gxtest imports all requested
+;;; test modules in prepare-harness before any suite runs, so this callback can
+;;; traverse the already prepared expander contexts without a standalone
+;;; closure process.  Direct callers may still run the suite through std/test;
+;;; they own preparation of the declared roots in that case.
+(def (testing-interface-prepared-source-admission-suite testing test roots)
+  (test-suite "prepared native source graph admission"
+    (test-case "admit the graph prepared by the native test harness"
+      (testing-interface-call-with-prepared-source-graph
+       testing test roots))))
 
 (def (testing-interface-test-file-serial? testing test-file)
   (and (find (lambda (profile)

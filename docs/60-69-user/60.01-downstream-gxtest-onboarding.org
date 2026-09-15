@@ -145,6 +145,9 @@ The downstream test surface is:
 | API | Use |
 |-----+-----|
 | =make-gxtest-policy-test= | Default downstream =gxtest= suite entry. Pass the same runner entry files so policy follows their package-local import owners once with ordinary tests. |
+| =+testing-source-admission-profile+= | Opt a POO testing interface into admission over the graph already prepared by the enclosing native =gxtest= harness. |
+| =testing-interface-prepared-source-admission-suite= | Build an ordinary =std/test= suite that invokes the interface's =.admit-prepared-source-graph= method only after native harness preparation. |
+| =testing-interface-call-with-prepared-source-graph= | Invoke the POO admission method directly for an already prepared, non-empty root declaration. |
 | =make-policy-test= | Minimal =gxtest= suite for the files supplied by the build/test owner. |
 | =policy-findings= | Raw =TypeFinding= values for a files-scoped custom test. |
 | =policy-status= | =pass= or =fail= status for a files-scoped custom test. |
@@ -168,6 +171,15 @@ assertions over an explicit file scope. =project-policy-report= also requires
 that explicit file set; it never discovers or reconstructs a build graph.
 Do not destructure reports with alist helpers such as =assq=. Treat report
 container details as private and use the =gxtest-report-*= accessors.
+
+For a package that composes policy as a POO Testing extension, add
+=+testing-source-admission-profile+= to its testing interface, implement the
+=.admit-prepared-source-graph= method with =.cc=, and export the suite returned
+by =testing-interface-prepared-source-admission-suite=. Keep that suite in the
+same =gerbil test= invocation as its declared roots. Native =gxtest= prepares
+every requested module before running any exported suite, so the method can
+consume the resident expander contexts; it must not launch a standalone
+=native-import-closure= process or maintain another graph/cache.
 
 * Agent Contract
 Agents integrating the harness downstream should follow this order:
