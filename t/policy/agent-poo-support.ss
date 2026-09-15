@@ -2,10 +2,10 @@
 ;;; Gerbil scheme harness agent POO policy support.
 
 (import :gerbil/gambit
-        :gslph/src/parser/facade
-        :gslph/src/scenario/policy
-        (only-in :gslph/src/support/time duration-literal->nanos)
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/scenario/policy
+        (only-in :asp-gerbil-scheme/src/support/time duration-literal->nanos)
+        :asp-gerbil-scheme/src/types/facade)
 (export #t)
 
 
@@ -16,25 +16,24 @@
 
 ;; : (-> TimedPolicyScenarioResult Boolean )
 (def (policy-scenario-benchmark-targeted? timing)
-  (let* ((observed-ns
-          (duration-literal->nanos (hash-get timing 'observed_total)))
+  (let* ((total-ns (hash-get timing 'totalNs))
          (target-ns
           (duration-literal->nanos (hash-get timing 'target_total)))
          (max-ns
           (duration-literal->nanos (hash-get timing 'max_total)))
          (regression-budget-ns
           (duration-literal->nanos (hash-get timing 'regression_budget))))
-    (and observed-ns
+    (and (integer? total-ns)
+         (> total-ns 0)
          target-ns
          max-ns
          regression-budget-ns
-         (<= observed-ns target-ns)
          (< target-ns max-ns)
-         (= max-ns (+ observed-ns regression-budget-ns)))))
+         (= max-ns (+ target-ns regression-budget-ns)))))
 
 ;; : (-> MaybeNumber String )
-(def (poo-policy-performance-timing-status total-ms)
-  (if (and (number? total-ms) (>= total-ms 0))
+(def (poo-policy-performance-timing-status total-ns)
+  (if (and (integer? total-ns) (> total-ns 0))
     "pass"
     "fail"))
 
@@ -42,8 +41,14 @@
 (def (policy-scenario-timing-steps-measured? timings)
   (cond
    ((null? timings) #t)
-   ((and (number? (hash-get (car timings) 'durationMs))
-         (>= (hash-get (car timings) 'durationMs) 0))
+   ((and (integer? (hash-get (car timings) 'durationNs))
+         (> (hash-get (car timings) 'durationNs) 0)
+         (string? (hash-get (car timings) 'duration))
+         (integer? (hash-get (car timings) 'cpuDurationNs))
+         (> (hash-get (car timings) 'cpuDurationNs) 0)
+         (string? (hash-get (car timings) 'cpuDuration))
+         (integer? (hash-get (car timings) 'schedulerDelayNs))
+         (>= (hash-get (car timings) 'schedulerDelayNs) 0))
     (policy-scenario-timing-steps-measured? (cdr timings)))
    (else #f)))
 

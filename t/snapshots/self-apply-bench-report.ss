@@ -1,7 +1,7 @@
 (benchReport
  (languageId "gerbil-scheme")
- (providerId "gerbil-scheme-harness")
- (schemaId "agent.semantic-protocols.gerbil-scheme-harness-bench")
+ (providerId "asp-gerbil-scheme")
+ (schemaId "agent.semantic-protocols.asp-gerbil-scheme-bench")
  (status "pass")
  (iterations 1)
  (maxTotalMs 60000)

@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Stable snapshot projections for benchmark packets.
 
-(import :gslph/src/constants
-        :gslph/src/support/time)
+(import :asp-gerbil-scheme/src/constants
+        :asp-gerbil-scheme/src/support/time)
 
 (export bench-report-snapshot)
 

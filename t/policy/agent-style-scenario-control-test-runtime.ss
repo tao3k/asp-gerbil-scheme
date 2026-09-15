@@ -6,12 +6,12 @@
         :std/misc/ports
         :std/misc/process
         :std/sort
-        :gslph/src/parser/facade
-        :gslph/src/policy/agent-style
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-style
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios
         :policy/fixtures)
 (import :policy/agent-style-support)
@@ -234,7 +234,7 @@
              "source-form-reader-boundary")
             (agent-style-check-r013-scenario-learning!
              context
-             ["gerbil://src/testing/gxtest-runner.ss"
+             ["gerbil-utils/testing.ss"
               "harness-self-apply"]
              ["reader-collection-boundary"
               "source-form-reader-boundary"

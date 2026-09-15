@@ -2,7 +2,7 @@
 ;;; Query-free projection artifacts from the native Gerbil parser.
 
 (import :gerbil/gambit
-        :gslph/src/parser/facade)
+        :asp-gerbil-scheme/src/parser/facade)
 
 (export parse-owner-language-projection
         source-file->language-projection)
@@ -34,7 +34,7 @@
           (protocolId +language-projection-protocol-id+)
           (protocolVersion "1")
           (languageId "gerbil-scheme")
-          (harness (hash (harnessId "gerbil-scheme-language-project-harness")
+          (harness (hash (harnessId "asp-gerbil-scheme")
                          (parserAbi "gerbil-scheme-parser-v1")
                          (selectorDialect "gerbil-scheme")))
           (sources [(hash (sourceId source-id)

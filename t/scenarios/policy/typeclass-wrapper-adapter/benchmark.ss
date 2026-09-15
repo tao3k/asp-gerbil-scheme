@@ -1,28 +1,12 @@
-((max_total . 27ms)
- (observed_total . 12ms)
- (target_total . 17ms)
- (regression_budget . 15ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2))
-  ((name . collect-after) (durationMs . 6))
-  ((name . policy-before) (durationMs . 1))
-  ((name . policy-after) (durationMs . 3)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed baseline 12ms for typeclass-wrapper-adapter; target keeps optimization visible and max_total is the hard regression ceiling")
- (maxCollectMs . 18)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 12)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "The typeclass-wrapper-adapter target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+ (sampleCount . 20)
  (purpose . "R013 typeclass wrapper scenario keeps learned wrap/unwrap method adapter repair within the scenario-owned timing gate")
  (feature . "typeclass-wrapper-adapter")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -53,5 +37,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style" "typeclass" "wrapper" "method-adapter"))

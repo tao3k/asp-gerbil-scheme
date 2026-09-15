@@ -1,90 +1,35 @@
 ;;; -*- Gerbil -*-
-;;; Boundary:
-;;; - test owner records policy expectations.
-;;; - Keep typed contracts and fixture intent explicit.
-(import :std/sort
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/1 append-map)
-        :std/srfi/13
-        :std/test
-        :std/text/json)
+;;; Executable v1 schema bundle used by provider semantic packet tests.
+
+(import :gerbil/gambit)
+
 (export +schema-files+
         +local-schema-refs+
-        schema-ref-closure
-        missing-schema-files)
-;; ConfigConstant
+        missing-schema-files
+        schema-ref-closure)
+
+;;; Bundle boundary:
+;;; - These are the schemas exercised by the local provider packet suite.
+;;; - Their `$ref` edges are internal fragments, so no remote fetch or
+;;;   repository-external schema authority participates in this test bundle.
 (def +schema-files+
-  ["semantic-agent-hook-provider-manifest.v1.schema.json"
-   "semantic-compare-packet.v1.schema.json"
-   "semantic-content-compaction.v1.schema.json"
-   "semantic-handle.v1.schema.json"
-   "semantic-invariant-candidate.v1.schema.json"
-   "semantic-gerbil-scheme-harness-info.v1.schema.json"
-   "semantic-extension-pattern-mapping.v1.schema.json"
-   "semantic-language-evidence.v1.schema.json"
-   "semantic-runtime-source-acquisition.v1.schema.json"
-   "semantic-type-proof.v1.schema.json"
-   "semantic-language-registry.v1.schema.json"
-   "semantic-native-syntax-fact-index.v1.schema.json"
-   "semantic-structural-index.v1.schema.json"
-   "semantic-query-packet.v1.schema.json"
-   "semantic-read-packet.v1.schema.json"
-   "semantic-search-packet.v1.schema.json"
-   "semantic-source-location.v1.schema.json"
-   "semantic-tree-sitter-provenance.v1.schema.json"
-   "semantic-type-surface.v1.schema.json"])
-;; ConfigConstant
-(def +local-schema-refs+
-  ["semantic-content-compaction.v1.schema.json"
-   "semantic-handle.v1.schema.json"
-   "semantic-invariant-candidate.v1.schema.json"
-   "semantic-native-syntax-fact-index.v1.schema.json"
-   "semantic-source-location.v1.schema.json"
-   "semantic-tree-sitter-provenance.v1.schema.json"
-   "semantic-type-surface.v1.schema.json"])
-;; SchemaRefClosure
-(def (schema-ref-closure)
-  (sort (unique (append-map schema-local-refs +schema-files+))
-        string<?))
-;; : (-> SourceFile SchemaLocalRefs )
-(def (schema-local-refs file)
-  (collect-local-schema-refs
-   (call-with-input-file (schema-path file) read-json)))
-;; : (-> Value CollectLocalSchemaRefs )
-(def (collect-local-schema-refs value)
-  (cond
-   ((hash-table? value)
-    (append-map
-     (lambda (entry)
-       (append (if (and (equal? (car entry) "$ref")
-                        (string? (cdr entry)))
-                 (local-schema-ref-list (cdr entry))
-                 '())
-               (collect-local-schema-refs (cdr entry))))
-     (hash->list value)))
-   ((list? value)
-    (append-map collect-local-schema-refs value))
-   (else '())))
-;; : (-> Ref LocalSchemaRefList )
-(def (local-schema-ref-list ref)
-  (let (path (local-schema-ref-path ref))
-    (if path [path] '())))
-;; : (-> Ref String )
-(def (local-schema-ref-path ref)
-  (if (or (string-prefix? "#" ref)
-          (string-prefix? "http://" ref)
-          (string-prefix? "https://" ref)
-          (not (string-contains ref ".schema.json")))
-    #f
-    (let (hash-index (string-index ref #\#))
-      (if hash-index
-        (substring ref 0 hash-index)
-        ref))))
-;; : (-> Files MissingSchemaFiles )
+  '("semantic-asp-gerbil-scheme-info.v1.schema.json"
+    "semantic-language-evidence.v1.schema.json"
+    "semantic-runtime-source-acquisition.v1.schema.json"
+    "semantic-type-proof.v1.schema.json"
+    "semantic-extension-pattern-mapping.v1.schema.json"
+    "semantic-compare-packet.v1.schema.json"
+    "semantic-structural-index.v1.schema.json"
+    "semantic-native-syntax-fact-index.v1.schema.json"))
+
+(def +local-schema-refs+ '())
+
+;; : (-> (List String) (List String))
 (def (missing-schema-files files)
   (filter (lambda (file)
-            (not (file-exists? (schema-path file))))
+            (not (file-exists? (string-append "schemas/" file))))
           files))
-;; : (-> SourceFile String )
-(def (schema-path file)
-  (string-append "schemas/" file))
+
+;; : (-> (List String))
+(def (schema-ref-closure)
+  +local-schema-refs+)

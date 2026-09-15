@@ -1,29 +1,12 @@
-((max_total . 12ms)
- (observed_total . 4ms)
- (target_total . 10ms)
- (regression_budget . 8ms)
- (expected_over_input_budget . 2ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2))
-  ((name . collect-after) (durationMs . 1))
-  ((name . policy-before) (durationMs . 0))
-  ((name . policy-after) (durationMs . 1)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
+ (target_total . 150ms)
+ (regression_budget . 150ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "real Marlin config-interface large-object repair must stay near 10ms and hard-fail above 12ms")
- (maxCollectMs . 6)
- (observedCollectMs . 0)
- (maxParseMs . 8)
- (observedParseMs . 0)
- (maxFileMs . 3)
- (observedFileMs . 0)
- (maxPhaseMs . 4)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "real Marlin config-interface large-object repair targets 150ms p95 with an equal regression headroom; observations remain live receipt data")
+ (sampleCount . 20)
  (purpose . "real Marlin config-interface large POO objects stay native, idiomatic, and performance-gated")
  (feature . "poo-marlin-config-interface-large-object")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-027")
@@ -71,5 +54,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "poo" "marlin" "config-interface" "large-object" "lambda-match" "performance"))

@@ -1,8 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Event lookup shape is owned by one symbolic index boundary.
 (package: sample/events)
-(import :gerbil/gambit
-        (only-in :std/sugar hash-key?))
+(import :gerbil/gambit)
 (export make-event-index
         event-index-ref
         event-name
@@ -26,28 +25,26 @@
     index))
 
 ;; event-index-ref
-;;   : (-> HashTable Symbol Value Value)
-(def (event-index-ref index key default)
-  (if (hash-key? index key)
-    (hash-get index key)
-    default))
+;;   : (-> HashTable Symbol Value)
+(def (event-index-ref index key)
+  (hash-get index key))
 
 ;; event-name
 ;;   : (-> HashTable Value)
 (def (event-name index)
-  (event-index-ref index 'name #f))
+  (event-index-ref index 'name))
 
 ;; event-owner
 ;;   : (-> HashTable Value)
 (def (event-owner index)
-  (event-index-ref index 'owner #f))
+  (event-index-ref index 'owner))
 
 ;; event-route
 ;;   : (-> HashTable Value)
 (def (event-route index)
-  (event-index-ref index 'route #f))
+  (event-index-ref index 'route))
 
 ;; event-priority
 ;;   : (-> HashTable Value)
 (def (event-priority index)
-  (event-index-ref index 'priority #f))
+  (event-index-ref index 'priority))

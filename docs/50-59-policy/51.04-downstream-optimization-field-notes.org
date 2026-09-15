@@ -36,7 +36,7 @@ poo-flow test t/module-system-lazy-loader-test.ss
 The release spec stayed canonical:
 
 #+begin_src scheme
-(exe: "src/cli" bin: "poo-flow")
+(exe: "src/provider-server" bin: "poo-flow-provider")
 #+end_src
 
 There was no durable value in a separate focused-build binary. Once the focused

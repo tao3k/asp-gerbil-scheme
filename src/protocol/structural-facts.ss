@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Native syntax fact rows for the structural index packet.
 
-(import :gslph/src/parser/facade
-        :gslph/src/protocol/function-quality-facts
-        :gslph/src/protocol/quality-shape-facts
-        :gslph/src/protocol/support
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/function-quality-facts
+        :asp-gerbil-scheme/src/protocol/quality-shape-facts
+        :asp-gerbil-scheme/src/protocol/support
         (only-in :std/misc/list unique)
         (only-in :std/sort sort)
         (only-in :std/sugar filter hash hash-get))

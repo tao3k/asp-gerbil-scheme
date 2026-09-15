@@ -9,5 +9,7 @@
 ;; PolicyTest
 (def agent-poo-hot-loop-runtime-policy-test
   (test-suite "gerbil scheme harness agent POO hot loop runtime policy"
-    agent-poo-hot-loop-runtime-debug-policy-test
-    agent-poo-hot-loop-runtime-compact-policy-test))
+    (test-case "agent-poo-hot-loop-runtime-debug-policy-test"
+      (check (run-test-suite! agent-poo-hot-loop-runtime-debug-policy-test) => #t))
+    (test-case "agent-poo-hot-loop-runtime-compact-policy-test"
+      (check (run-test-suite! agent-poo-hot-loop-runtime-compact-policy-test) => #t))))

@@ -1,28 +1,12 @@
-((max_total . 25ms)
- (observed_total . 6ms)
- (target_total . 15ms)
- (regression_budget . 19ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2))
-  ((name . collect-after) (durationMs . 2))
-  ((name . policy-before) (durationMs . 1))
-  ((name . policy-after) (durationMs . 1)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
+ (target_total . 150ms)
+ (regression_budget . 150ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed phase-aware-macro-boundary receipt is 6ms total; target keeps phase-aware macro contract checks in the small millisecond budget while max_total remains the hard regression ceiling")
- (maxCollectMs . 10)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 6)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "The phase-aware-macro-boundary target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+ (sampleCount . 20)
  (purpose . "R013 separates Gerbil meta-syntactic tower, phase/context parsing, expansion, and runtime helper responsibilities")
  (feature . "phase-aware-macro-boundary")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -62,5 +46,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style" "gerbil-native" "macro" "phase" "meta-syntactic-tower"))

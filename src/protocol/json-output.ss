@@ -6,6 +6,7 @@
 (export write-json-line)
 
 ;; Keep transport output independent from parser/search projection modules.
+;; : (-> Json Void)
 (def (write-json-line obj)
   (write-json obj)
   (newline))

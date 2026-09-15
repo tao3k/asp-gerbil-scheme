@@ -9,5 +9,7 @@
 ;; TestSuite
 (def parser-test-part-8-package-typed-contracts
   (test-suite "gerbil scheme harness parser part 8 package typed contracts"
-    parser-test-part-8-package-scope
-    parser-test-part-8-typed-comment-blocks))
+    (test-case "parser-test-part-8-package-scope"
+      (check (run-test-suite! parser-test-part-8-package-scope) => #t))
+    (test-case "parser-test-part-8-typed-comment-blocks"
+      (check (run-test-suite! parser-test-part-8-typed-comment-blocks) => #t))))

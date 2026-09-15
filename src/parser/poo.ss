@@ -2,8 +2,8 @@
 ;;; POO-specific parser-owned syntax facts.
 
 (import :gerbil/expander
-        :gslph/src/parser/model
-        :gslph/src/parser/support
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/support
         (only-in :std/misc/list unique)
         (only-in :std/misc/string string-trim-suffix)
         (only-in :std/srfi/13 string-prefix? string-suffix?))
@@ -279,14 +279,16 @@
 
 ;;; Boundary:
 ;;; - define-type carries both declaration slots and method-table entries.
-;;; - Method slots use dot-prefixed names in the spec or body keyword surface.
-;;; - Type parameters such as `T` or `Value` remain out of method-slot evidence.
+;;; - Header entries contribute only dot-prefixed method slots because ordinary
+;;;   header symbols are type parameters.
+;;; - Body labels contribute both typed fields and dot-prefixed methods in
+;;;   source order; method-body quality remains owned by its narrower scanner.
 ;; : (-> Datum (List String) )
 (def (poo-define-type-slots datum)
   (unique
    (append
     (poo-define-type-header-method-slots datum)
-    (poo-define-type-body-method-slots (safe-cddr datum)))))
+    (poo-define-type-body-slots (safe-cddr datum)))))
 
 ;;; Boundary:
 ;;; - Header method-slot extraction only reads the define-type spec list.
@@ -299,18 +301,31 @@
                   (datum-list-items (cdr spec)))
       '())))
 
-;;; Body labels such as `.map:` and `.ref:` are method-table slots.  Their
-;;; following expression is parsed separately by poo-define-type-method-options.
+;;; Body labels such as `Key:` and `.ref:` are public type slots. Their value
+;;; expression is skipped here and method bodies are classified separately by
+;;; `poo-define-type-method-options`.
 ;; : (-> (List Datum) (List String) )
-(def (poo-define-type-body-method-slots items)
+(def (poo-define-type-body-slots items)
   (if (pair? items)
-    (let (slot (poo-method-slot-name (car items)))
+    (let (slot (poo-type-slot-name (car items)))
       (if slot
         (cons slot
-              (poo-define-type-body-method-slots
+              (poo-define-type-body-slots
                (if (pair? (cdr items)) (cddr items) '())))
-        (poo-define-type-body-method-slots (cdr items))))
+        (poo-define-type-body-slots (cdr items))))
     '()))
+
+;; : (-> Datum MaybeString )
+(def (poo-type-slot-name item)
+  (cond
+   ((keyword? item)
+    (string-trim-suffix ":" (datum->string item)))
+   ((symbol? item)
+    (let (name (symbol->string item))
+      (and (or (string-prefix? "." name)
+               (string-suffix? ":" name))
+           (string-trim-suffix ":" name))))
+   (else #f)))
 
 ;;; Method options expose Gerbil-POO method-table fluency without changing the
 ;;; public poo-form struct shape.  Search, guide, and policy can consume these

@@ -1,7 +1,8 @@
 ;;; Module boundary: functional helpers stay pure and dependency-light so macro
 ;;; generated contract code can reuse them without creating policy/build cycles.
 
-(import (only-in :std/srfi/1 any every filter-map)
+(import (only-in :std/iter for/fold in-range)
+        (only-in :std/srfi/1 any every filter-map)
         :gerbil/gambit)
 
 (export constant-value
@@ -16,6 +17,7 @@
         list-intersects?
         non-empty-string?
         string-join-with
+        u8vector-line-start-offsets
         list-all?
         list-any?)
 
@@ -105,6 +107,26 @@
            (step state value))
          initial
          values))
+
+;;; Intent: share the byte-to-line index used by exact source projections.
+;; u8vector-line-start-offsets
+;; : (-> U8Vector Vector)
+;; | doc m%
+;; Builds zero-based byte offsets for every one-based source line.
+;; # Examples
+;; ```scheme
+;; (u8vector-line-start-offsets (string->utf8 "a\nb"))
+;; => #(0 2)
+;; ```
+;; Result: a compact vector beginning at byte offset zero.
+(def (u8vector-line-start-offsets bytes)
+  (list->vector
+   (reverse
+    (for/fold (starts '(0))
+              (index (in-range (u8vector-length bytes)))
+      (if (= (u8vector-ref bytes index) 10)
+        (cons (+ index 1) starts)
+        starts)))))
 
 ;;; Intent: express suffix trimming with foldr instead of ad hoc reverse loops.
 ;; drop-right-while

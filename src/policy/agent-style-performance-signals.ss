@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Upstream performance quality signals for R013 typed-combinator guidance.
 
-(import :gslph/src/parser/facade
+(import :asp-gerbil-scheme/src/parser/facade
         (only-in :std/misc/list unique)
         (only-in :std/sugar filter))
 

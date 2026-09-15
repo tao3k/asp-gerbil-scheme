@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; POO-composed dependency adapter repair profiles for policy payloads.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/prototype
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/prototype
         (only-in :std/srfi/1 take)
         (only-in :std/sugar hash))
 
@@ -43,7 +43,7 @@
    [(cons 'styleGuide "dependency-protocol-adapter")
     (cons 'styleCommand
           "asp gerbil-scheme guide --code --topic dependency-protocol-adapter --intent repair")
-    (cons 'repairAction "search-forwarded-example-then-guide-code")
+    (cons 'repairAction "provider-facts-then-guide-code")
     (cons 'guideCodeFlag "--code")
     (cons 'codeShapeExemplar "gerbil-poo rationaldict-style typed protocol adapter")
     (cons 'protocolSurface
@@ -63,7 +63,7 @@
     (cons 'reusableContractTestPattern
           "small t/ owner calls generic table-contract-tests or protocol-contract-tests against the adapter type descriptor")
     (cons 'adapterRepairShape
-          "query the search-forwarded rationaldict adapter example first, then use R017 guide --code for local parser/policy repair code; follow exact only-in dependency import -> define-type protocol surface -> Key/Value -> primitive methods.table slots (.empty/.ref/.acons/.remove/.foldl/.foldr) -> iteration/conversion/update/selection/equality/lens/serialization slots when dependency primitives exist -> generic contract tests")
+          "inspect provider-native dependency facts first, then use R017 guide --code for the source-backed rationaldict exemplar and local repair shape; follow exact only-in dependency import -> define-type protocol surface -> Key/Value -> primitive methods.table slots (.empty/.ref/.acons/.remove/.foldl/.foldr) -> iteration/conversion/update/selection/equality/lens/serialization slots when dependency primitives exist -> generic contract tests")
     (cons 'agentRepairStandard
           "current dependency already provides the bottom data structure; do not hand-write loose hash/alist objects. Build a typed protocol adapter: precise only-in imports for primitives, define-type Key/Value plus primitive methods.table slots (.empty/.ref/.acons/.remove/.foldl/.foldr), iteration/conversion/update/selection/equality/lens/serialization slots, behavior on protocol slots, derived table/set/list/iteration/lens/sexp/json/bytes/marshal capabilities when slots exist, and generic contract tests")
     (cons 'agentFlexibility
@@ -76,7 +76,7 @@
   (dependency-adapter-profile
    "dependency-poo-lineage"
    [(cons 'sourcePatternLineage
-          "gerbil-poo build/cli/rationaldict/table/brace/object/mop/io patterns")
+          "gerbil-poo build/runtime/rationaldict/table/brace/object/mop/io patterns")
     (cons 'macroBridgeBoundary
           "syntax forms should stay thin bridges like gerbil-poo brace.ss @method; runtime semantics belong in object/mop/protocol slots")
     (cons 'slotResolutionModel
@@ -85,24 +85,21 @@
           "json<-/<-json, marshal/unmarshal, bytes<-/<-bytes, and string<-/<-string are method/type slots")]))
 
 ;; DependencyAdapterProfile
-(def +dependency-adapter-build-cli-profile+
+(def +dependency-adapter-build-boundary-profile+
   (dependency-adapter-profile
-   "dependency-build-cli-lineage"
+   "dependency-build-boundary-lineage"
    [(cons 'buildPattern
           "use :std/make + :clan/base + :clan/building discovery, while filtering non-module policy/config files for this harness")
-    (cons 'cliOptionPattern
-          "keep src/cli.ss as a thin dispatcher; compose option objects when command option surfaces grow")]))
+    (cons 'boundaryCompositionPattern
+          "keep process entrypoints thin; compose POO-native request and configuration objects when boundary surfaces grow")]))
 
-;; : (-> Command Command DependencyAdapterProfile )
-(def (dependency-adapter-repair-command-profile search-command repair-command)
+;; : (-> Command DependencyAdapterProfile )
+(def (dependency-adapter-repair-command-profile repair-command)
   (dependency-adapter-profile
    "dependency-repair-commands"
-   [(cons 'searchExampleCommand search-command)
-    (cons 'repairCodeCommand repair-command)
+   [(cons 'repairCodeCommand repair-command)
     (cons 'allowedMoves
-          [(string-append "run " search-command
-                          " to inspect the dependency example before editing")
-           (string-append "run " repair-command
+          [(string-append "run " repair-command
                           " to inspect local R017 parser/policy repair code")
            "add or tighten only-in dependency primitive imports"
            "wrap dependency primitives with define-type and protocol slots"
@@ -120,21 +117,21 @@
 ;;; - This is the production POO use site for R017 repair guidance.
 ;;; - Each overlay contributes one adapter concern instead of one large hash.
 ;;; - The final composition overlay makes POO provenance visible in details.
-;; : (-> Command Command DependencyAdapterProfile )
-(def (dependency-adapter-standard-profile search-command repair-command)
+;; : (-> Command DependencyAdapterProfile )
+(def (dependency-adapter-standard-profile repair-command)
   (slot-profile-compose
    "dependency-adapter-standard"
    [(dependency-adapter-profile
      "dependency-profile-composition"
      [(cons 'profileComposition
-            "clan/list c3-compute-precedence-list + clan/poo/proto compose-proto*")
+            "gerbil-poo object<-alist semantic construction + native object C3 supers")
       (cons 'profileOverlays
             ["dependency-protocol-surface"
              "dependency-poo-lineage"
-             "dependency-build-cli-lineage"
+             "dependency-build-boundary-lineage"
              "dependency-repair-commands"])])
-    (dependency-adapter-repair-command-profile search-command repair-command)
-    +dependency-adapter-build-cli-profile+
+    (dependency-adapter-repair-command-profile repair-command)
+    +dependency-adapter-build-boundary-profile+
     +dependency-adapter-poo-lineage-profile+
     +dependency-adapter-protocol-surface-profile+]))
 
@@ -153,7 +150,6 @@
         (profilePrecedence (dependency-adapter-profile-precedence profile))
         (repairAction (dependency-adapter-profile-ref profile 'repairAction ""))
         (guideCodeFlag (dependency-adapter-profile-ref profile 'guideCodeFlag ""))
-        (searchExampleCommand (dependency-adapter-profile-ref profile 'searchExampleCommand ""))
         (repairCodeCommand (dependency-adapter-profile-ref profile 'repairCodeCommand ""))
         (codeShapeExemplar (dependency-adapter-profile-ref profile 'codeShapeExemplar ""))
         (sourcePatternLineage (dependency-adapter-profile-ref profile 'sourcePatternLineage ""))
@@ -186,7 +182,7 @@
         (ioSerializationMethodFamily
          (dependency-adapter-profile-ref profile 'ioSerializationMethodFamily ""))
         (buildPattern (dependency-adapter-profile-ref profile 'buildPattern ""))
-        (cliOptionPattern (dependency-adapter-profile-ref profile 'cliOptionPattern ""))
+        (boundaryCompositionPattern (dependency-adapter-profile-ref profile 'boundaryCompositionPattern ""))
         (manualObjectEncodingRisk
          (dependency-adapter-quality-fact-manual-object-encoding-risk fact))
         (genericContractWitnessKind
@@ -209,4 +205,4 @@
         (nativeFactSource
          (dependency-adapter-profile-ref profile 'nativeFactSource ""))
         (advice (dependency-adapter-quality-fact-advice fact))
-        (next (dependency-adapter-profile-ref profile 'searchExampleCommand ""))))
+        (next (dependency-adapter-profile-ref profile 'repairCodeCommand ""))))

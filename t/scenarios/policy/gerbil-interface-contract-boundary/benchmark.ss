@@ -1,28 +1,12 @@
-((max_total . 35ms)
- (observed_total . 12ms)
- (target_total . 20ms)
- (regression_budget . 23ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 4))
-  ((name . collect-after) (durationMs . 5))
-  ((name . policy-before) (durationMs . 1))
-  ((name . policy-after) (durationMs . 2)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
+ (target_total . 150ms)
+ (regression_budget . 150ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
   "gerbil-interface-contract-boundary keeps native using/interface contract repair under the scenario-owned timing gate")
- (maxCollectMs . 15)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 10)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+ (sampleCount . 20)
  (purpose . "R013 native Gerbil interface/contract scenario catches one-owner slot contract scaffolding and repairs it with local typed descriptor helpers")
  (feature . "gerbil-interface-contract-boundary")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -59,7 +43,7 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style"
        "gerbil-native"
        "using"

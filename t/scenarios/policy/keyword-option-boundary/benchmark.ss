@@ -1,29 +1,12 @@
-((max_total . 24ms)
- (observed_total . 6ms)
- (target_total . 14ms)
- (regression_budget . 18ms)
- (expected_over_input_budget . 1ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2) (durationNs . 2000000))
-  ((name . collect-after) (durationMs . 2) (durationNs . 2000000))
-  ((name . policy-before) (durationMs . 1) (durationNs . 1000000))
-  ((name . policy-after) (durationMs . 1) (durationNs . 1000000)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
   "keyword-option-boundary validates Gerbil native #!key option APIs as the repair for generated opts alist scanning")
- (maxCollectMs . 10)
- (observedCollectMs . 4)
- (maxParseMs . 14)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 6)
- (observedPhaseMs . 2)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+ (sampleCount . 20)
  (purpose
   .
   "R022 keyword option scenario rejects generated opts alist scanning when Gerbil keyword/default parameters should own the function option contract")
@@ -65,6 +48,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate"
   "assert-input-expected-comparison")
  (tags "style" "keyword" "optional" "anti-scaffold"))

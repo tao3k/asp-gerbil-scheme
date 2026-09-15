@@ -192,7 +192,7 @@
     "@@gerbil_bazel+//gerbil:extensions.bzl%gerbil": {
       "os:osx,arch:aarch64": {
         "bzlTransitiveDigest": "syK1vkgy74JTqVFQ+OZjMzo0XraQ682l5TBodh1nX9g=",
-        "usagesDigest": "NrwpJyFLjVtOXRtqF0V1G0K1Z3RYyzEtp18LJAu84es=",
+        "usagesDigest": "h0OqZUSFSIqVWz3EWl9bTOWPIsn+SHGiUPnKMYJC8W0=",
         "recordedInputs": [],
         "generatedRepoSpecs": {
           "local_gerbil": {

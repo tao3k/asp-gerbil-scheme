@@ -1,8 +1,7 @@
-#+TITLE: 31.03 Build Profile and Request Library
-#+AUTHOR: POO Flow / Gerbil Scheme Project Harness
+#+TITLE: 31.03 Optional Build Value Library
 #+OPTIONS: toc:3 num:nil
 
-* 31.03 Build Profile and Request Library
+* 31.03 Optional Build Value Library
 :PROPERTIES:
 :JD_ID: 31.03
 :STATUS: implemented
@@ -12,102 +11,56 @@
 
 ** Purpose
 
-The Building framework is an additive library over Gerbil's =std/make= and
-=gxpkg=.  It does not replace compilation or package management.  Its value is
-to make a build plan an explicit, composable value with a stable receipt that
-agents and downstream packages can inspect.
+=src/building/= provides POO-native, functional values for tests, scenario
+composition, receipt formatting, and experiments. =BuildProfile= and
+=BuildRequest= in this library describe those values only. They are not a
+package-native profile.
 
-** Model
+The separate =NativeProfile= in =src/build-api/native-profile.ss= is consulted
+by root =build.ss= and =build-provider.ss=. It selects concrete current-system
+facts such as macOS/Linux and architecture, prepares the platform pkg-config
+search path, and supplies only platform compiler selection for final executable
+forms. PackageSpec declares =pkg-config-libs= and =nix-deps=; upstream
+=:clan/building= resolves and normalizes the actual compiler/linker flags, and
+=std/make= remains the executor.
 
-=BuildProfile= is immutable execution policy: builder, stage labels, extra
-options, after hook, and description.  =BuildRequest= binds that policy to a
-label, requested stage specs, current predicate, and context.  A request is
-projected to ordered =BuildStage= values before it crosses the effect boundary.
+** Non-ownership rule
 
-#+begin_src mermaid
-flowchart LR
-  Script["build.ss"] --> Dispatch["command and target dispatch"]
-  Dispatch --> Api["Build API package policy"]
-  Api --> Profile["BuildProfile"]
-  Profile --> Request["BuildRequest"]
-  Request --> Plan["BuildStage plan"]
-  Plan --> Runner["build-request-run!"]
-  Runner --> Receipt["stage receipts and buildPlan"]
-#+end_src
+The optional library must not:
 
-** Public API
+- translate development or production labels into compiler options;
+- intercept release, optimized, or debug flags;
+- decide native source/output currentness;
+- own a package module catalog;
+- schedule, batch, retry, lock, or clean production compilation;
+- publish a BuildPlan as proof that a native build completed.
 
-Downstream packages import =:gslph/src/building/facade=.  The facade exports
-the constructors, predicates, and slot accessors for both profile and request,
-as well as the POO-native construction helpers:
+Those responsibilities remain with upstream Gerbil.
 
-- =make-std-builder-profile=
-- =make-std-builder-request=
-- =build-request-stage-plan=
-- =build-request-run!=
-- =build-request->alist=
+** Public use
 
-The slot surface matters: a downstream package can validate and compose the
-same objects instead of copying an internal alist shape or reaching through a
-package script.
+Downstream callers may import =:asp-gerbil-scheme/build-api= to construct pure
+stage/request values for their own application workflows or tests. Crossing an
+actual build effect must still call the native owner explicitly.
 
 #+begin_src scheme
-(import :gslph/src/building/facade)
-
-(def profile
-  (make-std-builder-profile (default-std-builder "src")))
+(import :asp-gerbil-scheme/build-api)
 
 (def request
   (make-std-builder-request
-   "library"
-   profile
-   [["library.ss"]]
+   "scenario"
+   (make-std-builder-profile scenario-builder)
+   [["fixture.ss"]]
    (lambda (spec context) #f)
-   'library))
-
-(build-request-run! request)
+   'fixture-context))
 #+end_src
 
-** Ownership Boundary
+This API is additive data modelling. It is not the normal package build route.
 
-- =build.ss= remains the command shell: option parsing, target selection, test
-  selection, and package-local dynamic loading.
-- Build API remains the package adapter: source-root policy, currentness
-  predicate, and package receipt persistence.
-- =src/building/= owns reusable profile/request values, stage-plan construction,
-  execution, and receipt projection.
+** Acceptance
 
-The package adapter constructs a request and delegates.  It must not copy the
-stage runner.  Downstream consumers import the facade and do not depend on the
-script's dynamic loader.
-
-** Incremental and Feedback Guarantees
-
-- A current request projects every stage as =skipped= and does not invoke
-  =std/make=.
-- A stale request preserves declaration order and projects =compiled= receipts.
-- Package receipts retain the ordered =buildPlan=, giving agents a durable
-  explanation of what was skipped or executed.
-- The performance suite protects warm execution, stale execution, stage-plan
-  construction, and profile/request construction plus projection.
-
-** Upstream Value and Developer UX
-
-The upstream tools remain the source of truth for compile semantics.  The
-framework adds policy-level structure that they intentionally do not provide:
-an inspectable plan before execution, reusable policy independent of a package
-script, and a receipt after execution.  For a downstream author this reduces
-the integration surface to one facade import and one request value; for an
-agent it makes a modification immediately checkable as a plan and receipt
-rather than an opaque shell invocation.
-
-** Acceptance Gates
-
-1. Framework tests cover warm and stale requests, object predicates, ordered
-   stage projection, and receipt fields.
-2. Native Build API tests assert that the normal package target writes a
-   =buildPlan= with a warm =skipped= stage.
-3. Performance tests set bounded budgets for profile/request creation and
-   projection without invoking =std/make=.
-4. =build.ss compile=, =build.ss test=, and =gxpkg build= remain supported
-   entry points; no =GERBIL_LOADPATH= wrapper is introduced.
+- Pure value and scenario tests remain green.
+- Root and provider cold builds use =NativeProfile= only for current-system
+  preparation and delegate dependency flag resolution to =:clan/building=.
+- Package build contracts contain no ASP development/production profile,
+  BuildPlan admission, or alternate native executor.

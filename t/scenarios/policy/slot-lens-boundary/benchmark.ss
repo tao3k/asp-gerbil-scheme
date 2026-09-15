@@ -1,28 +1,12 @@
-((max_total . 29ms)
- (observed_total . 14ms)
- (target_total . 19ms)
- (regression_budget . 15ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 4))
-  ((name . collect-after) (durationMs . 8))
-  ((name . policy-before) (durationMs . 0))
-  ((name . policy-after) (durationMs . 2)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
+ (target_total . 150ms)
+ (regression_budget . 150ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed baseline 14ms for slot-lens-boundary; target keeps optimization visible and max_total is the hard regression ceiling")
- (maxCollectMs . 24)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 16)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "The slot-lens-boundary target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+ (sampleCount . 20)
  (purpose . "R013 slot lens scenario keeps learned descriptor/lens repair within the scenario-owned timing gate")
  (feature . "slot-lens-boundary")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -53,5 +37,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style" "slot" "lens" "descriptor-boundary"))

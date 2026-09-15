@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Query helpers over parser-owned project facts.
 
-(import :gslph/src/parser/facade
+(import :asp-gerbil-scheme/src/parser/facade
         (only-in :std/sort sort)
         (only-in :std/srfi/1 append-map)
         (only-in :std/srfi/13

@@ -1,6 +1,13 @@
 ;;; Boundary: declarative macros lower caller policy into BuildProfile and BuildRequest values without executing builds.
 
-(import ./facade)
+(import (only-in ./facade
+                 make-build-profile
+                 std-builder-name
+                 std-builder-description
+                 make-build-request
+                 default-std-builder
+                 make-std-builder-profile
+                 make-std-builder-request))
 
 (export std-build
         define-build-profile

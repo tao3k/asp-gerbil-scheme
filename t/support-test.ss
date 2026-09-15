@@ -3,7 +3,7 @@
 ;;; - Time helpers expose one unit-safe conversion surface for benchmark receipts.
 ;;; - Negative or absent durations remain explicit missing evidence, never measured values.
 (import (only-in :std/test test-suite test-case check)
-        :gslph/src/support/time)
+        :asp-gerbil-scheme/src/support/time)
 
 (export support-test)
 ;; SupportTest

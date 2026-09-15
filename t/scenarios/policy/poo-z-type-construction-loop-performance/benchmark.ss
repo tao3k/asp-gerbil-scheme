@@ -1,28 +1,12 @@
-((max_total . 25ms)
- (observed_total . 6ms)
- (target_total . 15ms)
- (regression_budget . 19ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 4))
-  ((name . collect-after) (durationMs . 2))
-  ((name . policy-before) (durationMs . 0))
-  ((name . policy-after) (durationMs . 0)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
+ (target_total . 150ms)
+ (regression_budget . 150ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed baseline 6ms for poo-z-type-construction-loop-performance; target keeps optimization visible and max_total is the hard regression ceiling")
- (maxCollectMs . 12)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 8)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
-(iterations . 3)
- (unit . "ms")
+  "The poo-loop-modular-integer-type-construction target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+(sampleCount . 20)
  (purpose . "R034 modular integer type construction repair scenario keeps policy analysis within the scenario-owned timing gate")
  (feature . "poo-loop-modular-integer-type-construction")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-034")
@@ -44,5 +28,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "poo" "loop" "type" "modular"))

@@ -1,12 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; Stable types facade for the Gerbil Scheme project harness.
 
-(import :gslph/src/types/core
-        :gslph/src/types/env
-        :gslph/src/types/findings
-        :gslph/src/types/model
-        :gslph/src/types/signatures
-        :gslph/src/types/validation)
+(import :asp-gerbil-scheme/src/types/core
+        :asp-gerbil-scheme/src/types/env
+        :asp-gerbil-scheme/src/types/findings
+        :asp-gerbil-scheme/src/types/model
+        :asp-gerbil-scheme/src/types/signatures
+        :asp-gerbil-scheme/src/types/validation)
 
 (export make-type-unknown
         make-type-any

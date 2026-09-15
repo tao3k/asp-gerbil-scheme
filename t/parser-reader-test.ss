@@ -2,7 +2,7 @@
 ;;; Parser reader fact tests for formatter-facing R7RS source boundaries.
 
 (import :std/test
-        :gslph/src/parser/facade)
+        :asp-gerbil-scheme/src/parser/facade)
 
 (export parser-reader-test)
 

@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing package build responsibility policy.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/srfi/13 string-contains string-prefix? string-suffix?)
         (only-in :std/sugar cut filter filter-map find ormap)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export package-build-responsibility-findings
         package-build-responsibility-finding
@@ -23,13 +23,13 @@
     "\"${2:-}\" = pattern"
     "\"${2:-}\" = extension"))
 
-;;; Wrapper/materializer definitions are CLI/provider-wrapper ownership, not
+;;; Wrapper/materializer definitions are runtime-entry ownership, not
 ;;; package build ownership.
 ;; (List String)
 (def +package-build-wrapper-definition-prefixes+
   '("write-gsc-wrapper"
     "write-native-"
-    "write-provider-cli"
+    "write-provider-entry"
     "write-executable-script"))
 
 ;;; Canonical build surface observed in gerbil-poo:
@@ -80,7 +80,7 @@
 
 ;;; Boundary:
 ;;; - Only the package-root build.ss is governed here.
-;;; - Wrapper templates and command owners may contain CLI routing elsewhere.
+;;; - Wrapper templates and command owners may contain process routing elsewhere.
 ;; : (-> ProjectIndex (List PackageBuildFinding) )
 (def (package-build-responsibility-findings index)
   (let (file (package-top-level-build-file index))
@@ -119,7 +119,7 @@
 ;;; Finding contract:
 ;;; - Canonical witnesses explain repair direction, but they do not trigger R025.
 ;;; - R025 fires only on forbidden build-control evidence: handwritten load path
-;;;   or srcdir control, manual compiler dispatch, or legacy defbuild-script use.
+;;;   or srcdir control, manual compiler dispatch, or runtime routing.
 ;;; - The rule does not read build.ss text or infer from file names.
 ;; : (-> PackageBuildFile MaybePackageBuildFinding )
 (def (package-build-canonical-shape-finding file)
@@ -353,9 +353,9 @@
         (compositionalBuildShape
          "use clan/building for harness source discovery/load path, std/build-script for simple gxpkg packages, or std/make for build-spec features such as ssi:/gsc:; keep package tests on Gerbil's gxtest runner and runtime commands in compiled modules")
         (downstreamRepairPattern
-         "keep build.ss as the package build control plane, route package compilation through clan/building, std/build-script, or std/make build-spec, and keep command/runtime behavior in src/cli and src/commands")
+         "keep build.ss as the package build control plane, route package compilation through clan/building, std/build-script, or std/make build-spec, and keep provider behavior in a thin entry module over POO-native runtime owners")
         (disallowedShape
-         "hand-written srcdir/loadpath setup, manual compiler/process orchestration, shell pipelines, or CLI/runtime routing that replaces Gerbil's package build entrypoints")
+         "hand-written srcdir/loadpath setup, manual compiler orchestration, or runtime routing that replaces Gerbil's package build entrypoints")
         (sourceEvidence
          ["gerbil://tools/gxpkg.ss:1224-1234"
           "gerbil://std/build-script.ss:9-43"
@@ -372,7 +372,7 @@
 
 ;;; Finding contract:
 ;;; - Evidence comes from parser-owned call arguments, not raw grep.
-;;; - The repair path preserves build orchestration and moves CLI semantics.
+;;; - The repair path preserves build orchestration and moves runtime semantics.
 ;; : (-> PackageBuildFile CallFact MaybePackageBuildFinding )
 (def (package-build-responsibility-finding file call)
   (let (evidence (build-routing-call-evidence call))
@@ -381,13 +381,13 @@
           (policy-rule-id +agent-package-build-responsibility-rule+)
           (policy-rule-severity +agent-package-build-responsibility-rule+)
           (source-file-path file)
-          "package-level build.ss contains CLI/search routing; keep build.ss as build spec/orchestration and move command semantics into src/cli or src/commands"
+          "package-level build.ss contains runtime routing; keep build.ss as build spec/orchestration and move provider semantics into POO-native runtime owners"
           (call-fact-selector call)
           (hash (evidence evidence)
                 (kind "package-build-responsibility")
                 (allowedBuildRole "build spec, dependency setup, compile orchestration, gxtest execution")
-                (disallowedRole "CLI/search/pattern routing policy or generated command semantics")
-                (next "move routing to src/cli or src/commands/search"))))))
+                (disallowedRole "runtime routing policy or generated transport semantics")
+                (next "move provider routing to src/provider-server.ss over POO-native runtime owners"))))))
 
 ;;; Finding contract:
 ;;; - Evidence comes from parser-owned definition names.
@@ -400,13 +400,13 @@
           (policy-rule-id +agent-package-build-responsibility-rule+)
           (policy-rule-severity +agent-package-build-responsibility-rule+)
           (source-file-path file)
-          "package-level build.ss defines provider wrapper/script materializers; keep build.ss as build spec/orchestration and move command behavior into the CLI owner"
+          "package-level build.ss defines provider wrapper/script materializers; keep build.ss as build spec/orchestration and move runtime behavior into the resident provider owner"
           (definition-selector definition)
           (hash (evidence name)
                 (kind "package-build-wrapper-definition")
                 (allowedBuildRole "build spec, dependency setup, compile orchestration, gxtest execution")
-                (disallowedRole "provider wrapper/script generation or CLI executable materialization")
-                (next "move command entrypoint behavior to src/cli"))))))
+                (disallowedRole "provider wrapper/script generation or executable materialization")
+                (next "move provider entrypoint behavior to src/provider-server.ss"))))))
 
 ;;; Evidence boundary:
 ;;; - String arguments are still parser facts.

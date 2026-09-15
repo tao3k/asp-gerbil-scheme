@@ -4,6 +4,7 @@
 ;;; - Protocol methods are lifted through local helpers instead of copied into
 ;;;   the typeclass declaration body.
 (package: sample/wrapper)
+(import (only-in :clan/base compose cut))
 (export WrappedCodec.)
 
 ;; wrapped-marshal
@@ -34,7 +35,7 @@
 ;;       ```
 ;;     %
 (def (wrapped-unmarshal T wrap)
-  (lambda (port) (wrap (unmarshal T port))))
+  (compose wrap (cut unmarshal T <>)))
 
 ;; wrapped-bytes<-
 ;;   : (-> Type Procedure Procedure)
@@ -49,7 +50,7 @@
 ;;       ```
 ;;     %
 (def (wrapped-bytes<- T unwrap)
-  (lambda (v) (bytes<- T (unwrap v))))
+  (compose (cut bytes<- T <>) unwrap))
 
 ;; wrapped-<-bytes
 ;;   : (-> Type Procedure Procedure)
@@ -64,7 +65,7 @@
 ;;       ```
 ;;     %
 (def (wrapped-<-bytes T wrap)
-  (lambda (b) (wrap (<-bytes T b))))
+  (compose wrap (cut <-bytes T <>)))
 
 ;; wrapped-json<-
 ;;   : (-> Type Procedure Procedure)
@@ -79,7 +80,7 @@
 ;;       ```
 ;;     %
 (def (wrapped-json<- T unwrap)
-  (lambda (v) (json<- T (unwrap v))))
+  (compose (cut json<- T <>) unwrap))
 
 ;; wrapped-<-json
 ;;   : (-> Type Procedure Procedure)
@@ -94,7 +95,7 @@
 ;;       ```
 ;;     %
 (def (wrapped-<-json T wrap)
-  (lambda (j) (wrap (<-json T j))))
+  (compose wrap (cut <-json T <>)))
 
 ;; wrapped-map
 ;;   : (-> Procedure Procedure Procedure)
@@ -110,7 +111,8 @@
 ;;       ```
 ;;     %
 (def (wrapped-map wrap unwrap)
-  (lambda (f x) (wrap (f (unwrap x)))))
+  (lambda (f x)
+    ((compose wrap f unwrap) x)))
 
 ;; WrappedCodec.
 ;;   : (-> Type WrapperCodec)
