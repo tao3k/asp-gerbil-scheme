@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Typed-contract boundary signals for R013 Gerbil style guidance.
 
-(import :gslph/src/parser/facade
-        (only-in :gslph/src/policy/agent-style-gerbil-signal-support
+(import :asp-gerbil-scheme/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/policy/agent-style-gerbil-signal-support
                  typed-combinator-style-facts->quality-facet
                  typed-combinator-style-facts->signals
                  typed-combinator-style-facts->targets

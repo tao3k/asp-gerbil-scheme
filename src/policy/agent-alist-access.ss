@@ -4,10 +4,10 @@
 ;;; parameters, a record, profile accessor, or source-backed fact would make the
 ;;; shape explicit.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/sugar filter hash)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export alist-access-findings
         alist-access-finding)

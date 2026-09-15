@@ -1,13 +1,13 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing dependency protocol adapter policy over parser-owned facts.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-support
-        :gslph/src/policy/dependency-adapter-profile
-        :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-support
+        :asp-gerbil-scheme/src/policy/dependency-adapter-profile
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/misc/list unique)
         (only-in :std/srfi/13 string-contains string-join string-prefix?)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export dependency-protocol-adapter-findings
         dependency-protocol-adapter-finding)
@@ -26,10 +26,6 @@
 ;; Command
 (def +dependency-adapter-repair-code-command+
   "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-017 --intent repair")
-;; Command
-(def +dependency-adapter-search-example-command+
-  "asp gerbil-scheme search pattern poo rationaldict adapter --workspace . --view seeds")
-
 ;;; Entry boundary: policy only consumes parser-owned adapter facts.
 ;;; It does not infer adapter quality from raw source text.
 ;; : (-> ProjectIndex (List TypeFinding) )
@@ -61,8 +57,7 @@
 (def (dependency-protocol-adapter-missing-evidence index fact)
   (unique
    (append (dependency-adapter-quality-fact-missing-evidence fact)
-           (if (or (not (dependency-adapter-generic-contract-witness-required? index))
-                   (dependency-adapter-generic-contract-witness-exists? index fact))
+           (if (dependency-adapter-generic-contract-witness-exists? index fact)
              []
              ["generic-contract-test-witness"]))))
 
@@ -83,7 +78,6 @@
 (def (dependency-protocol-adapter-details index fact missing)
   (dependency-adapter-profile-details
    (dependency-adapter-standard-profile
-    +dependency-adapter-search-example-command+
     +dependency-adapter-repair-code-command+)
    fact
    missing
@@ -100,35 +94,6 @@
 (def (dependency-adapter-generic-contract-witness-exists? index fact)
   (equal? (dependency-adapter-contract-witness-kind index fact)
           "generic-contract-test"))
-
-;;; Boundary:
-;;; - Generic witnesses live in test owners, but package-level fast self-apply
-;;;   can intentionally exclude tests to avoid scenario/fixture noise.
-;;; - When tests are excluded by parsed package policy and absent from the
-;;;   current index, R017 still enforces local adapter quality but does not
-;;;   require invisible project-level witness evidence.
-;; : (-> ProjectIndex Boolean )
-(def (dependency-adapter-generic-contract-witness-required? index)
-  (or (project-index-has-test-owner? index)
-      (project-index-test-owner-scan-enabled? index)))
-
-;; : (-> ProjectIndex Boolean )
-(def (project-index-test-owner-scan-enabled? index)
-  (let* ((package (project-index-package index))
-         (policy (and package
-                      (project-package-test-directory-policy package))))
-    (or (not policy)
-        (pair? (test-directory-policy-allowed-directories policy)))))
-
-;;; Index witness scan:
-;;; - `ormap` expresses the existential query over parser-owned files.
-;;; - The lambda keeps path classification delegated to test-owner-path?.
-;;; - A hand-written loop would hide the "any visible test owner" invariant.
-;; : (-> ProjectIndex Boolean )
-(def (project-index-has-test-owner? index)
-  (ormap (lambda (file)
-           (test-owner-path? (source-file-path file)))
-         (project-index-files index)))
 
 ;;; Boundary:
 ;;; - Contract witness classification is project-wide.

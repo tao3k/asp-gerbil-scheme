@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing loop policy for list growth by repeated append.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/model
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/model
         (only-in :std/sugar filter-map hash ormap)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export list-growth-loop-performance-findings
         list-growth-loop-performance-finding)

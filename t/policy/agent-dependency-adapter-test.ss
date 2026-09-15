@@ -4,10 +4,10 @@
 (import :gerbil/gambit
         :std/test
         (only-in :clan/poo/object .call)
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/policy/prototype
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/prototype
+        :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios
         :policy/fixtures)
 (export agent-dependency-adapter-policy-test)
@@ -92,30 +92,28 @@
             (check (hash-get details 'agentRepairStandard)
                    => "current dependency already provides the bottom data structure; do not hand-write loose hash/alist objects. Build a typed protocol adapter: precise only-in imports for primitives, define-type Key/Value plus primitive methods.table slots (.empty/.ref/.acons/.remove/.foldl/.foldr), iteration/conversion/update/selection/equality/lens/serialization slots, behavior on protocol slots, derived table/set/list/iteration/lens/sexp/json/bytes/marshal capabilities when slots exist, and generic contract tests")
             (check (hash-get details 'repairAction)
-                   => "search-forwarded-example-then-guide-code")
+                   => "provider-facts-then-guide-code")
             (check (hash-get details 'guideCodeFlag) => "--code")
-            (check (hash-get details 'searchExampleCommand)
-                   => "asp gerbil-scheme search pattern poo rationaldict adapter --workspace . --view seeds")
             (check (hash-get details 'repairCodeCommand)
                    => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-017 --intent repair")
             (check (hash-get details 'codeShapeExemplar)
                    => "gerbil-poo rationaldict-style typed protocol adapter")
             (check (hash-get details 'profileComposition)
-                   => "clan/list c3-compute-precedence-list + clan/poo/proto compose-proto*")
+                   => "gerbil-poo object<-alist semantic construction + native object C3 supers")
             (check (hash-get details 'profileOverlays)
                    => ["dependency-protocol-surface"
                        "dependency-poo-lineage"
-                       "dependency-build-cli-lineage"
+                       "dependency-build-boundary-lineage"
                        "dependency-repair-commands"])
             (check (hash-get details 'profilePrecedence)
                    => ["dependency-adapter-standard"
                        "dependency-profile-composition"
                        "dependency-repair-commands"
-                       "dependency-build-cli-lineage"
+                       "dependency-build-boundary-lineage"
                        "dependency-poo-lineage"
                        "dependency-protocol-surface"])
             (check (hash-get details 'sourcePatternLineage)
-                   => "gerbil-poo build/cli/rationaldict/table/brace/object/mop/io patterns")
+                   => "gerbil-poo build/runtime/rationaldict/table/brace/object/mop/io patterns")
             (check (hash-get details 'protocolSurface)
                    => "minimal protocol slots first; derive table/set/list/iteration/lens/sexp/json/bytes/marshal-facing capabilities from the slot surface")
             (check (hash-get details 'protocolSurfaceReference)
@@ -144,14 +142,11 @@
                    => "json<-/<-json, marshal/unmarshal, bytes<-/<-bytes, and string<-/<-string are method/type slots")
             (check (hash-get details 'buildPattern)
                    => "use :std/make + :clan/base + :clan/building discovery, while filtering non-module policy/config files for this harness")
-            (check (hash-get details 'cliOptionPattern)
-                   => "keep src/cli.ss as a thin dispatcher; compose option objects when command option surfaces grow")
+            (check (hash-get details 'boundaryCompositionPattern)
+                   => "keep process entrypoints thin; compose POO-native request and configuration objects when boundary surfaces grow")
             (check (not (not (string-contains
                               (hash-get details 'adapterRepairShape)
-                              "query the search-forwarded rationaldict adapter example first")))
-                   => #t)
-            (check (not (not (member "run asp gerbil-scheme search pattern poo rationaldict adapter --workspace . --view seeds to inspect the dependency example before editing"
-                                      (hash-get details 'allowedMoves))))
+                              "inspect provider-native dependency facts first")))
                    => #t)
             (check (not (not (member "run asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-017 --intent repair to inspect local R017 parser/policy repair code"
                                       (hash-get details 'allowedMoves))))
@@ -163,8 +158,8 @@
                                       (hash-get details 'disallowedMoves))))
                    => #t)
             (check (hash-get repair 'guideTopic) => "dependency-protocol-adapter")
-            (check (hash-get repair 'nextCommand)
-                   => "asp gerbil-scheme search pattern poo rationaldict adapter --workspace . --view seeds")))
+            (check (hash-get repair 'guideCommand)
+                   => "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-017 --intent repair")))
     (test-case "agent policy rejects manual object encoding inside dependency adapters"
           (let* ((root ".run/policy-dependency-manual-object-adapter")
                  (_ (write-dependency-manual-object-adapter-project root))

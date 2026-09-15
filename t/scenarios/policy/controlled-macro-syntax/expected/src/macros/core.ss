@@ -5,7 +5,7 @@
 (package: sample/macros)
 
 ;; order-expansion-context
-;;   : (-> Integer Any OrderExpansionContext)
+;;   : (-> Integer SourceLocation OrderExpansionContext)
 ;;   | doc m%
 ;;       `order-expansion-context` records scoped macro expansion state.
 ;;     %

@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-repair replay calibration over parser-owned structural facts.
 
-(import :gslph/src/parser/facade
+(import :asp-gerbil-scheme/src/parser/facade
         (only-in :std/srfi/1 iota take)
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/types/facade)
 
 (export agent-repair-calibration-report
         agent-repair-calibration-assertions

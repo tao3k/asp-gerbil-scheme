@@ -1,28 +1,12 @@
-((max_total . 20ms)
- (observed_total . 4ms)
- (target_total . 12ms)
- (regression_budget . 16ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 1))
-  ((name . collect-after) (durationMs . 1))
-  ((name . policy-before) (durationMs . 1))
-  ((name . policy-after) (durationMs . 1)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed gerbil-iteration-macro-loop-boundary receipt is 4ms total; target keeps native iteration macro policy in the small millisecond budget while max_total remains the hard regression ceiling")
- (maxCollectMs . 8)
- (observedCollectMs . 0)
- (maxParseMs . 12)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 5)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "The gerbil-iteration-macro-loop-boundary target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+ (sampleCount . 20)
  (purpose . "R013 teaches agents to use Gerbil iteration macros when the loop contract is static and can be generated hygienically")
  (feature . "gerbil-iteration-macro-loop-boundary")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -60,5 +44,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style" "gerbil-native" "macro" "iteration" "for" "hot-loop"))

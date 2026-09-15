@@ -1,0 +1,17 @@
+((benchmarkKind . scenario-e2e)
+ (harness . "gxtest")
+ (target_total . 25ms)
+ (max_total . 100ms)
+ (observed_total . 39366us)
+ (regression_budget . 25ms)
+ (observedTimings (providerCacheHit . 39366us))
+ (targetRationale
+  .
+  "A resident Gerbil provider reuses its content-bound parser generation and returns structural search materialization without provider startup.")
+ (maxRssMb . 2048)
+ (routeSource . "resident-provider-cache")
+ (maxProviderProcessCount . 1)
+ (maxStdoutBytes . 16384)
+ (fallbackReason . "none")
+ (rule . "GERBIL-SCHEME-AGENT-PERF-RESIDENT-SEARCH-001")
+ (purpose . "Qualify the Gerbil contribution to the shared V1 resident Search path."))

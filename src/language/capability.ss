@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Project-local Gerbil capability posture facts for agent steering.
 
-(import :gslph/src/language/evidence
-        :gslph/src/parser/facade
-        :gslph/src/policy/catalog
+(import :asp-gerbil-scheme/src/language/evidence
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/catalog
         (only-in :std/srfi/1 append-map take)
         (only-in :std/srfi/13 string-contains)
         (only-in :std/sugar cut filter ormap))
@@ -60,7 +60,7 @@
       (package-module-posture-status package module-imports)
       "Gerbil package/module/namespace/import facts should preserve project module shape instead of flattening into small-Scheme files."
       "parser-owned-package-and-module-facts"
-      "search owner <path> --workspace . --view seeds"
+      "asp search playbook --language gerbil-scheme --rg -n -e <term> <path> --tantivy 'title:<term>^2 OR body:<term>'"
       ["capability" "posture" "package" "module" "namespace" "import" "export"]
       (hash (files (length files))
             (package (capability-package-name package))
@@ -109,7 +109,7 @@
       (active-or-available higher-order-facts)
       "Pure data transforms should prefer Gerbil higher-order and functional combinators before introducing manual loops."
       "parser-owned-higher-order-facts"
-      "search structural --workspace . --view seeds"
+      "projection --native-index --json --workspace ."
       ["capability" "posture" "higher-order" "map" "filter" "fold" "for/fold" "cut" "functional"]
       (hash (higherOrderForms (length higher-order-facts))
             (higherOrderSelectors
@@ -125,7 +125,7 @@
       (active-or-available control-flow-facts)
       "Named control-flow facts identify where loops are IO/state/generator drivers rather than pure data transforms."
       "parser-owned-control-flow-facts"
-      "search structural --workspace . --view seeds"
+      "projection --native-index --json --workspace ."
       ["capability" "posture" "control-flow" "named-let" "loop" "generator" "state" "driver"]
       (hash (controlFlowForms (length control-flow-facts))
             (controlFlowSelectors
@@ -139,32 +139,32 @@
       "configurable-interface-posture"
       "configurable-interface"
       (configurable-interface-status package)
-      "Downstream projects can override source scope and agent policy through gerbil.pkg policy without redeclaring built-in defaults."
-      "parser-owned-gerbil.pkg-and-build.ss-policy"
+      "Explicit caller evidence supplies source scope; native POO profiles own policy configuration, with all rules enabled by default."
+      "explicit-source-scope-and-native-poo-profiles"
       "info --json ."
-      ["capability" "posture" "configurable" "interface" "source-scope" "agent-policy" "gerbil.pkg" "build.ss"]
+      ["capability" "posture" "configurable" "interface" "source-scope" "agent-policy" "build.ss"]
       (hash (sourceScope (source-scope-status package))
             (agentPolicy (agent-policy-status package))
             (dependencies dependencies))
       []
-      ["downstream-policy-override" "build-ss-runtime-root-fallback"]
+      ["explicit-poo-profile" "executed-build-api-coverage"]
       "agent-configures-downstream-project-harness"
-      "use-gerbil.pkg-policy-overrides-only-when-project-declares-them")
+      "keep-package-acquisition-separate-from-policy")
      (capability-posture-fact
       "quality-closure-posture"
       "quality-closure"
       "declared-closure"
-      "Agent-facing Gerbil engineering quality is closed through info, guide, check, self-apply, structural snapshots, and bench receipts."
-      "info-owned-closure-commands-plus-parser-owned-policy-facts"
+      "Agent-facing Gerbil engineering quality is closed through build/API policy, guide, self-apply, structural snapshots, and bench receipts."
+      "build-api-plus-parser-owned-policy-facts"
       "info --json ."
-      ["capability" "posture" "quality" "closure" "engineering-quality" "agent-steering" "policy" "guide" "check" "self-apply" "bench" "snapshot" "search-projection" "source-class"]
+      ["capability" "posture" "quality" "closure" "engineering-quality" "agent-steering" "policy" "guide" "self-apply" "bench" "snapshot" "search-projection" "source-class"]
       (hash (files (length files))
             (definitions (length (project-definitions index)))
             (agentRules (agent-steering-rule-ids))
             (facts (agent-steering-facts))
-            (closures ["info" "guide" "check" "self-apply" "bench" "structural-snapshot"]))
+            (closures ["build-api-policy" "guide" "self-apply" "bench" "structural-snapshot"]))
       (agent-steering-rule-ids)
-      ["policy-covered" "guide-covered" "snapshot-covered" "bench-covered" "check-covered" "self-apply-covered" "source-class-covered"]
+      ["policy-covered" "guide-covered" "snapshot-covered" "bench-covered" "self-apply-covered" "source-class-covered"]
       "agent-assesses-gerbil-project-quality-before-editing"
       "query-capability-posture-and-run-closure-commands-before-claiming-quality")]))
 ;; : (-> String Capability Status Summary Witness Next (List SearchTerm) Counts PolicyRules QualitySignals AgentScenario String Fact )
@@ -223,33 +223,26 @@
 (def (configurable-interface-status package)
   (cond
    ((not package) "builtin-defaults")
-   ((or (project-package-source-scope-policy package)
-        (project-package-agent-policy package))
+   ((project-package-source-scope package)
     "project-overridden")
    (else "builtin-defaults")))
 ;; : (-> Package String )
 (def (source-scope-status package)
-  (let (policy (and package (project-package-source-scope-policy package)))
+  (let (policy (and package (project-package-source-scope package)))
     (if policy
       (hash (status "project-overridden")
-            (roots (source-scope-policy-roots policy))
-            (runtimeRoots (source-scope-policy-runtime-roots policy))
-            (excludeDirectories (source-scope-policy-exclude-directories policy))
-            (explanation (source-scope-policy-explanation policy)))
+            (roots (source-scope-roots policy))
+            (runtimeRoots (source-scope-runtime-roots policy))
+            (excludeDirectories (source-scope-exclude-directories policy))
+            (explanation (source-scope-explanation policy)))
       (hash (status "builtin-defaults")
             (roots ["."])
             (runtimeRoots [])
             (excludeDirectories [])
-            (explanation "Builtin source-scope defaults apply unless gerbil.pkg policy overrides them.")))))
+            (explanation "Builtin source-scope defaults apply unless executed Build API evidence supplies a scope.")))))
 ;; : (-> Package Status )
 (def (agent-policy-status package)
-  (let (policy (and package (project-package-agent-policy package)))
-    (if policy
-      (hash (status "project-overridden")
-            (default "all-rules-enabled")
-            (disabledRules (agent-policy-disabled-rules policy))
-            (explanation (agent-policy-explanation policy)))
-      (hash (status "builtin-defaults")
-            (default "all-rules-enabled")
-            (disabledRules [])
-            (explanation #f)))))
+  (hash (status "builtin-defaults")
+        (default "all-rules-enabled")
+        (disabledRules [])
+        (explanation #f)))

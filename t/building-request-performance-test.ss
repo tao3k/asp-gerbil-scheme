@@ -1,16 +1,20 @@
 (export building-request-performance-test)
 
 (import :std/test
-        :gslph/src/building/facade)
+        :gerbil/gambit
+        :asp-gerbil-scheme/src/building/facade)
 
-(def (elapsed-ms thunk)
-  (let (start (time->seconds (current-time)))
+(def (cpu-elapsed-ms thunk)
+  (let (start (##process-statistics))
     (thunk)
-    (* 1000. (- (time->seconds (current-time)) start))))
+    (let (end (##process-statistics))
+      (* 1000.
+         (+ (- (f64vector-ref end 0) (f64vector-ref start 0))
+            (- (f64vector-ref end 1) (f64vector-ref start 1)))))))
 
 (def building-request-performance-test
   (test-suite
-   "gslph building request performance"
+   "asp-gerbil-scheme building request performance"
    (test-case "constructs and projects reusable requests within framework budget"
      (let* ((make-calls 0)
             (builder
@@ -22,12 +26,11 @@
               'std-builder
               "request profile test builder"
               #f
-              []
-              (native-toolchain-default)))
+              []))
             (stage-specs
              [["alpha.ss"] ["beta.ss"] ["gamma.ss"] ["delta.ss"]])
             (elapsed
-             (elapsed-ms
+             (cpu-elapsed-ms
               (lambda ()
                 (let loop ((remaining 5000))
                   (if (> remaining 0)

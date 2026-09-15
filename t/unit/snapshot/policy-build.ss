@@ -1,18 +1,16 @@
 ;;; -*- Gerbil -*-
 ;;; Policy build and adapter snapshot projections.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/scenario/policy
-        :gslph/src/snapshot/facade
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/snapshot/facade
         :std/test
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/types/facade
         :unit/policy/poo-scenarios)
 (import :unit/snapshot/policy-support)
 (export macro-controlled-helper-policy-snapshot
         predicate-family-combinator-policy-snapshot
-        build-runtime-shell-template-policy-snapshot
-        package-build-shell-pipeline-policy-snapshot
         package-build-canonical-shape-policy-snapshot
         package-build-std-build-script-policy-snapshot
         package-build-std-make-ssi-policy-snapshot
@@ -78,16 +76,6 @@
           (list 'after
                 (list 'r016Findings
                       (map finding-snapshot after-findings))))))
-
-(def (build-runtime-shell-template-policy-snapshot)
-  (build-runtime-quality-policy-snapshot
-   "build-runtime-shell-template"
-   "t/scenarios/policy/build-runtime-shell-template"))
-
-(def (package-build-shell-pipeline-policy-snapshot)
-  (build-runtime-quality-policy-snapshot
-   "package-build-shell-pipeline"
-   "t/scenarios/policy/package-build-shell-pipeline"))
 
 (def (package-build-canonical-shape-policy-snapshot)
   (let* ((scenario

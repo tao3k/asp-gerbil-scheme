@@ -3,19 +3,15 @@
 
 (import :gerbil/gambit
         :std/test
-        :gslph/src/scenario/benchmark-contract
+        :asp-gerbil-scheme/src/scenario/benchmark-contract
         (only-in :std/sort sort)
         (only-in :std/sugar filter-map)
-        (only-in :gslph/src/support/time duration-literal->nanos))
+        (only-in :asp-gerbil-scheme/src/support/time duration-literal->nanos))
 (export scenario-benchmark-policy-test)
 
 (def +scenario-benchmark-include-dirs+
   '("t/scenarios/policy"))
 (def +scenario-benchmark-file+ "benchmark.ss")
-(def +scenario-benchmark-input-timing-names+
-  '("collect-before" "policy-before"))
-(def +scenario-benchmark-expected-timing-names+
-  '("collect-after" "policy-after"))
 
 ;; : (-> String String )
 (def (scenario-benchmark-child root name)
@@ -49,103 +45,9 @@
 (def (scenario-benchmark-contract path)
   (scenario-benchmark-contract/path path path))
 
-;; : (-> BenchmarkTimingName String Boolean)
-(def (scenario-benchmark-timing-name-equal? candidate name)
-  (cond
-   ((symbol? candidate) (equal? (symbol->string candidate) name))
-   ((string? candidate) (equal? candidate name))
-   (else #f)))
-
-;; : (-> Alist String Boolean)
-(def (scenario-benchmark-observed-timing-name? timing name)
-  (let (entry (and (list? timing) (assoc 'name timing)))
-    (and entry
-         (scenario-benchmark-timing-name-equal? (cdr entry) name))))
-
-;; : (-> (List Alist) String Boolean)
-(def (scenario-benchmark-observed-timing-present? timings name)
-  (cond
-   ((null? timings) #f)
-   ((scenario-benchmark-observed-timing-name? (car timings) name) #t)
-   (else
-    (scenario-benchmark-observed-timing-present? (cdr timings) name))))
-
-;; : (-> (List Alist) (List String) Boolean)
-(def (scenario-benchmark-observed-timings-present? timings names)
-  (cond
-   ((null? names) #t)
-   ((scenario-benchmark-observed-timing-present? timings (car names))
-    (scenario-benchmark-observed-timings-present? timings (cdr names)))
-   (else #f)))
-
-;; : (-> Alist (List String) Boolean)
-(def (scenario-benchmark-observed-timing-selected? timing names)
-  (cond
-   ((null? names) #f)
-   ((scenario-benchmark-observed-timing-name? timing (car names)) #t)
-   (else
-    (scenario-benchmark-observed-timing-selected? timing (cdr names)))))
-
-;; : (-> Alist Number)
-(def (scenario-benchmark-observed-timing-duration-ms timing)
-  (let (entry (assoc 'durationMs timing))
-    (if entry (cdr entry) 0)))
-
-;; : (-> Alist Number)
-(def (scenario-benchmark-observed-timing-duration-nanos timing)
-  (let ((duration-ns-entry (assoc 'durationNs timing))
-        (duration-ms-entry (assoc 'durationMs timing)))
-    (cond
-     (duration-ns-entry (cdr duration-ns-entry))
-     (duration-ms-entry (* (cdr duration-ms-entry) 1000000))
-     (else 0))))
-
-;; : (-> (List Alist) (List String) Number)
-(def (scenario-benchmark-observed-timings-total-ms timings names)
-  (cond
-   ((null? timings) 0)
-   ((scenario-benchmark-observed-timing-selected? (car timings) names)
-    (+ (scenario-benchmark-observed-timing-duration-ms (car timings))
-       (scenario-benchmark-observed-timings-total-ms (cdr timings) names)))
-  (else
-    (scenario-benchmark-observed-timings-total-ms (cdr timings) names))))
-
-;; : (-> (List Alist) (List String) Number)
-(def (scenario-benchmark-observed-timings-total-nanos timings names)
-  (cond
-   ((null? timings) 0)
-   ((scenario-benchmark-observed-timing-selected? (car timings) names)
-    (+ (scenario-benchmark-observed-timing-duration-nanos (car timings))
-       (scenario-benchmark-observed-timings-total-nanos
-        (cdr timings)
-        names)))
-   (else
-    (scenario-benchmark-observed-timings-total-nanos (cdr timings) names))))
-
-;; : (-> BenchmarkContract Boolean)
-(def (scenario-benchmark-input-expected-annotation? contract)
-  (let ((note (hash-get contract 'expected_over_input_note))
-        (rationale (hash-get contract 'targetRationale)))
-    (or (and (string? note) (> (string-length note) 0))
-        (and (string? rationale) (> (string-length rationale) 0)))))
-
-;; : (-> Any Boolean)
-(def (scenario-benchmark-non-negative-number? value)
-  (and (number? value) (>= value 0)))
-
-;; : (-> BenchmarkContract Symbol Symbol Boolean)
-(def (scenario-benchmark-observed-under-max? contract observed-key max-key)
-  (let ((observed (hash-get contract observed-key))
-        (max-value (hash-get contract max-key)))
-    (and (scenario-benchmark-non-negative-number? observed)
-         (number? max-value)
-         (<= observed max-value))))
-
 ;; : (-> BenchmarkContract Boolean )
 (def (scenario-benchmark-targeted? contract)
-  (let* ((observed-ns
-          (duration-literal->nanos (hash-get contract 'observed_total)))
-         (target-ns
+  (let* ((target-ns
           (duration-literal->nanos (hash-get contract 'target_total)))
          (max-ns
           (duration-literal->nanos (hash-get contract 'max_total)))
@@ -154,52 +56,20 @@
          (expected-over-input-budget-ns
           (duration-literal->nanos
            (hash-get contract 'expected_over_input_budget)))
-         (observed-timings (hash-get contract 'observedTimings))
-         (target-rationale (hash-get contract 'targetRationale))
-         (input-total-ns
-          (scenario-benchmark-observed-timings-total-nanos
-           observed-timings
-           +scenario-benchmark-input-timing-names+))
-         (expected-total-ns
-          (scenario-benchmark-observed-timings-total-nanos
-           observed-timings
-           +scenario-benchmark-expected-timing-names+)))
-    (and observed-ns
+         (target-rationale (hash-get contract 'targetRationale)))
+    (and (eq? (hash-get contract 'benchmarkKind) 'scenario-e2e)
+         (>= (hash-get contract 'sampleCount) 20)
          target-ns
          max-ns
          regression-budget-ns
          expected-over-input-budget-ns
-         (pair? observed-timings)
-         (string? target-rationale)
-         (scenario-benchmark-observed-timings-present?
-          observed-timings
-          +scenario-benchmark-input-timing-names+)
-         (scenario-benchmark-observed-timings-present?
-          observed-timings
-          +scenario-benchmark-expected-timing-names+)
-         (<= observed-ns target-ns)
+         (> target-ns 0)
          (< target-ns max-ns)
-         (<= expected-total-ns
-             (+ input-total-ns expected-over-input-budget-ns))
-         (or (< expected-total-ns input-total-ns)
-             (scenario-benchmark-input-expected-annotation? contract))
-         (scenario-benchmark-observed-under-max?
-          contract
-          'observedCollectMs
-          'maxCollectMs)
-         (scenario-benchmark-observed-under-max?
-          contract
-          'observedParseMs
-          'maxParseMs)
-         (scenario-benchmark-observed-under-max?
-          contract
-          'observedFileMs
-          'maxFileMs)
-         (scenario-benchmark-observed-under-max?
-          contract
-          'observedPhaseMs
-          'maxPhaseMs)
-         (= max-ns (+ observed-ns regression-budget-ns)))))
+         (> regression-budget-ns 0)
+         (>= expected-over-input-budget-ns 0)
+         (string? target-rationale)
+         (> (string-length target-rationale) 0)
+         (= max-ns (+ target-ns regression-budget-ns)))))
 
 ;; : (-> String (Maybe String))
 (def (scenario-benchmark-path-without-target path)
@@ -213,9 +83,21 @@
 
 (def scenario-benchmark-policy-test
   (test-suite "gerbil scheme harness policy scenario benchmark contracts"
-    (test-case "all policy scenario benchmarks carry measured target budgets"
+    (test-case "all policy scenario benchmarks carry explicit target headroom"
       (let (paths (scenario-benchmark-paths/include-dirs
                    +scenario-benchmark-include-dirs+))
         (check (pair? paths) => #t)
         (check (scenario-benchmark-paths-without-targets paths)
-               => [])))))
+               => [])))
+
+    (test-case "scenario normalization rejects a one-second ceiling"
+      (check-exception
+       (scenario-benchmark-datum->contract
+        '((benchmarkKind . scenario-e2e)
+          (max_total . 1s)
+          (target_total . 500ms)
+          (regression_budget . 500ms)
+          (expected_over_input_budget . 0ns)
+          (targetRationale . "invalid boundary witness")
+          (sampleCount . 20)))
+       true))))

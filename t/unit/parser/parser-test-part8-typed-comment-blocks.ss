@@ -2,11 +2,11 @@
 ;;; gerbil scheme harness parser part 8 typed comment blocks.
 
 (import :std/test
-        :gslph/src/extensions/facade
-        :gslph/src/parser/facade
-        :gslph/src/parser/typed-contract-scheme
-        :gslph/src/protocol/json
-        :gslph/src/protocol/structural-facts
+        :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/parser/typed-contract-scheme
+        :asp-gerbil-scheme/src/protocol/json
+        :asp-gerbil-scheme/src/protocol/structural-facts
         :std/srfi/13)
 (import :unit/parser/parser-test-part8-support)
 (export parser-test-part-8-typed-comment-blocks)
@@ -198,7 +198,7 @@
                        => ["Nat = (Refine Number natural?)"])
                 (check (hash-get doc 'marker) => "m%")
                 (check (hash-get doc 'body)
-                       => "`generate f n` returns a vector of n generated values.\n\n# Examples\n\n```scheme\n(generate (lambda (x) x) 0)\n;; => #()\n```")
+                       => "`generate f n` returns a vector of n generated values.\n\n# Examples\n\n```scheme\n(generate (lambda (x) x) 0)\n=> #()\n```")
                 (check (hash-get doc 'hasExamples) => #t)
                 (check (hash-get doc 'hasResultExamples) => #t)
                 (check (hash-get doc-example 'language) => "scheme")

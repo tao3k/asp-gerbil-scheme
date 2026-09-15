@@ -3,11 +3,11 @@
 
 (import :gerbil/gambit
         :std/test
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
         :policy/fixtures
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade)
 
 (export agent-macro-io-policy-test)
 

@@ -1,156 +1,124 @@
-* 31.07 Native Gerbil Declarative Build and Test Boundary
+#+title: 31.07 Native Gerbil Declarative Boundary
+#+startup: overview
+
+* 31.07 Native Gerbil Declarative Boundary
 :PROPERTIES:
 :JD_ID: 31.07
 :STATUS: active-design
-:OWNER: src/build.ss src/building src/testing Justfile
-:RELATED: 31.01, 31.04, 31.05, 51.06
-:UPSTREAM: Gerbil 0.18.2 clan/building std/make gxi gxtest
+:OWNER: build.ss build-provider.ss provider-package-spec.ss
+:RELATED: 31.01, 31.02, 31.08, 31.09
+:UPSTREAM: Gerbil 0.18.2 clan/building std/make std/build-script gxpkg
 :END:
 
-** Decision
+** Authoritative entrypoints
 
-The harness must not create a build or test CLI. It improves the Gerbil
-experience only above the upstream execution boundary:
+- =gerbil.pkg= owns package identity and dependency acquisition.
+- Root =build.ss= owns the complete library Graph and logical =deps:= through
+  =clan/building#init-build-environment!=.
+- =provider-package-spec.ss= owns the explicit provider runtime and executable
+  BuildSpec; =build-provider.ss= passes it to
+  =std/build-script#defbuild-script=.
+- =std/make= owns compilation, import dependencies, currentness, parallel
+  scheduling, artifact roots, clean, and native build flags.
 
-- =gxi= evaluates the source-root =src/build.ss= directly. The file is not an
-  executable shell program and needs no executable permission.
-- =clan/building= owns the native multicall entrypoint, =meta=, =spec=, and
-  =compile= actions. It delegates the build graph to =std/make=.
-- =gxtest= owns test-file discovery, =-test= export discovery, suite selection,
-  setup/cleanup, and process exit status.
-- =gxpkg env= may supply the local package environment to =gxi= and =gxtest=.
-  It is not a second build command and does not dispatch =build.ss=.
-
-The Building and Testing Framework remains a library. It may define data,
-receipts, scenario fixtures, and assertion helpers. It must not reimplement
-upstream argument parsing, source discovery, test discovery, build scheduling,
-or process dispatch.
-
-** Source-Root Declaration
-
-Runtime modules live under =src/=. The only build declaration therefore lives
-at =src/build.ss= and uses the public upstream macro:
-
-#+begin_src scheme
-;;; -*- Gerbil -*-
-(import :clan/building)
-
-(init-build-environment!
-  spec: (lambda () '(... standard std/make build specification ...)))
+#+begin_src mermaid
+flowchart LR
+  Manifest["gerbil.pkg"] --> Gxpkg["gxpkg"]
+  Root["build.ss
+Graph + deps"] --> Clan["init-build-environment!"]
+  Provider["build-provider.ss
+provider Graph"] --> Script["defbuild-script"]
+  Clan --> Make["std/make"]
+  Script --> Make
+  Make --> Library["package library"]
+  Make --> Binary["explicit provider binary"]
 #+end_src
 
-=init-build-environment!= sets the native source root from its own file,
-installs the upstream multicall entrypoint, and accepts a declarative spec
-procedure. There is no package-root wrapper, executable-bit requirement, or
-private upstream API use.
+** PackageSpec surface
 
-The project command is:
+=asp-gerbil-scheme-package-spec!= hygienically declares an ordinary POO object.
+The normal library declaration needs only a =spec= binding. Module discovery
+defaults internally to =clan/building#all-gerbil-modules=; callers supply
+=(modules ...)= only for a real specialized Graph. The explicit
+=(product-entry-modules ...)= option removes the declared product-owned closure
+when projecting the native library spec. The root declaration includes the
+provider entrypoints and executable runtime-state modules. Static operation
+contracts and registry/command projections remain library-owned and have no
+dependency on runtime dispatch; otherwise command discovery would implicitly
+load the resident server implementation.
 
-#+begin_src sh
-gxpkg env gxi src/build.ss compile
-#+end_src
+There is no public =roots=, source catalog DSL, development/production profile,
+or alternate native plan format. =exclude-dirs= is retained as a POO-native
+extension of clan's ignore set. =native-spec= remains an advanced escape hatch
+for a genuine native =std/make= BuildSpec such as the provider executable.
 
-An FFI package may keep a native =std/make= build spec as data. It may not
-turn that into manual compiler or process dispatch.
+** Native defaults
 
-** Package Module Identity
+=clan/building= derives =srcdir= from the location of =build.ss= and changes to
+that directory before evaluating the spec. Its default catalog excludes
+=main.ss=, =manifest.ss=, scripts, =run/=, =t/=, =.git/=, =_darcs/=, and
+=.gerbil/=. This repository adds no =exclude-dirs= overlay. The ignored
+=build/workspace-provider/= tree was an artifact of the retired custom
+=GERBIL_PATH= route, not a native source or output root.
 
-The source package declares =gslph/src=.  Every package-local runtime import
-must therefore use =:gslph/src/<module>=.  A source-relative import such as
-=:support/time= is not a valid package identity: it only works when a caller
-adds =src/= to =GERBIL_LOADPATH=, and native =std/make= correctly rejects it.
+The package does not rewrite =GERBIL_PATH=. Plain =gxi= may leave it unset and
+fall back to =gerbil-home=; =gxpkg env= normally selects the package-local
+=.gerbil= domain. =std/make= reads =gerbil.pkg= at the supplied package root and
+derives the package output prefix itself.
 
-The migration is parser-first.  Native module import facts identify imports;
-the source-owner map decides whether a module is local.  Only an import whose
-unprefixed module corresponds to =src/<module>.ss= is rewritten to
-=:gslph/src/<module>=.  Upstream namespaces such as =:std/=, =:gerbil/=,
-=:clan/=, and =:wr/= remain unchanged.  Existing =:gslph/src/= imports and
-dynamic module names are already canonical.
+=gxpkg build -R= and native =--release= requests remain upstream release mode.
+Optimized and debug modes are forwarded by upstream entrypoints. ASP defines no
+development or production mode.
 
-** Test Contract
+** Cold bootstrap
 
-Tests remain ordinary modules with gxtest-compatible =-test= exports. The only
-user-facing test forms are native ones:
+Root =build.ss= source-imports only
+=src/build-api/source-bootstrap.ss=. That internal module exposes the minimum
+POO PackageSpec declaration bindings and is not re-exported by
+=:asp-gerbil-scheme/build-api=. This lets a dependency-only environment compile
+the whole package with zero installed ASP artifacts.
 
-#+begin_src sh
-gxpkg env gxtest t/...
-gxpkg env gxtest -r '^policy$' t/...
-gxpkg env gxtest t/package-build-test.ss
-#+end_src
+The provider declaration is independently source-importable and
+=build-provider.ss= imports upstream =defbuild-script= directly. It does not
+load the full public facade and does not rebind the caller artifact domain.
 
-The Testing Framework may supply assertions, scenario fixtures, and
-performance receipt checks. It does not parse a second test CLI or make a
-selected file become a broad project run. Suite selection uses gxtest's =-r=
-option; file and recursive scope use its normal arguments.
+** Test Graph
 
-** Framework Boundary
+=t/= is excluded from the production library Graph by the upstream native
+default. GxTest discovers its own selected closure. When compiled execution is
+required, the testing layer gives the explicit =src/...= and =t/...= module
+paths to one =std/make= invocation at the package root. It does not construct a
+package BuildPlan or reuse a production source-root option.
 
-=src/building/= retains typed =BuildProfile= / =BuildRequest= data only where
-it improves inspection, receipt construction, or scenario tests. It lowers to
-or observes upstream =std/make= work; it is never the package executor.
+Native compile/spec/clean are available only through =build.ss=. The installed
+project CLI retains test targets and no longer duplicates those commands.
 
-=src/testing/= retains gxtest-compatible helpers and scenario assertions. Its
-performance gate is a gxtest case. There is no =bench= command and no
-framework-specific test-runner compatibility layer.
+Downstream packages may wrap =init-build-environment!= with the public
+=call-with-framework-native-build-memory-anomaly-guard=.  This composition reads
+the same machine-capacity selection used by PackageSpec, emits upstream-owned
+trace/guard receipts, and never changes or caps =std/make= scheduling.
 
-=Justfile= may name repeatable developer workflows, but every recipe invokes
-an upstream command directly. A build recipe uses =gxpkg env gxi=; a test
-recipe uses =gxpkg env gxtest=. It does not rewrite source paths or command
-behavior.
+** Generated sidecars
 
-On Darwin, a repository environment can inject a Nix SDK while the installed
-Gerbil runtime invokes the host C compiler. The installer may therefore make
-one command-local host-toolchain selection: clear inherited =SDKROOT= and
-resolve =CC= with =xcrun --find clang= for the native =gxi= invocation. This
-is not a compiler dispatcher, SDK path, or persistent environment mutation:
-the values are not stored, no path is hard-coded, and =gxi= still owns
-compilation. Other platforms invoke the same upstream command without an
-adaptation.
+A verified generated artifact may add immutable =extra-inputs:= to its matching
+native =gxc:= item. It may not remove the target, predict target currentness, or
+split the Graph. =std/make= still receives and owns the complete native spec.
 
-** Required Deletions
+** Required absence
 
-The migration removes:
+The following former owners are intentionally removed:
 
-- the former root =build.ss= dispatcher and its executable-bit requirement;
-- bootstrap stage lists, source-interface materialization, and dynamic loading;
-- handwritten getopt, =compile= / =install= dispatch, and test subcommands;
-- SDK paths, compiler paths, load-path rewriting, and package-manager-specific
-  shell dispatch; a command-local Darwin host-toolchain selection is permitted
-  only to prevent an externally injected SDK from being mixed with the
-  installed Gerbil runtime;
-- package-local wrappers which only forward to gxtest or std/make.
+- package development/production profile modules;
+- custom build-script bridge and body;
+- source-discovery and artifact-cleanup owners;
+- =native-build.ss= and =native-build-spec.ss=;
+- =package-native-plan.ss= and its hand-maintained stage list;
+- package =project-build.ss= compile/spec/clean facade;
+- ASP leases, lock recovery, scheduler mutation, currentness admission, and
+  toolchain environment rewriting.
 
-=native-build.ss= and =gxtest-runner.ss= are retained only where they expose a
-real reusable library concern. Any remaining part that serves the removed
-command protocol is deleted rather than preserved as compatibility code.
+** Verification
 
-** Migration And Verification
-
-1. Put the upstream =clan/building= declaration in =src/build.ss=.
-2. Change build recipes to =gxpkg env gxi src/build.ss compile= and test recipes
-   to direct =gxpkg env gxtest= invocations.
-3. Replace root test selections with direct gxtest file, recursive, and
-   suite-regex arguments while preserving selected-file scope.
-4. Add a downstream scenario that invokes a source-root build through =gxi= and
-   test modules through =gxtest= using only public library helpers.
-5. Extend the build policy to reject handwritten command routing, dynamic
-   loading, persistent or hard-coded environment rewriting, and direct compiler
-   process dispatch, while accepting the upstream =clan/building= form,
-   standard =std/make= FFI data, and the narrowly-scoped Darwin host-toolchain
-   selection.
-6. Add a parser-fact package-identity gate: no source-relative import may map
-   to an owned source module after migration.
-7. Keep performance checks as gxtest cases, with declaration/receipt overhead
-   measured separately from native compiler work and with explicit units.
-
-** Acceptance Criteria
-
-- =gxpkg env gxi src/build.ss compile= builds without a harness command or
-  executable permission.
-- =gxpkg env gxtest t/...= runs the full suite, and an explicit file runs only
-  that file.
-- =src/build.ss= stays a small upstream declaration with no custom runner or
-  mutable bootstrap logic.
-- Downstream examples use the same native commands and no hidden wrapper.
-- Policy and scenario coverage reject reintroduction of a second command
-  protocol.
+Acceptance requires dependency-only cold library and provider builds, focused
+package/GxTest tests, the canonical full test gate, exact-head CI on Linux and
+macOS, and downstream =poo-flow= validation after pinning the green commit.

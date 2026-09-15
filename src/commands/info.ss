@@ -1,12 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; Machine-readable harness info and verification receipt.
 
-(import :gslph/src/constants
-        :gslph/src/parser/facade
-        :gslph/src/policy/catalog
-        :gslph/src/protocol/json
-        :gslph/src/support/args
-        :gslph/src/support/io
+(import :asp-gerbil-scheme/src/constants
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/catalog
+        :asp-gerbil-scheme/src/protocol/json
+        :asp-gerbil-scheme/src/support/args
+        :asp-gerbil-scheme/src/support/io
         (only-in :std/srfi/13 string-join))
 
 (export info-main
@@ -14,7 +14,7 @@
         display-info-packet)
 ;; String
 (def +info-schema-id+
-  "agent.semantic-protocols.gerbil-scheme-harness-info")
+  "agent.semantic-protocols.asp-gerbil-scheme-info")
 ;; : (-> String JsonPacket )
 (def (info-packet root)
   (let* ((index (collect-project-package-only root))
@@ -41,13 +41,15 @@
 ;; Json
 (def (configurable-interface-json)
   (hash (sourceScope
-         (hash (owner "gerbil.pkg policy")
-               (fields ["roots" "runtime-roots" "exclude-directories" "explanation"])
-               (buildFallback
-                "build.ss defbuild-script targets provide runtimeRoots when explicit source-scope is absent")))
+         (hash (owner "PackageSpec native spec")
+               (projection "clan/building module catalog consumed exactly")
+               (additionalScope "explicit test or query entries")))
+        (buildScope
+         (hash (owner "build.ss")
+               (projection "native PackageSpec module catalog")))
         (agentPolicy
-         (hash (owner "gerbil.pkg policy")
-               (fields ["enabled-rules" "disabled-rules"])))))
+         (hash (owner "explicit POO profile")
+               (default "all-rules-enabled")))))
 ;; Json
 (def (agent-steering-json)
   (hash (facts (agent-steering-facts))
@@ -74,11 +76,11 @@
         (line-field "name" (hash-get package 'name))
         (line-field "manager" (hash-get package 'packageManager))])))
   (emit-text-line
-   "|interface source-scope=gerbil.pkg-policy fields=roots,runtime-roots,exclude-directories explanation=required-for-overrides")
+   "|interface source-scope=PackageSpec-native-spec parser=exact-projection additional=test-or-query-entries")
   (emit-text-line
-   "|interface build-scope=build.ss defbuild-script targets -> runtime-roots when explicit source-scope is absent")
+   "|interface build-scope=clan/building-std/make parser-discovery=disabled")
   (emit-text-line
-   "|interface agent-policy=gerbil.pkg-policy fields=enabled-rules,disabled-rules")
+   "|interface agent-policy=explicit-poo-profile default=all-rules-enabled package-overrides=unsupported")
   (emit-field-line
    "|agent-steering"
    [(line-field "facts" (string-join (agent-steering-facts) ","))])

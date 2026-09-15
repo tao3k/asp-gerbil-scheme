@@ -7,9 +7,9 @@
 (export resolve-precedence)
 
 ;; precedence-node
-;;   : (Class DirectSupers -> PrecedenceNode)
+;;   : (-> Class DirectSupers PrecedenceNode)
 ;;   | type Class = Symbol
-;;   | type DirectSupers = List
+;;   | type DirectSupers = (List Class)
 ;;   | doc m%
 ;;       `precedence-node` names the local MOP descriptor used by the
 ;;       linearization boundary.
@@ -30,7 +30,7 @@
 
 ;; precedence-tail
 ;;   : (-> PrecedenceNode PrecedenceTail)
-;;   | type PrecedenceTail = List
+;;   | type PrecedenceTail = (List Class)
 ;;   | doc m%
 ;;       `precedence-tail node` owns superclass tail extraction through a typed
 ;;       descriptor boundary.
@@ -41,7 +41,7 @@
 
 ;; merge-precedence-tail
 ;;   : (-> PrecedenceTail PrecedenceList PrecedenceList)
-;;   | type PrecedenceList = List
+;;   | type PrecedenceList = (List Class)
 ;;   | doc m%
 ;;       `merge-precedence-tail tail order` keeps duplicate filtering local to
 ;;       the merge helper.
@@ -57,7 +57,7 @@
 ;; resolve-precedence
 ;;   : (-> Class DirectSupers PrecedenceList)
 ;;   | type Class = Symbol
-;;   | type DirectSupers = List
+;;   | type DirectSupers = (List Class)
 ;;   | doc m%
 ;;       `resolve-precedence klass direct-supers` is a small orchestration
 ;;       boundary around the descriptor and tail merge helpers.

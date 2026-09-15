@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-(import :gslph/src/snapshot/facade
+(import :asp-gerbil-scheme/src/snapshot/facade
         :std/test)
 (export check-empty-self-apply-findings-snapshot)
 ;; Snapshot
@@ -7,7 +7,7 @@
   (check (self-apply-findings-snapshot '())
          => '(selfApplyFindings
               (languageId "gerbil-scheme")
-              (providerId "gerbil-scheme-harness")
+              (providerId "asp-gerbil-scheme")
               (status "pass")
               (findingCount 0)
               (findings ()))))

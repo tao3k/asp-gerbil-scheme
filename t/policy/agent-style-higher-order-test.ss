@@ -3,9 +3,9 @@
 
 (import :std/test
         :std/srfi/13
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/types/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/types/facade
         :policy/fixtures)
 
 (export agent-style-higher-order-policy-test)

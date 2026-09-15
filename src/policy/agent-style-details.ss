@@ -1,14 +1,14 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing repair payload for typed-combinator style findings.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-style-steering
-        :gslph/src/policy/agent-style-gerbil-signals
-        :gslph/src/policy/agent-style-destructuring-signals
-        :gslph/src/policy/agent-style-docs
-        :gslph/src/policy/agent-style-message
-        :gslph/src/policy/agent-style-performance-signals
-        :gslph/src/policy/gerbil-utils-source
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-style-steering
+        :asp-gerbil-scheme/src/policy/agent-style-gerbil-signals
+        :asp-gerbil-scheme/src/policy/agent-style-destructuring-signals
+        :asp-gerbil-scheme/src/policy/agent-style-docs
+        :asp-gerbil-scheme/src/policy/agent-style-message
+        :asp-gerbil-scheme/src/policy/agent-style-performance-signals
+        :asp-gerbil-scheme/src/policy/gerbil-utils-source
         (only-in :std/srfi/1 take)
         (only-in :std/sugar hash))
 

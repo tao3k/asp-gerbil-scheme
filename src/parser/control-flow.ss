@@ -2,9 +2,9 @@
 ;;; Parser-owned control-flow syntax fact extraction.
 
 (import :gerbil/expander
-        :gslph/src/parser/model
-        :gslph/src/parser/support
-        :gslph/src/parser/syntax
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/support
+        :asp-gerbil-scheme/src/parser/syntax
         (only-in :std/misc/list unique)
         (only-in :std/srfi/1 drop))
 

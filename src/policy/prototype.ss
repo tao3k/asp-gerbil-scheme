@@ -3,10 +3,16 @@
 
 (import :gerbil/gambit
         (only-in :clan/poo/mop define-type Any raise-type-error validate)
-        (only-in :clan/poo/object .call)
+        (only-in :clan/poo/object
+                 .alist
+                 .call
+                 .ref
+                 .slot?
+                 compute-precedence-list!
+                 object?
+                 object<-alist)
         (only-in :clan/poo/proto compose-proto* instantiate-proto)
         (only-in :clan/poo/table methods.table)
-        (only-in :clan/list c3-compute-precedence-list)
         (only-in :std/srfi/1 find fold)
         (only-in :std/sugar filter))
 
@@ -23,16 +29,6 @@
         slot-profile-ref
         slot-profile->prototype
         slot-profile-precedence-names)
-
-;;; Struct boundary:
-;;; - This is local profile data, not an extension of gerbil-poo objects.
-;;; - The cache mirrors object.ss precedence storage without defmethod hooks.
-;; : (-> ProfileName (List SlotProfile) SlotPrototype MaybePrecedence C3SlotProfile )
-(defstruct c3-slot-profile
-  (name
-   supers
-   slots
-   %precedence-list))
 
 ;;; Slot lookup boundary:
 ;;; - Association-list scanning is kept behind one helper.
@@ -211,20 +207,28 @@
          prototype
          #f))
 
-;;; C3 profile boundary:
-;;; - Profiles carry named supers, so policy details can expose precedence.
-;;; - Slot materialization still reuses the descriptor path above.
-;;; - This mirrors gerbil-poo object.ss without importing runtime object state.
+;;; Native POO profile boundary:
+;;; - A profile is an actual gerbil-poo object, not a parallel defstruct that
+;;;   reimplements object precedence and caches.
+;;; - Dynamic descriptor slots make object<-alist the correct semantic
+;;;   constructor here; the returned public value remains POO-native.
 ;; : (-> String SlotPrototype supers: (List SlotProfile) SlotProfile )
-(def (slot-profile name slots supers: (supers '()))
-  (make-c3-slot-profile name supers slots #f))
+(def (slot-profile profile-name slots supers: (profile-supers '()))
+  (object<-alist
+   (append
+    [(cons 'slot-profile? #t)
+     (cons 'profile-node-name profile-name)]
+    slots)
+   supers: profile-supers))
 
 ;;; Predicate boundary:
-;;; - Public callers should not depend on the private c3-slot-profile name.
-;;; - Descriptor compatibility stays in slot-profile-ref.
+;;; - The marker is inherited through native POO composition.
+;;; - Unrelated POO objects are not accepted as policy profiles.
 ;; : (-> SlotProfileCandidate Boolean )
 (def (slot-profile? value)
-  (c3-slot-profile? value))
+  (and (object? value)
+       (.slot? value 'slot-profile?)
+       (.ref value 'slot-profile?)))
 
 ;;; Composition boundary:
 ;;; - The synthetic profile has no slots of its own.
@@ -239,7 +243,7 @@
 ;; : (-> SlotProfile SlotProfile ... SlotProfile )
 (def (slot-profile-extend base . overlays)
   (slot-profile-compose
-   (string-append (c3-slot-profile-name base) "-extension")
+   (string-append (slot-profile-node-name base) "-extension")
    (fold cons [base] overlays)))
 
 ;;; Override boundary:
@@ -248,57 +252,35 @@
 ;; : (-> SlotProfile SlotProfile SlotProfile )
 (def (slot-profile-override base overlay)
   (slot-profile-compose
-   (string-append (c3-slot-profile-name overlay) "-override")
+   (string-append (slot-profile-node-name overlay) "-override")
    [overlay base]))
 
-;;; Materialization boundary:
-;;; - C3 decides which profile supers are considered and in what order.
-;;; - The descriptor layer still owns slot-level value replacement.
+;;; Compatibility projection boundary:
+;;; - Legacy table consumers may still request the effective slot alist.
+;;; - Native gerbil-poo owns C3 and slot resolution before this projection.
 ;; : (-> SlotProfile SlotPrototype )
 (def (slot-profile->prototype profile)
-  (slot-prototype-compose
-   (map c3-slot-profile-slots
-        (compute-slot-profile-precedence! profile))))
+  (filter
+   (lambda (slot)
+     (not (member (car slot) '(slot-profile? profile-node-name))))
+   (.alist profile)))
 
 ;;; Lookup boundary:
-;;; - Profile callers can pass either a live C3 profile or materialized slots.
-;;; - This keeps result metadata as plain data after a detector fires.
+;;; - Profile callers use native POO reads while legacy materialized slot lists
+;;;   retain the table-adapter fallback.
 ;; : (-> SlotProfile Symbol Value Value )
 (def (slot-profile-ref profile key fallback)
-  (slot-prototype-ref
-   (if (slot-profile? profile)
-     (slot-profile->prototype profile)
-     profile)
-   key
-   fallback))
+  (if (slot-profile? profile)
+    (if (.slot? profile key) (.ref profile key) fallback)
+    (slot-prototype-ref profile key fallback)))
 
 ;;; Metadata boundary:
 ;;; - Agent-facing details need names, not private profile structures.
-;;; - The list is ordered by C3 linearization from join point to base.
+;;; - The list comes directly from gerbil-poo's C3 linearization.
 ;; : (-> SlotProfile (List String) )
 (def (slot-profile-precedence-names profile)
-  (map c3-slot-profile-name (compute-slot-profile-precedence! profile)))
+  (map slot-profile-node-name (compute-precedence-list! profile)))
 
-;;; C3 boundary:
-;;; - Supers are computed first so c3-compute-precedence-list can reuse caches.
-;;; - Cycles report profile names, which makes policy profile bugs actionable.
-;; : (-> SlotProfile (List SlotProfile) )
-(def (compute-slot-profile-precedence! profile (heads '()))
-  (cond
-   ((c3-slot-profile-%precedence-list profile))
-   ((member profile heads)
-    (error "Circular slot profile precedence graph"
-           (map c3-slot-profile-name [profile . heads])))
-   (else
-    (for-each
-     (lambda (super)
-       (compute-slot-profile-precedence! super [profile . heads]))
-     (c3-slot-profile-supers profile))
-    (let (precedence-list
-          (c3-compute-precedence-list
-           profile
-           get-supers: c3-slot-profile-supers
-           get-name: c3-slot-profile-name
-           get-precedence-list: c3-slot-profile-%precedence-list))
-      (set! (c3-slot-profile-%precedence-list profile) precedence-list)
-      precedence-list))))
+;; : (-> SlotProfile String )
+(def (slot-profile-node-name profile)
+  (.ref profile 'profile-node-name))

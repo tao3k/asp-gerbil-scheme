@@ -6,15 +6,15 @@
         :std/misc/ports
         :std/misc/process
         :std/sort
-        :gslph/src/parser/facade
-        :gslph/src/policy/agent-style
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
-(import :policy/agent-style-support)
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-style
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
+(import "./agent-style-support")
 (export agent-style-comment-doc-policy-test)
 
 ;; PolicyTest
@@ -155,7 +155,7 @@
                    (findings (run-policy-checks index))
                    (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-013" findings)))
               (check matching => []))))
-(test-case "typed-combinator-style policy can be disabled by package config"
+(test-case "package metadata cannot disable typed-combinator-style policy"
           (let* ((root ".run/policy-typed-combinator-style-disabled")
                  (src (string-append root "/src"))
                  (owner (string-append src "/orders")))
@@ -170,5 +170,5 @@
             (let* ((index (collect-project root))
                    (findings (run-policy-checks index))
                    (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-013" findings)))
-              (check matching => []))))
+              (check (length matching) => 1))))
   ))

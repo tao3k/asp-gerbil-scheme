@@ -20,16 +20,29 @@
 ;; PolicyTest
 (def agent-style-policy-test
   (test-suite "gerbil scheme harness agent style policy"
-    agent-style-benchmark-policy-test
-    agent-style-scenario-composition-policy-test
-    agent-style-scenario-control-policy-test
-    agent-style-typed-core-policy-test
-    agent-style-typed-evidence-policy-test
-    agent-style-comment-core-policy-test
-    agent-style-comment-doc-policy-test
-    agent-style-functional-core-policy-test
-    agent-style-functional-branch-policy-test
-    agent-style-macro-metaprogramming-decision-policy-test
-    agent-style-predicate-policy-test
-    agent-style-syntax-local-registry-policy-test
-    agent-style-syntax-parameter-context-policy-test))
+    (test-case "agent-style-benchmark-policy-test"
+      (check (run-test-suite! agent-style-benchmark-policy-test) => #t))
+    (test-case "agent-style-scenario-composition-policy-test"
+      (check (run-test-suite! agent-style-scenario-composition-policy-test) => #t))
+    (test-case "agent-style-scenario-control-policy-test"
+      (check (run-test-suite! agent-style-scenario-control-policy-test) => #t))
+    (test-case "agent-style-typed-core-policy-test"
+      (check (run-test-suite! agent-style-typed-core-policy-test) => #t))
+    (test-case "agent-style-typed-evidence-policy-test"
+      (check (run-test-suite! agent-style-typed-evidence-policy-test) => #t))
+    (test-case "agent-style-comment-core-policy-test"
+      (check (run-test-suite! agent-style-comment-core-policy-test) => #t))
+    (test-case "agent-style-comment-doc-policy-test"
+      (check (run-test-suite! agent-style-comment-doc-policy-test) => #t))
+    (test-case "agent-style-functional-core-policy-test"
+      (check (run-test-suite! agent-style-functional-core-policy-test) => #t))
+    (test-case "agent-style-functional-branch-policy-test"
+      (check (run-test-suite! agent-style-functional-branch-policy-test) => #t))
+    (test-case "agent-style-macro-metaprogramming-decision-policy-test"
+      (check (run-test-suite! agent-style-macro-metaprogramming-decision-policy-test) => #t))
+    (test-case "agent-style-predicate-policy-test"
+      (check (run-test-suite! agent-style-predicate-policy-test) => #t))
+    (test-case "agent-style-syntax-local-registry-policy-test"
+      (check (run-test-suite! agent-style-syntax-local-registry-policy-test) => #t))
+    (test-case "agent-style-syntax-parameter-context-policy-test"
+      (check (run-test-suite! agent-style-syntax-parameter-context-policy-test) => #t))))

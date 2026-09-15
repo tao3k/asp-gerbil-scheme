@@ -1,3 +1,1 @@
-(package: sample/macros
-  policy: ((macro-governance allow-generated: #t explanation: "Controlled syntax-case macro helpers are allowed only with runtime-source, parser macro facts, and expansion evidence." witness: "search runtime-source macro sugar module-sugar")))
-
+(package: sample/macros)

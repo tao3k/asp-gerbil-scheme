@@ -1,0 +1,163 @@
+#+title: 31.09 Verified Generated Module Artifacts
+#+startup: overview
+
+* 31.09 Verified Generated Module Artifacts
+:PROPERTIES:
+:JD_ID: 31.09
+:STATUS: IMPLEMENTED
+:RELATED: 31.01, 31.07, 31.08
+:END:
+
+* Decision
+
+ASP Gerbil Scheme provides a generic verified sidecar extension for modules
+whose source expansion invokes a pure but expensive generator.  The extension
+reuses domain artifacts; it does not cache a native Gerbil target result and it
+does not become a second build system.
+
+The complete PackageSpec BuildSpec always reaches one upstream =std/make=
+session.  A declaration may only transform the matching module from a string or
+existing =gxc:= item into the same native =gxc:= item with merged
+=extra-inputs:=.  Every other target and every pre-existing option retain their
+original order and value.
+
+#+begin_src mermaid
+flowchart LR
+  Input["canonical generator input identity"]
+  Contract["schema + producer identity + member schemas"]
+  Key["SHA-256 contract key"]
+  Receipt["immutable Scheme receipt"]
+  Bytes["content-addressed domain sidecars"]
+  Validate["reload + byte digest + domain validator"]
+  Package["POO PackageSpec generated-modules"]
+  Extra["native gxc: extra-inputs:"]
+  Make["one full std/make session"]
+
+  Input --> Key
+  Contract --> Key
+  Key --> Receipt
+  Receipt --> Validate
+  Bytes --> Validate
+  Validate --> Package --> Extra --> Make
+#+end_src
+
+* Ownership relative to upstream Gerbil
+
+This extension follows upstream =std/make= and =std/build-script= rather than
+competing with them.
+
+| Concern | Owner |
+|---------+-------|
+| Module import/dependency graph | upstream =std/make= |
+| Native source/output currentness | upstream =std/make= |
+| Completion graph, worker pool, and scheduling | upstream =std/make= |
+| Build-script command and mode lowering | upstream =clan/building= or =std/build-script= |
+| Pure-generator input and producer identity | downstream domain adapter |
+| Domain sidecar materialization and load validation | downstream domain adapter |
+| Generic immutable receipt, digest verification, and path containment | ASP =generated-artifact= |
+| Generated-path dependency projection | ASP PackageSpec through upstream =gxc: extra-inputs:= |
+
+The extension deliberately does not pre-import a module to predict its native
+freshness, parse a reverse dependency graph, filter PackageSpec targets, split
+the BuildSpec into private batches, create a ready queue, or bypass
+=std/make=.  Improving those facilities belongs upstream.
+
+The improvement over unextended upstream behavior is narrower: when
+=std/make='s ordinary source import reaches an expensive pure expansion, the
+module can load a previously verified domain artifact instead of rerunning the
+generator.  Upstream still sees and executes the module and still owns the
+native result.
+
+* Public POO model
+
+=:asp-gerbil-scheme/build-api= exports four POO-native families:
+
+- =GeneratedArtifactMember=: stable member name, domain schema, and independent
+  validator;
+- =GeneratedArtifactBundle=: namespace, producer identity, canonical input
+  identity, members, artifact roots, receipt root, materializer, loader, and
+  artifact-path projection;
+- =GeneratedArtifactResolution=: =generated= or =reused= status, contract key,
+  locators, and admitted receipt;
+- =VerifiedGeneratedModule=: one native module identity and its generated
+  =extra-inputs:= paths.
+
+The domain adapter calls
+=asp-gerbil-scheme-resolve-generated-artifact-bundle!= from its expansion-time
+entry.  A cache hit exists only when all of the following hold:
+
+1. the receipt is one complete datum with schema
+   =asp-gerbil-scheme.generated-artifact-receipt.v1=;
+2. its contract equals the bundle's namespace, producer identity, canonical
+   input digest, and ordered member name/schema set;
+3. the receipt contains exactly one locator per declared member;
+4. every discovered artifact copy has the receipt byte digest;
+5. the domain loader succeeds and the member validator admits the loaded value.
+
+Any mismatch is a miss.  Resolution then requires the caller's producer,
+materializes the complete member set, reloads and revalidates every member, and
+publishes one immutable receipt through a temporary file plus no-overwrite
+rename.  A racing equal receipt is accepted; a different receipt for the same
+key is a hard conflict.
+
+* PackageSpec projection
+
+A package declares generated inputs without declaring a second graph:
+
+#+begin_src scheme
+(asp-gerbil-scheme-package-spec!
+ (example-package @ asp-gerbil-scheme-library-package-prototype)
+ (spec example-build-spec)
+ (modules ["src/plain.ss" "src/generated.ss"])
+ (generated-modules
+  [(asp-gerbil-scheme-verified-generated-module
+    module: "src/generated.ss"
+    extra-inputs: [".cache/grammar/<digest>.gir.z"])]))
+#+end_src
+
+Projection requires exactly one matching target.  A missing or duplicate match
+is rejected.  Existing =extra-inputs:= are merged in stable order and duplicate
+paths are removed.  The number and order of BuildSpec targets are invariant.
+
+* Domain adoption contract
+
+A parser/generator repository remains responsible for its own semantic format.
+For example, a grammar repository may keep compressed =.gir.z= artifacts and
+provide the following adapter operations:
+
+- producer identity derived from the generator implementation and schema;
+- canonical input identity derived from every grammar/source/config input;
+- materializer that writes content-addressed immutable artifacts;
+- loader that verifies framing and reconstructs the domain value;
+- validator that proves the reconstructed grammar/table satisfies the domain
+  schema;
+- artifact-path projection that returns only paths owned below the declared
+  roots.
+
+ASP does not hardcode a grammar, parser, language, or file extension.  A domain
+must not use a mutable locator shared by different contract keys.  Its locator
+should include the artifact content digest so two valid input identities cannot
+overwrite each other's bytes.
+
+* Failure and concurrency semantics
+
+- Absolute paths and root escapes are rejected before receipt admission.
+- Missing, changed, malformed, or validator-rejected bytes are never reused.
+- A miss with an unavailable producer is a normal hard failure; stale evidence
+  is not returned as a fallback.
+- Producer member-count drift and post-materialization validation failure are
+  hard failures.
+- Receipt publication is immutable per contract key.  Concurrent equal
+  publication converges; concurrent unequal publication fails as a conflict.
+- The receipt proves only generated-domain artifact admission.  It never means
+  the native Gerbil target is current or compiled.
+
+* Executable evidence
+
+=t/generated-artifact-build-api-test.ss= covers generation, verified reuse,
+input-key separation, tamper rejection without a producer, post-materialization
+validation, immutable-key conflict, path containment, stable native =gxc:=
+projection, ambiguous-owner rejection, and PackageSpec graph preservation.
+=t/package-build-contract-test.ss= verifies that the sole production Graph is
+declared by root =build.ss= and that package entrypoints use native Gerbil
+build surfaces.

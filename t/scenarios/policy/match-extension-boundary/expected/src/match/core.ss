@@ -6,7 +6,7 @@
 (export shape? shape-match)
 
 ;; shape?
-;;   : (-> Any Boolean)
+;;   : (-> Datum Boolean)
 ;;   | doc m%
 ;;       `shape? value` is the runtime predicate used by the match extension.
 ;;     %
@@ -18,6 +18,13 @@
 ;;   | doc m%
 ;;       `shape-match` is a match extension surface around the runtime
 ;;       predicate.
+;;
+;;       # Examples
+;;
+;;       ```scheme
+;;       (shape-match value)
+;;       ;; => match-pattern-syntax
+;;       ```
 ;;     %
 (defsyntax-for-match shape-match
   (syntax-rules ()
