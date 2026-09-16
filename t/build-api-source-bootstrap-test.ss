@@ -8,15 +8,15 @@
                  asp-gerbil-scheme-package-native-spec)
         (only-in :asp-gerbil-scheme/testing-api
                  testing-interface-command-for
-                 testing-interface-run-test!
-                 testing-benchmark-run/result)
+                 testing-interface-run-test!)
         (only-in :asp-gerbil-scheme/policy-api
                  make-project-policy-test
                  run-modularity-policy)
         (only-in :asp-gerbil-scheme/benchmark-api
                  benchmark-run/result
                  make-micro-kernel-fixture
-                 micro-kernel-run/result))
+                 micro-kernel-run/result
+                 testing-benchmark-run/result))
 
 (export build-api-source-bootstrap-test)
 

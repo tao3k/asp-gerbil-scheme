@@ -5,11 +5,12 @@
         (only-in :asp-gerbil-scheme/testing-api
                  +asp-testing-interface+
                  +testing-source-admission-profile+
-                 asp-gerbil-scheme-prepared-native-import-closure
-                 testing-interface-add-profile
+                 testing-interface-add-profile)
+        (only-in :asp-gerbil-scheme/testing-source-admission-api
                  testing-interface-prepared-source-admission-suite)
         (only-in :asp-gerbil-scheme/src/build-api/native-import-closure
-                 asp-gerbil-scheme-native-import-closure)
+                 asp-gerbil-scheme-native-import-closure
+                 asp-gerbil-scheme-prepared-native-import-closure)
         "./state")
 
 (export prepared-source-admission-test)
@@ -23,9 +24,8 @@
         +testing-source-admission-profile+)
        .admit-prepared-source-graph:
        (lambda (test roots)
-         ;; The admission fixture is listed before the witness fixture.  This
-         ;; can only be true here when native gxtest has prepared every module
-         ;; before executing this generated suite.
+         ;; The adapter establishes the prepared-source lifecycle before this
+         ;; user-declared slot is invoked.
          (check prepared-source-witness-ready? => #t)
          (check test => "prepared-source-admission")
          (check roots => +prepared-source-roots+)
@@ -34,8 +34,6 @@
            "t/scenarios/testing/prepared-source-admission/prepared-witness-fixture.ss"
            (asp-gerbil-scheme-prepared-native-import-closure "." roots))
           ? pair?)
-         ;; This source exists, but the scenario did not ask gxtest to prepare
-         ;; it.  The prepared projection must fail instead of importing it.
          (check-exception
           (asp-gerbil-scheme-prepared-native-import-closure
            "." '("t/testing-extension-test.ss"))

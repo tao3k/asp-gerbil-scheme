@@ -3,6 +3,10 @@
 (import :std/test
         (only-in :clan/poo/object .call .cc .ref object?)
         "../src/testing/extension"
+        "../src/testing/discovery-runner"
+        "../src/testing/source-admission"
+        (only-in ../src/build-api/native-import-closure
+                 asp-gerbil-scheme-prepared-native-import-closure)
         "../src/testing/performance")
 
 (export testing-extension-test)

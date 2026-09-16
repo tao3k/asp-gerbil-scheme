@@ -3,7 +3,7 @@
 
 (import :std/test
         (only-in :clan/poo/object .ref object?)
-        (only-in :asp-gerbil-scheme/testing-api
+        (only-in :asp-gerbil-scheme/benchmark-api
                  benchmark-receipt-pass?
                  testing-benchmark-run/result))
 

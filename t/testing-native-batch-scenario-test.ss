@@ -7,7 +7,8 @@
         (only-in :clan/timestamp call-with-timing)
         (only-in :asp-gerbil-scheme/testing-api
                  +asp-testing-interface+
-                 testing-interface-run-test-batch!
+                 testing-interface-run-test-batch!)
+        (only-in :asp-gerbil-scheme/testing-runner-api
                  testing-interface-test-files))
 
 (export testing-native-batch-scenario-test)

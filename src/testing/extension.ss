@@ -5,22 +5,7 @@
 ;;; filters. It delegates file discovery and suite execution to clan/testing.
 
 (import :gerbil/gambit
-        (only-in :clan/poo/object .call .cc .o .ref .slot? object?)
-        (only-in :clan/poo/debug trace-poo)
-        (only-in :clan/testing
-                 find-test-files
-                 %set-test-environment!)
-        (only-in :clan/timestamp call-with-timing current-tai-timestamp)
-        (only-in ../build-api/native-import-closure
-                 asp-gerbil-scheme-prepared-native-import-closure
-                 call-with-asp-gerbil-scheme-prepared-source-graph)
-        (only-in :std/test test-suite test-case)
-        (only-in :std/cli/multicall
-                 define-entry-point
-                 define-multicall-main
-                 set-default-entry-point!)
-        (only-in :std/cli/print-exit silent-exit)
-        (only-in :std/source this-source-file)
+        (only-in :clan/poo/object .cc .o .ref .slot? object?)
         (only-in :std/misc/wg make-wg wg-add! wg-wait!)
         (only-in :std/misc/process run-process)
         (only-in :std/srfi/1 drop find filter partition take unfold)
@@ -47,21 +32,15 @@
         testing-interface-command-for
         testing-interface-run-test!
         testing-interface-call-with-operation
-        testing-interface-call-with-prepared-source-graph
-        testing-interface-prepared-source-admission-suite
-        asp-gerbil-scheme-prepared-native-import-closure
-        testing-interface-trace-poo-for
         testing-discovery-profile-ignore-directories
         testing-interface-ignore-directories-for
         testing-interface-test-file-included?
-        testing-interface-test-files
         testing-interface-test-file-isolated?
         testing-interface-test-file-serial?
         testing-interface-test-file-batches
         testing-interface-worker-count
         testing-interface-run-test-batch!
         testing-interface-run-test-files!
-        init-profiled-test-environment!
         +testing-memory-profile+
         +testing-performance-profile+
         +testing-debug-trace-profile+
@@ -297,58 +276,6 @@
   (not (ormap (cut path-in-directory? test-file <>)
               (testing-interface-ignore-directories-for testing test))))
 
-;;; Delegate discovery to clan/testing, then apply only the POO-declared
-;;; negative directory boundary. ASP does not maintain a second catalog.
-(def (testing-interface-test-files testing test
-                                   pkgdir: (pkgdir ".")
-                                   regex: (regex "-test.ss$"))
-  (filter (cut testing-interface-test-file-included? testing test <>)
-          (find-test-files pkgdir regex)))
-
-;; init-profiled-test-environment!
-;;   : (-> TestingInterface TestEntryPoint)
-;;   | rationale m%
-;;       Preserve clan/testing discovery and execution while projecting the
-;;       selected POO profiles only at each fresh test-process boundary.
-;;     %
-;;   | doc m%
-;;       Install the normal package unit-test entrypoint after clan discovers
-;;       its native test files and the POO discovery profile subtracts ignored
-;;       child-package paths. Compatible files are balanced across the native
-;;       capacity inherited from `GERBIL_BUILD_CORES`; projects do not declare
-;;       a separate batch-size setting.
-;;
-;;       # Examples
-;;       ```scheme
-;;       (init-profiled-test-environment! +asp-testing-interface+)
-;;       ;; => installs the asp-profiled-unit-tests entrypoint
-;;       ```
-;;     %
-(defrules init-profiled-test-environment! ()
-  ((ctx testing)
-   (begin
-     (def here (this-source-file ctx))
-     (with-id ctx (main)
-       (define-multicall-main ctx))
-     (define-entry-point (asp-profiled-unit-tests)
-       (help: "Run clan unit tests through ASP POO profiles"
-        getopt: [])
-       (%set-test-environment! here)
-       (displayln "[asp-testing] phase=entry-ready")
-       (force-output)
-       (silent-exit
-        (let-values (((discovery-nanoseconds test-files)
-                      (call-with-timing
-                       (lambda ()
-                         (testing-interface-test-files
-                          testing "unit-tests.ss")))))
-          (displayln "[asp-testing] phase=discovery-complete elapsedNs="
-                     discovery-nanoseconds
-                     " fileCount=" (length test-files))
-          (force-output)
-          (testing-interface-run-test-files! testing test-files))))
-     (set-default-entry-point! 'asp-profiled-unit-tests))))
-
 (def (testing-memory-profile-max-heap-mib profile)
   (and (testing-profile-matches? profile 'memory)
        (let (value (.ref profile 'maxHeapMiB))
@@ -397,37 +324,6 @@
      ((not around) (thunk))
      ((procedure? around) (around operation thunk))
      (else (error "testing around-operation must be a procedure" around)))))
-
-;;; Invoke a downstream POO admission method with roots selected by the test
-;;; owner.  ASP neither discovers another graph nor computes another import
-;;; closure here; gxtest has already prepared every module before it executes
-;;; exported suites.
-(def (testing-interface-call-with-prepared-source-graph testing test roots)
-  (unless (testing-interface-profile-enabled? testing 'source-admission)
-    (error "testing source-admission profile is not enabled" test))
-  (unless (and (list? roots)
-               (pair? roots)
-               (andmap (lambda (root)
-                         (and (string? root) (> (string-length root) 0)))
-                       roots))
-    (error "invalid testing prepared source roots" roots))
-  (unless (.slot? testing '.admit-prepared-source-graph)
-    (error "testing interface has no prepared source graph admission method"
-           test))
-  (call-with-asp-gerbil-scheme-prepared-source-graph
-   (lambda ()
-     (.call testing .admit-prepared-source-graph test roots))))
-
-;;; Produce an ordinary std/test suite.  Native gxtest imports all requested
-;;; test modules in prepare-harness before any suite runs, so this callback can
-;;; traverse the already prepared expander contexts without a standalone
-;;; closure process.  Direct callers may still run the suite through std/test;
-;;; they own preparation of the declared roots in that case.
-(def (testing-interface-prepared-source-admission-suite testing test roots)
-  (test-suite "prepared native source graph admission"
-    (test-case "admit the graph prepared by the native test harness"
-      (testing-interface-call-with-prepared-source-graph
-       testing test roots))))
 
 (def (testing-interface-test-file-serial? testing test-file)
   (and (find (lambda (profile)
@@ -522,11 +418,11 @@
              (length test-files)
              " firstFile=" (and (pair? test-files) (car test-files)))
   (force-output)
-  (let (started-at (current-tai-timestamp))
+  (let (started-at (current-jiffy))
     (with-exception-catcher
      (lambda (failure)
        (displayln "[asp-testing] phase=batch-failed elapsedNs="
-                  (- (current-tai-timestamp) started-at)
+                  (testing-elapsed-nanoseconds started-at)
                   " fileCount=" (length test-files)
                   " firstFile=" (and (pair? test-files) (car test-files)))
        (force-output)
@@ -541,11 +437,15 @@
                  directory: (current-directory)
                  stdout-redirection: #f))))
          (displayln "[asp-testing] phase=batch-complete elapsedNs="
-                    (- (current-tai-timestamp) started-at)
+                    (testing-elapsed-nanoseconds started-at)
                     " fileCount=" (length test-files)
                     " firstFile=" (and (pair? test-files) (car test-files)))
          (force-output)
          result)))))
+
+(def (testing-elapsed-nanoseconds started-jiffy)
+  (quotient (* (- (current-jiffy) started-jiffy) 1000000000)
+            (jiffies-per-second)))
 
 (def (testing-interface-run-test-files! testing test-files)
   (let-values (((serial-files parallel-files)
@@ -592,11 +492,3 @@
           (if max-heap-mib (* max-heap-mib 1024 1024) 0)))
     (##set-max-heap! max-heap-bytes)
     max-heap-bytes))
-
-(def (testing-interface-trace-poo-for testing test poo
-                                      name: (name 'testing-profile-target))
-  (if (find (lambda (profile)
-              (testing-profile-matches? profile 'debug-trace))
-            (testing-interface-profiles-for testing test))
-    (trace-poo poo name)
-    poo))

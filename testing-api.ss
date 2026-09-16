@@ -1,10 +1,6 @@
 ;;; -*- Gerbil -*-
-;;; Public opt-in testing profiles and performance instrumentation.
+;;; Public POO declarations for opt-in testing Profiles and slots.
 
-(import (only-in :clan/testing init-test-environment!)
-        "./src/testing/extension"
-        "./src/testing/performance")
+(import "./src/testing/extension")
 
-(export init-test-environment!
-        (import: "./src/testing/extension")
-        (import: "./src/testing/performance"))
+(export (import: "./src/testing/extension"))
