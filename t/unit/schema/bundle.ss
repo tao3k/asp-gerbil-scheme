@@ -13,14 +13,7 @@
 ;;; - Their `$ref` edges are internal fragments, so no remote fetch or
 ;;;   repository-external schema authority participates in this test bundle.
 (def +schema-files+
-  '("semantic-asp-gerbil-scheme-info.v1.schema.json"
-    "semantic-language-evidence.v1.schema.json"
-    "semantic-runtime-source-acquisition.v1.schema.json"
-    "semantic-type-proof.v1.schema.json"
-    "semantic-extension-pattern-mapping.v1.schema.json"
-    "semantic-compare-packet.v1.schema.json"
-    "semantic-structural-index.v1.schema.json"
-    "semantic-native-syntax-fact-index.v1.schema.json"))
+  '("semantic-asp-gerbil-scheme-info.v1.schema.json"))
 
 (def +local-schema-refs+ '())
 

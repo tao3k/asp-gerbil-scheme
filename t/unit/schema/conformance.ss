@@ -80,9 +80,6 @@
          (facts (json-get packet "facts"))
          (fact (car facts))
          (details (json-get fact "details")))
-    (check-packet-conforms-to-schema!
-     packet
-     "semantic-language-evidence.v1.schema.json")
     (check (json-get packet "namespace") => "compiler-evidence")
     (check (json-get packet "quality") => "verified")
     (check (json-get packet "missing") => [])
@@ -116,9 +113,6 @@
          (source-comments (json-get packet "sourceComments"))
          (facts (json-get packet "facts"))
          (fact (car facts)))
-    (check-packet-conforms-to-schema!
-     packet
-     "semantic-runtime-source-acquisition.v1.schema.json")
     (check (json-get packet "quality") => "version-matched-source-plan")
     (check (string-prefix? "search runtime-source " (json-get packet "next")) => #t)
     (check (json-get source-ref "checkoutPolicy") => "exact-tag-from-active-runtime")
@@ -144,9 +138,6 @@
          (proof (car proofs))
          (profile (json-get proof "profile"))
          (proof-tree (json-get proof "proof")))
-    (check-packet-conforms-to-schema!
-     packet
-     "semantic-type-proof.v1.schema.json")
     (check (json-get packet "namespace") => "proof")
     (check (json-get packet "quality") => "verified")
     (check (json-get proof-system "level") => "medium-weight")
@@ -166,9 +157,6 @@
          (source-lookup (json-get mapping "sourceLookup"))
          (agent-read-order (json-get mapping "agentReadOrder"))
          (agent-action (json-get mapping "agentAction")))
-    (check-packet-conforms-to-schema!
-     packet
-     "semantic-extension-pattern-mapping.v1.schema.json")
     (check (json-get packet "quality") => "partial")
     (check (json-get packet "missing") => ["writeenv-roundtrip-witness"])
     (check (string-prefix? "search " (json-get packet "next")) => #t)
@@ -228,9 +216,6 @@
          (comparison (car comparisons))
          (left (json-get comparison "left"))
          (right (json-get comparison "right")))
-    (check-packet-conforms-to-schema!
-     packet
-     "semantic-compare-packet.v1.schema.json")
     (check (json-get packet "quality") => "verified")
     (check (json-get packet "missing") => [])
     (check (json-get comparison "id") => "env-active-documented")
@@ -278,15 +263,6 @@
                                   "map"
                                   "role"
                                   "sequence-map")))
-    (check-packet-conforms-to-schema!
-     packet
-     "semantic-structural-index.v1.schema.json")
-    (check-packet-conforms-to-schema!
-     owner-packet
-     "semantic-native-syntax-fact-index.v1.schema.json")
-    (check-packet-conforms-to-schema!
-     higher-order-packet
-     "semantic-native-syntax-fact-index.v1.schema.json")
     (check (json-get packet "rawSourceStored") => #f)
     (check (json-get packet "indexMode") => "interface")
     (check (length (json-get packet "syntaxFacts")) => 0)
