@@ -183,7 +183,7 @@ jobs:
           if [ ! -e .gerbil/pkg/asp-gerbil-scheme ]; then
             gerbil pkg link asp-gerbil-scheme .
           fi
-          rm -rf .gerbil/lib/asp-gerbil-scheme .gerbil/build
+          gerbil clean
           gerbil pkg list
 
       - name: Save Gerbil package dependency cache
