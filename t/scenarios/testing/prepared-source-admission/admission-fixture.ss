@@ -34,6 +34,12 @@
            "t/scenarios/testing/prepared-source-admission/prepared-witness-fixture.ss"
            (asp-gerbil-scheme-prepared-native-import-closure "." roots))
           ? pair?)
+         ;; This source exists, but the scenario did not ask gxtest to prepare
+         ;; it.  The prepared projection must fail instead of importing it.
+         (check-exception
+          (asp-gerbil-scheme-prepared-native-import-closure
+           "." '("t/testing-extension-test.ss"))
+          true)
          (check-exception
           (asp-gerbil-scheme-native-import-closure "." roots)
           true)

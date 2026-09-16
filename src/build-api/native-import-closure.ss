@@ -75,6 +75,37 @@
      entries)
     (reverse ordered)))
 
+;; Read a context already installed by the native test harness.  Unlike
+;; import-module, this lookup cannot expand or evaluate an unprepared module.
+;; : (-> Path ExpanderContext)
+(def (prepared-module-context entry)
+  (let* ((source (path-default-extension entry ".ss"))
+         (resolved (core-resolve-module-path source))
+         (context (hash-get __module-registry resolved)))
+    (or context
+        (error "prepared source is absent from the native module registry"
+               entry resolved))))
+
+;; : (-> Path (List Path) (List Path))
+(def (project-prepared-native-import-closure root entries)
+  (let* ((package-name
+          (or (asp-gerbil-scheme-package-build-package-name root)
+              (error "prepared native import closure requires package: in gerbil.pkg"
+                     root)))
+         (package-prefix (string-append package-name "/"))
+         (visited (make-hash-table-eq))
+         (ordered '()))
+    (def (visit imported)
+      (alet (context (import-context imported))
+        (unless (hash-get visited context)
+          (hash-put! visited context #t)
+          (alet (source (local-module-source context package-prefix))
+            (when (and source (file-exists? (path-expand source root)))
+              (for-each visit (module-context-import context))
+              (set! ordered (cons source ordered)))))))
+    (for-each (lambda (entry) (visit (prepared-module-context entry))) entries)
+    (reverse ordered)))
+
 ;; : (-> Path (List Path) (List Path))
 (def (asp-gerbil-scheme-native-import-closure root entries)
   (when (current-asp-gerbil-scheme-prepared-source-graph?)
@@ -88,6 +119,6 @@
     (error "prepared native import closure requires the source-admission slot"
            root entries))
   ;; gxtest has already imported every declared root before it invokes suites.
-  ;; import-module therefore resolves resident contexts from Gerbil's native
-  ;; registry; this projection never constitutes a standalone graph owner.
-  (project-native-import-closure root entries))
+  ;; Read those resident contexts directly; an absent root is a lifecycle
+  ;; error and must never fall through to import-module.
+  (project-prepared-native-import-closure root entries))
