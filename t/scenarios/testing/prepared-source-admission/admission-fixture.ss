@@ -1,12 +1,15 @@
 ;;; -*- Gerbil -*-
 
-(import (only-in :std/test check)
+(import (only-in :std/test check check-exception)
         (only-in :clan/poo/object .cc)
         (only-in :asp-gerbil-scheme/testing-api
                  +asp-testing-interface+
                  +testing-source-admission-profile+
+                 asp-gerbil-scheme-prepared-native-import-closure
                  testing-interface-add-profile
                  testing-interface-prepared-source-admission-suite)
+        (only-in :asp-gerbil-scheme/src/build-api/native-import-closure
+                 asp-gerbil-scheme-native-import-closure)
         "./state")
 
 (export prepared-source-admission-test)
@@ -26,6 +29,15 @@
          (check prepared-source-witness-ready? => #t)
          (check test => "prepared-source-admission")
          (check roots => +prepared-source-roots+)
+         (check
+          (member
+           "t/scenarios/testing/prepared-source-admission/prepared-witness-fixture.ss"
+           (asp-gerbil-scheme-prepared-native-import-closure "." roots))
+          ? pair?)
+         (check-exception
+          (asp-gerbil-scheme-native-import-closure "." roots)
+          true)
+         (displayln "[asp-testing] phase=prepared-source-negative-path-blocked")
          (displayln "[asp-testing] phase=prepared-source-admission-complete")
          #t)))
 

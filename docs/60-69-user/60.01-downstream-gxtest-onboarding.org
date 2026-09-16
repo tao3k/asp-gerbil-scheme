@@ -148,6 +148,7 @@ The downstream test surface is:
 | =+testing-source-admission-profile+= | Opt a POO testing interface into admission over the graph already prepared by the enclosing native =gxtest= harness. |
 | =testing-interface-prepared-source-admission-suite= | Build an ordinary =std/test= suite that invokes the interface's =.admit-prepared-source-graph= method only after native harness preparation. |
 | =testing-interface-call-with-prepared-source-graph= | Invoke the POO admission method directly for an already prepared, non-empty root declaration. |
+| =asp-gerbil-scheme-prepared-native-import-closure= | Project the resident native contexts inside the prepared-source slot capability; it fails outside that lifecycle. |
 | =make-policy-test= | Minimal =gxtest= suite for the files supplied by the build/test owner. |
 | =policy-findings= | Raw =TypeFinding= values for a files-scoped custom test. |
 | =policy-status= | =pass= or =fail= status for a files-scoped custom test. |
@@ -178,8 +179,12 @@ For a package that composes policy as a POO Testing extension, add
 by =testing-interface-prepared-source-admission-suite=. Keep that suite in the
 same =gerbil test= invocation as its declared roots. Native =gxtest= prepares
 every requested module before running any exported suite, so the method can
-consume the resident expander contexts; it must not launch a standalone
-=native-import-closure= process or maintain another graph/cache.
+consume the resident expander contexts through
+=asp-gerbil-scheme-prepared-native-import-closure=. The ordinary build-time
+=asp-gerbil-scheme-native-import-closure= fails inside this slot, while the
+prepared projection fails outside it. This two-sided capability contract blocks
+a downstream method from silently restoring a cold closure path; it must not
+launch a standalone closure process or maintain another graph/cache.
 
 * Agent Contract
 Agents integrating the harness downstream should follow this order:

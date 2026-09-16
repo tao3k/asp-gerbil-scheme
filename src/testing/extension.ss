@@ -11,6 +11,9 @@
                  find-test-files
                  %set-test-environment!)
         (only-in :clan/timestamp call-with-timing current-tai-timestamp)
+        (only-in ../build-api/native-import-closure
+                 asp-gerbil-scheme-prepared-native-import-closure
+                 call-with-asp-gerbil-scheme-prepared-source-graph)
         (only-in :std/test test-suite test-case)
         (only-in :std/cli/multicall
                  define-entry-point
@@ -46,6 +49,7 @@
         testing-interface-call-with-operation
         testing-interface-call-with-prepared-source-graph
         testing-interface-prepared-source-admission-suite
+        asp-gerbil-scheme-prepared-native-import-closure
         testing-interface-trace-poo-for
         testing-discovery-profile-ignore-directories
         testing-interface-ignore-directories-for
@@ -410,7 +414,9 @@
   (unless (.slot? testing '.admit-prepared-source-graph)
     (error "testing interface has no prepared source graph admission method"
            test))
-  (.call testing .admit-prepared-source-graph test roots))
+  (call-with-asp-gerbil-scheme-prepared-source-graph
+   (lambda ()
+     (.call testing .admit-prepared-source-graph test roots))))
 
 ;;; Produce an ordinary std/test suite.  Native gxtest imports all requested
 ;;; test modules in prepare-harness before any suite runs, so this callback can

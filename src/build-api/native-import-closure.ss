@@ -8,7 +8,21 @@
         (only-in "./package-build"
                  asp-gerbil-scheme-package-build-package-name))
 
-(export asp-gerbil-scheme-native-import-closure)
+(export asp-gerbil-scheme-native-import-closure
+        asp-gerbil-scheme-prepared-native-import-closure
+        call-with-asp-gerbil-scheme-prepared-source-graph)
+
+;;; Dynamic capability installed only by the Testing prepared-source slot.
+;;; It separates build-time closure projection from resident-context
+;;; observation and makes accidental re-entry into the cold projection API a
+;;; typed lifecycle failure instead of a silent performance regression.
+(def current-asp-gerbil-scheme-prepared-source-graph?
+  (make-parameter #f))
+
+(def (call-with-asp-gerbil-scheme-prepared-source-graph thunk)
+  (parameterize
+      ((current-asp-gerbil-scheme-prepared-source-graph? #t))
+    (thunk)))
 
 ;; : (-> ImportBinding (Maybe ExpanderContext))
 (def (import-context value)
@@ -33,7 +47,7 @@
 ;; lets Gerbil resolve wrappers, phases, preludes, and relative paths itself;
 ;; the projection neither reparses source nor imports every catalog member.
 ;; : (-> Path (List Path) (List Path))
-(def (asp-gerbil-scheme-native-import-closure root entries)
+(def (project-native-import-closure root entries)
   (let* ((package-name
           (or (asp-gerbil-scheme-package-build-package-name root)
               (error "native import closure requires package: in gerbil.pkg"
@@ -60,3 +74,20 @@
        (visit (import-module (path-default-extension entry ".ss") #f #f)))
      entries)
     (reverse ordered)))
+
+;; : (-> Path (List Path) (List Path))
+(def (asp-gerbil-scheme-native-import-closure root entries)
+  (when (current-asp-gerbil-scheme-prepared-source-graph?)
+    (error "build-time native import closure is forbidden during prepared source admission"
+           root entries))
+  (project-native-import-closure root entries))
+
+;; : (-> Path (List Path) (List Path))
+(def (asp-gerbil-scheme-prepared-native-import-closure root entries)
+  (unless (current-asp-gerbil-scheme-prepared-source-graph?)
+    (error "prepared native import closure requires the source-admission slot"
+           root entries))
+  ;; gxtest has already imported every declared root before it invokes suites.
+  ;; import-module therefore resolves resident contexts from Gerbil's native
+  ;; registry; this projection never constitutes a standalone graph owner.
+  (project-native-import-closure root entries))

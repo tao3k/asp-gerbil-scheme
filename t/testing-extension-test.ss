@@ -126,6 +126,12 @@
         '("src/domain.ss"))
        true))
 
+    (test-case "prepared closure capability fails outside source admission"
+      (check-exception
+       (asp-gerbil-scheme-prepared-native-import-closure
+        "." '("t/testing-extension-test.ss"))
+       true))
+
     (test-case "prepared source admission rejects an empty root declaration"
       (let (testing
             (.cc (testing-interface-add-profile

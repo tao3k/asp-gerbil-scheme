@@ -22,4 +22,9 @@
                      output
                      "phase=prepared-source-admission-complete")
                     #t)
+               => #t)
+        (check (and (string-contains
+                     output
+                     "phase=prepared-source-negative-path-blocked")
+                    #t)
                => #t)))))
