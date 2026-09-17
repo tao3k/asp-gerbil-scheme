@@ -5,10 +5,7 @@
 (import (only-in :std/build-script defbuild-script)
         (only-in "./src/build-api/source-bootstrap"
                  asp-gerbil-scheme-package-spec!
-                 asp-gerbil-scheme-library-package-prototype
-                 asp-gerbil-scheme-package-native-profile
-                 asp-gerbil-scheme-package-pkg-config-libs
-                 asp-gerbil-scheme-native-profile-prepare!))
+                 asp-gerbil-scheme-library-package-prototype))
 
 (def +product-entry-modules+
   '("provider-package-spec"
@@ -28,12 +25,6 @@
  @ asp-gerbil-scheme-library-package-prototype)
  (spec asp-gerbil-scheme-library-spec)
  (product-entry-modules +product-entry-modules+))
-
-((asp-gerbil-scheme-native-profile-prepare!
-  (asp-gerbil-scheme-package-native-profile
-   asp-gerbil-scheme-library-package-spec))
- (asp-gerbil-scheme-package-pkg-config-libs
-  asp-gerbil-scheme-library-package-spec))
 
 ;; Native spec/compile/clean/meta dispatch; gxpkg owns package acquisition.
 (defbuild-script (asp-gerbil-scheme-library-spec))

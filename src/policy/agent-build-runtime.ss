@@ -174,9 +174,9 @@
 (def (runtime-quality-message result)
   (cond
    ((package-build-framework-overreach-result? result)
-     "package-level build.ss is adding local phase/cache/stamp/worker ownership on top of Gerbil's build surface; keep std/make or clan/building as the build owner and move cache/receipt policy into reusable harness APIs")
+     "package-level build.ss is adding local phase/cache/stamp/worker ownership on top of Gerbil's build surface; keep std/make as the build owner and move cache/receipt policy into reusable ASP Building APIs")
     ((package-build-custom-system-result? result)
-     "package-level build.ss is drifting into a hand-written build system; keep build.ss on gxpkg plus clan/building, std/build-script, or std/make build-spec and move command/runtime behavior into package modules")
+     "package-level build.ss is drifting into a hand-written build system; keep build.ss on ASP Building API PackageSpec data plus std/build-script or std/make and move command/runtime behavior into package modules")
    (else "build/runtime ownership is outside the admitted package build model")))
 
 ;;; Compatibility helper for callers that expect one finding per source file.
@@ -298,16 +298,16 @@
 (def (runtime-quality-allowed-shape result)
   (cond
    ((package-build-framework-overreach-result? result)
-     "build.ss delegates source discovery and compilation to clan/building, std/build-script, or std/make; optional acceleration is exposed as a thin harness API around the existing build entrypoint")
+     "build.ss delegates declarative source projection to ASP Building API and compilation to std/build-script/std/make; optional acceleration is exposed as a thin harness API around the existing build entrypoint")
     ((package-build-custom-system-result? result)
-     "package build delegates to a native Gerbil surface: gxpkg plus :clan/building for src-root discovery, :std/build-script for simple package templates, or :std/make build-spec for ssi:/gsc:/FFI/native build forms")
+     "package build imports :asp-gerbil-scheme/building-api for PackageSpec data, uses :std/build-script for gxpkg commands, and delegates ssi:/gsc:/FFI/native execution to :std/make")
    (else "Gerbil runtime wrapper source plus list command arguments")))
 
 ;; : (-> DetectionResult String )
 (def (runtime-quality-disallowed-shape result)
   (cond
    ((package-build-framework-overreach-result? result)
-     "downstream build.ss defining its own phase receipt, stamp cache, cache freshness, or phase-skip control plane on top of std/make or clan/building")
+     "downstream build.ss defining its own phase receipt, stamp cache, cache freshness, or phase-skip control plane on top of std/make")
     ((package-build-custom-system-result? result)
      "hand-written compiler dispatch, GERBIL_LOADPATH/source-root management, or local mini build orchestration inside build.ss")
    (else "local build orchestration outside the admitted package owner")))
@@ -316,9 +316,9 @@
 (def (runtime-quality-next-action result)
   (cond
    ((package-build-framework-overreach-result? result)
-     "delete local phase/cache/stamp ownership from downstream build.ss; keep std/make or clan/building calls in place and move reusable acceleration/receipt behavior into a harness API that wraps the normal build entrypoint")
+     "delete local phase/cache/stamp ownership from downstream build.ss; keep std/make execution in place and move reusable acceleration/receipt behavior into ASP Building API profiles around the normal build entrypoint")
     ((package-build-custom-system-result? result)
-     "replace the local build system with :clan/building plus all-gerbil-modules for src-root packages, :std/build-script defbuild-script for simple gxpkg packages, or :std/make build-spec for ssi:/gsc:/FFI builds; keep provider behavior in a thin entry module over POO-native runtime owners")
+     "replace the local build system with :asp-gerbil-scheme/building-api PackageSpec data plus :std/build-script defbuild-script or :std/make build-spec; keep provider behavior in a thin entry module over POO-native runtime owners")
    (else "delegate package compilation to the native upstream build owner")))
 
 ;;; Scope guard: build/runtime files intentionally emit launcher/runtime

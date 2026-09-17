@@ -32,18 +32,11 @@
     "write-provider-entry"
     "write-executable-script"))
 
-;;; Canonical build surface observed in gerbil-poo:
-;;; `:clan/building` owns source discovery, load path setup, and the
-;;; compile/spec entrypoints.
+;;; Canonical build surfaces keep std/make as the only executor. ASP's public
+;;; Build API may project PackageSpec data but never owns scheduling.
 ;; (List ModuleName)
 (def +package-build-native-build-modules+
-  '(":clan/building" ":std/build-script" ":std/make"))
-
-;;; Legacy module evidence remains available for future migrations, but the
-;;; current canonical set accepts clan/building, std/build-script, and std/make.
-;; (List ModuleName)
-(def +package-build-legacy-build-modules+
-  '())
+  '(":asp-gerbil-scheme/building-api" ":std/build-script" ":std/make"))
 
 ;;; Provider include evidence:
 ;;; - build.ss may include reusable stage descriptors.
@@ -53,14 +46,11 @@
 (def +package-build-provider-build-includes+
   '("src/build-api/provider-build.ss"))
 
-;;; Canonical shape witnesses:
-;;; - `init-build-environment!` is the public clan/building entrypoint.
-;;; - `%set-build-environment!` is the clan/building source-root entrypoint
-;;;   used by packages whose Gerbil modules intentionally live under src/.
-;;; - Keeping the callees data-driven prevents one-off build.ss exemptions.
+;;; Canonical shape witnesses are the upstream std/build-script and std/make
+;;; entrypoints; ASP PackageSpec supplies data to defbuild-script.
 ;; (List CalleeName)
 (def +package-build-spec-callees+
-  '("init-build-environment!" "%set-build-environment!" "defbuild-script" "make"))
+  '("defbuild-script" "make"))
 
 ;; (List CalleeName)
 (def +package-build-std-make-callees+
@@ -68,7 +58,8 @@
 
 ;; (List CalleeName)
 (def +package-build-manual-environment-callees+
-  '("add-load-path!" "apply" "setenv"))
+  '("add-load-path!" "apply" "setenv"
+    "init-build-environment!" "%set-build-environment!"))
 
 ;; (List CalleeName)
 (def +package-build-manual-dispatch-callees+
@@ -93,9 +84,8 @@
       '())))
 
 ;;; Boundary:
-;;; - The package-root build.ss should expose the clan/building surface.
-;;; - Complex provider builds may keep provider-specific stage descriptors, but
-;;;   source discovery and load path setup belong to init-build-environment!.
+;;; - The package-root build.ss should expose std/build-script or std/make.
+;;; - ASP PackageSpec may own declarative discovery and native option data.
 ;; : (-> ProjectIndex (List PackageBuildFinding) )
 (def (package-build-canonical-shape-findings index)
   (let (file (package-top-level-build-file index))
@@ -126,9 +116,6 @@
   (let* ((native-import
           (find package-build-native-build-import?
                 (source-file-module-imports file)))
-         (legacy-import
-          (find package-build-legacy-build-import?
-                (source-file-module-imports file)))
          (build-call
           (find package-build-init-environment-call?
                 (source-file-calls file)))
@@ -141,9 +128,6 @@
          (manual-call
           (find package-build-manual-compiler-dispatch-call?
                 (source-file-calls file)))
-         (legacy-script-call
-          (find package-build-legacy-build-script-call?
-                (source-file-calls file)))
          (native-build-definition
           (find package-build-native-build-definition?
                 (source-file-definitions file)))
@@ -154,38 +138,28 @@
           (find package-build-main-definition?
                 (source-file-definitions file))))
     (and (or manual-environment-call
-             manual-call
-             legacy-script-call)
+             manual-call)
          (make-type-finding
           (policy-rule-id +agent-package-build-canonical-shape-rule+)
          (policy-rule-severity +agent-package-build-canonical-shape-rule+)
          (source-file-path file)
-          "package-level build.ss contains forbidden build control; use clan/building, std/build-script, or std/make build-spec, and do not hand-write GERBIL_LOADPATH/srcdir setup, manual compiler dispatch, or runtime routing in build.ss"
+          "package-level build.ss contains forbidden build control; use std/build-script with ASP PackageSpec or a native std/make build-spec, and do not hand-write GERBIL_LOADPATH/srcdir setup, manual compiler dispatch, or runtime routing in build.ss"
           (package-build-canonical-shape-selector
-           file native-import legacy-import build-call module-enumerator-call manual-environment-call manual-call native-build-definition provider-build-include main-definition)
+           file native-import build-call module-enumerator-call manual-environment-call manual-call native-build-definition provider-build-include main-definition)
           (package-build-canonical-shape-details
-           native-import legacy-import build-call module-enumerator-call manual-environment-call manual-call native-build-definition provider-build-include main-definition)))))
+           native-import build-call module-enumerator-call manual-environment-call manual-call native-build-definition provider-build-include main-definition)))))
 
 ;; : (-> ModuleImportFact Boolean )
 (def (package-build-native-build-import? fact)
   (member (module-import-fact-module fact)
           +package-build-native-build-modules+))
 
-;;; Legacy imports are migration evidence: they explain why R025 fired, but
-;;; they never satisfy the canonical clan/building gate.
-;; : (-> ModuleImportFact Boolean )
-(def (package-build-legacy-build-import? fact)
-  (member (module-import-fact-module fact)
-          +package-build-legacy-build-modules+))
-
 ;;; Boundary:
 ;;; - Gerbil records macro-like build forms as ordinary call facts.
-;;; - clan/building owns both the public init macro and the lower-level
-;;;   source-root initializer used by src/ packages.
 ;;; - `defbuild-script` is the std/build-script package entrypoint used by
 ;;;   gxpkg templates.
 ;;; - `make` is canonical when paired with a std/make build-spec, including
-;;;   `(ssi:)`/FFI build forms that clan/building does not express.
+;;;   `(ssi:)`/FFI build forms.
 ;; : (-> CallFact Boolean )
 (def (package-build-init-environment-call? call)
   (or (member (call-fact-callee call)
@@ -215,17 +189,11 @@
            (ormap (cut package-build-call-arguments-member? call <>)
                   +package-build-std-make-callees+))))
 
-;;; Module enumeration proves the spec delegates source discovery to
-;;; clan/building instead of keeping a handwritten file walk.
+;;; Module enumeration proves the spec delegates source discovery instead of
+;;; keeping a handwritten file walk.
 ;; : (-> CallFact Boolean )
 (def (package-build-module-enumerator-call? call)
   (equal? (call-fact-callee call) "all-gerbil-modules"))
-
-;;; A std/build-script package form is not a finding by itself. Manual
-;;; environment or compiler/process dispatch evidence owns the warning.
-;; : (-> CallFact Boolean )
-(def (package-build-legacy-build-script-call? call)
-  #f)
 
 ;;; Definition surface:
 ;;; - std/make owners may expose `spec` or `build-spec` and pass it to make.
@@ -244,16 +212,34 @@
 (def (package-build-provider-build-include? include)
   (member include +package-build-provider-build-includes+))
 
-;;; Manual environment setup is the main regression clan/building prevents.
+;;; Manual environment setup is a regression the native entrypoints prevent.
 ;;; Keep the predicate narrow so normal provider env variables do not trip it.
+;; : (-> CallFact Boolean)
+(def (package-build-manual-environment-owner? call)
+  (member (call-fact-callee call)
+          +package-build-manual-environment-callees+))
+
+;; : (-> CallFact Boolean)
+(def (package-build-known-environment-initializer-call? call)
+  (or (equal? (call-fact-callee call) "add-load-path!")
+      (member (call-fact-callee call)
+              '("init-build-environment!" "%set-build-environment!"))))
+
+;; : (-> CallFact Boolean)
+(def (package-build-nonstandard-srcdir-call? call)
+  (and (package-build-srcdir-argument-call? call)
+       (not (package-build-std-make-call? call))))
+
+;; : (-> CallFact Boolean)
+(def (package-build-manual-environment-operation? call)
+  (or (package-build-known-environment-initializer-call? call)
+      (package-build-loadpath-setenv-call? call)
+      (package-build-nonstandard-srcdir-call? call)))
+
 ;; : (-> CallFact Boolean )
 (def (package-build-manual-environment-call? call)
-  (and (member (call-fact-callee call)
-               +package-build-manual-environment-callees+)
-       (or (equal? (call-fact-callee call) "add-load-path!")
-           (package-build-loadpath-setenv-call? call)
-           (and (package-build-srcdir-argument-call? call)
-                (not (package-build-std-make-call? call))))
+  (and (package-build-manual-environment-owner? call)
+       (package-build-manual-environment-operation? call)
        (not (package-build-test-load-path-call? call))))
 
 ;;; Build-local gxtest needs source and test module roots in the running Gerbil
@@ -308,8 +294,8 @@
 ;;; - Manual environment or compiler dispatch is the most actionable location.
 ;;; - If no violation witness exists, the selector falls back through missing
 ;;;   canonical witnesses so the diagnostic still points at repairable evidence.
-;; : (-> PackageBuildFile MaybeModuleImportFact MaybeModuleImportFact MaybeCallFact MaybeCallFact MaybeCallFact MaybeCallFact MaybeDefinitionFact MaybeIncludePath MaybeDefinitionFact Selector )
-(def (package-build-canonical-shape-selector file native-import legacy-import build-call module-enumerator-call manual-environment-call manual-call native-build-definition provider-build-include main-definition)
+;; : (-> PackageBuildFile MaybeModuleImportFact MaybeCallFact MaybeCallFact MaybeCallFact MaybeCallFact MaybeDefinitionFact MaybeIncludePath MaybeDefinitionFact Selector )
+(def (package-build-canonical-shape-selector file native-import build-call module-enumerator-call manual-environment-call manual-call native-build-definition provider-build-include main-definition)
   (cond
    (manual-environment-call (call-fact-selector manual-environment-call))
    (manual-call (call-fact-selector manual-call))
@@ -318,20 +304,17 @@
    (build-call (call-fact-selector build-call))
    (module-enumerator-call (call-fact-selector module-enumerator-call))
    (native-import (package-build-module-import-selector native-import))
-   (legacy-import (package-build-module-import-selector legacy-import))
    (else (string-append (source-file-path file) ":1-1"))))
 
-;;; Details keep source provenance explicit so an agent can repair toward the
-;;; gerbil-poo/clan pattern rather than inventing a local mini build system.
-;; : (-> MaybeModuleImportFact MaybeModuleImportFact MaybeCallFact MaybeCallFact MaybeCallFact MaybeCallFact MaybeDefinitionFact MaybeIncludePath MaybeDefinitionFact PolicyDetails )
-(def (package-build-canonical-shape-details native-import legacy-import build-call module-enumerator-call manual-environment-call manual-call native-build-definition provider-build-include main-definition)
+;;; Details keep source provenance explicit so an agent repairs toward native
+;;; std/make rather than inventing a local mini build system.
+;; : (-> MaybeModuleImportFact MaybeCallFact MaybeCallFact MaybeCallFact MaybeCallFact MaybeDefinitionFact MaybeIncludePath MaybeDefinitionFact PolicyDetails )
+(def (package-build-canonical-shape-details native-import build-call module-enumerator-call manual-environment-call manual-call native-build-definition provider-build-include main-definition)
   (hash (kind "package-build-canonical-shape")
         (nativeBuildImport
          (and native-import (module-import-fact-module native-import)))
         (nativeBuildImportModifier
          (and native-import (module-import-fact-modifier native-import)))
-        (legacyBuildImport
-         (and legacy-import (module-import-fact-module legacy-import)))
         (buildSpecEntrypoint
          (and build-call (call-fact-callee build-call)))
         (moduleEnumerator
@@ -349,11 +332,11 @@
         (handWrittenMain
          (and main-definition (definition-name main-definition)))
         (allowedShape
-         "canonical build.ss: use clan/building for src-root source discovery, std/build-script defbuild-script for the official gxpkg package template, or std/make build-spec when the package needs ssi:/gsc:/FFI build forms")
+         "canonical build.ss: use std/build-script defbuild-script with an ASP PackageSpec, or use a direct std/make build-spec when the package needs ssi:/gsc:/FFI build forms")
         (compositionalBuildShape
-         "use clan/building for harness source discovery/load path, std/build-script for simple gxpkg packages, or std/make for build-spec features such as ssi:/gsc:; keep package tests on Gerbil's gxtest runner and runtime commands in compiled modules")
+         "use the ASP PackageSpec catalog for declarative source projection, std/build-script for gxpkg commands, and std/make for build-spec features such as ssi:/gsc:; keep package tests on Gerbil's gxtest runner and runtime commands in compiled modules")
         (downstreamRepairPattern
-         "keep build.ss as the package build control plane, route package compilation through clan/building, std/build-script, or std/make build-spec, and keep provider behavior in a thin entry module over POO-native runtime owners")
+         "keep build.ss as the package build boundary, route package compilation through std/build-script or std/make over declarative ASP PackageSpec data, and keep provider behavior in a thin entry module over POO-native runtime owners")
         (disallowedShape
          "hand-written srcdir/loadpath setup, manual compiler orchestration, or runtime routing that replaces Gerbil's package build entrypoints")
         (sourceEvidence
@@ -362,13 +345,13 @@
           "gerbil://std/build-spec.ss:150-220"
           "gerbil://std/make.ss:150-190"
           "gerbil://std/make.ss:559-579"
-          ".data/gerbil-utils/building.ss:1-120"
-          ".data/gerbil-poo/build.ss:1-18"
+          "src/build-api/package-spec.ss"
+          "src/build-api/native-spec-support.ss"
           "gerbil://doc/reference/std/make.md:32-52"])
         (nativeFactSource
          "parser-owned moduleImportFacts plus include facts, callFacts and definitionFacts")
         (next
-         "remove manual compiler/loadpath/srcdir control from build.ss; keep package build initialization on clan/building, std/build-script, or std/make build-spec and route runtime commands through compiled package modules")))
+         "remove manual compiler/loadpath/srcdir control from build.ss; keep package build initialization on std/build-script or std/make over ASP Building API PackageSpec data and route runtime commands through compiled package modules")))
 
 ;;; Finding contract:
 ;;; - Evidence comes from parser-owned call arguments, not raw grep.

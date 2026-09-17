@@ -51,7 +51,7 @@ competing with them.
 | Module import/dependency graph | upstream =std/make= |
 | Native source/output currentness | upstream =std/make= |
 | Completion graph, worker pool, and scheduling | upstream =std/make= |
-| Build-script command and mode lowering | upstream =clan/building= or =std/build-script= |
+| Build-script command and mode lowering | upstream =std/build-script= |
 | Pure-generator input and producer identity | downstream domain adapter |
 | Domain sidecar materialization and load validation | downstream domain adapter |
 | Generic immutable receipt, digest verification, and path containment | ASP =generated-artifact= |

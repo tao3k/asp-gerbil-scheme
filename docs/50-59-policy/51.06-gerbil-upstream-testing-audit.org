@@ -28,7 +28,7 @@ helpers.
 |---------+-------|
 | test arguments and recursive directories | =gerbil test= |
 | suite loading, setup/cleanup, filtering, summary | =:clan/testing= |
-| package/module graph | =clan/building= and =std/make= |
+| package/module graph | ASP Building API PackageSpec and =std/make= |
 | memory/performance/debug/resource declaration | ASP POO profiles |
 | POO method tracing | =:clan/poo/debug= |
 

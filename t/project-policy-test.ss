@@ -22,5 +22,5 @@
       (check (run-test-suite! project-policy-macro-witness-test) => #t))
     ;; The full project gate remains function-based because its explicit
     ;; evidence set is supplied by the native package and gxtest catalogs.
-    (test-case "clan module set passes the full project policy gate"
+    (test-case "ASP native module set passes the full project policy gate"
       (check (run-test-suite! project-policy-full-test) => #t))))

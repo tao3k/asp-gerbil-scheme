@@ -13,7 +13,7 @@
        "|rule search-playbook-owner=ASP-Rust-Runtime; this provider publishes facts and contains no Search playbook"
        "|cmd native-index=asp-gerbil-scheme projection --native-index --json --workspace ."
        "|cmd native-owner-facts=asp-gerbil-scheme projection --native-index --owner <path> --json --workspace ."
-       "|flow build-ss=choose a native lane by package need: clan/building for src-root all-gerbil-modules packages, std/build-script for simple gxpkg packages, std/make build-spec for ssi:/gsc:/FFI; do not hand-write loadpath/srcdir/compiler/runtime routing"
+       "|flow build-ss=import ASP building-api for declarative PackageSpec data, use std/build-script for gxpkg commands, and keep std/make as the executor for ssi:/gsc:/FFI; do not hand-write loadpath/srcdir/compiler/runtime routing"
        "|cmd exact-source=asp query playbook --language gerbil-scheme --selector <gerbil-scheme://owner#item/kind/name> --projection source --workspace ."
        "|cmd callable-skeleton=asp query playbook --language gerbil-scheme --selector <gerbil-scheme://owner#item/kind/name> --projection callable-skeleton --workspace ."
        "|policy source-index-owner=asp-server; native-fact-owner=gerbil-scheme; provider never plans, ranks, caches, or renders Search"
@@ -42,8 +42,8 @@
       (append ["|policy structural-fact-boundary=Gerbil publishes parser/interface facts through typed provider evidence; no provider-local search command owns them"
        "|policy structural-index-owner=Gerbil Scheme provider-local parser facts; ASP Server may route the packet, while graph topology, caching, and ranking are separate contracts"
                "|policy configurable-interface=PackageSpec/clan-building supplies the native std/make graph; parser consumes exact projected paths; explicit test/query entries may extend scope; explicit POO profiles configure policy; gerbil.pkg cannot disable rules"
-               "|policy package-build-canonical-lanes=build.ss has three native Gerbil lanes: :clan/building plus all-gerbil-modules for src-root package discovery, :std/build-script defbuild-script for simple gxpkg package templates, and :std/make build-spec for ssi:/gsc:/FFI/static/native build forms"
-               "|policy package-build-forbidden-control=R025 should target handwritten GERBIL_LOADPATH/srcdir setup, manual compiler ownership, and runtime routing in build.ss; ordinary shell/process use is not a violation, and valid std/make ssi:/gsc:/FFI builds must not be canonicalized into clan/building"
+               "|policy package-build-canonical-lanes=build.ss imports :asp-gerbil-scheme/building-api for declarative PackageSpec data, :std/build-script defbuild-script for gxpkg commands, and :std/make remains the sole ssi:/gsc:/FFI/static/native executor"
+               "|policy package-build-forbidden-control=R025 targets handwritten GERBIL_LOADPATH/srcdir setup, manual compiler ownership, and runtime routing in build.ss; ordinary shell/process use is not a violation"
                "|policy boundary-composition=keep process entrypoints thin with precise only-in imports; when boundary surfaces grow, compose POO-native request and configuration objects"
                "|policy package-module-style=Gerbil package modules should preserve package:/namespace:/import/export style instead of flattening into generic Scheme files"]
               (agent-rule-policy-lines)

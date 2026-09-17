@@ -42,7 +42,7 @@
 (def (configurable-interface-json)
   (hash (sourceScope
          (hash (owner "PackageSpec native spec")
-               (projection "clan/building module catalog consumed exactly")
+               (projection "ASP Building API PackageSpec catalog consumed exactly")
                (additionalScope "explicit test or query entries")))
         (buildScope
          (hash (owner "build.ss")
@@ -78,7 +78,7 @@
   (emit-text-line
    "|interface source-scope=PackageSpec-native-spec parser=exact-projection additional=test-or-query-entries")
   (emit-text-line
-   "|interface build-scope=clan/building-std/make parser-discovery=disabled")
+   "|interface build-scope=asp-building-api-std/make parser-discovery=disabled")
   (emit-text-line
    "|interface agent-policy=explicit-poo-profile default=all-rules-enabled package-overrides=unsupported")
   (emit-field-line

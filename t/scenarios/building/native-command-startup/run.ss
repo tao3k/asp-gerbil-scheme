@@ -1,18 +1,11 @@
 ;;; -*- Gerbil -*-
-;;; Real ASP command startup probe. Each child is stopped at its first semantic
-;;; event; compilation and test execution are deliberately outside this gate.
+;;; One-shot real ASP command startup probe. Each child is stopped at its first
+;;; semantic event; compilation and test execution are outside this gate.
 
 (import :gerbil/gambit
-        (only-in :clan/timestamp current-tai-timestamp)
         (only-in :std/misc/process run-process)
         (only-in :std/os/signal kill SIGTERM)
-        (only-in :std/srfi/13 string-prefix? string-contains)
-        :asp-gerbil-scheme/src/benchmark/statistics
-        (only-in :asp-gerbil-scheme/testing-api
-                 +asp-testing-interface+
-                 testing-interface-test-file-batches)
-        (only-in :asp-gerbil-scheme/testing-runner-api
-                 testing-interface-test-files))
+        (only-in :std/srfi/13 string-prefix?))
 
 (def +contract-path+
   "t/scenarios/building/native-command-startup/scenario-contract.ss")
@@ -31,11 +24,14 @@
   (with-catch void
     (lambda () (kill (process-pid process) SIGTERM))))
 
-(def (measure-first-event lane command event? attempt)
-  (displayln "[native-command-startup] lane=" lane
-             " attempt=" attempt " event=process-start")
+(def (elapsed-nanoseconds started-jiffy)
+  (quotient (* (- (current-jiffy) started-jiffy) 1000000000)
+            (jiffies-per-second)))
+
+(def (measure-first-event lane command event?)
+  (displayln "[native-command-startup] lane=" lane " event=process-start")
   (force-output)
-  (let* ((started-at (current-tai-timestamp))
+  (let* ((started-at (current-jiffy))
          (sample
           (run-process
            command
@@ -51,15 +47,13 @@
                    (error "native command exited before its startup event"
                           lane command))
                   ((event? line)
-                   (let (elapsed (- (current-tai-timestamp) started-at))
+                   (let (elapsed (elapsed-nanoseconds started-at))
                      (stop-probe! process)
                      `((lane . ,lane)
-                       (attempt . ,attempt)
                        (elapsedNs . ,elapsed)
                        (event . ,line))))
                   (else (loop)))))))))
     (displayln "[native-command-startup] lane=" lane
-               " attempt=" attempt
                " event=first-semantic-output elapsed-ns="
                (cdr (assq 'elapsedNs sample))
                " line=" (cdr (assq 'event sample)))
@@ -69,81 +63,82 @@
 (def (sample-elapsed sample)
   (cdr (assq 'elapsedNs sample)))
 
-(def (measure-series lane command event? attempts)
-  (map (lambda (attempt)
-         (measure-first-event lane command event? attempt))
-       (iota attempts 1)))
+(def (assert-budget lane elapsed-ns max-ns)
+  (unless (< elapsed-ns max-ns)
+    (error "native command startup exceeded its first-event budget"
+           lane elapsed-ns max-ns)))
 
-(def (assert-budget lane samples max-ns)
-  (for-each
-   (lambda (sample)
-     (unless (< (sample-elapsed sample) max-ns)
-       (error "native command startup exceeded its first-event budget"
-              lane sample max-ns)))
-   samples))
-
-(def (assert-p50-budget lane p50 max-ns)
-  (unless (< p50 max-ns)
-    (error "native command median startup exceeded its first-event target"
-           lane p50 max-ns)))
+(def (nonnegative-delta measured baseline)
+  (max 0 (- measured baseline)))
 
 (def (main . _)
   (let* ((contract (call-with-input-file +contract-path+ read))
-         (attempts (contract-ref contract 'attemptCount))
-         (test-files
-          (testing-interface-test-files +asp-testing-interface+ "unit-tests.ss"))
-         (test-batches
-          (testing-interface-test-file-batches
-           +asp-testing-interface+ test-files))
-         (startup-test-batch (and (pair? test-batches) (car test-batches)))
-         (_ (unless (pair? startup-test-batch)
-              (error "ASP native test catalog produced no executable batch")))
-         (_ (displayln "[native-command-startup] lane=test event=batch-selected"
-                       " catalog-file-count=" (length test-files)
-                       " batch-count=" (length test-batches)
-                       " startup-batch-file-count="
-                       (length startup-test-batch)))
-         (build-samples
-          (measure-series
-           'build
-           (native-command ["build"] ["GERBIL_BUILD_VERBOSE=1"])
-           (lambda (line)
-             (and (string-contains
-                   line "[asp-build] phase=spec-project-start") #t))
-           attempts))
-         (test-samples
-          (measure-series
-           'test
+         (test-file (contract-ref contract 'testFile))
+         (_test-file-exists
+          (unless (and (string? test-file) (file-exists? test-file))
+            (error "native startup test file is absent" test-file)))
+         (baseline-sample
+          (measure-first-event
+           'gerbil-baseline
            (native-command
-            (append ["test" "-v"] startup-test-batch) [])
-           (lambda (line) (string-prefix? "=== " line))
-           attempts))
-         (build-p50
-          (benchmark-sample-percentile (map sample-elapsed build-samples) 50))
-         (test-p50
-          (benchmark-sample-percentile (map sample-elapsed test-samples) 50)))
+            ["interactive" "-e"
+             "(displayln \"[asp-startup-baseline] ready\")"] [])
+           (lambda (line)
+             (string-prefix? "[asp-startup-baseline]" line))))
+         (baseline-ns (sample-elapsed baseline-sample))
+         (_baseline-within-budget
+          (assert-budget
+           'gerbil-baseline baseline-ns
+           (contract-ref contract 'maxBaselineFirstEventNanoseconds)))
+         (build-sample
+          (measure-first-event
+           'build
+           (native-command
+            ["interactive" "build.ss" "spec"]
+            ["GERBIL_BUILD_VERBOSE=1"])
+           (lambda (line)
+             (string-prefix?
+              "[asp-build] phase=spec-project-start" line))))
+         (build-ns (sample-elapsed build-sample))
+         (build-incremental-ns
+          (nonnegative-delta build-ns baseline-ns))
+         (_build-within-budget
+          (assert-budget
+           'build build-ns
+           (contract-ref contract 'maxBuildFirstEventNanoseconds)))
+         (_build-incremental-within-budget
+          (assert-budget
+           'build-incremental build-incremental-ns
+           (contract-ref contract 'maxBuildIncrementalFirstEventNanoseconds)))
+         (test-sample
+          (measure-first-event
+           'test
+           (native-command ["test" "-v" test-file] [])
+           (lambda (line) (string-prefix? "=== " line))))
+         (test-ns (sample-elapsed test-sample))
+         (test-incremental-ns
+          (nonnegative-delta test-ns baseline-ns)))
     (assert-budget
-     'build build-samples
-     (contract-ref contract 'maxBuildFirstEventNanoseconds))
-    (assert-budget
-     'test test-samples
+     'test test-ns
      (contract-ref contract 'maxTestFirstEventNanoseconds))
-    (assert-p50-budget
-     'build build-p50
-     (contract-ref contract 'targetBuildP50Nanoseconds))
-    (assert-p50-budget
-     'test test-p50
-     (contract-ref contract 'targetTestP50Nanoseconds))
+    (assert-budget
+     'test-incremental test-incremental-ns
+     (contract-ref contract 'maxTestIncrementalFirstEventNanoseconds))
     (pretty-print
-     `((schema . asp-gerbil-scheme.native-command-startup.v1)
+     `((schema . asp-gerbil-scheme.native-command-startup.v3)
        (subject . asp-gerbil-scheme-self)
-       (testCatalogFileCount . ,(length test-files))
-       (testBatchCount . ,(length test-batches))
-       (startupTestBatchFileCount . ,(length startup-test-batch))
-       (buildSamples . ,build-samples)
-       (testSamples . ,test-samples)
-       (buildP50Ns . ,build-p50)
-       (testP50Ns . ,test-p50)))
+       (testFile . ,test-file)
+       (baselineSample . ,baseline-sample)
+       (buildSample . ,build-sample)
+       (testSample . ,test-sample)
+       (baselineNs . ,baseline-ns)
+       (buildNs . ,build-ns)
+       (testNs . ,test-ns)
+       (buildIncrementalNs . ,build-incremental-ns)
+       (testIncrementalNs . ,test-incremental-ns)))
     (displayln "[native-command-startup] event=complete"
-               " build-p50-ns=" build-p50
-               " test-p50-ns=" test-p50)))
+               " baseline-ns=" baseline-ns
+               " build-ns=" build-ns
+               " build-incremental-ns=" build-incremental-ns
+               " test-ns=" test-ns
+               " test-incremental-ns=" test-incremental-ns)))

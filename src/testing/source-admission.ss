@@ -3,6 +3,7 @@
 
 (import (only-in :clan/poo/object .call .slot?)
         (only-in :std/test test-suite test-case)
+        (only-in :std/sugar cut)
         (only-in ./extension
                  testing-interface-profile-enabled?)
         (only-in ../build-api/native-import-closure
@@ -11,6 +12,8 @@
 (export testing-interface-call-with-prepared-source-graph
         testing-interface-prepared-source-admission-suite)
 
+;; : (forall (t p v) (-> t String (List p) v))
+;; : (-> TestingInterface TestName (List Path) Value)
 (def (testing-interface-call-with-prepared-source-graph testing test roots)
   (unless (testing-interface-profile-enabled? testing 'source-admission)
     (error "testing source-admission profile is not enabled" test))
@@ -27,7 +30,12 @@
    (lambda ()
      (.call testing .admit-prepared-source-graph test roots))))
 
+;; : (forall (t r) (-> t String (List r) TestSuite))
+;; : (-> TestingInterface TestName (List Path) TestSuite)
 (def (testing-interface-prepared-source-admission-suite testing test roots)
-  (test-suite "prepared native source graph admission"
-    (test-case "admit the graph prepared by the native test harness"
-      (testing-interface-call-with-prepared-source-graph testing test roots))))
+  (let (admit-prepared-source-graph
+        (cut testing-interface-call-with-prepared-source-graph
+             testing test roots))
+    (test-suite "prepared native source graph admission"
+      (test-case "admit the graph prepared by the native test harness"
+        (admit-prepared-source-graph)))))

@@ -1,12 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; Native source scope for policy tests.
 ;;;
-;;; Production and test modules come from clan/building's std/make graph.
-;;; ASP performs no filesystem discovery or import expansion.
+;;; Production and test modules use the same lightweight source catalog as
+;;; PackageSpec. std/make remains the sole build graph executor.
 
 (import :gerbil/gambit
-        (rename-in :clan/building
-                   (all-gerbil-modules std-make-gerbil-modules))
+        (rename-in "../build-api/native-spec-support"
+                   (all-gerbil-modules native-gerbil-modules))
         (only-in :std/misc/path path-expand)
         (only-in :std/srfi/13 string-suffix?))
 
@@ -18,9 +18,9 @@
       (parameterize ((current-directory test-root))
         (map (cut string-append "t/" <>)
              (filter (cut string-suffix? "-test.ss" <>)
-                     (std-make-gerbil-modules))))
+                     (native-gerbil-modules))))
       [])))
 
 (def (project-policy-source-files)
-  (append (std-make-gerbil-modules)
+  (append (native-gerbil-modules)
           (project-policy-test-files)))

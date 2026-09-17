@@ -26,7 +26,7 @@
 
 ;; (List ModuleName)
 (def +package-build-canonical-modules+
-  '(":clan/building"))
+  '(":asp-gerbil-scheme/building-api"))
 
 ;; (List ModuleName)
 (def +package-build-std-build-script-modules+
@@ -38,7 +38,7 @@
 
 ;; (List CalleeName)
 (def +package-build-canonical-environment-callees+
-  '("init-build-environment!" "%set-build-environment!"))
+  '("asp-gerbil-scheme-package-spec!"))
 
 ;; (List CalleeName)
 (def +package-build-std-build-script-callees+
@@ -151,7 +151,7 @@
     "package build custom-system drift requires scope, missing native build surface, and manual orchestration evidence")))
 
 ;;; Framework-overreach detection catches the opposite failure mode from the
-;;; custom-system detector: build.ss imports std/make or clan/building, but then
+;;; custom-system detector: build.ss imports std/make or the ASP Build API, but then
 ;;; recreates build-phase/cache ownership locally.  The repair is not to replace
 ;;; Gerbil's build system; it is to keep cache/receipt policy in harness APIs
 ;;; that wrap the normal build entrypoint.
@@ -244,27 +244,23 @@
           (call-fact-selector (car calls))))))
 
 ;;; Canonical package build evidence stays structural: module imports prove
-;;; clan/building is present, calls prove environment initialization, and either
-;;; calls or definitions prove delegated source discovery.
+;;; ASP PackageSpec is present, calls prove declaration, and either calls or
+;;; definitions prove delegated source discovery.
 ;; : (-> SourceFile Boolean)
 (def (package-build-canonical-build-shape? file)
-  (or (package-build-canonical-clan-shape? file)
+  (or (package-build-canonical-package-spec-shape? file)
       (package-build-std-build-script-shape? file)
       (package-build-std-make-buildspec-shape? file)))
 
-;;; Clan/building shape is the preferred package boundary: the import provides
-;;; build semantics, init call owns environment setup, and enumerator/spec
-;;; evidence proves source discovery is delegated instead of handwritten.
+;;; ASP PackageSpec is a declarative projection boundary. Its macro call owns
+;;; source slots directly; execution is still provided by std/build-script and
+;;; std/make.
 ;; : (-> SourceFile Boolean)
-(def (package-build-canonical-clan-shape? file)
+(def (package-build-canonical-package-spec-shape? file)
   (and (ormap package-build-canonical-module-import?
               (source-file-module-imports file))
        (ormap package-build-canonical-environment-call?
-              (source-file-calls file))
-       (or (ormap package-build-canonical-enumerator-call?
-                  (source-file-calls file))
-           (ormap package-build-spec-definition?
-                  (source-file-definitions file)))))
+              (source-file-calls file))))
 
 ;;; std/build-script is accepted as a legacy structural witness only when the
 ;;; import and defbuild-script call appear together, keeping migration evidence

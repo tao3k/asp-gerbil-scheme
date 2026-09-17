@@ -40,11 +40,12 @@
         (only-in "./native-profile"
                  asp-gerbil-scheme-default-native-profile
                  asp-gerbil-scheme-native-profile-projection-heartbeat-seconds
-                 asp-gerbil-scheme-native-profile-executable-gsc-options))
+                 asp-gerbil-scheme-native-profile-executable-gsc-options
+                 asp-gerbil-scheme-native-profile-prepare!))
 
 ;; asp-gerbil-scheme-package-spec!
 ;;   : (-> Syntax Syntax)
-;;   | defaults modules to clan/building's native package catalog
+;;   | defaults modules to the local lightweight native source catalog
 ;;   | doc m%
 ;;       Declare a downstream Gerbil package without importing ASP product
 ;;       entrypoints.  The native-spec slot remains an ordinary std/make value.
@@ -78,9 +79,9 @@
           (and (pair? entries)
                (asp-gerbil-scheme-native-import-closure
                 (current-directory) entries)))
-      ;; Without declared public entries, exactly match clan/building: gxpkg
-      ;; invokes build.ss in the package directory and the native catalog reads
-      ;; that current directory. Tests and generated build trees stay excluded.
+      ;; Without declared public entries, gxpkg invokes build.ss in the package
+      ;; directory and the native catalog reads that current directory. Tests
+      ;; and generated build trees stay excluded.
         (upstream-all-gerbil-modules
          exclude-dirs:
          (asp-gerbil-scheme-package-exclude-dirs package-spec)))))
@@ -98,7 +99,12 @@
 
 ;; : (-> PackageSpec (List NativeBuildItem))
 (def (asp-gerbil-scheme-package-native-spec package-spec)
-  (let* ((native-options-resolver
+  (let* ((native-profile
+          (asp-gerbil-scheme-package-native-profile package-spec))
+         (_prepared
+          ((asp-gerbil-scheme-native-profile-prepare! native-profile)
+           (asp-gerbil-scheme-package-pkg-config-libs package-spec)))
+         (native-options-resolver
           (asp-gerbil-scheme-package-native-options-resolver package-spec))
         (native-options
          (if native-options-resolver
@@ -115,7 +121,7 @@
                item
                (append
                 (asp-gerbil-scheme-native-profile-executable-gsc-options
-                 (asp-gerbil-scheme-package-native-profile package-spec))
+                 native-profile)
                 native-options)))
              ((or (? string?) [(? (cut member <> '(gxc: gsc:))) . _])
               (if (null? native-options) item
@@ -209,8 +215,8 @@
           (when heartbeat
             (thread-terminate! heartbeat)))))))
 
-;; The macro-generated spec procedure is the direct std/make boundary used by
-;; clan/building. A PackageSpec remains the POO owner;
+;; The macro-generated spec procedure is the direct std/make boundary. A
+;; PackageSpec remains the POO owner;
 ;; spec-projector selects its native or policy-admitted projection.
 ;; : (-> PackageSpec (List NativeBuildItem))
 (def (asp-gerbil-scheme-package-build-spec package-spec)

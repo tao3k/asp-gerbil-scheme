@@ -6,7 +6,7 @@
 :PROPERTIES:
 :JD_ID: 31.04
 :STATUS: implemented
-:OWNER: clan/building and clan/testing
+:OWNER: ASP Building API and clan/testing
 :RELATED: 31.01, 51.04, 51.06
 :END:
 
@@ -25,7 +25,7 @@ which suites exist or invokes a second source collector.
 
 #+begin_src mermaid
 flowchart LR
-  Package["gerbil.pkg"] --> Building["clan/building"]
+  Package["gerbil.pkg"] --> Building["ASP Building API PackageSpec"]
   Building --> Make["std/make graph"]
   CLI["gerbil test"] --> Testing["clan/testing"]
   Profiles["ASP POO profiles"] -. limits and observations .-> CLI

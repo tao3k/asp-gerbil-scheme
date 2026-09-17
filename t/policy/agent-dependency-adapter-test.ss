@@ -141,7 +141,7 @@
             (check (hash-get details 'ioSerializationMethodFamily)
                    => "json<-/<-json, marshal/unmarshal, bytes<-/<-bytes, and string<-/<-string are method/type slots")
             (check (hash-get details 'buildPattern)
-                   => "use :std/make + :clan/base + :clan/building discovery, while filtering non-module policy/config files for this harness")
+                   => "use ASP Building API PackageSpec discovery with :std/make execution, while filtering non-module policy/config files for this harness")
             (check (hash-get details 'boundaryCompositionPattern)
                    => "keep process entrypoints thin; compose POO-native request and configuration objects when boundary surfaces grow")
             (check (not (not (string-contains

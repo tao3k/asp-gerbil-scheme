@@ -83,9 +83,9 @@ visible instead of being captured by the adapter.
 
 ** Source scope
 
-Production scope comes from =clan/building#all-gerbil-modules=, which is the
-same std/make graph used by the package build. Policy tests obtain their
-=t/=-rooted modules through that same upstream graph and filter the explicit
+Production scope comes from ASP PackageSpec's lightweight native catalog,
+which supplies the same std/make graph used by the package build. Policy tests
+obtain their =t/=-rooted modules through that same catalog and filter the explicit
 =-test.ss= module set. ASP does not walk the repository or expand imports to
 manufacture a second source graph.
 

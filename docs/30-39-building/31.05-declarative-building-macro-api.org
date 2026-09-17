@@ -4,8 +4,8 @@
 * Purpose
 
 The Building Framework is a library, not a project-specific shell recipe.
-Package build entrypoints use Gerbil's native =:clan/building= or
-=:std/build-script= surface. The declarative BuildRequest macros remain a typed
+Package build entrypoints use ASP =:asp-gerbil-scheme/building-api= declarations
+with Gerbil's native =:std/build-script= surface. The declarative BuildRequest macros remain a typed
 plan/receipt library for Testing and inspection; they are not a package
 compiler entrypoint and do not define development or production modes.
 
@@ -14,7 +14,7 @@ compiler entrypoint and do not define development or production modes.
 #+begin_mermaid
 flowchart LR
   Package["POO package spec<br/>optional native overrides"] --> Script["Downstream build.ss"]
-  Script --> Native["clan/building or std/build-script"]
+  Script --> Native["std/build-script"]
   Native --> Make["std/make"]
   Decl["typed plan and receipt"] --> Build["building/facade"]
   TestDecl["testing/building"] --> TestModel["testing/model"]

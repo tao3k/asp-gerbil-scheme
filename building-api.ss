@@ -1,6 +1,6 @@
 ;;; -*- Gerbil -*-
-;;; Optional public Building Framework API. Package declarations that only need
-;;; PackageSpec should import :asp-gerbil-scheme/build-api instead.
+;;; Public ASP Building API. PackageSpec supplies declarative build data while
+;;; std/make remains the only graph executor; profiles add optional observation.
 
 (import "./src/build-api/generated-artifact"
         "./src/build-api/framework"

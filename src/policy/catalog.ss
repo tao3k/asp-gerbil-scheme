@@ -156,7 +156,7 @@
          (guideTopic "package-build-canonical-shape")
          (guideIntent "repair")
          (nextCommand "asp gerbil-scheme guide --code --rule GERBIL-SCHEME-AGENT-POLICY-025 --intent repair")
-         (requires "package-level build.ss should use a native Gerbil package build surface: :clan/building with all-gerbil-modules for src-root packages, :std/build-script defbuild-script for standard gxpkg packages, or :std/make build-spec for ssi:/gsc:/FFI builds; resident provider operations belong behind the POO-native HTTP runtime entrypoint, not build.ss stages"))
+         (requires "package-level build.ss should import :asp-gerbil-scheme/building-api for declarative PackageSpec data, use :std/build-script defbuild-script for gxpkg commands, and leave ssi:/gsc:/FFI execution to :std/make; resident provider operations belong behind the POO-native HTTP runtime entrypoint, not build.ss stages"))
    ])
 ;;; Boundary:
 ;;; - agent-steering-rule-ids composes first-class procedures.

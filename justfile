@@ -4,10 +4,12 @@ set positional-arguments
 # Homebrew Gerbil/Gambit must use the host macOS SDK.  A surrounding Nix
 # environment may inject its own Apple SDK and break Gambit's C compilation.
 # Other platforms retain their native Gerbil environment unchanged.
+logical_cores := `getconf _NPROCESSORS_ONLN`
+build_cores := env_var_or_default("GERBIL_BUILD_CORES", logical_cores)
 gerbil := if os() == "macos" {
-    "env -u SDKROOT -u DEVELOPER_DIR gerbil"
+    "env -u SDKROOT -u DEVELOPER_DIR GERBIL_BUILD_CORES=" + build_cores + " gerbil"
 } else {
-    "gerbil"
+    "env GERBIL_BUILD_CORES=" + build_cores + " gerbil"
 }
 
 default:

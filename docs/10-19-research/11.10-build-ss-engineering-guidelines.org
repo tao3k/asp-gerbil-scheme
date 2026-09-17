@@ -8,7 +8,8 @@ This note fixes the harness rule for package-level =build.ss= files:
 
 The package build owner should delegate source discovery, dependency
 compilation, and worker scheduling to Gerbil's native build APIs such as
-=std/make=, =std/build-script=, and =clan/building=. Package-specific code may
+=std/make= and =std/build-script=, with ASP Building API supplying declarative
+PackageSpec data. Package-specific code may
 describe build specs, but it should not hand-write broad file walks, duplicate
 test execution, or shell/native compiler orchestration.
 
@@ -93,7 +94,7 @@ otherwise the host CPU count.
   targets instead of using Gerbil build APIs.
 - =build.ss= defines local worker queues, build-job runners, phase receipts, or
   stamp freshness on top of an already-selected native =std/make= /
-  =clan/building= surface.
+  =std/make= surface.
 - =build.ss test= compiles source modules, build support modules, test support
   modules, and gxtest modules through separate broad =make= calls.
 - A normal test target runs the same policy surface twice: once through gxtest
@@ -127,7 +128,7 @@ contract. A change must pass these gates before it becomes policy or a build
 API:
 
 - The owner must be an upstream Gerbil owner (=std/make=, =std/build-script=,
-  =gxpkg=, or =clan/building=) or a reusable harness API consumed by arbitrary
+  =gxpkg=) or a reusable harness API consumed by arbitrary
   packages.
 - The implementation must not key behavior on a downstream project name, fixed
   binary name, fixed worker count, fixed source directory beyond a declared

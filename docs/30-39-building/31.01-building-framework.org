@@ -13,8 +13,8 @@
 
 Production package compilation is native Gerbil:
 
-- =build.ss= declares the complete library Graph with
-  =clan/building#init-build-environment!=.
+- =build.ss= declares the complete library Graph through ASP PackageSpec and
+  =std/build-script#defbuild-script=.
 - =build-provider.ss= declares the explicit provider executable Graph with
   =std/build-script#defbuild-script=.
 - =std/make= alone owns import dependency resolution, currentness, build modes,
@@ -34,8 +34,8 @@ identity + acquisition"]
 name + deps + PackageSpec Graph"]
   Provider["build-provider.ss
 provider BuildSpec"]
-  Clan["clan/building
-package environment"]
+  Spec["ASP Building API
+PackageSpec projection"]
   Make["std/make
 native dependency and freshness owner"]
   Values["src/building
@@ -43,7 +43,7 @@ optional pure values"]
   Tests["GxTest explicit test closure"]
 
   Manifest --> Build
-  Build --> Clan --> Make
+  Build --> Spec --> Make
   Provider --> Make
   Tests --> Make
   Values -. observe or model .-> Make
@@ -54,9 +54,7 @@ optional pure values"]
 The library entry keeps the dependency-aware upstream declaration:
 
 #+begin_src scheme
-(import (only-in :clan/building
-                 all-gerbil-modules
-                 init-build-environment!)
+(import (only-in :std/build-script defbuild-script)
         (only-in "./src/build-api/source-bootstrap"
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype))
@@ -64,16 +62,12 @@ The library entry keeps the dependency-aware upstream declaration:
 (asp-gerbil-scheme-package-spec!
  (library-package @ asp-gerbil-scheme-library-package-prototype)
  (spec library-spec)
- (modules (all-gerbil-modules))
  (product-entry-modules +product-entry-modules+))
 
-(init-build-environment!
- name: "asp-gerbil-scheme"
- deps: '("clan" "clan/poo")
- spec: library-spec)
+(defbuild-script (library-spec))
 #+end_src
 
-=PackageSpec='s =exclude-dirs= slot starts with clan's native exclusions for
+=PackageSpec='s =exclude-dirs= slot starts with ASP's native exclusions for
 =t/=, =run/=, =.git/=, =_darcs/=, and =.gerbil/=. A downstream POO declaration
 may extend that inherited set for a real project source layout. This project
 adds no overlay: the retired =build/workspace-provider= tree belonged to the

@@ -89,7 +89,7 @@
   (dependency-adapter-profile
    "dependency-build-boundary-lineage"
    [(cons 'buildPattern
-          "use :std/make + :clan/base + :clan/building discovery, while filtering non-module policy/config files for this harness")
+          "use ASP Building API PackageSpec discovery with :std/make execution, while filtering non-module policy/config files for this harness")
     (cons 'boundaryCompositionPattern
           "keep process entrypoints thin; compose POO-native request and configuration objects when boundary surfaces grow")]))
 

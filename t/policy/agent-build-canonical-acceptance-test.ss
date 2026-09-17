@@ -13,7 +13,7 @@
 ;; PolicyTest
 (def agent-build-canonical-acceptance-policy-test
   (test-suite "gerbil scheme harness package build canonical acceptance policy"
-    (test-case "agent policy accepts clan/building package build"
+    (test-case "agent policy accepts ASP Building API package build"
       (let ((root ".run/policy-package-build-canonical-clan-building"))
         (reset-fixture-root root)
         (ensure-dir ".run")
@@ -22,12 +22,12 @@
                     "(package: sample/build-canonical-clan-building)\n")
         (write-text
          (string-append root "/build.ss")
-         ";;; -*- Gerbil -*-\n(import :std/make\n        :clan/base\n        :clan/building)\n(def (spec)\n  (!> (all-gerbil-modules)\n      (cut cons \"t/unit/build-runtime\" <>)))\n(init-build-environment!\n name: \"sample-package\"\n deps: '(\"clan\")\n spec: spec)\n")
+         ";;; -*- Gerbil -*-\n(import (only-in :std/build-script defbuild-script)\n        :asp-gerbil-scheme/building-api)\n(asp-gerbil-scheme-package-spec!\n (sample-package-spec @ asp-gerbil-scheme-library-package-prototype)\n (spec spec)\n (modules '(\"src/main.ss\")))\n(defbuild-script (spec))\n")
         (let* ((index (collect-project root))
                (findings (run-agent-policy index)))
           (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-025" findings) => [])
           (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-020" findings) => []))))
-    (test-case "agent policy accepts only-in clan/building package build"
+    (test-case "agent policy accepts only-in ASP Building API package build"
       (let ((root ".run/policy-package-build-canonical-only-in-clan-building"))
         (reset-fixture-root root)
         (ensure-dir ".run")
@@ -36,7 +36,7 @@
                     "(package: sample/build-canonical-only-in-clan-building)\n")
         (write-text
          (string-append root "/build.ss")
-         ";;; -*- Gerbil -*-\n(import :std/make\n        :clan/base\n        (only-in :clan/building init-build-environment! all-gerbil-modules))\n(def (spec)\n  (!> (all-gerbil-modules)\n      (cut cons \"t/unit/build-runtime\" <>)))\n(init-build-environment!\n name: \"sample-package\"\n deps: '(\"clan\")\n spec: spec)\n")
+         ";;; -*- Gerbil -*-\n(import (only-in :std/build-script defbuild-script)\n        (only-in :asp-gerbil-scheme/building-api\n                 asp-gerbil-scheme-package-spec!\n                 asp-gerbil-scheme-library-package-prototype))\n(asp-gerbil-scheme-package-spec!\n (sample-package-spec @ asp-gerbil-scheme-library-package-prototype)\n (spec spec)\n (modules '(\"src/main.ss\")))\n(defbuild-script (spec))\n")
         (let* ((index (collect-project root))
                (findings (run-agent-policy index)))
           (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-025" findings) => [])
@@ -56,7 +56,7 @@
                     "(package: sample/build-canonical-stage-table)\n")
         (write-text
          (string-append root "/build.ss")
-         ";;; -*- Gerbil -*-\n(import :std/make\n        :clan/base\n        :clan/building)\n(defstruct provider-build-stage (name action))\n(def (spec)\n  (!> (all-gerbil-modules)\n      (cut cons \"t/unit/build-runtime\" <>)))\n(def (provider-build-stages)\n  [(make-provider-build-stage \"compile\" (lambda (args) args))])\n(def (provider-build-stage-ref name)\n  (find (lambda (stage) (equal? (provider-build-stage-name stage) name)) (provider-build-stages)))\n(def (run-provider-build-stage! stage args)\n  ((provider-build-stage-action stage) args))\n(init-build-environment!\n name: \"sample-package\"\n deps: '(\"clan\")\n spec: spec)\n")
+         ";;; -*- Gerbil -*-\n(import (only-in :std/build-script defbuild-script)\n        :asp-gerbil-scheme/building-api)\n(asp-gerbil-scheme-package-spec!\n (sample-package-spec @ asp-gerbil-scheme-library-package-prototype)\n (spec spec)\n (modules '(\"src/main.ss\")))\n(defstruct provider-build-stage (name action))\n(def (provider-build-stages)\n  [(make-provider-build-stage \"compile\" (lambda (args) args))])\n(def (provider-build-stage-ref name)\n  (find (lambda (stage) (equal? (provider-build-stage-name stage) name)) (provider-build-stages)))\n(def (run-provider-build-stage! stage args)\n  ((provider-build-stage-action stage) args))\n(defbuild-script (spec))\n")
         (let* ((index (collect-project root))
                (findings (run-agent-policy index)))
           (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-025" findings) => []))))
@@ -73,7 +73,7 @@
                     "(package: sample/build-canonical-provider-build-include)\n")
         (write-text
          (string-append root "/build.ss")
-         ";;; -*- Gerbil -*-\n(import :std/make\n        :clan/base\n        :clan/building)\n(def (spec)\n  (!> (all-gerbil-modules)\n      (cut cons \"t/unit/build-runtime\" <>)))\n(include \"src/build-api/provider-build.ss\")\n(init-build-environment!\n name: \"sample-package\"\n deps: '(\"clan\")\n spec: spec)\n")
+         ";;; -*- Gerbil -*-\n(import (only-in :std/build-script defbuild-script)\n        :asp-gerbil-scheme/building-api)\n(asp-gerbil-scheme-package-spec!\n (sample-package-spec @ asp-gerbil-scheme-library-package-prototype)\n (spec spec)\n (modules '(\"src/main.ss\")))\n(include \"src/build-api/provider-build.ss\")\n(defbuild-script (spec))\n")
         (write-text
          (string-append support "/provider-build.ss")
          ";;; -*- Gerbil -*-\n(def (provider-build-spec)\n  '(\"src/main\"))\n(def (run-build! args)\n  (apply make (provider-build-spec) srcdir: (current-directory) []))\n")

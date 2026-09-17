@@ -4,7 +4,7 @@
 * Decision
 
 The former native target stage adapter is removed. It duplicated responsibilities
-already owned by =clan/building= and =std/make=: package Graph storage,
+already owned by ASP PackageSpec and =std/make=: package Graph storage,
 currentness prediction, stage ordering, clean behavior, and package compile
 commands.
 

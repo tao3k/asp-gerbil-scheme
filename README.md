@@ -39,10 +39,11 @@ just test-files t/package-build-contract-test.ss
 The harness building framework is documented in `docs/30-39-building/31.01-building-framework.org`.
 It keeps Gerbil `std/make` as the compile executor while adding explicit build stages,
 receipts, package stage ordering, and performance gates.
-Downstream `build.ss` files import the latency-bounded
-`:asp-gerbil-scheme/build-api` PackageSpec facade. Optional framework,
-testing, Policy, and benchmark capabilities are separately owned by
-`:asp-gerbil-scheme/building-api`, `:asp-gerbil-scheme/testing-api`,
+Downstream `build.ss` files import
+`:asp-gerbil-scheme/building-api` for PackageSpec and optional build profiles.
+The narrow `:asp-gerbil-scheme/build-api` facade remains available to cold
+self-bootstrap owners that need PackageSpec only. Testing, Policy, and
+benchmark capabilities are separately owned by `:asp-gerbil-scheme/testing-api`,
 `:asp-gerbil-scheme/policy-api`, and `:asp-gerbil-scheme/benchmark-api`; loading
 a PackageSpec never initializes those graphs.
 Pure expansion-time generators can use the verified content-addressed sidecar

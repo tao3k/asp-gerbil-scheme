@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-;;; Current-system profile data for upstream clan/building package builds.
+;;; Current-system profile data for native std/make package builds.
 
 (import :gerbil/gambit
         (only-in :clan/poo/object .def)
@@ -20,7 +20,42 @@
         asp-gerbil-scheme-native-profile-architecture
         asp-gerbil-scheme-native-profile-projection-heartbeat-seconds
         asp-gerbil-scheme-native-profile-executable-gsc-options
+        asp-gerbil-scheme-native-pkg-config-options
         asp-gerbil-scheme-native-profile-prepare!)
+
+;; std/make remains the executor; this function only projects an explicitly
+;; declared native dependency through the platform pkg-config command after
+;; the host profile has prepared its search path.
+;; : (-> String (List String) String)
+(def (native-pkg-config-query option libraries)
+  (try
+   (let (result
+         (string-trim-both
+          (run-process
+           (append ["pkg-config" option] libraries)
+           coprocess: read-all-as-string)))
+     (if (> (string-length result) 0)
+       result
+       (error "pkg-config returned no native options" option libraries)))
+   (catch (exception)
+     (error "Failed to resolve native library options with pkg-config"
+            libraries exception))))
+
+;; asp-gerbil-scheme-native-pkg-config-options
+;;   : (-> (List String) (List String))
+;;   | doc m%
+;;       Projects explicitly declared C libraries into native compiler and
+;;       linker option forms consumed by a std/make BuildSpec.
+;;
+;;       # Examples
+;;       ```scheme
+;;       (asp-gerbil-scheme-native-pkg-config-options '("openssl"))
+;;       ;; => ("-ld-options" "..." "-cc-options" "...")
+;;       ```
+;;     %
+(def (asp-gerbil-scheme-native-pkg-config-options libraries)
+  ["-ld-options" (native-pkg-config-query "--libs" libraries)
+   "-cc-options" (native-pkg-config-query "--cflags" libraries)])
 
 ;; : (-> (List String) (Maybe Path))
 (def (native-profile-homebrew-prefix packages)
@@ -66,8 +101,8 @@
   ;; Keep the public/default compiler contract at gcc. A Homebrew
   ;; Gerbil/Gambit build can retain a versioned gcc-N plus linker flags that no
   ;; longer match the current SDK; the unversioned platform command avoids
-  ;; inheriting that installation-time drift. clan/building still owns option
-  ;; normalization and applies this only to final executable forms.
+  ;; inheriting that installation-time drift. PackageSpec owns option
+  ;; projection and applies this only to final executable forms.
   (executable-gsc-options '("-cc" "gcc"))
   (prepare!
    (lambda (pkg-config-libs)

@@ -9,6 +9,8 @@
 
 (export testing-interface-trace-poo-for)
 
+;; : (forall (t p) (-> t String p p))
+;; : (-> TestingInterface Test PooObject PooObject)
 (def (testing-interface-trace-poo-for testing test poo
                                       name: (name 'testing-profile-target))
   (if (find (lambda (profile)

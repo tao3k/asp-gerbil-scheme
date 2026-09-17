@@ -12,9 +12,7 @@
                  asp-gerbil-scheme-package-public-entry-modules
                  asp-gerbil-scheme-package-native-profile
                  asp-gerbil-scheme-package-pkg-config-libs
-                 asp-gerbil-scheme-package-nix-deps)
-        (only-in "./native-profile"
-                 asp-gerbil-scheme-native-profile-prepare!))
+                 asp-gerbil-scheme-package-nix-deps))
 
 (export asp-gerbil-scheme-package-spec!
         all-gerbil-modules
@@ -23,5 +21,4 @@
         asp-gerbil-scheme-package-public-entry-modules
         asp-gerbil-scheme-package-native-profile
         asp-gerbil-scheme-package-pkg-config-libs
-        asp-gerbil-scheme-package-nix-deps
-        asp-gerbil-scheme-native-profile-prepare!)
+        asp-gerbil-scheme-package-nix-deps)

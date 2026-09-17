@@ -8,7 +8,7 @@ This document is the downstream user contract for packages that consume the
 Gerbil Scheme language project harness through =gerbil.pkg= and =gxtest=.
 
 The harness owns policy evaluation, reporting, and repair hints. A downstream
-=PackageSpec= supplies the native module graph through clan/building and
+=PackageSpec= supplies the native module graph through ASP Building API and
 =std/make=; explicit test/query entries may extend that scope. The parser never
 rescans roots or follows imports to rebuild it. Optional thresholds use explicit
 native POO profiles. =gerbil.pkg= owns only package identity and dependency
@@ -35,7 +35,7 @@ and test lifecycle. Existing =gxtest= files remain supported without conversion.
 
 * Native package declarations
 For the default library PackageSpec, =exclude-modules= removes declared paths
-from the upstream catalog with clan/building's native removal helper, and
+from the native catalog with ASP's indexed removal helper, and
 =extra-spec= appends ordinary =std/make= targets unchanged. Use these POO slots
 for interface-only targets, FFI, and additional public entry modules, without a
 downstream catalog scan or =native-spec-projector=. Exclusions apply before

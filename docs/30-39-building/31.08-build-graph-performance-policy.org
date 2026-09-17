@@ -43,7 +43,7 @@ flowchart LR
 | A sidecar cache removes a target, predicts native currentness, or schedules compilation | Rejected |
 
 PackageSpec performs only its pure declaration projection. The root entry
-passes the complete declared spec to native =clan/building=. It does not parse imports, infer
+passes the complete declared spec to native =std/build-script/std/make=. It does not parse imports, infer
 reverse dependencies, compare source/output mtimes, pre-clean an affected
 closure, or decide that a build is current.  Those operations require Gerbil
 expander and =std/make= semantics.
@@ -91,19 +91,18 @@ could not be retained as compatibility surfaces.  Package declarations now
 provide source groups only; the complete native spec reaches the upstream
 executor without an ASP-derived dependency graph or freshness filter.
 
-=:clan/building= and =:std/make= are not peer schedulers.  Clan owns the
-package-level discovery and build-environment projection, while =std/make= owns
-execution.  ASP package macros may specialize the declaration syntax, but must
-lower into that upstream path rather than introducing another builder loop.
+ASP Building API and =:std/make= are not peer schedulers. ASP owns declarative
+PackageSpec projection, while =std/make= owns execution. ASP package macros may
+specialize declaration syntax but cannot introduce another builder loop.
 
 #+begin_src mermaid
 flowchart LR
   Macro["ASP package macro\noptional native BuildSpec overrides"]
-  Clan[":clan/building\ndiscovery · environment · options"]
+  Spec["ASP Building API\ndiscovery · profiles · options"]
   Make[":std/make\ndependency · incremental · parallel execution"]
   Observe["passive receipt\nelapsed · CPU · RSS · compiler jobs"]
 
-  Macro --> Clan --> Make
+  Macro --> Spec --> Make
   Make -. "observed, never rescheduled" .-> Observe
 #+end_src
 

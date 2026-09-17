@@ -22,12 +22,26 @@
 (export testing-interface-test-files
         init-profiled-test-environment!)
 
+;; testing-interface-test-files
+;;   : (forall (t) (-> t String String (List Path)))
+;;   : (-> TestingInterface TestName Path String (List Path))
+;;   | doc m%
+;;       Discovers native clan/testing files, then applies the declarative ASP
+;;       TestingInterface inclusion slots before execution.
+;;
+;;       # Examples
+;;       ```scheme
+;;       (testing-interface-test-files testing "unit-tests.ss")
+;;       ;; => ("t/example-test.ss")
+;;       ```
+;;     %
 (def (testing-interface-test-files testing test
                                    pkgdir: (pkgdir ".")
                                    regex: (regex "-test.ss$"))
   (filter (cut testing-interface-test-file-included? testing test <>)
           (find-test-files pkgdir regex)))
 
+;; : (-> Integer Integer)
 (def (testing-elapsed-nanoseconds started-jiffy)
   (quotient (* (- (current-jiffy) started-jiffy) 1000000000)
             (jiffies-per-second)))
@@ -35,6 +49,18 @@
 ;;; Macro expansion captures the caller's unit-tests.ss source location.  The
 ;;; imported runner is merely the native execution trampoline; the supplied
 ;;; testing object remains the sole declaration of enabled Profiles and slots.
+;; init-profiled-test-environment!
+;;   : (-> Syntax Syntax)
+;;   | doc m%
+;;       Installs the native gxtest entrypoint around one declarative ASP
+;;       TestingInterface value without creating a second test runner.
+;;
+;;       # Examples
+;;       ```scheme
+;;       (init-profiled-test-environment! +asp-testing-interface+)
+;;       ;; => native gxtest entrypoint declarations
+;;       ```
+;;     %
 (defrules init-profiled-test-environment! ()
   ((ctx testing)
    (begin

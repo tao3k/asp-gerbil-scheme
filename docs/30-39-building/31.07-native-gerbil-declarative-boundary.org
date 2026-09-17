@@ -7,14 +7,14 @@
 :STATUS: active-design
 :OWNER: build.ss build-provider.ss provider-package-spec.ss
 :RELATED: 31.01, 31.02, 31.08, 31.09
-:UPSTREAM: Gerbil 0.18.2 clan/building std/make std/build-script gxpkg
+:UPSTREAM: Gerbil 0.18.2 std/make std/build-script gxpkg
 :END:
 
 ** Authoritative entrypoints
 
 - =gerbil.pkg= owns package identity and dependency acquisition.
-- Root =build.ss= owns the complete library Graph and logical =deps:= through
-  =clan/building#init-build-environment!=.
+- Root =build.ss= owns the complete library Graph through ASP PackageSpec and
+  =std/build-script#defbuild-script=.
 - =provider-package-spec.ss= owns the explicit provider runtime and executable
   BuildSpec; =build-provider.ss= passes it to
   =std/build-script#defbuild-script=.
@@ -25,11 +25,10 @@
 flowchart LR
   Manifest["gerbil.pkg"] --> Gxpkg["gxpkg"]
   Root["build.ss
-Graph + deps"] --> Clan["init-build-environment!"]
+Graph"] --> Script
   Provider["build-provider.ss
 provider Graph"] --> Script["defbuild-script"]
-  Clan --> Make["std/make"]
-  Script --> Make
+  Script --> Make["std/make"]
   Make --> Library["package library"]
   Make --> Binary["explicit provider binary"]
 #+end_src
@@ -38,7 +37,7 @@ provider Graph"] --> Script["defbuild-script"]
 
 =asp-gerbil-scheme-package-spec!= hygienically declares an ordinary POO object.
 The normal library declaration needs only a =spec= binding. Module discovery
-defaults internally to =clan/building#all-gerbil-modules=; callers supply
+defaults internally to ASP's lightweight native catalog; callers supply
 =(modules ...)= only for a real specialized Graph. The explicit
 =(product-entry-modules ...)= option removes the declared product-owned closure
 when projecting the native library spec. The root declaration includes the
@@ -49,13 +48,12 @@ load the resident server implementation.
 
 There is no public =roots=, source catalog DSL, development/production profile,
 or alternate native plan format. =exclude-dirs= is retained as a POO-native
-extension of clan's ignore set. =native-spec= remains an advanced escape hatch
+extension of the native ignore set. =native-spec= remains an advanced escape hatch
 for a genuine native =std/make= BuildSpec such as the provider executable.
 
 ** Native defaults
 
-=clan/building= derives =srcdir= from the location of =build.ss= and changes to
-that directory before evaluating the spec. Its default catalog excludes
+Gxpkg evaluates =build.ss= from the package directory. ASP's default catalog excludes
 =main.ss=, =manifest.ss=, scripts, =run/=, =t/=, =.git/=, =_darcs/=, and
 =.gerbil/=. This repository adds no =exclude-dirs= overlay. The ignored
 =build/workspace-provider/= tree was an artifact of the retired custom
@@ -93,7 +91,7 @@ package BuildPlan or reuse a production source-root option.
 Native compile/spec/clean are available only through =build.ss=. The installed
 project CLI retains test targets and no longer duplicates those commands.
 
-Downstream packages may wrap =init-build-environment!= with the public
+Downstream packages may wrap native build execution with the public
 =call-with-framework-native-build-memory-anomaly-guard=.  This composition reads
 the same machine-capacity selection used by PackageSpec, emits upstream-owned
 trace/guard receipts, and never changes or caps =std/make= scheduling.

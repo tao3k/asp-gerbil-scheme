@@ -2,20 +2,16 @@
 ;;; -*- Gerbil -*-
 
 (import :std/make
-        :clan/building)
+        :asp-gerbil-scheme/building-api)
 
 (def +package-build-phase-receipt-schema+ "sample.build.phase.v1")
 (def +package-build-cache-stamp+ ".cache/sample/build.stamp")
 (def +package-build-worker-count+ 4)
 
-(def (spec)
-  (all-gerbil-modules))
-
-(%set-build-environment!
- "build.ss"
- name: "sample"
- deps: '()
- spec: spec)
+(asp-gerbil-scheme-package-spec!
+ (sample-package-spec @ asp-gerbil-scheme-library-package-prototype)
+ (spec spec)
+ (modules '("src/main.ss")))
 
 (def (package-build-cache-fresh? stage)
   (and (file-exists? +package-build-cache-stamp+)

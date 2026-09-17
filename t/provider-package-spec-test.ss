@@ -23,8 +23,8 @@
         (check (take entry 4)
                => '(exe: "src/provider-server"
                        bin: "asp-gerbil-scheme"))
-        ;; PackageSpec declares capabilities; upstream clan/building owns
-        ;; pkg-config resolution and the resulting compiler/linker flags.
+        ;; PackageSpec declares capabilities; the local native profile projects
+        ;; pkg-config flags and std/make remains the sole executor.
         (check (member "-cc-options" entry) ? true)
         (check (member "-ld-options" entry) ? true)
         (check (and (member "-cc" entry)

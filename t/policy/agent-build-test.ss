@@ -301,7 +301,7 @@
                         "(package: sample/build-worker-overreach)\n")
             (write-text
              (string-append root "/build.ss")
-             ";;; -*- Gerbil -*-\n(import :std/make\n        :clan/building)\n(def +package-build-worker-count+ 8)\n(def (spec)\n  (all-gerbil-modules))\n(%set-build-environment!\n \"build.ss\"\n name: \"sample\"\n deps: '()\n spec: spec)\n(def (package-build-job-queue modules)\n  modules)\n(def (package-build-run-worker! module options)\n  (apply make [module] options))\n(def (compile-package! options)\n  (for-each (lambda (module)\n              (package-build-run-worker! module options))\n            (package-build-job-queue (spec)))\n  (apply make (spec) options))\n")
+             ";;; -*- Gerbil -*-\n(import :std/make\n        :asp-gerbil-scheme/building-api)\n(def +package-build-worker-count+ 8)\n(asp-gerbil-scheme-package-spec!\n (sample-package-spec @ asp-gerbil-scheme-library-package-prototype)\n (spec spec)\n (modules '(\"src/main.ss\")))\n(def (package-build-job-queue modules)\n  modules)\n(def (package-build-run-worker! module options)\n  (apply make [module] options))\n(def (compile-package! options)\n  (for-each (lambda (module)\n              (package-build-run-worker! module options))\n            (package-build-job-queue (spec)))\n  (apply make (spec) options))\n")
             (let* ((index (collect-project root))
                    (findings (run-agent-policy index))
                    (build-runtime-matching
@@ -353,16 +353,15 @@
               (check (hash-get details 'kind)
                      => "package-build-canonical-shape")
               (check (hash-get details 'nativeBuildImport) => ":std/make")
-              (check (hash-get details 'legacyBuildImport) => #f)
               (check (hash-get details 'buildSpecEntrypoint) => "make")
               (check (hash-get details 'moduleEnumerator) => #f)
               (check (hash-get details 'providerBuildInclude) => #f)
               (check (hash-get details 'manualEnvironmentSetup) => "setenv")
               (check (hash-get details 'manualCompilerDispatch) => "invoke")
               (check (hash-get details 'compositionalBuildShape)
-                     => "use clan/building for harness source discovery/load path, std/build-script for simple gxpkg packages, or std/make for build-spec features such as ssi:/gsc:; keep package tests on Gerbil's gxtest runner and runtime commands in compiled modules")
+                     => "use the ASP PackageSpec catalog for declarative source projection, std/build-script for gxpkg commands, and std/make for build-spec features such as ssi:/gsc:; keep package tests on Gerbil's gxtest runner and runtime commands in compiled modules")
               (check (hash-get details 'downstreamRepairPattern)
-                     => "keep build.ss as the package build control plane, route package compilation through clan/building, std/build-script, or std/make build-spec, and keep provider behavior in a thin entry module over POO-native runtime owners"))))
+                     => "keep build.ss as the package build boundary, route package compilation through std/build-script or std/make over declarative ASP PackageSpec data, and keep provider behavior in a thin entry module over POO-native runtime owners"))))
     (test-case "agent policy accepts std/build-script package build"
           (let ((root ".run/policy-package-build-canonical-defbuild"))
             (reset-fixture-root root)

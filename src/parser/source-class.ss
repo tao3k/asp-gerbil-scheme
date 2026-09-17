@@ -15,7 +15,7 @@
   (cond
    ((equal? path "gerbil.pkg")
     "config")
-   ;; clan/building owns this generated package-layer registration module.
+   ;; The package build boundary owns this generated registration module.
    ;; It is part of the native graph but not an agent-authored runtime owner.
    ((equal? path "version.ss")
     "package-version")

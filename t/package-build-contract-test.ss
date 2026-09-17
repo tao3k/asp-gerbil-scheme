@@ -33,6 +33,8 @@
     (test-case "root build owns the native library graph and dependencies"
       (let ((library-source
              (call-with-input-file "build.ss" read-all-as-string))
+            (justfile-source
+             (call-with-input-file "justfile" read-all-as-string))
             (provider-source
              (call-with-input-file "build-provider.ss" read-all-as-string))
             (package-spec-source
@@ -53,6 +55,10 @@
              (call-with-input-file "benchmark-api.ss" read-all-as-string)))
         (check (string-contains library-source "defbuild-script")
                ? true)
+        (check (string-contains justfile-source
+                                "env_var_or_default(\"GERBIL_BUILD_CORES\"")
+               ? true)
+        (check (string-contains justfile-source "_NPROCESSORS_ONLN") ? true)
         (check (string-contains library-source "init-build-environment!") => #f)
         ;; Source discovery is the PackageSpec prototype's default projection;
         ;; build.ss declares only project-specific product boundaries.
@@ -100,7 +106,7 @@
         (check (string-contains provider-source "init-build-environment!") => #f)
         (check (string-contains package-spec-source "pkg-config-options") => #f)
         (check (string-contains provider-package-spec-source
-                                "pkg-config-options")
+                                "asp-gerbil-scheme-native-pkg-config-options")
                ? true)
         (check (string-contains library-source "define-entry-point") => #f)
         (check (string-contains provider-source "define-entry-point") => #f)

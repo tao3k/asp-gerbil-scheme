@@ -111,7 +111,7 @@
       (check (asp-gerbil-scheme-package-modules raw-ffi-fixture)
              => '("src/a.ss" "src/b.ss" "src/c.ss" "src/main.ss"))
       (check (raw-ffi-spec) => (raw-ffi-spec)))
-    (test-case "native clan catalog preserves every downstream source root"
+    (test-case "native ASP catalog preserves every downstream source root"
       (let (modules (catalog-root-modules))
         (check (length modules) => 3)
         (check (member "src/core.ss" modules) ? values)

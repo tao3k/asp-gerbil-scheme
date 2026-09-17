@@ -20,9 +20,9 @@ The separate =NativeProfile= in =src/build-api/native-profile.ss= is consulted
 by root =build.ss= and =build-provider.ss=. It selects concrete current-system
 facts such as macOS/Linux and architecture, prepares the platform pkg-config
 search path, and supplies only platform compiler selection for final executable
-forms. PackageSpec declares =pkg-config-libs= and =nix-deps=; upstream
-=:clan/building= resolves and normalizes the actual compiler/linker flags, and
-=std/make= remains the executor.
+forms. PackageSpec declares =pkg-config-libs= and =nix-deps=; the host native
+profile resolves the actual compiler/linker flags, and =std/make= remains the
+executor.
 
 ** Non-ownership rule
 
@@ -61,6 +61,6 @@ This API is additive data modelling. It is not the normal package build route.
 
 - Pure value and scenario tests remain green.
 - Root and provider cold builds use =NativeProfile= only for current-system
-  preparation and delegate dependency flag resolution to =:clan/building=.
+  preparation and native dependency flag projection.
 - Package build contracts contain no ASP development/production profile,
   BuildPlan admission, or alternate native executor.
