@@ -1,13 +1,19 @@
 #!/usr/bin/env gxi
 ;;; -*- Gerbil -*-
-;;; Native control: the literal BuildSpec reaches the official defbuild-script.
+;;; Native control: clan/building catalogs the package and hands the resulting
+;;; BuildSpec to the official defbuild-script/std/make executor.
 
-(import (only-in :std/build-script defbuild-script))
+(import (only-in :std/build-script defbuild-script)
+        (only-in :clan/building all-gerbil-modules))
 
-(def +shared-build-spec+ '("probe.ss"))
+(def +native-build-spec+
+  (all-gerbil-modules
+   exclude: '("asp-build.ss" "native-build.ss" "run-ab.ss"
+              "benchmark.ss" "scenario-contract.ss")))
 
 (when (getenv "GERBIL_BUILD_VERBOSE" #f)
-  (displayln "[package-spec-native-ab] lane=native phase=spec-ready target-count=1 executor=std/make")
+  (displayln "[package-spec-native-ab] lane=native phase=spec-ready target-count="
+             (length +native-build-spec+) " executor=std/make")
   (force-output))
 
-(defbuild-script +shared-build-spec+)
+(defbuild-script +native-build-spec+)

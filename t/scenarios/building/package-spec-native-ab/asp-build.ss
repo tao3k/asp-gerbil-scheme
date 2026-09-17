@@ -1,6 +1,7 @@
 #!/usr/bin/env gxi
 ;;; -*- Gerbil -*-
-;;; Candidate: PackageSpec projects the same one-element native BuildSpec.
+;;; Candidate: PackageSpec projects only the declared product closure, then
+;;; hands that ordinary BuildSpec to the same defbuild-script/std/make executor.
 
 (import (only-in :std/build-script defbuild-script)
         (only-in :asp-gerbil-scheme/build-api
@@ -10,6 +11,6 @@
 (asp-gerbil-scheme-package-spec!
  (package-spec-native-ab @ asp-gerbil-scheme-library-package-prototype)
  (spec package-spec-native-ab-spec)
- (modules '("probe.ss")))
+ (public-entry-modules '("probe.ss")))
 
 (defbuild-script (package-spec-native-ab-spec))

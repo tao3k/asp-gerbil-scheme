@@ -13,7 +13,13 @@
 (def +scenario-root+ "t/scenarios/building/package-spec-native-ab")
 (def +sample-count+ 3)
 (def +max-overhead-ns+ 3000000000)
-(def +expected-spec+ '("probe.ss"))
+(def +expected-native-spec+
+  '("probe.ss"
+    "unrelated/one.ss"
+    "unrelated/two.ss"
+    "unrelated/three.ss"
+    "unrelated/four.ss"))
+(def +expected-asp-spec+ '("probe.ss"))
 
 (def (scenario-command image build action verbose?)
   (append
@@ -100,11 +106,15 @@
     (create-directory* asp-image)
     (let ((native-spec (run-spec 'native native-image "native-build.ss"))
           (asp-spec (run-spec 'asp asp-image "asp-build.ss")))
-      (unless (and (equal? native-spec asp-spec)
-                   (equal? native-spec +expected-spec+))
-        (error "A/B lanes projected different BuildSpec values"
+      (unless (and (= (length native-spec) (length +expected-native-spec+))
+                   (andmap (lambda (target) (member target native-spec))
+                           +expected-native-spec+)
+                   (equal? asp-spec +expected-asp-spec+))
+        (error "A/B lanes did not preserve native catalog and ASP closure scopes"
                native-spec asp-spec))
-      (displayln "[package-spec-native-ab] phase=spec-equal spec=" native-spec))
+      (displayln "[package-spec-native-ab] phase=scope-projected"
+                 " native-target-count=" (length native-spec)
+                 " asp-target-count=" (length asp-spec)))
     (let* ((native-cold
             (measure-build 'native 'cold native-image "native-build.ss"))
            (asp-cold
@@ -129,11 +139,14 @@
            (native-warm-compile (series-compile-count native-warm))
            (asp-warm-compile (series-compile-count asp-warm))
            (receipt
-            `((schema . asp-gerbil-scheme.package-spec-native-ab.v1)
+            `((schema . asp-gerbil-scheme.package-spec-native-ab.v2)
               (executor . std/make)
-              (targetCount . 1)
-              (sourceTarget . "probe.ss")
-              (projectedBuildSpec "probe.ss")
+              (productTarget . "probe.ss")
+              (nativeTargetCount . ,(length +expected-native-spec+))
+              (aspTargetCount . ,(length +expected-asp-spec+))
+              (aspRemovedUnreachableTargetCount
+               . ,(- (length +expected-native-spec+)
+                     (length +expected-asp-spec+)))
               (nativeCold . ,native-cold)
               (aspCold . ,asp-cold)
               (nativeWarm . ,native-warm)
@@ -152,10 +165,15 @@
       (displayln "[package-spec-native-ab] evidence-root=" run-root
                  " receipt=" receipt-path)
       (force-output)
-      (unless (= (sample-ref native-cold 'compileCount) 1)
-        (error "native cold lane must compile exactly one target" native-cold))
+      (unless (= (sample-ref native-cold 'compileCount)
+                 (length +expected-native-spec+))
+        (error "native cold lane must compile the complete catalog" native-cold))
       (unless (= (sample-ref asp-cold 'compileCount) 1)
-        (error "ASP cold lane must compile exactly one target" asp-cold))
+        (error "ASP cold lane must compile only the product closure" asp-cold))
+      (unless (< (sample-ref asp-cold 'elapsedNs)
+                 (sample-ref native-cold 'elapsedNs))
+        (error "ASP closure did not improve cold std/make time"
+               native-cold asp-cold))
       (unless (and (= native-warm-compile 0) (= asp-warm-compile 0))
         (error "warm lanes must compile zero targets"
                native-warm-compile asp-warm-compile))
