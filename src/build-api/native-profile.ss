@@ -25,10 +25,12 @@
         asp-gerbil-scheme-native-pkg-config-options
         asp-gerbil-scheme-native-profile-prepare!)
 
-;; std/make remains the executor; this function only projects an explicitly
-;; declared native dependency through the platform pkg-config command after
-;; the host profile has prepared its search path.
-;; : (-> String (List String) String)
+;; native-pkg-config-query
+;;   : (-> String (List String) String)
+;;   | requires libraries names explicitly declared by the PackageSpec
+;;   | rationale std/make remains the executor; this process boundary only
+;;       projects platform pkg-config output after the host profile has
+;;       prepared its search path
 (def (native-pkg-config-query option libraries)
   (try
    ;; A successful query may legitimately be empty when headers live in the
@@ -72,6 +74,10 @@
       (catch _ #f)))
    packages))
 
+;; native-profile-default-projection-observability-enabled?
+;;   : (-> Boolean)
+;;   | rationale normalize the optional process setting once at the POO slot
+;;       boundary so projection code receives an ordinary predicate result
 (def (native-profile-default-projection-observability-enabled?)
   (cond
    ((getenv "GERBIL_BUILD_VERBOSE" #f)
