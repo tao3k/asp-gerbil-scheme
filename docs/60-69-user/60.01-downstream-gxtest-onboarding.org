@@ -20,7 +20,7 @@ targets. Native make owns output placement, dependency ordering, and freshness;
 =compile-selected-tests= run compiles through native make before loading its
 compiled test module.
 
-Timing helpers are exported by =:asp-gerbil-scheme/build-api=:
+Timing helpers are exported by =:asp-gerbil-scheme/building-api=:
 =benchmark-elapsed-ms/us= measures one invocation, and
 =benchmark-p95-elapsed-ms/us= takes a positive sample count and a thunk. The
 latter uses nearest-rank p95; for fewer than twenty samples this can be the
@@ -29,7 +29,7 @@ and their scenario budgets. Downstream packages need no private clock or
 fastest-sample implementation.
 
 For the native clan test command surface, import =init-test-environment!= from
-=:asp-gerbil-scheme/build-api= and call it in a root test script. This is the
+=:asp-gerbil-scheme/building-api= and call it in a root test script. This is the
 original =clan/testing= macro, with its upstream discovery, command registration,
 and test lifecycle. Existing =gxtest= files remain supported without conversion.
 
@@ -77,7 +77,7 @@ For a custom modularity audit, derive and pass a native POO profile explicitly:
 
 #+begin_src scheme
 (import (only-in :clan/poo/object .cc)
-        :asp-gerbil-scheme/build-api)
+        :asp-gerbil-scheme/building-api)
 
 (def focused-profile
   (.cc default-modularity-profile 'max-source-lines 500))
@@ -96,7 +96,7 @@ Create a small test owner such as =t/project-policy-test.ss=:
 #+begin_src scheme
 ;;; -*- Gerbil -*-
 (import :std/test
-        :asp-gerbil-scheme/build-api)
+        :asp-gerbil-scheme/building-api)
 
 (export project-policy-test)
 
@@ -194,7 +194,7 @@ Agents integrating the harness downstream should follow this order:
 2. Add the =gerbil.pkg= dependency without creating a repository-local
    =.gerbil= directory.
 3. Add =t/project-policy-test.ss= using the stable
-   =:asp-gerbil-scheme/build-api= facade.
+   =:asp-gerbil-scheme/building-api= facade.
 4. Run =gxtest t/project-policy-test.ss=.
 5. If policy fails, inspect the structured =agentRepair.findingGroups= packet
    or render it through unified ASP before editing downstream source.

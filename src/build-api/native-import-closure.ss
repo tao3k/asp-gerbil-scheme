@@ -71,6 +71,8 @@
               (set! ordered (cons source ordered)))))))
     (for-each
      (lambda (entry)
+       ;; import-module already consults Gerbil's authoritative module
+       ;; registry before expanding source; do not duplicate that lookup here.
        (visit (import-module (path-default-extension entry ".ss") #f #f)))
      entries)
     (reverse ordered)))

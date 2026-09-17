@@ -1,7 +1,7 @@
 (import :std/test
         :clan/poo/object
         "../../../../src/parser/facade"
-        (only-in :asp-gerbil-scheme/build-api
+        (only-in :asp-gerbil-scheme/building-api
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype
                  asp-gerbil-scheme-package-native-spec
@@ -51,7 +51,7 @@
 (def (downstream-build-api-imports)
   (map module-import-fact-module
        (source-file-module-imports
-        (parse-source-file "." "build-api.ss"))))
+        (parse-source-file "." "building-api.ss"))))
 
 ;; : (-> ModuleReference Boolean)
 (def (asp-product-entry-module-reference? reference)

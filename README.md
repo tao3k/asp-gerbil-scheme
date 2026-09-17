@@ -35,14 +35,13 @@ Run selected tests through the same native environment:
 ```sh
 just test-files t/package-build-contract-test.ss
 ```
-## Building Framework
-The harness building framework is documented in `docs/30-39-building/31.01-building-framework.org`.
-It keeps Gerbil `std/make` as the compile executor while adding explicit build stages,
-receipts, package stage ordering, and performance gates.
-Downstream `build.ss` files import
-`:asp-gerbil-scheme/building-api` for PackageSpec and optional build profiles.
-The narrow `:asp-gerbil-scheme/build-api` facade remains available to cold
-self-bootstrap owners that need PackageSpec only. Testing, Policy, and
+## Building API
+Downstream `build.ss` files import the single narrow
+`:asp-gerbil-scheme/building-api` facade for PackageSpec declarations.
+Gerbil `std/make` remains the only graph, currentness, scheduling, and execution
+owner. Optional native behavior is composed through PackageSpec and
+NativeProfile POO slots; it does not add another public build framework.
+Testing, Policy, and
 benchmark capabilities are separately owned by `:asp-gerbil-scheme/testing-api`,
 `:asp-gerbil-scheme/policy-api`, and `:asp-gerbil-scheme/benchmark-api`; loading
 a PackageSpec never initializes those graphs.

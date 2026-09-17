@@ -1,6 +1,6 @@
 ;;; -*- Gerbil -*-
 ;;; Internal source bootstrap for this package's root build entrypoints.
-;;; The public :asp-gerbil-scheme/build-api facade has the same narrow closure;
+;;; The public :asp-gerbil-scheme/building-api facade has the same narrow closure;
 ;;; this source-relative owner additionally bootstraps this package's own cold
 ;;; build before the public facade has been compiled.
 

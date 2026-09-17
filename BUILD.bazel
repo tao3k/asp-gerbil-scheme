@@ -15,7 +15,7 @@ PROVIDER_ENTRY_SOURCES = [
 ]
 
 PACKAGE_DECLARATION_SOURCES = [
-    "build-api.ss",
+    "building-api.ss",
     "gerbil.pkg",
 ]
 

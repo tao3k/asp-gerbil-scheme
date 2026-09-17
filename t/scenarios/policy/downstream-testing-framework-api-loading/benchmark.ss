@@ -15,7 +15,7 @@
   "keep gerbil test and clan/testing authoritative while composing bounded POO instrumentation")
  (inputShape
   .
-  "downstream tests opt into :asp-gerbil-scheme/testing-api; PackageSpec loading remains isolated in :asp-gerbil-scheme/build-api")
+  "downstream tests opt into :asp-gerbil-scheme/testing-api; PackageSpec loading remains isolated in :asp-gerbil-scheme/building-api")
  (expectedOutcome
   .
   "map optional profiles to explicit upstream test paths and keep benchmark timing as a POO observation receipt")

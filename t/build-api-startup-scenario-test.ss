@@ -61,7 +61,7 @@
 (def build-api-startup-scenario-test
   (test-suite "public Build API startup scenario"
     (test-case "PackageSpec facade excludes optional subsystem closures"
-      (let (source (call-with-input-file "build-api.ss" read-all-as-string))
+      (let (source (call-with-input-file "building-api.ss" read-all-as-string))
         (for-each
          (lambda (forbidden)
            (check (string-contains source forbidden) => #f))
@@ -96,33 +96,4 @@
                  => #t)
           (check (< incremental-nanoseconds
                     (startup-contract-ref contract 'maxNanoseconds))
-                 => #t))))
-    (test-case "verbose PackageSpec exposes projection lifecycle"
-      (let (output
-              (run-process
-               ;; The repository devenv can provide a Nix Apple SDK while the
-               ;; installed Gerbil/Gambit compiler was built against the host
-               ;; toolchain.  Keep that unrelated shell overlay out of this
-               ;; native Gerbil Scenario; `env -u` is harmless when absent.
-               ["env" "-u" "DEVELOPER_DIR" "-u" "SDKROOT"
-                (string-append
-                 "GERBIL_LOADPATH="
-                 (path-expand ".gerbil/lib" (current-directory)) ":"
-                 (path-expand ".gerbil/lib" (getenv "HOME")))
-                "GERBIL_BUILD_VERBOSE=1"
-                "gerbil" "interactive" +build-api-startup-scenario+ "spec"]
-               stderr-redirection: #t
-               coprocess: read-all-as-string))
-        (check (and (string-contains output
-                                     "[asp-build] phase=spec-project-start")
-                    #t)
-               => #t)
-        (check (and (string-contains output
-                                     "[asp-build] phase=spec-project-complete")
-                    #t)
-               => #t)
-        (check (< (string-contains output
-                                   "[asp-build] phase=spec-project-start")
-                  (string-contains output
-                                   "[asp-build] phase=spec-project-complete"))
-               => #t)))))
+                 => #t))))))

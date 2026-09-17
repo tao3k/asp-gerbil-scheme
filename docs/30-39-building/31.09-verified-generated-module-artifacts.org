@@ -5,7 +5,7 @@
 :PROPERTIES:
 :JD_ID: 31.09
 :STATUS: IMPLEMENTED
-:RELATED: 31.01, 31.07, 31.08
+:RELATED: 31.07, 31.08
 :END:
 
 * Decision
@@ -70,7 +70,9 @@ native result.
 
 * Public POO model
 
-=:asp-gerbil-scheme/build-api= exports four POO-native families:
+The optional =src/build-api/generated-artifact= extension owns four POO-native
+families; importing the narrow =:asp-gerbil-scheme/building-api= facade does not
+load this generator/runtime closure:
 
 - =GeneratedArtifactMember=: stable member name, domain schema, and independent
   validator;

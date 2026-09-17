@@ -4,7 +4,7 @@
 ;;; Policy, testing, benchmark, or Building Framework graphs.
 
 (import (only-in :std/build-script defbuild-script)
-        (only-in :asp-gerbil-scheme/build-api
+        (only-in :asp-gerbil-scheme/building-api
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype))
 

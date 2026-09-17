@@ -68,7 +68,7 @@
          (string-append root "/build.ss")
          (string-append
           ";;; -*- Gerbil -*-\n"
-          "(import :asp-gerbil-scheme/build-api\n"
+          "(import :asp-gerbil-scheme/building-api\n"
           "        (only-in :std/build-script defbuild-script))\n"
           "(def +modules+ '(\"src/core.ss\"))\n"
           "(asp-gerbil-scheme-package-spec!\n"

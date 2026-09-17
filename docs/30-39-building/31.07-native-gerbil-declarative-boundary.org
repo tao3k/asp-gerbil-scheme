@@ -6,7 +6,7 @@
 :JD_ID: 31.07
 :STATUS: active-design
 :OWNER: build.ss build-provider.ss provider-package-spec.ss
-:RELATED: 31.01, 31.02, 31.08, 31.09
+:RELATED: 31.04, 31.08, 31.09
 :UPSTREAM: Gerbil 0.18.2 std/make std/build-script gxpkg
 :END:
 
@@ -73,7 +73,7 @@ development or production mode.
 Root =build.ss= source-imports only
 =src/build-api/source-bootstrap.ss=. That internal module exposes the minimum
 POO PackageSpec declaration bindings and is not re-exported by
-=:asp-gerbil-scheme/build-api=. This lets a dependency-only environment compile
+=:asp-gerbil-scheme/building-api=. This lets a dependency-only environment compile
 the whole package with zero installed ASP artifacts.
 
 The provider declaration is independently source-importable and
@@ -91,10 +91,10 @@ package BuildPlan or reuse a production source-root option.
 Native compile/spec/clean are available only through =build.ss=. The installed
 project CLI retains test targets and no longer duplicates those commands.
 
-Downstream packages may wrap native build execution with the public
-=call-with-framework-native-build-memory-anomaly-guard=.  This composition reads
-the same machine-capacity selection used by PackageSpec, emits upstream-owned
-trace/guard receipts, and never changes or caps =std/make= scheduling.
+Package projection observability is a =NativeProfile= POO slot.  A caller may
+compose an observer, enable predicate, and heartbeat interval without wrapping
+or replacing native execution.  Runtime heap limits belong to per-test Testing
+profiles; package compilation remains wholly owned by =std/make=.
 
 ** Generated sidecars
 
@@ -113,7 +113,9 @@ The following former owners are intentionally removed:
 - =package-native-plan.ss= and its hand-maintained stage list;
 - package =project-build.ss= compile/spec/clean facade;
 - ASP leases, lock recovery, scheduler mutation, currentness admission, and
-  toolchain environment rewriting.
+  toolchain environment rewriting;
+- the former =src/building= stage/request/runner framework and its build-time
+  memory supervisor.
 
 ** Verification
 

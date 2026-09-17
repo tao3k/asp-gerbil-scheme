@@ -7,7 +7,7 @@
 :JD_ID: 31.04
 :STATUS: implemented
 :OWNER: ASP Building API and clan/testing
-:RELATED: 31.01, 51.04, 51.06
+:RELATED: 31.07, 51.04, 51.06
 :END:
 
 ** Boundary

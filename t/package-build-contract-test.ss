@@ -44,8 +44,6 @@
              (call-with-input-file "provider-package-spec.ss"
                                    read-all-as-string))
             (public-facade-source
-             (call-with-input-file "build-api.ss" read-all-as-string))
-            (building-api-source
              (call-with-input-file "building-api.ss" read-all-as-string))
             (testing-api-source
              (call-with-input-file "testing-api.ss" read-all-as-string))
@@ -141,8 +139,8 @@
         (check (string-contains public-facade-source
                                 "./src/build-api/package-spec")
                ? true)
-        (check (string-contains building-api-source "./src/building/facade")
-               ? true)
+        (check (file-exists? "building-api.ss") ? true)
+        (check (file-exists? "build-api.ss") => #f)
         (check (string-contains testing-api-source "./src/testing/extension")
                ? true)
         (check (string-contains policy-api-source "./src/policy/gxtest")

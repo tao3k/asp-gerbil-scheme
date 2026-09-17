@@ -1,8 +1,7 @@
 (import :std/test
+        (only-in :clan/poo/object .cc)
         (only-in :std/misc/path path-expand)
-        :asp-gerbil-scheme/build-api
-        (only-in :asp-gerbil-scheme/src/build-api/native-profile
-                 asp-gerbil-scheme-native-profile-projection-heartbeat-seconds))
+        :asp-gerbil-scheme/building-api)
 (export package-native-declaration-test)
 
 ;; Direct defbuild-script controls.  PackageSpec must return these ordinary
@@ -73,6 +72,23 @@
  (extra-spec '("ui/init.ss"))
  (native-spec '((ssi: "standalone.ss"))))
 
+(def projection-observer-events [])
+
+(def projection-observer-profile
+  (.cc asp-gerbil-scheme-default-native-profile
+       projection-observability-enabled?: (lambda () #t)
+       projection-observer:
+       (lambda (phase elapsed-milliseconds fields)
+         (set! projection-observer-events
+               (cons (list phase elapsed-milliseconds fields)
+                     projection-observer-events)))))
+
+(asp-gerbil-scheme-package-spec!
+ (projection-observer-fixture @ asp-gerbil-scheme-library-package-prototype)
+ (spec projection-observer-spec)
+ (modules '())
+ (native-profile projection-observer-profile))
+
 (asp-gerbil-scheme-package-spec!
  (catalog-root-fixture @ asp-gerbil-scheme-library-package-prototype)
  (spec catalog-root-spec)
@@ -107,6 +123,23 @@
        (asp-gerbil-scheme-native-profile-projection-heartbeat-seconds
         (asp-gerbil-scheme-package-native-profile managed-ffi-fixture))
        => 5))
+    (test-case "the sole public Building API exposes POO profile slots"
+      (let (profile
+            (asp-gerbil-scheme-package-native-profile managed-ffi-fixture))
+        (check
+         (procedure?
+          (asp-gerbil-scheme-native-profile-projection-observability-enabled?
+           profile))
+         => #t)
+        (check
+         (procedure?
+         (asp-gerbil-scheme-native-profile-projection-observer profile))
+         => #t)))
+    (test-case "a composed observer profile receives the projection lifecycle"
+      (set! projection-observer-events [])
+      (projection-observer-spec)
+      (check (map car (reverse projection-observer-events))
+             => '(spec-project-start spec-project-complete)))
     (test-case "declarations do not mutate the catalog or accumulate targets"
       (check (asp-gerbil-scheme-package-modules raw-ffi-fixture)
              => '("src/a.ss" "src/b.ss" "src/c.ss" "src/main.ss"))

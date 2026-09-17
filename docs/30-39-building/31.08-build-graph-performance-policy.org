@@ -70,7 +70,7 @@ Testing, Policy, benchmark, or product entrypoints. The provider entry instead
 source-imports its explicit PackageSpec and imports
 =:std/build-script/defbuild-script= directly. Neither may import
 =building/std-builder= or another compiled ASP runtime module. The full
-=:asp-gerbil-scheme/build-api= remains the sole installed downstream facade.
+=:asp-gerbil-scheme/building-api= remains the sole installed downstream facade.
 
 There is deliberately no =verify-current= command.  ASP cannot prove Gerbil
 currentness without duplicating the upstream executor. Native repeated-build

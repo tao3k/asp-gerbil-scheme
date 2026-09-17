@@ -18,6 +18,8 @@
         asp-gerbil-scheme-native-profile-name
         asp-gerbil-scheme-native-profile-platform
         asp-gerbil-scheme-native-profile-architecture
+        asp-gerbil-scheme-native-profile-projection-observability-enabled?
+        asp-gerbil-scheme-native-profile-projection-observer
         asp-gerbil-scheme-native-profile-projection-heartbeat-seconds
         asp-gerbil-scheme-native-profile-executable-gsc-options
         asp-gerbil-scheme-native-pkg-config-options
@@ -70,11 +72,41 @@
       (catch _ #f)))
    packages))
 
+(def (native-profile-default-projection-observability-enabled?)
+  (cond
+   ((getenv "GERBIL_BUILD_VERBOSE" #f)
+    => (lambda (value)
+         (let (level (string->number value))
+           (and (real? level) (> level 0)))))
+   (else #f)))
+
+;; Observer : (-> Symbol Integer (List String) Void)
+(def (native-profile-default-projection-observer phase elapsed-milliseconds
+                                                 fields)
+  (let* ((port (current-output-port))
+         (record
+          (call-with-output-string
+           (lambda (buffer)
+             (display "[asp-build] phase=" buffer)
+             (display phase buffer)
+             (for-each
+              (lambda (field) (display " " buffer) (display field buffer))
+              fields)
+             (display " elapsedMs=" buffer)
+             (display elapsed-milliseconds buffer)
+             (newline buffer)))))
+    (write-substring record 0 (string-length record) port)
+    (force-output port)))
+
 (defpoo-object-family
   (prototype asp-gerbil-scheme-native-profile-prototype
              (name 'portable)
              (platform 'portable)
              (architecture (car (system-type)))
+             (projection-observability-enabled?
+              native-profile-default-projection-observability-enabled?)
+             (projection-observer
+              native-profile-default-projection-observer)
              (projection-heartbeat-seconds 5)
              (executable-gsc-options [])
              (prepare! (lambda (_pkg-config-libs) #!void)))
@@ -83,6 +115,10 @@
               (asp-gerbil-scheme-native-profile-name name)
               (asp-gerbil-scheme-native-profile-platform platform)
               (asp-gerbil-scheme-native-profile-architecture architecture)
+              (asp-gerbil-scheme-native-profile-projection-observability-enabled?
+               projection-observability-enabled?)
+              (asp-gerbil-scheme-native-profile-projection-observer
+               projection-observer)
               (asp-gerbil-scheme-native-profile-projection-heartbeat-seconds
                projection-heartbeat-seconds)
               (asp-gerbil-scheme-native-profile-executable-gsc-options
