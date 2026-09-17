@@ -10,7 +10,6 @@
 
 (export asp-gerbil-scheme-native-import-closure
         asp-gerbil-scheme-prepared-native-import-closure
-        asp-gerbil-scheme-resident-import-footprints
         call-with-asp-gerbil-scheme-prepared-source-graph)
 
 ;;; Dynamic capability installed only by the Testing prepared-source slot.
@@ -86,41 +85,6 @@
     (or context
         (error "prepared source is absent from the native module registry"
                entry resolved))))
-
-(def (resident-direct-import-contexts context)
-  (reverse
-   (foldl
-    (lambda (imported contexts)
-      (alet (direct (import-context imported))
-        (if (or (not (expander-context-id direct))
-                (memq direct contexts))
-          contexts
-          (cons direct contexts))))
-    []
-    (module-context-import context))))
-
-(def (resident-context-closure-ids root-context)
-  (let ((visited (make-hash-table-eq))
-        (ordered []))
-    (def (visit imported)
-      (alet (context (import-context imported))
-        (unless (hash-get visited context)
-          (hash-put! visited context #t)
-          (alet (id (expander-context-id context))
-            (when id (set! ordered (cons id ordered))))
-          (for-each visit (module-context-import context)))))
-    (visit root-context)
-    (reverse ordered)))
-
-;;; Project direct-import footprints exclusively from Gerbil's resident module
-;;; registry.  No source is parsed or imported here; an absent context is a
-;;; lifecycle error instead of a fallback to cold expansion.
-;; : (-> Path (List (Pair ModuleId (List ModuleId))))
-(def (asp-gerbil-scheme-resident-import-footprints entry)
-  (map (lambda (context)
-         (cons (expander-context-id context)
-               (resident-context-closure-ids context)))
-       (resident-direct-import-contexts (prepared-module-context entry))))
 
 ;; : (-> Path (List Path) (List Path))
 (def (project-prepared-native-import-closure root entries)

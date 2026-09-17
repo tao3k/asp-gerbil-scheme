@@ -2,6 +2,7 @@
 ;;; Process-level regression for root-only native Import Model projection.
 
 (import (only-in :std/test test-suite test-case check)
+        (only-in :std/misc/path path-expand)
         (only-in :std/misc/process run-process)
         (only-in :clan/timestamp call-with-timing))
 
@@ -27,7 +28,10 @@
   (call-with-timing
    (lambda ()
      (run-process
-      ["gerbil" "interactive" build "spec"]
+      ["env" "-u" "DEVELOPER_DIR" "-u" "SDKROOT"
+       (string-append "GERBIL_PATH="
+                      (path-expand ".gerbil" (current-directory)))
+       "gerbil" "interactive" build "spec"]
       directory: +native-import-public-closure-root+
       coprocess: read))))
 

@@ -11,8 +11,9 @@
                  testing-interface-profile-enabled?
                  testing-interface-profiles-for)
         (only-in ../build-api/native-import-closure
-                 asp-gerbil-scheme-resident-import-footprints
-                 call-with-asp-gerbil-scheme-prepared-source-graph))
+                 call-with-asp-gerbil-scheme-prepared-source-graph)
+        (only-in ../build-api/resident-import-footprint
+                 asp-gerbil-scheme-resident-import-footprints))
 
 (export testing-interface-call-with-prepared-source-graph
         testing-interface-admit-resident-import-footprints!
