@@ -9,10 +9,13 @@
         (only-in :std/misc/path path-directory path-expand path-normalize)
         (only-in :std/misc/wg make-wg wg-add! wg-wait!)
         (only-in :std/misc/process run-process)
-        (only-in :std/srfi/1 drop find filter filter-map partition take unfold)
+        (only-in :std/srfi/1 drop find filter partition take unfold)
         (only-in :std/srfi/13 string-contains string-prefix?)
         (only-in :std/sugar with-id)
-        (only-in ../build-api/core-capacity native-build-core-count))
+        (only-in ../build-api/core-capacity native-build-core-count)
+        (only-in ./import-footprint-reader
+                 testing-import-footprint-datum-owners
+                 testing-import-footprint-file-owners))
 
 (export testing-profile
         testing-profile?
@@ -222,16 +225,13 @@
   (.cc (testing-profile 'discovery 'clan-test-file-filter)
        ignoreDirectories: []))
 
-;;; Opt-in lifecycle contract for source admission that must reuse the module
-;;; contexts prepared by the enclosing native gxtest harness.  The profile is
-;;; deliberately not enabled by default: a downstream extension supplies the
-;;; POO method that owns its policy and receipt.
+;;; Opt-in admission reuses module contexts prepared by native gxtest.
+;;; Downstream POO extensions own policy, receipts, and enablement.
 (def +testing-source-admission-profile+
   (testing-profile 'source-admission 'prepared-native-test-graph))
 
-;;; The registry thresholds are the authoritative duplicate-large-closure
-;;; policy.  A downstream package may additionally name known heavy owners for
-;;; an early reader-native preflight before a native test process is started.
+;;; Registry thresholds own duplicate-large-closure policy; named heavy owners
+;;; are only an optional reader-native preflight before process creation.
 (def (testing-import-footprint-profile heavy-owners max-heavy-owners action
                                        large-closure-module-count:
                                        (large-closure-module-count 16)
@@ -257,9 +257,7 @@
            large-closure-module-count max-shared-closure-modules
            ignored-module-prefixes))
   (.cc (testing-profile 'import-footprint 'resident-import-closure-admission)
-       ;; These two slots are an early reader-native preflight only.  The
-       ;; authoritative large-closure decision comes from Gerbil's resident
-       ;; module registry in testing-source-admission-api.
+       ;; Registry admission remains authoritative over this early preflight.
        heavyOwners: heavy-owners
        maxHeavyOwnersPerTest: max-heavy-owners
        largeClosureModuleCount: large-closure-module-count
@@ -276,41 +274,6 @@
        (.slot? value 'maxSharedClosureModules)
        (.slot? value 'ignoredModulePrefixes)
        (.slot? value 'action)))
-
-(def (testing-import-spec-owner spec)
-  (cond
-   ((or (symbol? spec) (string? spec)) spec)
-   ((and (pair? spec)
-         (memq (car spec)
-               '(only-in except-in rename-in prefix-in
-                 for-syntax for-template for-label))
-         (pair? (cdr spec)))
-    (testing-import-spec-owner (cadr spec)))
-   (else #f)))
-
-;;; Read only import owners. Quoted data is inert, while wrappers such as
-;;; cond-expand remain traversable so an agent cannot hide a heavy import.
-(def (testing-import-footprint-datum-owners datum)
-  (cond
-   ((not (pair? datum)) [])
-   ((memq (car datum) '(quote quasiquote syntax quasisyntax)) [])
-   ((eq? (car datum) 'import)
-    (filter-map testing-import-spec-owner (cdr datum)))
-   (else
-    (append (testing-import-footprint-datum-owners (car datum))
-            (testing-import-footprint-datum-owners (cdr datum))))))
-
-(def (testing-import-footprint-file-owners path)
-  (call-with-input-file
-   path
-   (lambda (port)
-     (let loop ((owners-rev []))
-       (let (datum (read port))
-         (if (eof-object? datum)
-           (reverse owners-rev)
-           (loop
-            (foldl cons owners-rev
-                   (testing-import-footprint-datum-owners datum)))))))))
 
 (def (testing-import-owner-member? owner owners)
   (and (find (lambda (candidate) (equal? owner candidate)) owners) #t))
@@ -338,9 +301,7 @@
           (testing-profile-matches? profile 'import-footprint))
         (testing-interface-profiles-for testing test)))
 
-;;; This admission executes before ASP creates native test batches.  It does
-;;; not import or expand the inspected file and therefore cannot recreate the
-;;; expensive closure it is designed to prevent.
+;;; Reader-only preflight runs before native batches without loading a closure.
 (def (testing-interface-admit-test-imports! testing test-file)
   (alet (profile
          (testing-interface-import-footprint-profile-for testing test-file))

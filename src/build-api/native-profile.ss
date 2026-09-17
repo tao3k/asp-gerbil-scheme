@@ -29,14 +29,13 @@
 ;; : (-> String (List String) String)
 (def (native-pkg-config-query option libraries)
   (try
-   (let (result
-         (string-trim-both
-          (run-process
-           (append ["pkg-config" option] libraries)
-           coprocess: read-all-as-string)))
-     (if (> (string-length result) 0)
-       result
-       (error "pkg-config returned no native options" option libraries)))
+   ;; A successful query may legitimately be empty when headers live in the
+   ;; compiler's default include path (notably OpenSSL on Ubuntu).  Process
+   ;; status, rather than output length, is the native availability contract.
+   (string-trim-both
+    (run-process
+     (append ["pkg-config" option] libraries)
+     coprocess: read-all-as-string))
    (catch (exception)
      (error "Failed to resolve native library options with pkg-config"
             libraries exception))))

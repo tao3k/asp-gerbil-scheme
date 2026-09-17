@@ -3,7 +3,7 @@
 
 (import (only-in :clan/poo/object .call .o .ref .slot?)
         (only-in :std/test test-suite test-case)
-        (only-in :std/srfi/1 filter find foldl)
+        (only-in :std/srfi/1 append-map filter filter-map find foldl unfold)
         (only-in :std/srfi/13 string-prefix?)
         (only-in :std/sugar cut)
         (only-in ./extension
@@ -67,31 +67,26 @@
                (cons owner seen)
                (cons (cons owner closure) result)))))))))
 
+(def (resident-import-overlap left right large-threshold)
+  (let ((left-closure (cdr left))
+        (right-closure (cdr right)))
+    (and (>= (length left-closure) large-threshold)
+         (>= (length right-closure) large-threshold)
+         (let (shared (shared-module-ids left-closure right-closure))
+           (.o leftOwner: (car left)
+               rightOwner: (car right)
+               leftModuleCount: (length left-closure)
+               rightModuleCount: (length right-closure)
+               sharedModules: shared
+               sharedModuleCount: (length shared))))))
+
 (def (resident-import-overlaps footprints large-threshold)
-  (let outer ((lefts footprints) (overlaps-rev []))
-    (if (null? lefts)
-      (reverse overlaps-rev)
-      (let* ((left (car lefts))
-             (left-closure (cdr left)))
-        (if (< (length left-closure) large-threshold)
-          (outer (cdr lefts) overlaps-rev)
-          (let inner ((rights (cdr lefts)) (result overlaps-rev))
-            (if (null? rights)
-              (outer (cdr lefts) result)
-              (let* ((right (car rights))
-                     (right-closure (cdr right)))
-                (if (< (length right-closure) large-threshold)
-                  (inner (cdr rights) result)
-                  (let (shared (shared-module-ids left-closure right-closure))
-                    (inner
-                     (cdr rights)
-                     (cons (.o leftOwner: (car left)
-                               rightOwner: (car right)
-                               leftModuleCount: (length left-closure)
-                               rightModuleCount: (length right-closure)
-                               sharedModules: shared
-                               sharedModuleCount: (length shared))
-                           result))))))))))))
+  (append-map
+   (lambda (suffix)
+     (filter-map
+      (cut resident-import-overlap (car suffix) <> large-threshold)
+      (cdr suffix)))
+   (unfold null? values cdr footprints)))
 
 ;;; Authoritative duplicate-large-closure admission.  All closure membership
 ;;; comes from Gerbil's __module-registry after gxtest has prepared the test;
