@@ -7,6 +7,8 @@
         "../src/testing/source-admission"
         (only-in ../src/build-api/native-import-closure
                  asp-gerbil-scheme-prepared-native-import-closure)
+        (only-in "./fixtures/resident-import-footprint/root"
+                 resident-footprint-root-witness)
         "../src/testing/performance")
 
 (export testing-extension-test)
@@ -71,6 +73,63 @@
                 "unit-tests.ss"
                 "vendor/generated/t/generated-test.ss")
                => #f)))
+
+    (test-case "POO import footprint profile rejects repeated heavy owners"
+      (let* ((profile
+              (testing-import-footprint-profile
+               '(:fixture/heavy-a :fixture/heavy-b)
+               1
+               'reject))
+             (testing
+              (testing-interface-add-profile
+               +asp-testing-interface+ profile)))
+        (check
+         (testing-import-footprint-datum-owners
+          '(import (only-in :fixture/heavy-a value)
+                   :fixture/heavy-b))
+         => '(:fixture/heavy-a :fixture/heavy-b))
+        (check-exception
+         (testing-interface-admit-test-imports!
+          testing "t/fixtures/import-footprint-over-budget.ss")
+         true)
+        (let (receipt
+              (testing-interface-admit-test-imports!
+               testing "t/fixtures/import-footprint-admitted.ss"))
+          (check (.ref receipt 'admitted?) => #t)
+          (check (.ref receipt 'heavyOwners) => '(:fixture/heavy-a)))))
+
+    (test-case "resident registry rejects overlapping large import closures"
+      (check resident-footprint-root-witness
+             => '(resident-shared resident-shared))
+      (let* ((profile
+              (testing-import-footprint-profile
+               [] 0 'reject
+               large-closure-module-count: 2
+               max-shared-closure-modules: 0
+               ignored-module-prefixes: []))
+             (testing
+              (testing-interface-add-profile
+               +asp-testing-interface+ profile)))
+        (check-exception
+         (testing-interface-admit-resident-import-footprints!
+          testing
+          "t/testing-extension-test.ss"
+          '("t/fixtures/resident-import-footprint/root.ss"))
+         true)
+        (let* ((observed
+                (testing-interface-add-profile
+                 +asp-testing-interface+
+                 (.cc profile action: 'observe)))
+               (receipt
+                (testing-interface-admit-resident-import-footprints!
+                 observed
+                 "t/testing-extension-test.ss"
+                 '("t/fixtures/resident-import-footprint/root.ss"))))
+          (check (.ref receipt 'admitted?) => #f)
+          (check (length (.ref receipt 'violations)) => 1)
+          (check (.ref (car (.ref receipt 'violations))
+                       'sharedModuleCount)
+                 => 1))))
 
     (test-case "the profiled package entry is backed by executable test data"
       (check (testing-interface-ignore-directories-for
