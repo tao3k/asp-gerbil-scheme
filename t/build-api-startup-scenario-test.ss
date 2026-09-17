@@ -78,7 +78,20 @@
                stderr-redirection: #t
                coprocess: read-all-as-string)))
         ;; These are native std/make/gxc markers.  ASP does not reinterpret the
-        ;; level or manufacture a parallel verbose protocol.
+        ;; level. PackageSpec adds only its POO-profiled projection lifecycle;
+        ;; std/make retains planner and compiler output ownership.
+        (check (and (string-contains output
+                                     "[asp-build] phase=spec-project-start")
+                    #t)
+               => #t)
+        (check (and (string-contains output
+                                     "[asp-build] phase=spec-project-complete")
+                    #t)
+               => #t)
+        (check (< (string-contains output
+                                   "[asp-build] phase=spec-project-start")
+                  (string-contains output "... compile probe.ss"))
+               => #t)
         (check (and (string-contains output "... compile probe.ss") #t)
                => #t)
         (check (and (string-contains output "Loading ssxi module") #t)

@@ -1,6 +1,8 @@
 (import :std/test
         (only-in :std/misc/path path-expand)
-        :asp-gerbil-scheme/build-api)
+        :asp-gerbil-scheme/build-api
+        (only-in :asp-gerbil-scheme/src/build-api/native-profile
+                 asp-gerbil-scheme-native-profile-projection-heartbeat-seconds))
 (export package-native-declaration-test)
 
 ;; Direct defbuild-script controls.  PackageSpec must return these ordinary
@@ -100,6 +102,11 @@
              => (list +platform-ffi-target+ '(ssi: "ffi/platform"))))
     (test-case "package-local test support remains a native build target"
       (check (test-support-spec) => +test-support-native-control+))
+    (test-case "native profile declares the projection heartbeat"
+      (check
+       (asp-gerbil-scheme-native-profile-projection-heartbeat-seconds
+        (asp-gerbil-scheme-package-native-profile managed-ffi-fixture))
+       => 5))
     (test-case "declarations do not mutate the catalog or accumulate targets"
       (check (asp-gerbil-scheme-package-modules raw-ffi-fixture)
              => '("src/a.ss" "src/b.ss" "src/c.ss" "src/main.ss"))

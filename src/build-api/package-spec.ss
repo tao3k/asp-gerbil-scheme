@@ -19,6 +19,9 @@
         asp-gerbil-scheme-package-modules)
 
 (import (only-in :clan/poo/object .cc .def .get)
+        (only-in :gerbil/gambit
+                 make-thread thread-start! thread-sleep! thread-terminate!
+                 write-substring)
         (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
         (rename-in "./native-spec-support"
                    (all-gerbil-modules upstream-all-gerbil-modules)
@@ -36,6 +39,7 @@
                  initialize-native-build-core-capacity!)
         (only-in "./native-profile"
                  asp-gerbil-scheme-default-native-profile
+                 asp-gerbil-scheme-native-profile-projection-heartbeat-seconds
                  asp-gerbil-scheme-native-profile-executable-gsc-options))
 
 ;; asp-gerbil-scheme-package-spec!
@@ -128,7 +132,82 @@
             native-spec)
            (else
             (asp-gerbil-scheme-package-default-native-spec package-spec)))
-          generated-modules))))
+         generated-modules))))
+
+(def (native-build-observability-enabled?)
+  (cond
+   ((getenv "GERBIL_BUILD_VERBOSE" #f)
+    => (lambda (value)
+         (let (level (string->number value))
+           (and (real? level) (> level 0)))))
+   (else #f)))
+
+(def (native-build-elapsed-milliseconds started-jiffy)
+  (quotient (* (- (current-jiffy) started-jiffy) 1000)
+            (jiffies-per-second)))
+
+(def (write-native-build-observation! phase started-jiffy . fields)
+  (let* ((port (current-output-port))
+         (record
+          (call-with-output-string
+           (lambda (buffer)
+             (display "[asp-build] phase=" buffer)
+             (display phase buffer)
+             (for-each
+              (lambda (field) (display " " buffer) (display field buffer))
+              fields)
+             (display " elapsedMs=" buffer)
+             (display (native-build-elapsed-milliseconds started-jiffy)
+                      buffer)
+             (newline buffer)))))
+    (write-substring record 0 (string-length record) port)
+    (force-output port)))
+
+;; Keep the native PackageSpec projection observable without changing its
+;; ownership or caching its result.  The heartbeat interval is declared by the
+;; PackageSpec's native POO profile; std/make retains planning and execution.
+(def (call-with-native-build-projection-observation package-spec thunk)
+  (if (not (native-build-observability-enabled?))
+    (thunk)
+    (let* ((started-jiffy (current-jiffy))
+           (profile (asp-gerbil-scheme-package-native-profile package-spec))
+           (interval
+            (asp-gerbil-scheme-native-profile-projection-heartbeat-seconds
+             profile))
+           (port (current-output-port))
+           (heartbeat #f))
+      (unless (and (real? interval) (> interval 0))
+        (error "native profile projection heartbeat must be positive" interval))
+      (write-native-build-observation!
+       'spec-project-start started-jiffy
+       "owner=asp-build-api/native-import-closure"
+       "executor=std/make")
+      (dynamic-wind
+        (lambda ()
+          (set! heartbeat
+                (make-thread
+                 (lambda ()
+                   (let loop ()
+                     (thread-sleep! interval)
+                     (parameterize ((current-output-port port))
+                       (write-native-build-observation!
+                        'spec-project-active started-jiffy
+                        "owner=asp-build-api/native-import-closure"
+                        "executor=std/make"))
+                     (loop)))))
+          (thread-start! heartbeat))
+        (lambda ()
+          (let (result (thunk))
+            (write-native-build-observation!
+             'spec-project-complete started-jiffy
+             (string-append "targetCount="
+                            (number->string (length result)))
+             "owner=asp-build-api/native-import-closure"
+             "executor=std/make")
+            result))
+        (lambda ()
+          (when heartbeat
+            (thread-terminate! heartbeat)))))))
 
 ;; The macro-generated spec procedure is the direct std/make boundary used by
 ;; clan/building. A PackageSpec remains the POO owner;
@@ -139,9 +218,10 @@
   (let (projector (.get package-spec spec-projector))
     (unless (procedure? projector)
       (error "Package Spec spec-projector must be a procedure" projector))
-    ;; std/make owns GERBIL_BUILD_VERBOSE and all of its output semantics.
-    ;; PackageSpec only supplies the native projection.
-    (projector package-spec)))
+    ;; GERBIL_BUILD_VERBOSE activates a native PackageSpec projection receipt;
+    ;; std/make still owns planning, currentness, compilation, and its output.
+    (call-with-native-build-projection-observation
+     package-spec (lambda () (projector package-spec)))))
 
 ;; Import-safe semantic base for concrete project library and provider specs.
 ;; Script entrypoints remain in top-level build.ss files; this module owns only

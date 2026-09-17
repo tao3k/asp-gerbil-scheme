@@ -18,6 +18,7 @@
         asp-gerbil-scheme-native-profile-name
         asp-gerbil-scheme-native-profile-platform
         asp-gerbil-scheme-native-profile-architecture
+        asp-gerbil-scheme-native-profile-projection-heartbeat-seconds
         asp-gerbil-scheme-native-profile-executable-gsc-options
         asp-gerbil-scheme-native-profile-prepare!)
 
@@ -40,6 +41,7 @@
              (name 'portable)
              (platform 'portable)
              (architecture (car (system-type)))
+             (projection-heartbeat-seconds 5)
              (executable-gsc-options [])
              (prepare! (lambda (_pkg-config-libs) #!void)))
   (accessors poo-family-ref
@@ -47,6 +49,8 @@
               (asp-gerbil-scheme-native-profile-name name)
               (asp-gerbil-scheme-native-profile-platform platform)
               (asp-gerbil-scheme-native-profile-architecture architecture)
+              (asp-gerbil-scheme-native-profile-projection-heartbeat-seconds
+               projection-heartbeat-seconds)
               (asp-gerbil-scheme-native-profile-executable-gsc-options
                executable-gsc-options)
               (asp-gerbil-scheme-native-profile-prepare! prepare!))
