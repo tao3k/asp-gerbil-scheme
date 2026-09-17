@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/protocol/json
-        :std/misc/process
         :std/sort
         :std/test)
+(include "../../support/fixture-filesystem.inc")
 (export check-structural-index-required-envelope
         check-structural-index-queryable-facts
         check-structural-index-quality-shape-facts
@@ -397,10 +397,7 @@
 
 ;; : (-> String Unit )
 (def (reset-fixture-root root)
-  (when (file-exists? root)
-    (void
-     (run-process ["rm" "-rf" root]
-                  stderr-redirection: #t))))
+  (reset-test-fixture-root! root))
 
 ;; : (-> String EnsureDir )
 (def (ensure-dir path)

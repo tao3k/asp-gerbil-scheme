@@ -18,6 +18,7 @@
         (only-in :asp-gerbil-scheme/src/types/core type-status)
         :asp-gerbil-scheme/src/types/facade)
 
+(include "../support/fixture-filesystem.inc")
 (include "fixture-support.ss")
 (export filter-rule
         json-finding-by-rule

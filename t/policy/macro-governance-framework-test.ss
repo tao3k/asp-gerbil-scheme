@@ -3,7 +3,6 @@
 
 (import :gerbil/gambit
         :std/test
-        (only-in :std/misc/process run-process)
         (only-in :std/text/json json-object->string write-json-sort-keys?)
         (only-in :clan/poo/object .cc)
         :asp-gerbil-scheme/src/macro-governance/facade
@@ -11,11 +10,11 @@
         :asp-gerbil-scheme/src/scenario/policy
         :asp-gerbil-scheme/src/types/facade)
 
+(include "../support/fixture-filesystem.inc")
 (export macro-governance-framework-policy-test)
 
 (def (macro-governance-reset-root root)
-  (when (file-exists? root)
-    (void (run-process ["rm" "-rf" root] stderr-redirection: #t))))
+  (reset-test-fixture-root! root))
 
 (def (macro-governance-ensure-directory path)
   (with-catch (lambda (_) #f) (lambda () (create-directory path))))
@@ -63,6 +62,8 @@
         (check (macro-governance-profile-max-pattern-count
                 asp-strict-macro-governance-profile)
                => 64)))
+    (test-case "fixture cleanup cannot escape the repository .run boundary"
+      (check-exception (macro-governance-reset-root "t") true))
     (test-case "admission accepts a bounded hygienic macro with executable witness"
       (let (root ".run/macro-governance-admitted")
         (write-macro-governance-project

@@ -1,0 +1,15 @@
+((scenarioKind . native-command-first-event)
+ (subject . asp-gerbil-scheme-self)
+ (attemptCount . 3)
+ (buildCommand . "gerbil build")
+ (buildEvent . "[asp-build] phase=spec-project-start")
+ (testCommand . "gerbil test -v <real ASP batch>")
+ (testEvent . "=== <first-test-file>")
+ (maxBuildFirstEventNanoseconds . 15000000000)
+ (targetBuildP50Nanoseconds . 15000000000)
+ (maxTestFirstEventNanoseconds . 25000000000)
+ (targetTestP50Nanoseconds . 18000000000)
+ (targetRationale
+  . "Measure the real ASP package only until PackageSpec starts preparing the std/make handoff and native gxtest starts the first file in a core-sized batch derived from the complete ASP test catalog; do not benchmark full compilation or suite execution.")
+ (requiredEvidence build-first-event test-first-event catalog-file-count
+                   batch-count batch-file-count sample-count p50))

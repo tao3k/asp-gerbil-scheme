@@ -44,6 +44,7 @@ rebuild:
     just build
     just test
 
-# Run the bounded same-source native std/make versus PackageSpec A/B scenario.
-benchmark-build-api-native-ab:
-    {{gerbil}} interactive t/scenarios/building/package-spec-native-ab/run-ab.ss
+# Measure real `gerbil build` and `gerbil test` only to their first semantic
+# event; full compilation and suite execution are intentionally excluded.
+benchmark-native-command-startup:
+    {{gerbil}} env gerbil interactive t/scenarios/building/native-command-startup/run.ss

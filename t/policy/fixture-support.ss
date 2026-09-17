@@ -35,10 +35,7 @@
                 stderr-redirection: #t)))
 ;; : (-> String ResetFixtureRoot )
 (def (reset-fixture-root root)
-  (when (file-exists? root)
-    (void
-     (run-process ["rm" "-rf" root]
-                  stderr-redirection: #t))))
+  (reset-test-fixture-root! root))
 ;; : (-> String String )
 (def (write-functional-idiom-control-context-project root)
   (let* ((src (string-append root "/src"))

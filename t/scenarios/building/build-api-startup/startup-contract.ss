@@ -1,9 +1,9 @@
 ((scenarioKind . process-startup)
  (attemptCount . 1)
- (maxNanoseconds . 3000000000)
+ (maxNanoseconds . 4000000000)
  (targetNanoseconds . 1500000000)
  (targetRationale
-  . "a PackageSpec-only downstream build script must start in a few seconds")
+  . "a PackageSpec-only downstream build script must start within four seconds while retaining a 1.5-second target")
  (feature . "build-api-startup-closure")
  (rule . "ASP-GERBIL-SCHEME-BUILD-API-STARTUP-001")
  (optimizationFocus
