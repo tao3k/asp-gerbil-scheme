@@ -35,10 +35,21 @@
   (count (lambda (line) (string-prefix? "... compile " line))
          (string-split output #\newline)))
 
-(def (run-spec image build)
-  (run-process (scenario-command image build "spec" #f)
-               directory: +scenario-root+
-               coprocess: read))
+(def (run-spec lane image build)
+  (displayln "[package-spec-native-ab] lane=" lane
+             " phase=spec event=process-start")
+  (force-output)
+  (let-values (((elapsed-ns spec)
+                (call-with-timing
+                 (lambda ()
+                   (run-process (scenario-command image build "spec" #f)
+                                directory: +scenario-root+
+                                coprocess: read)))))
+    (displayln "[package-spec-native-ab] lane=" lane
+               " phase=spec event=process-returned elapsed-ns=" elapsed-ns
+               " target-count=" (length spec))
+    (force-output)
+    spec))
 
 (def (measure-build lane phase image build)
   (displayln "[package-spec-native-ab] lane=" lane
@@ -79,14 +90,16 @@
     (lambda (port) (pretty-print receipt port))))
 
 (def (main . _)
+  (displayln "[package-spec-native-ab] phase=scenario-start event=ready")
+  (force-output)
   (let* ((run-root (make-temporary-file-name "asp-package-spec-native-ab"))
          (native-image (path-expand "native" run-root))
          (asp-image (path-expand "asp" run-root))
          (receipt-path (path-expand "receipt.ss" run-root)))
     (create-directory* native-image)
     (create-directory* asp-image)
-    (let ((native-spec (run-spec native-image "native-build.ss"))
-          (asp-spec (run-spec asp-image "asp-build.ss")))
+    (let ((native-spec (run-spec 'native native-image "native-build.ss"))
+          (asp-spec (run-spec 'asp asp-image "asp-build.ss")))
       (unless (and (equal? native-spec asp-spec)
                    (equal? native-spec +expected-spec+))
         (error "A/B lanes projected different BuildSpec values"

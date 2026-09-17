@@ -13,5 +13,5 @@
  (optimizationFocus . "PackageSpec import, projection, and std/make handoff")
  (inputShape . "One macro-heavy Gerbil POO target compiled into isolated lane images")
  (expectedOutcome . "Both warm lanes compile zero targets and PackageSpec p50 stays within three seconds of native p50")
- (measurementPhases "native-cold" "asp-cold" "native-warm" "asp-warm" "compare-p50")
+ (measurementPhases "scenario-start" "native-spec" "asp-spec" "native-cold" "asp-cold" "native-warm" "asp-warm" "compare-p50")
  (tags "building" "std-make" "package-spec" "native-control" "warm-path"))

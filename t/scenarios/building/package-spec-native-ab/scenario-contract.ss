@@ -12,5 +12,6 @@
  (maxProjectionOverheadSeconds . 3)
  (targetRationale
   . "The same macro-heavy target and std/make executor isolate PackageSpec projection and process-loading overhead from native currentness work.")
- (measurementPhases process-start spec-projected process-returned)
+ (measurementPhases scenario-start spec-process-start spec-process-returned
+                    compile-process-start compile-process-returned)
  (requiredEvidence upstream-revision cold-seconds warm-samples warm-p50 compile-counts))
