@@ -3,7 +3,7 @@
 (package: sample/linearization)
 (export resolve-precedence)
 
-;; : (-> Class DirectSupers PrecedenceList)
+;; : (-> Class DirectSupers C3PrecedenceList)
 (def (resolve-precedence klass direct-supers)
   (let loop ((rest direct-supers) (order [klass]))
     (match rest

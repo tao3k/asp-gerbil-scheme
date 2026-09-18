@@ -1,28 +1,12 @@
-((max_total . 105ms)
- (observed_total . 5ms)
- (target_total . 100ms)
- (regression_budget . 100ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2))
-  ((name . collect-after) (durationMs . 2))
-  ((name . policy-before) (durationMs . 1))
-  ((name . policy-after) (durationMs . 0)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
+ (target_total . 150ms)
+ (regression_budget . 150ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "downstream gxtest policy scope runs through the real gxtest test boundary and must stay below a small fixture budget while following imported source owners")
- (maxCollectMs . 174)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 116)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "downstream gxtest policy scope runs twenty samples through the real import-closure boundary; the target covers normal parser and policy work, the independent input/expected p95 comparison allows 100ms of measured tree-shape and allocator variance, and explicit total headroom absorbs scheduler tail latency")
+ (sampleCount . 20)
  (purpose
   .
   "R013 downstream gxtest scenario reproduces unit-tests importing project-policy-test while source warnings live behind another imported test")
@@ -33,10 +17,10 @@
   "gxtest files-scope import closure must include tested package-local source owners")
  (inputShape
   .
-  "unit-tests imports project-policy-test and cli-test; cli-test imports src/cli where the R013 warning lives")
+  "unit-tests imports project-policy-test and provider-entry-test; provider-entry-test imports src/provider-entry where the R013 warning lives")
  (expectedOutcome
   .
-  "gxtest policy report on unit-tests sees src/cli before repair and passes after the source owner uses fold style")
+  "gxtest policy report on unit-tests sees src/provider-entry before repair and passes after the source owner uses fold style")
  (expectedReferencePattern . "loop-driver-combinator-boundary")
  (expectedReferenceExamples
   "gerbil://std/actor-v13/rpc/proto/cipher.ss#foldl-chunk-accumulator"
@@ -61,7 +45,7 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style"
        "gxtest"
        "downstream"

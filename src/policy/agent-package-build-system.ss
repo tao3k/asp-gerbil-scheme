@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Package-level build.ss custom build-system detection.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/detection
-        :gslph/src/policy/poo-source
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/detection
+        :asp-gerbil-scheme/src/policy/poo-source
         (only-in :std/srfi/13 string-contains string-suffix?)
         (only-in :std/sugar cut filter hash ormap))
 
@@ -26,7 +26,7 @@
 
 ;; (List ModuleName)
 (def +package-build-canonical-modules+
-  '(":clan/building"))
+  '(":asp-gerbil-scheme/building-api"))
 
 ;; (List ModuleName)
 (def +package-build-std-build-script-modules+
@@ -38,7 +38,7 @@
 
 ;; (List CalleeName)
 (def +package-build-canonical-environment-callees+
-  '("init-build-environment!" "%set-build-environment!"))
+  '("asp-gerbil-scheme-package-spec!"))
 
 ;; (List CalleeName)
 (def +package-build-std-build-script-callees+
@@ -82,13 +82,6 @@
     "find src"))
 
 ;; (List String)
-(def +package-build-shell-pipeline-literal-markers+
-  '("|" "xargs" "find src" "sort |" " -P "))
-
-;; (List CalleeName)
-(def +package-build-shell-dispatch-callees+
-  '("invoke" "run-process" "open-process"))
-
 ;;; Local state evidence includes cache, stamp, receipt, and worker ownership.
 ;;; It only becomes a finding when combined with package build scope and a
 ;;; native build surface, so ordinary package helper identifiers are not enough.
@@ -126,8 +119,7 @@
 ;; : (-> (List DetectionPrototype))
 (def (package-build-quality-detection-prototypes)
   [(package-build-custom-system-detection-prototype)
-   (package-build-framework-overreach-detection-prototype)
-   (package-build-shell-pipeline-detection-prototype)])
+   (package-build-framework-overreach-detection-prototype)])
 
 ;; : (-> DetectionResult Boolean)
 (def (package-build-custom-system-result? result)
@@ -159,7 +151,7 @@
     "package build custom-system drift requires scope, missing native build surface, and manual orchestration evidence")))
 
 ;;; Framework-overreach detection catches the opposite failure mode from the
-;;; custom-system detector: build.ss imports std/make or clan/building, but then
+;;; custom-system detector: build.ss imports std/make or the ASP Build API, but then
 ;;; recreates build-phase/cache ownership locally.  The repair is not to replace
 ;;; Gerbil's build system; it is to keep cache/receipt policy in harness APIs
 ;;; that wrap the normal build entrypoint.
@@ -178,24 +170,9 @@
     +package-build-framework-overreach-required-groups+
     "package build API overreach requires package scope, native build surface evidence, and local phase/cache/stamp ownership")))
 
-;;; Shell pipeline detection stays separate from the broader custom-system
-;;; detector so sh -c pipeline repair remains precise.
-;; : (-> DetectionPrototype)
-(def (package-build-shell-pipeline-detection-prototype)
-  (detection-prototype-extend
-   +all-of-detection-prototype+
-   (poo-source-pattern-detection-overlay 'prototype-composition)
-   (detection-prototype
-    "package-build-shell-pipeline-all-of"
-    'all-of
-    [package-build-shell-dispatch-call-evidence
-     package-build-shell-pipeline-literal-evidence]
-    0
-    ["shell-dispatch-call" "shell-pipeline-literal"]
-    "package build shell-pipeline drift requires dispatch and payload evidence")))
-
-;;; Scope guard: only package-root build.ss is checked for custom build-system
-;;; drift.  build/runtime owners use a separate detector profile.
+;;; Scope guard: every package-owned build.ss, including nested workspace
+;;; packages, is checked for custom build-system drift. Build/runtime owners
+;;; use a separate detector profile.
 ;; : (-> SourceFile Boolean)
 (def (package-build-file? file)
   (equal? (source-path-class (source-file-path file))
@@ -253,8 +230,9 @@
        (binding-fact-selector (car bindings))))
      (else #f))))
 
-;;; Evidence boundary: keep only parser-owned calls that prove build.ss is
-;;; coordinating compiler/process work instead of delegating to clan/building.
+;;; Evidence boundary: a process primitive is ordinary Scheme.  It becomes
+;;; build-control evidence only when its parser-owned arguments name a compiler
+;;; or build-environment operation.
 ;; : (-> SourceFile MaybeEvidenceGroup)
 (def (package-build-manual-orchestration-evidence file)
   (let (calls (filter package-build-manual-orchestration-call?
@@ -265,52 +243,24 @@
           (length calls)
           (call-fact-selector (car calls))))))
 
-;;; Shell dispatch evidence stays separate from literal pipeline strings so
-;;; command invocation and argument content can compose as independent signals.
-;; : (-> SourceFile MaybeEvidenceGroup)
-(def (package-build-shell-dispatch-call-evidence file)
-  (let (calls (filter package-build-shell-dispatch-call?
-                      (source-file-calls file)))
-    (and (pair? calls)
-         (evidence-group
-          "shell-dispatch-call"
-          (length calls)
-          (call-fact-selector (car calls))))))
-
-;;; Pipeline literals refine sh -c evidence so build.ss warnings focus on
-;;; pipeline orchestration instead of every shell invocation.
-;; : (-> SourceFile MaybeEvidenceGroup)
-(def (package-build-shell-pipeline-literal-evidence file)
-  (let (calls (filter package-build-shell-pipeline-literal-call?
-                      (source-file-calls file)))
-    (and (pair? calls)
-         (evidence-group
-          "shell-pipeline-literal"
-          (length calls)
-          (call-fact-selector (car calls))))))
-
 ;;; Canonical package build evidence stays structural: module imports prove
-;;; clan/building is present, calls prove environment initialization, and either
-;;; calls or definitions prove delegated source discovery.
+;;; ASP PackageSpec is present, calls prove declaration, and either calls or
+;;; definitions prove delegated source discovery.
 ;; : (-> SourceFile Boolean)
 (def (package-build-canonical-build-shape? file)
-  (or (package-build-canonical-clan-shape? file)
+  (or (package-build-canonical-package-spec-shape? file)
       (package-build-std-build-script-shape? file)
       (package-build-std-make-buildspec-shape? file)))
 
-;;; Clan/building shape is the preferred package boundary: the import provides
-;;; build semantics, init call owns environment setup, and enumerator/spec
-;;; evidence proves source discovery is delegated instead of handwritten.
+;;; ASP PackageSpec is a declarative projection boundary. Its macro call owns
+;;; source slots directly; execution is still provided by std/build-script and
+;;; std/make.
 ;; : (-> SourceFile Boolean)
-(def (package-build-canonical-clan-shape? file)
+(def (package-build-canonical-package-spec-shape? file)
   (and (ormap package-build-canonical-module-import?
               (source-file-module-imports file))
        (ormap package-build-canonical-environment-call?
-              (source-file-calls file))
-       (or (ormap package-build-canonical-enumerator-call?
-                  (source-file-calls file))
-           (ormap package-build-spec-definition?
-                  (source-file-definitions file)))))
+              (source-file-calls file))))
 
 ;;; std/build-script is accepted as a legacy structural witness only when the
 ;;; import and defbuild-script call appear together, keeping migration evidence
@@ -394,10 +344,10 @@
 ;;; The marker table is policy data, so extending it does not add branch logic.
 ;; : (-> CallFact Boolean)
 (def (package-build-manual-orchestration-call? call)
-  (or (member (call-fact-callee call)
-              +package-build-manual-orchestration-callees+)
-      (ormap package-build-manual-orchestration-argument?
-             (filter string? (call-fact-arguments call)))))
+  (and (member (call-fact-callee call)
+               +package-build-manual-orchestration-callees+)
+       (ormap package-build-manual-orchestration-argument?
+              (filter string? (call-fact-arguments call)))))
 
 ;;; Marker matching is a predicate family: cut/ormap express any orchestration
 ;;; marker hit without turning the package-build rule into an open-coded branch.
@@ -405,25 +355,6 @@
 (def (package-build-manual-orchestration-argument? argument)
   (ormap (cut string-contains argument <>)
          +package-build-manual-orchestration-markers+))
-
-;;; sh -c is the risk boundary because it collapses typed argv into shell text.
-;; : (-> CallFact Boolean)
-(def (package-build-shell-dispatch-call? call)
-  (and (member (call-fact-callee call)
-               +package-build-shell-dispatch-callees+)
-       (call-arguments-contain? call "sh")
-       (call-arguments-contain? call "-c")))
-
-;;; Nested argument scanning requires the shell dispatcher and pipeline literal
-;;; to be on the same parsed call, which is stricter than source text matching.
-;; : (-> CallFact Boolean)
-(def (package-build-shell-pipeline-literal-call? call)
-  (and (package-build-shell-dispatch-call? call)
-       (ormap (lambda (argument)
-                (and (string? argument)
-                     (ormap (cut string-contains argument <>)
-                            +package-build-shell-pipeline-literal-markers+)))
-              (call-fact-arguments call))))
 
 ;;; Shared argument containment keeps signal logic data-driven: callers provide
 ;;; the marker, while parser-owned argument values remain the evidence boundary.

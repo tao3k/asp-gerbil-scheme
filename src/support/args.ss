@@ -26,10 +26,11 @@
 ;; ConfigConstant
 (def +boolean-flags+
   '("--json" "--code" "--names-only" "--changed" "--full" "--check" "--more"
-    "--artifact"))
+    "--artifact" "--runtime-request-frame-stdin"))
 ;; ConfigConstant
 (def +value-options+
   '("--term" "--query" "--selector" "--workspace" "--from-hook" "--view" "--package"
+    "--server-endpoint"
     "--owner"
     "--iterations" "--max-total-ms" "--max-interface-ms" "--whitelist"
     "--topic" "--intent" "--role" "--level" "--rule" "--finding" "--limit"))

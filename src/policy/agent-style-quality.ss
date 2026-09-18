@@ -1,10 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned quality facet aggregation for typed-combinator style policy.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-style-gerbil-signals
-        :gslph/src/policy/agent-style-destructuring-signals
-        :gslph/src/policy/agent-style-performance-signals
+(import :asp-gerbil-scheme/src/parser/facade
+        (only-in :asp-gerbil-scheme/src/parser/function-quality
+                 function-quality-poo-profile-facets)
+        :asp-gerbil-scheme/src/policy/agent-style-gerbil-signals
+        :asp-gerbil-scheme/src/policy/agent-style-destructuring-signals
+        :asp-gerbil-scheme/src/policy/agent-style-performance-signals
         (only-in :std/misc/list unique)
         (only-in :std/srfi/13 string-prefix?)
         (only-in :std/sugar cut filter ormap))
@@ -14,6 +16,14 @@
         typed-combinator-style-quality-repair-triggered?
         quality-facet-present?
         quality-facet-any?)
+
+;; (List QualityFacet)
+(def +typed-combinator-style-strict-responsibility-facets+
+  ["concurrency-control-boundary"
+   "actor-runtime-boundary"
+   "match-extension-boundary"
+   "mop-class-macro-boundary"
+   "method-table-lambda-drift"])
 
 ;;; Quality facets summarize parser-owned style evidence for a source owner.
 ;;; Keep advisory signals available even when they do not trigger a finding.
@@ -33,6 +43,11 @@
     (apply append
            (map typed-combinator-style-profile-quality-facets
                 (source-file-function-quality-profiles file)))
+    ;; A POO-only owner may contain no ordinary `def`, so its method-table
+    ;; quality cannot depend on function-profile materialization.
+    (apply append
+           (map function-quality-poo-profile-facets
+                (source-file-poo-forms file)))
     (typed-combinator-style-generator-quality-facets file)
     (typed-combinator-style-anti-ai-scaffold-quality-facets file)
     (typed-combinator-style-gerbil-upstream-idiom-quality-facets file)
@@ -98,7 +113,10 @@
 ;;; The policy turns manual-loop drift into warnings so self-apply can repair.
 ;; : (-> SourceFile (List QualityFacet) Boolean )
 (def (typed-combinator-style-quality-repair-triggered? file quality-facets)
-  (or (quality-facet-any? quality-facets
+  (or (quality-facet-any?
+       quality-facets
+       +typed-combinator-style-strict-responsibility-facets+)
+      (quality-facet-any? quality-facets
                           ["scheme-native-typed-block-migration"])
       (and (not (typed-combinator-style-positive-quality-covered?
                  quality-facets))
@@ -143,7 +161,9 @@
 ;;; when the file lacks concrete combinator or expression-level evidence.
 ;; : (-> (List QualityFacet) Boolean )
 (def (typed-combinator-style-positive-quality-covered? facets)
-  (or (and (quality-facet-present? facets "expression-level-composition")
+  (or (and (quality-facet-any? facets
+                                ["expression-level-composition"
+                                 "combinator-composition"])
            (quality-facet-any? facets
                                ["higher-order-used"
                                 "combinator-backed"

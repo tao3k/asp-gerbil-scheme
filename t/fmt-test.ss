@@ -3,9 +3,9 @@
 
 (import :std/test
         (only-in :std/misc/path path-expand)
-        :gslph/src/benchmark/framework
-        :gslph/src/format/facade
-        :gslph/src/support/io)
+        :asp-gerbil-scheme/src/benchmark/framework
+        :asp-gerbil-scheme/src/format/facade
+        :asp-gerbil-scheme/src/support/io)
 
 (export fmt-test)
 

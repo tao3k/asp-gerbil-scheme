@@ -2,27 +2,29 @@
 ;;; Agent-facing policy checks over facade intent comments.
 
 (import :gerbil/gambit
-        :gslph/src/parser/facade
-        :gslph/src/policy/agent-basic
-        :gslph/src/policy/agent-macro-protocol
-        :gslph/src/policy/agent-alist-access
-        :gslph/src/policy/agent-anonymous-pair
-        :gslph/src/policy/agent-build
-        :gslph/src/policy/agent-build-runtime
-        :gslph/src/policy/agent-comment
-        :gslph/src/policy/agent-dependency-adapter
-        :gslph/src/policy/agent-import
-        :gslph/src/policy/agent-list-growth
-        :gslph/src/policy/agent-list-random-access
-        :gslph/src/policy/agent-macro-io
-        :gslph/src/policy/agent-string-growth
-        :gslph/src/policy/agent-poo
-        :gslph/src/policy/agent-source-scope
-        :gslph/src/policy/agent-style
-        :gslph/src/policy/agent-support
-        :gslph/src/policy/gerbil-utils-source
-        :gslph/src/policy/model
-        :gslph/src/policy/modularity
+        (only-in :asp-gerbil-scheme/src/macro-governance/admission
+                 macro-governance-findings)
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-basic
+        :asp-gerbil-scheme/src/policy/agent-macro-protocol
+        :asp-gerbil-scheme/src/policy/agent-alist-access
+        :asp-gerbil-scheme/src/policy/agent-anonymous-pair
+        :asp-gerbil-scheme/src/policy/agent-build
+        :asp-gerbil-scheme/src/policy/agent-build-runtime
+        :asp-gerbil-scheme/src/policy/agent-comment
+        :asp-gerbil-scheme/src/policy/agent-dependency-adapter
+        :asp-gerbil-scheme/src/policy/agent-import
+        :asp-gerbil-scheme/src/policy/agent-list-growth
+        :asp-gerbil-scheme/src/policy/agent-list-random-access
+        :asp-gerbil-scheme/src/policy/agent-macro-io
+        :asp-gerbil-scheme/src/policy/agent-string-growth
+        :asp-gerbil-scheme/src/policy/agent-poo
+        :asp-gerbil-scheme/src/policy/agent-source-scope
+        :asp-gerbil-scheme/src/policy/agent-style
+        :asp-gerbil-scheme/src/policy/agent-support
+        :asp-gerbil-scheme/src/policy/gerbil-utils-source
+        :asp-gerbil-scheme/src/policy/model
+        :asp-gerbil-scheme/src/policy/modularity
         (only-in :std/misc/ports read-file-lines)
         (only-in :std/srfi/1 take)
         (only-in :std/srfi/13
@@ -31,7 +33,7 @@
                  string-suffix?
                  string-trim)
         (only-in :std/sugar cut filter filter-map find hash ormap while with-catch)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export run-agent-policy
         facade-intent-finding
@@ -83,7 +85,6 @@
    (poo-method-shape-findings index)
    (poo-prototype-fixed-point-findings index)
    (poo-construction-performance-findings index)
-   (poo-generated-receipt-boundary-findings index)
    (poo-clone-override-loop-performance-findings index)
    (poo-materialization-loop-performance-findings index)
    (poo-composition-loop-performance-findings index)
@@ -98,8 +99,7 @@
    (list-growth-loop-performance-findings index)
    (list-random-access-loop-performance-findings index)
    (string-growth-loop-performance-findings index)
-   (macro-expansion-io-boundary-findings index)
-   (macro-runtime-source-witness-findings index)
+   (macro-governance-findings index)
    (protocol-evidence-findings index)
    (typed-combinator-style-findings index)
    (comment-quality-findings index)

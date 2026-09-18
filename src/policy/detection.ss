@@ -2,10 +2,13 @@
 ;;; Policy-owned combinators for parser-owned evidence groups.
 
 (import :gerbil/gambit
-        :gslph/src/policy/prototype
+        (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
+        :asp-gerbil-scheme/src/policy/prototype
         (only-in :std/sugar filter filter-map hash ormap))
 
-(export evidence-group
+(export evidence-group-object-prototype
+        policy-detection-result-object-prototype
+        evidence-group
         evidence-group-name
         evidence-group-count
         evidence-group-selector
@@ -37,27 +40,64 @@
         detection-result-selector
         detection-result-details)
 
-;;; EvidenceGroup is intentionally small positional data: name, count, selector.
-;;; The parser owns facts and selectors; policy combinators only compose them.
-;; : (-> String Integer Selector EvidenceGroup )
-(def (evidence-group name count selector)
-  (list name count selector))
+;;; EvidenceGroup is public parser evidence, so its representation is a native
+;;; object rather than an anonymous positional list.
+(defpoo-object-family
+  (prototype evidence-group-object-prototype
+             (policy-value-kind 'evidence-group))
+  (constructor
+   (evidence-group group-name group-count group-selector)
+   (name group-name)
+   (count group-count)
+   (selector group-selector))
+  (accessors poo-family-ref
+             (required
+              (evidence-group-name name)
+              (evidence-group-count count)
+              (evidence-group-selector selector))
+             (optional)))
 
-;; : (-> EvidenceGroup String )
-(def (evidence-group-name group)
-  (car group))
+;;; DetectionResult is likewise a stable public policy product.  The macro owns
+;;; its constructor/accessor frame while the functional combinators below own
+;;; detection behavior.
+(defpoo-object-family
+  (prototype policy-detection-result-object-prototype
+             (policy-value-kind 'detection-result))
+  (constructor
+   (%detection-result result-combiner
+                      result-threshold
+                      result-required-groups
+                      result-missing-groups
+                      result-groups
+                      result-prototype
+                      result-combiner-kind
+                      result-description
+                      result-metadata)
+   (combiner result-combiner)
+   (threshold result-threshold)
+   (requiredGroups result-required-groups)
+   (missingGroups result-missing-groups)
+   (groups result-groups)
+   (prototype result-prototype)
+   (combinerKind result-combiner-kind)
+   (description result-description)
+   (metadata result-metadata))
+  (accessors poo-family-ref
+             (required
+              (detection-result-combiner combiner)
+              (detection-result-threshold threshold)
+              (detection-result-required-groups requiredGroups)
+              (detection-result-missing-groups missingGroups)
+              (detection-result-groups groups)
+              (detection-result-prototype prototype)
+              (detection-result-combiner-kind combinerKind)
+              (detection-result-description description)
+              (detection-result-metadata metadata))
+             (optional)))
 
-;; : (-> EvidenceGroup Integer )
-(def (evidence-group-count group)
-  (cadr group))
-
-;; : (-> EvidenceGroup Selector )
-(def (evidence-group-selector group)
-  (caddr group))
-
-;;; DetectionPrototype is a C3 slot profile.  Composition follows the same
-;;; multiple-inheritance model as gerbil-poo objects, then materializes into
-;;; plain descriptor slots at the policy boundary.
+;;; DetectionPrototype is a native POO slot profile.  Composition uses
+;;; gerbil-poo's own C3 object graph; parser-owned evidence remains functional
+;;; data passed into the configured extractors.
 ;; : (-> Name CombinerKind Extractors Threshold Required Description DetectionPrototype )
 (def (detection-prototype name combiner extractors threshold required description)
   (slot-profile
@@ -80,8 +120,9 @@
     (cons 'quality-signals quality-signals)
     (cons 'witness witness)]))
 
-;;; Instantiation boundary: compose-proto* returns a prototype transformer.
-;;; Policy modules consume plain descriptor data, so instantiate at this edge.
+;;; Composition boundary: the resulting value remains a native POO profile.
+;;; Policy modules consume it through slot-profile-ref and preserve its C3
+;;; lineage for diagnostic provenance.
 ;; : (-> (List DetectionPrototype) DetectionPrototype )
 (def (detection-prototype-compose prototypes)
   (slot-profile-compose "detection-prototype-composition" prototypes))
@@ -143,8 +184,8 @@
    "fires when every required parser-owned evidence group is present"))
 
 ;;; Boundary:
-;;; - A detection prototype is still plain descriptor data after composition.
-;;; - POO composition owns override order; parser-owned evidence owns facts.
+;;; - A detection prototype remains a POO object after composition.
+;;; - Native POO composition owns override order; parser-owned evidence owns facts.
 ;;; - Policy rules only choose descriptors and repair messages.
 ;; : (-> Subject DetectionPrototype MaybeDetectionResult )
 (def (run-detection-prototype subject prototype)
@@ -223,14 +264,14 @@
 ;; : (-> CombinerName Threshold Required Missing Groups Prototype Kind Description DetectionResult )
 (def (detection-result* combiner threshold required missing groups
                         prototype combiner-kind description)
-  (list combiner threshold required missing groups
-        prototype combiner-kind description '()))
+  (%detection-result combiner threshold required missing groups
+                     prototype combiner-kind description '()))
 
 ;; : (-> CombinerName Threshold Required Missing Groups Prototype Kind Description Metadata DetectionResult )
 (def (detection-result/metadata combiner threshold required missing groups
                                 prototype combiner-kind description metadata)
-  (list combiner threshold required missing groups
-        prototype combiner-kind description metadata))
+  (%detection-result combiner threshold required missing groups
+                     prototype combiner-kind description metadata))
 
 ;; : (-> DetectionPrototype Threshold Required Missing Groups DetectionResult )
 (def (prototype-detection-result prototype threshold required missing groups)
@@ -244,44 +285,6 @@
    (detection-combiner-kind-name (detection-prototype-combiner prototype))
    (detection-prototype-description prototype)
    (detection-prototype-metadata prototype)))
-
-;; : (-> DetectionResult (List EvidenceGroup) )
-(def (detection-result-groups result)
-  (list-ref result 4))
-
-;; : (-> DetectionResult String )
-(def (detection-result-combiner result)
-  (list-ref result 0))
-
-;; : (-> DetectionResult Integer )
-(def (detection-result-threshold result)
-  (list-ref result 1))
-
-;; : (-> DetectionResult (List GroupName) )
-(def (detection-result-required-groups result)
-  (list-ref result 2))
-
-;; : (-> DetectionResult (List GroupName) )
-(def (detection-result-missing-groups result)
-  (list-ref result 3))
-
-;; : (-> DetectionResult String )
-(def (detection-result-prototype result)
-  (if (> (length result) 5)
-    (list-ref result 5)
-    (detection-result-combiner result)))
-
-;; : (-> DetectionResult String )
-(def (detection-result-combiner-kind result)
-  (if (> (length result) 6)
-    (list-ref result 6)
-    "direct"))
-
-;; : (-> DetectionResult String )
-(def (detection-result-description result)
-  (if (> (length result) 7)
-    (list-ref result 7)
-    ""))
 
 ;; : (-> DetectionResult Selector Selector )
 (def (detection-result-selector result fallback)
@@ -316,8 +319,7 @@
 
 ;; : (-> DetectionResult Symbol Value Value )
 (def (detection-result-metadata-slot result key fallback)
-  (let (metadata (if (> (length result) 8) (list-ref result 8) '()))
-    (detection-prototype-slot metadata key fallback)))
+  (detection-prototype-slot (detection-result-metadata result) key fallback))
 
 ;;; Details expose the combinator decision to agents without prescribing the
 ;;; final edit. The model gets enough evidence to adapt the repair.

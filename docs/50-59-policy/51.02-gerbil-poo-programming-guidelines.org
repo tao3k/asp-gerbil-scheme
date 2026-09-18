@@ -19,7 +19,7 @@ The reference source is =.data/gerbil-poo=.
 - =t/object-test.ss= and =t/mop-test.ss= show the concrete syntax agents should
   learn: ={(:: @ super) slot: ...}=, =>=, =>.+=, =?=, and =.mix=.
 
-- =object.ss:149-151= implements =object<-alist= by converting each pair into a constant slot spec before calling =make-object=. This is an external alist adapter, not the preferred declaration form for stable config/profile objects.
+- =object.ss:149-151= implements =object<-alist= by converting each pair into a constant slot spec before calling =make-object=. At a public call site this is an external alist adapter, not the preferred declaration form for stable config/profile objects. A bounded declaration macro may nevertheless emit it internally after its grammar has proved that every row is a constant slot assignment; the public form and result remain POO-native.
 - =object.ss:128-131= and =object.ss:414-416= show that =.get= expands into recursive =.ref= calls, and =.ref= resolves through the object instance hash. Repeated projection groups should be bound once or batched.
 - =object.ss:390-401= implements =.o= as both expression syntax and match syntax; the match side expands through =o?/slots= and =.refs/slots=.
 - =object.ss:204-218= exposes =(.refs/slots slots)= as the lower-level batch projection helper behind slot predicates and match-style projections.
@@ -34,7 +34,8 @@ compiler can see clearly:
 
 - fixed slot sets become lexical bindings with =with-slots=,
 - compact config specs use =lambda-match= or local destructuring helpers,
-- stable object declarations stay as named native =.o= values,
+- stable direct object declarations stay as named native =.o= values; bounded
+  declaration macros may choose a measured constant-slot lowering internally,
 - full-object materialization happens once at a boundary,
 - hot loops carry scalar/list/hash state rather than repeated POO construction,
   projection, or traversal.
@@ -75,8 +76,9 @@ inside one POO shape:
 - =>.+= merges nested object/prototype fragments.
 - =.mix= materializes an instance when the prototype should be instantiated.
 
-Large configuration, profile, and schema objects keep the same rule. The
-performance shape is not to rewrite native POO into =object<-alist= or a hash.
+Large configuration, profile, and schema objects keep the same rule. At a
+direct user call site, the performance shape is not to rewrite native POO into
+=object<-alist= or a hash.
 Name the stable native =.o= shape once, compose a small native overlay at the
 boundary for genuinely dynamic slots, and keep hot loops in scalar state after
 capturing needed slots outside the loop:
@@ -102,6 +104,25 @@ capturing needed slots outside the loop:
 This keeps the object shape native and inspectable while avoiding repeated slot
 resolution, repeated composition, or repeated object construction inside the
 loop.
+
+A declaration macro is a separate compile-time boundary.  When its accepted
+grammar is only a bounded sequence of =(slot value)= rows, re-emitting =.o=
+forces the =.o= expander to rebuild =self=-aware slot lambdas and normalize
+syntax capabilities that the declaration language has already excluded.  Such
+a macro MAY lower internally through upstream =object<-alist= when all of the
+following hold:
+
+- the user-facing form remains a named POO declaration;
+- the result is a native POO object, not an exposed alist model;
+- inheritance, defaults, computed slots, =self=, =next-method=, match syntax,
+  and dynamic composition are rejected by the bounded grammar;
+- semantic equivalence and compile-time improvement have same-source A/B
+  evidence;
+- runtime and hot-loop construction keep independent runtime benchmarks.
+
+This is not permission to rewrite arbitrary =.o= declarations.  It is an
+optimizer-visible lowering owned by the declaration macro after that macro has
+proved the narrower semantics.
 When the slot set is static in one local computation, bind the slots with
 =with-slots= and reduce scalar state once. Use =.refs/slots= only when the slot
 names are dynamic or the projection itself is the boundary protocol:

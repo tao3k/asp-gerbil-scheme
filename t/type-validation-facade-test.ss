@@ -2,7 +2,7 @@
 ;;; Tests for downstream-facing TypeSpec validation exports.
 
 (import :std/test
-        (only-in :gslph/src/types/model
+        (only-in :asp-gerbil-scheme/src/types/model
                  make-type-unknown
                  make-type-any
                  make-type-base
@@ -23,7 +23,7 @@
                  make-type-record
                  type-kind
                  parse-type-contract)
-        (only-in :gslph/src/types/validation
+        (only-in :asp-gerbil-scheme/src/types/validation
                  type-validation-diagnostic-code
                  type-validation-diagnostic-path
                  type-validation-diagnostic-category

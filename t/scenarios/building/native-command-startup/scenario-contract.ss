@@ -1,0 +1,16 @@
+((scenarioKind . native-command-first-event)
+ (subject . asp-gerbil-scheme-self)
+ (buildCommand . "gerbil interactive build.ss spec")
+ (buildEvent . "[asp-build] phase=spec-project-start")
+ (testCommand . "gerbil test -v t/package-build-contract-test.ss")
+ (testFile . "t/package-build-contract-test.ss")
+ (testEvent . "=== <first-test-file>")
+ (maxBaselineFirstEventNanoseconds . 2500000000)
+ (maxBuildFirstEventNanoseconds . 15000000000)
+ (maxTestFirstEventNanoseconds . 25000000000)
+ (maxBuildIncrementalFirstEventNanoseconds . 4000000000)
+ (maxTestIncrementalFirstEventNanoseconds . 12000000000)
+ (targetRationale
+  . "Run one empty Gerbil baseline, the real ASP build.ss PackageSpec, and one real ASP test file. Stop each child at its first semantic event and fail immediately after an over-budget lane. The gxpkg gerbil build command intentionally starts a second Gerbil process after manifest generation, so its wrapper latency is not attributed to the ASP import closure.")
+ (requiredEvidence baseline-first-event build-first-event test-first-event
+                   test-file raw-elapsed incremental-elapsed))

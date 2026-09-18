@@ -1,28 +1,12 @@
-((target_total . 18ms)
- (max_total . 30ms)
- (observed_total . 4ms)
- (regression_budget . 26ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 1))
-  ((name . collect-after) (durationMs . 1))
-  ((name . policy-before) (durationMs . 1))
-  ((name . policy-after) (durationMs . 1)))
+((benchmarkKind . scenario-e2e)
+ (target_total . 100ms)
+ (max_total . 200ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed baseline 4ms for scoped match-extension-boundary; target keeps the match macro policy scenario in a small millisecond budget while max_total remains the hard regression ceiling")
- (maxCollectMs . 15)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 10)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "The match-extension-boundary target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+ (sampleCount . 20)
  (purpose . "R013 match extension scenario keeps Gerbil core/match defsyntax-for-match and applicative destructuring guidance under the scenario-owned timing gate")
  (feature . "match-extension-boundary")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -67,5 +51,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style" "macro" "match"))

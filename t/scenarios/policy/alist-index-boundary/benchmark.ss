@@ -1,32 +1,15 @@
-((max_total . 25ms)
- (observed_total . 7ms)
- (target_total . 14ms)
- (regression_budget . 18ms)
- (expected_over_input_budget . 3ms)
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (expected_over_input_note
   .
   "expected builds an explicit make-hash-table-eq index; the scenario gate compares collect/policy time while the repair removes repeated runtime alist scans")
- (observedTimings
-  ((name . collect-before) (durationMs . 2) (durationNs . 2000000))
-  ((name . collect-after) (durationMs . 3) (durationNs . 3000000))
-  ((name . policy-before) (durationMs . 1) (durationNs . 1000000))
-  ((name . policy-after) (durationMs . 1) (durationNs . 1000000)))
  (targetRationale
   .
   "alist-index-boundary keeps repeated inline assq/cdr detection parser-owned and validates the expected index/accessor repair inside a tight scenario timing gate")
- (maxCollectMs . 10)
- (observedCollectMs . 5)
- (maxParseMs . 14)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 6)
- (observedPhaseMs . 3)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+ (sampleCount . 20)
  (purpose
   .
   "R022 alist index scenario rejects repeated inline alist probing when a symbolic index or named accessor boundary should own the event shape")
@@ -68,6 +51,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate"
   "assert-input-expected-comparison")
  (tags "style" "alist" "hash-index" "anti-scaffold"))

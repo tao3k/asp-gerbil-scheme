@@ -1,15 +1,16 @@
 ;;; -*- Gerbil -*-
 ;;; Agent-facing POO policy checks.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-poo-callees
-        :gslph/src/policy/agent-poo-object-literal
-        :gslph/src/policy/agent-poo-loop-performance
-        :gslph/src/policy/agent-support
-        :gslph/src/policy/model
-        (only-in :std/srfi/13 string-contains string-join string-prefix?)
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-poo-callees
+        :asp-gerbil-scheme/src/policy/agent-poo-object-literal
+        :asp-gerbil-scheme/src/policy/agent-poo-loop-performance
+        :asp-gerbil-scheme/src/policy/agent-support
+        :asp-gerbil-scheme/src/policy/model
+        (only-in :std/srfi/13
+                 string-contains string-downcase string-join string-prefix?)
         (only-in :std/sugar filter filter-map hash hash-get ormap)
-        :gslph/src/types/findings)
+        :asp-gerbil-scheme/src/types/findings)
 
 (export poo-direct-writeenv-findings
         poo-direct-writeenv-finding
@@ -23,8 +24,6 @@
         poo-prototype-fixed-point-finding
         poo-construction-performance-findings
         poo-construction-performance-finding
-        poo-generated-receipt-boundary-findings
-        poo-generated-receipt-boundary-finding
         poo-clone-override-loop-performance-findings
         poo-clone-override-loop-performance-finding
         poo-materialization-loop-performance-findings
@@ -138,13 +137,70 @@
     '()))
 ;; : (-> ProjectIndex SourceFile CallFact Boolean )
 (def (manual-object-model-call? index file call)
+  (let (caller (call-fact-caller call))
+    (and (manual-object-model-owner? index file)
+         (manual-object-model-callee? call)
+         caller
+         (manual-object-domain-constructor-caller? file caller)
+         (not (caller-declares-intentional-raw-data-record? file caller)))))
+
+;; : (-> ProjectIndex SourceFile Boolean)
+(def (manual-object-model-owner? index file)
   (and (index-source-runtime-file-path? index (source-file-path file))
-       (null? (source-file-poo-forms file))
-       (member (call-fact-callee call) +manual-object-model-callees+)
-       (call-fact-caller call)
-       (or (string-prefix? "make-" (call-fact-caller call))
-           (string-prefix? "new-" (call-fact-caller call))
-           (string-prefix? "build-" (call-fact-caller call)))))
+       (null? (source-file-poo-forms file))))
+
+;; : (-> CallFact Boolean)
+(def (manual-object-model-callee? call)
+  (member (call-fact-callee call) +manual-object-model-callees+))
+
+;; : (-> SourceFile Caller Boolean)
+(def (manual-object-domain-constructor-caller? file caller)
+  (and (not (caller-builds-type-finding? file caller))
+       (or (string-prefix? "make-" caller)
+           (string-prefix? "new-" caller)
+           (string-prefix? "build-" caller))))
+
+;;; Waiver boundary:
+;;; - A transport serializer may deliberately construct a JSON hash even when
+;;;   the module has no POO forms of its own.
+;;; - Admission requires an adjacent definition comment with the exact intent;
+;;;   a module-wide marker cannot suppress unrelated constructors.
+;; : (-> SourceFile Caller Boolean)
+(def (caller-declares-intentional-raw-data-record? file caller)
+  (ormap
+   (lambda (fact)
+     (and (equal? (comment-quality-fact-target-kind fact) "definition")
+          (equal? (comment-quality-fact-target-name fact) caller)
+          (ormap intentional-raw-data-record-comment?
+                 (comment-quality-fact-comment-lines fact))))
+   (source-file-comment-quality-facts file)))
+
+;; : (-> CommentLine Boolean)
+(def (intentional-raw-data-record-comment? line)
+  (and (string? line)
+       (string-contains (string-downcase line)
+                        "intentional raw data record")))
+
+;;; A hash nested in make-type-finding is typed diagnostic evidence, not an
+;;; alternative domain object model. Require both calls in the same caller so
+;;; ordinary build-/make-/new- constructors remain covered by POLICY-010.
+;; caller-builds-type-finding?
+;; : (-> SourceFile Caller Boolean)
+;; | doc m%
+;; Recognizes a typed diagnostic constructor in the same lexical caller.
+;; # Examples
+;; ```scheme
+;; (caller-builds-type-finding? file "build-policy-findings")
+;; => #t when that caller invokes make-type-finding
+;; ```
+;; Result: true only for parser-owned call evidence in one caller boundary.
+(def (caller-builds-type-finding? file caller)
+  (and (find (lambda (candidate)
+               (and (equal? (call-fact-caller candidate) caller)
+                    (equal? (call-fact-callee candidate)
+                            "make-type-finding")))
+             (source-file-calls file))
+       #t))
 ;; : (-> SourceFile CallFact TypeFinding )
 (def (poo-object-model-finding file call)
   (make-type-finding
@@ -241,7 +297,7 @@
          (docsPath "docs/50-59-policy/51.02-gerbil-poo-programming-guidelines.org")
          (source "gerbil-poo doc/poo.md:299-319, t/object-test.ss, and t/mop-test.ss")
          (preferredSyntax "{(:: @ super) slot: ...}, =>, =>.+, ?, .mix")
-         (next "read docs/50-59-policy/51.02-gerbil-poo-programming-guidelines.org; gerbil-scheme-harness agent guide . --poo"))))
+         (next "read docs/50-59-policy/51.02-gerbil-poo-programming-guidelines.org; asp-gerbil-scheme agent guide . --poo"))))
 ;;; Boundary:
 ;;; - This is a POO performance policy, not a build policy.
 ;;; - Large data-shaped `.o` calls can create avoidable macro-expansion work.
@@ -285,71 +341,6 @@
          (publicApiBoundary "keep POO declarations native and parser-visible")
          (sourceEvidence "gerbil-poo object.ss:149-158")
          (next "use GERBIL-SCHEME-AGENT-POLICY-032 for loop-local object construction performance"))))
-
-(def +poo-generated-boundary-keywords+
-  '("receipt" "manifest" "snapshot" "handoff" "diagnostic"))
-
-;;; Boundary:
-;;; - Generated runtime receipts are fixed data state, not user-authored POO
-;;;   declarations.
-;;; - Adapter constructors remain valid for external ingestion, but generated
-;;;   receipt/handoff/manifest builders should use defstruct internally and
-;;;   serialize once through an explicit ->alist boundary.
-;; : (-> ProjectIndex (List TypeFinding) )
-(def (poo-generated-receipt-boundary-findings index)
-  (if (poo-capability-active? index)
-    (apply append
-           (map (lambda (file)
-                  (if (index-source-runtime-file-path? index
-                                                       (source-file-path file))
-                    (filter-map
-                     (lambda (call)
-                       (and (poo-generated-receipt-boundary-call? file call)
-                            (poo-generated-receipt-boundary-finding
-                             file
-                             call)))
-                     (source-file-calls file))
-                    '()))
-                (project-index-files index)))
-    '()))
-
-;; : (-> SourceFile CallFact Boolean )
-(def (poo-generated-receipt-boundary-call? file call)
-  (and (member (call-fact-callee call) +poo-super-constructor-callees+)
-       (poo-generated-boundary-context? file call)))
-
-;; : (-> SourceFile CallFact Boolean )
-(def (poo-generated-boundary-context? file call)
-  (or (poo-generated-boundary-name? (source-file-path file))
-      (poo-generated-boundary-name? (or (call-fact-caller call) ""))))
-
-;; : (-> String Boolean )
-(def (poo-generated-boundary-name? name)
-  (ormap (lambda (fragment)
-           (and (string-contains name fragment) #t))
-         +poo-generated-boundary-keywords+))
-
-;; : (-> SourceFile CallFact TypeFinding )
-(def (poo-generated-receipt-boundary-finding file call)
-  (make-type-finding
-   (policy-rule-id +agent-poo-generated-receipt-boundary-rule+)
-   (policy-rule-severity +agent-poo-generated-receipt-boundary-rule+)
-   (source-file-path file)
-   (string-append
-    "generated runtime boundary " (or (call-fact-caller call) "top-level")
-    " constructs receipt-like state with " (call-fact-callee call)
-    "; use a fixed defstruct internally and one explicit ->alist projection at the ABI boundary")
-   (call-fact-selector call)
-   (hash (kind "poo-generated-receipt-boundary")
-         (callee (call-fact-callee call))
-         (caller (or (call-fact-caller call) "top-level"))
-         (guidanceMode "quality-performance-warning")
-         (trigger "receipt/manifest/snapshot/handoff context uses POO adapter constructor for generated state")
-         (allowedUse "native .o/.def user POO declarations and adapter constructors at external ingestion boundaries remain valid")
-         (preferredConstruction "defstruct for generated receipt state plus explicit receipt->alist projection at presentation/runtime ABI boundary")
-         (performanceEvidence "fixed Gerbil structs keep generated receipt construction stable; object<-alist/object<-hash rebuild object shape and hide the boundary behind adapter conversion")
-         (sourceEvidence "gerbil runtime-response defstruct->alist pattern and gerbil-poo object.ss adapter constructors")
-         (next "replace generated receipt object<-alist/object<-hash/object<-fun with defstruct fields and a named ->alist serializer"))))
 
 ;;; Boundary:
 ;;; - poo-method-shape-findings composes first-class procedures.
@@ -539,5 +530,6 @@
            (source "gerbil-poo doc/poo.md:30-50, 655-720")
            (next
             (string-append
-             "asp gerbil-scheme search owner " (source-file-path file)
-             " items --query 'poo putdefault setslots typed doc result example' --workspace . --view seeds"))))))
+             "asp-gerbil-scheme projection --native-index --owner "
+             (source-file-path file)
+             " --json --workspace ."))))))

@@ -2,17 +2,17 @@
 ;;; Shared syntax constants, body projection, macro-family, and top-form helpers.
 
 (import :gerbil/expander
-        :gslph/src/parser/formals
-        :gslph/src/parser/model
-        :gslph/src/parser/support
+        :asp-gerbil-scheme/src/parser/formals
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/support
+        :asp-gerbil-scheme/src/parser/syntax-ast
         (only-in :std/misc/list unique)
         (only-in :std/srfi/1 drop)
-        (only-in :std/srfi/13 string-index-right string-prefix?)
+        (only-in :std/srfi/13 string-prefix?)
         (only-in :std/sugar filter-map find))
 
 (export +definition-heads+
         +macro-definition-heads+
-        +macro-family-min-count+
         +non-call-heads+
         +declarative-top-level-heads+
         form-caller-name
@@ -40,20 +40,9 @@
         macro-phase
         macro-pattern-count
         syntax-rules-datum
+        definition-lowering-macro?
         macro-hygienic?
         macro-quality-facets
-        macro-family-facts-from-macros
-        macro-family-groups
-        macro-family-group-cons
-        macro-family-fact-from-group
-        macro-family-quality-facets
-        macro-family-prefix
-        macro-family-last-hyphen-index
-        macro-family-last
-        macro-family-uniform-value
-        macro-family-all?
-        macro-family-thin-wrapper?
-        macro-family-uniform?
         datum-has-head?
         top-form-from
         top-form-head-name
@@ -81,8 +70,6 @@
     defsyntax-for-import defsyntax-for-export defsyntax-for-import-export
     defsyntax-stx defsyntax-stx/form))
 ;; ConfigConstant
-(def +macro-family-min-count+ 4)
-;; ConfigConstant
 (def +non-call-heads+
   '(quote quasiquote syntax quote-syntax
     package package: prelude: namespace: import export include
@@ -94,8 +81,7 @@
 ;; Their nested call facts are declarations, not executable effects.
 (def +declarative-top-level-heads+
   '("declare" "c-declare" "c-define-type" "define-c-lambda"
-    "begin-ffi" "begin-foreign" "c-define" "namespace"
-    "declare-gxtest-memory-exception"))
+    "begin-ffi" "begin-foreign" "c-define" "namespace"))
 
 ;; : (-> Datum FormCallerName )
 (def (form-caller-name datum)
@@ -346,7 +332,7 @@
      ((eq? head 'defrule) 1)
      ((eq? head 'defrules) (max 0 (length (safe-cdddr datum))))
      ((tree-contains-symbol? datum 'syntax-rules)
-      (max 0 (length (safe-cdddr (syntax-rules-datum datum)))))
+      (max 0 (length (safe-cddr (syntax-rules-datum datum)))))
      (else 0))))
 ;; syntax-rules-datum
 ;;   : (-> Datum Datum)
@@ -366,6 +352,31 @@
               (and (pair? item) (eq? (car item) 'syntax-rules)))
             (flatten-with-pairs datum))
       '()))
+
+;;; A definition-lowering macro is safe at module top level only when every
+;;; declarative branch expands directly to a native definition form.  This is
+;;; deliberately stricter than accepting `begin` or recursively searching a
+;;; template: mixed definition/effect templates must remain visible to R005.
+;; : (-> Head Datum Boolean)
+(def (definition-lowering-macro? head datum)
+  (let (clauses
+        (cond
+         ((eq? head 'defrule) (safe-cddr datum))
+         ((eq? head 'defrules) (safe-cdddr datum))
+         ((tree-contains-symbol? datum 'syntax-rules)
+          (safe-cddr (syntax-rules-datum datum)))
+         (else '())))
+    (and (pair? clauses)
+         (andmap definition-lowering-clause? clauses))))
+
+;; : (-> Datum Boolean)
+(def (definition-lowering-clause? clause)
+  (and (pair? clause)
+       (pair? (cdr clause))
+       (let (template (cadr clause))
+         (and (pair? template)
+              (symbol? (car template))
+              (member (car template) +definition-heads+)))))
 ;; : (-> Datum Boolean )
 (def (macro-hygienic? datum)
   (let (head (and (pair? datum) (car datum)))
@@ -392,6 +403,8 @@
                  "declarative-macro-pattern")
             (and (tree-contains-symbol? datum 'syntax-rules)
                  "syntax-rules-pattern")
+            (and (definition-lowering-macro? head datum)
+                 "definition-lowering-macro")
             (and (tree-contains-symbol? datum 'identifier-rules)
                  "identifier-rules-pattern")
             (and (tree-contains-symbol? datum 'syntax-case)
@@ -458,142 +471,14 @@
                      (tree-contains-symbol? datum 'letrec))
                  "macro-template-runtime-binding")])))
 
-;;; Macro-family evidence is derived from parser macro facts, not source text.
-;;; It catches repeated same-prefix thin wrappers that should collapse into a
-;;; compact hygienic macro family or table-driven syntax helper.
-;; : (-> Relpath (List MacroFact) (List MacroFamilyFact) )
-(def (macro-family-facts-from-macros relpath macros)
-  (filter-map (lambda (group)
-                (macro-family-fact-from-group relpath group))
-              (macro-family-groups macros)))
-
-;; : (-> (List MacroFact) (List MacroFamilyGroup) )
-(def (macro-family-groups macros)
-  (reverse
-   (map (lambda (group)
-          (cons (car group) (reverse (cdr group))))
-        (foldl (lambda (macro groups)
-                 (let (prefix (macro-family-prefix (macro-fact-name macro)))
-                   (if prefix
-                     (macro-family-group-cons prefix macro groups)
-                     groups)))
-               '()
-               macros))))
-
-;; : (-> String MacroFact (List MacroFamilyGroup) (List MacroFamilyGroup) )
-(def (macro-family-group-cons prefix macro groups)
-  (cond
-   ((null? groups) (list (cons prefix (list macro))))
-   ((equal? prefix (caar groups))
-    (cons (cons prefix (cons macro (cdar groups))) (cdr groups)))
-   (else
-    (cons (car groups)
-          (macro-family-group-cons prefix macro (cdr groups))))))
-
-;; : (-> Relpath MacroFamilyGroup (Maybe MacroFamilyFact) )
-(def (macro-family-fact-from-group relpath group)
-  (let* ((prefix (car group))
-         (macros (cdr group))
-         (macro-count (length macros)))
-    (if (< macro-count +macro-family-min-count+)
-      #f
-      (let* ((first-macro (car macros))
-             (last-macro (macro-family-last macros))
-             (kind (macro-family-uniform-value macros macro-fact-kind
-                                               "mixed-macro-family"))
-             (transformer
-              (macro-family-uniform-value macros macro-fact-transformer
-                                          "mixed-transformer"))
-             (thin-wrapper? (macro-family-thin-wrapper? macros))
-             (role (if thin-wrapper?
-                     "repeated-thin-macro-family"
-                     "macro-family"))
-             (facets (macro-family-quality-facets macros transformer
-                                                  thin-wrapper?)))
-        (make-macro-family-fact
-         (string-append prefix "-family")
-         kind
-         relpath
-         (macro-fact-start first-macro)
-         (macro-fact-end last-macro)
-         role
-         prefix
-         (map macro-fact-name macros)
-         macro-count
-         transformer
-         facets
-         ["collapse same-prefix macro wrappers into one syntax-rules helper or macro family table"
-          "keep macro surface thin and move runtime behavior into ordinary helpers"
-          "document the macro family expansion contract with one example per shape"])))))
-
-;; : (-> (List MacroFact) String Boolean (List QualityFacet) )
-(def (macro-family-quality-facets macros transformer thin-wrapper?)
-  (unique
-   (filter identity
-           ["macro-family-boundary"
-            (and thin-wrapper? "repeated-thin-macro-wrapper")
-            (and (equal? transformer "syntax-rules")
-                 "declarative-macro-family")
-            (and (macro-family-all? macro-fact-hygienic macros)
-                 "hygienic-macro-family")
-            (and (equal? transformer "syntax-rules")
-                 "syntax-rules-macro-family")
-            (and thin-wrapper? "thin-macro-family")])))
-
-;; : (-> String (Maybe String) )
-(def (macro-family-prefix name)
-  (let (index (macro-family-last-hyphen-index name))
-    (and index
-         (> index 0)
-         (substring name 0 index))))
-
-;; : (-> String (Maybe Integer) )
-(def (macro-family-last-hyphen-index name)
-  (let (index (string-index-right name #\-))
-    (and index
-         (> index 0)
-         (< index (- (string-length name) 1))
-         index)))
-
-;; : (forall (a) (-> (List a) a) )
-(def (macro-family-last items)
-  (if (null? (cdr items))
-    (car items)
-    (macro-family-last (cdr items))))
-
-;; : (forall (a b) (-> (List a) (-> a b) b b) )
-(def (macro-family-uniform-value items accessor mixed)
-  (let (values (unique (filter identity (map accessor items))))
-    (if (= (length values) 1)
-      (car values)
-      mixed)))
-
-;; : (forall (a) (-> (-> a Boolean) (List a) Boolean) )
-(def (macro-family-all? pred items)
-  (cond
-   ((null? items) #t)
-   ((pred (car items)) (macro-family-all? pred (cdr items)))
-   (else #f)))
-
-;; : (-> (List MacroFact) Boolean )
-(def (macro-family-thin-wrapper? macros)
-  (and (macro-family-uniform? macros macro-fact-kind)
-       (macro-family-uniform? macros macro-fact-transformer)
-       (macro-family-all?
-        (lambda (macro)
-          (<= (macro-fact-pattern-count macro) 2))
-        macros)))
-
-;; : (forall (a b) (-> (List a) (-> a b) Boolean) )
-(def (macro-family-uniform? items accessor)
-  (= (length (unique (filter identity (map accessor items)))) 1))
-
 ;; : (-> Relpath Form Datum TopFormFrom )
 (def (top-form-from relpath form datum)
   (let* ((head (top-form-datum-head datum))
          (loc (stx-source form)))
     (make-top-form (form-kind head) (top-form-head-name head) relpath
-                   (source-start-line loc) (source-end-line loc))))
+                   (source-start-line loc) (source-end-line loc)
+                   (syntax-ast-from-form relpath form
+                                         (form-caller-name datum)))))
 ;; : (-> Head String )
 (def (top-form-head-name head)
   (if head

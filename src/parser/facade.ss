@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Stable parser facade for the Gerbil Scheme project harness.
 
-(import :gslph/src/parser/core
-        :gslph/src/parser/package
-        :gslph/src/parser/source-class
-        :gslph/src/parser/source-scope)
+(import :asp-gerbil-scheme/src/parser/core
+        :asp-gerbil-scheme/src/parser/package
+        :asp-gerbil-scheme/src/parser/source-class
+        :asp-gerbil-scheme/src/parser/source-scope)
 
 (export +source-extensions+
         +config-files+
@@ -13,7 +13,6 @@
         collect-project/profile
         collect-source-scope
         collect-selected-source-scope
-        collect-test-source-scope
         collect-project-package-only
         collect-source-files
         gerbil-source-path?
@@ -297,11 +296,25 @@
         comment-quality-fact-context
         comment-quality-fact-evidence
         comment-quality-fact-selector
+        syntax-relation-kind
+        syntax-relation-name
+        syntax-relation-start
+        syntax-relation-end
+        syntax-relation-phase
+        syntax-relation-context
+        syntax-relation-structural-path
+        syntax-ast-version
+        syntax-ast-path
+        syntax-ast-owner
+        syntax-ast-relations
+        syntax-ast-template-callees
+        syntax-ast-relation-projection
         top-form-kind
         top-form-head
         top-form-path
         top-form-start
         top-form-end
+        top-form-syntax-ast
         top-form-selector
         declarative-top-form?
         source-file-path
@@ -337,33 +350,12 @@
         project-package-name
         project-package-dependencies
         project-package-manager
-        project-package-test-directory-policy
-        project-package-macro-governance-policy
-        project-package-source-scope-policy
-        project-package-modularity-policy
-        project-package-agent-policy
-        test-directory-policy-allowed-directories
-        test-directory-policy-explanation
-        macro-governance-policy-allow-generated
-        macro-governance-policy-explanation
-        macro-governance-policy-witness
-        source-scope-policy-roots
-        source-scope-policy-runtime-roots
-        source-scope-policy-exclude-directories
-        source-scope-policy-explanation
-        modularity-policy-disabled
-        modularity-policy-enabled-rules
-        modularity-policy-disabled-rules
-        modularity-policy-max-source-line-count
-        modularity-policy-max-test-line-count
-        modularity-policy-min-source-definition-count
-        modularity-policy-min-test-definition-count
-        modularity-policy-max-test-case-count
-        modularity-policy-max-test-definition-span
-        modularity-policy-config-path
-        modularity-policy-explanation
-        agent-policy-disabled-rules
-        agent-policy-explanation
+        project-package-source-scope
+        project-package-with-source-scope
+        source-scope-roots
+        source-scope-runtime-roots
+        source-scope-exclude-directories
+        source-scope-explanation
         project-index-root
         project-index-files
         project-index-package

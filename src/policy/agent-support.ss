@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Shared helpers for agent-facing policy rule families.
 
-(import :gslph/src/parser/facade
+(import :asp-gerbil-scheme/src/parser/facade
         (only-in :std/srfi/13 string-contains string-empty? string-prefix? string-suffix?)
         (only-in :std/sugar ormap))
 
@@ -12,8 +12,6 @@
         poo-capability-dependency?
         source-runtime-file-path?
         index-source-runtime-file-path?
-        explicit-runtime-entrypoint-path?
-        configured-runtime-roots
         source-path-under-root?
         project-poo-forms
         poo-class-fact-exists?
@@ -25,6 +23,20 @@
 ;; Integer
 (def +poo-capability-dependencies+
   '("gerbil-poo" "clan/poo"))
+;; Source classes that participate in the one project scan but do not own
+;; runtime entrypoints.  Rule families for tests, build declarations, fixtures,
+;; and generated evidence consume those classes independently.
+(def +non-runtime-source-classes+
+  '("config"
+    "package-version"
+    "package-build"
+    "snapshot-output"
+    "policy-scenario"
+    "fixture"
+    "test"
+    "declarative-case"
+    "declarative-profile"
+    "generated"))
 ;;; Boundary:
 ;;; - poo-source-file? composes first-class procedures.
 ;;; - Keep data-flow evidence visible.
@@ -59,31 +71,20 @@
 (def (source-runtime-file-path? path)
   (and (string-prefix? "src/" path)
        (string-suffix? ".ss" path)))
-;; : (-> String Boolean )
-(def (explicit-runtime-entrypoint-path? path)
-  (and (string-prefix? "src/search-fast/" path)
-       (string-suffix? ".ss" path)))
 ;;; Boundary:
 ;;; - index-source-runtime-file-path? composes first-class procedures.
 ;;; - Keep data-flow evidence visible.
 ;; : (-> ProjectIndex String Boolean )
 (def (index-source-runtime-file-path? index path)
   (and (string-suffix? ".ss" path)
-       (let* ((package (project-index-package index))
-              (policy (and package
-                           (project-package-source-scope-policy package)))
-              (roots (configured-runtime-roots policy)))
-         (ormap (lambda (root)
-                  (source-path-under-root? path root))
-                roots))))
-;; : (-> Policy (List String) )
-(def (configured-runtime-roots policy)
-  (cond
-   ((and policy (pair? (source-scope-policy-runtime-roots policy)))
-    (source-scope-policy-runtime-roots policy))
-   ((and policy (pair? (source-scope-policy-roots policy)))
-    (source-scope-policy-roots policy))
-   (else ["src"])))
+       (not (member (source-path-class path)
+                    +non-runtime-source-classes+))
+       ;; The ProjectIndex is already an exact native/test graph projection.
+       ;; Runtime admission trusts membership plus parser-owned source class;
+       ;; package roots must not create a second, approximate graph.
+       (ormap (lambda (file)
+                (equal? (source-file-path file) path))
+              (project-index-files index))))
 ;; : (-> String String Boolean )
 (def (source-path-under-root? path root)
   (or (equal? root ".")

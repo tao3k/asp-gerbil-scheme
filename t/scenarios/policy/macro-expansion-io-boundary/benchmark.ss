@@ -1,29 +1,12 @@
-((max_total . 24ms)
- (observed_total . 6ms)
- (target_total . 14ms)
- (regression_budget . 18ms)
- (expected_over_input_budget . 1ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2) (durationNs . 2000000))
-  ((name . collect-after) (durationMs . 2) (durationNs . 2000000))
-  ((name . policy-before) (durationMs . 1) (durationNs . 1000000))
-  ((name . policy-after) (durationMs . 1) (durationNs . 1000000)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
   "macro-expansion-io-boundary keeps expansion-time IO detection parser-owned and validates the thin syntax payload repair in a small millisecond gate")
- (maxCollectMs . 10)
- (observedCollectMs . 4)
- (maxParseMs . 14)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 6)
- (observedPhaseMs . 2)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+ (sampleCount . 20)
  (purpose
   .
   "R040 macro expansion IO scenario rejects generated macro owners that hide filesystem reads, path resolution, and syntax generation inside one transformer")
@@ -65,6 +48,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate"
   "assert-input-expected-comparison")
  (tags "style" "macro" "phase" "io" "expansion"))

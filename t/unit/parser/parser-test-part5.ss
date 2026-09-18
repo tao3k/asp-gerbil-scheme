@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 (import :std/test
-        :gslph/src/extensions/facade
-        :gslph/src/parser/facade
-        :gslph/src/protocol/json
+        :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/json
         :std/srfi/13)
 (export parser-test-part-5)
 
@@ -308,7 +308,11 @@
             (check (source-file-parse-error file) => #f)
             (check (source-file-predicate-family-facts file) => '())
             (check (source-file-field-access-pattern-facts file) => '())
-            (check (source-file-boolean-condition-facts file) => '())
+            (let (boolean-facts (source-file-boolean-condition-facts file))
+              (check (map boolean-condition-fact-name boolean-facts)
+                     => ["boolean-condition-definition?"])
+              (check (map boolean-condition-fact-condition-callees boolean-facts)
+                     => [[">=" "string-suffix?"]]))
             (check (source-file-loop-driver-facts file) => '())))
     (test-case "native reader captures quality-shape parser facts"
           (let* ((root (path-normalize "."))
@@ -386,5 +390,7 @@
 ;; TestSuite
 (def parser-test-part-5
   (test-suite "gerbil scheme harness parser part 5"
-    parser-test-part-5-higher-order-control
-    parser-test-part-5-quality-shape))
+    (test-case "parser-test-part-5-higher-order-control"
+      (check (run-test-suite! parser-test-part-5-higher-order-control) => #t))
+    (test-case "parser-test-part-5-quality-shape"
+      (check (run-test-suite! parser-test-part-5-quality-shape) => #t))))

@@ -2,11 +2,11 @@
 ;;; gerbil scheme harness parser part 8 comment quality.
 
 (import :std/test
-        :gslph/src/extensions/facade
-        :gslph/src/parser/facade
-        :gslph/src/parser/typed-contract-scheme
-        :gslph/src/protocol/json
-        :gslph/src/protocol/structural-facts
+        :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/parser/typed-contract-scheme
+        :asp-gerbil-scheme/src/protocol/json
+        :asp-gerbil-scheme/src/protocol/structural-facts
         :std/srfi/13)
 (import :unit/parser/parser-test-part8-support)
 (export parser-test-part-8-comment-quality)

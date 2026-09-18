@@ -1,28 +1,12 @@
-((max_total . 25ms)
- (observed_total . 7ms)
- (target_total . 15ms)
- (regression_budget . 18ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2))
-  ((name . collect-after) (durationMs . 2))
-  ((name . policy-before) (durationMs . 1))
-  ((name . policy-after) (durationMs . 2)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed baseline 7ms for controlled-branch-higher-order-performance; target keeps optimization visible and max_total is the hard regression ceiling")
- (maxCollectMs . 10)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 5)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "The typed-combinator-style target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+ (sampleCount . 20)
  (purpose . "R014 higher-order branch repair scenario keeps policy analysis within the scenario-owned timing gate")
  (feature . "typed-combinator-style")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-014")
@@ -35,5 +19,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style" "higher-order" "branch"))

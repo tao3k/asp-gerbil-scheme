@@ -1,18 +1,18 @@
 ;;; -*- Gerbil -*-
 ;;; Policy bridge for source-backed Gerbil POO pattern metadata.
 
-(import (only-in :gslph/src/extensions/poo-patterns
+(import (only-in :asp-gerbil-scheme/src/extensions/poo-patterns
                  poo-pattern-id
                  poo-pattern-quality-signals
                  poo-pattern-source-owners
                  poo-pattern-witness)
-        :gslph/src/policy/detection)
+        :asp-gerbil-scheme/src/policy/detection)
 
 (export poo-source-pattern-detection-overlay)
 
 ;;; Boundary:
-;;; - :gslph/src/extensions/poo-patterns owns gerbil-poo:// selectors and pattern facts.
-;;; - :gslph/src/policy/detection owns detector prototype slots and result details.
+;;; - :asp-gerbil-scheme/src/extensions/poo-patterns owns gerbil-poo:// selectors and pattern facts.
+;;; - :asp-gerbil-scheme/src/policy/detection owns detector prototype slots and result details.
 ;;; - This bridge keeps policy rules source-backed without making every rule
 ;;;   know the pattern registry shape.
 ;; : (-> PatternKind DetectionPrototype )

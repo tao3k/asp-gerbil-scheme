@@ -257,12 +257,26 @@
         comment-quality-fact-required
         comment-quality-fact-context
         comment-quality-fact-evidence
+        make-syntax-relation
+        syntax-relation-kind
+        syntax-relation-name
+        syntax-relation-start
+        syntax-relation-end
+        syntax-relation-phase
+        syntax-relation-context
+        syntax-relation-structural-path
+        make-syntax-ast
+        syntax-ast-version
+        syntax-ast-path
+        syntax-ast-owner
+        syntax-ast-relations
         make-top-form
         top-form-kind
         top-form-head
         top-form-path
         top-form-start
         top-form-end
+        top-form-syntax-ast
         source-file::t
         make-source-file
         source-file-path
@@ -336,8 +350,25 @@
 (defstruct typed-contract-fact (definition-name definition-kind definition-formals definition-arity path definition-start definition-end comment-start comment-end contract contract-output contract-inputs contract-input-count arity-alignment tokens arrow-count group-count quality reasons quality-facets repair-evidence typed-comment))
 ;; CommentQualityFactStruct
 (defstruct comment-quality-fact (target-kind target-name path target-start target-end comment-start comment-end comment-lines comment-kind quality reasons required context evidence))
+;; SyntaxRelationStruct
+;;
+;; A compact retained projection of one native syntax occurrence. Native
+;; syntax objects never cross into this model or the JSON/protocol boundary.
+(defstruct syntax-relation
+  (kind name start end phase context reverse-structural-path))
+
+;; The walker retains reverse-cons paths so sibling and descendant relations
+;; share their prefix spine.  Consumers continue to receive source order.
+;; : (-> SyntaxRelation (List Integer))
+(def (syntax-relation-structural-path relation)
+  (reverse (syntax-relation-reverse-structural-path relation)))
+;; SyntaxAstStruct
+;;
+;; Gerbil's native syntax object is traversed exactly once, then released.  The
+;; retained AST owns shared source identity plus compact phase-aware relations.
+(defstruct syntax-ast (version path owner relations))
 ;; TopFormStruct
-(defstruct top-form (kind head path start end))
+(defstruct top-form (kind head path start end syntax-ast))
 ;; SourceFileStruct
 (defstruct source-file (path line-count package prelude namespace imports exports includes definitions calls forms module-imports module-exports macros macro-family-facts bindings poo-forms higher-order-forms control-flow-forms predicate-family-facts field-access-pattern-facts projection-burst-facts boolean-condition-facts loop-driver-facts dependency-adapter-quality-facts function-quality-profiles typed-contract-facts comment-quality-facts parse-error))
 ;; ProjectIndexStruct

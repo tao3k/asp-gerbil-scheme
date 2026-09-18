@@ -2,8 +2,8 @@
 ;;; Parser-owned dependency protocol adapter quality facts.
 
 (import :gerbil/expander
-        :gslph/src/parser/model
-        :gslph/src/parser/support
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/support
         (only-in :std/misc/list unique)
         (only-in :std/misc/string string-trim-suffix)
         (only-in :std/sort sort)
@@ -22,7 +22,7 @@
 (def +internal-module-prefixes+
   '("." ":std/" ":gerbil/" ":parser/" ":policy/" ":protocol/"
     ":support/" ":types/" ":commands/" ":checker/" ":snapshot/"
-    ":language/" ":extensions/" ":package-manager/" ":gslph/src/constants"))
+    ":language/" ":extensions/" ":package-manager/" ":asp-gerbil-scheme/src/constants"))
 
 ;; (List String)
 (def +validation-slots+ '(".validate" ".element?"))
@@ -158,10 +158,29 @@
          (primary (primary-dependency-import matched-imports
                                              (dependency-adapter-candidate-body-symbols candidate))))
     (and primary
+         (dependency-adapter-protocol-surface? candidate)
          (dependency-adapter-materialization-from-matches
           candidate
           matched-imports
           primary))))
+
+;;; Admission boundary:
+;;; - R017 governs dependency protocol adapters, not every domain Type that
+;;;   derives from an imported POO metatype.
+;;; - At least one adapter capability family must be declared by the local
+;;;   slot/protocol surface before the candidate becomes an R017 fact.
+;;; - Validation-only Type refinements remain governed by their native Type
+;;;   contract and must never be told to invent table or serialization slots.
+;; : (-> DependencyAdapterCandidate Boolean )
+(def (dependency-adapter-protocol-surface? candidate)
+  (let ((slots (dependency-adapter-candidate-slots candidate))
+        (protocols (dependency-adapter-candidate-protocol-refs candidate)))
+    (or (adapter-slot-any? slots +core-table-slots+)
+        (adapter-slot-any? slots +conversion-slots+)
+        (adapter-slot-any? slots +equality-slots+)
+        (tokens-contain-any? protocols
+                             ["table" "dict" "set" "list"
+                              "json" "sexp" "marshal" "bytes"]))))
 
 ;;; Boundary:
 ;;; - Materialization freezes all evidence derived from matched dependency imports.
