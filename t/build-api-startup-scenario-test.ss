@@ -6,6 +6,8 @@
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
         (only-in :std/os/signal kill SIGTERM)
+        (only-in :std/sort stable-sort)
+        (only-in :std/srfi/1 iota)
         (only-in :std/srfi/13 string-contains string-prefix?))
 
 (export build-api-startup-scenario-test)
@@ -70,30 +72,43 @@
            "src/policy"
            "src/benchmark"
            ":clan/testing"))))
-    (test-case "PackageSpec incremental first event stays within four seconds"
+    (test-case "PackageSpec median incremental first event stays subsecond-oriented"
       (let (contract
             (call-with-input-file +build-api-startup-contract+ read))
         (check (startup-contract-ref contract 'scenarioKind)
                => 'process-startup)
-        (check (startup-contract-ref contract 'attemptCount) => 1)
-        (let* ((baseline-sample (measure-gerbil-baseline-first-event))
-               (baseline-nanoseconds (car baseline-sample))
-               (sample (measure-package-spec-first-event))
-               (elapsed-nanoseconds (car sample))
-               (incremental-nanoseconds
-                (max 0 (- elapsed-nanoseconds baseline-nanoseconds)))
-               (event (cdr sample)))
-          (displayln "[build-api-startup-scenario] baselineNs="
-                     baseline-nanoseconds
-                     " elapsedNs=" elapsed-nanoseconds
-                     " incrementalNs=" incremental-nanoseconds)
-          (check (string-prefix? "[asp-build] phase=spec-project-start"
-                                 event)
-                 => #t)
-          (check (< baseline-nanoseconds
+        (check (startup-contract-ref contract 'attemptCount) => 3)
+        (let* ((samples
+                (map
+                 (lambda (_attempt)
+                   (let* ((baseline (measure-gerbil-baseline-first-event))
+                          (build (measure-package-spec-first-event)))
+                     (list (car baseline)
+                           (car build)
+                           (max 0 (- (car build) (car baseline)))
+                           (cdr build))))
+                 (iota (startup-contract-ref contract 'attemptCount))))
+               (incremental
+                (stable-sort (map caddr samples) <))
+               (median (list-ref incremental
+                                 (quotient (length incremental) 2))))
+          (for-each
+           (match <>
+             ([baseline elapsed delta event]
+              (displayln "[build-api-startup-scenario] baselineNs=" baseline
+                         " elapsedNs=" elapsed " incrementalNs=" delta)
+              (check (string-prefix?
+                      "[asp-build] phase=spec-project-start" event)
+                     => #t)
+              (check (< baseline
+                        (startup-contract-ref
+                         contract 'maxBaselineFirstEventNanoseconds))
+                     => #t)
+              (check (< delta (startup-contract-ref contract 'maxNanoseconds))
+                     => #t)))
+           samples)
+          (displayln "[build-api-startup-scenario] medianIncrementalNs=" median)
+          (check (< median
                     (startup-contract-ref
-                     contract 'maxBaselineFirstEventNanoseconds))
-                 => #t)
-          (check (< incremental-nanoseconds
-                    (startup-contract-ref contract 'maxNanoseconds))
+                     contract 'maxMedianIncrementalNanoseconds))
                  => #t))))))

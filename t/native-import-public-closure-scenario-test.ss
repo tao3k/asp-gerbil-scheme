@@ -4,7 +4,9 @@
 (import (only-in :std/test test-suite test-case check)
         (only-in :std/misc/path path-expand)
         (only-in :std/misc/process run-process)
-        (only-in :clan/timestamp call-with-timing))
+        (only-in :clan/timestamp call-with-timing)
+        (only-in :asp-gerbil-scheme/src/build-api/native-import-closure
+                 asp-gerbil-scheme-native-import-closure))
 
 (export native-import-public-closure-scenario-test)
 
@@ -17,7 +19,10 @@
 (def +native-import-public-closure-contract+
   "t/scenarios/building/native-import-public-closure/scenario-contract.ss")
 
-(def +native-import-public-closure-expected+ '("a.ss" "b.ss" "c.ss"))
+(def +asp-library-root+ (path-expand ".gerbil/lib" (current-directory)))
+
+(def +native-import-public-closure-expected+
+  '("syntax-helper.ss" "a.ss" "b.ss" "c.ss"))
 (def +native-import-direct-root-expected+ '("c.ss"))
 
 (def (native-import-public-closure-contract-ref contract key)
@@ -33,7 +38,19 @@
                       (path-expand ".gerbil" (current-directory)))
        "gerbil" "interactive" build "spec"]
       directory: +native-import-public-closure-root+
-      coprocess: read))))
+     coprocess: read))))
+
+(def (build-native-import-fixture!)
+  (let* ((root (path-expand +native-import-public-closure-root+
+                            (current-directory)))
+         (gerbil-path (path-expand ".gerbil" root)))
+    (run-process
+     ["env" "-u" "DEVELOPER_DIR" "-u" "SDKROOT"
+      (string-append "GERBIL_PATH=" gerbil-path)
+      (string-append "GERBIL_LOADPATH=" +asp-library-root+)
+      "gerbil" "build"]
+     directory: root)
+    (add-load-path! (path-expand "lib" gerbil-path))))
 
 (def native-import-public-closure-scenario-test
   (test-suite "native Import Model public closure scenario"
@@ -58,4 +75,24 @@
            " closure-elapsed-ns=" closure-nanoseconds)
           (check direct-spec => +native-import-direct-root-expected+)
           (check closure-spec => +native-import-public-closure-expected+)
-          (check (member "unrelated.ss" closure-spec) => #f))))))
+          (check (member "unrelated.ss" closure-spec) => #f))))
+    (test-case "current compiled interfaces preserve native closure in milliseconds"
+      (let* ((contract
+              (call-with-input-file +native-import-public-closure-contract+ read))
+             (root (path-expand +native-import-public-closure-root+
+                                (current-directory))))
+        (build-native-import-fixture!)
+        (let-values (((elapsed-nanoseconds closure)
+                      (call-with-timing
+                       (lambda ()
+                         (asp-gerbil-scheme-native-import-closure
+                          root '("c.ss"))))))
+          (displayln
+           "[native-import-public-closure-scenario] phase=current-interface"
+           " target-count=" (length closure)
+           " elapsed-ns=" elapsed-nanoseconds)
+          (check closure => +native-import-public-closure-expected+)
+          (check (< elapsed-nanoseconds
+                    (native-import-public-closure-contract-ref
+                     contract 'maxCurrentInterfaceProjectionNanoseconds))
+                 => #t))))))
