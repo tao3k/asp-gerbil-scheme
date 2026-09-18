@@ -28,7 +28,7 @@
   "benchmark-contract")
  (styleRewriteBoundary
   .
-  "do not rewrite native .o profile/config declarations to object<-alist; optimize by naming stable native shapes, composing only small boundary overlays, and keeping loops in scalar state")
+  "do not rewrite direct native .o profile/config declarations to object<-alist; bounded declaration-macro internals require their own semantic and compile-time A/B evidence, while runtime optimization keeps stable native shapes, small boundary overlays, and scalar loop state")
  (measurementPhases
   "collect-before"
   "collect-after"
