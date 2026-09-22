@@ -210,6 +210,7 @@ jobs:
         run: |
           gerbil test \
             t/build-script-command-test.ss \
+            t/build-api-startup-scenario-test.ss \
             t/package-build-contract-test.ss \
             t/package-native-declaration-test.ss \
             t/build-api-source-bootstrap-test.ss \

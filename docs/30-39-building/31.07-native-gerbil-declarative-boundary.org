@@ -7,7 +7,7 @@
 :STATUS: active-design
 :OWNER: build.ss build-provider.ss provider-package-spec.ss
 :RELATED: 31.04, 31.08, 31.09
-:UPSTREAM: Gerbil 0.18.2 std/make std/build-script gxpkg
+:UPSTREAM: Gerbil v0.19 d801e7a1c7f77df421f638e62aaebe370f193c97 std/make std/build-script gxpkg
 :END:
 
 ** Authoritative entrypoints

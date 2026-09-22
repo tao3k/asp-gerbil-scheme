@@ -121,6 +121,48 @@ modules as upstream dependency propagation converged.  Both receipts retained
 upstream behavior; ASP does not add an mtime filter, affected-module parser, or
 alternate scheduler to hide it.
 
+** V19 Building API audit (2026-09-22)
+
+On Gerbil =d801e7a=, the root =build.ss= still sends its complete declared
+library spec to =std/make=; Linux and macOS V19 Release CI both build the
+library and provider. This proves native build compatibility, not a speedup
+over an independent builder. The former ASP topology/currentness/adaptive
+execution-window code remains absent.
+
+The optional =public-entry-modules= slot has a different responsibility: it
+selects *which modules* belong in the package spec. In the four-module fixture,
+declaring only =c.ss= to native =std/make= produced only =c.ssi=; it did not
+materialize the imported =a.ss=, =b.ss=, or phase import =syntax-helper.ss= as
+package targets. ASP's native import closure and an explicit four-module
+declaration both projected exactly those four targets. The closure therefore
+cannot be removed as a transparent speed optimization while downstream
+packages rely on public-entry target selection.
+
+A same-target, host-local A/B used that fixture with the explicit declaration
+as control and the public-entry closure as candidate. Three warm process-level
+=spec= samples in seconds were =0.54, 0.52, 0.71= for the explicit declaration
+and =0.58, 0.53, 0.51= for the closure. Two cold =compile= samples per lane,
+ordered control/candidate/candidate/control and preceded by native =clean=,
+were =1.64, 1.49= and =1.83, 1.67= seconds respectively. This tiny fixture
+does not establish an end-to-end performance difference, but it supplies no
+evidence that the closure accelerates V19 builds. It must be justified by
+target-selection semantics or a separate representative same-output A/B,
+not by the old V18.2 speed claim.
+
+The compiled-interface shortcut inside =native-import-closure.ss= reads Gerbil
+import metadata only to enumerate package targets. Its source/interface
+timestamp check selects between that metadata and native expander traversal;
+it must never suppress a declared target or decide =std/make= currentness.
+Root ASP =build.ss= uses the default catalog and does not exercise this
+public-entry shortcut.
+
+The separate V19 PackageSpec startup scenario passed locally with three
+paired incremental first-event samples of =0.249, 0.374, 0.333= seconds
+(median =0.333= seconds), below its unchanged =1.5=-second median gate. This
+measures ASP's pre-=std/make= startup increment, not an alternate executor's
+build throughput; CI now runs the same scenario with the canonical library
+tests.
+
 * Runtime Evidence Boundary
 
 Gerbil 0.18.2 keeps =workch=, =completions=, and =import-mx= lexical inside
