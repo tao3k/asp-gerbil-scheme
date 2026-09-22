@@ -106,21 +106,6 @@ flowchart LR
   Make -. "observed, never rescheduled" .-> Observe
 #+end_src
 
-** Native removal receipt (2026-09-03)
-
-After removing the downstream topology/currentness/adaptive window subsystem,
-the focused Building tests and the native build completed successfully.  The
-first changed-source =std/make= phase took =5,647 ms=, used all =12= configured
-workers without a memory-derived worker cap, reached =5= active compiler jobs,
-and peaked at =859,881,472 bytes= RSS.
-
-Two immediately repeated native invocations took =4,215 ms= and =3,692 ms= in
-the observed =std/make= phase.  They still compiled three and then two downstream
-modules as upstream dependency propagation converged.  Both receipts retained
-=configured-worker-count=12= and =worker-count=12=.  This is recorded as native
-upstream behavior; ASP does not add an mtime filter, affected-module parser, or
-alternate scheduler to hide it.
-
 ** V19 Building API audit (2026-09-22)
 
 On Gerbil =d801e7a=, the root =build.ss= still sends its complete declared
@@ -163,9 +148,12 @@ measures ASP's pre-=std/make= startup increment, not an alternate executor's
 build throughput; CI now runs the same scenario with the canonical library
 tests.
 
+On =macos-latest=, CI run =35687157343= executed that module with
+=MODULE-OK= and a =0.394873=-second median incremental first event.
+
 * Runtime Evidence Boundary
 
-Gerbil 0.18.2 keeps =workch=, =completions=, and =import-mx= lexical inside
+The upstream =std/make= keeps =workch=, =completions=, and =import-mx= lexical inside
 =std/make#make-build=.  The public API does not expose an exact ready-queue
 count.  ASP therefore does not infer =ready-module-count= from static topology
 width or child process counts.

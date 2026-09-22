@@ -45,8 +45,3 @@ rebuild:
     just deps
     just build
     just test
-
-# Measure real `gerbil build` and `gerbil test` only to their first semantic
-# event; full compilation and suite execution are intentionally excluded.
-benchmark-native-command-startup:
-    {{gerbil}} env gerbil interactive t/scenarios/building/native-command-startup/run.ss

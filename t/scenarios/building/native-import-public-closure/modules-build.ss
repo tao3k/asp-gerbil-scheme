@@ -1,6 +1,6 @@
 #!/usr/bin/env gxi
 ;;; -*- Gerbil -*-
-;;; Direct-root control for PackageSpec root-mode A/B.
+;;; Direct-root control for PackageSpec target-selection contract.
 
 (import (only-in :std/build-script defbuild-script)
         (only-in :asp-gerbil-scheme/building-api
