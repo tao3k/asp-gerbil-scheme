@@ -10,7 +10,8 @@
 ;; Build entrypoints must be self-hosting: this native Gerbil module list is
 ;; package-spec data consumed directly by the upstream std/make projection.
 (def +provider-runtime-modules+
-  '("src/utilities/functional.ss"
+  '("src/support/list.ss"
+    "src/utilities/functional.ss"
     "src/parser/model.ss"
     "src/parser/selectors.ss"
     "src/parser/support.ss"
