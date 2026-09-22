@@ -29,7 +29,7 @@ jobs:
             target: x86_64-unknown-linux-gnu
             gerbil-asset: gerbil-v0.19-d801e7a1c7f77df421f638e62aaebe370f193c97-linux-x86_64-portable-full-single-host-unlimited-patch8bbb52add2b9
             gerbil-sha256: 44da3780cf450a6b747bf327b837696e0f99d5177a5a8046f9f65cd54e126745
-          - os: macos-26
+          - os: macos-latest
             target: aarch64-apple-darwin
             gerbil-asset: gerbil-v0.19-d801e7a1c7f77df421f638e62aaebe370f193c97-darwin-aarch64-gcc16-arm64-aot-tools-single-host-unlimited-patch16675e99f856
             gerbil-sha256: c6a4bc783311670ea56d0c384ebdffae491112ba9bdd253cd763a260a5793d6b
@@ -103,6 +103,9 @@ jobs:
           GERBIL_SHA256: ${{ matrix.gerbil-sha256 }}
         run: |
           set -euo pipefail
+          if [ "$RUNNER_OS" = macOS ]; then
+            test "$(uname -m)" = arm64
+          fi
           archive="$RUNNER_TEMP/$GERBIL_ASSET.tar.gz"
           curl --fail --location --retry 3 --output "$archive" \
             "https://github.com/tao3k/gerbil-bazel/releases/download/$GERBIL_ASSET/$GERBIL_ASSET.tar.gz"
