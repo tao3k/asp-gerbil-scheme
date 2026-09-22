@@ -4,19 +4,19 @@
 ;;; - Callers own explicit source roots and exclusions.
 ;;; - This module turns scope evidence into concrete parser file sets.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/package
         (only-in :asp-gerbil-scheme/src/parser/selectors relative-path source-full-path)
-        (only-in :std/iter for/fold)
-        (only-in :std/misc/list unique)
+        (only-in :std/list/list foldl)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
         (only-in :std/misc/ports read-file-lines)
-        (only-in :std/sort sort)
-        (only-in :std/srfi/13
+
+        (only-in :std/string/misc
                  string-contains
                  string-index-right
                  string-prefix?
                  string-suffix?)
-        (only-in :std/sugar cut filter ormap))
+        )
 
 (export +source-extensions+
         +config-files+
@@ -145,7 +145,7 @@
            (when (> remaining 0)
              (scan-source-preview-entry
               root dir entry ignored-dirs walk add-file)))
-         (sort (directory-files dir) string<?))))
+         (list-sort string<? (directory-files dir)))))
     (for-each
      (lambda (source-root)
        (when (> remaining 0)
@@ -434,7 +434,7 @@
 ;; : (-> String Dir IgnoredDirs WalkSourceDirectory )
 (def (walk-source-directory root dir ignored-dirs)
   (def (walk dir acc)
-    (for/fold (result acc) (entry (sort (directory-files dir) string<?))
+    (foldl (lambda (entry result)
       (if (member entry '("." ".."))
         result
         (let (path (path-expand entry dir))
@@ -444,7 +444,9 @@
             (walk path result))
            ((gerbil-source-path? path)
             (cons path result))
-           (else result))))))
+           (else result)))))
+     acc
+     (list-sort string<? (directory-files dir))))
   (walk dir '()))
 
 ;; : (-> String String Entry IgnoredDirs Boolean )

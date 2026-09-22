@@ -1,14 +1,14 @@
 ;;; -*- Gerbil -*-
 ;;; Source-range transport helpers.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :asp-gerbil-scheme/src/parser/model
                  definition-path
                  definition-start
                  definition-end)
         (only-in :std/misc/ports read-all-as-string read-file-lines)
-        (only-in :std/srfi/13 string-index string-index-right string-prefix?)
-        (only-in :std/sugar foldl iota))
+        (only-in :std/string/misc string-index string-index-right string-prefix?)
+        )
 
 (export read-definition-code
         read-definition-with-leading-comments

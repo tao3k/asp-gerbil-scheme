@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Conservative TypeSpec subtyping proof engine.
 
-(import :gerbil/gambit
-        (only-in :std/sugar hash)
+(import :gerbil/runtime/gambit
+
         :asp-gerbil-scheme/src/types/model)
 
 (export make-type-proof

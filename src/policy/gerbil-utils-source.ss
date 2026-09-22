@@ -8,8 +8,8 @@
         :asp-gerbil-scheme/src/policy/prototype
         (only-in :asp-gerbil-scheme/src/policy/agent-style-gerbil-signal-support
                  typed-contract-fact-mentions-any?)
-        (only-in :std/srfi/1 find)
-        (only-in :std/sugar ormap))
+        (only-in :std/list/list find)
+        )
 
 (export gerbil-utils-source-detection-overlay
         gerbil-utils-source-details

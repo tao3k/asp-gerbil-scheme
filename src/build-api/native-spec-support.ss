@@ -2,11 +2,10 @@
 ;;; Lightweight source catalog and target normalization for PackageSpec.
 ;;; std/make and std/build-script remain the only build executors.
 
-(import :gerbil/gambit
-        (only-in :std/misc/path
+(import :gerbil/runtime/gambit
+        (only-in :std/string/path
                  path-default-extension path-extension-is?)
-        (only-in :std/srfi/1 lset-difference)
-        (only-in :clan/filesystem find-files path-is-script?))
+        (only-in :std/list/list-builder with-list-builder))
 
 (export all-gerbil-modules
         default-exclude-dirs
@@ -14,8 +13,33 @@
         remove-build-files
         normalize-spec)
 
-(def +default-exclude-files+ '("main.ss" "manifest.ss"))
+(def +default-exclude-files+ '("main.ss" "manifest.ss" "version.ss"))
 (def default-exclude-dirs '("run" "t" ".git" "_darcs" ".gerbil"))
+
+;; Keep the package source catalog on V19's native filesystem primitives.
+(def (package-script? path)
+  (let (info (file-info path #f))
+    (and info
+         (eq? (file-info-type info) 'regular)
+         (not (zero? (bitwise-and (file-info-mode info) #o111)))
+         (call-with-input-file path
+           (lambda (port)
+             (and (eqv? (read-char port) #\#)
+                  (eqv? (read-char port) #\!)))))))
+
+(def (package-source-files root include? recurse?)
+  (with-list-builder (collect!)
+    (let walk ((path root))
+      (let (info (file-info path #f))
+        (cond
+         ((and info (eq? (file-info-type info) 'directory))
+          (when (recurse? path)
+            (for-each
+             (lambda (name)
+               (unless (or (equal? name ".") (equal? name ".."))
+                 (walk (path-expand name path))))
+             (directory-files path))))
+         ((include? path) (collect! path)))))))
 
 ;; A basename provides recursive exclusion behavior. A relative path scopes
 ;; the same exclusion to one package subtree, allowing a
@@ -33,14 +57,14 @@
 ;; : (-> (List Path) (List Path) (List Path))
 (def (all-gerbil-modules exclude: (exclude +default-exclude-files+)
                          exclude-dirs: (exclude-dirs default-exclude-dirs))
-  ((cut lset-difference equal? <> exclude)
-   (find-files ""
-               (lambda (path)
-                 (and (path-extension-is? path ".ss")
-                      (not (path-is-script? path))))
-               recurse?:
-               (lambda (path)
-                 (not (excluded-gerbil-directory? path exclude-dirs))))))
+  (filter (lambda (path) (not (member path exclude)))
+          (package-source-files
+           ""
+           (lambda (path)
+             (and (path-extension-is? path ".ss")
+                  (not (package-script? path))))
+           (lambda (path)
+             (not (excluded-gerbil-directory? path exclude-dirs))))))
 
 ;; : (forall (p) (-> p String (-> p Boolean)))
 ;; source-file-matcher

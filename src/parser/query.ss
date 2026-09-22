@@ -2,14 +2,14 @@
 ;;; Query helpers over parser-owned project facts.
 
 (import :asp-gerbil-scheme/src/parser/facade
-        (only-in :std/sort sort)
-        (only-in :std/srfi/1 append-map)
-        (only-in :std/srfi/13
+
+        (only-in :asp-gerbil-scheme/src/support/list append-map)
+        (only-in :std/string/misc
                  string-contains
                  string-downcase
                  string-empty?
-                 string-join
-                 string-tokenize))
+                 string-join)
+        (only-in :std/text/pregexp pregexp-split))
 
 (export matching-definitions
         ranked-files
@@ -51,10 +51,10 @@
 ;;       ```
 ;;     %
 (def (ranked-files index)
-  (sort (project-index-files index)
-        (lambda (a b)
+  (list-sort (lambda (a b)
           (> (length (source-file-definitions a))
-             (length (source-file-definitions b))))))
+             (length (source-file-definitions b))))
+             (project-index-files index)))
 ;; ranked-query-files
 ;;   : (-> ProjectIndex String (List SourceFile))
 ;;   | doc m%
@@ -77,10 +77,10 @@
                (and (> score 0) (cons file score))))
            (project-index-files index))))
     (map car
-         (sort scored
-               (lambda (left right)
+         (list-sort (lambda (left right)
                  (ranked-query-file>? (car left) (cdr left)
-                                      (car right) (cdr right)))))))
+                                      (car right) (cdr right)))
+                    scored))))
 ;; : (-> Left LeftScore Right RightScore Boolean )
 (def (ranked-query-file>? left left-score right right-score)
   (cond
@@ -295,7 +295,8 @@
 ;;       ```
 ;;     %
 (def (split-query query)
-  (string-tokenize query))
+  (filter (lambda (part) (not (string-empty? part)))
+          (pregexp-split "[[:space:]]+" query)))
 ;; : (-> SearchTerm Boolean )
 (def (searchable-term? value)
   (and value

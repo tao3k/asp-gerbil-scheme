@@ -1,9 +1,10 @@
 ;;; -*- Gerbil -*-
 (import :std/test
+        (only-in :std/test/base test-result-ok? test-suite!)
         :asp-gerbil-scheme/src/extensions/facade
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/protocol/json
-        :std/srfi/13)
+        :std/string/misc)
 (export parser-test-part-5)
 
 ;; : (-> Selector Relpath Boolean )
@@ -391,6 +392,6 @@
 (def parser-test-part-5
   (test-suite "gerbil scheme harness parser part 5"
     (test-case "parser-test-part-5-higher-order-control"
-      (check (run-test-suite! parser-test-part-5-higher-order-control) => #t))
+      (check (test-result-ok? (test-suite! parser-test-part-5-higher-order-control)) => #t))
     (test-case "parser-test-part-5-quality-shape"
-      (check (run-test-suite! parser-test-part-5-quality-shape) => #t))))
+      (check (test-result-ok? (test-suite! parser-test-part-5-quality-shape)) => #t))))

@@ -3,7 +3,7 @@
         :asp-gerbil-scheme/src/extensions/facade
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/protocol/json
-        :std/srfi/13)
+        :std/string/misc)
 (export parser-test-part-2)
 
 ;; : (-> Selector Relpath Boolean )
@@ -113,12 +113,12 @@
                        "dispatch"
                        "select"])
             (check (map module-import-fact-module (source-file-module-imports file))
-                   => [":std/misc/path"
+                   => [":std/string/path"
                        ":std/misc/repr"
-                       ":std/misc/hash"
-                       ":std/misc/list"
+                       ":std/hash/misc"
+                       ":std/list/list"
                        ":std/stxutil"
-                       ":std/text/json"
+                       ":std/encoding/json"
                        ":std/sugar"])
             (check (map module-import-fact-modifier (source-file-module-imports file))
                    => ["for-template" "phi:" "except-in" "rename-in"

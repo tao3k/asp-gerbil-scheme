@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Executable contracts for POO macro admission independent of package metadata.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
-        (only-in :std/text/json json-object->string write-json-sort-keys?)
+        (only-in :std/encoding/json json->string)
         (only-in :clan/poo/object .cc)
         :asp-gerbil-scheme/src/macro-governance/facade
         :asp-gerbil-scheme/src/parser/facade
@@ -24,8 +24,7 @@
   (call-with-output-file path (lambda (port) (display text port))))
 
 (def (macro-governance-canonical-json value)
-  (parameterize ((write-json-sort-keys? #t))
-    (json-object->string value)))
+  (json->string value sort-keys: #t))
 
 ;; : (-> String String String Unit)
 (def (write-macro-governance-project root macro-source test-source)

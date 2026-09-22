@@ -7,8 +7,8 @@
         :asp-gerbil-scheme/src/policy/detection
         :asp-gerbil-scheme/src/policy/gerbil-utils-source
         :asp-gerbil-scheme/src/policy/model
-        (only-in :std/srfi/1 take)
-        (only-in :std/sugar cut filter filter-map foldl hash ormap)
+        (only-in :std/list/list take)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export controlled-branch-shape-findings

@@ -7,7 +7,7 @@
         :asp-gerbil-scheme/src/snapshot/facade
         :std/test
         :asp-gerbil-scheme/src/types/facade
-        :unit/policy/poo-scenarios)
+        "../policy/poo-scenarios")
 (export #t)
 
 ;; (List PooGuidanceCorpusScenario)

@@ -3,7 +3,7 @@
 
 (import :asp-gerbil-scheme/src/commands/guide
         :asp-gerbil-scheme/src/protocol/registry
-        (only-in :std/srfi/13 string-contains string-prefix?)
+        (only-in :std/string/misc string-contains string-prefix?)
         :std/test)
 
 (export check-guide-and-registry-fact-boundary)

@@ -7,9 +7,9 @@
         :asp-gerbil-scheme/src/policy/agent-style-gerbil-signals
         :asp-gerbil-scheme/src/policy/agent-style-destructuring-signals
         :asp-gerbil-scheme/src/policy/agent-style-performance-signals
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/13 string-prefix?)
-        (only-in :std/sugar cut filter ormap))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/string/misc string-prefix?)
+        )
 
 (export typed-combinator-style-quality-facets
         typed-combinator-style-repair-evidence

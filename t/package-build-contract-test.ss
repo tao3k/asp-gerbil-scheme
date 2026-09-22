@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Package-library native build ownership contracts.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :std/test test-suite test-case check)
-        (only-in :std/misc/path path-expand)
+        (only-in :std/string/path path-expand)
         (only-in :std/misc/ports read-all-as-string)
-        (only-in :std/srfi/13 string-contains)
+        (only-in :std/string/misc string-contains)
         (only-in :std/source gerbil-home)
         (only-in "../src/build-api/package-build"
                  asp-gerbil-scheme-package-build-active-gerbil-path)

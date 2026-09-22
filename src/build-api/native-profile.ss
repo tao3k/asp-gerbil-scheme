@@ -1,13 +1,13 @@
 ;;; -*- Gerbil -*-
 ;;; Current-system profile data for native std/make package builds.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :clan/poo/object .def)
         (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
-        (only-in :std/sugar ormap)
-        (only-in :std/srfi/13 string-trim-both))
+
+        (only-in :std/string/misc string-trim))
 
 (export asp-gerbil-scheme-native-profile-prototype
         asp-gerbil-scheme-portable-native-profile
@@ -36,7 +36,7 @@
    ;; A successful query may legitimately be empty when headers live in the
    ;; compiler's default include path (notably OpenSSL on Ubuntu).  Process
    ;; status, rather than output length, is the native availability contract.
-   (string-trim-both
+   (string-trim
     (run-process
      (append ["pkg-config" option] libraries)
      coprocess: read-all-as-string))
@@ -66,7 +66,7 @@
    (lambda (package)
      (try
       (let (prefix
-            (string-trim-both
+            (string-trim
              (run-process ["brew" "--prefix" package]
                           coprocess: read-all-as-string
                           stderr-redirection: #t)))

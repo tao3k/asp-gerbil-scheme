@@ -1,7 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Reader-only direct import projection for the testing footprint preflight.
 
-(import (only-in :std/srfi/1 filter-map foldl))
+(import :gerbil/runtime/gambit
+        (only-in :std/list/list filter-map foldl))
 
 (export testing-import-footprint-datum-owners
         testing-import-footprint-file-owners)

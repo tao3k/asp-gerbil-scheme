@@ -5,8 +5,8 @@
         :asp-gerbil-scheme/src/policy/agent-support
         :asp-gerbil-scheme/src/policy/dependency-adapter-profile
         :asp-gerbil-scheme/src/policy/model
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/13 string-contains string-join string-prefix?)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/string/misc string-contains string-join string-prefix?)
         :asp-gerbil-scheme/src/types/findings)
 
 (export dependency-protocol-adapter-findings

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Pure TypeSpec union normalization primitives shared by validation.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :asp-gerbil-scheme/src/types/model
                  type=?
                  type-kind

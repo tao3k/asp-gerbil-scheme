@@ -7,7 +7,7 @@
         :asp-gerbil-scheme/src/protocol/json
         :asp-gerbil-scheme/src/support/args
         :asp-gerbil-scheme/src/support/io
-        (only-in :std/srfi/13 string-join))
+        (only-in :std/string/misc string-join))
 
 (export info-main
         info-packet

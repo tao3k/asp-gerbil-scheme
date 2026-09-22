@@ -2,8 +2,8 @@
 ;;; Shared parser-fact locality helpers for POO loop policies.
 
 (import :asp-gerbil-scheme/src/parser/facade
-        (only-in :std/sugar ormap)
-        :gerbil/gambit)
+
+        :gerbil/runtime/gambit)
 
 (export poo-call-loop-driver
         poo-call-inside-loop-driver?

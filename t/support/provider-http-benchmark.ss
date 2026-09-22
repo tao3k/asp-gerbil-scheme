@@ -3,11 +3,11 @@
 ;;; transfer together so reported duration excludes independent process-launch
 ;;; latency while still crossing the production loopback transport.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
-        (only-in :std/srfi/1 append-map iota)
-        (only-in :std/srfi/13 string-tokenize))
+        (only-in :std/list/list iota)
+        (only-in :asp-gerbil-scheme/src/support/list append-map))
 
 (export parallel-live-corpus-samples)
 
@@ -49,7 +49,7 @@
       (let (line (read-line port))
         (if (eof-object? line)
             (reverse samples)
-            (let (tokens (string-tokenize line))
+            (let (tokens (string-split line #\space))
               (unless (and (= (length tokens) 2)
                            (string=? (car tokens) "200"))
                 (error "concurrent provider HTTP transfer failed" line))

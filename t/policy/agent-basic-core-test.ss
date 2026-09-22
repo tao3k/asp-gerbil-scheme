@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; gerbil scheme harness agent basic core policy.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :std/misc/ports
         :std/misc/process
-        (only-in :std/text/json read-json)
+        (only-in :std/encoding/json read-json)
         :asp-gerbil-scheme/src/parser/facade
         (only-in :asp-gerbil-scheme/src/policy/agent-basic
                  generic-owner-findings

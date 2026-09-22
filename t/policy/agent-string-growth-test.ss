@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil scheme harness string growth policy tests.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
-        :policy/fixtures
+        "./fixtures"
         :asp-gerbil-scheme/src/scenario/policy
         :asp-gerbil-scheme/src/types/facade)
 

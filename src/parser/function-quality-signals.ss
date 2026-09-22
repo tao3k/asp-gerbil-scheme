@@ -2,7 +2,7 @@
 ;;; Focused function-quality signals derived from call and higher-order facts.
 
 (import :asp-gerbil-scheme/src/parser/model
-        (only-in :std/sugar cut filter foldl ormap))
+        )
 
 (export function-quality-dynamic-scope-cleanup-facets
         typed-contract-profile-facets

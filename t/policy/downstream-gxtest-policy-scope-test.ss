@@ -2,7 +2,7 @@
 ;;; Downstream gxtest policy-scope regression scenario.
 
 (import :std/test
-        :policy/agent-style-support
+        "./agent-style-support"
         :asp-gerbil-scheme/src/policy/gxtest
         :asp-gerbil-scheme/src/scenario/policy
         :asp-gerbil-scheme/src/types/facade)

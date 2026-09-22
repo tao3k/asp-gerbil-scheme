@@ -57,7 +57,7 @@
     (selector "t/fixtures/parser/complex-syntax.ss:48-51"))))
  (moduleImports
   ((moduleImport
-    (module ":std/misc/path")
+    (module ":std/string/path")
     (phase "template")
     (modifier "for-template")
     (symbols ())
@@ -69,13 +69,13 @@
     (symbols ())
     (selector "t/fixtures/parser/complex-syntax.ss:10-10"))
    (moduleImport
-    (module ":std/misc/hash")
+    (module ":std/hash/misc")
     (phase "runtime")
     (modifier "except-in")
     (symbols ("hash-copy"))
     (selector "t/fixtures/parser/complex-syntax.ss:9-9"))
    (moduleImport
-    (module ":std/misc/list")
+    (module ":std/list/list")
     (phase "runtime")
     (modifier "rename-in")
     (symbols ("foldl" "fold-left"))
@@ -87,7 +87,7 @@
     (symbols ())
     (selector "t/fixtures/parser/complex-syntax.ss:7-7"))
    (moduleImport
-    (module ":std/text/json")
+    (module ":std/encoding/json")
     (phase "runtime")
     (modifier "only-in")
     (symbols ("read-json"))

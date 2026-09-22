@@ -1,9 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; HTTP client boundary for the resident provider runtime.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
-        (only-in :std/sugar hash)
         "../src/runtime/provider-http-json-client")
 
 (export provider-http-json-client-test)

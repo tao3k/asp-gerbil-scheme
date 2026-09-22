@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Filesystem, macro-witness, and large-owner fixture writers.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/misc/process)
 
 (export #t)

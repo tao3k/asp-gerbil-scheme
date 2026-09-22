@@ -5,7 +5,7 @@
 ;;; ordinary std/make planning must not pay to load testing-only detection.
 
 (import :gerbil/expander
-        (only-in :std/misc/path path-default-extension))
+        (only-in :std/string/path path-default-extension))
 
 (export asp-gerbil-scheme-resident-import-footprints)
 

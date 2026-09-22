@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Event lookup shape is owned by one symbolic index boundary.
 (package: sample/events)
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 (export make-event-index
         event-index-ref
         event-name

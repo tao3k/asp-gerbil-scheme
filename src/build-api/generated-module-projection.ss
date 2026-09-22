@@ -4,12 +4,12 @@
 ;;; ordinary build scripts must not load that implementation when declarations
 ;;; are empty.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in "../object-family/syntax"
                  defpoo-object-family poo-family-ref)
-        (only-in :std/misc/list delete-duplicates/hash)
-        (only-in :std/misc/plist pgetq psetq)
-        (only-in :std/sugar hash-key?))
+        (only-in :std/list/list delete-duplicates/hash)
+        (only-in :std/list/plist pgetq psetq)
+        )
 
 (export asp-gerbil-scheme-verified-generated-module-prototype
         asp-gerbil-scheme-verified-generated-module

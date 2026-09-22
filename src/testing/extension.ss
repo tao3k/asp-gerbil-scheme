@@ -1,17 +1,17 @@
 ;;; -*- Gerbil -*-
-;;; POO-native extensions for the upstream clan/testing interface.
+;;; POO-native profiles for the native Gerbil test interface.
 ;;;
 ;;; This module describes optional test instrumentation and negative discovery
-;;; filters. It delegates file discovery and suite execution to clan/testing.
+;;; filters. Native gxtest remains the test executor.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :clan/poo/object .cc .o .ref .slot? object?)
-        (only-in :std/misc/path path-directory path-expand path-normalize)
-        (only-in :std/misc/wg make-wg wg-add! wg-wait!)
+        (only-in :std/string/path path-directory path-expand path-normalize)
+        (only-in :std/sync/wg make-wg wg-add! wg-wait!)
         (only-in :std/misc/process run-process)
-        (only-in :std/srfi/1 drop find filter partition take unfold)
-        (only-in :std/srfi/13 string-contains string-prefix?)
-        (only-in :std/sugar with-id)
+        (only-in :std/list/list drop find filter foldl iota partition take)
+        (only-in :std/string/misc string-contains string-prefix?)
+
         (only-in ../build-api/core-capacity native-build-core-count)
         (only-in ./import-footprint-reader
                  testing-import-footprint-datum-owners
@@ -132,7 +132,7 @@
                         bindings: (initial-bindings []))
   (.o (:: self)
       kind: 'testing-interface-extension
-      upstream: ':clan/testing
+      upstream: ':gerbil/tools/gxtest
       command: 'gerbil-test
       profiles: initial-profiles
       bindings: initial-bindings
@@ -206,7 +206,7 @@
 
 (def +testing-performance-profile+
   (.cc (testing-profile 'performance 'machine-observation)
-       timingLibrary: ':clan/timestamp
+       timingLibrary: ':asp-gerbil-scheme/src/support/time
        memoryLibrary: ':asp-gerbil-scheme/src/benchmark/memory
        metrics: '(wall-time cpu-time allocation gc managed-heap)))
 
@@ -222,7 +222,7 @@
   (testing-profile 'serial-resource 'shared-resource-declaration))
 
 (def +testing-discovery-profile+
-  (.cc (testing-profile 'discovery 'clan-test-file-filter)
+  (.cc (testing-profile 'discovery 'native-test-file-filter)
        ignoreDirectories: []))
 
 ;;; Opt-in admission reuses module contexts prepared by native gxtest.
@@ -475,16 +475,18 @@
            (group-count (min file-count worker-count))
            (base-width (quotient file-count group-count))
            (wide-group-count (modulo file-count group-count)))
-      (unfold
-       (lambda (state) (= (cdr state) group-count))
-       (lambda (state)
-         (take (car state)
-               (+ base-width (if (< (cdr state) wide-group-count) 1 0))))
-       (lambda (state)
-         (let (width
-               (+ base-width (if (< (cdr state) wide-group-count) 1 0)))
-           (cons (drop (car state) width) (+ (cdr state) 1))))
-       (cons test-files 0)))))
+      (let (result
+            (foldl
+             (lambda (index state)
+               (let* ((remaining (car state))
+                      (groups-rev (cdr state))
+                      (width (+ base-width
+                                (if (< index wide-group-count) 1 0))))
+                 (cons (drop remaining width)
+                       (cons (take remaining width) groups-rev))))
+             (cons test-files [])
+             (iota group-count)))
+        (reverse (cdr result))))))
 
 ;; testing-interface-test-file-batches
 ;;   : (-> TestingInterface (List Path) (List (List Path)))

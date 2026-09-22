@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 
 (export upstream-gxtest-files
         upstream-gxtest-main)

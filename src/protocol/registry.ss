@@ -7,7 +7,7 @@
                  provider-operation-contract-operation
                  provider-operation-contract->json
                  provider-operation-contracts)
-        (only-in :std/sugar hash))
+        )
 
 (export language-registry)
 ;;; Boundary:

@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Pure paths for Gerbil module build artifacts.
 
-(import (only-in :std/misc/path path-expand)
-        (only-in :std/srfi/13 string-suffix?))
+(import (only-in :std/string/path path-expand)
+        (only-in :std/string/misc string-suffix?))
 
 (export asp-gerbil-scheme-build-module-source-file
         asp-gerbil-scheme-build-module-output-file)

@@ -11,7 +11,7 @@
                  object-type-contract-object-kind
                  object-type-contract-predicate
                  object-type-contract-slots)
-        :gerbil/gambit)
+        :gerbil/runtime/gambit)
 
 (export slot-contract->alist
         object-type-contract->alist

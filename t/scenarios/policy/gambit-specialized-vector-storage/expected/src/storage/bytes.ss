@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Expected: use a u8vector when the payload is bytes.
 (package: scenario/gambit-specialized-vector-storage/expected)
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 (export copy-bytes)
 
 (def (copy-bytes bytes)

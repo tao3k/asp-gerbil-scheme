@@ -1,8 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; gerbil scheme harness agent build policy.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
+        (only-in :std/test/base test-result-ok? test-suite!)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
         :asp-gerbil-scheme/src/types/facade
@@ -403,8 +404,8 @@
 (def agent-build-policy-test
   (test-suite "gerbil scheme harness agent build policy"
     (test-case "agent-build-runtime-policy-test"
-      (check (run-test-suite! agent-build-runtime-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-build-runtime-policy-test)) => #t))
     (test-case "agent-build-package-rejection-policy-test"
-      (check (run-test-suite! agent-build-package-rejection-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-build-package-rejection-policy-test)) => #t))
     (test-case "agent-build-canonical-acceptance-policy-test"
-      (check (run-test-suite! agent-build-canonical-acceptance-policy-test) => #t))))
+      (check (test-result-ok? (test-suite! agent-build-canonical-acceptance-policy-test)) => #t))))

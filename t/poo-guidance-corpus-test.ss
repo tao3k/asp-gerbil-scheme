@@ -3,7 +3,7 @@
 ;;; This test runs a source-load check in a fresh gxi process so local scenario
 ;;; edits are not hidden by an installed package copy of t/unit/snapshot/policy.ss.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test)
 
 (export poo-guidance-corpus-test)

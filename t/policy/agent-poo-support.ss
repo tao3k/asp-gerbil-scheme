@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil scheme harness agent POO policy support.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/scenario/policy
         (only-in :asp-gerbil-scheme/src/support/time duration-literal->nanos)

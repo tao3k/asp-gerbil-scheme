@@ -6,7 +6,7 @@
                  asp-gerbil-scheme-library-package-prototype
                  asp-gerbil-scheme-package-native-spec
                  asp-gerbil-scheme-package-modules)
-        (only-in :std/srfi/13 string-contains))
+        (only-in :std/string/misc string-contains))
 
 (export library-provider-boundary-test)
 

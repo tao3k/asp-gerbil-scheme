@@ -8,9 +8,10 @@
         (only-in :asp-gerbil-scheme/src/runtime/provider-semantic-evidence
                  provider-semantic-evidence-packet)
         :std/misc/ports
-        :std/srfi/13
+        :std/string/misc
         :std/test
-        :std/text/json)
+        (only-in :std/encoding/json
+                 JSONReadOptions read-json string->json write-json))
 
 (export check-info-json-schema-conformance
         check-language-evidence-json-schema-conformance
@@ -24,12 +25,9 @@
   (hash-get table key))
 
 (def (packet-json packet)
-  (call-with-input-string
-   (call-with-output-string
-    (lambda (out)
-      (parameterize ((current-output-port out))
-        (write-json packet))))
-   read-json))
+  (string->json (call-with-output-string
+                 (lambda (out) (write-json out packet)))
+                (JSONReadOptions object-as-hash: #t)))
 ;; : (-> (List String) Json )
 (def (info-json args)
   (let* ((status #f)
@@ -39,10 +37,13 @@
               (parameterize ((current-output-port out))
                 (set! status (info-main args)))))))
     (check status => 0)
-    (call-with-input-string output read-json)))
+    (string->json output (JSONReadOptions object-as-hash: #t))))
 ;; : (-> SourceFile Json )
 (def (schema-json file)
-  (call-with-input-file (string-append "schemas/" file) read-json))
+  (call-with-input-file
+   (string-append "schemas/" file)
+   (lambda (port)
+     (read-json port (JSONReadOptions object-as-hash: #t)))))
 ;; : (-> Packet SchemaFile Integer )
 (def (check-packet-conforms-to-schema! packet schema-file)
   (let (schema (schema-json schema-file))
@@ -247,7 +248,7 @@
          (syntax-facts (json-get owner-packet "facts"))
          (higher-order-facts (json-get higher-order-packet "facts"))
          (macro-fact (find-syntax-fact syntax-facts "macro" "capture-safe"))
-         (import-fact (find-syntax-fact syntax-facts "import" ":std/text/json"))
+         (import-fact (find-syntax-fact syntax-facts "import" ":std/encoding/json"))
          (binding-fact (find-syntax-fact syntax-facts "binding" "again"))
          (class-fact (find-syntax-fact syntax-facts "class" "<Widget>"))
          (method-fact (find-syntax-fact syntax-facts "method" ":render"))

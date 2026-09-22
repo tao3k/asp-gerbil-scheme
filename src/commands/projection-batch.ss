@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Shared ASP projection-batch adapter backed by the native Gerbil parser.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :asp-gerbil-scheme/src/parser/exact-owner
                  parse-exact-owner-definitions)
         (only-in :asp-gerbil-scheme/src/parser/selectors item-structural-selector)
@@ -13,8 +13,8 @@
         (only-in :asp-gerbil-scheme/src/parser/selectors definition-selector)
         (only-in :asp-gerbil-scheme/src/utilities/functional
                  u8vector-line-start-offsets)
-        (only-in :std/srfi/13 string-contains)
-        (only-in :std/sugar hash))
+        (only-in :std/string/misc string-contains)
+        )
 
 (export project-provider-projection-batch
         +request-schema-id+

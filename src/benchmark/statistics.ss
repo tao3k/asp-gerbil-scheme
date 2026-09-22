@@ -2,9 +2,9 @@
 ;;; Exact nanosecond sample statistics shared by benchmark runners.
 ;;; Boundary: this module selects statistics; it never measures work.
 
-(import :gerbil/gambit
-        (only-in :std/sort sort)
-        (only-in :std/sugar andmap))
+(import :gerbil/runtime/gambit
+
+        )
 
 (export benchmark-percentile-index
         benchmark-statistics-ref
@@ -35,7 +35,7 @@
                          (and (integer? sample) (> sample 0)))
                        samples))
     (error "benchmark samples must be positive integer nanoseconds" samples))
-  (sort samples <))
+  (list-sort < samples))
 
 ;; : (-> (List Integer) Integer Integer)
 (def (benchmark-sample-percentile samples percentile)
@@ -60,8 +60,7 @@
   (unless (pair? samples)
     (error "benchmark sample set must be non-empty" samples))
   (let (sorted
-        (sort samples
-              (lambda (left right)
+        (list-sort (lambda (left right)
                 (let ((left-ns (projection left))
                       (right-ns (projection right)))
                   (unless (and (integer? left-ns) (> left-ns 0)
@@ -69,6 +68,6 @@
                     (error "benchmark projection must return positive integer nanoseconds"
                            left-ns
                            right-ns))
-                  (< left-ns right-ns)))))
+                  (< left-ns right-ns))) samples))
     (list-ref sorted
               (benchmark-percentile-index (length sorted) percentile))))

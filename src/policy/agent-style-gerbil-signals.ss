@@ -34,9 +34,9 @@
                  typed-combinator-style-facts->signals
                  typed-combinator-style-facts->targets
                  typed-contract-fact-mentions-any?)
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/13 string-contains string-empty?)
-        (only-in :std/sugar cut filter ormap))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/string/misc string-contains string-empty?)
+        )
 
 (export typed-combinator-style-generator-quality-facets
         +typed-comment-metadata-fields+

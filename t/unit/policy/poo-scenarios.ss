@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Reusable downstream POO policy scenario fixtures.
 
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 
 (export write-poo-direct-writeenv-project
         write-poo-io-override-project

@@ -2,12 +2,11 @@
 ;;; Intent:
 ;;; - This suite protects the parser's repeated-project memory boundary.
 ;;; - The POO testing profile applies the heap cap before execution.
-(import (only-in :gerbil/gambit getenv setenv thread-receive thread-send)
+(import (only-in :gerbil/runtime/gambit getenv setenv thread-receive thread-send list-sort)
         (only-in :std/test test-suite test-case check)
-        (only-in :std/srfi/1 foldl iota)
-        (only-in :std/srfi/13 string-prefix? string-split)
-        (only-in :std/misc/path path-expand)
-        (only-in :std/sort sort)
+        (only-in :std/list/list foldl iota)
+        (only-in :std/string/misc string-prefix? string-split)
+        (only-in :std/string/path path-expand)
         :asp-gerbil-scheme/src/parser/core
         (only-in :asp-gerbil-scheme/src/parser/parse-workers parse-source-files)
         :asp-gerbil-scheme/src/parser/profile
@@ -69,19 +68,19 @@
               "1"
               (lambda ()
                 (policy-source-report "." files)))))))
-    (sort
+    (list-sort
+     string<?
      (filter (cut string-prefix?
                   "[asp-gerbil-scheme-parse-worker] event=start path=" <>)
-             (string-split output #\newline))
-     string<?)))
+             (string-split output #\newline)))))
 
 ;; : (-> (List String) (List String))
 (def (expected-policy-parse-start-lines files)
-  (sort
+  (list-sort
+   string<?
    (map (cut string-append
              "[asp-gerbil-scheme-parse-worker] event=start path=" <>)
-        (map (cut path-expand <> (current-directory)) files))
-   string<?))
+        (map (cut path-expand <> (current-directory)) files))))
 
 ;;; Boundary:
 ;;; - The repeated profile test compares parser facts without retaining source receipts.

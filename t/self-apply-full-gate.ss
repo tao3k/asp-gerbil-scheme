@@ -4,14 +4,14 @@
 (import :std/test
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
-        :policy/fixtures
+        "policy/fixtures"
         (only-in :asp-gerbil-scheme/src/policy/gxtest-report
                  project-policy-report)
         (only-in "../src/policy/test-scope"
                  project-policy-source-files)
         :asp-gerbil-scheme/src/policy/repair-calibration
         :asp-gerbil-scheme/src/snapshot/facade
-        :std/sugar
+        (only-in :gerbil/runtime/gambit hash filter-map)
         :asp-gerbil-scheme/src/types/facade)
 (export self-apply-full-test)
 

@@ -3,13 +3,11 @@
 ;;; The caller supplies the bootstrap endpoint. This owner never discovers a
 ;;; workspace, starts a server, reads source, or falls back to local semantics.
 
-(import :gerbil/gambit
-        (only-in :std/net/request
-                 http-post
-                 request-json
-                 request-status)
-        (only-in :std/srfi/13 string-prefix? string-suffix?)
-        (only-in :std/text/json write-json))
+(import :gerbil/runtime/gambit
+        (only-in :std/net/http/client
+                 http-post Request-content Request-status Request-close)
+        (only-in :std/string/misc string-prefix? string-suffix?)
+        (only-in :std/encoding/json JSONReadOptions read-json write-json))
 
 (export provider-http-json-request!
         provider-http-json-request/transport!
@@ -84,7 +82,7 @@
 ;; : (-> Json String)
 (def (json->string value)
   (call-with-output-string ""
-    (lambda (output) (write-json value output))))
+    (lambda (output) (write-json output value))))
 
 ;;; Native transport uses Gerbil's upstream HTTP client. It returns a compact
 ;;; status/JSON pair so the admission logic is independently testable without a
@@ -94,9 +92,16 @@
   (let (response
         (http-post url
                    headers: '(("Content-Type" . "application/json"))
-                   data: (json->string request)))
-    (values (request-status response)
-            (request-json response))))
+                   body: (string->utf8 (json->string request))))
+    (dynamic-wind
+      void
+      (lambda ()
+        (values (Request-status response)
+                (read-json
+                 (open-input-string
+                  (utf8->string (Request-content response)))
+                 (JSONReadOptions object-as-hash: #t))))
+      (lambda () (Request-close response)))))
 
 ;; : (-> String JsonObject JsonObject)
 (def (provider-http-json-request! endpoint request)

@@ -2,7 +2,7 @@
 ;;; Each public capability facade must work at its stable package address both
 ;;; during source bootstrap and after installation.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         (only-in :asp-gerbil-scheme/building-api
                  asp-gerbil-scheme-package-native-spec))

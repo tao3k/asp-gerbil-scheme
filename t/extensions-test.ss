@@ -7,8 +7,8 @@
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/snapshot/facade
         :std/test
-        (only-in :std/sugar andmap)
-        (only-in :std/srfi/13 string-join))
+        (only-in :gerbil/runtime/gambit andmap)
+        (only-in :std/string/misc string-join))
 (export extensions-test)
 ;; : TestSuite
 (def extensions-test

@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil scheme harness policy source scope self-audit tests.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
-        :policy/fixtures
+        "./fixtures"
         :asp-gerbil-scheme/src/policy/gxtest
         :asp-gerbil-scheme/src/types/facade)
 
@@ -26,7 +26,7 @@
                     "(package: sample/policy-scope)\n")
         (write-text
          (string-append source-dir "/bad.ss")
-         ";;; -*- Gerbil -*-\n(import (only-in :std/srfi/13 string-prefix?))\n(def (policy-file? path)\n  (not (string-prefix? \"t/scenarios/\" path)))\n")
+         ";;; -*- Gerbil -*-\n(import (only-in :std/string/misc string-prefix?))\n(def (policy-file? path)\n  (not (string-prefix? \"t/scenarios/\" path)))\n")
         (let* ((index (collect-project root))
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-021" findings))

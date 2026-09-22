@@ -1,7 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned source path classification for agent-facing projections.
 
-(import (only-in :std/srfi/13 string-contains string-prefix? string-suffix?))
+(import :gerbil/runtime/gambit
+        (only-in :std/string/misc
+                 string-contains string-prefix? string-suffix?))
 
 (export source-path-class)
 ;;; Boundary:

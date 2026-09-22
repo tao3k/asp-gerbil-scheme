@@ -6,8 +6,8 @@
                  definition-selector
                  project-definitions
                  project-typed-contract-facts)
-        (only-in :std/srfi/1 append-map)
-        (only-in :std/sugar cut filter-map foldl foldr)
+        (only-in :asp-gerbil-scheme/src/support/list append-map)
+
         :asp-gerbil-scheme/src/types/model
         :asp-gerbil-scheme/src/types/signatures)
 

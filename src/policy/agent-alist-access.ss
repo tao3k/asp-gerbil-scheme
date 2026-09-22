@@ -6,7 +6,7 @@
 
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/model
-        (only-in :std/sugar filter hash)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export alist-access-findings

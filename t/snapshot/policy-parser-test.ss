@@ -2,10 +2,10 @@
 ;;; Parser and policy snapshot checks.
 
 (import :std/test
-        :unit/snapshot/parser
-        :unit/snapshot/policy
-        :unit/snapshot/check-report
-        :unit/snapshot/self-apply)
+        "../unit/snapshot/parser"
+        "../unit/snapshot/policy"
+        "../unit/snapshot/check-report"
+        "../unit/snapshot/self-apply")
 
 (export snapshot-policy-parser-test)
 
@@ -20,4 +20,3 @@
       (check-empty-check-report-snapshot))
     (test-case "self apply findings snapshot is an explicit invariant"
       (check-empty-self-apply-findings-snapshot))))
-

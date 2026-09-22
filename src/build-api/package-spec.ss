@@ -19,7 +19,7 @@
         asp-gerbil-scheme-package-modules)
 
 (import (only-in :clan/poo/object .cc .def .get)
-        (only-in :gerbil/gambit
+        (only-in :gerbil/runtime/gambit
                  make-thread thread-start! thread-sleep! thread-terminate!)
         (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
         (rename-in "./native-spec-support"

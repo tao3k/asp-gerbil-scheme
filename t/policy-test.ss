@@ -4,6 +4,7 @@
 ;;; - Keep individual policy test files under modularity limits.
 
 (import :std/test
+        (only-in :std/test/base test-result-ok? test-suite!)
         :asp-gerbil-scheme/src/policy/gxtest
   "./policy/modularity-test"
   "./policy/agent-basic-test"
@@ -31,41 +32,41 @@
 (def policy-test
   (test-suite "gerbil scheme harness policy"
     (test-case "modularity-policy-test"
-      (check (run-test-suite! modularity-policy-test) => #t))
+      (check (test-result-ok? (test-suite! modularity-policy-test)) => #t))
     (test-case "agent-basic-policy-test"
-      (check (run-test-suite! agent-basic-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-basic-policy-test)) => #t))
     (test-case "agent-list-growth-policy-test"
-      (check (run-test-suite! agent-list-growth-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-list-growth-policy-test)) => #t))
     (test-case "agent-list-random-access-policy-test"
-      (check (run-test-suite! agent-list-random-access-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-list-random-access-policy-test)) => #t))
     (test-case "agent-macro-io-policy-test"
-      (check (run-test-suite! agent-macro-io-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-macro-io-policy-test)) => #t))
     (test-case "macro-governance-framework-policy-test"
-      (check (run-test-suite! macro-governance-framework-policy-test) => #t))
+      (check (test-result-ok? (test-suite! macro-governance-framework-policy-test)) => #t))
     (test-case "agent-string-growth-policy-test"
-      (check (run-test-suite! agent-string-growth-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-string-growth-policy-test)) => #t))
     (test-case "agent-alist-access-policy-test"
-      (check (run-test-suite! agent-alist-access-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-alist-access-policy-test)) => #t))
     (test-case "agent-anonymous-pair-policy-test"
-      (check (run-test-suite! agent-anonymous-pair-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-anonymous-pair-policy-test)) => #t))
     (test-case "agent-build-policy-test"
-      (check (run-test-suite! agent-build-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-build-policy-test)) => #t))
     (test-case "agent-source-scope-policy-test"
-      (check (run-test-suite! agent-source-scope-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-source-scope-policy-test)) => #t))
     (test-case "agent-repair-policy-test"
-      (check (run-test-suite! agent-repair-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-repair-policy-test)) => #t))
     (test-case "agent-style-higher-order-policy-test"
-      (check (run-test-suite! agent-style-higher-order-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-style-higher-order-policy-test)) => #t))
     (test-case "agent-style-policy-test"
-      (check (run-test-suite! agent-style-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-style-policy-test)) => #t))
     (test-case "agent-dependency-adapter-policy-test"
-      (check (run-test-suite! agent-dependency-adapter-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-dependency-adapter-policy-test)) => #t))
     (test-case "agent-poo-policy-test"
-      (check (run-test-suite! agent-poo-policy-test) => #t))
+      (check (test-result-ok? (test-suite! agent-poo-policy-test)) => #t))
     downstream-gxtest-policy-scope-test
     (test-case "scenario-benchmark-policy-test"
-      (check (run-test-suite! scenario-benchmark-policy-test) => #t))
+      (check (test-result-ok? (test-suite! scenario-benchmark-policy-test)) => #t))
     (test-case "detection-policy-test"
-      (check (run-test-suite! detection-policy-test) => #t))
+      (check (test-result-ok? (test-suite! detection-policy-test)) => #t))
     (test-case "gerbil-utils-source-policy-test"
-      (check (run-test-suite! gerbil-utils-source-policy-test) => #t))))
+      (check (test-result-ok? (test-suite! gerbil-utils-source-policy-test)) => #t))))

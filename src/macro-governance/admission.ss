@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Single-pass macro admission over parser-owned project facts.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/macro-governance/model
         :asp-gerbil-scheme/src/parser/facade
         (only-in :asp-gerbil-scheme/src/policy/agent-macro-io
@@ -14,9 +14,8 @@
                  +macro-governance-admission-rule+
                  policy-rule-id
                  policy-rule-severity)
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/1 append-map)
-        (only-in :std/sugar filter-map hash)
+        (only-in :asp-gerbil-scheme/src/support/list unique append-map)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export macro-governance-admit

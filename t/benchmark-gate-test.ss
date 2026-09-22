@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Boundary: upstream benchmark gate helpers stay reusable by downstream tests.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         (only-in :asp-gerbil-scheme/src/support/time
                  duration-literal->nanos
@@ -272,12 +272,12 @@
                => #t)
         (check (string? (benchmark-fixture-ref receipt 'elapsed)) => #t)
         (check (benchmark-fixture-ref receipt 'timingSource)
-               => ":clan/timestamp#call-with-timing")
+               => ":std/time/precise#current-time-precise")
         (let (runtime-stats (benchmark-fixture-ref receipt 'runtimeStats))
           (check (benchmark-fixture-ref runtime-stats 'memorySource)
-                 => ":gerbil/gambit###process-statistics")
+                 => ":gerbil/runtime/gambit###process-statistics")
           (check (benchmark-fixture-ref runtime-stats 'gcPrecondition)
-                 => ":gerbil/gambit###gc")
+                 => ":gerbil/runtime/gambit###gc")
           (check (pair? (benchmark-fixture-ref runtime-stats 'memoryBefore))
                  => #t)
           (check (pair? (benchmark-fixture-ref runtime-stats 'memoryAfter))

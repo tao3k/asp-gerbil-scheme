@@ -4,6 +4,7 @@
 (import :std/test
         (only-in :clan/poo/object .o .ref .slot? object?)
         :asp-gerbil-scheme/src/object-family/syntax)
+(export object-family-syntax-test)
 
 (def (family-test-ref value key (default #f))
   (if (.slot? value key) (.ref value key) default))
@@ -48,5 +49,3 @@
         (check (object? profile) => #t)
         (check (family-profile-name profile) => 'family-profile)
         (check (family-profile-enabled? profile) => #t)))))
-
-(run-tests! object-family-syntax-test)

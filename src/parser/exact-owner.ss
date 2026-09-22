@@ -4,11 +4,11 @@
 ;;; only while reading; definition projection stays parser-owned and pure.
 
 (import :gerbil/expander
-        :gerbil/gambit
+        :gerbil/runtime/gambit
         (only-in :asp-gerbil-scheme/src/parser/definition-syntax
                  +definition-heads+
                  definitions-from-form)
-        (only-in :std/srfi/1 fold))
+        (only-in :std/list/list fold))
 
 (export parse-exact-owner-definitions
         read-exact-owner-forms)

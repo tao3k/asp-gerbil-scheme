@@ -1,6 +1,6 @@
 (import :std/test
         (only-in :clan/poo/object .cc)
-        (only-in :std/misc/path path-expand)
+        (only-in :std/string/path path-expand)
         :asp-gerbil-scheme/building-api)
 (export package-native-declaration-test)
 

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Lightweight support for agent POO guidance policy tests.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/facade
         (only-in :asp-gerbil-scheme/src/policy/agent-poo
                  poo-direct-writeenv-findings

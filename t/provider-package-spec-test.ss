@@ -1,4 +1,4 @@
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :clan/poo/object
         :std/test
         (only-in "../provider-package-spec"
@@ -9,7 +9,7 @@
                  asp-gerbil-scheme-native-profile-platform
                  asp-gerbil-scheme-native-profile-architecture))
 
-(export provider-package-spec-test main)
+(export provider-package-spec-test)
 
 (def provider-package-spec-test
   (test-suite "provider package spec"
@@ -76,6 +76,3 @@
                      (.get asp-gerbil-scheme-provider-package-spec
                            runtime-modules))
              => #f))))
-
-(def (main . _args)
-  (run-tests! provider-package-spec-test))

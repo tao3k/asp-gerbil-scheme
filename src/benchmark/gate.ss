@@ -6,8 +6,7 @@
         :asp-gerbil-scheme/src/benchmark/fixture-contract
         :asp-gerbil-scheme/src/benchmark/memory
         :asp-gerbil-scheme/src/benchmark/statistics
-        :asp-gerbil-scheme/src/support/time
-        (only-in :clan/timestamp call-with-timing))
+        :asp-gerbil-scheme/src/support/time)
 
 (export benchmark-default-max-total
         benchmark-default-kind
@@ -34,7 +33,7 @@
         benchmark-receipt-pass?)
 
 ;; : String
-(def benchmark-timing-source ":clan/timestamp#call-with-timing")
+(def benchmark-timing-source ":std/time/precise#current-time-precise")
 
 ;; : Integer
 (def benchmark-admission-percentile 95)
@@ -98,9 +97,9 @@
       (let (memory-after (benchmark-memory-usage))
         (list elapsed
               result
-              `((timingSource . ":clan/timestamp#call-with-timing")
+              `((timingSource . ":std/time/precise#current-time-precise")
                 (memorySource . ,benchmark-memory-source)
-                (gcPrecondition . ":gerbil/gambit###gc")
+                (gcPrecondition . ":gerbil/runtime/gambit###gc")
                 (memoryBefore . ,memory-before)
                 (memoryAfter . ,memory-after)
                 (memoryDelta

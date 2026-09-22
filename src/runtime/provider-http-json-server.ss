@@ -2,27 +2,33 @@
 ;;; The HTTP server owns transport lifecycle and JSON request/response framing.
 ;;; Runtime and stream state are validated POO objects; hashes exist only at
 ;;; the HTTP wire boundary and never become semantic or lifecycle owners.
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :asp-gerbil-scheme/src/runtime/provider-operation
                  provider-runtime-contract-receipt
                  provider-runtime-request->response)
         :asp-gerbil-scheme/src/runtime/provider/interface
-        (only-in :std/format format)
         (only-in :std/io
                  call-with-output-string
-                 localhost4
-                 ServerSocket-close
+                 read-all-from-reader
                  Socket-address
+                 Socket-close
                  tcp-listen)
-        (only-in :std/net/httpd
-                 http-register-handler
-                 http-request-body
-                 http-request-method
-                 http-response-write
-                 start-http-server!
-                 stop-http-server!)
-        (only-in :std/sugar hash)
-        (only-in :std/text/json read-json write-json))
+        (only-in :std/net/address InetAddress InetAddress-port localhost4)
+        (only-in :std/log stderr-log-sink)
+        (only-in :std/net/http/server
+                 Request-body
+                 Request-method
+                 ResponseHandler-write!
+                 Server-start!
+                 Server-stop!
+                 ServerConfig
+                 new-closure-handler
+                 new-http-server
+                 new-static-mux
+                 status-code->status)
+        (only-in :std/sync/channel make-channel channel-get channel-put)
+
+        (only-in :std/encoding/json JSONReadOptions read-json write-json))
 
 (export serve-provider-http-json-runtime!
         validate-provider-http-json-environment!)
@@ -56,23 +62,23 @@
 (def (json->u8vector value)
   (string->utf8
    (call-with-output-string ""
-     (lambda (output) (write-json value output)))))
+     (lambda (output) (write-json output value)))))
 
 ;; : (-> U8Vector Json)
 (def (u8vector->json bytes)
   ;; HTTP owns UTF-8 bytes while `read-json` owns characters.  Passing a raw
   ;; u8vector port through here makes each non-ASCII byte a separate character
   ;; and changes parser byte offsets after a JSON round trip.
-  (read-json (open-input-string (utf8->string bytes))))
+  (read-json (open-input-string (utf8->string bytes))
+             (JSONReadOptions object-as-hash: #t)))
 
 ;; : (-> HttpResponse Integer Json Void)
 (def (write-json-response response status value)
   (let (body (json->u8vector value))
-    (http-response-write
+    (ResponseHandler-write!
      response
-     status
+     (status-code->status status)
      (list (cons "Content-Type" "application/json")
-           (cons "Content-Length" (number->string (u8vector-length body)))
            (cons "Connection" "keep-alive"))
      body)))
 
@@ -178,8 +184,8 @@
 
 ;; : (-> HttpRequest HttpResponse Void)
 (def (health-handler request response)
-  (case (http-request-method request)
-    ((GET)
+  (cond
+    ((string=? (Request-method request) "GET")
      (write-json-response response 200 (provider-runtime-contract-receipt)))
     (else
      (write-json-response response 405
@@ -188,7 +194,7 @@
 
 ;; : (-> HttpRequest HttpResponse Void)
 (def (provider-runtime-handler request response)
-  (if (eq? (http-request-method request) 'POST)
+  (if (string=? (Request-method request) "POST")
       (with-catch
        (lambda (error)
          (write-json-response
@@ -198,9 +204,7 @@
                 ("reasonKind" "provider-runtime-request-decode-failed")
                 ("error" (runtime-error->string error)))))
        (lambda ()
-         (let* ((body (http-request-body request))
-                (_ (unless body
-                     (error "provider runtime request body is required")))
+         (let* ((body (read-all-from-reader (Request-body request)))
                 (request-value (u8vector->json body))
                 (response-value
                  (provider-runtime-request-value->response request-value)))
@@ -211,7 +215,7 @@
 
 ;; : (-> ProviderHttpRuntimeState HttpRequest HttpResponse Void)
 (def (provider-runtime-stream-handler runtime request response)
-  (if (eq? (http-request-method request) 'POST)
+  (if (string=? (Request-method request) "POST")
       (with-catch
        (lambda (error)
          (write-json-response
@@ -221,9 +225,7 @@
                 ("reasonKind" "provider-runtime-request-stream-frame-invalid")
                 ("error" (runtime-error->string error)))))
        (lambda ()
-         (let* ((body (http-request-body request))
-                (_ (unless body
-                     (error "provider runtime request stream body is required")))
+         (let* ((body (read-all-from-reader (Request-body request)))
                 (frame (u8vector->json body))
                 (_ (unless
                     (and (string=?
@@ -259,14 +261,14 @@
              ("failure" "provider runtime stream endpoint requires POST")))))
 
 ;; : (-> ProviderHttpRuntimeState HttpRequest HttpResponse Void)
-(def (shutdown-handler runtime request response)
-  (if (eq? (http-request-method request) 'POST)
+(def (shutdown-handler runtime stopped request response)
+  (if (string=? (Request-method request) "POST")
       (begin
         (write-json-response response 200 (hash ("state" "draining")))
         (spawn (lambda ()
                  (thread-sleep! 0.001)
-                 (stop-http-server!
-                  (provider-http-runtime-server runtime)))))
+                 (Server-stop! (provider-http-runtime-server runtime))
+                 (channel-put stopped #t))))
       (write-json-response response 405
                            (hash ("state" "failed")
                                  ("failure" "shutdown endpoint requires POST")))))
@@ -295,10 +297,12 @@
 (def (concrete-http-address requested-address)
   (match requested-address
     ("127.0.0.1:0"
-     (let* ((reservation (tcp-listen (cons localhost4 0)))
+     (let* ((reservation (tcp-listen (InetAddress localhost4 0)))
             (bound-address (Socket-address reservation))
-            (address (format "127.0.0.1:~a" (cdr bound-address))))
-       (ServerSocket-close reservation)
+            (address (string-append "127.0.0.1:"
+                                    (number->string
+                                     (InetAddress-port bound-address)))))
+       (Socket-close reservation)
        address))
     (address address)))
 
@@ -308,24 +312,38 @@
    (lambda (name) (getenv name #f)))
   (let* ((address (concrete-http-address
                    (required-environment "ASP_CLIENT_SERVER_HOST")))
-         (endpoint (format "http://~a/" address))
-         (server (start-http-server! backlog: 64 address))
+         (endpoint (string-append "http://" address "/"))
+         (stopped (make-channel 1))
+         (runtime-cell (vector #f))
+         (server
+          (new-http-server
+           (ServerConfig
+            mux: (new-static-mux
+                  path: "/health" (new-closure-handler health-handler)
+                  path: "/v1/provider-runtime"
+                  (new-closure-handler provider-runtime-handler)
+                  path: "/v1/provider-runtime-stream"
+                  (new-closure-handler
+                   (lambda (request response)
+                     (provider-runtime-stream-handler
+                      (vector-ref runtime-cell 0) request response)))
+                  path: "/shutdown"
+                  (new-closure-handler
+                   (lambda (request response)
+                     (shutdown-handler
+                      (vector-ref runtime-cell 0) stopped request response))))
+            log: (stderr-log-sink)
+            listen: (list (string-append "inet4:" address))
+            backlog: 64)))
          (runtime (provider-http-runtime-state
                    server
                    (make-mutex 'provider-request-stream)
                    (vector '())
                    1024))
          (output (current-output-port)))
-    (http-register-handler server "/health" health-handler)
-    (http-register-handler server "/v1/provider-runtime" provider-runtime-handler)
-    (http-register-handler server "/v1/provider-runtime-stream"
-                           (lambda (request response)
-                             (provider-runtime-stream-handler
-                              runtime request response)))
-    (http-register-handler server "/shutdown"
-                           (lambda (request response)
-                             (shutdown-handler runtime request response)))
-    (write-json (runtime-bootstrap endpoint) output)
+    (vector-set! runtime-cell 0 runtime)
+    (Server-start! server)
+    (write-json output (runtime-bootstrap endpoint))
     (newline)
     (force-output output)
-    (thread-join! server)))
+    (channel-get stopped)))

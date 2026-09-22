@@ -4,8 +4,8 @@
 (import :gerbil/expander
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/support
-        (only-in :std/misc/list unique)
-        (only-in :std/sugar foldl hash))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        )
 
 (export +syntax-ast-version+
         syntax-ast-from-form

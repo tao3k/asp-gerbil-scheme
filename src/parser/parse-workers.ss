@@ -1,13 +1,13 @@
 ;;; -*- Gerbil -*-
 ;;; Parallel source-file parse scheduling.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/profile
         :asp-gerbil-scheme/src/parser/source-file
         :asp-gerbil-scheme/src/support/time
-        (only-in :std/srfi/1 iota)
-        (only-in :std/sugar cut while))
+        (only-in :std/list/list iota)
+        )
 
 (export parse-source-files/concurrent
         parse-source-files

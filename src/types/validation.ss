@@ -4,8 +4,8 @@
 ;;; Parser syntax errors stay outside this layer; this layer owns semantic
 ;;; diagnostics, alias arity checks, and conservative compatibility.
 
-(import :gerbil/gambit
-        (only-in :std/sugar cut)
+(import :gerbil/runtime/gambit
+
         :asp-gerbil-scheme/src/types/model
         (only-in :asp-gerbil-scheme/src/types/validation-union
                  flatten-union-members

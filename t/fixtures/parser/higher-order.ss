@@ -3,8 +3,8 @@
 ;;; - Higher-order fixture contracts stay adjacent to each definition so parser evidence can prove style coverage.
 ;;; - Keep each transform expression-shaped to exercise combinator, generator, and syntax witnesses without broad prose.
 (import :std/sugar
-        :std/srfi/1
-        (rename-in :std/misc/list (foldl fold-left)))
+        :std/list/list
+        (rename-in :std/list/list (foldl fold-left)))
 (export select names positives positive-names matched-tags
         any-positive? first-positive total bump counted
         specialized-label wrapper-label)

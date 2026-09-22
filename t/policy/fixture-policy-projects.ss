@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Policy reporting and compact project writers for policy test suites.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/misc/process
-        (only-in :std/srfi/13 string-prefix? string-tokenize)
+        (only-in :std/string/misc string-prefix?)
         (only-in :asp-gerbil-scheme/src/constants +language-id+ +provider-id+)
         (only-in :asp-gerbil-scheme/src/parser/facade
                  collect-project
@@ -129,12 +129,14 @@
 
 ;; : (-> String (List Path) )
 (def (policy-check-status-paths output)
-  (let loop ((tokens (string-tokenize output)) (paths []))
-    (match tokens
+  (let loop ((lines (string-split output #\newline)) (paths []))
+    (match lines
       ([] (reverse paths))
-      ([_status path . rest]
-       (loop rest (cons path paths)))
-      ([_] (reverse paths)))))
+      ([line . rest]
+       (loop rest
+             (if (>= (string-length line) 4)
+               (cons (substring line 3 (string-length line)) paths)
+               paths))))))
 
 ;; : (-> (List String) Root )
 (def (policy-check-root args)
@@ -271,7 +273,7 @@
     (ensure-dir owner)
     (write-text
      (string-append owner "/gerbil-scheme-search-example.ss")
-     ";;; -*- Gerbil -*-\n(import :gerbil/gambit)\n(export main)\n(def (main . args) 0)\n(exit (apply main (cdr (command-line))))\n")))
+     ";;; -*- Gerbil -*-\n(import :gerbil/runtime/gambit)\n(export main)\n(def (main . args) 0)\n(exit (apply main (cdr (command-line))))\n")))
 ;; : (-> String Unit )
 (def (write-ffi-declare-project root)
   (let* ((src (string-append root "/src"))

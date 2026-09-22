@@ -6,10 +6,10 @@
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/support
         :asp-gerbil-scheme/src/parser/syntax-ast
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/1 drop)
-        (only-in :std/srfi/13 string-prefix?)
-        (only-in :std/sugar filter-map find))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/list/list drop)
+        (only-in :std/string/misc string-prefix?)
+        )
 
 (export +definition-heads+
         +macro-definition-heads+

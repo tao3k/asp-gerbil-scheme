@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Evidence thresholds and source-backed repair vocabulary for shape policy.
 
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 
 (export +field-access-helper-evidence-min-access-count+
         +field-access-helper-evidence-min-caller-count+

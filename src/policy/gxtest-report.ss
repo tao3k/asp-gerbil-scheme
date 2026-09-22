@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Runtime gxtest policy report API.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in "../constants" +language-id+ +provider-id+)
         (only-in "../parser/facade"
                  collect-selected-source-scope

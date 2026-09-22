@@ -1,10 +1,9 @@
 (export projection-batch-test)
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         (only-in :asp-gerbil-scheme/src/commands/projection-batch
-                 project-provider-projection-batch)
-        (only-in :std/sugar hash))
+                 project-provider-projection-batch))
 
 (def (projection-request owners)
   (hash

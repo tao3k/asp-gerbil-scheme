@@ -2,7 +2,7 @@
 ;;; Single source-file parsing and reader helpers.
 
 (import :gerbil/expander
-        :gerbil/gambit
+        :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/comment-quality
         :asp-gerbil-scheme/src/parser/control-flow
         :asp-gerbil-scheme/src/parser/dependency-adapter-quality
@@ -21,15 +21,15 @@
         :asp-gerbil-scheme/src/parser/syntax
         :asp-gerbil-scheme/src/parser/typed-contract
         :asp-gerbil-scheme/src/support/time
-        (only-in :std/misc/list unique)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
         (only-in :std/misc/ports open-output-string read-file-lines)
-        (only-in :std/srfi/1 take)
-        (only-in :std/srfi/13
+        (only-in :std/list/list take)
+        (only-in :std/string/misc
                  string-contains
                  string-join
                  string-prefix?
                  string-trim)
-        (only-in :std/sugar foldl))
+        )
 
 (export read-native-forms
         read-native-forms/lines

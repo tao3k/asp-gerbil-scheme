@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Focused admission regression for validation-only POO Type specializations.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :asp-gerbil-scheme/src/parser/facade
         (only-in :asp-gerbil-scheme/src/policy/agent-dependency-adapter

@@ -6,8 +6,8 @@
         :asp-gerbil-scheme/src/policy/detection
         :asp-gerbil-scheme/src/policy/model
         :asp-gerbil-scheme/src/policy/poo-source
-        (only-in :std/srfi/13 string-contains)
-        (only-in :std/sugar cut filter filter-map hash)
+        (only-in :std/string/misc string-contains)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export build-runtime-quality-findings

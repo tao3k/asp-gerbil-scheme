@@ -2,7 +2,7 @@
 ;;; Full tests for downstream-facing POO object contract validation facade.
 
 (import :std/test
-        (only-in :std/sugar hash)
+        (only-in :gerbil/runtime/gambit hash)
         :asp-gerbil-scheme/src/extensions/poo-object-validation)
 
 (export poo-object-validation-full-test)

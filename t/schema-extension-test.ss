@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 
 (import :std/test
-        :unit/schema/conformance)
+        "./unit/schema/conformance")
 (export schema-extension-test)
 
 ;; SchemaExtensionTest

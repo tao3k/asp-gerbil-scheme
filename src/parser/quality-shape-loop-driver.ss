@@ -2,7 +2,7 @@
 ;;; Parser-owned loop driver classification from native call facts.
 
 (import :asp-gerbil-scheme/src/parser/model
-        (only-in :std/sugar cut filter ormap))
+        )
 
 (export loop-driver-facts-from-source)
 

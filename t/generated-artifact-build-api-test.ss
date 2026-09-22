@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Verified expansion-artifact and native BuildSpec projection contracts.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :std/test test-suite test-case check check-exception)
-        (only-in :std/misc/path path-directory path-expand)
+        (only-in :std/string/path path-directory path-expand)
         "../src/build-api/generated-artifact"
         (only-in "../src/build-api/package-spec"
                  asp-gerbil-scheme-package-spec!

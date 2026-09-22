@@ -3,9 +3,9 @@
 
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/agent-support
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/1 take)
-        (only-in :std/sugar cut filter filter-map hash hash-get ormap))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/list/list take)
+        )
 
 (import :asp-gerbil-scheme/src/utilities/functional)
 

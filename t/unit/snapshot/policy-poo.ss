@@ -7,8 +7,8 @@
         :asp-gerbil-scheme/src/snapshot/facade
         :std/test
         :asp-gerbil-scheme/src/types/facade
-        :unit/policy/poo-scenarios)
-(import :unit/snapshot/policy-support)
+        "../policy/poo-scenarios")
+(import "./policy-support")
 (export downstream-poo-agent-policy-snapshot
         poo-prototype-fixed-point-policy-snapshot
         poo-guidance-corpus-policy-snapshot)

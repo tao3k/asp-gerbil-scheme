@@ -3,8 +3,8 @@
 
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/model
-        (only-in :std/srfi/13 string-contains string-prefix? string-suffix?)
-        (only-in :std/sugar cut filter filter-map find ormap)
+        (only-in :std/string/misc string-contains string-prefix? string-suffix?)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export package-build-responsibility-findings

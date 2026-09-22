@@ -5,8 +5,8 @@
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/support
         :asp-gerbil-scheme/src/parser/syntax-support
-        (only-in :std/srfi/1 drop)
-        (only-in :std/sugar cut))
+        (only-in :std/list/list drop)
+        )
 
 (export calls-from-form
         calls-from-stxes

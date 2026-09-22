@@ -2,8 +2,8 @@
 ;;; Upstream performance quality signals for R013 typed-combinator guidance.
 
 (import :asp-gerbil-scheme/src/parser/facade
-        (only-in :std/misc/list unique)
-        (only-in :std/sugar filter))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        )
 
 (export typed-combinator-style-upstream-performance-quality-facets)
 

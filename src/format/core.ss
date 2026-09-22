@@ -2,7 +2,7 @@
 ;;; Gerbil harness; command modules may select files, but they must not
 ;;; duplicate lexical scanner or suffix ownership rules.
 ;;; Parser reader facts decide where whitespace may change.
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/reader
         :asp-gerbil-scheme/src/utilities/functional)
 

@@ -3,27 +3,27 @@
 
 (import :std/test
         :asp-gerbil-scheme/src/snapshot/facade
-        (rename-in :unit/snapshot/policy-poo
+        (rename-in "./policy-poo"
           (downstream-poo-agent-policy-snapshot policy-poo-downstream-poo-agent-policy-snapshot)
           (poo-prototype-fixed-point-policy-snapshot policy-poo-poo-prototype-fixed-point-policy-snapshot)
           (poo-guidance-corpus-policy-snapshot policy-poo-poo-guidance-corpus-policy-snapshot))
-        (rename-in :unit/snapshot/policy-flow
+        (rename-in "./policy-flow"
           (functional-idiom-policy-snapshot policy-flow-functional-idiom-policy-snapshot)
           (real-agent-basic-syntax-policy-snapshot policy-flow-real-agent-basic-syntax-policy-snapshot)
           (controlled-branch-shape-policy-snapshot policy-flow-controlled-branch-shape-policy-snapshot)
           (controlled-branch-conditional-dispatch-policy-snapshot policy-flow-controlled-branch-conditional-dispatch-policy-snapshot))
-        (rename-in :unit/snapshot/policy-typed
+        (rename-in "./policy-typed"
           (typed-combinator-style-policy-snapshot policy-typed-typed-combinator-style-policy-snapshot)
           (case-lambda-function-factory-policy-snapshot policy-typed-case-lambda-function-factory-policy-snapshot)
           (generator-combinator-policy-snapshot policy-typed-generator-combinator-policy-snapshot)
           (controlled-macro-syntax-policy-snapshot policy-typed-controlled-macro-syntax-policy-snapshot)
           (typeclass-algebra-policy-snapshot policy-typed-typeclass-algebra-policy-snapshot)
           (destructuring-combinator-boundary-policy-snapshot policy-typed-destructuring-combinator-boundary-policy-snapshot))
-        (rename-in :unit/snapshot/policy-comment-dependency
+        (rename-in "./policy-comment-dependency"
           (comment-quality-policy-snapshot policy-comment-dependency-comment-quality-policy-snapshot)
           (harness-dependency-policy-application-policy-snapshot policy-comment-dependency-harness-dependency-policy-application-policy-snapshot)
           (harness-dependency-policy-disable-requires-explanation-policy-snapshot policy-comment-dependency-harness-dependency-policy-disable-requires-explanation-policy-snapshot))
-        (rename-in :unit/snapshot/policy-build
+        (rename-in "./policy-build"
           (macro-controlled-helper-policy-snapshot policy-build-macro-controlled-helper-policy-snapshot)
           (predicate-family-combinator-policy-snapshot policy-build-predicate-family-combinator-policy-snapshot)
           (package-build-canonical-shape-policy-snapshot policy-build-package-build-canonical-shape-policy-snapshot)

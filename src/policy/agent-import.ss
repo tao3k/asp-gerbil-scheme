@@ -4,7 +4,7 @@
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/agent-support
         :asp-gerbil-scheme/src/policy/model
-        (only-in :std/srfi/13 string-prefix?)
+        (only-in :std/string/misc string-prefix?)
         :asp-gerbil-scheme/src/types/findings)
 
 (export explicit-precise-import-findings

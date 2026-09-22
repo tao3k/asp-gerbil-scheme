@@ -2,7 +2,7 @@
 ;;; Internal Build API projection of machine capacity into Gerbil's two
 ;;; upstream native consumers. This module owns no scheduling or Build Graph.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :gerbil/compiler/base __available-cores))
 
 (export native-build-core-count

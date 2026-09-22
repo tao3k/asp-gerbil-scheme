@@ -1,12 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; Explicit changed-file and package-only parser projections.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/package
         :asp-gerbil-scheme/src/parser/parse-workers
         :asp-gerbil-scheme/src/parser/source-scope
-        (only-in :std/sort sort))
+        )
 
 (export collect-source-scope
         collect-project-package-only)
@@ -21,7 +21,7 @@
 (def (collect-source-scope root paths)
   (let* ((root (path-normalize root))
          (package (read-project-package root))
-         (files (sort (changed-source-files root package paths) string<?)))
+         (files (list-sort string<? (changed-source-files root package paths))))
     (make-project-index root
                         (parse-source-files root files)
                         package)))

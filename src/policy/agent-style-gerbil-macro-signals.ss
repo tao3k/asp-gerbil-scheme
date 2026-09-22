@@ -8,8 +8,8 @@
                  typed-combinator-style-facts->targets
                  typed-contract-fact-mentions-any?
                  typed-contract-fact-doc-mentions-any?)
-        (only-in :std/misc/list unique)
-        (only-in :std/sugar filter ormap))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        )
 
 (export typed-combinator-style-macro-family-quality-facets
         typed-combinator-style-macro-family-signals

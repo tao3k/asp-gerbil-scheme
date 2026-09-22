@@ -4,10 +4,10 @@
 (import :gerbil/expander
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/support
-        (only-in :std/misc/list unique)
-        (only-in :std/misc/string string-trim-suffix)
-        (only-in :std/sort sort)
-        (only-in :std/srfi/13 string-contains string-prefix? string-suffix?))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/string/misc string-trim-suffix)
+
+        (only-in :std/string/misc string-contains string-prefix? string-suffix?))
 
 (export dependency-adapter-candidates-from-form
         dependency-adapter-quality-facts-from-candidates)
@@ -302,10 +302,10 @@
 (def (primary-dependency-import imports body-symbols)
   (and (pair? imports)
        (car
-        (sort imports
-              (lambda (left right)
+        (list-sort (lambda (left right)
                 (> (dependency-adapter-import-score left body-symbols)
-                   (dependency-adapter-import-score right body-symbols)))))))
+                   (dependency-adapter-import-score right body-symbols)))
+                   imports))))
 
 ;; : (-> ModuleImportFact BodySymbols Integer )
 (def (dependency-adapter-import-score import body-symbols)

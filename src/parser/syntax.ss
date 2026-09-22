@@ -9,9 +9,9 @@
         :asp-gerbil-scheme/src/parser/imports
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/support
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/1 drop)
-        (only-in :std/srfi/13 string-index-right string-prefix?))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/list/list drop)
+        (only-in :std/string/misc string-index-right string-prefix?))
 
 (export +definition-heads+
         +declarative-top-level-heads+

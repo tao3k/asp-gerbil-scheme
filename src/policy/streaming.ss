@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Bounded streaming prototype for file-local policy rules.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/parse-workers
         :asp-gerbil-scheme/src/policy/agent-basic
-        (only-in :std/sort sort)
-        (only-in :std/srfi/1 drop fold take))
+
+        (only-in :std/list/list drop fold take))
 
 (export run-basic-agent-policy/streaming/selected)
 
@@ -28,7 +28,7 @@
   (when (< batch-size 1)
     (error "streaming policy batch size must be positive" batch-size))
   (let ((root (path-normalize root))
-        (paths (sort paths string<?)))
+        (paths (list-sort string<? paths)))
     (let loop ((remaining paths)
                (generic-findings '())
                (vague-findings '()))

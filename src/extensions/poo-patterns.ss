@@ -6,8 +6,8 @@
 
 (import :asp-gerbil-scheme/src/extensions/poo-pattern-support
         :asp-gerbil-scheme/src/extensions/poo-pattern-typeclass
-        (only-in :std/srfi/13 string-join)
-        (only-in :std/sugar hash))
+        (only-in :std/string/misc string-join)
+        )
 
 (export poo-pattern-id
         poo-pattern-focus

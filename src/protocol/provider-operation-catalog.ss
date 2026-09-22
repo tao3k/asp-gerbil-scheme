@@ -3,11 +3,11 @@
 ;;; resident runtime.  This module owns no executable dispatch, environment,
 ;;; memo, or transport state.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :clan/poo/object .def .o .ref .slot? object?)
         (only-in :clan/poo/mop Type. define-type element? validate)
-        (only-in :std/srfi/1 every)
-        (only-in :std/sugar hash)
+        (only-in :std/list/list every)
+
         (only-in "../object-family/syntax"
                  defpoo-object-family
                  poo-family-ref))

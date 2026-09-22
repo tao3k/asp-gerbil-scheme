@@ -3,7 +3,7 @@
 ;;; This owner knows Scheme datum shape and spelling only; TypeSpec construction
 ;;; and grammar dispatch remain in model.ss.
 
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 
 (export function-keyword-marker?
         function-keyword-name

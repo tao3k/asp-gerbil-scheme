@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Policy scenario runner shared by tests and future agent-facing fixtures.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
         (only-in :asp-gerbil-scheme/src/benchmark/statistics
@@ -9,9 +9,9 @@
                  benchmark-sample-statistics
                  benchmark-select-sample)
         :asp-gerbil-scheme/src/scenario/benchmark-contract
-        (only-in :clan/timestamp call-with-timing)
-        (only-in :std/srfi/1 find iota)
-        (only-in :std/sugar foldl hash)
+        (only-in :asp-gerbil-scheme/src/support/time call-with-timing)
+        (only-in :std/list/list find iota)
+
         :asp-gerbil-scheme/src/support/time
         :asp-gerbil-scheme/src/types/facade)
 
@@ -256,10 +256,10 @@
                 after-findings)))
     (hash (schemaId "agent.semantic-protocols.gerbil-scheme-policy-scenario-timing")
           (schemaVersion "5")
-          (timingSource ":gerbil/gambit#cpu-time")
-          (wallTimingSource ":clan/timestamp#call-with-timing")
+          (timingSource ":gerbil/runtime/gambit#cpu-time")
+          (wallTimingSource ":std/time/precise#current-time-precise")
           (admissionClock 'process-cpu)
-          (gcPrecondition ":gerbil/gambit###gc")
+          (gcPrecondition ":gerbil/runtime/gambit###gc")
           (measurementOrder measurement-order)
           (scenarioId (policy-scenario-id scenario))
           (totalNs total-ns)
@@ -537,10 +537,10 @@
                  cpu-duration-ns))
         (cons value
               (hash (name name)
-                    (timingSource ":clan/timestamp#call-with-timing")
+                    (timingSource ":std/time/precise#current-time-precise")
                     (durationNs duration-ns)
                     (duration (duration-nanos->text duration-ns))
-                    (cpuTimingSource ":gerbil/gambit#cpu-time")
+                    (cpuTimingSource ":gerbil/runtime/gambit#cpu-time")
                     (cpuDurationNs cpu-duration-ns)
                     (cpuDuration (duration-nanos->text cpu-duration-ns))
                     (schedulerDelayNs

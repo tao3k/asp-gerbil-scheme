@@ -1,8 +1,8 @@
 ;;; Module boundary: contract syntax owns declaration expansion only; runtime
 ;;; validation and projection remain ordinary caller-visible dependencies.
 
-(import :gerbil/gambit
-        (for-syntax :gerbil/gambit))
+(import :gerbil/runtime/gambit
+        (for-syntax :gerbil/runtime/gambit))
 
 (export defobject-contract)
 

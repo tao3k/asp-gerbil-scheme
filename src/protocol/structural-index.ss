@@ -4,12 +4,12 @@
 (import :asp-gerbil-scheme/src/constants
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/protocol/structural-facts
-        (only-in :std/misc/list unique)
+        (only-in :asp-gerbil-scheme/src/support/list unique append-map)
         (only-in :std/misc/ports read-file-lines)
-        (only-in :std/sort sort)
-        (only-in :std/srfi/1 append-map take)
-        (only-in :std/srfi/13 string-join)
-        (only-in :std/sugar cut foldl hash hash-put! with-catch))
+
+        (only-in :std/list/list take)
+        (only-in :std/string/misc string-join)
+        )
 
 (export structural-index-packet-json
         structural-index-artifact-packet-json
@@ -333,9 +333,9 @@
 ;;; Interface mode avoids this cost and leaves workspace indexing to ASP Rust.
 ;; : (-> (List JsonRow) (List JsonRow) )
 (def (json-rows-by-id rows)
-  (sort rows
-        (lambda (a b)
-          (string<? (hash-get a 'id) (hash-get b 'id)))))
+  (list-sort (lambda (a b)
+               (string<? (hash-get a 'id) (hash-get b 'id)))
+             rows))
 
 ;;; Artifact generation uses full parser fingerprints for validation stability.
 ;;; This path is intentionally outside the hot search and bench interface.

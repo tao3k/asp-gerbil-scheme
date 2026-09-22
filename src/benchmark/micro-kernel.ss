@@ -2,12 +2,12 @@
 ;;; Batched micro-kernel measurement with exact nanoseconds-per-operation gates.
 ;;; Boundary: fixtures declare budgets; only live receipts contain observations.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/benchmark/memory
         :asp-gerbil-scheme/src/benchmark/statistics
         :asp-gerbil-scheme/src/support/time
-        (only-in :clan/timestamp call-with-timing)
-        (only-in :std/sugar andmap))
+        (only-in :asp-gerbil-scheme/src/support/time call-with-timing)
+        )
 
 (export make-micro-kernel-fixture
         micro-kernel-fixture-contract-pass?
@@ -150,8 +150,8 @@
                   result
                   `((sampleIndex . ,sample-index)
                     (operations . ,operations)
-                    (timingSource . ":gerbil/gambit#cpu-time")
-                    (wallTimingSource . ":clan/timestamp#call-with-timing")
+                    (timingSource . ":gerbil/runtime/gambit#cpu-time")
+                    (wallTimingSource . ":std/time/precise#current-time-precise")
                     (totalNs . ,total-ns)
                     (wallTotalNs . ,wall-total-ns)
                     (baselineBeforeNs . ,baseline-before-ns)
@@ -195,9 +195,9 @@
        (schemaVersion . "1")
        (benchmarkKind . micro-kernel)
        (name . ,(micro-kernel-ref fixture 'name))
-       (timingSource . ":gerbil/gambit#cpu-time")
-       (wallTimingSource . ":clan/timestamp#call-with-timing")
-       (sampleGcPrecondition . ":gerbil/gambit###gc")
+       (timingSource . ":gerbil/runtime/gambit#cpu-time")
+       (wallTimingSource . ":std/time/precise#current-time-precise")
+       (sampleGcPrecondition . ":gerbil/runtime/gambit###gc")
        (baselineStatistic . bracket-min)
        (admissionStatistic . p50)
        (operations . ,operations)
@@ -225,7 +225,7 @@
              'fail))
        (runtimeStats
         . ((memorySource . ,benchmark-memory-source)
-           (gcPrecondition . ":gerbil/gambit###gc")
+           (gcPrecondition . ":gerbil/runtime/gambit###gc")
            (memoryBefore . ,memory-before)
            (memoryAfter . ,memory-after)
            (memoryDelta

@@ -1,12 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; gerbil scheme harness modularity policy.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :clan/poo/object .cc .get)
         :std/test
         :std/misc/ports
         :std/misc/process
-        (only-in :std/text/json read-json)
+        (only-in :std/encoding/json read-json)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
         :asp-gerbil-scheme/src/policy/gxtest

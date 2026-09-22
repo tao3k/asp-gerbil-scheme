@@ -1,19 +1,19 @@
 ;;; -*- Gerbil -*-
 ;;; gerbil scheme harness agent POO runtime protocol policy.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :std/misc/ports
         :std/misc/process
-        (only-in :std/text/json read-json)
+        (only-in :std/encoding/json read-json)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
         :asp-gerbil-scheme/src/policy/gxtest
         :asp-gerbil-scheme/src/scenario/policy
         :asp-gerbil-scheme/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
-(import :policy/agent-poo-support)
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
+(import "./agent-poo-support")
 (export agent-poo-runtime-protocol-policy-test)
 
 ;; : (-> (List TypeFinding) (List String))
@@ -198,9 +198,9 @@
             (write-text (string-append root "/gerbil.pkg")
                         "(package: sample/orders)\n")
             (write-text (string-append owner "/broad.ss")
-                        ";;; -*- Gerbil -*-\n(package: sample/orders)\n(import :std/srfi/13)\n(def (starts? value) (string-prefix? \"a\" value))\n")
+                        ";;; -*- Gerbil -*-\n(package: sample/orders)\n(import :std/string/misc)\n(def (starts? value) (string-prefix? \"a\" value))\n")
             (write-text (string-append owner "/precise.ss")
-                        ";;; -*- Gerbil -*-\n(package: sample/orders)\n(import (only-in :std/srfi/13 string-prefix?))\n(def (starts? value) (string-prefix? \"a\" value))\n")
+                        ";;; -*- Gerbil -*-\n(package: sample/orders)\n(import (only-in :std/string/misc string-prefix?))\n(def (starts? value) (string-prefix? \"a\" value))\n")
             (let* ((index (collect-project root))
                    (findings (run-agent-policy index))
                    (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-018" findings))

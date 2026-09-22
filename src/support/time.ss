@@ -1,11 +1,14 @@
 ;;; -*- Gerbil -*-
 ;;; Small timing helpers for benchmark and snapshot code.
 
-(import :gerbil/gambit
-        (only-in :std/srfi/13 string-index string-suffix?)
-        (only-in :std/sugar andmap))
+(import :gerbil/runtime/gambit
+        (only-in :std/time/precise
+                 current-time-precise PreciseTime-seconds PreciseTime-nseconds)
+        (only-in :std/string/misc string-index string-suffix?)
+        )
 
 (export monotonic-ms
+        call-with-timing
         duration-ms
         monotonic-micros
         duration-micros
@@ -19,6 +22,17 @@
         average-duration-ms
         average-duration-micros
         duration-state)
+
+;; V19 native nanosecond wall-time measurement for benchmark receipts.
+(def (precise-time-nanos)
+  (let (now (current-time-precise))
+    (+ (* (PreciseTime-seconds now) 1000000000)
+       (PreciseTime-nseconds now))))
+
+(def (call-with-timing thunk)
+  (let* ((started (precise-time-nanos))
+         (result (thunk)))
+    (values (- (precise-time-nanos) started) result)))
 ;; : (-> Unit Integer)
 (def (monotonic-ms)
   (inexact->exact (floor (* 1000.0 (##current-time-point)))))

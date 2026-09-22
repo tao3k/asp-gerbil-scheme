@@ -2,6 +2,7 @@
 ;;; Explicit full-project policy gate.
 
 (import :std/test
+        (only-in :std/test/base test-result-ok? test-suite!)
         :asp-gerbil-scheme/src/policy/gxtest
         (only-in "../src/policy/test-scope"
                  project-policy-source-files))
@@ -19,8 +20,8 @@
 (def project-policy-test
   (test-suite "asp gerbil-scheme project policy gate"
     (test-case "public policy macro expands to an executable gxtest suite"
-      (check (run-test-suite! project-policy-macro-witness-test) => #t))
+      (check (test-result-ok? (test-suite! project-policy-macro-witness-test)) => #t))
     ;; The full project gate remains function-based because its explicit
     ;; evidence set is supplied by the native package and gxtest catalogs.
     (test-case "ASP native module set passes the full project policy gate"
-      (check (run-test-suite! project-policy-full-test) => #t))))
+      (check (test-result-ok? (test-suite! project-policy-full-test)) => #t))))

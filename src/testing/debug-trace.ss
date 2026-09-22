@@ -2,7 +2,7 @@
 ;;; Optional execution adapter for the declarative debug-trace Profile.
 
 (import (only-in :clan/poo/debug trace-poo)
-        (only-in :std/srfi/1 find)
+        (only-in :std/list/list find)
         (only-in ./extension
                  testing-interface-profiles-for
                  testing-profile-name))

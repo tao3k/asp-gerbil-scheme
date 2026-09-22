@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil contract projection helpers for typed comments.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/typed-contract-scheme-expression
         (only-in :asp-gerbil-scheme/src/parser/typed-contract-token
                  typed-contract-token-char?
@@ -23,12 +23,12 @@
                  type-validation-diagnostic-message
                  type-spec-valid?
                  type-validation-diagnostics)
-        (only-in :std/srfi/13
+        (only-in :std/string/misc
                  string-empty?
                  string-ref
-                 string-trim-both)
-        (only-in :std/srfi/1 drop-right)
-        (only-in :std/sugar cut filter foldl hash))
+                 string-trim)
+        (only-in :std/list/list drop-right)
+        )
 
 (export scheme-contract-output
         scheme-contract-inputs

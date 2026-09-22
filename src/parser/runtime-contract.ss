@@ -3,13 +3,13 @@
 ;;; Boundary: static `;; :` signatures stay in typed-contract-scheme; this
 ;;; module owns runtime contract arrows and their TypeSpec validation bridge.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :asp-gerbil-scheme/src/parser/typed-contract-scheme
                  scheme-type-expression-text-json
                  split-top-level-type-exprs)
-        (only-in :std/srfi/1 drop-right last)
-        (only-in :std/srfi/13 string-join)
-        (only-in :std/sugar cut hash))
+        (only-in :std/list/list drop-right last)
+        (only-in :std/string/misc string-join)
+        )
 
 (export scheme-runtime-contract-json)
 

@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Reusable benchmark.ss framework helpers for downstream gxtest gates.
 
-(import :gerbil/gambit
-        (only-in :std/sort sort)
+(import :gerbil/runtime/gambit
+
         :asp-gerbil-scheme/src/benchmark/gate)
 
 (export #t)
@@ -94,7 +94,7 @@
             ((equal? entry +benchmark-contract-file+)
              (set! paths (cons path paths)))
             (else #!void))))
-       (sort (directory-files dir) string<?)))
+       (list-sort string<? (directory-files dir))))
     (walk root)
     (reverse paths)))
 
@@ -157,7 +157,7 @@
             ((benchmark-string-suffix? entry ".ss")
              (set! paths (cons path paths)))
             (else #!void))))
-       (sort (directory-files dir) string<?)))
+       (list-sort string<? (directory-files dir))))
     (walk root)
     (reverse paths)))
 

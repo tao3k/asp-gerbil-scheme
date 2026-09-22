@@ -1,7 +1,7 @@
 ;;; Boundary: guide sections are declarative command receipts. Keeping rows here
 ;;; prevents CLI argument handling from duplicating provider policy guidance.
 
-(import :asp-gerbil-scheme/src/policy/catalog (only-in :std/misc/list unique))
+(import :asp-gerbil-scheme/src/policy/catalog (only-in :asp-gerbil-scheme/src/support/list unique))
 (export guide-section-lines-for)
 (def (make-guide-section id rows) (list id rows))
 (def +guide-basic-section+

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Query-free projection artifacts from the native Gerbil parser.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/facade)
 
 (export parse-owner-language-projection

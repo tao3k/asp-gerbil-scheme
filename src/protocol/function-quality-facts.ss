@@ -3,7 +3,7 @@
 
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/protocol/support
-        (only-in :std/misc/list unique))
+        (only-in :asp-gerbil-scheme/src/support/list unique))
 
 (export function-quality-profile-structural-fact-json)
 

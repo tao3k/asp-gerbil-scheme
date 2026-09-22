@@ -3,7 +3,7 @@
 (import (only-in :std/test test-suite test-case check)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
-        (only-in :std/srfi/13 string-contains))
+        (only-in :std/string/misc string-contains))
 
 (export testing-prepared-source-admission-scenario-test)
 

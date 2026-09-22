@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
-(import :asp-gerbil-scheme/src/parser/facade
+(import (only-in :gerbil/runtime/gambit list-sort)
+        :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/protocol/json
-        :std/sort
         :std/test)
 (include "../../support/fixture-filesystem.inc")
 (export check-structural-index-required-envelope
@@ -217,7 +217,7 @@
     (check (packet-has-owner? packet "src/commands/projection.ss") => #t)
     (check (> (hash-get packet 'symbolTotal) 0) => #t)
     (check (packet-has-syntax-fact? facts-packet "macro" "capture-safe") => #t)
-    (check (packet-has-syntax-fact? facts-packet "import" ":std/text/json") => #t)
+    (check (packet-has-syntax-fact? facts-packet "import" ":std/encoding/json") => #t)
     (check (packet-has-syntax-fact? facts-packet "export" ":render") => #t)
     (check (packet-has-syntax-fact-field? facts-packet "export" ":render" 'modifier "direct") => #t)
     (check (packet-has-syntax-fact-field? facts-packet "export" ":render" 'symbols [":render"]) => #t)
@@ -355,9 +355,9 @@
 ;; : (-> ProjectIndex (List OwnerPath) Packet )
 (def (owner-facts-packet index owners)
   (hash (facts
-         (sort (owner-facts index owners)
-               (lambda (a b)
-                 (string<? (hash-get a 'id) (hash-get b 'id)))))))
+         (list-sort (lambda (a b)
+                      (string<? (hash-get a 'id) (hash-get b 'id)))
+                    (owner-facts index owners)))))
 
 ;; : (-> ProjectIndex (List OwnerPath) (List SyntaxFact) )
 (def (owner-facts index owners)
@@ -456,7 +456,7 @@
 ;; : (-> Packet Boolean )
 (def (packet-syntax-fact-ids-are-sorted? packet)
   (let (ids (map (cut hash-get <> 'id) (packet-syntax-facts packet)))
-    (equal? ids (sort ids string<?))))
+    (equal? ids (list-sort string<? ids))))
 ;; : (-> Packet (List SyntaxFact) )
 (def (packet-syntax-facts packet)
   (if (hash-key? packet 'syntaxFacts)

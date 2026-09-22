@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; JSON projections for Gerbil parser-owned facts.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/constants
         :asp-gerbil-scheme/src/extensions/facade
         :asp-gerbil-scheme/src/parser/facade
@@ -10,8 +10,8 @@
         (only-in :asp-gerbil-scheme/src/protocol/json-output write-json-line)
         :asp-gerbil-scheme/src/protocol/structural-index
         :asp-gerbil-scheme/src/protocol/structural-facts
-        (only-in :std/sort sort)
-        (only-in :std/sugar hash hash-key? hash-put!)
+
+
         :asp-gerbil-scheme/src/types/facade)
 
 (export source-file-json

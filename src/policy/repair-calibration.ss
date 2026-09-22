@@ -2,7 +2,7 @@
 ;;; Agent-repair replay calibration over parser-owned structural facts.
 
 (import :asp-gerbil-scheme/src/parser/facade
-        (only-in :std/srfi/1 iota take)
+        (only-in :std/list/list iota take)
         :asp-gerbil-scheme/src/types/facade)
 
 (export agent-repair-calibration-report

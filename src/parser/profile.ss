@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Parser profile helpers.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/support/time
-        (only-in :std/sort sort)
-        (only-in :std/srfi/1 take))
+
+        (only-in :std/list/list take))
 
 (export profile-row
         timed-profile-packet
@@ -50,10 +50,9 @@
 ;;       while preserving the row packet shape.
 ;;     %
 (def (slowest-profile-rows rows limit)
-  (let* ((ordered (sort rows
-                        (lambda (left right)
+  (let* ((ordered (list-sort (lambda (left right)
                           (> (hash-get left 'durationMs)
-                             (hash-get right 'durationMs)))))
+                             (hash-get right 'durationMs))) rows))
          (count (min limit (length ordered))))
     (take ordered count)))
 

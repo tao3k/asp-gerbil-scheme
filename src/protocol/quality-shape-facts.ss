@@ -3,8 +3,8 @@
 
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/protocol/support
-        (only-in :std/misc/list unique)
-        (only-in :std/sugar filter hash))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        )
 
 (export predicate-family-structural-fact-json
         field-access-pattern-structural-fact-json

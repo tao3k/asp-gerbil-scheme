@@ -4,9 +4,9 @@
 ;;; - Keep contracts, evidence, and failure semantics explicit.
 ;;; Command-line argument helpers.
 
-(import :gerbil/gambit
-        (only-in :std/srfi/1 last)
-        (only-in :std/srfi/13 string-prefix?))
+(import :gerbil/runtime/gambit
+        (only-in :std/list/list last)
+        (only-in :std/string/misc string-prefix?))
 
 (export flag?
         option

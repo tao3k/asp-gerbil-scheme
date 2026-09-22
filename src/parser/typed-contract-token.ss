@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Token helpers for Scheme-native typed contracts.
 
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 
 (export typed-contract-token-char?
         typed-contract-arrow-count

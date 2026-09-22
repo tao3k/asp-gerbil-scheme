@@ -3,7 +3,7 @@
 ;;; Invariant: semantic validation and timing execution remain in sibling owners.
 
 (import :asp-gerbil-scheme/src/support/time
-        (only-in :std/sugar andmap ormap foldl))
+        )
 
 (export benchmark-default-max-total
         benchmark-default-kind

@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Package build API behavior tests.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
-        (only-in :std/misc/path path-expand)
+        (only-in :std/string/path path-expand)
         (only-in :std/source gerbil-home)
         "../src/build-api/package-build")
 

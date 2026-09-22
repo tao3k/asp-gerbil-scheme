@@ -2,12 +2,12 @@
 ;;; Gerbil scheme harness agent repair policy tests.
 
 (import :std/test
-        (only-in :std/text/json read-json)
+        (only-in :std/encoding/json string->json JSONReadOptions)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
         :asp-gerbil-scheme/src/policy/gxtest
         :asp-gerbil-scheme/src/policy/repair-calibration
-        :policy/fixtures)
+        "./fixtures")
 
 (export agent-repair-policy-test)
 
@@ -18,7 +18,8 @@
       (let* ((root ".run/policy-functional-idiom-check-json")
              (_ (write-functional-idiom-project root))
              (result (policy-check-output ["--json" root]))
-             (packet (call-with-input-string (cdr result) read-json))
+             (packet (string->json (cdr result)
+                                   (JSONReadOptions object-as-hash: #t)))
              (agent-repair (hash-get packet "agentRepair"))
              (repair-plan (hash-get agent-repair "repairPlan"))
              (finding-groups (hash-get agent-repair "findingGroups"))

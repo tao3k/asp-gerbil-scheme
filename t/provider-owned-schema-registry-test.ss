@@ -4,7 +4,7 @@
                  provider-operation-contracts)
         :asp-gerbil-scheme/src/protocol/registry
         (only-in :std/misc/ports read-all-as-string)
-        (only-in :std/srfi/13 string-contains)
+        (only-in :std/string/misc string-contains)
         :std/test)
 
 (export provider-owned-schema-registry-test)

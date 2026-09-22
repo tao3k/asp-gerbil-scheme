@@ -3,7 +3,7 @@
 ;;; - test owner records policy expectations.
 ;;; - Keep typed contracts and fixture intent explicit.
 (import :std/test
-        :std/srfi/13)
+        :std/string/misc)
 (export check-poo-runtime-witnesses)
 ;; ParsedData
 (def (load-poo-runtime!)
@@ -13,9 +13,9 @@
                  :clan/poo/debug
                  :clan/poo/io
                  :clan/poo/type
-                 :gerbil/gambit
+                 :gerbil/runtime/gambit
                  :std/misc/repr
-                 :std/text/json)))
+                 :std/encoding/json)))
 ;; TypeSpec
 (def (check-poo-prototype-runtime-witness)
   (load-poo-runtime!)

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Parser regression for calls nested in native gerbil-poo definitions.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :asp-gerbil-scheme/src/parser/facade
         (only-in :asp-gerbil-scheme/src/policy/agent-basic

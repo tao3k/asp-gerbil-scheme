@@ -10,8 +10,8 @@
         :asp-gerbil-scheme/src/extensions/poo-validation
         :asp-gerbil-scheme/src/package-manager/facade
         :asp-gerbil-scheme/src/parser/facade
-        (only-in :std/srfi/13 string-join string-suffix?)
-        (only-in :std/sugar filter hash ormap))
+        (only-in :std/string/misc string-join string-suffix?)
+        )
 
 (export poo-extension-active?
         poo-extension-fact

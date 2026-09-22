@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil scheme harness generated POO boundary policy.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
-        :policy/agent-poo-support
+        "./agent-poo-support"
         :asp-gerbil-scheme/src/scenario/policy
         :asp-gerbil-scheme/src/types/facade)
 
@@ -35,7 +35,7 @@
         (check (length timings) => 4)
         (check (hash-get timing 'admissionStatistic) => 'p95)
         (check (hash-get timing 'gcPrecondition)
-               => ":gerbil/gambit###gc")
+               => ":gerbil/runtime/gambit###gc")
         (check (hash-get timing 'sampleCount) => 20)
         (check (length samples) => 20)
         (check (hash-get (car samples) 'measurementOrder)

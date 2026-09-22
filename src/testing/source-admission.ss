@@ -3,9 +3,10 @@
 
 (import (only-in :clan/poo/object .call .o .ref .slot?)
         (only-in :std/test test-suite test-case)
-        (only-in :std/srfi/1 append-map filter filter-map find foldl unfold)
-        (only-in :std/srfi/13 string-prefix?)
-        (only-in :std/sugar cut)
+        (only-in :std/list/list filter filter-map find foldl)
+        (only-in :asp-gerbil-scheme/src/support/list append-map)
+        (only-in :std/string/misc string-prefix?)
+
         (only-in ./extension
                  testing-import-footprint-profile?
                  testing-interface-profile-enabled?
@@ -81,12 +82,16 @@
                sharedModuleCount: (length shared))))))
 
 (def (resident-import-overlaps footprints large-threshold)
-  (append-map
-   (lambda (suffix)
-     (filter-map
-      (cut resident-import-overlap (car suffix) <> large-threshold)
-      (cdr suffix)))
-   (unfold null? values cdr footprints)))
+  (let loop ((suffix footprints) (result []))
+    (if (null? suffix)
+      (reverse result)
+      (loop (cdr suffix)
+            (foldl (lambda (overlap result-rev)
+                     (cons overlap result-rev))
+                   result
+                   (filter-map
+                    (cut resident-import-overlap (car suffix) <> large-threshold)
+                    (cdr suffix)))))))
 
 ;;; Authoritative duplicate-large-closure admission.  All closure membership
 ;;; comes from Gerbil's __module-registry after gxtest has prepared the test;

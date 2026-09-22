@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned package metadata facts.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :asp-gerbil-scheme/src/parser/support datum-list-items safe-cadr)
-        (only-in :std/misc/list unique)
-        (only-in :std/sugar filter-map))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        )
 
 (export read-project-package
         project-package-path

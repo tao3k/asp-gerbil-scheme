@@ -6,8 +6,8 @@
         :asp-gerbil-scheme/src/language/facade
         (only-in :asp-gerbil-scheme/src/protocol/json pattern-mapping-json)
         :asp-gerbil-scheme/src/types/facade
-        (only-in :std/srfi/13 string-join)
-        (only-in :std/sugar hash))
+        (only-in :std/string/misc string-join)
+        )
 
 (export provider-semantic-evidence-packet)
 

@@ -5,8 +5,8 @@
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/agent-support
         :asp-gerbil-scheme/src/policy/model
-        (only-in :std/srfi/1 take)
-        (only-in :std/sugar cut filter filter-map hash ormap)
+        (only-in :std/list/list take)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export comment-quality-findings

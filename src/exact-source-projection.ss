@@ -2,7 +2,7 @@
 ;;; Provider-core exact source and callable-skeleton projection.
 
 (import :gerbil/expander
-        :gerbil/gambit
+        :gerbil/runtime/gambit
         (only-in :asp-gerbil-scheme/src/parser/control-flow
                  control-flow-facts-from-form)
         (only-in :asp-gerbil-scheme/src/parser/exact-owner
@@ -33,9 +33,10 @@
         (only-in :asp-gerbil-scheme/src/parser/syntax
                  binding-facts-from-form
                  calls-from-form)
-        (only-in :std/srfi/1 find foldl)
-        (only-in :std/srfi/13 string-contains string-index string-prefix? string-split)
-        (only-in :std/text/base64 base64-decode))
+        (only-in :std/list/list find foldl)
+        (only-in :std/string/misc string-index string-prefix? string-split)
+        (only-in :std/text/pregexp pregexp-match-positions)
+        (only-in :std/encoding/base64 base64-decode))
 
 (export project-provider-native-exact-request)
 
@@ -70,18 +71,22 @@
 
 ;; A parsed selector is:
 ;; [requested root owner kind symbol segment-kind segment-identity].
+(def (selector-marker-position marker selector)
+  (let (matches (pregexp-match-positions marker selector))
+    (and (pair? matches) (caar matches))))
+
 (def (parse-exact-selector selector)
   (unless (string-prefix? +selector-prefix+ selector)
     (error "provider-native exact selector has the wrong language prefix"
            selector))
-  (let (item-position (string-contains selector "#item/"))
+  (let (item-position (selector-marker-position "#item/" selector))
     (unless item-position
       (error "provider-native exact selector is missing #item/" selector))
     (let* ((owner-start (string-length +selector-prefix+))
            (owner (substring selector owner-start item-position))
            (tail-start (+ item-position (string-length "#item/")))
            (tail (substring selector tail-start (string-length selector)))
-           (segment-position (string-contains tail "/segment/"))
+           (segment-position (selector-marker-position "/segment/" tail))
            (root-tail
             (if segment-position
               (substring tail 0 segment-position)

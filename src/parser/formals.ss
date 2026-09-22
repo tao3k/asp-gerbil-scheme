@@ -7,7 +7,7 @@
 ;;; - Definition and formal recovery must stay deterministic across value, list, method, and macro-style heads.
 
 (import :asp-gerbil-scheme/src/parser/support
-        (only-in :std/misc/list unique))
+        (only-in :asp-gerbil-scheme/src/support/list unique))
 
 (export definition-name-datums
         definition-formal-names

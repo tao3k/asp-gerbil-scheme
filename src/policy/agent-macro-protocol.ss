@@ -1,15 +1,15 @@
 ;;; -*- Gerbil -*-
 ;;; Agent macro/protocol witness and facade export conflict checks.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/agent-support
         :asp-gerbil-scheme/src/policy/gerbil-utils-source
         :asp-gerbil-scheme/src/policy/model
         :asp-gerbil-scheme/src/policy/modularity
-        (only-in :std/misc/path path-directory path-expand path-simplify)
-        (only-in :std/srfi/13 string-contains string-prefix? string-suffix?)
-        (only-in :std/sugar filter-map hash hash-key? hash-put! ormap while)
+        (only-in :std/string/path path-directory path-expand path-simplify)
+        (only-in :std/string/misc string-contains string-prefix? string-suffix?)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export macro-runtime-source-witness-findings

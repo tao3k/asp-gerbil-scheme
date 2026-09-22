@@ -13,15 +13,14 @@
                  expander-context-id
                  module-context? module-context-import
                  prelude-context?)
-        (only-in :std/iter for in-input-port)
-        (only-in :std/misc/dag walk-dag)
-        (only-in :std/misc/hash hash-ensure-ref)
-        (only-in :std/misc/list with-list-builder)
-        (only-in :std/misc/path
+        (only-in :std/iter for)
+        (only-in :std/struct/dag walk-dag)
+        (only-in :std/hash/misc hash-ensure-ref)
+        (only-in :std/list/list-builder with-list-builder)
+        (only-in :std/string/path
                  path-default-extension path-expand path-strip-extension)
-        (only-in :std/sort stable-sort)
-        (only-in :std/srfi/1 find)
-        (only-in :std/srfi/13 string-prefix?)
+        (only-in :std/list/list find)
+        (only-in :std/string/misc string-prefix?)
         (only-in "./package-build"
                  asp-gerbil-scheme-package-build-package-name))
 
@@ -113,12 +112,15 @@
                 (for-each walk datum))))
           (call-with-input-file path
             (lambda (port)
-              (for (datum (in-input-port port))
-                (walk datum))))))
+              (let loop ()
+                (let (datum (read port))
+                  (unless (eof-object? datum)
+                    (walk datum)
+                    (loop))))))))
     (map cdr
-         (stable-sort imports
-                      (lambda (left right)
-                        (> (car left) (car right)))))))
+         (list-sort (lambda (left right)
+                      (> (car left) (car right)))
+                    imports))))
 
 ;; : (-> String (List Path) (Maybe Path))
 (def (installed-library-root package-name entries)

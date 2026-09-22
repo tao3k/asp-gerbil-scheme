@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-(import :std/srfi/13)
+(import :std/string/misc)
 
 ;; : (-> Path String Boolean )
 (def (path-matches-token? relpath token)

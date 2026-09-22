@@ -2,8 +2,8 @@
 ;;; Shared helpers for agent-facing policy rule families.
 
 (import :asp-gerbil-scheme/src/parser/facade
-        (only-in :std/srfi/13 string-contains string-empty? string-prefix? string-suffix?)
-        (only-in :std/sugar ormap))
+        (only-in :std/string/misc string-contains string-empty? string-prefix? string-suffix?)
+        )
 
 (export +poo-declarative-heads+
         +poo-capability-dependencies+

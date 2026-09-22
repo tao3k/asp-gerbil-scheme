@@ -1,11 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil scheme harness agent style policy support.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :std/misc/ports
         :std/misc/process
-        :std/sort
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/agent-style
         :asp-gerbil-scheme/src/policy/facade
@@ -50,10 +49,10 @@
   (filter agent-style-policy-scenario-fixture-root?
           (map agent-style-policy-scenario-root
                (filter agent-style-policy-scenario-entry?
-                       (sort
+                       (list-sort
+                        string<?
                         (directory-files
-                         +agent-style-policy-scenario-fixtures-root+)
-                        string<?)))))
+                         +agent-style-policy-scenario-fixtures-root+))))))
 
 ;; : (-> Path Path )
 (def (agent-style-policy-scenario-benchmark-path root)
@@ -179,7 +178,7 @@
            => +agent-style-policy-scenario-timing-schema-id+)
     (check (hash-get timing 'scenarioId) => scenario-id)
     (check (hash-get timing 'gcPrecondition)
-           => ":gerbil/gambit###gc")
+           => ":gerbil/runtime/gambit###gc")
     (check (length timings) => 4)
     (check (agent-style-policy-scenario-timing-steps-measured? timings)
            => #t)

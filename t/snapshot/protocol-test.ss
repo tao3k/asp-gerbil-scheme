@@ -2,8 +2,8 @@
 ;;; Protocol snapshot checks.
 
 (import :std/test
-        :unit/snapshot/extension-test
-        :unit/snapshot/language-evidence)
+        "../unit/snapshot/extension-test"
+        "../unit/snapshot/language-evidence")
 
 (export snapshot-protocol-test)
 

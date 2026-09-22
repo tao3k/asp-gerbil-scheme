@@ -2,7 +2,7 @@
 ;;; Higher-order scenario control policy.
 
 (import :std/test
-        :policy/agent-style-support
+        "./agent-style-support"
         :asp-gerbil-scheme/src/scenario/policy
         :asp-gerbil-scheme/src/parser/facade)
 (export agent-style-scenario-control-higher-order-policy-test)

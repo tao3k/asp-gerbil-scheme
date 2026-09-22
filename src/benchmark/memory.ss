@@ -3,13 +3,13 @@
 ;;; Boundary: this owner reads Gambit process statistics without loading the
 ;;; unrelated heap-walker foreign macros from :std/debug/heap.
 
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 
 (export benchmark-memory-source
         benchmark-memory-usage)
 
 ;; : String
-(def benchmark-memory-source ":gerbil/gambit###process-statistics")
+(def benchmark-memory-source ":gerbil/runtime/gambit###process-statistics")
 
 ;; benchmark-memory-usage
 ;;   : (-> Alist)

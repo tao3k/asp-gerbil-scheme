@@ -7,7 +7,7 @@
                  typed-combinator-style-facts->signals
                  typed-combinator-style-facts->targets
                  typed-contract-fact-mentions-any?)
-        (only-in :std/sugar filter))
+        )
 
 (export typed-combinator-style-serialization-boundary-quality-facets
         typed-combinator-style-serialization-boundary-signals

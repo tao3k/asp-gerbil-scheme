@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Canonical package-build acceptance scenarios.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade

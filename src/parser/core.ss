@@ -2,7 +2,7 @@
 ;;; Parser-owned facts for the Gerbil Scheme project harness.
 
 (import :gerbil/expander
-        :gerbil/gambit
+        :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/comment-quality
         :asp-gerbil-scheme/src/parser/control-flow
         :asp-gerbil-scheme/src/parser/dependency-adapter-quality
@@ -25,11 +25,11 @@
         :asp-gerbil-scheme/src/parser/syntax-ast
         :asp-gerbil-scheme/src/parser/typed-contract
         :asp-gerbil-scheme/src/support/time
-        (only-in :std/misc/list delete-duplicates/hash)
+        (only-in :std/list/list delete-duplicates/hash)
         (only-in :std/misc/ports open-output-string read-file-lines)
-        (only-in :std/sort sort)
-        (only-in :std/srfi/1 foldl iota take)
-        (only-in :std/srfi/13
+
+        (only-in :std/list/list foldl iota take)
+        (only-in :std/string/misc
                  string-contains
                  string-index-right
                  string-join
@@ -404,7 +404,7 @@
 (def (collect-project root)
   (let* ((root (path-normalize root))
          (package (read-project-package root))
-         (files (sort (collect-source-files root package) string<?)))
+         (files (list-sort string<? (collect-source-files root package))))
     (make-project-index root
                         (parse-source-files root files)
                         package)))
@@ -441,10 +441,9 @@
          ;; at the caller's current directory.  Absolute owners remain stable
          ;; through source-full-path while relative owners resolve under root.
          (files
-          (sort (delete-duplicates/hash
+          (list-sort string<? (delete-duplicates/hash
                  (map (lambda (path) (source-full-path root path)) paths)
-                 from-end?: #t)
-                string<?)))
+                 from-end?: #t))))
     (make-project-index root
                         (parse-source-files root files)
                         package)))
@@ -462,7 +461,7 @@
          (source-scope-packet
           (timed-profile-packet
            "collect-source-files"
-           (lambda () (sort (collect-source-files root package) string<?))))
+           (lambda () (list-sort string<? (collect-source-files root package)))))
          (files (hash-get source-scope-packet 'value))
          (source-scope-phase (hash-get source-scope-packet 'phase)))
     (set! package-packet #f)

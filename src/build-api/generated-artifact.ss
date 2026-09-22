@@ -3,17 +3,17 @@
 ;;; This cache never decides whether a native target is current and never
 ;;; changes the build graph: every projected target still reaches std/make.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in "../object-family/syntax"
                  defpoo-object-family poo-family-ref)
         (only-in :std/crypto/digest sha256)
-        (only-in :std/misc/path
+        (only-in :std/string/path
                  path-directory path-expand path-maybe-normalize
                  path-simplify subpath?)
         (only-in :std/misc/ports read-all-as-u8vector)
-        (only-in :std/srfi/13 string-prefix?)
-        (only-in :std/sugar with-catch)
-        (only-in :std/text/utf8 string->utf8)
+        (only-in :std/string/misc string-prefix?)
+
+        (only-in :std/string/utf8 string->utf8)
         "./generated-module-projection")
 
 (export asp-gerbil-scheme-generated-artifact-member-prototype

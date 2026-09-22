@@ -4,11 +4,11 @@
 ;;; - :asp-gerbil-scheme/src/extensions/poo-patterns owns static POO pattern slots.
 ;;; - This module owns validation packets and diagnostics derived from them.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/extensions/poo-patterns
-        (only-in :std/srfi/1 append-map)
-        (only-in :std/srfi/13 string-contains string-prefix?)
-        (only-in :std/sugar filter hash ormap))
+        (only-in :asp-gerbil-scheme/src/support/list append-map)
+        (only-in :std/string/misc string-contains string-prefix?)
+        )
 
 ;;; Selector URI prefixes are protocol vocabulary, not free-form string checks.
 ;;; Keeping the whitelist as data lets new extension namespaces land without

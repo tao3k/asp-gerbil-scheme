@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Fast scenario-level contracts for POO optimization fixtures.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :asp-gerbil-scheme/src/benchmark/framework
-        :policy/agent-poo-scenario-registry
-        :policy/agent-poo-scenario-contract-support)
+        "./agent-poo-scenario-registry"
+        "./agent-poo-scenario-contract-support")
 
 (export agent-poo-scenario-contract-test)
 

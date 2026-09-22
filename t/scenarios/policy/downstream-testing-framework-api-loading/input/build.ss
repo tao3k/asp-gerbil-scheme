@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/building-api)
 
 (export downstream-testing-project

@@ -1,11 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; All policy scenario benchmarks must expose measured target budgets.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :asp-gerbil-scheme/src/scenario/benchmark-contract
-        (only-in :std/sort sort)
-        (only-in :std/sugar filter-map)
+        (only-in :std/list/list filter-map)
         (only-in :asp-gerbil-scheme/src/support/time duration-literal->nanos))
 (export scenario-benchmark-policy-test)
 
@@ -32,7 +31,7 @@
 (def (scenario-benchmark-paths root)
   (filter-map (lambda (entry)
                 (scenario-benchmark-path root entry))
-              (sort (directory-files root) string<?)))
+              (list-sort string<? (directory-files root))))
 
 ;; : (-> (List String) (List String) )
 (def (scenario-benchmark-paths/include-dirs roots)

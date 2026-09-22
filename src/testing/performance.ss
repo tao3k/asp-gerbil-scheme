@@ -4,11 +4,11 @@
 ;;; The upstream test command remains responsible for suite execution. This
 ;;; module only instruments an explicit thunk selected by a test case.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :asp-gerbil-scheme/src/benchmark/gate
                  benchmark-run/result)
         (only-in :clan/poo/object .o)
-        (only-in :std/srfi/1 filter))
+        (only-in :std/list/list filter))
 
 (export testing-benchmark-run/result
         testing-benchmark-body-phase)

@@ -4,8 +4,8 @@
 (import (only-in :std/test test-suite test-case check)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
-        (only-in :std/srfi/13 string-contains)
-        (only-in :clan/timestamp call-with-timing))
+        (only-in :std/string/misc string-contains)
+        (only-in :asp-gerbil-scheme/src/support/time call-with-timing))
 
 (export testing-api-startup-scenario-test)
 

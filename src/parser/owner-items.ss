@@ -2,7 +2,7 @@
 ;;; Lightweight parser surface for owner-items.
 
 (import :gerbil/expander
-        :gerbil/gambit
+        :gerbil/runtime/gambit
         (only-in :asp-gerbil-scheme/src/parser/definition-syntax definitions-from-form)
         :asp-gerbil-scheme/src/parser/exports
         :asp-gerbil-scheme/src/parser/model
@@ -11,16 +11,16 @@
         :asp-gerbil-scheme/src/parser/selectors
         :asp-gerbil-scheme/src/parser/support
         :asp-gerbil-scheme/src/parser/syntax
-        (only-in :std/misc/list unique)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
         (only-in :std/misc/ports open-output-string read-file-lines)
-        (only-in :std/sort sort)
-        (only-in :std/srfi/1 find take)
-        (only-in :std/srfi/13
+
+        (only-in :std/list/list find take)
+        (only-in :std/string/misc
                  string-contains
                  string-join
                  string-prefix?
                  string-trim)
-        (only-in :std/sugar cut filter hash ormap))
+        )
 
 (export owner-items-source-path?
         parse-owner-items-source-file
@@ -290,9 +290,9 @@
 ;;; - Sorting by synthetic id prevents output churn when collection order moves.
 ;; : (-> (List SyntaxFactJson) (List SyntaxFactJson) )
 (def (stable-owner-items-syntax-facts facts)
-  (sort facts
-        (lambda (a b)
-          (string<? (hash-get a 'id) (hash-get b 'id)))))
+  (list-sort (lambda (a b)
+               (string<? (hash-get a 'id) (hash-get b 'id)))
+             facts))
 
 ;; : (-> ModuleImportFact SyntaxFactJson )
 (def (owner-module-import-fact-json fact)

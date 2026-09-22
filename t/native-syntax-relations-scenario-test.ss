@@ -2,7 +2,7 @@
 ;;; Checked-in scenario owner for the Gerbil-native syntax relation contract.
 
 (import :std/test
-        (only-in :std/misc/list unique)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
         :asp-gerbil-scheme/src/benchmark/framework
         (only-in :asp-gerbil-scheme/src/benchmark/gate benchmark-fixture-ref)
         :asp-gerbil-scheme/src/parser/facade)

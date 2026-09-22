@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; POO policy values and typed receipts for macro governance.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :clan/poo/object .def)
         (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
-        (only-in :std/sugar hash))
+        )
 
 (export macro-governance-rule-prototype
         macro-governance-hygiene-rule

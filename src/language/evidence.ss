@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil language/runtime/std evidence facts for agent-facing search.
 
-(import (only-in :std/srfi/13 string-contains string-index)
-        (only-in :std/sugar filter ormap))
+(import :gerbil/runtime/gambit
+        (only-in :std/string/misc string-contains string-index))
 
 (export runtime-bin
         evidence-fact
@@ -571,10 +571,10 @@
     "std/srfi/13"
     "SRFI-13 string procedures are available to the harness and used by search rendering."
     "fact"
-    "provider-imports-:std/srfi/13"
+    "provider-imports-:std/string/misc"
     "search std string"
     ["std" "standard-library" "srfi" "srfi-13" "std/srfi/13" "string" "string-contains" "string-prefix"]
-    (hash (module ":std/srfi/13")
+    (hash (module ":std/string/misc")
           (capabilities ["string-contains" "string-prefix?" "string-suffix?"]))
     []
     "agent-does-not-know-gerbil-standard-string-module"
@@ -601,14 +601,14 @@
            (correction "use-call-with-output-string-from-std-misc-ports"))])
    (evidence-fact
     "std/text/json"
-    "Gerbil JSON parsing is available through :std/text/json; import read-json with only-in when the harness needs machine packet validation."
+    "Gerbil JSON parsing is available through :std/encoding/json; import read-json with only-in when the harness needs machine packet validation."
     "fact"
-    "provider-imports-:std/text/json"
+    "provider-imports-:std/encoding/json"
     "search std json"
-    ["std" "standard-library" "json" "std/text/json" ":std/text/json" "read-json" "only-in"]
-    (hash (module ":std/text/json")
+    ["std" "standard-library" "json" "std/text/json" ":std/encoding/json" "read-json" "only-in"]
+    (hash (module ":std/encoding/json")
           (capabilities ["read-json"])
-          (minimalImport "(import (only-in :std/text/json read-json))"))
+          (minimalImport "(import (only-in :std/encoding/json read-json))"))
     []
     "agent-needs-json-packet-validation-without-python-parser"
     "use-gerbil-std-text-json-read-json-with-only-in"

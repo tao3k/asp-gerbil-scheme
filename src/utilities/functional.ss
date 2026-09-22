@@ -2,8 +2,8 @@
 ;;; generated contract code can reuse them without creating policy/build cycles.
 
 (import (only-in :std/iter for/fold in-range)
-        (only-in :std/srfi/1 any every filter-map)
-        :gerbil/gambit)
+        (only-in :std/list/list any every filter-map)
+        :gerbil/runtime/gambit)
 
 (export constant-value
         maybe-map

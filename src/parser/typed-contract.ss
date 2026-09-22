@@ -1,23 +1,23 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned typed-combinator contract facts.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/typed-comment-metadata
         :asp-gerbil-scheme/src/parser/typed-contract-diagnostics
         :asp-gerbil-scheme/src/parser/typed-contract-comment-index
         :asp-gerbil-scheme/src/parser/typed-contract-scheme
         (only-in :std/misc/ports read-file-lines)
-        (only-in :std/srfi/13
+        (only-in :std/string/misc
                  string-join
                  string-empty?
                  string-every
                  string-prefix?
-                 string-trim
-                 string-trim-both)
-        (only-in :std/srfi/1 last take take-while)
-        (only-in :std/misc/list length<=n? unique)
-        (only-in :std/sugar cut filter filter-map find foldl hash ormap while with-catch)
+                 string-trim)
+        (only-in :std/list/list last take take-while)
+        (only-in :std/list/list length<=n?)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+
         )
 
 (export typed-contract-facts-from-definitions

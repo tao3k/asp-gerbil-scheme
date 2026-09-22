@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; gerbil scheme harness agent POO guidance policy.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :asp-gerbil-scheme/src/types/facade
-        :unit/policy/poo-scenarios)
-(import :policy/agent-poo-guidance-support)
+        "../unit/policy/poo-scenarios")
+(import "./agent-poo-guidance-support")
 (export agent-poo-guidance-policy-test)
 
 ;; PolicyTest

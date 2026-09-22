@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil type-expression diagnostics and top-level tokenization.
 
-(import :gerbil/gambit
-        (only-in :std/srfi/13 string-empty? string-ref string-trim-both)
-        (only-in :std/srfi/1 drop-right)
-        (only-in :std/sugar cut foldl))
+(import :gerbil/runtime/gambit
+        (only-in :std/string/misc string-empty? string-ref string-trim)
+        (only-in :std/list/list drop-right)
+        )
 
 (export scheme-type-expression-diagnostics
         scheme-keyword-marker?
@@ -260,7 +260,7 @@
 
 ;; : (-> TypeExpr (List TypeExpr) (List TypeExpr) )
 (def (cons-nonblank-type-expr value out)
-  (let (part (string-trim-both value))
+  (let (part (string-trim value))
     (if (equal? part "")
       out
       (cons part out))))

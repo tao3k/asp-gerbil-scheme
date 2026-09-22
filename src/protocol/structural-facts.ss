@@ -5,9 +5,9 @@
         :asp-gerbil-scheme/src/protocol/function-quality-facts
         :asp-gerbil-scheme/src/protocol/quality-shape-facts
         :asp-gerbil-scheme/src/protocol/support
-        (only-in :std/misc/list unique)
-        (only-in :std/sort sort)
-        (only-in :std/sugar filter hash hash-get))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+
+        )
 
 (export structural-syntax-fact-json)
 
@@ -68,9 +68,9 @@
 ;;; The anonymous predicate compares only fact ids and preserves fact payloads.
 ;; : (-> (List StructuralFactJson) (List StructuralFactJson) )
 (def (stable-structural-facts facts)
-  (sort facts
-        (lambda (a b)
-          (string<? (hash-get a 'id) (hash-get b 'id)))))
+  (list-sort (lambda (a b)
+               (string<? (hash-get a 'id) (hash-get b 'id)))
+             facts))
 ;; : (-> Fact Json )
 (def (module-import-structural-fact-json fact)
   (hash (id (native-syntax-fact-id "import" (module-import-fact-path fact)

@@ -2,7 +2,7 @@
 ;;; Formatter command contract tests.
 
 (import :std/test
-        (only-in :std/misc/path path-expand)
+        (only-in :std/string/path path-expand)
         :asp-gerbil-scheme/src/benchmark/framework
         :asp-gerbil-scheme/src/format/facade
         :asp-gerbil-scheme/src/support/io)

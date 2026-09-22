@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Parser selector and project aggregation helpers.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/model
-        (only-in :std/srfi/13 string-prefix? string-suffix?)
-        (only-in :std/sugar hash-get hash-key? hash-put!))
+        (only-in :std/string/misc string-prefix? string-suffix?)
+        )
 
 (export project-definitions
         project-calls

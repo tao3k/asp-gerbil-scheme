@@ -5,8 +5,8 @@
         :asp-gerbil-scheme/src/extensions/facade
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/snapshot/support
-        (only-in :std/srfi/1 list-copy)
-        (only-in :std/sugar hash-key?)
+        (only-in :std/list/list list-copy)
+
         :asp-gerbil-scheme/src/types/facade)
 
 (export snapshot-load

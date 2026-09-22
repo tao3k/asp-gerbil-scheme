@@ -2,8 +2,8 @@
 ;;; Shared parser support helpers for Gerbil syntax facts.
 
 (import :gerbil/expander
-        :gerbil/gambit
-        (only-in :std/sugar cut match ormap))
+        :gerbil/runtime/gambit
+        )
 
 (export flatten
         flatten-with-pairs

@@ -4,10 +4,9 @@
 (import :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/higher-order
         :asp-gerbil-scheme/src/parser/function-quality-signals
-        (only-in :clan/base fun)
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/13 string-prefix? string-suffix?)
-        (only-in :std/sugar cut filter find foldl ormap))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/string/misc string-prefix? string-suffix?)
+        )
 
 (export function-quality-profiles-from-source
         function-quality-poo-profile-facets)
@@ -246,14 +245,14 @@
 ;;; This prevents file/module comments from satisfying a function-level repair.
 ;; : (-> DefinitionName CommentFacts CommentQualityFact )
 (def (matching-comment-quality name facts)
-  (find (fun (definition-comment-fact? fact)
+  (find (lambda (fact)
           (and (equal? (comment-quality-fact-target-kind fact) "definition")
                (fact-field=? comment-quality-fact-target-name name fact)))
         facts))
 
 ;; : (-> DefinitionName HashTable CommentQualityFact )
 (def (matching-comment-quality/indexed name fact-index)
-  (find (fun (definition-comment-fact? fact)
+  (find (lambda (fact)
           (equal? (comment-quality-fact-target-kind fact) "definition"))
         (function-quality-indexed-facts fact-index name)))
 
@@ -329,7 +328,7 @@
 ;;       string field equals the definition name.
 ;;     %
 (def (facts-with-field facts accessor name)
-  (filter (fun (matches-field? fact)
+  (filter (lambda (fact)
             (fact-field=? accessor name fact))
           facts))
 
@@ -346,7 +345,7 @@
 ;;       optional string field links the fact to `name`.
 ;;     %
 (def (facts-with-any-field facts accessors name)
-  (filter (fun (matches-any-field? fact)
+  (filter (lambda (fact)
             (ormap (cut fact-field=? <> name fact) accessors))
           facts))
 
@@ -363,7 +362,7 @@
 ;;       parser-owned name list contains the definition.
 ;;     %
 (def (facts-containing-field facts accessor name)
-  (filter (fun (contains-field? fact)
+  (filter (lambda (fact)
             (member name (accessor fact)))
           facts))
 
@@ -380,7 +379,7 @@
 ;;       parser fact linked by the supplied accessor.
 ;;     %
 (def (first-fact-with-field facts accessor name)
-  (find (fun (matches-field? fact)
+  (find (lambda (fact)
           (fact-field=? accessor name fact))
         facts))
 

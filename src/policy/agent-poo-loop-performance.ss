@@ -7,7 +7,7 @@
         :asp-gerbil-scheme/src/policy/agent-poo-object-literal
         :asp-gerbil-scheme/src/policy/agent-support
         :asp-gerbil-scheme/src/policy/model
-        (only-in :std/sugar filter-map hash ormap)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export poo-clone-override-loop-performance-findings

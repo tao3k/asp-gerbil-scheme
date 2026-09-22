@@ -4,7 +4,7 @@
 (import (only-in :std/test test-suite test-case check)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
-        (only-in :clan/timestamp call-with-timing)
+        (only-in ../src/support/time call-with-timing)
         (only-in :asp-gerbil-scheme/testing-api
                  +asp-testing-interface+
                  testing-interface-run-test-batch!)

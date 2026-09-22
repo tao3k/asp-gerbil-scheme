@@ -1,18 +1,18 @@
 ;;; -*- Gerbil -*-
 ;;; Modularity policy checks over parser-owned source-file facts.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :clan/poo/object .def .get)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/model
         (only-in :std/misc/ports read-file-lines)
-        (only-in :std/srfi/13
+        (only-in :std/string/misc
                  string-contains
                  string-empty?
                  string-prefix?
                  string-suffix?
                  string-trim)
-        (only-in :std/sugar cut filter filter-map find foldl hash ormap with-catch)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export run-modularity-policy

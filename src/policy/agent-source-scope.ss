@@ -3,9 +3,9 @@
 
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/model
-        (only-in :std/srfi/1 find)
-        (only-in :std/srfi/13 string-contains string-prefix?)
-        (only-in :std/sugar cut filter filter-map hash ormap)
+        (only-in :std/list/list find)
+        (only-in :std/string/misc string-contains string-prefix?)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export policy-source-scope-findings

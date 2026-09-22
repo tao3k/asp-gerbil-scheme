@@ -2,8 +2,8 @@
 ;;; Shared helpers for Gerbil-specific style signal projection.
 
 (import :asp-gerbil-scheme/src/parser/facade
-        (only-in :std/srfi/13 string-contains)
-        (only-in :std/sugar ormap))
+        (only-in :std/string/misc string-contains)
+        )
 
 (export typed-combinator-style-facts->quality-facet
         typed-combinator-style-facts->signals

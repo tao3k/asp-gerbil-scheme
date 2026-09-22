@@ -1,15 +1,15 @@
 ;;; -*- Gerbil -*-
 ;;; Indexed adjacent typed-comment ownership and projection.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/typed-comment-metadata
         :asp-gerbil-scheme/src/parser/typed-contract-diagnostics
         :asp-gerbil-scheme/src/parser/typed-contract-scheme
-        (only-in :std/srfi/13 string-join string-empty? string-prefix?)
-        (only-in :std/srfi/1 last take-while)
-        (only-in :std/misc/list unique)
-        (only-in :std/sugar filter filter-map find while))
+        (only-in :std/string/misc string-join string-empty? string-prefix?)
+        (only-in :std/list/list last take-while)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        )
 
 (export typed-contract-entry-index/definitions
         typed-contract-entry-index-count

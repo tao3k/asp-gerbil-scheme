@@ -2,10 +2,10 @@
 ;;; Boundary: POO prototypes, constructors, accessors, and closed JSON
 ;;; projections for the resident provider runtime.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :clan/poo/object .cc .def .o .ref)
-        (only-in :std/misc/lru make-lru-cache)
-        (only-in :std/sugar hash)
+        (only-in :std/struct/lru make-LRUCache)
+
         (only-in "../../object-family/syntax"
                  defpoo-object-family
                  poo-family-ref)
@@ -266,7 +266,7 @@
   (provider-require-memo-state!
    (.o (:: @ [provider-memo-state-prototype])
        lock: (make-mutex 'provider-projection-memo)
-       cache: (make-lru-cache entry-limit-value)
+       cache: (make-LRUCache entry-limit-value)
        hits-cell: (vector 0)
        misses-cell: (vector 0)
        entry-limit: entry-limit-value

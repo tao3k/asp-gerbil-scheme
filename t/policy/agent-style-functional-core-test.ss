@@ -1,21 +1,20 @@
 ;;; -*- Gerbil -*-
 ;;; gerbil scheme harness agent style functional core policy.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :std/misc/ports
         :std/misc/process
-        :std/sort
-        (only-in :std/text/json read-json)
+        (only-in :std/encoding/json string->json JSONReadOptions)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/agent-style
         :asp-gerbil-scheme/src/policy/facade
         :asp-gerbil-scheme/src/policy/gxtest
         :asp-gerbil-scheme/src/scenario/policy
         :asp-gerbil-scheme/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
-(import :policy/agent-style-support)
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
+(import "./agent-style-support")
 (export agent-style-functional-core-policy-test)
 
 ;; PolicyTest
@@ -105,7 +104,9 @@
             (match (policy-check-output [root])
               ([exit-code . output]
                (check exit-code => 1)
-               (let* ((packet (call-with-input-string output read-json))
+               (let* ((packet
+                       (string->json output
+                                     (JSONReadOptions object-as-hash: #t)))
                       (repair (hash-get packet "agentRepair"))
                       (findings (hash-get packet "findings"))
                       (r009 (hash-get
@@ -176,7 +177,9 @@
             (match (policy-check-output [root])
               ([exit-code . output]
                (check exit-code => 1)
-               (let* ((packet (call-with-input-string output read-json))
+               (let* ((packet
+                       (string->json output
+                                     (JSONReadOptions object-as-hash: #t)))
                       (finding (json-finding-by-rule
                                 (hash-get packet "findings")
                                 "GERBIL-SCHEME-AGENT-POLICY-014"))

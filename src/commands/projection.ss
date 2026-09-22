@@ -1,12 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; Query-free parser projection command for ASP lifecycle import.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/parser/language-projection
         (only-in :asp-gerbil-scheme/src/protocol/json-output write-json-line)
         :asp-gerbil-scheme/src/protocol/structural-index
-        (only-in :std/misc/path path-normalize)
+        (only-in :std/string/path path-normalize)
         :asp-gerbil-scheme/src/support/args)
 
 (export projection-main)

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Typed Gerbil package scope from ASP-admitted candidates.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :asp-gerbil-scheme/src/constants +language-id+ +provider-id+)
         (only-in :asp-gerbil-scheme/src/parser/package
                  project-package-dependencies
@@ -11,11 +11,12 @@
                  source-scope-roots
                  source-scope-runtime-roots)
         (only-in :std/crypto/digest sha256)
-        (only-in :std/misc/path path-directory path-expand path-normalize)
+        (only-in :std/string/path path-directory path-expand path-normalize)
         (only-in :std/misc/ports read-all-as-string)
-        (only-in :std/srfi/1 delete-duplicates filter-map find)
-        (only-in :std/srfi/13 string-prefix? string-suffix?)
-        (only-in :std/sugar hash))
+        (only-in :std/list/list filter-map find)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/string/misc string-prefix? string-suffix?)
+        )
 
 (export project-resolution-request->response)
 
@@ -348,9 +349,6 @@
   (ormap (lambda (extension) (string-suffix? extension path))
          +source-extensions+))
 
-(def (unique values)
-  (delete-duplicates values equal?))
-
 (def (required-field object key)
   (let (value (hash-ref object key #f))
     (unless value
@@ -400,7 +398,7 @@
   (string-append
    "sha256:"
    (apply string-append
-          (map byte->hex (u8vector->list (sha256 text))))))
+          (map byte->hex (u8vector->list (sha256 (string->utf8 text)))))))
 
 (def (short-digest text)
   (substring (sha256-text text) 7 23))

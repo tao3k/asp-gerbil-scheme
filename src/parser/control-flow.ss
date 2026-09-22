@@ -5,8 +5,8 @@
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/support
         :asp-gerbil-scheme/src/parser/syntax
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/1 drop))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/list/list drop))
 
 (export control-flow-facts-from-form
         control-flow-quality-facets)

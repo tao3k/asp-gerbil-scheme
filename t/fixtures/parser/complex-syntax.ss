@@ -3,12 +3,12 @@
 ;;; - test owner records policy expectations.
 ;;; - Keep typed contracts and fixture intent explicit.
 (import :std/sugar
-        (only-in :std/text/json read-json)
+        (only-in :std/encoding/json read-json)
         (for-syntax :std/stxutil)
-        (rename-in :std/misc/list (foldl fold-left))
-        (except-in :std/misc/hash hash-copy)
+        (rename-in :std/list/list (foldl fold-left))
+        (except-in :std/hash/misc hash-copy)
         (phi: +1 :std/misc/repr)
-        (for-template :std/misc/path))
+        (for-template :std/string/path))
 (export make-widget with-widget <Widget> <Renderable> :render)
 ;; : (-> Value SourceLine String )
 (defrule (with-widget value body ...)

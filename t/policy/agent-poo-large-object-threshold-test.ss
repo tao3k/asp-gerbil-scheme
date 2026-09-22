@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil scheme harness POO large-object threshold policy.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :asp-gerbil-scheme/src/benchmark/gate
         (only-in :asp-gerbil-scheme/src/parser/model make-call-fact)

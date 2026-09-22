@@ -1,11 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; gerbil scheme harness agent style typed evidence policy.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :std/misc/ports
         :std/misc/process
-        :std/sort
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/agent-style
         :asp-gerbil-scheme/src/policy/agent-style-performance-signals
@@ -13,9 +12,9 @@
         :asp-gerbil-scheme/src/policy/gxtest
         :asp-gerbil-scheme/src/scenario/policy
         :asp-gerbil-scheme/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
-(import :policy/agent-style-support)
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
+(import "./agent-style-support")
 (export agent-style-typed-evidence-policy-test)
 
 ;; PolicyTest
@@ -137,7 +136,7 @@
             (write-text (string-append root "/gerbil.pkg")
                         "(package: sample/orders)\n")
             (write-text (string-append owner "/core.ss")
-                        ";;; -*- Gerbil -*-\n(package: sample/orders)\n(import :gerbil/gambit)\n;; : (-> (List Flonum) Flonum)\n(def (sum-samples samples)\n  (let loop ((rest samples) (count 0) (total 0.0))\n    (if (null? rest)\n      total\n      (loop (cdr rest)\n            (fx+ count 1)\n            (fl+ total (car rest))))))\n")
+                        ";;; -*- Gerbil -*-\n(package: sample/orders)\n(import :gerbil/runtime/gambit)\n;; : (-> (List Flonum) Flonum)\n(def (sum-samples samples)\n  (let loop ((rest samples) (count 0) (total 0.0))\n    (if (null? rest)\n      total\n      (loop (cdr rest)\n            (fx+ count 1)\n            (fl+ total (car rest))))))\n")
             (let* ((index (collect-project root))
                    (findings (run-policy-checks index))
                    (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-013" findings)))

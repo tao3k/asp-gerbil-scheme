@@ -2,7 +2,7 @@
 ;;; Boundary: POO-native semantic operations for the resident HTTP provider.
 ;;; JSON is decoded before this owner and projected after it; operation
 ;;; selection dispatches through the descriptor protocol, never a CLI route.
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :clan/poo/mop .defgeneric)
         (only-in :asp-gerbil-scheme/src/commands/project-resolution
                  project-resolution-request->response)
@@ -18,11 +18,11 @@
                  provider-operation-contract-response-schema-id
                  provider-operation-contract-response-schema-version
                  provider-operation-contracts)
-        (only-in :std/misc/lru
+        (only-in :std/struct/lru
                  lru-cache-get
                  lru-cache-put!
-                 lru-cache-size)
-        (only-in :std/text/json write-json)
+                 LRUCache-size)
+        (only-in :std/encoding/json write-json)
         "provider/interface.ss")
 
 (export provider-operation-execute
@@ -86,7 +86,7 @@
      state
      (lambda ()
        (provider-memo-observation
-        (lru-cache-size (provider-memo-state-cache state))
+        (LRUCache-size (provider-memo-state-cache state))
         (provider-memo-state-entry-limit state)
         (provider-memo-state-key-byte-limit state)
         (provider-memo-state-value-byte-limit state)
@@ -169,7 +169,7 @@
 ;; : (-> JsonValue String)
 (def (json->string value)
   (call-with-output-string ""
-    (lambda (output) (write-json value output))))
+    (lambda (output) (write-json output value))))
 
 ;; : (-> JsonObject String String)
 (def (required-payload-string payload name)

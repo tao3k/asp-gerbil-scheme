@@ -1,7 +1,7 @@
 ;;; Gxtest policy runtime converts one already-collected ProjectIndex into the
 ;;; stable report/status API consumed by Build API admission and test tooling.
 ;;; It must not rediscover sources or rescan owners for individual projections.
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in ../constants +language-id+ +provider-id+)
         (only-in ../parser/model project-index-files)
         (only-in ../parser/selectors project-definitions)

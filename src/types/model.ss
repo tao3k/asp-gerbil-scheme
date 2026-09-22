@@ -4,10 +4,10 @@
 ;;; display projection. Validation, compatibility, and proof rules live in
 ;;; sibling modules so the model layer stays constructor-oriented.
 
-(import :gerbil/gambit
-        (only-in :std/srfi/1 drop-right every last lset=)
+(import :gerbil/runtime/gambit
+        (only-in :std/list/list drop-right every last)
         :asp-gerbil-scheme/src/utilities/functional
-        (only-in :std/sugar cut filter-map ormap)
+
         (only-in :asp-gerbil-scheme/src/utilities/contracts
                  make-object-type-contract
                  make-slot-contract
@@ -230,8 +230,11 @@
   (and (eq? (type-kind left) (type-kind right))
        (case (type-kind left)
          ((record)
-          (and (lset= equal?
-                       (type-record-required left)
+          (and (andmap (lambda (name)
+                         (member name (type-record-required right)))
+                       (type-record-required left))
+               (andmap (lambda (name)
+                         (member name (type-record-required left)))
                        (type-record-required right))
                (record-fields=? (type-record-fields left)
                                 (type-record-fields right))))

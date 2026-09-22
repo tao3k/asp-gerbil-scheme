@@ -3,8 +3,8 @@
 
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/prototype
-        (only-in :std/srfi/1 take)
-        (only-in :std/sugar hash))
+        (only-in :std/list/list take)
+        )
 
 (export dependency-adapter-profile
         dependency-adapter-profile-extend

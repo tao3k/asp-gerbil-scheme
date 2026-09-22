@@ -3,7 +3,7 @@
 
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/model
-        (only-in :std/sugar filter-map hash ormap)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export string-growth-loop-performance-findings

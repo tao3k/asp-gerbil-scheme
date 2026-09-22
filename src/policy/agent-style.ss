@@ -14,9 +14,9 @@
         :asp-gerbil-scheme/src/policy/agent-support
         :asp-gerbil-scheme/src/policy/agent-style-shape
         :asp-gerbil-scheme/src/policy/model
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/13 string-empty?)
-        (only-in :std/sugar cut filter filter-map foldl hash hash-get ormap)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/string/misc string-empty?)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export typed-combinator-style-findings

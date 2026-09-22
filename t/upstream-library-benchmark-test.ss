@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Execute real installed clan libraries through the shared benchmark gate.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
-        (only-in :clan/debug traced-function)
+        (only-in :clan/poo/support/debug traced-function)
         :clan/poo/object
         :clan/poo/brace
         (only-in :clan/poo/debug DDT trace-poo)
@@ -21,19 +21,19 @@
 (export upstream-library-benchmark-test)
 
 (def +upstream-debug-reference-sources+
-  '(".data/gerbil-utils/debug.ss#traced-function"
+  '(".data/gerbil-poo-v19/support/debug.ss#traced-function"
     ".data/gerbil-poo/debug.ss#trace-poo"))
 
 (def upstream-debug-benchmark-fixture
   (cons
-   (cons 'benchmarkLibrary ":clan/timestamp#call-with-timing")
+   (cons 'benchmarkLibrary ":std/time/precise#current-time-precise")
    (cons
     (cons 'referenceSources +upstream-debug-reference-sources+)
     (make-benchmark-fixture
      'GERBIL-SCHEME-UPSTREAM-LIBRARY-BENCHMARK
      'clan-debug-runtime
      "installed clan debug call and POO tracing paths"
-     "real :clan/debug and :clan/poo/debug procedures"
+     "real :clan/poo/support/debug and :clan/poo/debug procedures"
      "preserve upstream behavior and emit an exact nanosecond receipt"
      '(benchmark upstream library debug)))))
 
@@ -73,23 +73,23 @@
     (test-case "fixture records upstream timing and source owners"
       (check (benchmark-fixture-ref upstream-debug-benchmark-fixture
                                     'benchmarkLibrary)
-             => ":clan/timestamp#call-with-timing")
+             => ":std/time/precise#current-time-precise")
       (check (benchmark-fixture-ref upstream-debug-benchmark-fixture
                                     'referenceSources)
              => +upstream-debug-reference-sources+))
 
-    (test-case ":clan/debug traced-function executes under the benchmark gate"
+    (test-case ":clan/poo/support/debug traced-function executes under the benchmark gate"
       (let-values (((receipt result)
                     (benchmark-run/result upstream-debug-benchmark-fixture
                                           run-traced-function-benchmark)))
         (check result => 42)
         (check (benchmark-receipt-pass? receipt) => #t)
         (check (benchmark-fixture-ref receipt 'timingSource)
-               => ":clan/timestamp#call-with-timing")
+               => ":std/time/precise#current-time-precise")
         (check (benchmark-fixture-ref
                 (benchmark-fixture-ref receipt 'runtimeStats)
                 'memorySource)
-               => ":gerbil/gambit###process-statistics")))
+               => ":gerbil/runtime/gambit###process-statistics")))
 
     (test-case ":clan/poo/debug trace-poo executes under the benchmark gate"
       (let-values (((receipt result)
@@ -140,14 +140,14 @@
         (check (benchmark-fixture-ref receipt 'benchmarkKind)
                => 'micro-kernel)
         (check (benchmark-fixture-ref receipt 'timingSource)
-               => ":gerbil/gambit#cpu-time")
+               => ":gerbil/runtime/gambit#cpu-time")
         (check (benchmark-fixture-ref receipt 'wallTimingSource)
-               => ":clan/timestamp#call-with-timing")
+               => ":std/time/precise#current-time-precise")
         (check (benchmark-fixture-ref receipt 'admissionStatistic) => 'p50)
         (check (benchmark-fixture-ref receipt 'baselineStatistic)
                => 'bracket-min)
         (check (benchmark-fixture-ref receipt 'sampleGcPrecondition)
-               => ":gerbil/gambit###gc")
+               => ":gerbil/runtime/gambit###gc")
         (check (benchmark-fixture-ref receipt 'sampleCount) => 20)
         (check (> (benchmark-fixture-ref receipt 'p50NetNs) 0) => #t)
         (check (> (benchmark-fixture-ref receipt 'p95Ns) 0) => #t)

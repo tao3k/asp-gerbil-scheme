@@ -2,7 +2,7 @@
 ;;; Gerbil feature scenario control policy.
 
 (import :std/test
-        :policy/agent-style-support)
+        "./agent-style-support")
 (export agent-style-scenario-control-gerbil-features-policy-test)
 
 ;; PolicyTest

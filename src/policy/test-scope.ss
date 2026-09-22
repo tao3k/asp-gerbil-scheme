@@ -4,11 +4,11 @@
 ;;; Production and test modules use the same lightweight source catalog as
 ;;; PackageSpec. std/make remains the sole build graph executor.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (rename-in "../build-api/native-spec-support"
                    (all-gerbil-modules native-gerbil-modules))
-        (only-in :std/misc/path path-expand)
-        (only-in :std/srfi/13 string-suffix?))
+        (only-in :std/string/path path-expand)
+        (only-in :std/string/misc string-suffix?))
 
 (export project-policy-source-files)
 

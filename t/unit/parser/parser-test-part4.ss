@@ -3,7 +3,7 @@
         :asp-gerbil-scheme/src/extensions/facade
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/protocol/json
-        :std/srfi/13)
+        :std/string/misc)
 (export parser-test-part-4)
 
 ;; : (-> Selector Relpath Boolean )

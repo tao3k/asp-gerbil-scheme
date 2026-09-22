@@ -1,8 +1,8 @@
 ;;; Module boundary: runtime contract records are plain Gerbil values shared by
 ;;; syntax expansion, projections, tests, and policy reports.
 
-(import (only-in :std/srfi/1 filter-map)
-        :gerbil/gambit)
+(import (only-in :std/list/list filter-map)
+        :gerbil/runtime/gambit)
 
 (export make-slot-contract
         slot-contract?

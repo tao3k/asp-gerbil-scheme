@@ -2,7 +2,7 @@
 ;;; Type-check dispatch for Gerbil source projects.
 
 (import :asp-gerbil-scheme/src/parser/model
-        (only-in :std/sugar hash ormap)
+
         :asp-gerbil-scheme/src/types/env
         :asp-gerbil-scheme/src/types/findings
         :asp-gerbil-scheme/src/types/source-findings)

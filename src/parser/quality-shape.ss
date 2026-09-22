@@ -3,15 +3,15 @@
 ;;; Boundary: this module emits evidence packets only. Policy thresholds,
 ;;; repair wording, and agent-facing severity stay outside the parser layer.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/quality-shape-loop-driver
         (only-in :asp-gerbil-scheme/src/parser/support datum-list-items)
         (only-in :asp-gerbil-scheme/src/parser/syntax form-caller-name)
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/1 find)
-        (only-in :std/srfi/13 string-prefix? string-suffix?)
-        (only-in :std/sugar cut filter filter-map foldl ormap))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/list/list find)
+        (only-in :std/string/misc string-prefix? string-suffix?)
+        )
 
 (export predicate-family-facts-from-source
         field-access-pattern-facts-from-source

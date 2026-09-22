@@ -2,7 +2,7 @@
 ;;; Typed repair diagnostic objects and JSON projections.
 
 (import :asp-gerbil-scheme/src/policy/catalog
-        (only-in :std/srfi/13 string-join)
+        (only-in :std/string/misc string-join)
         :asp-gerbil-scheme/src/types/findings)
 
 (export #t)

@@ -2,9 +2,10 @@
 ;;; Process-level regression for root-only native Import Model projection.
 
 (import (only-in :std/test test-suite test-case check)
-        (only-in :std/misc/path path-expand)
+        (only-in :gerbil/runtime/system gerbil-path)
+        (only-in :std/string/path path-expand)
         (only-in :std/misc/process run-process)
-        (only-in :clan/timestamp call-with-timing)
+        (only-in ../src/support/time call-with-timing)
         (only-in :asp-gerbil-scheme/src/build-api/native-import-closure
                  asp-gerbil-scheme-native-import-closure))
 
@@ -19,7 +20,7 @@
 (def +native-import-public-closure-contract+
   "t/scenarios/building/native-import-public-closure/scenario-contract.ss")
 
-(def +asp-library-root+ (path-expand ".gerbil/lib" (current-directory)))
+(def +asp-library-root+ (path-expand "lib" (gerbil-path)))
 
 (def +native-import-public-closure-expected+
   '("syntax-helper.ss" "a.ss" "b.ss" "c.ss"))
@@ -36,6 +37,7 @@
       ["env" "-u" "DEVELOPER_DIR" "-u" "SDKROOT"
        (string-append "GERBIL_PATH="
                       (path-expand ".gerbil" (current-directory)))
+       (string-append "GERBIL_LOADPATH=" +asp-library-root+)
        "gerbil" "interactive" build "spec"]
       directory: +native-import-public-closure-root+
      coprocess: read))))

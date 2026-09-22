@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Formatter file discovery and write application.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/format/core
-        (only-in :std/misc/path path-expand)
-        (only-in :std/sort sort)
+        (only-in :std/string/path path-expand)
+
         :asp-gerbil-scheme/src/support/io)
 
 (export fmt-target-files
@@ -34,8 +34,8 @@
   (when (> (length targets) +fmt-max-explicit-files+)
     (error "too many Scheme fmt files; bulk formatting is Rust-owned"
            (length targets)))
-  (sort (map (lambda (target) (fmt-explicit-source-file root target)) targets)
-        string<?))
+  (list-sort string<?
+             (map (lambda (target) (fmt-explicit-source-file root target)) targets)))
 
 ;; : (-> String String Path)
 (def (fmt-explicit-source-file root target)

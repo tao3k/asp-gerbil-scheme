@@ -2,19 +2,21 @@
 
 (export provider-http-json-server-test)
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/commands/projection-batch
         :asp-gerbil-scheme/src/runtime/provider-http-json-server
         :asp-gerbil-scheme/src/runtime/provider-operation
         :asp-gerbil-scheme/src/runtime/provider/interface
-        (only-in :std/format format)
-        (only-in :std/misc/path path-expand)
+        (only-in :std/string/path path-expand)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
-        (only-in :std/srfi/1 append-map iota)
-        (only-in :std/sugar hash hash-key?)
-        (only-in :std/text/base64 base64-encode)
-        (only-in :std/text/json read-json write-json)
+        (only-in :std/io/bio/api
+                 open-input-port-buffered-reader
+                 BufferedReader-read-line-utf8)
+        (only-in :std/list/list iota)
+        (only-in :asp-gerbil-scheme/src/support/list append-map)
+        (only-in :std/encoding/base64 base64-encode)
+        (only-in :std/encoding/json JSONReadOptions read-json write-json)
         (only-in "support/provider-http-benchmark"
                  parallel-live-corpus-samples)
         :std/test)
@@ -25,6 +27,9 @@
   "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
 (def +contract-digest+
   "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
+
+(def (read-wire-json reader)
+  (read-json reader (JSONReadOptions object-as-hash: #t)))
 
 ;; HTTP/live-corpus acceptance consumes an artifact already admitted by the
 ;; workspace build/install boundary. It must never make a test invocation
@@ -61,7 +66,7 @@
    (list artifact "serve")))
 
 (def (http-get-json url)
-  (read-json
+  (read-wire-json
    (open-input-string
     (run-process
      (list "curl" "--fail-with-body" "--silent" "--show-error" url)
@@ -69,7 +74,7 @@
      stderr-redirection: #t))))
 
 (def (http-post-json url body)
-  (read-json
+  (read-wire-json
    (open-input-string
     (run-process
      (list "curl"
@@ -86,7 +91,7 @@
 
 (def (json-string value)
   (call-with-output-string
-   (lambda (port) (write-json value port))))
+   (lambda (port) (write-json port value))))
 
 (def (read-bootstrap-json process)
   (let (line (read-line process))
@@ -98,7 +103,7 @@
      (lambda (exception)
        (error "provider bootstrap JSON decode failed" line exception))
      (lambda ()
-       (read-json (open-input-string line))))))
+       (read-wire-json (open-input-string line))))))
 
 (def (file-bytes path)
   (string->utf8
@@ -169,6 +174,13 @@
      ((zero? (string-length line)) (read-nonempty-line port))
      (else line))))
 
+(def (read-nonempty-buffered-line reader)
+  (let (line (BufferedReader-read-line-utf8 reader))
+    (cond
+     ((eof-object? line) (error "timed HTTP response omitted latency"))
+     ((zero? (string-length line)) (read-nonempty-buffered-line reader))
+     (else line))))
+
 (def (curl-transfer-arguments url body first?)
   (append
    (if first? '() '("--next"))
@@ -194,29 +206,33 @@
                 (append-map
                  (lambda (index)
                    (curl-transfer-arguments url body (zero? index)))
-                 (iota total))))
-         (output
-          (run-process arguments
-                       coprocess: read-all-as-string
-                       stderr-redirection: #t))
-         (port (open-input-string output)))
-    (let parse ((index 0) (samples '()))
-      (if (= index total)
-          (reverse samples)
-          (let* ((response (read-json port))
-                 (elapsed-seconds
-                  (string->number (read-nonempty-line port)))
-                 (elapsed
-                  (inexact->exact (round (* elapsed-seconds 1000000.0)))))
-            (unless (string=? (hash-ref response "outcome") "ready")
-              (error "live corpus provider request failed" response))
-            (parse (+ index 1)
-                   (if (< index warm-count)
-                       samples
-                       (cons elapsed samples))))))))
+                 (iota total)))))
+    ;; V19 JSON and latency lines must share one BufferedReader. Mixing its
+    ;; byte buffer with Gambit's character read-line corrupts the port state.
+    (run-process
+     arguments
+     stderr-redirection: #t
+     coprocess:
+     (lambda (port)
+       (let ((reader (open-input-port-buffered-reader port))
+             (options (JSONReadOptions object-as-hash: #t)))
+         (let parse ((index 0) (samples '()))
+           (if (= index total)
+               (reverse samples)
+               (let* ((response (read-json reader options))
+                      (elapsed-seconds
+                       (string->number (read-nonempty-buffered-line reader)))
+                      (elapsed
+                       (inexact->exact (round (* elapsed-seconds 1000000.0)))))
+                 (unless (string=? (hash-ref response "outcome") "ready")
+                   (error "live corpus provider request failed" response))
+                 (parse (+ index 1)
+                        (if (< index warm-count)
+                            samples
+                            (cons elapsed samples)))))))))))
 
 (def (direct-live-corpus-samples body warm-count sample-count)
-  (let ((request-value (read-json (open-input-string body)))
+  (let ((request-value (read-wire-json (open-input-string body)))
         (total (+ warm-count sample-count)))
     (let loop ((index 0) (samples '()))
       (if (= index total)
@@ -413,7 +429,7 @@
            (body (live-corpus-request package-root "live-corpus-warm"))
            (direct-response
             (provider-runtime-request->response
-             (read-json (open-input-string body))))
+             (read-wire-json (open-input-string body))))
            (service-samples (direct-live-corpus-samples body 16 128))
            (service-sorted (sort-latencies service-samples))
            (service-maximum (apply max service-samples))
@@ -421,12 +437,15 @@
             (asp-gerbil-scheme/src/runtime/provider-operation#provider-runtime-projection-memo-stats)))
       (check (hash-ref direct-response "outcome") => "ready")
       (displayln
-        (format "[provider-projection-memo-input] requestBytes=~a responsePayloadBytes=~a entries=~a hits=~a misses=~a"
-                (string-length body)
-                (string-length (json-string (hash-ref direct-response "payload")))
-                (hash-ref memo-stats "entries")
-               (hash-ref memo-stats "hits")
-               (hash-ref memo-stats "misses")))
+        (string-append
+         "[provider-projection-memo-input] requestBytes="
+         (number->string (string-length body))
+         " responsePayloadBytes="
+         (number->string
+          (string-length (json-string (hash-ref direct-response "payload"))))
+         " entries=" (number->string (hash-ref memo-stats "entries"))
+         " hits=" (number->string (hash-ref memo-stats "hits"))
+         " misses=" (number->string (hash-ref memo-stats "misses"))))
       (check (> (hash-ref memo-stats "hits") 0) => #t)
       (run-process
        (provider-environment package-root artifact #t)
@@ -450,16 +469,16 @@
                      (p99 (latency-percentile sorted 99))
                      (maximum (apply max samples)))
                 (displayln
-                 (format
-                  "[provider-live-corpus] schemaVersion=1 provider=asp-gerbil-scheme owners=2 samples=128 serviceP50Micros=~a serviceP95Micros=~a serviceP99Micros=~a serviceMaxMicros=~a loopbackP50Micros=~a loopbackP95Micros=~a loopbackP99Micros=~a loopbackMaxMicros=~a"
-                  (latency-percentile service-sorted 50)
-                  (latency-percentile service-sorted 95)
-                  (latency-percentile service-sorted 99)
-                  service-maximum
-                  p50
-                  p95
-                  p99
-                  maximum))
+                 (string-append
+                  "[provider-live-corpus] schemaVersion=1 provider=asp-gerbil-scheme owners=2 samples=128"
+                  " serviceP50Micros=" (number->string (latency-percentile service-sorted 50))
+                  " serviceP95Micros=" (number->string (latency-percentile service-sorted 95))
+                  " serviceP99Micros=" (number->string (latency-percentile service-sorted 99))
+                  " serviceMaxMicros=" (number->string service-maximum)
+                  " loopbackP50Micros=" (number->string p50)
+                  " loopbackP95Micros=" (number->string p95)
+                  " loopbackP99Micros=" (number->string p99)
+                  " loopbackMaxMicros=" (number->string maximum)))
                 (check (< (latency-percentile service-sorted 99) 1000) => #t))
               (let (responses
                     (concurrent-live-corpus-responses endpoint body 16))
@@ -469,12 +488,12 @@
                       (parallel-live-corpus-samples endpoint body 16))
                      (parallel-sorted (sort-latencies parallel-samples)))
                 (displayln
-                 (format
-                  "[provider-live-corpus-concurrent] schemaVersion=1 connections=16 samples=16 p50Micros=~a p95Micros=~a p99Micros=~a maxMicros=~a"
-                  (latency-percentile parallel-sorted 50)
-                  (latency-percentile parallel-sorted 95)
-                  (latency-percentile parallel-sorted 99)
-                  (apply max parallel-samples)))
+                 (string-append
+                  "[provider-live-corpus-concurrent] schemaVersion=1 connections=16 samples=16"
+                  " p50Micros=" (number->string (latency-percentile parallel-sorted 50))
+                  " p95Micros=" (number->string (latency-percentile parallel-sorted 95))
+                  " p99Micros=" (number->string (latency-percentile parallel-sorted 99))
+                  " maxMicros=" (number->string (apply max parallel-samples))))
                 (check (length parallel-samples) => 16))
               (http-post-json (string-append endpoint "shutdown") "{}")))
            (read-all-as-string process))))))
@@ -483,11 +502,12 @@
     (let* ((package-root (current-directory))
            (body (lambda (index)
                    (live-corpus-request
-                    package-root (format "memo-~a" index)
-                    (format "memo-generation-~a" index))))
+                    package-root
+                    (string-append "memo-" (number->string index))
+                    (string-append "memo-generation-" (number->string index)))))
            (execute (lambda (index)
                       (provider-runtime-request->response
-                       (read-json (open-input-string (body index)))))))
+                       (read-wire-json (open-input-string (body index)))))))
       (for-each execute (iota 4))
       (execute 0)
       (execute 4)
@@ -509,8 +529,8 @@
     (let* ((package-root (current-directory))
            (body (live-corpus-request
                   package-root "memo-source" "memo-source-generation"))
-           (original (read-json (open-input-string body)))
-           (forged (read-json (open-input-string body)))
+           (original (read-wire-json (open-input-string body)))
+           (forged (read-wire-json (open-input-string body)))
            (forged-owner
             (car (hash-ref (hash-ref forged "payload") "owners"))))
       (provider-runtime-request->response original)
@@ -548,7 +568,7 @@
        directory: package-root
        coprocess:
        (lambda (process)
-         (let* ((bootstrap (read-json process))
+         (let* ((bootstrap (read-wire-json process))
                 (endpoint (hash-ref bootstrap "endpoint"))
                 (frame
                  (json-string

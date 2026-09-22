@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Tiny gxtest adapter for downstream packages that depend on this harness.
 
-(import :gerbil/gambit
-        (for-syntax :gerbil/gambit
+(import :gerbil/runtime/gambit
+        (for-syntax :gerbil/runtime/gambit
                     :gerbil/expander
-                    :std/stxutil)
+                    :std/string/path)
         (only-in :std/test check test-case test-suite)
         (only-in "./gxtest-report"
                  gxtest-report-agent-repair

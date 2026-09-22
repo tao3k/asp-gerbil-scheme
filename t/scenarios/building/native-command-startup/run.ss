@@ -2,10 +2,10 @@
 ;;; One-shot real ASP command startup probe. Each child is stopped at its first
 ;;; semantic event; compilation and test execution are outside this gate.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :std/misc/process run-process)
         (only-in :std/os/signal kill SIGTERM)
-        (only-in :std/srfi/13 string-prefix?))
+        (only-in :std/string/misc string-prefix?))
 
 (def +contract-path+
   "t/scenarios/building/native-command-startup/scenario-contract.ss")

@@ -4,9 +4,10 @@
 (import :asp-gerbil-scheme/src/language/evidence
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/catalog
-        (only-in :std/srfi/1 append-map take)
-        (only-in :std/srfi/13 string-contains)
-        (only-in :std/sugar cut filter ormap))
+        (only-in :std/list/list take)
+        (only-in :asp-gerbil-scheme/src/support/list append-map)
+        (only-in :std/string/misc string-contains)
+        )
 
 (export capability-posture-facts
         matching-capability-posture-facts)

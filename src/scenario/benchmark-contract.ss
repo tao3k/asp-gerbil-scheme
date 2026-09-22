@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Lightweight benchmark contract normalization for policy scenarios.
 
-(import :gerbil/gambit
-        (only-in :std/sugar hash hash-put!)
+(import :gerbil/runtime/gambit
+
         (only-in :asp-gerbil-scheme/src/benchmark/fixture-model
                  benchmark-scenario-max-total)
         :asp-gerbil-scheme/src/support/time)

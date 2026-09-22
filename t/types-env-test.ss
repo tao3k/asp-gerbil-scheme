@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/runtime-contract

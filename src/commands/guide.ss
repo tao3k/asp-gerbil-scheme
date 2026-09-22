@@ -1,7 +1,7 @@
 ;;; Boundary: this command resolves a compact guide receipt from parser-owned
 ;;; topics and selectors; it does not implement search or policy decisions.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/commands/guide-sections
         :asp-gerbil-scheme/src/language/evidence
         :asp-gerbil-scheme/src/parser/facade
@@ -10,9 +10,10 @@
         :asp-gerbil-scheme/src/policy/catalog
         :asp-gerbil-scheme/src/support/args
         :asp-gerbil-scheme/src/support/io
-        (only-in :std/misc/list length<=n? unique)
-        (only-in :std/srfi/1 drop take)
-        (only-in :std/srfi/13
+        (only-in :std/list/list length<=n?)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/list/list drop take)
+        (only-in :std/string/misc
                  string-join
                  string-contains
                  string-downcase

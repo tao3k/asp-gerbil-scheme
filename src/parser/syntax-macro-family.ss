@@ -2,10 +2,10 @@
 ;;; Parser-owned macro-family grouping and uniformity evidence.
 
 (import :asp-gerbil-scheme/src/parser/model
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/13 string-index-right)
-        (only-in :std/sugar filter-map foldl)
-        :gerbil/gambit)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/string/misc string-index-right)
+
+        :gerbil/runtime/gambit)
 
 (export +macro-family-min-count+
         macro-family-facts-from-macros

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Fast smoke for downstream-facing POO source-ref validation.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :std/test test-suite test-case check-equal?)
         :asp-gerbil-scheme/src/extensions/poo-source-ref-validation)
 

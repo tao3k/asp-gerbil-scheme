@@ -1,15 +1,15 @@
 ;;; -*- Gerbil -*-
 ;;; gerbil scheme harness dependency adapter policy tests.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         (only-in :clan/poo/object .call)
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
         :asp-gerbil-scheme/src/policy/prototype
         :asp-gerbil-scheme/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
 (export agent-dependency-adapter-policy-test)
 
 ;; : (-> TableAdapter TableSample Boolean )

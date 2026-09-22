@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; POO-backed slot prototype helpers for policy descriptors.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :clan/poo/mop define-type Any raise-type-error validate)
         (only-in :clan/poo/object
                  .alist
@@ -13,8 +13,8 @@
                  object<-alist)
         (only-in :clan/poo/proto compose-proto* instantiate-proto)
         (only-in :clan/poo/table methods.table)
-        (only-in :std/srfi/1 find fold)
-        (only-in :std/sugar filter))
+        (only-in :std/list/list find fold)
+        )
 
 (export SlotPrototypeTable.
         slot-prototype-compose

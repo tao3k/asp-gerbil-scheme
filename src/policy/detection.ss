@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Policy-owned combinators for parser-owned evidence groups.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
         :asp-gerbil-scheme/src/policy/prototype
-        (only-in :std/sugar filter filter-map hash ormap))
+        )
 
 (export evidence-group-object-prototype
         policy-detection-result-object-prototype

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Executable v1 schema bundle used by provider semantic packet tests.
 
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 
 (export +schema-files+
         +local-schema-refs+

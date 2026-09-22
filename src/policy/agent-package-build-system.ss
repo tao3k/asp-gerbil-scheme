@@ -4,8 +4,8 @@
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/detection
         :asp-gerbil-scheme/src/policy/poo-source
-        (only-in :std/srfi/13 string-contains string-suffix?)
-        (only-in :std/sugar cut filter hash ormap))
+        (only-in :std/string/misc string-contains string-suffix?)
+        )
 
 (export package-build-file?
         package-build-quality-detection-prototypes

@@ -4,9 +4,9 @@
 (import :gerbil/expander
         :asp-gerbil-scheme/src/parser/model
         :asp-gerbil-scheme/src/parser/support
-        (only-in :std/misc/list unique)
-        (only-in :std/misc/string string-trim-suffix)
-        (only-in :std/srfi/13 string-prefix? string-suffix?))
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/string/misc string-trim-suffix)
+        (only-in :std/string/misc string-prefix? string-suffix?))
 
 (export +poo-definition-heads+
         poo-form-facts-from-form)

@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil scheme harness anonymous pair access policy tests.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/facade
-        :policy/fixtures
+        "./fixtures"
         :asp-gerbil-scheme/src/types/facade)
 
 (export agent-anonymous-pair-policy-test)
@@ -50,4 +50,3 @@
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-023" findings)))
           (check matching => []))))))
-

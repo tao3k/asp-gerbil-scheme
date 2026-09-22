@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Expected: use Gambit numeric lanes when the domain is fixed.
 (package: scenario/gambit-fixnum-flonum-arithmetic-boundary/expected)
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 (export sum-samples)
 
 ;; sum-samples

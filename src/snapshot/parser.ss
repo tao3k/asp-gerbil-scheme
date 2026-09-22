@@ -3,7 +3,7 @@
 
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/snapshot/support
-        (only-in :std/srfi/1 list-copy))
+        (only-in :std/list/list list-copy))
 
 (export parser-source-file-snapshot)
 

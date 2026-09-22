@@ -3,11 +3,11 @@
 ;;; Invariant: JSON hashes are admitted only at the transport edge; runtime
 ;;; semantics, operation identity, state, and observations are POO objects.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :clan/poo/object .ref .slot? object?)
         (only-in :clan/poo/mop Type. define-type element? validate)
-        (only-in :std/misc/lru lru-cache? lru-cache-capacity)
-        (only-in :std/srfi/1 every))
+        (only-in :std/struct/lru LRUCache? LRUCache-cap)
+        (only-in :std/list/list every))
 
 (export ProviderSchemaReference
         ProviderOperationDescriptor
@@ -194,13 +194,13 @@
        (every single-cell?
               (map (lambda (slot) (.ref value slot))
                    '(hits-cell misses-cell)))
-       (lru-cache? (.ref value 'cache))
+       (LRUCache? (.ref value 'cache))
        (natural? (vector-ref (.ref value 'hits-cell) 0))
        (natural? (vector-ref (.ref value 'misses-cell) 0))
        (every positive-natural?
               (map (lambda (slot) (.ref value slot))
                    '(entry-limit key-byte-limit value-byte-limit)))
-       (= (lru-cache-capacity (.ref value 'cache))
+       (= (LRUCache-cap (.ref value 'cache))
           (.ref value 'entry-limit))))
 
 ;;; Memo-state ownership boundary:

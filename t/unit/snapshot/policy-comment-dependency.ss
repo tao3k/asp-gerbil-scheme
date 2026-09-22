@@ -7,8 +7,8 @@
         :asp-gerbil-scheme/src/snapshot/facade
         :std/test
         :asp-gerbil-scheme/src/types/facade
-        :unit/policy/poo-scenarios)
-(import :unit/snapshot/policy-support)
+        "../policy/poo-scenarios")
+(import "./policy-support")
 (export comment-quality-policy-snapshot
         harness-dependency-policy-application-policy-snapshot
         harness-dependency-policy-disable-requires-explanation-policy-snapshot)

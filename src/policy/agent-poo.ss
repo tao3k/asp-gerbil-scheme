@@ -7,9 +7,9 @@
         :asp-gerbil-scheme/src/policy/agent-poo-loop-performance
         :asp-gerbil-scheme/src/policy/agent-support
         :asp-gerbil-scheme/src/policy/model
-        (only-in :std/srfi/13
+        (only-in :std/string/misc
                  string-contains string-downcase string-join string-prefix?)
-        (only-in :std/sugar filter filter-map hash hash-get ormap)
+
         :asp-gerbil-scheme/src/types/findings)
 
 (export poo-direct-writeenv-findings

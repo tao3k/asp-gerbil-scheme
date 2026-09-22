@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Package-local Gerbil environment support.
 
-(import (only-in :std/misc/path path-expand path-normalize)
-         (only-in :std/srfi/13 string-prefix?)
+(import (only-in :std/string/path path-expand path-normalize)
+         (only-in :std/string/misc string-prefix?)
          (only-in :std/source gerbil-home)
-        :gerbil/gambit)
+        :gerbil/runtime/gambit)
 (export asp-gerbil-scheme-package-configure-build-root!
          asp-gerbil-scheme-package-build-package-name
          asp-gerbil-scheme-package-build-active-gerbil-path

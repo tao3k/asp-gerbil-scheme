@@ -20,14 +20,14 @@
         ignoreDirectories: '("nested-package"))))
 
 ;; Executable source witness for the public package-entry macro. The generated
-;; entry remains clan-owned and is not invoked while gxtest loads this module.
+;; entry remains native Gerbil-owned and is not invoked while gxtest loads this module.
 (init-profiled-test-environment! +testing-entry-witness+)
 
 (def testing-extension-test
   (test-suite "POO extensions for upstream testing"
     (test-case "the object names the upstream executor without replacing it"
       (check (object? +asp-testing-interface+) => #t)
-      (check (.ref +asp-testing-interface+ 'upstream) => ':clan/testing)
+      (check (.ref +asp-testing-interface+ 'upstream) => ':gerbil/tools/gxtest)
       (check (.ref +asp-testing-interface+ 'command) => 'gerbil-test))
 
     (test-case "scenario profiles are enabled by default"
@@ -42,11 +42,11 @@
       (check (.ref +testing-debug-trace-profile+ 'operation)
              => 'trace-poo)
       (check (.ref +testing-performance-profile+ 'timingLibrary)
-             => ':clan/timestamp)
+             => ':asp-gerbil-scheme/src/support/time)
       (check (.ref +testing-performance-profile+ 'metrics)
              => '(wall-time cpu-time allocation gc managed-heap)))
 
-    (test-case "clan discovery results can be filtered by a POO profile"
+    (test-case "native discovery results can be filtered by a POO profile"
       (let* ((discovery
               (.cc +testing-discovery-profile+
                    ignoreDirectories: '("lambda-episteme" "vendor/generated")))

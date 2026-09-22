@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; R005 regression for declarative user-interface case and profile projections.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :asp-gerbil-scheme/src/parser/facade
         (only-in :asp-gerbil-scheme/src/policy/agent-basic

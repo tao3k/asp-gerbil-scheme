@@ -3,9 +3,9 @@
 
 (import :asp-gerbil-scheme/src/policy/catalog
         :asp-gerbil-scheme/src/policy/repair-diagnostic
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/1 take)
-        (only-in :std/srfi/13 string-join)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/list/list take)
+        (only-in :std/string/misc string-join)
         :asp-gerbil-scheme/src/types/findings)
 
 (export repairable-finding?

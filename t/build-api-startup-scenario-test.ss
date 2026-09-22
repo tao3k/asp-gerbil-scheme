@@ -1,14 +1,14 @@
 ;;; -*- Gerbil -*-
 ;;; Process-level regression for the public PackageSpec startup boundary.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         (only-in :std/test test-suite test-case check)
         (only-in :std/misc/ports read-all-as-string)
         (only-in :std/misc/process run-process)
         (only-in :std/os/signal kill SIGTERM)
-        (only-in :std/sort stable-sort)
-        (only-in :std/srfi/1 iota)
-        (only-in :std/srfi/13 string-contains string-prefix?))
+        (only-in :std/list/list list-sort)
+        (only-in :std/list/list iota)
+        (only-in :std/string/misc string-contains string-prefix?))
 
 (export build-api-startup-scenario-test)
 
@@ -89,7 +89,7 @@
                            (cdr build))))
                  (iota (startup-contract-ref contract 'attemptCount))))
                (incremental
-                (stable-sort (map caddr samples) <))
+                (list-sort < (map caddr samples)))
                (median (list-ref incremental
                                  (quotient (length incremental) 2))))
           (for-each

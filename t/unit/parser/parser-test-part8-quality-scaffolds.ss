@@ -7,8 +7,8 @@
         :asp-gerbil-scheme/src/parser/typed-contract-scheme
         :asp-gerbil-scheme/src/protocol/json
         :asp-gerbil-scheme/src/protocol/structural-facts
-        :std/srfi/13)
-(import :unit/parser/parser-test-part8-support)
+        :std/string/misc)
+(import "./parser-test-part8-support")
 (export parser-test-part-8-quality-scaffolds)
 
 ;; PolicyTest

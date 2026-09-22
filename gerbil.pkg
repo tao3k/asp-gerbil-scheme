@@ -1,4 +1,4 @@
 (package:
  asp-gerbil-scheme
 depend:
-("github.com/mighty-gerbils/gerbil-poo@1c3225637525400341a09e958296962c10184ead"))
+("github.com/tao3k/gerbil-poo@1b384119f25552c7ed2868c961d10b0bc1ead442"))

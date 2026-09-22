@@ -1,20 +1,20 @@
 ;;; -*- Gerbil -*-
-;;; Native clan/testing trampoline for a declarative ASP testing object.
+;;; Native Gerbil testing trampoline for a declarative ASP testing object.
 ;;;
 ;;; Projects declare slots and Profile mappings through testing-api.  Only the
 ;;; package test entrypoint imports this module, so discovery and CLI machinery
 ;;; are absent from ordinary library consumers.
 
-(import :gerbil/gambit
-        (only-in :clan/testing find-test-files %set-test-environment!)
+(import :gerbil/runtime/gambit
         (only-in :std/cli/multicall
                  define-entry-point
-                 define-multicall-main
+                 call-entry-point
                  set-default-entry-point!)
         (only-in :std/cli/print-exit silent-exit)
         (only-in :std/source this-source-file)
-        (only-in :std/srfi/1 filter)
-        (only-in :std/sugar with-id)
+        (only-in :std/list/list filter)
+        (only-in :std/string/path path-expand path-directory)
+        (only-in :std/text/pregexp pregexp-match)
         (only-in ./extension
                  testing-interface-test-file-included?
                  testing-interface-run-test-files!))
@@ -22,11 +22,11 @@
 (export testing-interface-test-files
         init-profiled-test-environment!)
 
-;; testing-interface-test-files
 ;;   : (forall (t) (-> t String String (List Path)))
+;; testing-interface-test-files
 ;;   : (-> TestingInterface TestName Path String (List Path))
 ;;   | doc m%
-;;       Discovers native clan/testing files, then applies the declarative ASP
+;;       Discovers Gerbil test files, then applies the declarative ASP
 ;;       TestingInterface inclusion slots before execution.
 ;;
 ;;       # Examples
@@ -39,9 +39,50 @@
                                    pkgdir: (pkgdir ".")
                                    regex: (regex "-test.ss$"))
   (filter (cut testing-interface-test-file-included? testing test <>)
-          (find-test-files pkgdir regex)))
+          (let (files [])
+            (let walk ((path pkgdir) (inside-test-dir? #f))
+              (let (info (file-info path #f))
+                (cond
+                 ((and info (eq? (file-info-type info) 'directory))
+                  (unless (equal? (path-strip-directory path) "dep")
+                    (for-each
+                     (lambda (name)
+                       (unless (or (equal? name ".") (equal? name ".."))
+                         (walk (path-expand name path)
+                               (or inside-test-dir? (equal? name "t")))))
+                     (directory-files path))))
+                 ((and inside-test-dir? (pregexp-match regex path))
+                  (set! files (cons path files))))))
+            (list-sort string<? files))))
 
-;; : (-> Integer Integer)
+;; %set-test-environment!
+;;   : (-> Path Void)
+;;   | doc m%
+;;       Install the declaring package root as the native test environment.
+;;
+;;       # Examples
+;;       ```scheme
+;;       (%set-test-environment! "/workspace/unit-tests.ss")
+;;       ;; => current-directory is /workspace
+;;       ```
+;;     %
+(def (%set-test-environment! script-path)
+  (let (root (path-directory script-path))
+    (current-directory root)
+    (set-load-path! (cons root (load-path)))))
+
+;; testing-elapsed-nanoseconds
+;;   : (-> Integer Integer)
+;;   | doc m%
+;;       Convert a native jiffy interval into nanoseconds for test progress
+;;       receipts without changing the test executor's clock or lifecycle.
+;;
+;;       # Examples
+;;       ```scheme
+;;       (testing-elapsed-nanoseconds (current-jiffy))
+;;       ;; => a nonnegative integer
+;;       ```
+;;     %
 (def (testing-elapsed-nanoseconds started-jiffy)
   (quotient (* (- (current-jiffy) started-jiffy) 1000000000)
             (jiffies-per-second)))
@@ -65,10 +106,9 @@
   ((ctx testing)
    (begin
      (def here (this-source-file ctx))
-     (with-id ctx (main)
-       (define-multicall-main ctx))
+     (def main call-entry-point)
      (define-entry-point (asp-profiled-unit-tests)
-       (help: "Run clan unit tests through ASP POO profiles"
+       (help: "Run Gerbil unit tests through ASP POO profiles"
         getopt: [])
        (%set-test-environment! here)
        (displayln "[asp-testing] phase=entry-ready")

@@ -9,8 +9,8 @@
         :asp-gerbil-scheme/src/policy/agent-style-message
         :asp-gerbil-scheme/src/policy/agent-style-performance-signals
         :asp-gerbil-scheme/src/policy/gerbil-utils-source
-        (only-in :std/srfi/1 take)
-        (only-in :std/sugar hash))
+        (only-in :std/list/list take)
+        )
 
 (export typed-combinator-style-details)
 
