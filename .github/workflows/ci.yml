@@ -24,28 +24,28 @@ jobs:
         include:
           - os: ubuntu-latest
             target: library
-            gerbil-label: release-v0.19-d801e7a
-            gerbil-ref: d801e7a1c7f77df421f638e62aaebe370f193c97
-            gerbil-asset: gerbil-v0.19-d801e7a1c7f77df421f638e62aaebe370f193c97-linux-x86_64-portable-full-single-host-unlimited-patch8bbb52add2b9
-            gerbil-sha256: 44da3780cf450a6b747bf327b837696e0f99d5177a5a8046f9f65cd54e126745
+            gerbil-label: release-v0.19-2591dcd
+            gerbil-ref: 2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb
+            gerbil-asset: gerbil-v0.19-2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb-linux-x86_64-portable-full-single-host-unlimited-patchf5cedd8168cb
+            gerbil-sha256: 9844ba362fdf6f1c5e8a4411e462a466d52dee0d541f8e84f61091cec0e5e740
           - os: macos-latest
             target: library
-            gerbil-label: release-v0.19-d801e7a
-            gerbil-ref: d801e7a1c7f77df421f638e62aaebe370f193c97
-            gerbil-asset: gerbil-v0.19-d801e7a1c7f77df421f638e62aaebe370f193c97-darwin-aarch64-gcc16-arm64-aot-tools-single-host-unlimited-patch16675e99f856
-            gerbil-sha256: c6a4bc783311670ea56d0c384ebdffae491112ba9bdd253cd763a260a5793d6b
+            gerbil-label: release-v0.19-2591dcd
+            gerbil-ref: 2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb
+            gerbil-asset: gerbil-v0.19-2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb-darwin-aarch64-gcc16-arm64-aot-tools-single-host-unlimited-patchf5cedd8168cb
+            gerbil-sha256: 8d9c88434aed6301eaebb719bf52472f05c2368eafc630e8a9f1d67cc9895a21
           - os: ubuntu-latest
             target: provider
-            gerbil-label: release-v0.19-d801e7a
-            gerbil-ref: d801e7a1c7f77df421f638e62aaebe370f193c97
-            gerbil-asset: gerbil-v0.19-d801e7a1c7f77df421f638e62aaebe370f193c97-linux-x86_64-portable-full-single-host-unlimited-patch8bbb52add2b9
-            gerbil-sha256: 44da3780cf450a6b747bf327b837696e0f99d5177a5a8046f9f65cd54e126745
+            gerbil-label: release-v0.19-2591dcd
+            gerbil-ref: 2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb
+            gerbil-asset: gerbil-v0.19-2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb-linux-x86_64-portable-full-single-host-unlimited-patchf5cedd8168cb
+            gerbil-sha256: 9844ba362fdf6f1c5e8a4411e462a466d52dee0d541f8e84f61091cec0e5e740
           - os: macos-latest
             target: provider
-            gerbil-label: release-v0.19-d801e7a
-            gerbil-ref: d801e7a1c7f77df421f638e62aaebe370f193c97
-            gerbil-asset: gerbil-v0.19-d801e7a1c7f77df421f638e62aaebe370f193c97-darwin-aarch64-gcc16-arm64-aot-tools-single-host-unlimited-patch16675e99f856
-            gerbil-sha256: c6a4bc783311670ea56d0c384ebdffae491112ba9bdd253cd763a260a5793d6b
+            gerbil-label: release-v0.19-2591dcd
+            gerbil-ref: 2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb
+            gerbil-asset: gerbil-v0.19-2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb-darwin-aarch64-gcc16-arm64-aot-tools-single-host-unlimited-patchf5cedd8168cb
+            gerbil-sha256: 8d9c88434aed6301eaebb719bf52472f05c2368eafc630e8a9f1d67cc9895a21
     env:
       GERBIL_REF: ${{ matrix.gerbil-ref }}
       GERBIL_PREFIX: ${{ github.workspace }}/.ci/gerbil/${{ matrix.gerbil-label }}
