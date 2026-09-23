@@ -315,9 +315,10 @@
                 testing
                 "t/large-test.ss"
                 ["-q"])
-               => ["gerbil"
+               => ["gxi"
                    "-:max-heap=2048M"
-                   "test"
+                   "-e"
+                   "(import :gerbil/tools/gxtest) (exit (apply main (cdddr (command-line))))"
                    "-q"
                    "t/large-test.ss"])))
 

@@ -22,6 +22,9 @@
 (def +native-batch-scenario-entrypoint+
   "t/scenarios/policy/upstream-gxtest-delegation/native-batch-entrypoint.ss")
 
+(def +native-batch-failure-fixture+
+  "t/scenarios/policy/upstream-gxtest-delegation/failure-fixture.ss")
+
 (def +native-batch-scenario-files+
   (map (lambda (name)
          (string-append +native-batch-scenario-root+ "/" name "-test.ss"))
@@ -135,6 +138,14 @@
                     (native-batch-contract-ref
                      contract 'maxFirstOutputNanoseconds))
                  => #t))))
+    (test-case "failed assertion propagates the native gxtest exit status"
+      (let ((raised? #f))
+        (with-catch
+         (lambda (_failure) (set! raised? #t))
+         (lambda ()
+           (testing-interface-run-test-batch!
+            +asp-testing-interface+ [ +native-batch-failure-fixture+ ])))
+        (check raised? => #t)))
     (test-case "failed native batch retains an elapsed terminal receipt"
       (let ((port (open-output-string))
             (raised? #f))

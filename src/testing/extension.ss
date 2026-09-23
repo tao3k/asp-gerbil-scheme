@@ -421,10 +421,13 @@
 
 ;;; The public declaration is the POO profile. This is its private projection
 ;;; at the fresh-process boundary, before the upstream test module is loaded.
+(def +native-gxtest-exit-expression+
+  "(import :gerbil/tools/gxtest) (exit (apply main (cdddr (command-line))))")
+
 (def (testing-interface-command-for testing test (arguments []))
-  (append ["gerbil"]
+  (append ["gxi"]
           (testing-interface-runtime-options-for testing test)
-          ["test"]
+          ["-e" +native-gxtest-exit-expression+]
           arguments
           [test]))
 
@@ -530,11 +533,11 @@
             (loop other (foldl cons batches-rev groups)))))))))
 
 (def (testing-interface-command-for-files testing test-files)
-  (append ["gerbil"]
+  (append ["gxi"]
           (if (null? test-files)
             []
             (testing-interface-runtime-options-for testing (car test-files)))
-          ["test"]
+          ["-e" +native-gxtest-exit-expression+]
           test-files))
 
 (def (testing-interface-run-test-batch! testing test-files)
