@@ -4,9 +4,9 @@
 ;;; - Owns provider-curated gerbil-poo -> gerbil-utils closure facts only.
 ;;; - Does not inspect ambient load paths or mutate package declarations.
 
-(import :gslph/src/package-manager/facade
-        (only-in :std/srfi/13 string-join)
-        (only-in :std/sugar hash ormap))
+(import :asp-gerbil-scheme/src/package-manager/facade
+        (only-in :std/string/misc string-join)
+        )
 
 (export poo-inherited-utils-capability-names
         poo-inherited-utils-pattern-query?

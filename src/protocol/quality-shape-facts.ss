@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Structural JSON projection for parser-owned quality-shape facts.
 
-(import :gslph/src/parser/facade
-        :gslph/src/protocol/support
-        (only-in :std/misc/list unique)
-        (only-in :std/sugar filter hash))
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/support
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        )
 
 (export predicate-family-structural-fact-json
         field-access-pattern-structural-fact-json

@@ -3,6 +3,7 @@
 ;;; - Wire encoding keeps JSON strings, raw bytes, and framed marshal output in
 ;;;   separate local protocol helpers.
 (package: sample/wire)
+(import (only-in :clan/base compose cut))
 (export encode-wire)
 
 ;; payload-json-string
@@ -66,5 +67,6 @@
 ;;       ```
 ;;     %
 (def (encode-wire payload tag)
-  (marshal-frame
-   (payload-json-string payload tag)))
+  ((compose marshal-frame
+            (cut payload-json-string <> tag))
+   payload))

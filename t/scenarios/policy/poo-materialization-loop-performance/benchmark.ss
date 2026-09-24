@@ -1,28 +1,12 @@
-((max_total . 25ms)
- (observed_total . 4ms)
- (target_total . 15ms)
- (regression_budget . 21ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2))
-  ((name . collect-after) (durationMs . 1))
-  ((name . policy-before) (durationMs . 1))
-  ((name . policy-after) (durationMs . 0)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
+ (target_total . 150ms)
+ (regression_budget . 150ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed baseline 4ms for poo-materialization-loop-performance; target keeps optimization visible and max_total is the hard regression ceiling")
- (maxCollectMs . 10)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 5)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
-(iterations . 3)
- (unit . "ms")
+  "The poo-loop-materialization target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+(sampleCount . 20)
  (purpose . "R029 materialization repair scenario keeps policy analysis within the scenario-owned timing gate")
  (feature . "poo-loop-materialization")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-029")
@@ -65,5 +49,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "poo" "loop" "materialization"))

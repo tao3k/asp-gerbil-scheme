@@ -4,9 +4,9 @@
 ;;; - Keep contracts, evidence, and failure semantics explicit.
 ;;; Command-line argument helpers.
 
-(import :gerbil/gambit
-        (only-in :std/srfi/1 last)
-        (only-in :std/srfi/13 string-prefix?))
+(import :gerbil/runtime/gambit
+        (only-in :std/list/list last)
+        (only-in :std/string/misc string-prefix?))
 
 (export flag?
         option
@@ -26,10 +26,11 @@
 ;; ConfigConstant
 (def +boolean-flags+
   '("--json" "--code" "--names-only" "--changed" "--full" "--check" "--more"
-    "--artifact"))
+    "--artifact" "--runtime-request-frame-stdin"))
 ;; ConfigConstant
 (def +value-options+
   '("--term" "--query" "--selector" "--workspace" "--from-hook" "--view" "--package"
+    "--server-endpoint"
     "--owner"
     "--iterations" "--max-total-ms" "--max-interface-ms" "--whitelist"
     "--topic" "--intent" "--role" "--level" "--rule" "--finding" "--limit"))

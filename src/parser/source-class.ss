@@ -1,7 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned source path classification for agent-facing projections.
 
-(import (only-in :std/srfi/13 string-contains string-prefix? string-suffix?))
+(import :gerbil/runtime/gambit
+        (only-in :std/string/misc
+                 string-contains string-prefix? string-suffix?))
 
 (export source-path-class)
 ;;; Boundary:
@@ -15,7 +17,17 @@
   (cond
    ((equal? path "gerbil.pkg")
     "config")
-   ((equal? path "build.ss")
+   ;; The package build boundary owns this generated registration module.
+   ;; It is part of the native graph but not an agent-authored runtime owner.
+   ((equal? path "version.ss")
+    "package-version")
+   ((or (equal? path "build.ss")
+        (string-suffix? "/build.ss" path))
+    "package-build")
+   ((and (not (string-contains path "/"))
+        (or (string-prefix? "build-" path)
+            (string-suffix? "-build.ss" path)
+            (string-suffix? "-package-spec.ss" path)))
     "package-build")
    ((and (or (string-prefix? "src/build-api/" path)
              (string-prefix? "src/testing/" path))
@@ -33,12 +45,18 @@
    ((or (string-prefix? "t/" path)
         (string-contains path "/t/"))
     "test")
+   ((and (string-prefix? "user-interface/" path)
+         (or (string-prefix? "user-interface/cases/" path)
+             (string-contains path "/cases/")))
+    "declarative-case")
+   ((and (string-prefix? "user-interface/" path)
+         (or (string-prefix? "user-interface/profiles/" path)
+             (string-contains path "/profiles/")))
+    "declarative-profile")
    ((or (string-contains path "/generated/")
         (string-contains path ".generated."))
     "generated")
-   ((or (string-prefix? "src/check-fast/" path)
-        (equal? path "src/search-fast/gerbil-scheme-search-extension.ss")
-        (equal? path "src/search-fast/gerbil-scheme-search-pattern.ss"))
+   ((string-prefix? "src/check-fast/" path)
     "native-fast-runtime")
    ((or (string-prefix? "src/" path)
         (string-prefix? "bin/" path))

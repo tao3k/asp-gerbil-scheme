@@ -1,17 +1,17 @@
 ;;; -*- Gerbil -*-
 ;;; gerbil scheme harness agent basic functional policy.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :std/misc/ports
         :std/misc/process
-        (only-in :std/text/json read-json)
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
+        (only-in :std/encoding/json string->json JSONReadOptions)
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/types/facade
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
 (export agent-basic-functional-policy-test)
 
 ;; PolicyTest
@@ -24,11 +24,18 @@
                  (_ (write-text (string-append root "/src/changed/core.ss")
                                 ";;; -*- Gerbil -*-\n(package: sample/changed)\n(def (process x) x)\n"))
              (result (policy-check-output ["--changed" root]))
-                 (output (cdr result)))
+             (packet (string->json (cdr result)
+                                   (JSONReadOptions object-as-hash: #t)))
+             (findings (hash-get packet "findings")))
             (check (car result) => 1)
-            (check (not (not (string-contains output "scope=changed"))) => #t)
-            (check (not (not (string-contains output "src/changed/core.ss"))) => #t)
-            (check (not (string-contains output "src/stable/core.ss")) => #t)))
+            (check (hash-get packet "scope") => "changed")
+            (check (hash-get packet "requestedFiles")
+                   => ["src/changed/core.ss"])
+            (check (andmap (lambda (finding)
+                             (equal? (hash-get finding "path")
+                                     "src/changed/core.ss"))
+                           findings)
+                   => #t)))
 (test-case "agent policy preserves named-let control contexts"
           (let* ((root ".run/policy-functional-idiom-control-context")
                  (_ (write-functional-idiom-control-context-project root))

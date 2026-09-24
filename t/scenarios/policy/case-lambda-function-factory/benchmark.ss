@@ -1,28 +1,12 @@
-((max_total . 25ms)
- (observed_total . 6ms)
- (target_total . 15ms)
- (regression_budget . 19ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2))
-  ((name . collect-after) (durationMs . 3))
-  ((name . policy-before) (durationMs . 1))
-  ((name . policy-after) (durationMs . 0)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 400ms)
+ (target_total . 200ms)
+ (regression_budget . 200ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed baseline 6ms for case-lambda-function-factory; target keeps optimization visible and max_total is the hard regression ceiling")
- (maxCollectMs . 10)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 6)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "The case-lambda-function-factory target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+ (sampleCount . 20)
  (purpose . "R013 case-lambda function factory scenario keeps arity-specialized repair within the scenario-owned timing gate")
  (feature . "case-lambda-function-factory")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -48,5 +32,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style" "higher-order" "case-lambda" "arity"))

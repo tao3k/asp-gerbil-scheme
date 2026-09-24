@@ -1,5 +1,5 @@
 ;;; -*- Gerbil -*-
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 
 (export marlin-slow-test-target
         marlin-slow-run-log

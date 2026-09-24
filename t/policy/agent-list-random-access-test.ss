@@ -1,13 +1,13 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil scheme harness list random access policy tests.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :policy/fixtures
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        "./fixtures"
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade)
 
 (export agent-list-random-access-policy-test)
 

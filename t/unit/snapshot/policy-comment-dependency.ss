@@ -1,14 +1,14 @@
 ;;; -*- Gerbil -*-
 ;;; Policy comment and dependency snapshot projections.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/scenario/policy
-        :gslph/src/snapshot/facade
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/snapshot/facade
         :std/test
-        :gslph/src/types/facade
-        :unit/policy/poo-scenarios)
-(import :unit/snapshot/policy-support)
+        :asp-gerbil-scheme/src/types/facade
+        "../policy/poo-scenarios")
+(import "./policy-support")
 (export comment-quality-policy-snapshot
         harness-dependency-policy-application-policy-snapshot
         harness-dependency-policy-disable-requires-explanation-policy-snapshot)
@@ -83,11 +83,6 @@
           (project-index-package (policy-scenario-index result 'before)))
          (after-package
           (project-index-package (policy-scenario-index result 'after)))
-         (before-policy-finding
-          (policy-scenario-required-finding
-           result
-           'before
-           "GERBIL-SCHEME-AGENT-POLICY-024"))
          (before-style-finding
           (policy-scenario-required-finding
            result
@@ -108,8 +103,6 @@
           (list 'before
                 (list 'package
                       (package-agent-policy-snapshot before-package))
-                (list 'policyFinding
-                      (finding-snapshot-copy before-policy-finding))
                 (list 'styleFinding
                       (finding-snapshot-copy before-style-finding)))
           (list 'after

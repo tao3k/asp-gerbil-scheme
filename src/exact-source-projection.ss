@@ -2,13 +2,15 @@
 ;;; Provider-core exact source and callable-skeleton projection.
 
 (import :gerbil/expander
-        :gerbil/gambit
-        (only-in :gslph/src/parser/control-flow
+        :gerbil/runtime/gambit
+        (only-in :asp-gerbil-scheme/src/parser/control-flow
                  control-flow-facts-from-form)
-        (only-in :gslph/src/parser/exact-owner
+        (only-in :asp-gerbil-scheme/src/parser/exact-owner
                  parse-exact-owner-definitions
                  read-exact-owner-forms)
-        (only-in :gslph/src/parser/model
+        (only-in :asp-gerbil-scheme/src/utilities/functional
+                 u8vector-line-start-offsets)
+        (only-in :asp-gerbil-scheme/src/parser/model
                  binding-fact-end
                  binding-fact-kind
                  binding-fact-name
@@ -28,12 +30,13 @@
                  definition-kind
                  definition-name
                  definition-start)
-        (only-in :gslph/src/parser/syntax
+        (only-in :asp-gerbil-scheme/src/parser/syntax
                  binding-facts-from-form
                  calls-from-form)
-        (only-in :std/srfi/1 find foldl)
-        (only-in :std/srfi/13 string-contains string-index string-prefix? string-split)
-        (only-in :std/text/base64 base64-decode))
+        (only-in :std/list/list find foldl)
+        (only-in :std/string/misc string-index string-prefix? string-split)
+        (only-in :std/text/pregexp pregexp-match-positions)
+        (only-in :std/encoding/base64 base64-decode))
 
 (export project-provider-native-exact-request)
 
@@ -68,18 +71,22 @@
 
 ;; A parsed selector is:
 ;; [requested root owner kind symbol segment-kind segment-identity].
+(def (selector-marker-position marker selector)
+  (let (matches (pregexp-match-positions marker selector))
+    (and (pair? matches) (caar matches))))
+
 (def (parse-exact-selector selector)
   (unless (string-prefix? +selector-prefix+ selector)
     (error "provider-native exact selector has the wrong language prefix"
            selector))
-  (let (item-position (string-contains selector "#item/"))
+  (let (item-position (selector-marker-position "#item/" selector))
     (unless item-position
       (error "provider-native exact selector is missing #item/" selector))
     (let* ((owner-start (string-length +selector-prefix+))
            (owner (substring selector owner-start item-position))
            (tail-start (+ item-position (string-length "#item/")))
            (tail (substring selector tail-start (string-length selector)))
-           (segment-position (string-contains tail "/segment/"))
+           (segment-position (selector-marker-position "/segment/" tail))
            (root-tail
             (if segment-position
               (substring tail 0 segment-position)
@@ -118,19 +125,20 @@
 (def (selector-segment-kind selector) (vector-ref selector 5))
 (def (selector-segment-identity selector) (vector-ref selector 6))
 
+(def +definition-kind-aliases+
+  '(("function" "def" "function")
+    ("method" "defmethod" "method")
+    ("macro" "defsyntax" "macro")))
+
+;; : (-> String String Boolean)
 (def (definition-kind-matches? selector-kind definition-kind)
-  (cond
-   ((equal? selector-kind "function")
-    (member definition-kind '("def" "function")))
-   ((equal? selector-kind "method")
-    (member definition-kind '("defmethod" "method")))
-   ((equal? selector-kind "macro")
-    (member definition-kind '("defsyntax" "macro")))
-   (else
-    (equal? selector-kind definition-kind))))
+  (let (aliases (assoc selector-kind +definition-kind-aliases+ equal?))
+    (if aliases
+      (member definition-kind (cdr aliases))
+      (equal? selector-kind definition-kind))))
 
 (def (temporary-source-name)
-  (string-append "gslph-exact-" (symbol->string (gensym)) ".ss"))
+  (string-append "asp-gerbil-scheme-exact-" (symbol->string (gensym)) ".ss"))
 
 (def (with-parsed-source source-text proc)
   (let* ((name (temporary-source-name))
@@ -150,16 +158,6 @@
                     (read-exact-owner-forms path))))
          (delete-file path)
          result)))))
-
-(def (line-start-offsets bytes)
-  (let loop ((index 0) (starts '(0)))
-    (cond
-     ((= index (u8vector-length bytes))
-      (list->vector (reverse starts)))
-     ((= (u8vector-ref bytes index) 10)
-      (loop (+ index 1) (cons (+ index 1) starts)))
-     (else
-      (loop (+ index 1) starts)))))
 
 ;; Parser line ranges are one-based and inclusive. Returned byte ranges are
 ;; zero-based and end-exclusive.
@@ -434,6 +432,11 @@
                        identity)))
                segments))))
 
+;;; Exact projection resolves the callable once, computes byte ranges from the
+;;; shared line-offset index, and then selects source or skeleton rendering.
+;;; Descendant selection is valid only for source projections; all failures
+;;; retain the original requested selector so callers receive deterministic
+;;; evidence instead of a widened owner-level fallback.
 (def (project-parsed-request request selector source-bytes parsed)
   (let* ((definitions (vector-ref parsed 0))
          (forms (vector-ref parsed 1))
@@ -446,7 +449,7 @@
                         (definition-kind candidate))))
                 definitions))
          (byte-length (u8vector-length source-bytes))
-         (starts (line-start-offsets source-bytes)))
+         (starts (u8vector-line-start-offsets source-bytes)))
     (unless definition
       (error "provider-native exact selector does not resolve"
              (selector-root selector)))

@@ -2,12 +2,12 @@
 ;;; Gerbil-poo pattern specs and accessors for extension search packets.
 ;;; Boundary:
 ;;; - Owns source-backed pattern families and selector/schema payloads.
-;;; - Keeps :gslph/src/extensions/poo focused on activation and origin dispatch.
+;;; - Keeps :asp-gerbil-scheme/src/extensions/poo focused on activation and origin dispatch.
 
-(import :gslph/src/extensions/poo-pattern-support
-        :gslph/src/extensions/poo-pattern-typeclass
-        (only-in :std/srfi/13 string-join)
-        (only-in :std/sugar hash))
+(import :asp-gerbil-scheme/src/extensions/poo-pattern-support
+        :asp-gerbil-scheme/src/extensions/poo-pattern-typeclass
+        (only-in :std/string/misc string-join)
+        )
 
 (export poo-pattern-id
         poo-pattern-focus

@@ -1,12 +1,12 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil Scheme source formatter.
 
-(import :gerbil/gambit
-        :gslph/src/format/facade
-        :gslph/src/protocol/json
-        (only-in :std/misc/path path-normalize)
-        :gslph/src/support/args
-        :gslph/src/support/io)
+(import :gerbil/runtime/gambit
+        :asp-gerbil-scheme/src/format/facade
+        :asp-gerbil-scheme/src/protocol/json
+        (only-in :std/string/path path-normalize)
+        :asp-gerbil-scheme/src/support/args
+        :asp-gerbil-scheme/src/support/io)
 
 (export fmt-main)
 

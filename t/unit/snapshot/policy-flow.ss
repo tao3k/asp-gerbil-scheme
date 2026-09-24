@@ -1,14 +1,14 @@
 ;;; -*- Gerbil -*-
 ;;; Policy flow snapshot projections.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/scenario/policy
-        :gslph/src/snapshot/facade
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/snapshot/facade
         :std/test
-        :gslph/src/types/facade
-        :unit/policy/poo-scenarios)
-(import :unit/snapshot/policy-support)
+        :asp-gerbil-scheme/src/types/facade
+        "../policy/poo-scenarios")
+(import "./policy-support")
 (export functional-idiom-policy-snapshot
         real-agent-basic-syntax-policy-snapshot
         controlled-branch-shape-policy-snapshot

@@ -1,18 +1,18 @@
 ;;; -*- Gerbil -*-
 ;;; Typed contract signature diagnostics and token projection helpers.
 
-(import :gerbil/gambit
-        :gslph/src/parser/model
-        :gslph/src/parser/typed-comment-metadata
-        :gslph/src/parser/typed-contract-scheme
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/13
+(import :gerbil/runtime/gambit
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/typed-comment-metadata
+        :asp-gerbil-scheme/src/parser/typed-contract-scheme
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/string/misc
                  string-contains
                  string-empty?
                  string-every
                  string-prefix?
                  string-trim)
-        (only-in :std/sugar cut filter-map find ormap while))
+        )
 
 (export typed-contract-invalid-reasons
         typed-contract-quality

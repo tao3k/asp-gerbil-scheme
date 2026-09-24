@@ -1,17 +1,18 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil contract projection metadata extraction.
 
-(import :gerbil/gambit
-        :gslph/src/parser/runtime-contract
-        :gslph/src/parser/typed-contract-scheme
-        (only-in :std/srfi/13
+(import :gerbil/runtime/gambit
+        :asp-gerbil-scheme/src/parser/runtime-contract
+        :asp-gerbil-scheme/src/parser/typed-contract-scheme
+        (only-in :std/string/misc
                  string-contains
                  string-join
                  string-prefix?
                  string-trim)
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/1 drop-right iota last take-while)
-        (only-in :std/sugar filter filter-map find foldl hash ormap))
+        (only-in :std/text/pregexp pregexp-match-positions)
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/list/list drop-right iota last take-while)
+        )
 
 (export typed-comment-empty-metadata
         typed-comment-metadata
@@ -353,11 +354,15 @@
         (start (typed-comment-section-group-start section))
         (end (typed-comment-section-group-end section))))
 
+(def (typed-comment-marker-position marker text)
+  (let (matches (pregexp-match-positions marker text))
+    (and (pair? matches) (caar matches))))
+
 ;; : (-> TypedCommentSection (Maybe Json))
 (def (typed-comment-type-section-json section)
   (and (equal? (typed-comment-section-group-key section) "type")
        (let* ((text (typed-comment-section-text section))
-              (equals (string-contains text "="))
+              (equals (typed-comment-marker-position "=" text))
               (left (if equals
                       (string-trim (substring text 0 equals))
                       (string-trim text)))
@@ -621,7 +626,7 @@
 ;; : (-> SectionLine (Maybe String))
 (def (typed-comment-doc-result-text line)
   (let* ((trimmed (string-trim line))
-         (index (string-contains trimmed "=>")))
+         (index (typed-comment-marker-position "=>" trimmed)))
     (and index
          (typed-comment-doc-result-line? trimmed)
          (string-trim

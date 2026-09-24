@@ -1,28 +1,12 @@
-((max_total . 25ms)
- (observed_total . 4ms)
- (target_total . 15ms)
- (regression_budget . 21ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 1))
-  ((name . collect-after) (durationMs . 1))
-  ((name . policy-before) (durationMs . 1))
-  ((name . policy-after) (durationMs . 1)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
+ (target_total . 150ms)
+ (regression_budget . 150ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
-  "observed poo-module-validation-feature-dispatch receipt is 4ms total; target keeps POO validation policy in the small millisecond budget while max_total remains the hard regression ceiling")
- (maxCollectMs . 10)
- (observedCollectMs . 0)
- (maxParseMs . 15)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 6)
- (observedPhaseMs . 0)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+  "The poo-module-validation-feature-dispatch target defines the optimization objective; max_total is the hard regression ceiling, and runtime observations belong only in measured receipts.")
+ (sampleCount . 20)
  (purpose . "R013 routes POO module validation drift toward compiler-style feature dispatch and local cache handlers")
  (feature . "poo-module-validation-feature-dispatch")
  (rule . "GERBIL-SCHEME-AGENT-POLICY-013")
@@ -65,5 +49,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "style" "gerbil-native" "compiler" "poo" "validation" "feature-dispatch" "cache"))

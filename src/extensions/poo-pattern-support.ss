@@ -5,7 +5,7 @@
 ;;; - Keeps pattern data modules focused on source-backed evidence values.
 
 (import (only-in :clan/poo/object .@ object<-alist)
-        (only-in :std/sugar hash))
+        )
 
 (export poo-selector
         poo-form-template

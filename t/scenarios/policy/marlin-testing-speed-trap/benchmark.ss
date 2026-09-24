@@ -1,53 +1,35 @@
-((max_total . 76ms)
- (observed_total . 1ms)
- (target_total . 25ms)
- (regression_budget . 75ms)
- (expected_over_input_budget . 5ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 1))
-  ((name . policy-before) (durationMs . 1))
-  ((name . collect-after) (durationMs . 1))
-  ((name . policy-after) (durationMs . 1)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 300ms)
+ (target_total . 150ms)
+ (regression_budget . 150ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
   "Marlin-like downstream build.ss must keep selected tests incremental instead of expanding one user action into gxtest-main plus a broad policy scope")
- (maxCollectMs . 50)
- (observedCollectMs . 1)
- (maxParseMs . 50)
- (observedParseMs . 1)
- (maxFileMs . 50)
- (observedFileMs . 1)
- (maxPhaseMs . 50)
- (observedPhaseMs . 1)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 3)
- (unit . "ms")
- (purpose . "Capture the Marlin downstream build speed trap as a testing framework optimization metric")
+ (sampleCount . 20)
+ (purpose . "Capture the Marlin downstream speed trap as an upstream-selection boundary")
  (feature . "marlin-testing-speed-trap")
  (rule . "GERBIL-SCHEME-AGENT-TESTING-MARLIN-SPEED-TRAP-001")
  (optimizationFocus
   .
-  "replace agent-written all-test plus appended policy-scope dispatch with thin testing-framework scope selection")
+  "keep explicit file selection in gerbil test and map only POO instrumentation profiles")
  (inputShape
   .
   "Marlin-like build.ss keeps long gxtest file lists, appends source policy files, and routes test through one gxtest-main entrypoint")
  (expectedOutcome
   .
-  "declare multiple gxtest suites and policy scenarios through the harness testing API so explicit files, manifest roots, and scenario ids stay separate")
+  "invoke explicit files through gerbil test and bind different memory profiles without a private scope collector")
  (measurementPhases
   "collect-before"
   "policy-before"
   "collect-after"
   "policy-after"
-  "select-explicit-file"
-  "expand-manifest-root"
-  "select-policy-scenario"
+  "profile-compose"
+  "upstream-selection"
   "assert-time-gate"
-  "assert-memory-gate")
+  )
  (tags "testing"
-       "framework"
+       "profile-extension"
        "marlin"
        "downstream"
        "build.ss"

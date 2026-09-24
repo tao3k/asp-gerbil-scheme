@@ -5,7 +5,7 @@
 (package: sample/dashboard)
 (import (only-in :clan/poo/object object<-alist .cc)
         (only-in :clan/base lambda-match curry !>)
-        (only-in :std/srfi/1 iota))
+        (only-in :std/list/list iota))
 (export build-profile score-events dispatch-dashboard update-profile dashboard-threshold
         event-priority)
 

@@ -3,7 +3,7 @@
 ;;; - test owner records policy expectations.
 ;;; - Keep typed contracts and fixture intent explicit.
 (package: sample/control-flow)
-(import :std/misc/list-builder
+(import :std/list/list-builder
         :std/misc/ports)
 ;; : (-> Boolean Parameter )
 (def current-setting

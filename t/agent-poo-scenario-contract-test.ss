@@ -2,11 +2,11 @@
 ;;; - This test owns the correspondence between registered POO scenarios and benchmark witnesses.
 ;;; - Keep the registry-facing paths stable so policy coverage cannot silently lose a representative case.
 (import
- :gerbil/gambit
+ :gerbil/runtime/gambit
  (only-in :std/test test-suite test-case check)
- (only-in :std/misc/path path-expand)
- (only-in :std/sugar filter-map)
- :gslph/t/policy/agent-poo-scenario-registry)
+ (only-in :std/string/path path-expand)
+ (only-in :std/list/list filter-map)
+ "policy/agent-poo-scenario-registry")
 
 (export agent-poo-scenario-contract-test)
 

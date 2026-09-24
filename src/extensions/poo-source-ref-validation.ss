@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Lightweight POO source-ref structural validation.
 
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 
 (export poo-object-source-ref-structural-validation)
 

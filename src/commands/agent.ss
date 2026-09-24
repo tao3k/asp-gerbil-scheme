@@ -1,11 +1,11 @@
 ;;; -*- Gerbil -*-
 ;;; Agent command adapter.
 
-(import :gslph/src/commands/guide
-        :gslph/src/constants
-        :gslph/src/protocol/json
-        :gslph/src/protocol/registry
-        :gslph/src/support/args)
+(import :asp-gerbil-scheme/src/commands/guide
+        :asp-gerbil-scheme/src/constants
+        :asp-gerbil-scheme/src/protocol/json
+        :asp-gerbil-scheme/src/protocol/registry
+        :asp-gerbil-scheme/src/support/args)
 
 (export agent-main)
 ;; agent-main

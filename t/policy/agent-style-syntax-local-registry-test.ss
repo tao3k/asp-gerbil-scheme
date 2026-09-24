@@ -2,7 +2,7 @@
 ;;; Syntax-local registry scenario policy.
 
 (import :std/test
-        :policy/agent-style-support)
+        "./agent-style-support")
 (export agent-style-syntax-local-registry-policy-test)
 
 ;; PolicyTest

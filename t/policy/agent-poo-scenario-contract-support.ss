@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Lightweight POO scenario fixture contracts.
 
-(import :gerbil/gambit
-        :gslph/src/benchmark/framework
-        :policy/agent-poo-scenario-registry)
+(import :gerbil/runtime/gambit
+        :asp-gerbil-scheme/src/benchmark/framework
+        "./agent-poo-scenario-registry")
 
 (export #t)
 

@@ -1,19 +1,19 @@
 ;;; -*- Gerbil -*-
 ;;; gerbil scheme harness agent POO hot loop runtime compact policy.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :std/misc/ports
         :std/misc/process
-        (only-in :std/text/json read-json)
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
-(import :policy/agent-poo-support)
+        (only-in :std/encoding/json read-json)
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
+(import "./agent-poo-support")
 (export agent-poo-hot-loop-runtime-compact-policy-test)
 
 ;; PolicyTest

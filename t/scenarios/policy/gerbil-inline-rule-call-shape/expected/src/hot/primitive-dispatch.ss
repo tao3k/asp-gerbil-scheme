@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Expected: keep primitive calls lexical and direct so inline rules can see them.
 (package: scenario/gerbil-inline-rule-call-shape/expected)
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 (export count-small small?)
 
 ;; small?

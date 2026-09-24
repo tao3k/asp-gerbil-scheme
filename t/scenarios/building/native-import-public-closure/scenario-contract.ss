@@ -1,0 +1,12 @@
+((scenarioKind . native-gerbil-build)
+ (attemptCount . 2)
+ (executor . std/make)
+ (importModel . gerbil/module-context-import)
+ (packageIdentity . asp-native-import-public-closure-fixture)
+ (publicEntry . "c.ss")
+ (directRootTargets "c.ss")
+ (expectedTargets "syntax-helper.ss" "a.ss" "b.ss" "c.ss")
+ (excludedTarget . "unrelated.ss")
+ (pooResponsibility . public-entry-module-declaration)
+ (expectedOutcome
+  . "modules returns the declared root while public-entry-modules returns exactly its native import closure"))

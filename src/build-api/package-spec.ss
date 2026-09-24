@@ -1,250 +1,255 @@
-;;; -*- Gerbil -*-
-;;; Lightweight package API build surface for downstream dependency installs.
+;;; Package-spec declarations are the sole bridge from downstream build.ss
+;;; syntax to POO-owned package objects and their source/native projections.
+;;; Preserve native module ownership; tests and policy receive explicit inputs
+;;; and never infer a second production graph from this projection.
+(export asp-gerbil-scheme-package-spec!
+        all-gerbil-modules
+        default-exclude-dirs
+        asp-gerbil-scheme-library-package-prototype
+        asp-gerbil-scheme-package-native-spec
+        asp-gerbil-scheme-package-generated-modules
+        asp-gerbil-scheme-package-product-entry-modules
+        asp-gerbil-scheme-package-native-prelude-spec
+        asp-gerbil-scheme-package-native-profile
+        asp-gerbil-scheme-package-native-capabilities
+        asp-gerbil-scheme-package-pkg-config-libs
+        asp-gerbil-scheme-package-nix-deps
+        asp-gerbil-scheme-package-native-options-resolver
+        asp-gerbil-scheme-package-public-entry-modules
+        asp-gerbil-scheme-package-modules)
 
-(import (only-in :gerbil/gambit
-                 directory-files
-                 file-exists?)
-        (only-in :std/sort sort)
-        (only-in :std/srfi/1 append-map)
-        (only-in :std/srfi/13 string-suffix?))
+(import (only-in :clan/poo/object .cc .def .get)
+        (only-in :gerbil/runtime/gambit
+                 make-thread thread-start! thread-sleep! thread-terminate!)
+        (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
+        (rename-in "./native-spec-support"
+                   (all-gerbil-modules upstream-all-gerbil-modules)
+                   (default-exclude-dirs upstream-default-exclude-dirs))
+        (only-in "./native-spec-support"
+                 all-gerbil-modules
+                 default-exclude-dirs
+                 remove-build-files
+                 normalize-spec)
+        (only-in "./generated-module-projection"
+                 asp-gerbil-scheme-project-generated-modules)
+        (only-in "./native-import-closure"
+                 asp-gerbil-scheme-native-import-closure)
+        (only-in "./core-capacity"
+                 initialize-native-build-core-capacity!)
+        (only-in "./native-profile"
+                 asp-gerbil-scheme-default-native-profile
+                 asp-gerbil-scheme-native-profile-projection-observability-enabled?
+                 asp-gerbil-scheme-native-profile-projection-observer
+                 asp-gerbil-scheme-native-profile-projection-heartbeat-seconds
+                 asp-gerbil-scheme-native-profile-executable-gsc-options
+                 asp-gerbil-scheme-native-profile-prepare!))
 
-(export gslph-package-api-spec
-        gslph-package-api-stage-specs)
+;; asp-gerbil-scheme-package-spec!
+;;   : (-> Syntax Syntax)
+;;   | defaults modules to the local lightweight native source catalog
+;;   | doc m%
+;;       Declare a downstream Gerbil package without importing ASP product
+;;       entrypoints.  The native-spec slot remains an ordinary std/make value.
+;;
+;;       # Examples
+;;
+;;       ```scheme
+;;       (asp-gerbil-scheme-package-spec!
+;;         (example-package @ asp-gerbil-scheme-library-package-prototype)
+;;         (spec spec))
+;;       (spec)
+;;       ;; => std/make BuildSpec
+;;       ```
+;;     %
+(defrules asp-gerbil-scheme-package-spec! ()
+  ((_ (name @ prototype) (spec spec-name) slot ...)
+   (begin
+     (.def (name @ prototype)
+       slot ...)
+     (def (spec-name)
+       (asp-gerbil-scheme-package-build-spec name)))))
 
-;; : (List (List Path))
-;;; Package API prologue stages keep native parser, type, and policy
-;;; owners materialized before report modules so cold CI cannot build a report
-;;; facade without the transitive library graph it imports.
-(def +gslph-package-api-prologue-stages+
-  '(("build-api/package-build.ss")
-    ("build-api/source-coverage.ss"
-     "constants.ss")
-    ("build-api/package-receipt.ss"
-     "build-api/cli-gsc-options.ss"
-     "build-api/launcher-receipt.ss"
-     "build-api/release-modules.ss"
-     "build-api/build-path-contract.ss"
-     "build-api/package-spec.ss"
-     "support/time.ss")
-    ("benchmark/gate.ss")
-    ("benchmark/framework.ss")
-    ("testing/model.ss")
-    ("testing/scope.ss")
-    ("testing/scenario.ss"
-     "testing/performance.ss"
-     "testing/batch.ss")
-    ("testing/selection.ss")
-    ("utilities/functional.ss")
-    ("utilities/contracts.ss")
-    ("utilities/projection.ss")
-    ("utilities/contract-syntax.ss")
-    ("types/core.ss"
-     "types/env.ss"
-     "types/findings.ss"
-     "types/source-findings.ss"
-     "types/model.ss"
-     "types/signatures.ss"
-     "types/subtyping.ss"
-     "types/validation.ss"
-     "types/facade.ss"
-     "parser/model.ss"
-     "parser/support.ss"
-     "parser/formals.ss"
-     "parser/syntax-support.ss"
-     "parser/definition-syntax.ss"
-     "parser/exact-owner.ss"
-     "parser/syntax-calls.ss"
-     "parser/imports.ss"
-     "parser/syntax.ss"
-     "parser/comment-quality-classifier.ss"
-     "parser/comment-quality.ss"
-     "parser/control-flow.ss"
-     "parser/dependency-adapter-quality.ss"
-     "parser/exports.ss"
-     "parser/higher-order.ss"
-     "parser/function-quality.ss"
-     "parser/package.ss"
-     "parser/profile.ss"
-     "parser/quality-shape.ss"
-     "parser/selectors.ss"
-     "parser/source-scope.ss"
-     "parser/source-class.ss"
-     "parser/source-file.ss"
-     "parser/test-source-scope.ss"
-     "parser/typed-contract-token.ss"
-     "parser/typed-contract-scheme.ss"
-     "parser/runtime-contract.ss"
-     "parser/typed-comment-metadata.ss"
-     "parser/typed-contract-diagnostics.ss"
-     "parser/typed-contract.ss"
-     "parser/poo.ss"
-     "parser/parse-workers.ss"
-     "parser/core.ss"
-     "parser/facade.ss"
-     "extensions/poo-pattern-support.ss"
-     "extensions/poo-pattern-typeclass.ss"
-     "extensions/poo-patterns.ss")
-    ("exact-source-projection.ss")
-    ("testing/commands.ss")
-    ("testing/framework.ss")))
+;; : (-> PackageSpec (List NativeBuildItem))
+(def (asp-gerbil-scheme-package-modules package-spec)
+  (let (declared
+        (asp-gerbil-scheme-package-declared-modules package-spec))
+    (or (and (procedure? declared) (declared))
+        declared
+        (alet (entries
+               (asp-gerbil-scheme-package-public-entry-modules package-spec))
+          (and (pair? entries)
+               (asp-gerbil-scheme-native-import-closure
+                (current-directory) entries)))
+      ;; Without declared public entries, gxpkg invokes build.ss in the package
+      ;; directory and the native catalog reads that current directory. Tests
+      ;; and generated build trees stay excluded.
+        (upstream-all-gerbil-modules
+         exclude-dirs:
+         (asp-gerbil-scheme-package-exclude-dirs package-spec)))))
 
-;; Policy stages follow the internal import DAG. A facade must never expand
-;; against a concurrently generated model SSI.
-;; : (List (List Path))
-(def +gslph-package-api-policy-stages+
-  '(("policy/model.ss"
-     "policy/agent-support.ss"
-     "policy/agent-import.ss"
-     "policy/agent-style-steering.ss"
-     "policy/agent-style-gerbil-signal-support.ss"
-     "policy/agent-style-destructuring-signals.ss"
-     "policy/agent-style-performance-signals.ss"
-     "policy/agent-style-message.ss"
-     "policy/prototype.ss"
-     "policy/agent-poo-callees.ss")
-    ("policy/agent-alist-access.ss"
-     "policy/agent-anonymous-pair.ss"
-     "policy/agent-comment.ss"
-     "policy/dependency-adapter-profile.ss"
-     "policy/agent-list-growth.ss"
-     "policy/agent-list-random-access.ss"
-     "policy/agent-macro-io.ss"
-     "policy/agent-source-scope.ss"
-     "policy/agent-string-growth.ss"
-     "policy/agent-style-gerbil-boundary-signals.ss"
-     "policy/agent-style-gerbil-macro-signals.ss"
-     "policy/agent-style-docs.ss"
-     "policy/detection.ss"
-     "policy/agent-poo-object-literal.ss"
-     "policy/agent-build.ss"
-     "policy/modularity.ss"
-     "policy/catalog.ss")
-    ("policy/poo-source.ss"
-     "policy/agent-dependency-adapter.ss"
-     "policy/agent-style-gerbil-signals.ss"
-     "policy/gerbil-utils-source.ss"
-     "policy/agent-poo-loop-performance.ss"
-     "policy/repair.ss")
-    ("policy/agent-package-build-system.ss"
-     "policy/agent-style-shape.ss"
-     "policy/agent-style-quality.ss"
-     "policy/agent-style-details.ss"
-     "policy/agent-macro-protocol.ss"
-     "policy/agent-poo.ss")
-    ("policy/agent-basic.ss"
-     "policy/agent-build-runtime.ss"
-     "policy/agent-style.ss")
-    ("policy/agent.ss")
-    ("policy/core.ss")
-    ("policy/facade.ss")
-    ("policy/gxtest-report.ss")))
+;; : (-> PackageSpec (List NativeBuildItem))
+(def (asp-gerbil-scheme-package-default-native-spec package-spec)
+  (append
+   (asp-gerbil-scheme-package-native-prelude-spec package-spec)
+   (remove-build-files
+    (asp-gerbil-scheme-package-modules package-spec)
+    (append
+     (.get package-spec exclude-modules)
+     (asp-gerbil-scheme-package-product-entry-modules package-spec)))
+   (.get package-spec extra-spec)))
 
-;; : (List (List Path))
-(def +gslph-package-api-epilogue-stages+
-  '(("testing/build-paths.ss"
-     "testing/gxtest-smoke.ss"
-     "testing/gxtest-context.ss"
-     "testing/gxtest-report.ss")
-    ("testing/build-process.ss")
-    ("testing/gxtest-syntax.ss")
-    ("testing/memory-profile.ss"
-     "testing/execution-profile.ss")
-    ("testing/gxtest-imports.ss")
-    ("testing/gxtest-sources.ss")
-    ("testing/gxtest-discovery.ss")
-    ("testing/build-support.ss"
-     "testing/build.ss")
-    ("testing/gxtest-delegate.ss")
-    ("testing/gxtest-expression.ss")
-    ("testing/gxtest-receipts.ss")
-    ("testing/gxtest-policy.ss"
-     "testing/gxtest-build.ss")
-    ("testing/gxtest-execution.ss")
-    ("testing/gxtest-run.ss")
-    ("testing/build-runtime.ss")
-    ("testing/build-runner.ss")
-    ("testing/gxtest-runner.ss")
-    ("testing/project-build.ss")
-    ("build-api/project-build.ss")
-    ("build-api/project-cli.ss")))
+;; : (-> PackageSpec (List NativeBuildItem))
+(def (asp-gerbil-scheme-package-native-spec package-spec)
+  (let* ((native-profile
+          (asp-gerbil-scheme-package-native-profile package-spec))
+         (_prepared
+          ((asp-gerbil-scheme-native-profile-prepare! native-profile)
+           (asp-gerbil-scheme-package-pkg-config-libs package-spec)))
+         (native-options-resolver
+          (asp-gerbil-scheme-package-native-options-resolver package-spec))
+        (native-options
+         (if native-options-resolver
+           (native-options-resolver)
+           []))
+        (projector (.get package-spec native-spec-projector))
+        (native-spec (.get package-spec native-spec))
+        (generated-modules
+         (asp-gerbil-scheme-package-generated-modules package-spec)))
+    (map (lambda (item)
+           (match item
+             ([(? (cut member <> '(exe: static-exe:))) . _]
+              (normalize-spec
+               item
+               (append
+                (asp-gerbil-scheme-native-profile-executable-gsc-options
+                 native-profile)
+                native-options)))
+             ((or (? string?) [(? (cut member <> '(gxc: gsc:))) . _])
+              (if (null? native-options) item
+                (normalize-spec item native-options)))
+             (else item)))
+         (asp-gerbil-scheme-project-generated-modules
+          (cond
+           ((procedure? projector)
+            (projector package-spec))
+           (projector
+            (error "Package Spec native-spec-projector must be a procedure"
+                   projector))
+           (native-spec
+            native-spec)
+           (else
+            (asp-gerbil-scheme-package-default-native-spec package-spec)))
+         generated-modules))))
 
-;; : (List (List Path))
-(def +gslph-package-api-command-prologue-stages+
-  '(("support/args.ss"
-     "support/io.ss")))
+(def (native-build-elapsed-milliseconds started-jiffy)
+  (quotient (* (- (current-jiffy) started-jiffy) 1000)
+            (jiffies-per-second)))
 
-;; : (List String)
-(def +gslph-package-api-building-stages+
-  '(("building/model.ss"
-     "building/native-toolchain.ss")
-    ("building/build-script.ss")
-    ("building/std-builder.ss")
-    ("building/observability.ss")
-    ("building/facade.ss")
-    ("building/declarative.ss"
-     "building/commands.ss")
-    ("testing/building.ss")))
+(def (write-native-build-observation! profile phase started-jiffy . fields)
+  ((asp-gerbil-scheme-native-profile-projection-observer profile)
+   phase
+   (native-build-elapsed-milliseconds started-jiffy)
+   fields))
 
-;; Native build interfaces must precede directory-wide parallel compilation.
-;; : (List (List Path))
-(def +gslph-package-api-build-api-stages+
-  '(("build-api/artifact-cleanup.ss"
-     "build-api/component-closure.ss")
-    ("build-api/native-build.ss")
-    ("build-api/framework.ss")))
+;; Keep the native PackageSpec projection observable without changing its
+;; ownership or caching its result.  The heartbeat interval is declared by the
+;; PackageSpec's native POO profile; std/make retains planning and execution.
+(def (call-with-native-build-projection-observation package-spec thunk)
+  (let (profile (asp-gerbil-scheme-package-native-profile package-spec))
+    (if (not ((asp-gerbil-scheme-native-profile-projection-observability-enabled?
+               profile)))
+      (thunk)
+      (let* ((started-jiffy (current-jiffy))
+           (interval
+            (asp-gerbil-scheme-native-profile-projection-heartbeat-seconds
+             profile))
+           (port (current-output-port))
+           (heartbeat #f))
+      (unless (and (real? interval) (> interval 0))
+        (error "native profile projection heartbeat must be positive" interval))
+      (write-native-build-observation!
+       profile 'spec-project-start started-jiffy
+       "owner=asp-build-api/native-import-closure"
+       "executor=std/make")
+      (dynamic-wind
+        (lambda ()
+          (set! heartbeat
+                (make-thread
+                 (lambda ()
+                   (let loop ()
+                     (thread-sleep! interval)
+                     (parameterize ((current-output-port port))
+                       (write-native-build-observation!
+                        profile 'spec-project-active started-jiffy
+                        "owner=asp-build-api/native-import-closure"
+                        "executor=std/make"))
+                     (loop)))))
+          (thread-start! heartbeat))
+        (lambda ()
+          (let (result (thunk))
+            (write-native-build-observation!
+             profile 'spec-project-complete started-jiffy
+             (string-append "targetCount="
+                            (number->string (length result)))
+             "owner=asp-build-api/native-import-closure"
+             "executor=std/make")
+            result))
+        (lambda ()
+          (when heartbeat
+            (thread-terminate! heartbeat))))))))
 
-(def +gslph-package-api-directories+
-  '("utilities" "types" "parser" "policy" "protocol" "extensions" "language" "format" "commands"))
+;; The macro-generated spec procedure is the direct std/make boundary. A
+;; PackageSpec remains the POO owner;
+;; spec-projector selects its native or policy-admitted projection.
+;; : (-> PackageSpec (List NativeBuildItem))
+(def (asp-gerbil-scheme-package-build-spec package-spec)
+  (initialize-native-build-core-capacity!)
+  (let (projector (.get package-spec spec-projector))
+    (unless (procedure? projector)
+      (error "Package Spec spec-projector must be a procedure" projector))
+    ;; GERBIL_BUILD_VERBOSE activates a native PackageSpec projection receipt;
+    ;; std/make still owns planning, currentness, compilation, and its output.
+    (call-with-native-build-projection-observation
+     package-spec (lambda () (projector package-spec)))))
 
-;; : (List (List Path))
-(def +gslph-package-api-launcher-stages+
-  '(("search-light-launcher.ss")
-    ("cli-launcher.ss")))
-
-;; : (-> String Boolean)
-(def (gslph-ss-file? file)
-  (and (string? file)
-       (string-suffix? ".ss" file)))
-
-;; : (-> String (List Path))
-(def (gslph-package-api-directory-spec dir)
-  (let (source-dir (string-append "src/" dir))
-    (if (file-exists? source-dir)
-      (map (lambda (file) (string-append dir "/" file))
-           (sort (filter gslph-ss-file? (directory-files source-dir))
-                 string<?))
-      [])))
-
-;; : (-> (List (List Path)) (List Path))
-(def (gslph-package-api-flatten-stages stages)
-  (append-map (lambda (stage) stage) stages))
-
-(def gslph-package-api-stage-specs-cache #f)
-(def gslph-package-api-spec-cache #f)
-
-;; : (-> (List (List Path)))
-(def (gslph-package-api-stage-specs/fresh)
-  (append +gslph-package-api-prologue-stages+
-          +gslph-package-api-policy-stages+
-          +gslph-package-api-building-stages+
-          +gslph-package-api-build-api-stages+
-          +gslph-package-api-command-prologue-stages+
-          (map gslph-package-api-directory-spec
-                +gslph-package-api-directories+)
-          +gslph-package-api-launcher-stages+
-          +gslph-package-api-epilogue-stages+))
-
-;; : (-> (List (List Path)))
-(def (gslph-package-api-stage-specs)
-  (or gslph-package-api-stage-specs-cache
-      (let (stages (gslph-package-api-stage-specs/fresh))
-        (set! gslph-package-api-stage-specs-cache stages)
-        stages)))
-
-;; : (-> (List Path))
-(def (gslph-package-api-spec)
-  (or gslph-package-api-spec-cache
-      (let (spec (gslph-package-api-flatten-stages
-                  (gslph-package-api-stage-specs)))
-        (set! gslph-package-api-spec-cache spec)
-        spec)))
+;; Import-safe semantic base for concrete project library and provider specs.
+;; Script entrypoints remain in top-level build.ss files; this module owns only
+;; reusable POO values and projections.
+(defpoo-object-family
+  (prototype asp-gerbil-scheme-library-package-prototype
+             (role 'library)
+             (modules #f)
+             (public-entry-modules [])
+             (exclude-dirs upstream-default-exclude-dirs)
+             (exclude-modules [])
+             (native-prelude-spec [])
+             (extra-spec [])
+             (product-entry-modules [])
+             (generated-modules [])
+             (native-profile asp-gerbil-scheme-default-native-profile)
+             (native-capabilities [])
+             (pkg-config-libs #f)
+             (nix-deps #f)
+             (native-options-resolver #f)
+             (spec-projector asp-gerbil-scheme-package-native-spec)
+             (native-spec-projector #f)
+             (native-spec #f))
+  (accessors poo-family-ref
+             (required
+              (asp-gerbil-scheme-package-declared-modules modules)
+              (asp-gerbil-scheme-package-public-entry-modules
+               public-entry-modules)
+              (asp-gerbil-scheme-package-exclude-dirs exclude-dirs)
+              (asp-gerbil-scheme-package-product-entry-modules
+               product-entry-modules)
+              (asp-gerbil-scheme-package-native-prelude-spec
+               native-prelude-spec)
+              (asp-gerbil-scheme-package-generated-modules generated-modules)
+              (asp-gerbil-scheme-package-native-profile native-profile)
+              (asp-gerbil-scheme-package-native-capabilities
+               native-capabilities)
+              (asp-gerbil-scheme-package-pkg-config-libs pkg-config-libs)
+              (asp-gerbil-scheme-package-nix-deps nix-deps)
+              (asp-gerbil-scheme-package-native-options-resolver
+               native-options-resolver))
+             (optional)))

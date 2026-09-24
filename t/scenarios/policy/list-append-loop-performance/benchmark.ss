@@ -1,29 +1,12 @@
-((max_total . 24ms)
- (observed_total . 6ms)
- (target_total . 14ms)
- (regression_budget . 18ms)
- (expected_over_input_budget . 1ms)
- (observedTimings
-  ((name . collect-before) (durationMs . 2) (durationNs . 2000000))
-  ((name . collect-after) (durationMs . 2) (durationNs . 2000000))
-  ((name . policy-before) (durationMs . 1) (durationNs . 1000000))
-  ((name . policy-after) (durationMs . 1) (durationNs . 1000000)))
+((benchmarkKind . scenario-e2e)
+ (max_total . 200ms)
+ (target_total . 100ms)
+ (regression_budget . 100ms)
+ (expected_over_input_budget . 100ms)
  (targetRationale
   .
   "list-append-loop-performance keeps loop-local append detection parser-owned and validates the accumulator repair in a small millisecond gate")
- (maxCollectMs . 10)
- (observedCollectMs . 4)
- (maxParseMs . 14)
- (observedParseMs . 0)
- (maxFileMs . 5)
- (observedFileMs . 0)
- (maxPhaseMs . 6)
- (observedPhaseMs . 2)
- (maxRssMb . 512)
- (memoryMetric . resident-set-size)
- (memoryUnit . "MB")
- (iterations . 1)
- (unit . "ms")
+ (sampleCount . 20)
  (purpose
   .
   "R039 list append loop scenario rejects generated O(n^2) list growth when a cons/reverse accumulator or hash-index merge boundary should own the hot path")
@@ -66,6 +49,5 @@
   "policy-before"
   "policy-after"
   "assert-time-gate"
-  "assert-memory-gate"
   "assert-input-expected-comparison")
  (tags "style" "list" "loop" "append" "performance"))

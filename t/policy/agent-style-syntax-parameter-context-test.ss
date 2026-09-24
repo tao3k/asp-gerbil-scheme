@@ -2,7 +2,7 @@
 ;;; Syntax-parameterized macro context scenario policy.
 
 (import :std/test
-        :policy/agent-style-support)
+        "./agent-style-support")
 (export agent-style-syntax-parameter-context-policy-test)
 
 ;; PolicyTest

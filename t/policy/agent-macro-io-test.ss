@@ -1,13 +1,13 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil scheme harness macro expansion IO policy tests.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :policy/fixtures
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade)
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        "./fixtures"
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade)
 
 (export agent-macro-io-policy-test)
 

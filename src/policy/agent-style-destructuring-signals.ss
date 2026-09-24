@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned destructuring signals for typed-combinator style policy.
 
-(import :gslph/src/parser/facade
-        (only-in :std/srfi/13 string-contains)
-        (only-in :std/sugar filter ormap))
+(import :asp-gerbil-scheme/src/parser/facade
+        (only-in :std/string/misc string-contains)
+        )
 
 (export typed-combinator-style-destructuring-quality-facets
         typed-combinator-style-destructuring-signals

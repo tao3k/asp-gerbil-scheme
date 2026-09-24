@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 
 (import :std/test
-        (only-in :std/srfi/1 find)
-        (only-in :std/srfi/13 string-contains)
-        (only-in :std/text/base64 base64-encode)
-        :gslph/src/exact-source-projection)
+        (only-in :std/list/list find)
+        (only-in :std/string/misc string-contains)
+        (only-in :std/encoding/base64 base64-encode)
+        :asp-gerbil-scheme/src/exact-source-projection)
 
 (export exact-source-projection-test)
 

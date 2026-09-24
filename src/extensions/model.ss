@@ -1,8 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Provider-owned extension fact model.
 
-(import (only-in :std/srfi/13 string-join)
-        (only-in :std/sugar hash))
+(import :gerbil/runtime/gambit
+        (only-in :std/string/misc string-join)
+        )
 
 (export extension-fact
         make-extension-fact

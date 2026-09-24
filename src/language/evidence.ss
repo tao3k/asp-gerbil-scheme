@@ -1,8 +1,8 @@
 ;;; -*- Gerbil -*-
 ;;; Gerbil language/runtime/std evidence facts for agent-facing search.
 
-(import (only-in :std/srfi/13 string-contains string-index)
-        (only-in :std/sugar filter ormap))
+(import :gerbil/runtime/gambit
+        (only-in :std/string/misc string-contains string-index))
 
 (export runtime-bin
         evidence-fact
@@ -141,12 +141,12 @@
          (tag (or (gerbil-runtime-tag version-string) "unknown-runtime-tag"))
          (runtime-resolver
           (hash (scheme "gerbil-runtime-source")
-                (owner "asp")
+                (owner "gerbil-scheme")
                 (stateNamespace "runtime-source/gerbil-scheme")
                 (versionKey tag)
                 (selectorFormat "gerbil-runtime-source://<source-path>#<symbol>")
                 (output "code-with-comments")
-                (indexOwner "asp-structural-index"))))
+                (indexOwner "asp-server"))))
     [(evidence-fact
       "gerbil-runtime-source"
       "Gerbil language facts must come from a source checkout matched to the active runtime version."
@@ -165,11 +165,11 @@
                              (checkoutPolicy "exact-tag-from-active-runtime")
                              (statePathPolicy "asp-state-managed")
                              (selectorScheme "runtime-source-owner-selector")))
-            (acquisition (hash (owner "asp")
-                               (operation "clone-or-fetch-checkout-index")
+            (acquisition (hash (owner "asp-server")
+                               (operation "clone-or-fetch-checkout")
                                (stateNamespace "runtime-source/gerbil-scheme")
                                (versionKey tag)
-                               (indexOwner "asp-structural-index")))
+                               (indexOwner "asp-server")))
             (selectorResolver runtime-resolver)
             (sourceExamples
              [(hash (id "std-sugar-defrule")
@@ -231,7 +231,7 @@
              (selector "gerbil-runtime-source://src/gerbil/core/module-sugar.ss#rename-out"))]
       "agent-needs-gerbil-macro-facts-from-versioned-source"
       "clone-active-runtime-source-before-answering-language-or-macro-usage"
-      ["no-memory" "version-matched-source" "asp-state-managed-checkout" "source-index-required" "code-with-comments-output" "selector-resolver-owned-by-asp" "source-ranking-prefers-runtime-source" "bootstrap-stubs-labelled"]
+      ["no-memory" "version-matched-source" "asp-state-managed-checkout" "source-index-required" "source-index-owned-by-asp-server" "code-with-comments-output" "selector-resolver-owned-by-gerbil-scheme" "source-ranking-prefers-runtime-source" "bootstrap-stubs-labelled"]
       [(hash (id "memory-language-answer")
              (risk "agent-answers-gerbil-language-usage-from-training-memory")
              (correction "acquire-runtime-source-and-search-source-facts"))
@@ -240,7 +240,7 @@
              (correction "checkout-source-tag-derived-from-active-runtime"))
        (hash (id "unindexed-source-checkout")
              (risk "agent-clones-source-but-searches-it-with-raw-grep")
-             (correction "index-checkout-through-asp-before-agent-facing-search"))])
+             (correction "defer-runtime-source-index-lookup-to-asp-server-ipc"))])
      (evidence-fact
       "gerbil-runtime-writeenv-source"
       "Gerbil writeenv and printer hook guidance must come from the active runtime source before POO :wr roundtrip claims."
@@ -259,11 +259,11 @@
                              (checkoutPolicy "exact-tag-from-active-runtime")
                              (statePathPolicy "asp-state-managed")
                              (selectorScheme "runtime-source-owner-selector")))
-            (acquisition (hash (owner "asp")
-                               (operation "clone-or-fetch-checkout-index")
+            (acquisition (hash (owner "asp-server")
+                               (operation "clone-or-fetch-checkout")
                                (stateNamespace "runtime-source/gerbil-scheme")
                                (versionKey tag)
-                               (indexOwner "asp-structural-index")))
+                               (indexOwner "asp-server")))
             (selectorResolver runtime-resolver)
             (sourceExamples
              [(hash (id "runtime-writeenv-binding")
@@ -314,7 +314,7 @@
              (correction "keep-poo-io-partial-until-runtime-source-backed-roundtrip-witness-exists"))
        (hash (id "raw-runtime-source-search")
              (risk "agent-clones-gerbil-source-but-searches-it-with-raw-grep")
-             (correction "use-asp-managed-runtime-source-index-before-agent-facing-search"))])]))
+             (correction "defer-runtime-source-index-lookup-to-asp-server-ipc"))])]))
 ;;; Boundary:
 ;;; - compiler-evidence-facts records upstream optimizer facts as medium-weight evidence.
 ;;; - It must not promote optimizer metadata into a complete type theory or proof system.
@@ -324,12 +324,12 @@
          (tag (or (gerbil-runtime-tag version-string) "unknown-runtime-tag"))
          (compiler-resolver
           (hash (scheme "gerbil-runtime-source")
-                (owner "asp")
+                (owner "gerbil-scheme")
                 (stateNamespace "runtime-source/gerbil-scheme")
                 (versionKey tag)
                 (selectorFormat "gerbil-runtime-source://<source-path>#<symbol>")
                 (output "code-with-comments")
-                (indexOwner "asp-structural-index"))))
+                (indexOwner "asp-server"))))
     [(evidence-fact
       "gerbil-compiler-medium-weight-evidence"
       "Gerbil compiler optimizer metadata supports medium-weight derivation witnesses, not a complete proof system."
@@ -352,11 +352,11 @@
                              (checkoutPolicy "exact-tag-from-active-runtime")
                              (statePathPolicy "asp-state-managed")
                              (selectorScheme "runtime-source-owner-selector")))
-            (acquisition (hash (owner "asp")
-                               (operation "clone-or-fetch-checkout-index")
+            (acquisition (hash (owner "asp-server")
+                               (operation "clone-or-fetch-checkout")
                                (stateNamespace "runtime-source/gerbil-scheme")
                                (versionKey tag)
-                               (indexOwner "asp-structural-index")))
+                               (indexOwner "asp-server")))
             (selectorResolver compiler-resolver)
             (sourceExamples
              [(hash (id "compiler-signature-metadata")
@@ -534,7 +534,7 @@
           (policyRules ["GERBIL-SCHEME-MOD-R006"
                         "GERBIL-SCHEME-AGENT-POLICY-004"
                         "GERBIL-SCHEME-AGENT-POLICY-005"])
-          (styleDoc "languages/gerbil-scheme-language-project-harness/docs/50-59-policy/51.05-current-project-programming-style.org"))
+          (styleDoc "languages/asp-gerbil-scheme/docs/50-59-policy/51.05-current-project-programming-style.org"))
     [(hash (role "style-reference")
            (symbol "generating<-list")
            (selector "gerbil-utils://generator.ss#generating<-list"))
@@ -571,10 +571,10 @@
     "std/srfi/13"
     "SRFI-13 string procedures are available to the harness and used by search rendering."
     "fact"
-    "provider-imports-:std/srfi/13"
+    "provider-imports-:std/string/misc"
     "search std string"
     ["std" "standard-library" "srfi" "srfi-13" "std/srfi/13" "string" "string-contains" "string-prefix"]
-    (hash (module ":std/srfi/13")
+    (hash (module ":std/string/misc")
           (capabilities ["string-contains" "string-prefix?" "string-suffix?"]))
     []
     "agent-does-not-know-gerbil-standard-string-module"
@@ -601,14 +601,14 @@
            (correction "use-call-with-output-string-from-std-misc-ports"))])
    (evidence-fact
     "std/text/json"
-    "Gerbil JSON parsing is available through :std/text/json; import read-json with only-in when the harness needs machine packet validation."
+    "Gerbil JSON parsing is available through :std/encoding/json; import read-json with only-in when the harness needs machine packet validation."
     "fact"
-    "provider-imports-:std/text/json"
+    "provider-imports-:std/encoding/json"
     "search std json"
-    ["std" "standard-library" "json" "std/text/json" ":std/text/json" "read-json" "only-in"]
-    (hash (module ":std/text/json")
+    ["std" "standard-library" "json" "std/text/json" ":std/encoding/json" "read-json" "only-in"]
+    (hash (module ":std/encoding/json")
           (capabilities ["read-json"])
-          (minimalImport "(import (only-in :std/text/json read-json))"))
+          (minimalImport "(import (only-in :std/encoding/json read-json))"))
     []
     "agent-needs-json-packet-validation-without-python-parser"
     "use-gerbil-std-text-json-read-json-with-only-in"
@@ -676,9 +676,9 @@
              (sourceRef
               (hash (kind "provider-pattern-registry")
                     (manager "native-provider")
-                    (package "gerbil-scheme-language-project-harness")
+                    (package "asp-gerbil-scheme")
                     (dependency "project-contract-patterns")
-                    (repository "agent-semantic-protocols/languages/gerbil-scheme-language-project-harness")
+                    (repository "agent-semantic-protocols/languages/asp-gerbil-scheme")
                     (pathPolicy "workspace-logical-selector")
                     (selectorScheme "project-contract-logical-symbol")))
              (sourceOwners ["src/utilities/contracts.ss"
@@ -788,9 +788,9 @@
              (origin "provider")
              (sourceRef (hash (kind "provider-source")
                               (manager "native-provider")
-                              (package "gerbil-scheme-language-project-harness")
-                              (dependency "gerbil-scheme-language-project-harness")
-                              (repository "agent-semantic-protocols/languages/gerbil-scheme-language-project-harness")
+                              (package "asp-gerbil-scheme")
+                              (dependency "asp-gerbil-scheme")
+                              (repository "agent-semantic-protocols/languages/asp-gerbil-scheme")
                               (pathPolicy "repository-relative")
                               (selectorScheme "provider-owner-selector")))
              (sourceOwners ["src/checker/forms.ss"

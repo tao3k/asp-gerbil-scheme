@@ -4,20 +4,29 @@
 ;;; display projection. Validation, compatibility, and proof rules live in
 ;;; sibling modules so the model layer stays constructor-oriented.
 
-(import :gerbil/gambit
-        (only-in :std/srfi/1 drop-right every last lset=)
-        :gslph/src/utilities/functional
-        (only-in :std/sugar cut filter-map ormap)
-        (only-in :gslph/src/utilities/contracts
+(import :gerbil/runtime/gambit
+        (only-in :std/list/list drop-right every last)
+        :asp-gerbil-scheme/src/utilities/functional
+
+        (only-in :asp-gerbil-scheme/src/utilities/contracts
                  make-object-type-contract
                  make-slot-contract
                  object-contract-issues
                  object-contract-valid?
                  require-object-contract!)
-        (only-in :gslph/src/utilities/projection
+        (only-in :asp-gerbil-scheme/src/utilities/projection
                  object-contract-report-rows
                  object-type-contract->alist)
-        :gslph/src/utilities/contract-syntax)
+        (only-in :asp-gerbil-scheme/src/types/model-syntax
+                 function-keyword-marker?
+                 function-keyword-name
+                 list-type-shorthand-sexpr?
+                 normalize-type-name
+                 strip-trailing-colon
+                 type-sexpr-first-operand
+                 type-sexpr-second-operand
+                 type-sexpr-third-operand)
+        :asp-gerbil-scheme/src/utilities/contract-syntax)
 
 (export make-type-unknown
         make-type-any
@@ -221,8 +230,11 @@
   (and (eq? (type-kind left) (type-kind right))
        (case (type-kind left)
          ((record)
-          (and (lset= equal?
-                       (type-record-required left)
+          (and (andmap (lambda (name)
+                         (member name (type-record-required right)))
+                       (type-record-required left))
+               (andmap (lambda (name)
+                         (member name (type-record-required left)))
                        (type-record-required right))
                (record-fields=? (type-record-fields left)
                                 (type-record-fields right))))
@@ -358,12 +370,6 @@
         (else (make-type-unknown)))))
     (else (make-type-unknown))))
 
-;; : (-> TypeDatum Boolean )
-(def (list-type-shorthand-sexpr? sexpr)
-  (and (list? sexpr)
-       (= (length sexpr) 1)
-       (pair? (car sexpr))))
-
 ;; : (-> TypeName (List TypeVariable) TypeSpec )
 (def (parse-type-symbol symbol bound-vars)
   (parse-type-name (normalize-type-name symbol) bound-vars))
@@ -430,37 +436,6 @@
          parse-union-type-sexpr)
    (cons '("record" "Record")
          parse-record-type-sexpr)))
-
-;;; Operand access boundary:
-;;; - Contract parser helpers should describe grammar slots, not cdr depth.
-;;; - Missing operands degrade through the supplied default so malformed
-;;;   contracts stay conservative without scattering safe-cadr variants.
-;; : (-> TypeDatum Default TypeDatum )
-(def (type-sexpr-first-operand sexpr . maybe-default)
-  (match (cdr sexpr)
-    ([value . _] value)
-    (else (type-sexpr-operand-default maybe-default))))
-
-;;; Slot invariant: the second grammar operand is present only when the tail has
-;;; at least two elements; otherwise the caller-owned default preserves
-;;; malformed-contract degradation.
-;; : (-> TypeDatum Default TypeDatum )
-(def (type-sexpr-second-operand sexpr . maybe-default)
-  (match (cdr sexpr)
-    ([_ value . _] value)
-    (else (type-sexpr-operand-default maybe-default))))
-
-;;; Slot invariant: the third grammar operand is reserved for optional arity
-;;; metadata such as `function*`; missing metadata must not become a type name.
-;; : (-> TypeDatum Default TypeDatum )
-(def (type-sexpr-third-operand sexpr . maybe-default)
-  (match (cdr sexpr)
-    ([_ _ value . _] value)
-    (else (type-sexpr-operand-default maybe-default))))
-
-;; : (-> (List Default) TypeDatum )
-(def (type-sexpr-operand-default maybe-default)
-  (if (pair? maybe-default) (car maybe-default) 'unknown))
 
 ;; : (-> TypeDatum (List TypeVariable) TypeConstructor TypeSpec )
 (def (parse-unary-type-sexpr sexpr bound-vars make)
@@ -542,20 +517,6 @@
     (cons (parse-type-sexpr* (car items) bound-vars)
           (parse-function-parameters (cdr items) bound-vars)))))
 
-;; : (-> TypeDatum Boolean)
-(def (function-keyword-marker? datum)
-  (or (keyword? datum)
-      (and (symbol? datum)
-           (string-trailing-colon? (symbol->string datum)))))
-
-;; : (-> TypeDatum KeywordName)
-(def (function-keyword-name datum)
-  (cond
-   ((keyword? datum) (keyword->string datum))
-   ((symbol? datum) (strip-trailing-colon (symbol->string datum)))
-   ((string? datum) (strip-trailing-colon datum))
-   (else "unknown")))
-
 ;;; Invariant:
 ;;; - forall extends the lexical type-variable environment only for its body.
 ;;; - Malformed binders collapse to unknown instead of inventing free variables.
@@ -595,13 +556,6 @@
                 (let (found (assoc (car field) right))
                   (and found (type=? (cdr field) (cdr found)))))
               left)))
-;; : (-> TypeName TypeName )
-(def (normalize-type-name name)
-  (cond
-   ((keyword? name) (keyword->string name))
-   ((symbol? name) (symbol->string name))
-   ((string? name) name)
-   (else "unknown")))
 ;; : (-> String NormalizeFieldName )
 (def (normalize-field-name name)
   (strip-trailing-colon (normalize-type-name name)))
@@ -688,14 +642,3 @@
     (if (and (pair? params) (pair? (cdr params)))
       (cadr params)
       (make-type-unknown))))
-;; : (-> SourceLine StripTrailingColon )
-(def (strip-trailing-colon text)
-  (let (size (string-length text))
-    (if (and (> size 0) (eq? (string-ref text (- size 1)) #\:))
-      (substring text 0 (- size 1))
-      text)))
-;; : (-> String Boolean)
-(def (string-trailing-colon? text)
-  (let (size (string-length text))
-    (and (> size 0)
-         (eq? (string-ref text (- size 1)) #\:))))

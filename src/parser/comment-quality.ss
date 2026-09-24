@@ -1,13 +1,13 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned engineering comment quality facts.
 
-(import :gerbil/gambit
-        :gslph/src/parser/comment-quality-classifier
-        :gslph/src/parser/model
+(import :gerbil/runtime/gambit
+        :asp-gerbil-scheme/src/parser/comment-quality-classifier
+        :asp-gerbil-scheme/src/parser/model
         (only-in :std/misc/ports read-file-lines)
-        (only-in :std/srfi/1 drop-while iota take take-while)
-        (only-in :std/srfi/13 string-contains string-downcase string-empty? string-prefix?)
-        (only-in :std/sugar cut filter find hash ormap))
+        (only-in :std/list/list drop-while iota take take-while)
+        (only-in :std/string/misc string-contains string-downcase string-empty? string-prefix?)
+        )
 
 (export comment-quality-facts-from-source
         comment-quality-facts-from-lines)

@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Parser-owned reader facts shared by formatter and policy code.
 
-(import :gerbil/gambit)
+(import :gerbil/runtime/gambit)
 
 (export parser-reader-initial-state
         parser-reader-literal-line?

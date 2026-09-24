@@ -1,13 +1,13 @@
 ;;; -*- Gerbil -*-
 ;;; Typed-combinator documentation and invalid-contract detail helpers.
 
-(import :gslph/src/parser/facade
-        :gslph/src/policy/agent-support
-        (only-in :std/misc/list unique)
-        (only-in :std/srfi/1 take)
-        (only-in :std/sugar cut filter filter-map hash hash-get ormap))
+(import :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-support
+        (only-in :asp-gerbil-scheme/src/support/list unique)
+        (only-in :std/list/list take)
+        )
 
-(import :gslph/src/utilities/functional)
+(import :asp-gerbil-scheme/src/utilities/functional)
 
 (export typed-combinator-style-missing-doc-targets
         typed-combinator-style-missing-forall-targets

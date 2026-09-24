@@ -2,7 +2,7 @@
 ;;; Macro metaprogramming decision scenario policy.
 
 (import :std/test
-        :policy/agent-style-support)
+        "./agent-style-support")
 (export agent-style-macro-metaprogramming-decision-policy-test)
 
 ;; PolicyTest

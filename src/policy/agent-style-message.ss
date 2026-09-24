@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Typed-combinator policy messages and contract summary helpers.
 
-(import :gerbil/gambit
-        :gslph/src/parser/facade
-        (only-in :std/sugar foldl))
+(import :gerbil/runtime/gambit
+        :asp-gerbil-scheme/src/parser/facade
+        )
 
 (export typed-combinator-style-message
         typed-combinator-style-missing-count

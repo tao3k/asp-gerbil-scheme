@@ -27,14 +27,16 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-          - os: ubuntu-latest
+            gerbil-asset: gerbil-v0.19-2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb-linux-x86_64-portable-full-single-host-unlimited-patchf5cedd8168cb
+            gerbil-sha256: 9844ba362fdf6f1c5e8a4411e462a466d52dee0d541f8e84f61091cec0e5e740
+          - os: macos-latest
             target: aarch64-apple-darwin
+            gerbil-asset: gerbil-v0.19-2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb-darwin-aarch64-gcc16-arm64-aot-tools-single-host-unlimited-patchf5cedd8168cb
+            gerbil-sha256: 8d9c88434aed6301eaebb719bf52472f05c2368eafc630e8a9f1d67cc9895a21
     env:
-      BINARY: gslph
-      GERBIL_LABEL: source-v0.18.2-4-gadd92248
-      GERBIL_REF: add922481cec81d05431db014bcb91b30485cf21
-      GERBIL_PREFIX: ${{ github.workspace }}/.ci/gerbil/source-v0.18.2-4-gadd92248
-      GERBIL_SRC: ${{ github.workspace }}/.ci/gerbil-src/source-v0.18.2-4-gadd92248
+      BINARY: asp-gerbil-scheme
+      GERBIL_REF: 2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb
+      GERBIL_PREFIX: ${{ github.workspace }}/.ci/gerbil/release-v0.19-2591dcd
       GH_TOKEN: ${{ github.token }}
       RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag || github.ref_name }}
       TARGET: ${{ matrix.target }}
@@ -58,6 +60,7 @@ jobs:
           fi
 
       - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -72,47 +75,58 @@ jobs:
             sqlite3 \
             zlib1g-dev
 
-      - name: Restore Gerbil install cache
-        id: gerbil-cache
-        uses: actions/cache/restore@v4
-        with:
-          path: .ci/gerbil/${{ env.GERBIL_LABEL }}
-          key: gerbil-install-${{ runner.os }}-${{ runner.arch }}-${{ env.GERBIL_LABEL }}-${{ env.GERBIL_REF }}
-          restore-keys: |
-            gerbil-install-${{ runner.os }}-${{ runner.arch }}-${{ env.GERBIL_LABEL }}-
-
-      - name: Build Gerbil
-        if: steps.gerbil-cache.outputs.cache-hit != 'true'
+      - name: Install macOS system dependencies
+        if: runner.os == 'macOS'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
-          build_cores() {
-            nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2
-          }
-          mkdir -p "$(dirname "$GERBIL_SRC")" "$(dirname "$GERBIL_PREFIX")"
-          rm -rf "$GERBIL_SRC" "$GERBIL_PREFIX"
-          git clone https://git.cons.io/mighty-gerbils/gerbil "$GERBIL_SRC"
-          cd "$GERBIL_SRC"
-          git checkout "$GERBIL_REF"
-          ./configure --prefix="$GERBIL_PREFIX"
-          echo "(def (gerbil-version-string) \"ci-${GERBIL_REF}\")" > src/gerbil/runtime/version.ss
-          . ./build-env.sh
-          for target in prepare gambit boot-gxi stage0 stage1 stdlib libgerbil lang r7rs-large srfi tools; do
-            GERBIL_BUILD_CORES="$(build_cores)" ./src/build.sh "$target"
-          done
-          ./install.sh
+          brew unlink gambit-scheme || true
+          brew unlink ghostscript || true
+          brew install gcc jq openssl pkg-config sqlite zlib
+          gcc_prefix="$(brew --prefix gcc)"
+          gcc_bin="$(
+            find "$gcc_prefix/bin" -maxdepth 1 -type f -name 'gcc-[0-9]*' \
+              | awk -F- '{print $NF "\t" $0}' \
+              | sort -n \
+              | tail -n 1 \
+              | cut -f2-
+          )"
+          test -x "$gcc_bin"
+          echo "GERBIL_GCC=$gcc_bin" >> "$GITHUB_ENV"
+          openssl_prefix="$(brew --prefix openssl@3 2>/dev/null || brew --prefix openssl)"
+          echo "PKG_CONFIG_PATH=$openssl_prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}" >> "$GITHUB_ENV"
 
-      - name: Save Gerbil install cache
-        if: steps.gerbil-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: .ci/gerbil/${{ env.GERBIL_LABEL }}
-          key: gerbil-install-${{ runner.os }}-${{ runner.arch }}-${{ env.GERBIL_LABEL }}-${{ env.GERBIL_REF }}
-
-      - name: Activate Gerbil
+      - name: Download verified Gerbil v0.19 release
+        env:
+          GERBIL_ASSET: ${{ matrix.gerbil-asset }}
+          GERBIL_SHA256: ${{ matrix.gerbil-sha256 }}
         run: |
+          set -euo pipefail
+          if [ "$RUNNER_OS" = macOS ]; then
+            test "$(uname -m)" = arm64
+          fi
+          archive="$RUNNER_TEMP/$GERBIL_ASSET.tar.gz"
+          curl --fail --location --retry 3 --output "$archive" \
+            "https://github.com/tao3k/gerbil-bazel/releases/download/$GERBIL_ASSET/$GERBIL_ASSET.tar.gz"
+          if command -v sha256sum >/dev/null 2>&1; then
+            printf '%s  %s\n' "$GERBIL_SHA256" "$archive" | sha256sum --check -
+          else
+            printf '%s  %s\n' "$GERBIL_SHA256" "$archive" | shasum -a 256 --check -
+          fi
+          mkdir -p "$GERBIL_PREFIX"
+          tar -xzf "$archive" -C "$GERBIL_PREFIX" --strip-components=1
+          jq -e --arg revision "$GERBIL_REF" \
+            '.upstreamRevision == $revision' \
+            "$GERBIL_PREFIX/gerbil-toolchain-release.json"
+          source "$GERBIL_PREFIX/activate"
+          echo "GERBIL_PREFIX=$GERBIL_PREFIX" >> "$GITHUB_ENV"
+          echo "GERBIL_HOME=$GERBIL_HOME" >> "$GITHUB_ENV"
+          echo "GAMBOPT=$GAMBOPT" >> "$GITHUB_ENV"
           echo "$GERBIL_PREFIX/bin" >> "$GITHUB_PATH"
-          "$GERBIL_PREFIX/bin/gxi" --version
-          "$GERBIL_PREFIX/bin/gxpkg" version
-          "$GERBIL_PREFIX/bin/gxi" -e '(displayln "gerbil-ready")'
+          gxi --version
+          gxpkg version
+          gxi -e '(displayln "gerbil-ready")'
 
       - name: Restore Gerbil package dependency cache
         id: gerbil-pkg-cache
@@ -121,17 +135,15 @@ jobs:
           path: |
             ~/.gerbil/pkg
             .gerbil
-          key: gerbil-pkg-${{ runner.os }}-${{ runner.arch }}-${{ env.GERBIL_LABEL }}-${{ env.GERBIL_REF }}-${{ hashFiles('gerbil.pkg') }}
-          restore-keys: |
-            gerbil-pkg-${{ runner.os }}-${{ runner.arch }}-${{ env.GERBIL_LABEL }}-${{ env.GERBIL_REF }}-
+          key: gerbil-pkg-v19-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-sha256 }}-${{ hashFiles('gerbil.pkg') }}
 
       - name: Install Gerbil package dependencies from gerbil.pkg
         run: |
           mkdir -p "$HOME/.gerbil/pkg"
           gxpkg dir --add git.cons.io/mighty-gerbils/gerbil-directory
           gxpkg deps --install
-          if [ ! -e .gerbil/pkg/gslph ]; then
-            gxpkg link gslph .
+          if [ ! -e .gerbil/pkg/asp-gerbil-scheme ]; then
+            gxpkg link asp-gerbil-scheme .
           fi
           gxpkg list
 
@@ -142,21 +154,18 @@ jobs:
           path: |
             ~/.gerbil/pkg
             .gerbil
-          key: gerbil-pkg-${{ runner.os }}-${{ runner.arch }}-${{ env.GERBIL_LABEL }}-${{ env.GERBIL_REF }}-${{ hashFiles('gerbil.pkg') }}
+          key: gerbil-pkg-v19-${{ runner.os }}-${{ runner.arch }}-${{ matrix.gerbil-sha256 }}-${{ hashFiles('gerbil.pkg') }}
 
-      - name: Build native binary
+      - name: Build canonical provider binary
         shell: bash
         run: |
           set -euo pipefail
           build_cores() {
             nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2
           }
-          GERBIL_BUILD_CORES="$(build_cores)" gxpkg env ./build.ss compile --release --optimized
-          test -x .bin/gslph
-          .bin/gslph search prime --view seeds --workspace . | tee /tmp/gslph-prime.txt
-          grep -q 'filePreview=' /tmp/gslph-prime.txt
-          .bin/gslph search workspace-scope --workspace . | tee /tmp/gslph-workspace-scope.txt
-          grep -q 'filePreview=' /tmp/gslph-workspace-scope.txt
+          GERBIL_BUILD_CORES="$(build_cores)" gxpkg env gxi ./build-provider.ss clean
+          GERBIL_BUILD_CORES="$(build_cores)" gxpkg env gxi ./build-provider.ss compile
+          test -x .gerbil/bin/asp-gerbil-scheme
 
       - name: Package provider binary
         shell: bash
@@ -164,21 +173,14 @@ jobs:
           set -euo pipefail
           rm -rf package
           mkdir -p package/bin package/src
-          cp .bin/gslph package/bin/gslph
+          cp .gerbil/bin/asp-gerbil-scheme package/bin/asp-gerbil-scheme
           cp -R src/. package/src/
           cp gerbil.pkg package/gerbil.pkg
           chmod +x "package/bin/${BINARY}"
           asset="${BINARY}-${TARGET}.tar.gz"
           tar -czf "$asset" -C package .
-          python - "$asset" <<'PY'
-          import hashlib
-          import pathlib
-          import sys
-
-          asset = pathlib.Path(sys.argv[1])
-          digest = hashlib.sha256(asset.read_bytes()).hexdigest()
-          pathlib.Path(f"{asset}.sha256").write_text(f"{digest}  {asset.name}\n")
-          PY
+          digest="$(openssl dgst -sha256 "$asset" | sed 's/^.*= //')"
+          printf '%s  %s\n' "$digest" "$asset" > "${asset}.sha256"
 
       - name: Publish release assets
         shell: bash

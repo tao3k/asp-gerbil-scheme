@@ -2,11 +2,11 @@
 ;;; Parser-owned higher-order syntax fact extraction.
 
 (import :gerbil/expander
-        :gslph/src/parser/formals
-        :gslph/src/parser/model
-        :gslph/src/parser/support
-        :gslph/src/parser/syntax
-        (only-in :std/misc/list unique))
+        :asp-gerbil-scheme/src/parser/formals
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/parser/support
+        :asp-gerbil-scheme/src/parser/syntax
+        (only-in :asp-gerbil-scheme/src/support/list unique))
 
 (export higher-order-facts-from-form
         higher-order-quality-facets)

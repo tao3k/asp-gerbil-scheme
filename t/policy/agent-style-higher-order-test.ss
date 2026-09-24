@@ -2,11 +2,11 @@
 ;;; Policy tests for gerbil-utils/base.ss-style higher-order abstraction.
 
 (import :std/test
-        :std/srfi/13
-        :gslph/src/parser/facade
-        :gslph/src/policy/facade
-        :gslph/src/types/facade
-        :policy/fixtures)
+        :std/string/misc
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/types/facade
+        "./fixtures")
 
 (export agent-style-higher-order-policy-test)
 

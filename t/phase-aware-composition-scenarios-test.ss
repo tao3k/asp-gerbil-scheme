@@ -1,9 +1,10 @@
 ;;; -*- Gerbil -*-
 
 (import :std/test
-        :gslph/src/parser/model
-        :gslph/src/scenario/benchmark-contract
-        :gslph/src/scenario/policy)
+        :asp-gerbil-scheme/src/parser/model
+        :asp-gerbil-scheme/src/scenario/benchmark-contract
+        :asp-gerbil-scheme/src/scenario/policy)
+(export phase-aware-composition-scenarios-test)
 
 (def +composition-hygiene-scenario+
   "t/scenarios/policy/macro-hygiene-context-preservation")
@@ -66,7 +67,7 @@
     benchmark-path)
    'feature))
 
-(def phase-aware-composition-scenarios-tests
+(def phase-aware-composition-scenarios-test
   (test-suite
    "phase-aware composition policy scenarios"
    (test-case
@@ -128,5 +129,3 @@
         "syntax"
         "for-syntax")
        #t)))))
-
-(run-tests! phase-aware-composition-scenarios-tests)

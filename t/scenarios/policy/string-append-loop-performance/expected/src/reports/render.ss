@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 (package: sample/reports)
 
-(import :std/srfi/13)
+(import :std/string/misc)
 
 (export render-lines)
 

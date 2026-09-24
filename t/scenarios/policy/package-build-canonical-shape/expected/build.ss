@@ -1,17 +1,16 @@
 #!/usr/bin/env gxi
 ;; -*- Gerbil -*-
 
-(import :std/make
-        :clan/base
-        :clan/building)
+(import (only-in :std/build-script defbuild-script)
+        (only-in :asp-gerbil-scheme/building-api
+                 asp-gerbil-scheme-package-spec!
+                 asp-gerbil-scheme-library-package-prototype))
 
-;;; Package build shape follows gerbil-poo: clan/building owns source discovery
-;;; and the build load path; spec only adds project-specific helper modules.
-(def (spec)
-  (!> (all-gerbil-modules)
-      (cut cons "t/unit/build-runtime" <>)))
+;;; ASP Building API owns declarative source projection; std/make owns the
+;;; native graph and scheduling through std/build-script.
+(asp-gerbil-scheme-package-spec!
+ (sample-package-spec @ asp-gerbil-scheme-library-package-prototype)
+ (spec spec)
+ (modules '("src/main.ss" "t/unit/build-runtime.ss")))
 
-(init-build-environment!
- name: "sample-package"
- deps: '("clan")
- spec: spec)
+(defbuild-script (spec))

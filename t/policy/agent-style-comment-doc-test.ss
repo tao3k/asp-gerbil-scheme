@@ -1,20 +1,19 @@
 ;;; -*- Gerbil -*-
 ;;; gerbil scheme harness agent style comment doc policy.
 
-(import :gerbil/gambit
+(import :gerbil/runtime/gambit
         :std/test
         :std/misc/ports
         :std/misc/process
-        :std/sort
-        :gslph/src/parser/facade
-        :gslph/src/policy/agent-style
-        :gslph/src/policy/facade
-        :gslph/src/policy/gxtest
-        :gslph/src/scenario/policy
-        :gslph/src/types/facade
-        :unit/policy/poo-scenarios
-        :policy/fixtures)
-(import :policy/agent-style-support)
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/policy/agent-style
+        :asp-gerbil-scheme/src/policy/facade
+        :asp-gerbil-scheme/src/policy/gxtest
+        :asp-gerbil-scheme/src/scenario/policy
+        :asp-gerbil-scheme/src/types/facade
+        "../unit/policy/poo-scenarios"
+        "./fixtures")
+(import "./agent-style-support")
 (export agent-style-comment-doc-policy-test)
 
 ;; PolicyTest
@@ -150,12 +149,12 @@
             (write-text (string-append root "/gerbil.pkg")
                         "(package: sample/utilities)\n")
             (write-text (string-append owner "/functional.ss")
-                        ";;; -*- Gerbil -*-\n;;; Boundary:\n;;; - Fixture proves public functional combinators may carry precision and summary contracts.\n(package: sample/utilities)\n(import :std/srfi/1)\n(export alist-select)\n;; alist-select\n;;   : (forall (k v) (-> [k] [(Pair k v)] [(Pair k v)]))\n;;   : (-> List Alist Alist)\n;;   | doc m%\n;;       `alist-select` projects keys in caller-provided order.\n;;\n;;       # Examples\n;;\n;;       ```scheme\n;;       (alist-select '(mode) '((mode . strict)))\n;;       ;; => ((mode . strict))\n;;       ```\n;;     %\n(def (alist-select keys alist)\n  (filter-map (lambda (key)\n                (let (entry (assoc key alist))\n                  (and entry (cons key (cdr entry)))))\n              keys))\n")
+                        ";;; -*- Gerbil -*-\n;;; Boundary:\n;;; - Fixture proves public functional combinators may carry precision and summary contracts.\n(package: sample/utilities)\n(import :std/list/list)\n(export alist-select)\n;; alist-select\n;;   : (forall (k v) (-> [k] [(Pair k v)] [(Pair k v)]))\n;;   : (-> List Alist Alist)\n;;   | doc m%\n;;       `alist-select` projects keys in caller-provided order.\n;;\n;;       # Examples\n;;\n;;       ```scheme\n;;       (alist-select '(mode) '((mode . strict)))\n;;       ;; => ((mode . strict))\n;;       ```\n;;     %\n(def (alist-select keys alist)\n  (filter-map (lambda (key)\n                (let (entry (assoc key alist))\n                  (and entry (cons key (cdr entry)))))\n              keys))\n")
             (let* ((index (collect-project root))
                    (findings (run-policy-checks index))
                    (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-013" findings)))
               (check matching => []))))
-(test-case "typed-combinator-style policy can be disabled by package config"
+(test-case "package metadata cannot disable typed-combinator-style policy"
           (let* ((root ".run/policy-typed-combinator-style-disabled")
                  (src (string-append root "/src"))
                  (owner (string-append src "/orders")))
@@ -170,5 +169,5 @@
             (let* ((index (collect-project root))
                    (findings (run-policy-checks index))
                    (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-013" findings)))
-              (check matching => []))))
+              (check (length matching) => 1))))
   ))

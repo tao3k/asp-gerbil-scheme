@@ -1,7 +1,7 @@
 ;;; -*- Gerbil -*-
 ;;; Stable facade for Gerbil package-manager facts.
 
-(import :gslph/src/package-manager/core)
+(import :asp-gerbil-scheme/src/package-manager/core)
 
 (export +gerbil-package-manager-id+
         +gerbil-local-package-root-hint+

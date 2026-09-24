@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 (import :std/test
-        :gslph/src/extensions/facade
-        :gslph/src/parser/facade
-        :gslph/src/protocol/json
-        :std/srfi/13)
+        :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/protocol/json
+        :std/string/misc)
 (export parser-test-part-4)
 
 ;; : (-> Selector Relpath Boolean )

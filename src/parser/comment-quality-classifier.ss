@@ -1,10 +1,10 @@
 ;;; -*- Gerbil -*-
 ;;; Comment quality classification and source-line helpers.
 
-(import :gerbil/gambit
-        :gslph/src/parser/model
-        (only-in :std/srfi/13 string-contains string-downcase string-empty? string-prefix?)
-        (only-in :std/sugar cut filter find ormap))
+(import :gerbil/runtime/gambit
+        :asp-gerbil-scheme/src/parser/model
+        (only-in :std/string/misc string-contains string-downcase string-empty? string-prefix?)
+        )
 
 (export facts-matching-field
         definition-comment-required?

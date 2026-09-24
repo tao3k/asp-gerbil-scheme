@@ -1,9 +1,9 @@
 ;;; -*- Gerbil -*-
 ;;; Stable facade for Gerbil language/runtime/std evidence.
 
-(import :gslph/src/language/evidence
-        :gslph/src/language/capability
-        :gslph/src/language/compare)
+(import :asp-gerbil-scheme/src/language/evidence
+        :asp-gerbil-scheme/src/language/capability
+        :asp-gerbil-scheme/src/language/compare)
 
 (export runtime-bin
         evidence-fact

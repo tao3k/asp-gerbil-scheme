@@ -5,14 +5,14 @@
 ;;; - This module owns runtime object contract validation for downstream module
 ;;;   systems without importing agent-facing pattern registries.
 
-(import :gerbil/gambit
-        (only-in :std/sugar hash)
-        (only-in :gslph/src/extensions/poo-source-ref-validation
+(import :gerbil/runtime/gambit
+
+        (only-in :asp-gerbil-scheme/src/extensions/poo-source-ref-validation
                  poo-object-source-ref-structural-validation)
-        (only-in :gslph/src/types/model
+        (only-in :asp-gerbil-scheme/src/types/model
                  parse-type-sexpr
                  type->string)
-        (only-in :gslph/src/types/validation
+        (only-in :asp-gerbil-scheme/src/types/validation
                  type-spec-valid?
                  type-validation-diagnostics))
 

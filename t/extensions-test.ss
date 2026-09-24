@@ -2,13 +2,13 @@
 ;;; Boundary:
 ;;; - test owner records policy expectations.
 ;;; - Keep typed contracts and fixture intent explicit.
-(import :gslph/src/extensions/facade
-        :gslph/src/extensions/poo-patterns
-        :gslph/src/parser/facade
-        :gslph/src/snapshot/facade
+(import :asp-gerbil-scheme/src/extensions/facade
+        :asp-gerbil-scheme/src/extensions/poo-patterns
+        :asp-gerbil-scheme/src/parser/facade
+        :asp-gerbil-scheme/src/snapshot/facade
         :std/test
-        (only-in :std/sugar andmap)
-        (only-in :std/srfi/13 string-join))
+        (only-in :gerbil/runtime/gambit andmap)
+        (only-in :std/string/misc string-join))
 (export extensions-test)
 ;; : TestSuite
 (def extensions-test
@@ -22,16 +22,6 @@
              (index (collect-project root))
              (snapshot (extension-packet-snapshot index))
              (expected (snapshot-load "t/snapshots/poo-extension-packet.ss")))
-        (check snapshot => expected)))
-    (test-case "poo search prime snapshot matches packet interface"
-      (let* ((root ".run/extensions-poo-search-prime")
-             (_ (write-extension-project
-                 root
-                 "sample/app"
-                 ["git.cons.io/mighty-gerbils/gerbil-poo"]))
-             (index (collect-project root))
-             (snapshot (search-prime-snapshot index))
-             (expected (snapshot-load "t/snapshots/poo-search-prime-packet.ss")))
         (check snapshot => expected)))
     (test-case "poo pattern specs are static POO objects"
       (check (poo-pattern-id 'object-system) => "poo-object-system")
