@@ -87,15 +87,15 @@
   (/ (benchmark-p95-elapsed-nanos count thunk) 1000))
 
 (def (benchmark-result-attempt thunk)
-  (##gc)
   (let (memory-before (benchmark-memory-usage))
     (let-values (((elapsed result)
                   (call-with-timing thunk)))
-      (unless (and (integer? elapsed) (> elapsed 0))
-        (error "benchmark timing source returned non-positive duration"
+      (unless (and (integer? elapsed) (>= elapsed 0))
+        (error "benchmark timing source returned invalid duration"
                elapsed))
       (let (memory-after (benchmark-memory-usage))
-        (list elapsed
+        ;; Match benchmark-elapsed-nanos/preconditioned at timer resolution.
+        (list (max 1 elapsed)
               result
               `((timingSource . ":std/time/precise#current-time-precise")
                 (memorySource . ,benchmark-memory-source)
@@ -117,8 +117,12 @@
 (def (benchmark-attempts attempts thunk)
   (if (<= attempts 0)
     (error "benchmark attempts must be positive" attempts)
-    (map (lambda (_) (benchmark-result-attempt thunk))
-         (iota attempts))))
+    (begin
+      ;; Precondition the series once. Automatic collections during a sample
+      ;; remain part of its measured wall time and p95 admission.
+      (##gc)
+      (map (lambda (_) (benchmark-result-attempt thunk))
+           (iota attempts)))))
 
 (def (benchmark-attempt-statistics attempts)
   (benchmark-sample-statistics (map car attempts)))
