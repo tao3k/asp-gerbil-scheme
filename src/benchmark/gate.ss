@@ -38,6 +38,10 @@
 ;; : Integer
 (def benchmark-admission-percentile 95)
 
+;; One full-heap precondition per small group avoids 1000 full collections
+;; while keeping the admitted sample series close to a clean-heap baseline.
+(def benchmark-gc-sample-interval 20)
+
 ;; benchmark-elapsed-nanos
 ;;   : (-> (-> Value) Integer)
 ;;   | doc m%
@@ -117,12 +121,13 @@
 (def (benchmark-attempts attempts thunk)
   (if (<= attempts 0)
     (error "benchmark attempts must be positive" attempts)
-    (begin
-      ;; Precondition the series once. Automatic collections during a sample
-      ;; remain part of its measured wall time and p95 admission.
-      (##gc)
-      (map (lambda (_) (benchmark-result-attempt thunk))
-           (iota attempts)))))
+    (map (lambda (sample-index)
+           ;; Recondition each group outside timing. Automatic collections
+           ;; during an attempt remain visible to p95 admission.
+           (when (zero? (modulo sample-index benchmark-gc-sample-interval))
+             (##gc))
+           (benchmark-result-attempt thunk))
+         (iota attempts))))
 
 (def (benchmark-attempt-statistics attempts)
   (benchmark-sample-statistics (map car attempts)))
