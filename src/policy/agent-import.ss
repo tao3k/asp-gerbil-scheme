@@ -29,7 +29,6 @@
 (def (explicit-precise-import-finding index file fact)
   (and (index-source-runtime-file-path? index (source-file-path file))
        (imprecise-runtime-import? fact)
-       (not (std-iter-macro-import? file fact))
        (not (reexported-import? file fact))
        (make-type-finding
         (policy-rule-id +agent-explicit-precise-import-rule+)
@@ -38,15 +37,6 @@
         (explicit-precise-import-message fact)
         (module-import-fact-selector fact)
         (explicit-precise-import-details fact))))
-
-;; The public for macro expands to iterator interface bindings at the call
-;; site. Importing only the macro leaves &Iterator-next! unbound. Parser-owned
-;; call facts identify the source files that need the complete std/iter API.
-(def (std-iter-macro-import? file fact)
-  (and (equal? (module-import-fact-module fact) ":std/iter")
-       (find (lambda (call)
-               (equal? (call-fact-callee call) "for"))
-             (source-file-calls file))))
 
 ;; : (-> ModuleImportFact Boolean )
 (def (imprecise-runtime-import? fact)
