@@ -152,9 +152,14 @@ The default PackageSpec now admits the complete policy rule set for existing
 Scheme sources selected by its native BuildSpec. An empty target selection
 does not initialize parser or policy modules. The original startup contract
 remains 2.5 seconds per attempt and 1.5 seconds median; a local three-pair
-receipt after this change measured 0.431 seconds median increment. Native
+receipt after this change measured 0.620 seconds median increment. Native
 =meta= and =clean= commands skip policy admission, and diagnostics use stderr
 so the =spec= and =meta= stdout contracts stay machine-readable.
+
+This startup fixture selects no Scheme source and stops at the first native
+projection event. It does not time full policy loading. A separate local
+selected-source probe reached policy completion in 2.3–3.7 seconds; reducing
+that import cost remains open. The original startup limits above are unchanged.
 
 On =macos-latest=, CI run =35687157343= executed that module with
 =MODULE-OK= and a =0.394873=-second median incremental first event.

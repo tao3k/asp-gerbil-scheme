@@ -1,7 +1,7 @@
 #!/usr/bin/env gxi
 ;;; -*- Gerbil -*-
-;;; Real downstream fixture: the default PackageSpec admits policy before
-;;; std/make receives the native BuildSpec.
+;;; Real downstream fixture: the default PackageSpec slot is installed, while
+;;; this empty BuildSpec measures native projection startup without policy work.
 
 (import (only-in :std/build-script defbuild-script)
         (only-in :asp-gerbil-scheme/building-api

@@ -5,12 +5,12 @@
  (maxMedianIncrementalNanoseconds . 1500000000)
  (targetNanoseconds . 500000000)
  (targetRationale
-  . "default BuildSpec policy must preserve the original 2.5-second per-attempt and 1.5-second median startup limits")
+  . "native BuildSpec projection must preserve the original 2.5-second per-attempt and 1.5-second median startup limits")
  (feature . "build-api-default-policy-startup")
  (rule . "ASP-GERBIL-SCHEME-BUILD-API-STARTUP-001")
  (optimizationFocus
-  . "keep direct default policy admission bounded before the std/make planning handoff when verbose is inherited")
+  . "keep the empty-target native projection bounded before the std/make planning handoff when verbose is inherited")
  (inputShape . "fresh Gerbil process loads the default policy PackageSpec and projects an empty downstream BuildSpec")
- (expectedOutcome . "the first native projection event is bounded with the full default policy closure")
+ (expectedOutcome . "the first native projection event stays bounded; this contract does not time full policy loading")
  (measurementPhases "process-start" "module-expand" "package-spec-project"
                     "std-make-handoff"))
