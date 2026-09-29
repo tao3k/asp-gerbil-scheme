@@ -62,14 +62,21 @@
 
 (def build-api-startup-scenario-test
   (test-suite "public Build API startup scenario"
-    (test-case "PackageSpec facade excludes optional subsystem closures"
-      (let (source (call-with-input-file "building-api.ss" read-all-as-string))
+    (test-case "PackageSpec defaults to policy without testing or benchmark facades"
+      (let ((source (call-with-input-file "building-api.ss" read-all-as-string))
+            (package-spec
+             (call-with-input-file "src/build-api/package-spec.ss"
+               read-all-as-string)))
+        (check (and (string-contains
+                     package-spec
+                     "(spec-projector asp-gerbil-scheme-package-policy-native-spec)")
+                    #t)
+               => #t)
         (for-each
          (lambda (forbidden)
            (check (string-contains source forbidden) => #f))
          '("src/building"
            "src/testing"
-           "src/policy"
            "src/benchmark"
            ":clan/testing"))))
     (test-case "PackageSpec median incremental first event stays subsecond-oriented"

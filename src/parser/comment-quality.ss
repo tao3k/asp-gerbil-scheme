@@ -4,8 +4,10 @@
 (import :gerbil/runtime/gambit
         :asp-gerbil-scheme/src/parser/comment-quality-classifier
         :asp-gerbil-scheme/src/parser/model
+        (rename-in :asp-gerbil-scheme/src/parser/list-prefix
+                   (take-while/proper take-while))
         (only-in :std/misc/ports read-file-lines)
-        (only-in :std/list/list drop-while iota take take-while)
+        (only-in :std/list/list drop-while iota take)
         (only-in :std/string/misc string-contains string-downcase string-empty? string-prefix?)
         )
 

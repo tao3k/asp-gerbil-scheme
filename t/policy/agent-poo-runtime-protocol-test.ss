@@ -201,6 +201,8 @@
                         ";;; -*- Gerbil -*-\n(package: sample/orders)\n(import :std/string/misc)\n(def (starts? value) (string-prefix? \"a\" value))\n")
             (write-text (string-append owner "/precise.ss")
                         ";;; -*- Gerbil -*-\n(package: sample/orders)\n(import (only-in :std/string/misc string-prefix?))\n(def (starts? value) (string-prefix? \"a\" value))\n")
+            (write-text (string-append owner "/iter-macro.ss")
+                        ";;; -*- Gerbil -*-\n(package: sample/orders)\n(import :std/iter)\n(def (sum values) (let (result 0) (for (value values) (set! result (+ result value))) result))\n")
             (let* ((index (collect-project root))
                    (findings (run-agent-policy index))
                    (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-018" findings))

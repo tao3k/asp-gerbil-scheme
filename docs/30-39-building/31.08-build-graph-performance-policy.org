@@ -148,6 +148,14 @@ measures ASP's pre-=std/make= startup increment, not an alternate executor's
 build throughput; CI now runs the same scenario with the canonical library
 tests.
 
+The default PackageSpec now admits the complete policy rule set for existing
+Scheme sources selected by its native BuildSpec. An empty target selection
+does not initialize parser or policy modules. The original startup contract
+remains 2.5 seconds per attempt and 1.5 seconds median; a local three-pair
+receipt after this change measured 0.431 seconds median increment. Native
+=meta= and =clean= commands skip policy admission, and diagnostics use stderr
+so the =spec= and =meta= stdout contracts stay machine-readable.
+
 On =macos-latest=, CI run =35687157343= executed that module with
 =MODULE-OK= and a =0.394873=-second median incremental first event.
 

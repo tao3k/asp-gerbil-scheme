@@ -6,8 +6,10 @@
         :asp-gerbil-scheme/src/parser/typed-comment-metadata
         :asp-gerbil-scheme/src/parser/typed-contract-diagnostics
         :asp-gerbil-scheme/src/parser/typed-contract-scheme
+        (rename-in :asp-gerbil-scheme/src/parser/list-prefix
+                   (take-while/proper take-while))
         (only-in :std/string/misc string-join string-empty? string-prefix?)
-        (only-in :std/list/list last take-while)
+        (only-in :std/list/list last)
         (only-in :asp-gerbil-scheme/src/support/list unique)
         )
 
