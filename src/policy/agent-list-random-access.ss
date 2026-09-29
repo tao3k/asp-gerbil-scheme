@@ -33,6 +33,9 @@
 ;; : (-> SourceFile CallFact (U #f LoopDriverFact) )
 (def (list-random-access-loop-driver file call)
   (and (member (call-fact-callee call) +list-random-access-loop-callees+)
+       ;; A literal index is bounded independently of loop length. The rule
+       ;; targets traversals whose index grows with the input.
+       (not (list-random-access-fixed-index? call))
        (call-fact-caller call)
        (ormap (lambda (loop)
                 (and (equal? (loop-driver-fact-caller loop)
@@ -40,6 +43,13 @@
                      (list-random-access-call-inside-loop? call loop)
                      loop))
               (source-file-loop-driver-facts file))))
+
+;; : (-> CallFact Boolean)
+(def (list-random-access-fixed-index? call)
+  (let* ((args (call-fact-arguments call))
+         (index (and (pair? args) (pair? (cdr args)) (cadr args)))
+         (value (and (string? index) (string->number index))))
+    (and (exact-integer? value) (>= value 0))))
 
 ;; : (-> CallFact LoopDriverFact Boolean )
 (def (list-random-access-call-inside-loop? call loop)

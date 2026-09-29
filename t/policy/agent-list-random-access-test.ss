@@ -59,6 +59,23 @@
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-041" findings)))
           (check matching => []))))
+    (test-case "agent policy accepts a fixed list field in a loop"
+      (let* ((root ".run/policy-list-fixed-field")
+             (source-dir (string-append root "/src/indexed")))
+        (reset-fixture-root root)
+        (ensure-dir ".run")
+        (ensure-dir root)
+        (ensure-dir (string-append root "/src"))
+        (ensure-dir source-dir)
+        (write-text (string-append root "/gerbil.pkg")
+                    "(package: sample/indexed)\n")
+        (write-text
+         (string-append source-dir "/select.ss")
+         ";;; -*- Gerbil -*-\n(package: sample/indexed)\n(export select-fields)\n(def (select-fields rows)\n  (let loop ((remaining rows) (out '()))\n    (if (null? remaining)\n      (reverse out)\n      (loop (cdr remaining)\n            (cons (list-ref (car remaining) 4) out)))))\n")
+        (let* ((index (collect-project root))
+               (findings (run-agent-policy index)))
+          (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-041" findings)
+                 => []))))
     (test-case "agent policy validates list random access scenario under performance gate"
       (let* ((scenario
               (make-policy-scenario
