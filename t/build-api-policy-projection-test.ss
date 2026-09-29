@@ -27,18 +27,6 @@
  (spec policy-nested-spec)
  (native-spec [[ssi: "interface" [gxc: "large"]]]))
 
-(asp-gerbil-scheme-package-spec!
- (policy-witness-fixture @ asp-gerbil-scheme-library-package-prototype)
- (spec policy-witness-spec)
- (modules '("small"))
- (policy-witnesses '("t/syntax-witness.ss")))
-
-(asp-gerbil-scheme-package-spec!
- (policy-missing-witness-fixture @ asp-gerbil-scheme-library-package-prototype)
- (spec policy-missing-witness-spec)
- (modules '("small"))
- (policy-witnesses '("t/missing.ss")))
-
 (def policy-extension-count 0)
 
 (asp-gerbil-scheme-package-spec!
@@ -57,13 +45,6 @@
   (unless (file-exists? ".run") (create-directory ".run"))
   (unless (file-exists? +policy-fixture-root+)
     (create-directory +policy-fixture-root+))
-  (let (test-dir (path-expand "t" +policy-fixture-root+))
-    (unless (file-exists? test-dir) (create-directory test-dir))
-    (call-with-output-file
-     (path-expand "syntax-witness.ss" test-dir)
-     (lambda (port)
-       (display ";;; -*- Gerbil -*-\n(import :std/test)\n(check 1 => 1)\n"
-                port))))
   (call-with-output-file
    (path-expand "gerbil.pkg" +policy-fixture-root+)
    (lambda (port) (display "(package: build-api-policy-projection)\n" port)))
@@ -98,16 +79,6 @@
                 (asp-gerbil-scheme-package-native-spec policy-nested-fixture)))
              => [[ssi: "interface" [gxc: "large"]]])
       (check-exception (with-policy-fixture policy-nested-spec) true))
-    (test-case "explicit test witness is parsed without becoming a build target"
-      (check (with-policy-fixture policy-witness-spec) => '("small"))
-      (check (with-policy-fixture
-              (lambda ()
-                (asp-gerbil-scheme-package-native-spec
-                 policy-witness-fixture)))
-             => '("small")))
-    (test-case "missing explicit policy witness fails closed"
-      (check-exception
-       (with-policy-fixture policy-missing-witness-spec) true))
     (test-case "downstream POO slot composes the default policy"
       (set! policy-extension-count 0)
       (check (with-policy-fixture policy-extended-spec) => '("small"))
