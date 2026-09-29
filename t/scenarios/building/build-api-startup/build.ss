@@ -1,7 +1,7 @@
 #!/usr/bin/env gxi
 ;;; -*- Gerbil -*-
-;;; Real downstream fixture: PackageSpec projection must not load optional ASP
-;;; Policy, testing, benchmark, or Building Framework graphs.
+;;; Real downstream fixture: the default PackageSpec slot is installed, while
+;;; this empty BuildSpec measures native projection startup without policy work.
 
 (import (only-in :std/build-script defbuild-script)
         (only-in :asp-gerbil-scheme/building-api

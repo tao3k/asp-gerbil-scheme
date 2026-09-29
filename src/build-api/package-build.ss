@@ -29,7 +29,6 @@
   (and (string? value)
        (> (string-length value) 0)))
 
-;; : (-> Path (Maybe String))
 ;; asp-gerbil-scheme-package-build-package-name
 ;;   : (-> Path (Maybe String))
 ;;   | doc m%

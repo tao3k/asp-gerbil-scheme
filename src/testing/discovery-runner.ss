@@ -22,8 +22,8 @@
 (export testing-interface-test-files
         init-profiled-test-environment!)
 
-;;   : (forall (t) (-> t String String (List Path)))
 ;; testing-interface-test-files
+;;   : (forall (t) (-> t String String (List Path)))
 ;;   : (-> TestingInterface TestName Path String (List Path))
 ;;   | doc m%
 ;;       Discovers Gerbil test files, then applies the declarative ASP

@@ -36,15 +36,25 @@ Run selected tests through the same native environment:
 just test-files t/package-build-contract-test.ss
 ```
 ## Building API
-Downstream `build.ss` files import the single narrow
-`:asp-gerbil-scheme/building-api` facade for PackageSpec declarations.
+Downstream `build.ss` files import
+`:asp-gerbil-scheme/building-api` for PackageSpec declarations. Its default
+POO `spec-projector` slot runs the existing policy rules on source modules
+selected by the native BuildSpec, before passing that same spec to `std/make`.
+Downstream packages declare their module targets; they override or compose the
+slot only when they need different admission behavior. The default reports the
+selected module count and findings, and rejects error findings such as a source
+file over 1000 lines. An empty target selection returns the native spec without
+initializing the policy rule set; a nonempty selection loads it once through
+Gerbil's module system and checks those source files.
+It does not scan the workspace for another project graph.
 Gerbil `std/make` remains the only graph, currentness, scheduling, and execution
 owner. Optional native behavior is composed through PackageSpec and
 NativeProfile POO slots; it does not add another public build framework.
-Testing, Policy, and
-benchmark capabilities are separately owned by `:asp-gerbil-scheme/testing-api`,
-`:asp-gerbil-scheme/policy-api`, and `:asp-gerbil-scheme/benchmark-api`; loading
-a PackageSpec never initializes those graphs.
+Testing and benchmark capabilities are separately owned by
+`:asp-gerbil-scheme/testing-api` and `:asp-gerbil-scheme/benchmark-api`.
+Standalone policy inspection remains available from
+`:asp-gerbil-scheme/policy-api`; the Building API default uses the same rule
+set on the sources selected for this build.
 Pure expansion-time generators can use the verified content-addressed sidecar
 extension documented in `docs/30-39-building/31.09-verified-generated-module-artifacts.org`;
 the extension projects only native `gxc:` `extra-inputs:` and never replaces

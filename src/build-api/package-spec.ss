@@ -7,6 +7,7 @@
         default-exclude-dirs
         asp-gerbil-scheme-library-package-prototype
         asp-gerbil-scheme-package-native-spec
+        asp-gerbil-scheme-package-policy-native-spec
         asp-gerbil-scheme-package-generated-modules
         asp-gerbil-scheme-package-product-entry-modules
         asp-gerbil-scheme-package-native-prelude-spec
@@ -19,8 +20,11 @@
         asp-gerbil-scheme-package-modules)
 
 (import (only-in :clan/poo/object .cc .def .get)
+        (only-in :gerbil/runtime/loader load-path add-load-path! set-load-path!)
         (only-in :gerbil/runtime/gambit
                  make-thread thread-start! thread-sleep! thread-terminate!)
+        (only-in :std/list/list append-map delete-duplicates/hash)
+        (only-in :std/string/path path-default-extension)
         (only-in "../object-family/syntax" defpoo-object-family poo-family-ref)
         (rename-in "./native-spec-support"
                    (all-gerbil-modules upstream-all-gerbil-modules)
@@ -141,6 +145,55 @@
             (asp-gerbil-scheme-package-default-native-spec package-spec)))
          generated-modules))))
 
+;; Policy sees the same explicit BuildSpec targets that std/make receives.
+;; Only target-to-source resolution is repeated, using std/make's own path
+;; primitive; ASP never collects another project or dependency graph.
+(def (native-module-source-paths module)
+  (let (path (path-default-extension module ".ss"))
+    (if (file-exists? path) [path] [])))
+
+(def (native-target-source-paths target)
+  (match target
+    ([ssi: _ . submodules]
+     (append-map native-target-source-paths submodules))
+    ((? string? module)
+     (native-module-source-paths module))
+    ([(? (cut member <>
+                     '(gxc: exe: static-exe:
+                       optimized-exe: optimized-static-exe:)))
+      (? string? module) . _]
+     (native-module-source-paths module))
+    (else [])))
+
+;; std/build-script evaluates its BuildSpec before dispatching native commands.
+;; Meta, spec inspection, and clean do not compile selected sources.
+(def (policy-build-command?)
+  (let (argv (command-line))
+    (or (null? argv)
+        (not (member (car (reverse argv)) '("meta" "spec" "clean"))))))
+
+(def (asp-gerbil-scheme-package-policy-native-spec package-spec)
+  (let* ((native-spec (asp-gerbil-scheme-package-native-spec package-spec))
+         (paths (delete-duplicates/hash
+                 (append-map native-target-source-paths native-spec))))
+    (when (and (pair? paths) (policy-build-command?))
+      (parameterize ((current-output-port (current-error-port)))
+        (displayln "[asp-gerbil-scheme-policy] START selected modules="
+                   (length paths))
+        (force-output))
+      ;; A clean package build has no compiled policy module yet. Let Gerbil's
+      ;; native source loader resolve this package before std/make compiles it.
+      (let (prior-load-path (load-path))
+        (dynamic-wind
+          (lambda () (add-load-path! (current-directory)))
+          (lambda ()
+            ((eval '(begin
+                      (import :asp-gerbil-scheme/src/build-api/policy-runner)
+                      asp-gerbil-scheme-run-selected-policy))
+             paths))
+          (lambda () (set-load-path! prior-load-path)))))
+    native-spec))
+
 (def (native-build-elapsed-milliseconds started-jiffy)
   (quotient (* (- (current-jiffy) started-jiffy) 1000)
             (jiffies-per-second)))
@@ -231,7 +284,7 @@
              (pkg-config-libs #f)
              (nix-deps #f)
              (native-options-resolver #f)
-             (spec-projector asp-gerbil-scheme-package-native-spec)
+             (spec-projector asp-gerbil-scheme-package-policy-native-spec)
              (native-spec-projector #f)
              (native-spec #f))
   (accessors poo-family-ref

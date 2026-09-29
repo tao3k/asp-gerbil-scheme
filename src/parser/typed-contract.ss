@@ -14,7 +14,7 @@
                  string-every
                  string-prefix?
                  string-trim)
-        (only-in :std/list/list last take take-while)
+        (only-in :std/list/list last take)
         (only-in :std/list/list length<=n?)
         (only-in :asp-gerbil-scheme/src/support/list unique)
 

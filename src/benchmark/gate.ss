@@ -38,6 +38,10 @@
 ;; : Integer
 (def benchmark-admission-percentile 95)
 
+;; One full-heap precondition per small group avoids 1000 full collections
+;; while keeping the admitted sample series close to a clean-heap baseline.
+(def benchmark-gc-sample-interval 20)
+
 ;; benchmark-elapsed-nanos
 ;;   : (-> (-> Value) Integer)
 ;;   | doc m%
@@ -87,15 +91,15 @@
   (/ (benchmark-p95-elapsed-nanos count thunk) 1000))
 
 (def (benchmark-result-attempt thunk)
-  (##gc)
   (let (memory-before (benchmark-memory-usage))
     (let-values (((elapsed result)
                   (call-with-timing thunk)))
-      (unless (and (integer? elapsed) (> elapsed 0))
-        (error "benchmark timing source returned non-positive duration"
+      (unless (and (integer? elapsed) (>= elapsed 0))
+        (error "benchmark timing source returned invalid duration"
                elapsed))
       (let (memory-after (benchmark-memory-usage))
-        (list elapsed
+        ;; Match benchmark-elapsed-nanos/preconditioned at timer resolution.
+        (list (max 1 elapsed)
               result
               `((timingSource . ":std/time/precise#current-time-precise")
                 (memorySource . ,benchmark-memory-source)
@@ -117,7 +121,12 @@
 (def (benchmark-attempts attempts thunk)
   (if (<= attempts 0)
     (error "benchmark attempts must be positive" attempts)
-    (map (lambda (_) (benchmark-result-attempt thunk))
+    (map (lambda (sample-index)
+           ;; Recondition each group outside timing. Automatic collections
+           ;; during an attempt remain visible to p95 admission.
+           (when (zero? (modulo sample-index benchmark-gc-sample-interval))
+             (##gc))
+           (benchmark-result-attempt thunk))
          (iota attempts))))
 
 (def (benchmark-attempt-statistics attempts)
