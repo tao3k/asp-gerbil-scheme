@@ -30,10 +30,16 @@
                  (_ (write-macro-runtime-source-project root #f))
                  (index (collect-project root))
                  (findings (run-agent-policy index))
+                 (build-findings
+                  (run-agent-policy index
+                                    test-evidence-complete?: #f))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings))
                  (finding (car matching))
                  (details (type-finding-details finding)))
             (check (length matching) => 1)
+            (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011"
+                                build-findings)
+                   => [])
             (check (type-finding-path finding) => "src/macros/core.ss")
             (check (hash-get details 'next)
                    => "search runtime-source macro sugar module-sugar")

@@ -33,7 +33,10 @@
                  root
                  (parse-source-files root paths)
                  (read-project-package root)))
-         (findings (run-policy-checks index))
+         ;; Native BuildSpec targets exclude test owners. Missing witness
+         ;; evidence cannot be inferred from this deliberately partial scope.
+         (findings (run-policy-checks
+                    index test-evidence-complete?: #f))
          (errors
           (filter (lambda (finding)
                     (equal? (type-finding-severity finding) "error"))

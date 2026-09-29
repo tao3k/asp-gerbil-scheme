@@ -6,7 +6,9 @@
 
 (export run-policy-checks)
 ;; : (-> ProjectIndex (List TypeFinding) )
-(def (run-policy-checks index)
+(def (run-policy-checks index
+                        test-evidence-complete?: (test-evidence-complete? #t))
   ;; Rule execution is provider-owned. Package metadata cannot suppress findings.
   (append (run-modularity-policy index)
-          (run-agent-policy index)))
+          (run-agent-policy
+           index test-evidence-complete?: test-evidence-complete?)))

@@ -72,7 +72,8 @@
 ;;;   path-scope hardcoding and repeated inline alist lookup.
 ;;; - Export conflict checks remain last because they compare accumulated facade bindings.
 ;; : (-> ProjectIndex (List TypeFinding) )
-(def (run-agent-policy index)
+(def (run-agent-policy index
+                       test-evidence-complete?: (test-evidence-complete? #t))
   (append
    (facade-intent-findings index)
    (generic-owner-findings index)
@@ -99,7 +100,8 @@
    (list-growth-loop-performance-findings index)
    (list-random-access-loop-performance-findings index)
    (string-growth-loop-performance-findings index)
-   (macro-governance-findings index)
+   (macro-governance-findings
+    index test-evidence-complete?: test-evidence-complete?)
    (protocol-evidence-findings index)
    (typed-combinator-style-findings index)
    (comment-quality-findings index)

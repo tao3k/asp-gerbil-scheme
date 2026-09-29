@@ -75,13 +75,15 @@
 ;; governance plan.  They are not rerun by a second policy owner.
 (def (macro-governance-findings
       index
-      profile: (profile asp-strict-macro-governance-profile))
+      profile: (profile asp-strict-macro-governance-profile)
+      test-evidence-complete?: (test-evidence-complete? #t))
   (let (plan (macro-governance-compile-rule-plan profile))
     (append
      (if (member 'expansion-io plan)
        (macro-expansion-io-boundary-findings index)
        '())
-     (if (member 'runtime-witness plan)
+     (if (and test-evidence-complete?
+              (member 'runtime-witness plan))
        (macro-runtime-source-witness-findings index)
        '())
      (macro-governance-profile-findings index profile plan: plan))))
