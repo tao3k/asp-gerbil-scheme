@@ -19,8 +19,7 @@
 
 ;; : (List String)
 (def +manual-object-model-callees+
-  ;; An empty mutable hash table is storage, not evidence of a domain object.
-  '("hash" "list->hash-table"))
+  '("hash" "make-hash-table" "list->hash-table"))
 
 ;; : (List String)
 (def +poo-prototype-ref-callees+

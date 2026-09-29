@@ -351,6 +351,8 @@
   (let (loop (poo-call-loop-driver file call))
     (and loop
          (poo-loop-local-object-constructor-call? call)
+         (or (not (equal? (call-fact-callee call) ".o"))
+             (poo-native-object-stable-slot-values? call))
          (not (poo-loop-caller-has-composition-call? file call))
          loop)))
 
@@ -360,11 +362,25 @@
 ;; : (-> CallFact Boolean )
 (def (poo-loop-local-object-constructor-call? call)
   (and (poo-object-constructor-callee? call)
-       ;; Native .o with row-dependent slots is often the required output of
-       ;; a map/closure. The measured adapter cost below does not apply.
-       (not (equal? (call-fact-callee call) ".o"))
        (not (poo-call-has-keyword-argument? call "supers:"))
        (poo-loop-local-object-constructor-small-enough? call)))
+
+;;; Only literal slot values prove that a native .o can be hoisted. Unknown
+;;; expressions may depend on the current row, so they stay outside R033.
+;; : (-> CallFact Boolean)
+(def (poo-native-object-stable-slot-values? call)
+  (let loop ((args (call-fact-arguments call))
+             (types (call-fact-argument-types call)))
+    (cond
+     ((null? args) #t)
+     ((null? types) #f)
+     ((and (string? (car args))
+           (let (arg (car args))
+             (and (> (string-length arg) 0)
+                  (char=? (string-ref arg (- (string-length arg) 1)) #\:))))
+      (loop (cdr args) (cdr types)))
+     ((car types) (loop (cdr args) (cdr types)))
+     (else #f))))
 
 ;; : (-> CallFact Boolean )
 (def (poo-object-constructor-callee? call)
@@ -410,10 +426,16 @@
          (loopRole (poo-loop-driver-agent-role loop))
          (guidanceMode "performance-warning")
          (trigger "loop-local repeated POO object construction")
-         (allowedUse "boundary object construction and per-iteration construction with genuinely changing object shape remain valid POO usage")
+         (allowedUse "boundary object construction and per-row objects with changing slot values remain valid POO usage")
          (preferredConstruction "hoist stable object construction or accumulate scalar/list/hash state and construct one final POO object")
-         (performanceEvidence "gerbil-poo object<-alist/object<-hash allocate a new object shape; measured 2000 loop constructions: object<-alist 500 slots 4114ms, object<-hash 500 slots 9522ms, hoisted object below 1ms at millisecond resolution")
-         (sourceEvidence "gerbil-poo object.ss:136-151")
+         (performanceEvidence
+          (if (equal? (call-fact-callee call) ".o")
+            "parser-owned literal slot values prove this loop-local .o is invariant; hoisting removes a repeated allocation"
+            "gerbil-poo object<-alist/object<-hash allocate a new object shape; measured 2000 loop constructions: object<-alist 500 slots 4114ms, object<-hash 500 slots 9522ms, hoisted object below 1ms at millisecond resolution"))
+         (sourceEvidence
+          (if (equal? (call-fact-callee call) ".o")
+            "parser-owned call arguments and loop containment"
+            "gerbil-poo object.ss:136-151"))
          (next "move object<-alist/object<-hash/object<-fun/.o construction outside the loop or return scalar/list/hash loop state and construct once"))))
 
 ;;; Boundary:

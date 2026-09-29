@@ -208,6 +208,23 @@
                    (findings (run-agent-policy index)))
               (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-010" findings)
                      => []))))
+(test-case "mutable hash populated by a domain constructor remains visible"
+          (let* ((root ".run/policy-poo-mutable-domain-hash")
+                 (src (string-append root "/src")))
+            (reset-fixture-root root)
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/domain-hash)\n")
+            (write-text
+             (string-append src "/domain.ss")
+             ";;; -*- Gerbil -*-\n(import (only-in :clan/poo/object .o))\n(export make-record)\n(def (make-record value)\n  (let (record (make-hash-table))\n    (hash-put! record 'value value)\n    record))\n")
+            (let* ((index (collect-project root))
+                   (findings (run-agent-policy index)))
+              (check (length (filter-rule "GERBIL-SCHEME-AGENT-POLICY-010"
+                                          findings))
+                     => 1))))
 (test-case "agent policy accepts downstream POO pattern-guided implementation"
           (let* ((root ".run/policy-downstream-poo-agent-positive")
                  (_ (write-downstream-poo-agent-positive-project root))

@@ -139,7 +139,7 @@
 (def (manual-object-model-call? index file call)
   (let (caller (call-fact-caller call))
     (and (manual-object-model-owner? index file)
-         (manual-object-model-callee? call)
+         (manual-object-model-callee? file call)
          caller
          (manual-object-domain-constructor-caller? file caller)
          (not (caller-declares-intentional-raw-data-record? file caller)))))
@@ -149,9 +149,21 @@
   (and (index-source-runtime-file-path? index (source-file-path file))
        (null? (source-file-poo-forms file))))
 
-;; : (-> CallFact Boolean)
-(def (manual-object-model-callee? call)
-  (member (call-fact-callee call) +manual-object-model-callees+))
+;; : (-> SourceFile CallFact Boolean)
+(def (manual-object-model-callee? file call)
+  (and (member (call-fact-callee call) +manual-object-model-callees+)
+       (or (not (equal? (call-fact-callee call) "make-hash-table"))
+           (manual-object-model-mutable-construction? file call))))
+
+;;; Empty hash storage alone is not a domain object. A constructor that fills
+;;; its table has both allocation and mutation facts in the same owner.
+;; : (-> SourceFile CallFact Boolean)
+(def (manual-object-model-mutable-construction? file allocation)
+  (ormap (lambda (call)
+           (and (equal? (call-fact-caller call)
+                        (call-fact-caller allocation))
+                (equal? (call-fact-callee call) "hash-put!")))
+         (source-file-calls file)))
 
 ;; : (-> SourceFile Caller Boolean)
 (def (manual-object-domain-constructor-caller? file caller)

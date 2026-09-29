@@ -109,6 +109,23 @@
                    (findings (run-agent-policy index)))
               (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-033" findings)
                      => []))))
+(test-case "loop-invariant native POO literal remains a hoisting warning"
+          (let* ((root ".run/policy-native-poo-stable-loop-object")
+                 (src (string-append root "/src")))
+            (reset-fixture-root root)
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/results)\n")
+            (write-text
+             (string-append src "/results.ss")
+             ";;; -*- Gerbil -*-\n(import (only-in :clan/poo/object .o))\n(export constant-objects)\n(def (constant-objects rows)\n  (let loop ((remaining rows) (result []))\n    (if (null? remaining) (reverse result)\n      (loop (cdr remaining)\n            (cons (.o value: 1) result)))))\n")
+            (let* ((index (collect-project root))
+                   (findings (run-agent-policy index)))
+              (check (length (filter-rule "GERBIL-SCHEME-AGENT-POLICY-033"
+                                          findings))
+                     => 1))))
 (test-case "agent policy redirects loop-local POO type construction to a named type binding"
           (let* ((scenario
                   (make-policy-scenario
