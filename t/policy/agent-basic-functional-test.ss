@@ -59,6 +59,21 @@
                    (findings (run-agent-policy index)))
               (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-009" findings)
                      => []))))
+(test-case "named-let literal arguments do not crash projection evidence"
+          (let* ((root ".run/policy-loop-literal-argument")
+                 (src (string-append root "/src")))
+            (reset-fixture-root root)
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/loop-literal)\n")
+            (write-text
+             (string-append src "/core.ss")
+             ";;; -*- Gerbil -*-\n(export last-item)\n(def (last-item xs)\n  (let loop ((rest xs) (found #f))\n    (if (null? rest) found\n      (loop (cdr rest) #f))))\n")
+            (let* ((index (collect-project root))
+                   (findings (run-agent-policy index)))
+              (check (list? findings) => #t))))
 (test-case "agent policy accepts explicit higher-order idiom"
           (let* ((root ".run/policy-functional-idiom-positive")
                  (_ (write-functional-idiom-positive-project root))

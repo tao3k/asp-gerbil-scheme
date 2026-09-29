@@ -19,8 +19,9 @@
     (and (pair? calls)
          (andmap (lambda (call)
                    (andmap (lambda (arg)
-                             (or (string-prefix? "(car " arg)
-                                 (string-prefix? "(cdr " arg)))
+                             (and (string? arg)
+                                  (or (string-prefix? "(car " arg)
+                                      (string-prefix? "(cdr " arg))))
                            (call-fact-arguments call)))
                  calls))))
 
