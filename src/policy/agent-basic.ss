@@ -258,12 +258,15 @@
 ;;;   declarative; arbitrary executable forms in the same file still fail.
 ;; : (-> SourceFile CallFact Boolean )
 (def (explicit-build-entrypoint-call? file call)
-  (and (equal? (source-path-class (source-file-path file)) "package-build")
-       (ormap (lambda (form)
-                (and (member (top-form-head form)
-                             +explicit-build-entrypoint-heads+)
-                     (call-within-top-form-range? call form)))
-              (source-file-forms file))))
+  (ormap (lambda (form)
+           (and (or (equal? (top-form-head form)
+                             "asp-gerbil-scheme-package-spec!")
+                    (and (equal? (source-path-class (source-file-path file))
+                                 "package-build")
+                         (member (top-form-head form)
+                                 +explicit-build-entrypoint-heads+)))
+                (call-within-top-form-range? call form)))
+         (source-file-forms file)))
 
 ;;; Parser-owned macro facets prove this exact local invocation lowers only to
 ;;; a definition.  Name equality, source ownership, and top-form containment

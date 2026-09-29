@@ -31,6 +31,26 @@
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005" findings)))
             (check matching => [])))
+(test-case "PackageSpec declarations are valid in a build-support module"
+          (let* ((root ".run/policy-build-support-package-spec")
+                 (src (string-append root "/src"))
+                 (support (string-append src "/build-support")))
+            (reset-fixture-root root)
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src)
+            (ensure-dir support)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/build-support)\n")
+            (write-text
+             (string-append support "/spec.ss")
+             ";;; -*- Gerbil -*-\n(asp-gerbil-scheme-package-spec!\n (sample-spec @ prototype)\n (spec sample-build)\n (modules (append '(\"src/core.ss\") '(\"src/main.ss\"))))\n(displayln \"runtime effect\")\n")
+            (let* ((index (collect-project root))
+                   (findings (filter-rule "GERBIL-SCHEME-AGENT-POLICY-005"
+                                          (run-agent-policy index))))
+              (check (length findings) => 1)
+              (check (type-finding-message (car findings))
+                     => "top-level executable call displayln should move behind a named definition or explicit entrypoint"))))
 (test-case "agent policy treats the native POO family macro as declarative"
       (let* ((root ".run/policy-poo-object-family-declarative")
              (src (string-append root "/src")))
