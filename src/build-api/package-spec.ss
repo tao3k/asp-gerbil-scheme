@@ -20,6 +20,7 @@
         asp-gerbil-scheme-package-modules)
 
 (import (only-in :clan/poo/object .cc .def .get)
+        (only-in :gerbil/runtime/loader load-path add-load-path! set-load-path!)
         (only-in :gerbil/runtime/gambit
                  make-thread thread-start! thread-sleep! thread-terminate!)
         (only-in :std/list/list append-map delete-duplicates/hash)
@@ -180,10 +181,17 @@
         (displayln "[asp-gerbil-scheme-policy] START selected modules="
                    (length paths))
         (force-output))
-      ((eval '(begin
-                (import :asp-gerbil-scheme/src/build-api/policy-runner)
-                asp-gerbil-scheme-run-selected-policy))
-       paths))
+      ;; A clean package build has no compiled policy module yet. Let Gerbil's
+      ;; native source loader resolve this package before std/make compiles it.
+      (let (prior-load-path (load-path))
+        (dynamic-wind
+          (lambda () (add-load-path! (current-directory)))
+          (lambda ()
+            ((eval '(begin
+                      (import :asp-gerbil-scheme/src/build-api/policy-runner)
+                      asp-gerbil-scheme-run-selected-policy))
+             paths))
+          (lambda () (set-load-path! prior-load-path)))))
     native-spec))
 
 (def (native-build-elapsed-milliseconds started-jiffy)
