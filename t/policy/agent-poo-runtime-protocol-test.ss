@@ -114,6 +114,35 @@
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
             (check matching => [])))
+(test-case "agent policy follows a quoted sibling import in a tested facade"
+          (let* ((root ".run/policy-macro-runtime-source-sibling-import")
+                 (build-graph
+                  (write-import-linked-macro-runtime-source-project root))
+                 (_ (write-text
+                     (string-append root "/user-interface/facade.ss")
+                     ";;; -*- Gerbil -*-\n(import \"order-case.ss\")\n(export order-case)\n"))
+                 (index
+                  (collect-selected-source-scope root build-graph))
+                 (findings (run-agent-policy index))
+                 (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
+            (check matching => [])))
+(test-case "agent policy accepts a colocated asserting suite"
+          (let* ((root ".run/policy-macro-runtime-source-colocated-suite")
+                 (build-graph
+                  (write-import-linked-macro-runtime-source-project root))
+                 (_ (write-text
+                     (string-append root "/t/order-case-test.ss")
+                     ";;; -*- Gerbil -*-\n(import :std/test)\n"))
+                 (_ (write-text
+                     (string-append root "/user-interface/parser-test.ss")
+                     ";;; -*- Gerbil -*-\n(import :std/test \"facade.ss\")\n(def parser-test (test-suite \"colocated\" (test-case \"macro\" (check order-case => #!void))))\n"))
+                 (index
+                  (collect-selected-source-scope
+                   root (append build-graph
+                                ["user-interface/parser-test.ss"])))
+                 (findings (run-agent-policy index))
+                 (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-011" findings)))
+            (check matching => [])))
 (test-case "agent policy rejects an assertion owner without the macro call"
           (let* ((root ".run/policy-macro-runtime-source-wrong-owner")
                  (_ (write-macro-runtime-source-project root #t))
@@ -163,6 +192,22 @@
             (check (type-finding-path (car method-shape)) => "src/orders/io.ss")
             (check (type-finding-path (car object-model)) => "src/orders/core.ss")
             (check (type-finding-selector (car object-model)) => "src/orders/core.ss:4-4")))
+(test-case "private empty hash index is storage rather than a domain object"
+          (let* ((root ".run/policy-poo-private-index")
+                 (src (string-append root "/src")))
+            (reset-fixture-root root)
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/index)\n")
+            (write-text
+             (string-append src "/index.ss")
+             ";;; -*- Gerbil -*-\n(import (only-in :clan/poo/object .o))\n(export index-result)\n(def (index-result rows)\n  (def (new-index) (make-hash-table))\n  (.o rows: rows index: (new-index)))\n")
+            (let* ((index (collect-project root))
+                   (findings (run-agent-policy index)))
+              (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-010" findings)
+                     => []))))
 (test-case "agent policy accepts downstream POO pattern-guided implementation"
           (let* ((root ".run/policy-downstream-poo-agent-positive")
                  (_ (write-downstream-poo-agent-positive-project root))

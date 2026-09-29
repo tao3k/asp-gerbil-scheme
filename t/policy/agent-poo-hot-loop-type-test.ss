@@ -93,6 +93,22 @@
               (check (hash-get details 'loopRole) => "manual-loop")
               (check (hash-get details 'preferredConstruction)
                      => "hoist stable object construction or accumulate scalar/list/hash state and construct one final POO object")))
+(test-case "native POO result per row is a required materialization"
+          (let* ((root ".run/policy-native-poo-result-per-row")
+                 (src (string-append root "/src")))
+            (reset-fixture-root root)
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/results)\n")
+            (write-text
+             (string-append src "/results.ss")
+             ";;; -*- Gerbil -*-\n(import (only-in :clan/poo/object .o))\n(export row-objects)\n(def (row-objects rows)\n  (let loop ((remaining rows) (result []))\n    (if (null? remaining) (reverse result)\n      (loop (cdr remaining)\n            (cons (.o value: (car remaining)) result)))))\n")
+            (let* ((index (collect-project root))
+                   (findings (run-agent-policy index)))
+              (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-033" findings)
+                     => []))))
 (test-case "agent policy redirects loop-local POO type construction to a named type binding"
           (let* ((scenario
                   (make-policy-scenario

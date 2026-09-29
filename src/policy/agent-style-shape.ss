@@ -488,9 +488,8 @@
      ((> (length pattern-facts) 1) "repeated-pattern-branch")
      ((and (pair? pattern-facts) (pair? manual-loop-facts))
       "pattern-branch-with-manual-loop")
-     ((>= (length conditional-branch-facts)
-          +controlled-branch-shape-conditional-dispatch-min-count+)
-      "nested-conditional-dispatch")
+     ;; Branch count alone gives no repeated work or safe replacement proof.
+     ;; Keep native case/if dispatch available to allocation-sensitive code.
      (else #f))))
 
 ;; : (-> ControlFlowFact Boolean )

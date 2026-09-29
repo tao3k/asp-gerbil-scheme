@@ -360,6 +360,9 @@
 ;; : (-> CallFact Boolean )
 (def (poo-loop-local-object-constructor-call? call)
   (and (poo-object-constructor-callee? call)
+       ;; Native .o with row-dependent slots is often the required output of
+       ;; a map/closure. The measured adapter cost below does not apply.
+       (not (equal? (call-fact-callee call) ".o"))
        (not (poo-call-has-keyword-argument? call "supers:"))
        (poo-loop-local-object-constructor-small-enough? call)))
 
