@@ -3,6 +3,7 @@
 
 (import :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/model
+        (only-in :std/string/misc string-prefix?)
 
         :asp-gerbil-scheme/src/types/findings)
 
@@ -34,12 +35,40 @@
 (def (list-growth-loop-driver file call)
   (and (member (call-fact-callee call) +list-growth-loop-callees+)
        (call-fact-caller call)
+       (list-growth-may-copy-carried-prefix? call)
        (ormap (lambda (loop)
                 (and (equal? (loop-driver-fact-caller loop)
                              (call-fact-caller call))
                      (list-growth-call-inside-loop? call loop)
+                     (list-growth-fed-back-to-loop? file call loop)
                      loop))
               (source-file-loop-driver-facts file))))
+
+;;; The native parser renders each argument separately. A direct identifier
+;;; can be a carried prefix; a constructor expression is its own fresh input
+;;; and this rule has no evidence that it copies the accumulated result.
+;; : (-> CallFact Boolean)
+(def (list-growth-may-copy-carried-prefix? call)
+  (let (args (call-fact-arguments call))
+    (and (pair? args)
+         (string? (car args))
+         (not (string-prefix? "(" (car args))))))
+
+;;; A loop-local append is quadratic only when its result becomes loop state.
+;;; Calls that prepend a fresh bounded batch to an old relation tail do not
+;;; copy an accumulated prefix, even when they sit inside a surrounding loop.
+;; : (-> SourceFile CallFact LoopDriverFact Boolean)
+(def (list-growth-fed-back-to-loop? file call loop)
+  (ormap
+   (lambda (recursive)
+     (and (equal? (call-fact-caller recursive) (call-fact-caller call))
+          (equal? (call-fact-callee recursive)
+                  (loop-driver-fact-name loop))
+          (number? (call-fact-start recursive))
+          (number? (call-fact-end recursive))
+          (<= (call-fact-start recursive) (call-fact-start call))
+          (>= (call-fact-end recursive) (call-fact-end call))))
+   (source-file-calls file)))
 
 ;;; Locality gate:
 ;;; - Caller equality alone is too broad; one boundary append after a loop is

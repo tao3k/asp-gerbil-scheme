@@ -43,6 +43,22 @@
                  (findings (run-agent-policy index))
                  (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-009" findings)))
             (check matching => [])))
+(test-case "structural recursion with two projections is not an accumulator rewrite"
+          (let* ((root ".run/policy-structural-recursion")
+                 (src (string-append root "/src")))
+            (reset-fixture-root root)
+            (ensure-dir ".run")
+            (ensure-dir root)
+            (ensure-dir src)
+            (write-text (string-append root "/gerbil.pkg")
+                        "(package: sample/compare)\n")
+            (write-text
+             (string-append src "/compare.ss")
+             ";;; -*- Gerbil -*-\n(export ordered<?)\n(def (ordered<? left right)\n  (let loop ((left left) (right right))\n    (cond ((null? left) (pair? right))\n          ((null? right) #f)\n          ((< (car left) (car right)) #t)\n          ((> (car left) (car right)) #f)\n          (else (loop (cdr left) (cdr right))))))\n")
+            (let* ((index (collect-project root))
+                   (findings (run-agent-policy index)))
+              (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-009" findings)
+                     => []))))
 (test-case "agent policy accepts explicit higher-order idiom"
           (let* ((root ".run/policy-functional-idiom-positive")
                  (_ (write-functional-idiom-positive-project root))

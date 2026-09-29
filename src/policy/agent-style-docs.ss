@@ -163,9 +163,9 @@
 ;; : (-> FunctionQualityProfile Boolean )
 (def (typed-combinator-style-profile-requires-doc? profile)
   (and (> (function-quality-profile-arity profile) 0)
-       (or (member (function-quality-profile-role profile)
-                   +typed-combinator-style-doc-required-roles+)
-           (and (function-quality-profile-exported profile)
+       (and (function-quality-profile-exported profile)
+            (or (member (function-quality-profile-role profile)
+                        +typed-combinator-style-doc-required-roles+)
                 (typed-combinator-style-profile-doc-required-facet? profile)))))
 
 ;;; Boundary:
@@ -195,7 +195,8 @@
 ;;; - Missing docs are reported at the macro boundary, not runtime helpers.
 ;; : (-> SourceFile MacroFact MaybeTargetName )
 (def (typed-combinator-style-macro-missing-doc-target file macro)
-  (and (not (typed-combinator-style-macro-has-doc? file macro))
+  (and (member (macro-fact-name macro) (source-file-exports file))
+       (not (typed-combinator-style-macro-has-doc? file macro))
        (macro-fact-name macro)))
 
 ;;; Macro doc lookup:

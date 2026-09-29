@@ -5,6 +5,10 @@
         :asp-gerbil-scheme/src/parser/facade
         :asp-gerbil-scheme/src/policy/agent-poo
         :asp-gerbil-scheme/src/policy/agent-support
+        (only-in :asp-gerbil-scheme/src/policy/agent-basic-loop-support
+                 manual-loop-projection-recursion?
+                 manual-loop-nested-driver?
+                 manual-loop-materializes-output?)
         :asp-gerbil-scheme/src/policy/model
         :asp-gerbil-scheme/src/policy/modularity
         (only-in :std/misc/ports read-file-lines)
@@ -502,10 +506,16 @@
 ;; : (-> SourceFile ControlFlowFact Boolean )
 (def (redundant-manual-loop-control-flow? file fact)
   (and (manual-loop-pure-transform-driver? file fact)
-       (let (signals (manual-loop-detection-signals file fact))
-         (not (find (lambda (signal)
-                      (not (member signal signals)))
-                    +redundant-manual-loop-required-signals+)))))
+       (not (manual-loop-projection-recursion? file fact))
+       (not (manual-loop-nested-driver? file fact))
+       (not (manual-loop-materializes-output? file fact))
+       (manual-loop-has-required-signals? file fact)))
+
+;; : (-> SourceFile ControlFlowFact Boolean)
+(def (manual-loop-has-required-signals? file fact)
+  (let (signals (manual-loop-detection-signals file fact))
+    (andmap (cut member <> signals)
+            +redundant-manual-loop-required-signals+)))
 
 ;;; Driver-kind gate:
 ;;; - Control-flow facts identify named-let syntax.
@@ -562,7 +572,7 @@
 ;;; state, so it is only advisory when the other absence witnesses also agree.
 ;; : (-> ControlFlowFact Boolean )
 (def (manual-loop-multi-binding-state? fact)
-  (>= (control-flow-fact-binding-count fact) 2))
+  (= (control-flow-fact-binding-count fact) 2))
 ;;; Boundary:
 ;;; - caller-has-functional-idiom? composes first-class procedures.
 ;;; - Keep data-flow evidence visible.

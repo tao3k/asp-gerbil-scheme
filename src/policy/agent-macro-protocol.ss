@@ -202,7 +202,11 @@
 
 ;; : (-> ProjectIndex SourceFile Boolean)
 (def (macro-runtime-source-test-owner? index owner)
-  (source-path-under-root? (source-file-path owner) "t"))
+  (or (source-path-under-root? (source-file-path owner) "t")
+      ;; Gerbil packages also colocate asserting suites beside their modules.
+      ;; Import and call facts identify those suites without a filename rule.
+      (and (member ":std/test" (source-file-imports owner))
+           (source-file-invokes? owner "test-suite"))))
 
 ;; : (-> SourceFile Boolean)
 (def (macro-runtime-source-assertion-owner? owner)
@@ -227,9 +231,10 @@
                 (append
                  (source-file-includes owner)
                  (filter-map
-                  (lambda (path)
-                    (macro-runtime-source-import-path index path))
-                  (source-file-imports owner))
+                  (lambda (fact)
+                    (macro-runtime-source-import-path
+                     index (module-import-fact-module fact)))
+                  (source-file-module-imports owner))
                  (filter-map macro-runtime-source-load-path
                              (source-file-calls owner)))))))
 
@@ -244,8 +249,11 @@
     (cond
      ((and package-prefix (string-prefix? package-prefix path))
       (substring path (string-length package-prefix) (string-length path)))
-     ((or (string-prefix? "./" path)
-          (string-prefix? "../" path))
+     ;; Native source imports also admit quoted sibling names without ./.
+     ;; Their parsed path has no module prefix and resolves relative to the
+     ;; importing owner, just like quoted ./name imports.
+     ((and (not (string-prefix? ":" path))
+           (not (string-prefix? "/" path)))
       path)
      (else #f))))
 

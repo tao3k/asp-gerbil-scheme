@@ -19,25 +19,13 @@
 ;; PolicyTest
 (def agent-style-functional-branch-policy-test
   (test-suite "gerbil scheme harness agent style functional branch policy"
-(test-case "agent policy reports nested conditional dispatch before launcher-style repair"
+(test-case "branch count alone does not require a launcher-style rewrite"
           (let* ((root ".run/policy-controlled-branch-conditional-dispatch")
                  (_ (write-controlled-branch-conditional-dispatch-project root))
                  (index (collect-project root))
                  (findings (run-agent-policy index))
-                 (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-014" findings))
-                 (finding (car matching)))
-            (check (length matching) => 1)
-            (check (type-finding-path finding) => "src/orders/core.ss")
-            (check (hash-get (type-finding-details finding) 'shape)
-                   => "nested-conditional-dispatch")
-            (check (hash-get (type-finding-details finding) 'conditionalBranchCount)
-                   => 4)
-            (check (hash-get (type-finding-details finding) 'conditionalDispatchGate)
-                   => 4)
-            (check (not (not (string-contains
-                              (type-finding-message finding)
-                              "source-backed Gerbil idioms such as fun, cut/curry/rcurry, compose/rcompose, or named fallback helpers")))
-                   => #t)))
+                 (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-014" findings)))
+            (check matching => [])))
 (test-case "agent policy validates higher-order branch repair scenario under performance gate"
           (let* ((scenario
                   (make-policy-scenario

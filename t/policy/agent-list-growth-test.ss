@@ -59,6 +59,23 @@
                (findings (run-agent-policy index))
                (matching (filter-rule "GERBIL-SCHEME-AGENT-POLICY-039" findings)))
           (check matching => []))))
+    (test-case "fresh batch prepend inside a loop does not copy the carried prefix"
+      (let* ((root ".run/policy-list-growth-fresh-batch")
+             (source-dir (string-append root "/src/reports")))
+        (reset-fixture-root root)
+        (ensure-dir ".run")
+        (ensure-dir root)
+        (ensure-dir (string-append root "/src"))
+        (ensure-dir source-dir)
+        (write-text (string-append root "/gerbil.pkg")
+                    "(package: sample/reports)\n")
+        (write-text
+         (string-append source-dir "/merge.ss")
+         ";;; -*- Gerbil -*-\n(package: sample/reports)\n(export prepend-batches)\n(def (prepend-batches batches old-tail)\n  (let loop ((remaining batches) (result old-tail))\n    (if (null? remaining) result\n      (loop (cdr remaining)\n            (append (map identity (car remaining)) result)))))\n")
+        (let* ((index (collect-project root))
+               (findings (run-agent-policy index)))
+          (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-039" findings)
+                 => []))))
     (test-case "agent policy validates list append loop scenario under performance gate"
       (let* ((scenario
               (make-policy-scenario
