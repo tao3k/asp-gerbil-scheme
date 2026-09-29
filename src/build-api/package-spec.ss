@@ -175,14 +175,8 @@
 (def (asp-gerbil-scheme-package-policy-native-spec package-spec)
   (let* ((native-spec (asp-gerbil-scheme-package-native-spec package-spec))
          (paths (delete-duplicates/hash
-                 (append-map native-target-source-paths native-spec)))
-         (witnesses (.get package-spec policy-witnesses)))
+                 (append-map native-target-source-paths native-spec))))
     (when (and (pair? paths) (policy-build-command?))
-      (for-each
-       (lambda (path)
-         (unless (and (string? path) (file-exists? path))
-           (error "Package Spec policy witness source is missing" path)))
-       witnesses)
       (parameterize ((current-output-port (current-error-port)))
         (displayln "[asp-gerbil-scheme-policy] START selected modules="
                    (length paths))
@@ -196,7 +190,7 @@
             ((eval '(begin
                       (import :asp-gerbil-scheme/src/build-api/policy-runner)
                       asp-gerbil-scheme-run-selected-policy))
-             (delete-duplicates/hash (append paths witnesses))))
+             paths))
           (lambda () (set-load-path! prior-load-path)))))
     native-spec))
 
@@ -283,9 +277,6 @@
              (exclude-modules [])
              (native-prelude-spec [])
              (extra-spec [])
-             ;; Exact test sources can witness macros without becoming build
-             ;; targets or causing a second project/source discovery pass.
-             (policy-witnesses [])
              (product-entry-modules [])
              (generated-modules [])
              (native-profile asp-gerbil-scheme-default-native-profile)
