@@ -71,15 +71,34 @@
   (test-suite "Building API admits its declared source projection"
     (test-case "unselected large source is outside the build graph"
       (check (with-policy-fixture policy-small-spec) => '("small")))
-    (test-case "a selected source over 1000 lines blocks the build"
-      (check-exception (with-policy-fixture policy-large-spec) true))
+    (test-case "ordinary build projects selected sources without policy scan"
+      (check (with-policy-fixture policy-large-spec) => '("large")))
+    (test-case "explicit policy checks selected source"
+      (let (previous (getenv "ASP_GERBIL_SCHEME_POLICY" #f))
+        (dynamic-wind
+          (lambda () (setenv "ASP_GERBIL_SCHEME_POLICY" "1"))
+          (lambda ()
+            (check (with-policy-fixture policy-small-spec) => '("small"))
+            (check-exception (with-policy-fixture policy-large-spec) true))
+          (lambda ()
+            (if previous
+              (setenv "ASP_GERBIL_SCHEME_POLICY" previous)
+              (setenv "ASP_GERBIL_SCHEME_POLICY"))))))
     (test-case "nested native module targets also receive policy"
       (check (with-policy-fixture
               (lambda ()
                 (asp-gerbil-scheme-package-native-spec policy-nested-fixture)))
              => [[ssi: "interface" [gxc: "large"]]])
-      (check-exception (with-policy-fixture policy-nested-spec) true))
-    (test-case "downstream POO slot composes the default policy"
+      (let (previous (getenv "ASP_GERBIL_SCHEME_POLICY" #f))
+        (dynamic-wind
+          (lambda () (setenv "ASP_GERBIL_SCHEME_POLICY" "1"))
+          (lambda ()
+            (check-exception (with-policy-fixture policy-nested-spec) true))
+          (lambda ()
+            (if previous
+              (setenv "ASP_GERBIL_SCHEME_POLICY" previous)
+              (setenv "ASP_GERBIL_SCHEME_POLICY"))))))
+    (test-case "downstream POO slot can compose explicit policy"
       (set! policy-extension-count 0)
       (check (with-policy-fixture policy-extended-spec) => '("small"))
       (check policy-extension-count => 1))))

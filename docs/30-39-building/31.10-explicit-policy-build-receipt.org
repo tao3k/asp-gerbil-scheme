@@ -1,0 +1,40 @@
+#+title: Explicit Policy Build Timing Receipt
+
+* Scope
+
+On 2026-10-02, a macOS arm64 Gerbil v0.19 (2591dcd) run measured an
+unchanged 36-module =gerbil-ascent= build. A separate Git worktree held the
+same sources and compiled package dependencies for both variants. The only
+variant change was the ASP =package-spec= source and compiled module: the
+installed =v0.1.2= behavior versus this explicit policy check. Commands used
+=/usr/bin/time -p just build= through the same devenv environment. All runs
+completed successfully.
+
+| Order | Variant | Wall seconds | Policy projection |
+|-------+---------+--------------+-------------------|
+| 1 | installed baseline, warm | 46.33 | scan on |
+| 2 | explicit policy | 46.12 | scan off |
+| 3 | explicit policy | 50.63 | scan off |
+| 4 | explicit policy, verbose receipt | 27.91 | 0 ms |
+| 5 | installed baseline, verbose receipt | 34.99 | 15,502 ms |
+| 6 | explicit policy, verbose receipt | 17.43 | 0 ms |
+
+The two verbose projection receipts isolate the removed work: 15.502 seconds
+of policy projection on the baseline and less than one millisecond with the
+new default. Wall time varied substantially, including two initial runs with
+no measurable reduction. The last adjacent baseline and changed runs were
+34.99 and 17.43 seconds; that pair alone does not establish a stable
+end-to-end speedup. A direct =std/build-script= experiment completed in 17.73
+seconds and did not justify replacing the PackageSpec boundary.
+
+* Qualification
+
+=just check-policy= still ran the complete policy pass over ASP's 207 selected
+modules, with zero errors and one pre-existing warning. In the Ascent worktree,
+=just check-policy= scanned 36 selected modules with zero findings, and
+=just test-quick= reported five =MODULE-OK= lines, =HARNESS-OK=, and =OK=.
+The focused =t/build-api-policy-projection-test.ss= passed and checked the
+default projection, explicit oversized-source rejection, and nested targets.
+
+The ordinary build continues through Gerbil =std/make=. The remaining startup
+and native build time is outside this policy pass.
