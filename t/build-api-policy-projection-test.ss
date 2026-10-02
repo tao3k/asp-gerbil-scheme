@@ -76,7 +76,7 @@
     (test-case "explicit policy checks selected source"
       (let (previous (getenv "ASP_GERBIL_SCHEME_POLICY" #f))
         (dynamic-wind
-          (lambda () (setenv "ASP_GERBIL_SCHEME_POLICY" "check"))
+          (lambda () (setenv "ASP_GERBIL_SCHEME_POLICY" "1"))
           (lambda ()
             (check (with-policy-fixture policy-small-spec) => '("small"))
             (check-exception (with-policy-fixture policy-large-spec) true))
@@ -91,7 +91,7 @@
              => [[ssi: "interface" [gxc: "large"]]])
       (let (previous (getenv "ASP_GERBIL_SCHEME_POLICY" #f))
         (dynamic-wind
-          (lambda () (setenv "ASP_GERBIL_SCHEME_POLICY" "check"))
+          (lambda () (setenv "ASP_GERBIL_SCHEME_POLICY" "1"))
           (lambda ()
             (check-exception (with-policy-fixture policy-nested-spec) true))
           (lambda ()

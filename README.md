@@ -40,7 +40,7 @@ just test-files t/package-build-contract-test.ss
 Downstream `build.ss` files import
 `:asp-gerbil-scheme/building-api` for PackageSpec declarations. Its default
 POO `spec-projector` slot runs the existing policy rules on source modules
-selected by the native BuildSpec when `ASP_GERBIL_SCHEME_POLICY=check` is set,
+selected by the native BuildSpec when `ASP_GERBIL_SCHEME_POLICY=1` is set,
 before passing that same spec to `std/make`. Ordinary `just build` leaves source
 currentness and compilation to `std/make` without a second parse of every
 selected module. `just check-policy` enables the complete policy pass; CI uses

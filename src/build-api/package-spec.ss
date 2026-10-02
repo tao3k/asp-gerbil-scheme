@@ -168,10 +168,10 @@
 ;; Policy is an explicit qualification pass over the same native BuildSpec.
 ;; Ordinary builds leave currentness and compilation to std/make without
 ;; parsing every selected source a second time. CI invokes the policy pass
-;; with ASP_GERBIL_SCHEME_POLICY=check.
+;; with ASP_GERBIL_SCHEME_POLICY=1.
 (def (policy-build-command?)
   (let (argv (command-line))
-    (and (equal? (getenv "ASP_GERBIL_SCHEME_POLICY" #f) "check")
+    (and (equal? (getenv "ASP_GERBIL_SCHEME_POLICY" #f) "1")
          (or (null? argv)
              (not (member (car (reverse argv))
                           '("meta" "spec" "clean")))))))

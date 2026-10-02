@@ -195,7 +195,7 @@ jobs:
         timeout-minutes: 10
         run: |
           gerbil clean
-          ASP_GERBIL_SCHEME_POLICY=check gerbil build
+          ASP_GERBIL_SCHEME_POLICY=1 gerbil build
 
       - name: Build canonical provider target
         if: matrix.target == 'provider'
