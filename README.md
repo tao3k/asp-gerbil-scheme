@@ -19,6 +19,7 @@ Use the thin justfile recipes, backed by Gerbil's native commands:
 ```sh
 just deps
 just build
+just check-policy
 just test
 just clean
 ```
@@ -39,9 +40,13 @@ just test-files t/package-build-contract-test.ss
 Downstream `build.ss` files import
 `:asp-gerbil-scheme/building-api` for PackageSpec declarations. Its default
 POO `spec-projector` slot runs the existing policy rules on source modules
-selected by the native BuildSpec, before passing that same spec to `std/make`.
+selected by the native BuildSpec when `ASP_GERBIL_SCHEME_POLICY=check` is set,
+before passing that same spec to `std/make`. Ordinary `just build` leaves source
+currentness and compilation to `std/make` without a second parse of every
+selected module. `just check-policy` enables the complete policy pass; CI uses
+it for the canonical library build.
 Downstream packages declare their module targets; they override or compose the
-slot only when they need different admission behavior. The default reports the
+slot only when they need different admission behavior. The explicit pass reports the
 selected module count and findings, and rejects error findings such as a source
 file over 1000 lines. An empty target selection returns the native spec without
 initializing the policy rule set; a nonempty selection loads it once through

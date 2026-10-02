@@ -165,12 +165,16 @@
      (native-module-source-paths module))
     (else [])))
 
-;; std/build-script evaluates its BuildSpec before dispatching native commands.
-;; Meta, spec inspection, and clean do not compile selected sources.
+;; Policy is an explicit qualification pass over the same native BuildSpec.
+;; Ordinary builds leave currentness and compilation to std/make without
+;; parsing every selected source a second time. CI invokes the policy pass
+;; with ASP_GERBIL_SCHEME_POLICY=check.
 (def (policy-build-command?)
   (let (argv (command-line))
-    (or (null? argv)
-        (not (member (car (reverse argv)) '("meta" "spec" "clean"))))))
+    (and (equal? (getenv "ASP_GERBIL_SCHEME_POLICY" #f) "check")
+         (or (null? argv)
+             (not (member (car (reverse argv))
+                          '("meta" "spec" "clean")))))))
 
 (def (asp-gerbil-scheme-package-policy-native-spec package-spec)
   (let* ((native-spec (asp-gerbil-scheme-package-native-spec package-spec))
