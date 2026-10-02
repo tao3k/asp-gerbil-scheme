@@ -12,6 +12,7 @@
  (optimizationFocus . "complete dependency-backed protocol adapter surface")
  (inputShape . "POO type exposes only a partial orderdict method table")
  (expectedOutcome . "supply primitive slots, derived capabilities, validation, and a generic contract witness")
+ (evidenceScopeContract . "production-only scope retains local adapter requirements; missing test witnesses require complete test scope")
  (measurementPhases
   "collect-before"
   "collect-after"

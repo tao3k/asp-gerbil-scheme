@@ -107,7 +107,7 @@ Create a small test owner such as =t/project-policy-test.ss=:
 Run it with:
 
 #+begin_src shell
-gxtest t/project-policy-test.ss
+gxi -e '(import :gerbil/tools/gxtest) (exit (apply main (cdddr (command-line))))' t/project-policy-test.ss
 #+end_src
 
 On failure, the adapter emits one JSON packet conforming to the shared
@@ -126,13 +126,13 @@ owner.
 
 Use the fast wiring check during normal development:
 #+begin_src shell
-gxtest t/self-apply-test.ss
+gxi -e '(import :gerbil/tools/gxtest) (exit (apply main (cdddr (command-line))))' t/self-apply-test.ss
 #+end_src
 
 Run the standalone self-apply gate explicitly when auditing source-policy debt
 outside the package's normal =build.ss test= path:
 #+begin_src shell
-gxtest t/self-apply-full-gate.ss
+gxi -e '(import :gerbil/tools/gxtest) (exit (apply main (cdddr (command-line))))' t/self-apply-full-gate.ss
 #+end_src
 
 The standalone gate performs the same source-policy analysis as the project
@@ -177,7 +177,7 @@ For a package that composes policy as a POO Testing extension, add
 =+testing-source-admission-profile+= to its testing interface, implement the
 =.admit-prepared-source-graph= method with =.cc=, and export the suite returned
 by =testing-interface-prepared-source-admission-suite=. Keep that suite in the
-same =gerbil test= invocation as its declared roots. Native =gxtest= prepares
+same native =:gerbil/tools/gxtest= invocation as its declared roots. Native =gxtest= prepares
 every requested module before running any exported suite, so the method can
 consume the resident expander contexts through
 =asp-gerbil-scheme-prepared-native-import-closure=. The ordinary build-time
@@ -195,7 +195,7 @@ Agents integrating the harness downstream should follow this order:
    =.gerbil= directory.
 3. Add =t/project-policy-test.ss= using the stable
    =:asp-gerbil-scheme/building-api= facade.
-4. Run =gxtest t/project-policy-test.ss=.
+4. Run =gxi -e '(import :gerbil/tools/gxtest) (exit (apply main (cdddr (command-line))))' t/project-policy-test.ss=.
 5. If policy fails, inspect the structured =agentRepair.findingGroups= packet
    or render it through unified ASP before editing downstream source.
 
@@ -204,5 +204,5 @@ operations are served separately by the HTTP JSON provider built from
 =build-provider.ss=:
 
 #+begin_src shell
-gxtest t/project-policy-test.ss
+gxi -e '(import :gerbil/tools/gxtest) (exit (apply main (cdddr (command-line))))' t/project-policy-test.ss
 #+end_src

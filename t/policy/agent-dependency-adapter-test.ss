@@ -40,6 +40,7 @@
 (def agent-dependency-adapter-policy-test
   (test-suite "gerbil scheme harness dependency adapter policy"
     (test-case "slot prototype table adapter has generic contract witness"
+          (check (slot-prototype-table-contract-witness) => #t)
           (let* ((sample '((alpha . 1) (beta . 2)))
                  (updated (.call SlotPrototypeTable.
                                   .update
@@ -62,6 +63,27 @@
                    => 2)
             (check (.call SlotPrototypeTable. .list<- sample) => sample)
             (check (slot-prototype-ref sample 'missing 'fallback) => 'fallback)))
+    (test-case "incomplete test scope preserves local adapter requirements"
+      (let* ((root ".run/policy-dependency-adapter-production-only")
+             (_ (write-dependency-protocol-adapter-project root #t #f))
+             (index (collect-source-scope root ["src/orders/dict.ss"])))
+        (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-017"
+                            (run-policy-checks index))
+               ? pair?)
+        (check (filter-rule "GERBIL-SCHEME-AGENT-POLICY-017"
+                            (run-policy-checks index test-evidence-complete?: #f))
+               => []))
+      (let* ((root ".run/policy-dependency-adapter-production-weak")
+             (_ (write-dependency-protocol-adapter-project root #f #f))
+             (index (collect-source-scope root ["src/orders/dict.ss"]))
+             (findings (filter-rule "GERBIL-SCHEME-AGENT-POLICY-017"
+                        (run-policy-checks index test-evidence-complete?: #f)))
+             (missing (hash-get (type-finding-details (car findings))
+                                'missingEvidence)))
+        (check (length findings) => 1)
+        (check (member "typed-validation-boundary" missing) ? pair?)
+        (check (member "generic-contract-test-witness" missing) => #f)))
+
     (test-case "agent policy reports weak dependency protocol adapters"
           (let* ((root ".run/policy-dependency-protocol-adapter")
                  (_ (write-dependency-protocol-adapter-project root #f #f))

@@ -8,6 +8,7 @@
   "policy selection stays subsecond; native process timing remains owned by native-batch-contract.ss")
  (sampleCount . 20)
  (purpose . "prove upstream Gerbil owns selection while ASP only declares POO instrumentation")
+ (testExitContract . "invoke upstream gxtest main in one gxi process and explicitly propagate its result; failed assertions must exit nonzero")
  (feature . "upstream-gxtest-delegation")
  (rule . "GERBIL-SCHEME-AGENT-TESTING-UPSTREAM-GXTEST-DELEGATION-001")
  (optimizationFocus

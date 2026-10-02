@@ -178,9 +178,11 @@
 
 (def (asp-gerbil-scheme-package-policy-native-spec package-spec)
   (let* ((native-spec (asp-gerbil-scheme-package-native-spec package-spec))
-         (paths (delete-duplicates/hash
-                 (append-map native-target-source-paths native-spec))))
-    (when (and (pair? paths) (policy-build-command?))
+         (paths (if (policy-build-command?)
+                  (delete-duplicates/hash
+                   (append-map native-target-source-paths native-spec))
+                  [])))
+    (when (pair? paths)
       (parameterize ((current-output-port (current-error-port)))
         (displayln "[asp-gerbil-scheme-policy] START selected modules="
                    (length paths))

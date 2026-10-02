@@ -11,6 +11,14 @@ gerbil := if os() == "macos" {
 } else {
     "env GERBIL_BUILD_CORES=" + build_cores + " gerbil"
 }
+gxi := if os() == "macos" {
+    "env -u SDKROOT -u DEVELOPER_DIR GERBIL_BUILD_CORES=" + build_cores + " gxi"
+} else {
+    "env GERBIL_BUILD_CORES=" + build_cores + " gxi"
+}
+# Propagate the upstream result explicitly: this installed Bach dispatcher can
+# return exit 0 even when gxtest reports a failed assertion.
+gxtest_exit := "(import :gerbil/tools/gxtest) (exit (apply main (cdddr (command-line))))"
 
 default:
     @just --list
@@ -29,10 +37,14 @@ check-policy:
     ASP_GERBIL_SCHEME_POLICY=1 {{gerbil}} build
 
 test:
-    {{gerbil}} test t/support-list-test.ss t/build-script-command-test.ss t/package-build-contract-test.ss t/package-native-declaration-test.ss t/native-import-public-closure-scenario-test.ss t/build-api-source-bootstrap-test.ss t/build-api-policy-projection-test.ss t/build-api-startup-scenario-test.ss t/provider-owned-schema-registry-test.ss t/exact-source-projection-test.ss t/projection-batch-test.ss t/projection-batch-scenario-test.ss t/language-projection-test.ss t/testing-extension-test.ss t/testing-native-batch-scenario-test.ss t/project-policy-test.ss
+    {{gxi}} -e '{{gxtest_exit}}' t/support-list-test.ss t/build-script-command-test.ss t/package-build-contract-test.ss t/package-native-declaration-test.ss t/native-import-public-closure-scenario-test.ss t/build-api-source-bootstrap-test.ss t/build-api-policy-projection-test.ss t/build-api-startup-scenario-test.ss t/provider-owned-schema-registry-test.ss t/exact-source-projection-test.ss t/projection-batch-test.ss t/projection-batch-scenario-test.ss t/language-projection-test.ss t/testing-extension-test.ss t/testing-native-batch-scenario-test.ss t/policy/agent-dependency-adapter-test.ss t/project-policy-test.ss
 
 test-files +files:
-    {{gerbil}} test "$@"
+    {{gxi}} -e '{{gxtest_exit}}' "$@"
+
+# Isolated compiler regression; supply the exact std/make source and patch base.
+audit-native-recovery make_source patch output:
+    python3 t/native-build-recovery/run.py --make-source "$1" --patch "$2" --output "$3"
 
 clean-provider:
     {{gerbil}} env gerbil interactive build-provider.ss clean

@@ -74,6 +74,23 @@
                 "vendor/generated/t/generated-test.ss")
                => #f)))
 
+    (test-case "discovery ignores are relative to the supplied package root"
+      (let* ((root "t/scenarios/policy/upstream-gxtest-delegation/expected")
+             (testing
+              (testing-interface-add-profile
+               +asp-testing-interface+
+               (.cc +testing-discovery-profile+ ignoreDirectories: '("t")))))
+        (check (length (testing-interface-test-files
+                        +asp-testing-interface+ "unit-tests.ss" pkgdir: root))
+               => 4)
+        (check (testing-interface-test-files
+                testing "unit-tests.ss" pkgdir: root)
+               => [])
+        (check (testing-interface-test-files
+                testing "unit-tests.ss"
+                pkgdir: (path-expand root (current-directory)))
+               => [])))
+
     (test-case "POO import footprint profile rejects repeated heavy owners"
       (let* ((profile
               (testing-import-footprint-profile

@@ -171,7 +171,10 @@
   (let (row (profile-row "parse-source-files"
                          (duration-ms start (monotonic-ms))))
     (hash-put! row 'workerCount worker-count)
-    (hash-put! row 'parallel (> worker-count 1))
+    (hash-put! row 'concurrent (> worker-count 1))
+    (hash-put! row 'vmProcessorCount (##current-vm-processor-count))
+    (hash-put! row 'parallel
+               (and (> worker-count 1) (> (##current-vm-processor-count) 1)))
     (hash-put! row 'scheduler "green-thread-mailbox")
     (hash-put! row 'sharedState "foreground-owned")
     (hash-put! row 'backpressure "bounded-active-workers")

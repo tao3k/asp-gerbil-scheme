@@ -1,0 +1,709 @@
+{
+  "schema": "asp.build-testing-repair-audit.v1",
+  "date": "2026-10-02",
+  "repository": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme",
+  "head": "c31711fca3008e7db97125d5c9f92b07b883f9a5",
+  "branch": "main",
+  "cores": 12,
+  "compilerDeployed": false,
+  "remoteCiRun": false,
+  "patchBases": {
+    "installed": {
+      "sourceSha256": "139d348ecbdb1b98edf0f6cf53fdd690f56b49c8bf6942383068da2d4ebe551a",
+      "version": "2591dcd.patchf5cedd8168cb"
+    },
+    "candidate": {
+      "sourceSha256": "d4393b8ccb5ee2640bbdef971ccb0ee9e53b2bc36fca7eac79b4381693d153f2",
+      "head": "d801e7a1c7f77df421f638e62aaebe370f193c97",
+      "containsPreexistingChanges": true
+    },
+    "toolMain": {
+      "sourceSha256": "5ecbb1719cc5ccfa28b3f0f5f881e7d8a9c7291d0c73faba672b851654fd6400",
+      "version": "2591dcd.patchf5cedd8168cb"
+    }
+  },
+  "candidateSourceUnchanged": true,
+  "invalidatedChecks": [
+    {
+      "receipt": {
+        "name": "asp-full-check",
+        "command": [
+          "just",
+          "check"
+        ],
+        "exit": 0,
+        "timeout": false,
+        "wallSeconds": 545.9760304590163,
+        "userSeconds": 95.588588,
+        "systemSeconds": 36.207679,
+        "cores": "12",
+        "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+      },
+      "reason": "Installed gerbil test discarded gxtest failure status; exit 0 is not acceptance."
+    },
+    {
+      "receipt": {
+        "name": "asp-final-check",
+        "command": [
+          "just",
+          "check"
+        ],
+        "exit": 0,
+        "timeout": false,
+        "wallSeconds": 401.199179874995,
+        "userSeconds": 46.132741,
+        "systemSeconds": 13.268765,
+        "cores": "12",
+        "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+      },
+      "reason": "Installed gerbil test discarded gxtest failure status; exit 0 is not acceptance."
+    }
+  ],
+  "qualifiedReceipts": {
+    "qualified-final-check": {
+      "name": "qualified-final-check",
+      "command": [
+        "just",
+        "check"
+      ],
+      "exit": 42,
+      "timeout": false,
+      "wallSeconds": 416.27705433400115,
+      "userSeconds": 39.403474,
+      "systemSeconds": 10.377246,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    "qualified-semantic-check": {
+      "name": "qualified-semantic-check",
+      "command": [
+        "just",
+        "test-files",
+        "t/support-list-test.ss",
+        "t/build-script-command-test.ss",
+        "t/package-build-contract-test.ss",
+        "t/package-native-declaration-test.ss",
+        "t/native-import-public-closure-scenario-test.ss",
+        "t/build-api-source-bootstrap-test.ss",
+        "t/build-api-policy-projection-test.ss",
+        "t/provider-owned-schema-registry-test.ss",
+        "t/exact-source-projection-test.ss",
+        "t/projection-batch-test.ss",
+        "t/projection-batch-scenario-test.ss",
+        "t/language-projection-test.ss",
+        "t/testing-extension-test.ss",
+        "t/policy/agent-dependency-adapter-test.ss",
+        "t/project-policy-test.ss"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 123.650620624976,
+      "userSeconds": 10.985815,
+      "systemSeconds": 2.918562,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    "native-cli-negative": {
+      "name": "native-cli-negative",
+      "command": [
+        "gerbil",
+        "test",
+        "t/scenarios/policy/upstream-gxtest-delegation/failure-fixture.ss"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 11.289503958018031,
+      "userSeconds": 1.093292,
+      "systemSeconds": 0.297962,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    "repaired-cli-negative": {
+      "name": "repaired-cli-negative",
+      "command": [
+        "just",
+        "test-files",
+        "t/scenarios/policy/upstream-gxtest-delegation/failure-fixture.ss"
+      ],
+      "exit": 42,
+      "timeout": false,
+      "wallSeconds": 11.09764212500886,
+      "userSeconds": 1.109856,
+      "systemSeconds": 0.31801199999999996,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    "repaired-cli-positive": {
+      "name": "repaired-cli-positive",
+      "command": [
+        "just",
+        "test-files",
+        "t/support-list-test.ss"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 11.24791712500155,
+      "userSeconds": 1.11908,
+      "systemSeconds": 0.32358899999999996,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    "tool-dispatch-negative": {
+      "name": "tool-dispatch-negative",
+      "command": [
+        "gerbil",
+        "interactive",
+        "t/native-build-recovery/tool-main-probe.ss",
+        "t/scenarios/policy/upstream-gxtest-delegation/failure-fixture.ss"
+      ],
+      "exit": 42,
+      "timeout": false,
+      "wallSeconds": 18.833132958010538,
+      "userSeconds": 1.199449,
+      "systemSeconds": 0.35264599999999996,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    "tool-dispatch-positive": {
+      "name": "tool-dispatch-positive",
+      "command": [
+        "gerbil",
+        "interactive",
+        "t/native-build-recovery/tool-main-probe.ss",
+        "t/support-list-test.ss"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 16.242877125012456,
+      "userSeconds": 1.174652,
+      "systemSeconds": 0.35337599999999997,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    "adapter-native-return": {
+      "name": "adapter-native-return",
+      "command": [
+        "gerbil",
+        "interactive",
+        "-e",
+        "(import :gerbil/tools/gxtest) (let (status (main \"t/policy/agent-dependency-adapter-test.ss\")) (displayln \"GXTST-RETURNED=\" status) (force-output) (exit status))"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 39.599639041000046,
+      "userSeconds": 4.53487,
+      "systemSeconds": 1.14365,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    "parser-vm-fields": {
+      "name": "parser-vm-fields",
+      "command": [
+        "gerbil",
+        "interactive",
+        "-e",
+        "(import \"src/parser/parse-workers.ss\") (let (packet (parse-source-files/profile \".\" [\"build.ss\" \"testing-api.ss\"])) (write (hash->list (hash-ref packet (quote parsePhase)))) (newline))"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 11.734007124992786,
+      "userSeconds": 0.75816,
+      "systemSeconds": 0.27571599999999996,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    "parser-vm-receipt": {
+      "name": "parser-vm-receipt",
+      "command": [
+        "gerbil",
+        "interactive",
+        "-e",
+        "(import \"src/parser/parse-workers.ss\") (write (parse-source-files/profile \".\" [\"build.ss\" \"testing-api.ss\"])) (newline)"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 8.489787583006546,
+      "userSeconds": 0.727757,
+      "systemSeconds": 0.24348,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    "qualified-batch-status": {
+      "name": "qualified-batch-status",
+      "command": [
+        "env",
+        "-u",
+        "SDKROOT",
+        "-u",
+        "DEVELOPER_DIR",
+        "gxi",
+        "-e",
+        "(import :std/test/base \"t/testing-native-batch-scenario-test.ss\") (let* ((suite testing-native-batch-scenario-test) (original (TestObject-init! suite))) (set! (TestObject-init! suite) (lambda () (original) (set! (TestObject-subtests suite) (filter (lambda (test) (member (TestObject-info test) (quote (\"comparison process propagates a failed native assertion\" \"failed assertion propagates the native gxtest exit status\" \"failed native batch retains an elapsed terminal receipt\")))) (TestObject-subtests suite))) (unless (= (length (TestObject-subtests suite)) 3) (error \"missing status regressions\")))) (unless (test-result-ok? (test-suite! suite)) (exit 42)) (displayln \"STATUS-REGRESSIONS-OK\"))"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 56.108498624991626,
+      "userSeconds": 5.239961,
+      "systemSeconds": 1.383828,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    }
+  },
+  "nativeRecovery": [
+    {
+      "name": "cold",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 18.388354665978113,
+      "userSeconds": 2.291807,
+      "systemSeconds": 1.196673,
+      "compileCount": 1
+    },
+    {
+      "name": "warm",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 7.9665559999994,
+      "userSeconds": 0.5976509999999999,
+      "systemSeconds": 0.1696129999999998,
+      "compileCount": 0
+    },
+    {
+      "name": "missing-middle.o1",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 17.547695374989416,
+      "userSeconds": 2.2659309999999997,
+      "systemSeconds": 1.2729160000000002,
+      "compileCount": 1
+    },
+    {
+      "name": "missing-middle~0.o1",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 20.417063875007443,
+      "userSeconds": 2.2283180000000007,
+      "systemSeconds": 1.2070400000000001,
+      "compileCount": 1
+    },
+    {
+      "name": "missing-middle~1.o1",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 16.952769833005732,
+      "userSeconds": 2.2792590000000006,
+      "systemSeconds": 1.223535,
+      "compileCount": 1
+    },
+    {
+      "name": "missing-middle~inner.o1",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 13.410819624987198,
+      "userSeconds": 2.2155809999999985,
+      "systemSeconds": 1.1469309999999995,
+      "compileCount": 1
+    },
+    {
+      "name": "missing-middle~empty.o1",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 20.89535295800306,
+      "userSeconds": 2.3103370000000005,
+      "systemSeconds": 1.1717690000000003,
+      "compileCount": 1
+    },
+    {
+      "name": "missing-middle~inner~0.o1",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 16.526410249993205,
+      "userSeconds": 2.1705559999999995,
+      "systemSeconds": 1.0718890000000005,
+      "compileCount": 1
+    },
+    {
+      "name": "force",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 19.1464765839919,
+      "userSeconds": 2.2270649999999996,
+      "systemSeconds": 1.1230419999999999,
+      "compileCount": 1
+    },
+    {
+      "name": "post-force-warm",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 7.631019583990565,
+      "userSeconds": 0.5683690000000006,
+      "systemSeconds": 0.179392,
+      "compileCount": 0
+    },
+    {
+      "name": "debug-option",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 18.789367374993162,
+      "userSeconds": 2.512042000000001,
+      "systemSeconds": 1.4511219999999998,
+      "compileCount": 1
+    },
+    {
+      "name": "post-debug-warm",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 7.280290084017906,
+      "userSeconds": 0.6132190000000008,
+      "systemSeconds": 0.17486000000000068,
+      "compileCount": 0
+    },
+    {
+      "name": "corrupt-receipt",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 17.290283834008733,
+      "userSeconds": 2.374001,
+      "systemSeconds": 1.370253,
+      "compileCount": 1
+    },
+    {
+      "name": "backend-failure",
+      "exit": 70,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 18.414512625022326,
+      "userSeconds": 1.977376999999997,
+      "systemSeconds": 0.9668689999999991,
+      "compileCount": 1
+    },
+    {
+      "name": "failure-recovery",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 18.480530000000726,
+      "userSeconds": 2.2812930000000016,
+      "systemSeconds": 1.3461700000000008,
+      "compileCount": 1
+    },
+    {
+      "name": "runtime",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 3.4894782080082223,
+      "userSeconds": 0.1313519999999997,
+      "systemSeconds": 0.055757999999999086,
+      "compileCount": 0
+    },
+    {
+      "name": "clean",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 6.432896707992768,
+      "userSeconds": 0.561477,
+      "systemSeconds": 0.17433699999999952,
+      "compileCount": 0
+    }
+  ],
+  "nativeInterruption": [
+    {
+      "name": "cold",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 19.59245183400344,
+      "userSeconds": 2.193172,
+      "systemSeconds": 1.0989019999999998,
+      "compileCount": 1
+    },
+    {
+      "name": "interrupted-backend",
+      "exit": 70,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 17.5051328749978,
+      "userSeconds": 1.2805969999999998,
+      "systemSeconds": 0.26521000000000017,
+      "compileCount": 1
+    },
+    {
+      "name": "interruption-recovery",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 20.17275491700275,
+      "userSeconds": 2.3056150000000004,
+      "systemSeconds": 1.1740649999999997,
+      "compileCount": 1
+    },
+    {
+      "name": "runtime",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 3.424898249999387,
+      "userSeconds": 0.12184799999999996,
+      "systemSeconds": 0.0510130000000002,
+      "compileCount": 0
+    }
+  ],
+  "startupCpuPairs": [
+    {
+      "name": "baseline",
+      "attempt": 0,
+      "firstEvent": true,
+      "wallSeconds": 0.5818205420218874,
+      "userSeconds": 0.119083,
+      "systemSeconds": 0.052752,
+      "cores": 12,
+      "termination": -15,
+      "command": [
+        "gerbil",
+        "interactive",
+        "-e",
+        "(displayln \"[asp-startup-baseline] ready\")"
+      ]
+    },
+    {
+      "name": "package",
+      "attempt": 0,
+      "firstEvent": true,
+      "wallSeconds": 4.956342958001187,
+      "userSeconds": 0.500543,
+      "systemSeconds": 0.20877300000000001,
+      "cores": 12,
+      "termination": -15,
+      "command": [
+        "gerbil",
+        "interactive",
+        "t/scenarios/building/build-api-startup/build.ss",
+        "spec"
+      ]
+    },
+    {
+      "name": "baseline",
+      "attempt": 1,
+      "firstEvent": true,
+      "wallSeconds": 0.7974881670088507,
+      "userSeconds": 0.10823299999999991,
+      "systemSeconds": 0.04264499999999999,
+      "cores": 12,
+      "termination": -15,
+      "command": [
+        "gerbil",
+        "interactive",
+        "-e",
+        "(displayln \"[asp-startup-baseline] ready\")"
+      ]
+    },
+    {
+      "name": "package",
+      "attempt": 1,
+      "firstEvent": true,
+      "wallSeconds": 5.278476707986556,
+      "userSeconds": 0.5058110000000001,
+      "systemSeconds": 0.204702,
+      "cores": 12,
+      "termination": -15,
+      "command": [
+        "gerbil",
+        "interactive",
+        "t/scenarios/building/build-api-startup/build.ss",
+        "spec"
+      ]
+    },
+    {
+      "name": "baseline",
+      "attempt": 2,
+      "firstEvent": true,
+      "wallSeconds": 0.7510999160003848,
+      "userSeconds": 0.12095599999999984,
+      "systemSeconds": 0.043830000000000036,
+      "cores": 12,
+      "termination": -15,
+      "command": [
+        "gerbil",
+        "interactive",
+        "-e",
+        "(displayln \"[asp-startup-baseline] ready\")"
+      ]
+    },
+    {
+      "name": "package",
+      "attempt": 2,
+      "firstEvent": true,
+      "wallSeconds": 6.693108542007394,
+      "userSeconds": 0.6268580000000001,
+      "systemSeconds": 0.22591799999999995,
+      "cores": 12,
+      "termination": 70,
+      "command": [
+        "gerbil",
+        "interactive",
+        "t/scenarios/building/build-api-startup/build.ss",
+        "spec"
+      ]
+    }
+  ],
+  "startupCpuBoundary": "Each process stopped at first phase marker; CPU includes cleanup. Not full builds or idle-host qualification.",
+  "syntaxQualification": {
+    "installedMake": "Official Gerbil MCP balance and syntax passed",
+    "candidateMake": "Balance passed; baseline and patched syntax fail at preexisting call-with-compile-job-slot against installed compiler",
+    "toolMainProbe": "Official Gerbil MCP balance and syntax passed; extracted gxtest branch only"
+  },
+  "remainingGates": [
+    {
+      "gate": "native batch wall time",
+      "observedSeconds": 19.933385,
+      "maximumSeconds": 10
+    },
+    {
+      "gate": "build API first event incremental wall time",
+      "observedSeconds": 5.726922,
+      "maximumSeconds": 2.5
+    },
+    {
+      "gate": "candidate compiler",
+      "requirement": "matching compiler build and upstream tests"
+    },
+    {
+      "gate": "remote CI and provider qualification",
+      "status": "not run"
+    }
+  ],
+  "fullCheckLoadAverage": [
+    133.99,
+    124.16,
+    118.22
+  ],
+  "sourceHashes": {
+    ".github/workflows/ci.yml": "fa8e6b2d698772e1c239ee54360e1edaf5103b6a40a8c6e26865fe3a33a74649",
+    "README.md": "1a5d2d1528da74666663b04b460299e007d2424ffd9fa1d23146ca224f62c02d",
+    "docs/50-59-policy/51.06-gerbil-upstream-testing-audit.org": "c513bf0ee7c5c4fe651212809f6ccc2f9873234f3597f725480b56fa02f199b0",
+    "docs/60-69-user/60.01-downstream-gxtest-onboarding.org": "8dba88082233a57b61571c130f1b38b831edc56e16bbdb639291973fbe3a6107",
+    "justfile": "ed954d319e787258d6259873cf5ac9ce9086b3800a9f8e4d1577715d6589cd54",
+    "src/build-api/package-spec.ss": "dc9c4859d3022180d6eade3468ccc14cc5d58c2e54036cd11f58e3272b6facd0",
+    "src/parser/parse-workers.ss": "e31c6a9c9312f2fdb381ca297d680f4722634de089aa057f97ede5fd43f82439",
+    "src/policy/agent-dependency-adapter.ss": "846c3f59c2a16469fb5967c29cd3295b514bb63cf20c1a196494cb2f301a9861",
+    "src/policy/agent.ss": "145d75f41c114730a51a1be79400147309e6c6ae95d6d63a2dac8817bf3c0674",
+    "src/testing/discovery-runner.ss": "124ef4bc78bea9652cadbcefd9c4fcaa0bb72ad27dbd2b56974be57f256611b5",
+    "t/policy/agent-dependency-adapter-test.ss": "4550909ef0ef524d9bb633cfb29055bf817ca1da1f156774310c0f3c786ccb76",
+    "t/scenarios/policy/dependency-protocol-adapter/benchmark.ss": "65fcc2ac44eba726784d32ae88fcf84997407ec1f95844b31c499bd0eac82f6d",
+    "t/scenarios/policy/upstream-gxtest-delegation/benchmark.ss": "bca645389939380feaf2f2e08efc235a635f8188d8b591305a38358aa92dbbad",
+    "t/testing-extension-test.ss": "63fca3167ae7d8d5f91126f87cf893ecd773240b58c9de80e682ebac98c717f9",
+    "t/testing-native-batch-scenario-test.ss": "aabcad7069349c7e14471c9668543271b3b854f4487d78d0b68f47e90721a262",
+    "t/native-build-recovery/README.md": "b6fcde607332d6ad5fd3bb52b7eb428093bad253dc4b4bd03e710a5899a7559b",
+    "t/native-build-recovery/candidate-make.patch": "9cc47637948d7e4661c65d91dfa041463b60c1c7375f2b3cf6686a301fcf04ae",
+    "t/native-build-recovery/installed-make.patch": "f695c5f6fe9ff135d7ec319958b058ccd953758e067b4afff8c72f399baefb4d",
+    "t/native-build-recovery/patch-bases.json": "1637d666e77b148cb2f282a1240c5b2de45bbeb334a4593cfb1aa94abc71f715",
+    "t/native-build-recovery/run.py": "573eee4b19bd42d4c7f40c19d04732b6394ffd3207f9b83f5fcd5a43a4081660",
+    "t/native-build-recovery/tool-main-exit.patch": "d453f8a9ca19688c03f9e8dce185e6f529069ce8c2a57740d05ce5e0dbca86f4",
+    "t/native-build-recovery/tool-main-probe.ss": "5828cb4041f1ec98f0cf4b181ed45a1df8f7c03eee58b897346ab124cce4b831"
+  },
+  "rawLogReferences": [
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/qualified-final-check.out",
+      "sha256": "b3006bd8d023b9f605afc985222c86a5d74917f8ace33e7447f809cc0fe51fec"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/qualified-final-check.err",
+      "sha256": "d7cb095c55560904d8cbec5ef975220fe0dcf6a2a79d9c10f06b175035620a8b"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/qualified-semantic-check.out",
+      "sha256": "6ff19b242c5c09f2c2395cb24a904b6a4a17b69c641dcab6859e922330e1b799"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/qualified-semantic-check.err",
+      "sha256": "6d66c43efaba8c43d72f86b4e4d57f58ef3b78f17f69791a1c77e9407f6921a8"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/native-cli-negative.out",
+      "sha256": "8e30258fc97b8b2c079876ce44f1787c7b8c012cd7a069e3a250006a858a2d0e"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/native-cli-negative.err",
+      "sha256": "4c086d3026137763f723bb5081a1393c5ca4a6caf53db55eb5f7d535889911aa"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/repaired-cli-negative.out",
+      "sha256": "8e30258fc97b8b2c079876ce44f1787c7b8c012cd7a069e3a250006a858a2d0e"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/repaired-cli-negative.err",
+      "sha256": "4b4e18c1bf4dee5f21e017b5dd55b4056c01ddd5d1c20555b34a3148df9c66fc"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/repaired-cli-positive.out",
+      "sha256": "5150c0bec1719aef5b76d73874f1e17174e4e66d974c131a198c4b22979242b6"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/repaired-cli-positive.err",
+      "sha256": "df95bd078ba2d3b3445970cc0e630f9be8e4191c70da1f5e1eaa903623092d11"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/tool-dispatch-negative.out",
+      "sha256": "8e30258fc97b8b2c079876ce44f1787c7b8c012cd7a069e3a250006a858a2d0e"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/tool-dispatch-negative.err",
+      "sha256": "b5d32a1e1ebf4c01fa63d9d78439090c5c2900f9211cae480550a3e8f7d879c7"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/tool-dispatch-positive.out",
+      "sha256": "5150c0bec1719aef5b76d73874f1e17174e4e66d974c131a198c4b22979242b6"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/tool-dispatch-positive.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/adapter-native-return.out",
+      "sha256": "63907391d37fc42ac8aef86a77e6e853b2febfa887d73e0db34a0faf81bc3064"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/adapter-native-return.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/parser-vm-fields.out",
+      "sha256": "0dd18f29cd2800c002822cd48470cf4a5cd1824001ad1251cc161a113414c900"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/parser-vm-fields.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/parser-vm-receipt.out",
+      "sha256": "4dcb39bb275874cea4f5d9d530f3b36b92c47c2b92feb90584a3a94c0184dedd"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/parser-vm-receipt.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/qualified-batch-status.out",
+      "sha256": "d3d0047782a74ebccd19597a447358428ea5f1b0f457d41729ef63efb64f1648"
+    },
+    {
+      "path": "/private/tmp/asp-gerbil-build-test-audit/qualified-batch-status.err",
+      "sha256": "2ca2b9fed3f3db66e85cfdc7f4ab7175019f09a4e3590f397734aebebac41f42"
+    }
+  ]
+}

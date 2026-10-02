@@ -85,7 +85,7 @@ Add a small `gxtest` fixture, for example `t/project-policy-test.ss`:
 ```
 Then run:
 ```sh
-gerbil test t/project-policy-test.ss
+gxi -e '(import :gerbil/tools/gxtest) (exit (apply main (cdddr (command-line))))' t/project-policy-test.ss
 ```
 Gerbil owns package-environment selection; use its native commands rather than
 hardcoding another package store. Never commit generated `.gerbil` state.

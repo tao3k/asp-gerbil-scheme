@@ -1,0 +1,13 @@
+--- a/src/gerbil/main.ss
++++ b/src/gerbil/main.ss
+@@ -209,7 +209,9 @@
+            (tool-module (import-module tool-id #f #t))
+            (tool-main-id (find-runtime-symbol tool-module 'main))
+            (tool-main (eval tool-main-id)))
+-      (apply tool-main args)))))
++      (if (equal? program-name "gxtest")
++        (exit (apply tool-main args))
++        (apply tool-main args))))))
+ 
+ (def (bach-main program-name args)
+   (match args

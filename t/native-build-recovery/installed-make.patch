@@ -1,0 +1,154 @@
+--- a/src/std/make.ss
++++ b/src/std/make.ss
+@@ -3,7 +3,8 @@
+ ;;; support for library build scripts
+ ;;; build-spec: see documentation in doc/reference/make.md
+ 
+-(import :gerbil/compiler
++(import (only-in :gerbil/compiler/base module-id->path-string)
++        :gerbil/compiler
+         :gerbil/expander
+         :std/sync/completion
+         :std/sync/channel
+@@ -195,14 +196,18 @@
+     ([copy: file] [(library-path file #f settings)])
+     (else (error "unknwon buildspec" spec))))
+ 
++(def current-native-receipts (make-parameter #f))
++
+ (def (make buildspec . rest)
+   (def settings (apply make-settings rest))
+-  (parameterize ((current-directory (settings-srcdir settings))
+-                 (current-expander-compiling? #t))
+-    (add-load-path! (settings-srcdir settings))
+-    (make-build buildspec settings))
+-  (when (> (settings-parallelize settings) 1)
+-    (execute-pending-compile-jobs!)))
++  (parameterize ((current-native-receipts (cons (make-mutex) [])))
++    (parameterize ((current-directory (settings-srcdir settings))
++                   (current-expander-compiling? #t))
++      (add-load-path! (settings-srcdir settings))
++      (make-build buildspec settings))
++    (when (> (settings-parallelize settings) 1)
++      (execute-pending-compile-jobs!))
++    (publish-native-receipts!)))
+ 
+ (def (make-build buildspec-in settings)
+   (parameterize ((current-compilation-target (settings-target settings)))
+@@ -247,7 +252,9 @@
+     (def (build? spec)
+       (let ((inputs (spec-inputs spec settings))
+             (outputs (spec-outputs spec settings)))
+-        (or (ormap (lambda (f) (not (file-exists? f)))
++        (or (settings-force settings)
++            (not (spec-native-current? spec settings))
++            (ormap (lambda (f) (not (file-exists? f)))
+                    outputs)
+             (ormap
+              (lambda (input)
+@@ -490,9 +497,79 @@
+     (else
+      (error "Bad buildspec" spec))))
+ 
++ ;; SSI contains the compiler's loader calls and nested module declarations.
++;; Follow only those structural forms, never quoted data or import names.
++(def (native-outputs mod settings)
++  (def root (prefix/ (settings-prefix settings) (path-strip-extension mod)))
++  (def (object-path id)
++    (path-expand (string-append id ".o1") (settings-libdir settings)))
++  (def (owned? id)
++    (or (equal? root id) (string-prefix? (string-append root "~") id)))
++  (def (walk form owner)
++    (match form
++      ([(or '%#begin '%#begin-syntax) . forms]
++       (append-map (cut walk <> owner) forms))
++      (['%#module (? symbol? id) . forms]
++       (let (nested (string-append owner "~" (module-id->path-string id)))
++         (cons (object-path nested) (append-map (cut walk <> nested) forms))))
++      (['%#call ['%#ref 'load-module] ['%#quote (? string? id)]]
++       (if (owned? id) [(object-path id)] []))
++      (_ [])))
++  (call-with-input-file (library-path mod ".ssi" settings)
++    (lambda (port)
++      (let loop ((paths [(object-path root)]))
++        (let (form (read port))
++          (if (eof-object? form)
++            (delete-duplicates/hash paths)
++            (loop (append paths (walk form root)))))))))
++
++(def (native-receipt-path mod settings)
++  (library-path mod ".native-complete" settings))
++
++(def (native-receipt-key mod opts settings)
++  (list 'native-complete-v1 (gerbil-version-string) (gerbil-home)
++        (settings-srcdir settings) (settings-libdir settings) (settings-prefix settings)
++        (settings-optimize settings) (settings-debug settings)
++        (gsc-compile-opts opts) (gerbil-gsc)
++        (file-timestamp (source-path mod ".ss" settings))
++        (file-timestamp (library-path mod ".ssi" settings))))
++
++(def (gxc-native-current? mod opts settings)
++  (or (not (eq? (settings-target settings) 'C))
++      (with-catch false
++        (lambda ()
++          (equal? (call-with-input-file (native-receipt-path mod settings) read)
++                  (native-receipt-key mod opts settings))))))
++
++(def (spec-native-current? spec settings)
++  (and (match spec
++         ((? string? mod) (gxc-native-current? mod #f settings))
++         ([gxc: mod . opts] (gxc-native-current? mod opts settings))
++         (_ #t))
++       (andmap (cut spec-native-current? <> settings) (spec-submodules spec))))
++
++(def (publish-native-receipts!)
++  ;; A queued gsc job is not a completed native library. This is called only
++  ;; after the executor has joined successfully; failures leave no receipt.
++  (for (entry (cdr (current-native-receipts)))
++    (match entry
++      ([mod opts settings]
++       (def paths (native-outputs mod settings))
++       (unless (andmap file-exists? paths)
++         (error "Incomplete native library outputs" mod paths))
++       (def receipt (native-receipt-path mod settings))
++       (def temporary (string-append receipt ".tmp"))
++       (when (file-exists? temporary) (delete-file temporary))
++       (call-with-output-file temporary
++         (lambda (port) (write (native-receipt-key mod opts settings) port)))
++       (rename-file temporary receipt)))))
++
+ (def (gxc-outputs mod opts settings)
+-  [(library-path mod ".ssi" settings)
+-   (static-path mod settings)])
++  (append [(library-path mod ".ssi" settings) (static-path mod settings)]
++          (if (eq? (settings-target settings) 'C)
++            (cons (native-receipt-path mod settings)
++                  (with-catch (lambda (_) []) (cut native-outputs mod settings)))
++            [])))
+ 
+ (def (gsc-compile-opts opts)
+   (match opts
+@@ -504,6 +581,10 @@
+   (message "... compile " mod)
+   (def gsc-opts (gsc-compile-opts opts))
+   (def srcpath (source-path mod ".ss" settings))
++  (def native? (and invoke-gsc? (eq? (settings-target settings) 'C)))
++  (when native?
++    (let (receipt (native-receipt-path mod settings))
++      (when (file-exists? receipt) (delete-file receipt))))
+   (let (gxc-opts
+         [invoke-gsc: invoke-gsc?
+          target: (settings-target settings)
+@@ -515,7 +596,11 @@
+          verbose: (settings-verbose>=? settings 9)
+          parallel: (> (settings-parallelize settings) 1)
+          (when/list gsc-opts [gsc-options: gsc-opts]) ...])
+-      (compile-module srcpath gxc-opts)))
++      (compile-module srcpath gxc-opts))
++  (when native?
++    (let (state (current-native-receipts))
++      (with-lock (car state)
++        (lambda () (set-cdr! state (cons [mod opts settings] (cdr state))))))))
+ 
+ (def (gsc-libpath mod settings)
+   (def libdir-prefix (settings-libdir-prefix settings))
