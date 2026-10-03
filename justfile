@@ -53,34 +53,6 @@ audit-native-frontend make_source patch native_gsc output:
     python3 t/native-build-recovery/frontend.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4/coordinator" --qualify --coordinator-fault
     python3 t/native-build-recovery/frontend.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4/lease" --qualify --experimental-lease --fail-backend
 
-# Research controls only: no production recovery or generation publication.
-audit-native-namespace make_source patch native_gsc output:
-    python3 t/native-build-recovery/namespace.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4"
-
-# Research broker only: cooperating writers and a fixed application closure.
-audit-native-publication make_source patch native_gsc output:
-    python3 t/native-build-recovery/publication.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4"
-
-# Local process-death controls; no power-loss or production durability claim.
-audit-native-publication-crash make_source patch native_gsc output:
-    python3 t/native-build-recovery/publication_crash.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4"
-
-# Expander facts and explicit external interface boundary; research only.
-audit-native-closure make_source patch native_gsc external_root output:
-    python3 t/native-build-recovery/closure.py --make-source "$1" --patch "$2" --native-gsc "$3" --external-root "$4" --output "$5"
-
-# Broker-owned compiler evidence and transactional publication; research only.
-audit-native-closure-publication make_source patch native_gsc external_root output:
-    python3 t/native-build-recovery/closure.py --make-source "$1" --patch "$2" --native-gsc "$3" --external-root "$4" --output "$5" --publication-study
-
-# Cooperating readers and owned scratch collection; explicit quiescence required.
-audit-native-retention make_source patch native_gsc external_root output:
-    python3 t/native-build-recovery/closure.py --make-source "$1" --patch "$2" --native-gsc "$3" --external-root "$4" --output "$5" --retention-study
-
-# Local acquisition/release/collection checkpoints; no power-loss qualification.
-audit-native-retention-crash make_source patch native_gsc external_root output:
-    python3 t/native-build-recovery/closure.py --make-source "$1" --patch "$2" --native-gsc "$3" --external-root "$4" --output "$5" --retention-crash-study
-
 clean-provider:
     {{gerbil}} env gerbil interactive build-provider.ss clean
 

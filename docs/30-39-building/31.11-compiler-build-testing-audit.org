@@ -632,279 +632,69 @@ deployment capability. See 31.19-frontend-native-drain-receipts.json and the Jus
 aggregate audit-native-frontend recipe. Historical failures and earlier exact-head
 CI remain separate evidence.
 
-* Namespace identity and forced-death recovery
+* 2026-10-03 Build-system ownership correction
 
-The namespace study uses the exact repaired source from 31.19 without changing
-its retained patches. An isolated directory-claim wrapper rejects two root paths
-that are aliases of the same directory. However, distinct canonical roots can
-contain module subdirectories that alias one shared directory. Both root claims
-then succeed while both producers write the same objects. Controlled B-then-A
-release again leaves B's receipt and input snapshots unchanged but changes the
-runtime from 43 to 42, with warm compilation skipped. Root canonicalization is
-insufficient for write-set ownership.
+The implementation direction in studies 31.20 through 31.26 is withdrawn.
+Standalone Python namespace claims, publication transactions, closure admission,
+reader records, retirement, and collection formed a separate build lifecycle.
+They were reachable through audit recipes only; neither =build.ss= nor the native
+PackageSpec projection invoked them. Labelling them research-only did not make
+this work an improvement to the project's build system.
 
-Another control starts native backend children in independent sessions. After
-killing the frontend and original process group, the direct backend wrappers are
-absent but both detached children acknowledge a new probe. Removing the claim in
-this owned scratch fixture based only on that original group's death permits B
-to publish 43, followed by old A's overwrite to 42. This intentionally unsafe test
-reclamation is counterexample evidence and is never applied to a real workspace.
-The control does not assert that normal gsc naturally detaches.
+The implementations and seven Justfile recipes are removed. The companion
+=closure.ss= extractor is also removed: the real project already has a Gerbil
+import-closure owner, and a second test-specific closure stack is not a migration
+plan. Earlier detailed narratives are available in Git history at =353f1e1=.
+The JSON records 31.20 through 31.26 are retained solely as historical experiment
+records. Their counts, commands, temporary paths, and hashes describe that
+historical checkout; they are not current build capability or runnable recipes.
 
-With separate fresh generations, B can complete while old backend jobs are paused
-in abandoned generation A. A's later native writes finish and import as 42, but B's
-objects and selector remain byte-identical and a reader pinned to B returns 43.
-The old claim is retained and A has no completion receipt. The selector is an
-atomic test metadata file, not an implemented production publication protocol.
-Full dependency closure, stale frontend publication fencing, unique generation
-allocation, reader retention, garbage collection and hot cache switching remain
-unqualified.
+** Actual implementation owners
 
-There are 37 recorded observations across 21 Gerbil process invocations. See
-31.20-native-namespace-generation-study.json, namespace.py and the
-just audit-native-namespace entrypoint. This advances the recovery design toward
-private producer outputs, separately fenced publication and pinned readers.
-Original-group or PID absence alone is not quiescence proof for arbitrary backend
-descendants. Namespace observation also does not freeze future pathname changes.
-The compiler patches remain undeployed and their 81 earlier local probes are not
-reattributed to this separate namespace experiment.
+| Contract | Existing owner | Execution boundary |
+|----------+----------------+--------------------|
+| Library lifecycle | =build.ss= and =:std/build-script= | =just build= / =just clean= |
+| Provider lifecycle | =build-provider.ss= and =:std/build-script= | =just build-provider= / =just clean-provider= |
+| Package target projection | =src/build-api/package-spec.ss= | Ordinary native BuildSpec values |
+| Local import closure | =src/build-api/native-import-closure.ss= | Native expander contexts or compiled import declarations |
+| Planning, currentness, compilation, outputs | =:std/make= | Native compiler execution |
+| Native completion amendment | Retained =installed-make.patch= / =candidate-make.patch= | Isolated qualification; not deployed |
 
+The import-closure projection selects package-local targets. It is not proof of
+complete external runtime closure, artifact immutability, or publication safety.
+It must not take currentness or execution ownership away from =std/make=.
 
-** 31.11.150 Publication Fencing And Application Closure
-The next experiment uses the same repaired installed source and private outputs,
-with two native application modules: =publication/app= imports =publication/dep=.
-Generation A returns 42 and B returns 43. A controlled old publisher pauses after
-checking its authority token. B obtains a newer token and publishes successfully.
+** Findings that survive the rejected direction
 
-Atomic replacement alone permits A to overwrite B on resumption, changing the
-fresh selector reader's result back to 42. Rechecking the token inside the same
-advisory lock used for grants and publication rejects A with exit 70 and preserves
-B's selector bytes and runtime 43. Fresh readers pinned to B continue returning 43
-in both controls. These are cooperating Python publication processes; no claim
-of fencing untrusted writers or distributed storage is made.
+- Distinct canonical roots can still alias the same module output directory.
+  A native writer-ownership fix must account for its actual output inventory.
+- Original process-group death does not prove that all write-capable descendants
+  are gone. A native executor recovery design needs a real producer boundary.
+- Source and SSI snapshots do not protect objects against an independent writer
+  after completion. The retained receipt amendment remains bounded by this gap.
+- Phase imports and reexports have compiler-owned structure. Any target-selection
+  change belongs in the existing native import projection; loader-output changes
+  belong in =std/make= and its compiler-generated SSI inventory.
 
-An entry module receipt does not bind a whole application closure. Removing B's
-dependency files while retaining its app receipt permits a fresh import through
-an explicitly supplied fallback dependency root, returning 101. A broker manifest
-with an explicit two-node dependency graph and six artifact hashes per module
-rejects an omitted graph node, incomplete inventory, absent dependency files, and
-a dependency object changed after sealing. Each rejection preserves the previous
-active selector. Complete B is admitted and returns 43; replaying the successful
-token is rejected in the uninterrupted broker run.
+The Python authority, retention, and crash controls establish behavior only of
+those removed prototypes. They do not establish Gerbil build publication,
+reader retention, or safe collection. No such feature is now claimed or deployed.
 
-The graph is fixture-owned, not extracted from general Gerbil imports. Installed
-runtime dependencies are external. Admission assumes successful trusted build
-completion and quiescent generation roots: hashes do not establish provenance or
-prevent mutation after validation. Authority and selector are separate atomic
-file replacements without durability synchronization, so crash-consistent token
-consumption and publication are not established. These controls also do not
-exercise a live process changing its Gerbil module cache, reader retention,
-namespace replacement, general closure extraction, or garbage collection.
+** Validation boundary and next implementation gate
 
-Evidence: =31.21-native-publication-closure-study.json=, =publication.py=, and
-=just audit-native-publication=. Retained compiler patches and deployment remain
-unchanged. Prior compiler and namespace observations are separate evidence.
-The next contracts are a crash-consistent authority/selector transaction, explicit
-admission trust and immutable storage, parser/compiler-owned dependency closure,
-and readers whose pinned generation lifetime is retained before reclamation.
+Run the existing =package-build-contract-test=, =package-native-declaration-test=,
+and =native-import-public-closure-scenario-test= through =just test-files=. These
+exercise the real build declaration/projection paths, including native phase
+imports and exclusion of unrelated modules. They are separate from the earlier
+81 isolated compiler probes, which are historical and not rerun by this cleanup.
 
+The correction's focused run passed all three modules with =MODULE-OK=,
+=HARNESS-OK=, final =OK=, and process exit 0. The public closure scenario projected
+one direct target and four closure targets. Justfile parsing, changed-text English
+validation, JSON parsing, remaining Python syntax, and whitespace checks passed.
+This cleanup adds no native compiler feature and does not qualify deployment.
 
-** 31.11.160 Process-Crash Publication Transaction
-The previous broker performs two atomic replacements. A new SIGKILL control
-pauses after replacing the active selector and before consuming the authority
-token. Restart sees active B and token 2 still unspent. A fresh publisher uses
-the same token with admitted manifest A, moving native runtime from 43 to 42.
-This is a publication-state failure even with immutable generation outputs.
-
-The single-record control commits current authority and active publication
-in one =state.json=. A publication binds epoch, request identifier, complete
-fixture manifest, and canonical manifest digest. All grants and publications
-use one stable advisory lock. The writer fsyncs a unique staging file, replaces
-the authoritative state, and fsyncs the parent directory before acknowledgement.
-
-Four checkpoint deaths yield consistent state on restart: before staging and
-after staging-file fsync retain A with the newer token unspent; after replacement
-and after directory fsync retain B with the token spent. An abandoned staging
-file is ignored. Retrying the original request commits B in the first two cases
-and returns a replay acknowledgement without rewriting state in the latter two.
-Every selected B reader returns 43. A consumed token with a different manifest
-or request is rejected; a newer grant also rejects the older token. Missing,
-malformed, and inconsistent authoritative records fail closed without reset.
-
-Evidence: =31.22-native-publication-process-crash-study.json=,
-=publication_crash.py=, and =just audit-native-publication-crash=. The run has
-45 observations, including 12 native Gerbil command invocations, 20 completed
-broker command invocations, and five deliberately killed broker processes.
-Eight additional observations record restarted or rejected-state preservation.
-Earlier observations and retained compiler patches remain separate and unchanged.
-
-The bound is process termination on a live local filesystem, not power loss or
-machine restart. Durability calls were exercised without establishing device or
-remote-filesystem guarantees. Grants interrupted during issuance, historical
-acknowledgement lookup, schema migration, untrusted publishers, lock pathname
-replacement, and general reader/writer concurrency remain untested. Admission
-still uses an explicit application graph and assumes immutable completed storage.
-The next implementation seam is compiler-owned dependency closure; publication
-integration also needs authenticated authority, retained readers, and explicit
-storage and durability contracts.
-
-
-** 31.11.170 Compiler-Owned Application Closure
-The closure study replaces a hand-maintained dependency graph with native
-expander import facts. It follows =module-context-import= through module-import,
-import-set, module-export, and owning context, retaining identity, resolved path,
-and relative phase. Source membership comes from an explicit build inventory and
-expander identities. Reachability from the app selects six of seven built modules,
-covering a renamed selected import, re-export bridge, phase-one import, and its
-transitive dependency. The unreachable module is excluded.
-
-Artifact shape also needs compiler evidence. A fixed two-object inventory fails
-for the bridge, which has one native object, while the app's compile-time code
-produces a third object. A narrow export in the scratch make copy exposes the
-retained =native-outputs= structural SSI walker without changing its implementation
-or retained patches. The resulting manifest binds 12 objects and 24 interface,
-completion, source-snapshot, and interface-snapshot files: 36 files across six
-reachable modules. Actual source bytes must match completed source snapshots.
-
-A/B generation imports return 42/43. Removing B's leaf and supplying A as a
-fallback permits native runtime 42, but the compiler fact resolves outside the
-expected local generation and is rejected. Omitting the transitive phase module
-from the artifact inventory is rejected. Changing source after the build also
-rejects sealing. This advances both dependency membership and output enumeration
-from fixed fixture assumptions to compiler-owned facts.
-
-The explicit external import frontier records and rechecks one installed list
-interface hash under a supplied installation root. Implicit language/compiler
-state and transitive external runtime/native dependencies remain unbound. The
-result is an application closure relative to those external assumptions, not a
-hermetic environment. Relative phase facts are preserved without general absolute
-phase composition. Source expansion runs authored fixture code in fresh processes
-and may execute compile-time code; no untrusted-input sandbox is established.
-
-Evidence: =31.23-native-compiler-closure-study.json=, =closure.ss=, =closure.py=,
-and =just audit-native-closure=. Unsupported nested path/import representations
-fail explicitly. Weak imports, arbitrary nested modules, dynamic runtime loads,
-external closure pinning, immutable storage, and integration with the publication
-transaction remain open. Prior observations are not rerun or counted. Retained
-compiler patches and deployment remain unchanged.
-
-
-** 31.11.180 Compiler Evidence And Transactional Publication
-The integration study registers compiler-derived graph and manifest evidence
-through a trusted fixture coordinator. Receipt identity binds the graph, manifest
-digest, compiler import/output fact hashes, extractor identity, patched make, and
-native gsc. Publishing submits a registered receipt ID plus candidate manifest.
-The single-record broker calls admission while holding its transaction lock;
-admission reads independent registered evidence and checks candidate identity,
-artifacts, and the explicit external interface frontier.
-
-Registered A/B publish and fresh pinned readers return 42/43. The A root pinned
-before B publication still returns 42 afterward. Unregistered evidence, candidate
-graph or inventory rewrites, changed registered receipt content, changed native
-object bytes, and candidate rehashing are rejected with exit 70, preserving active
-A and unspent authority. A paused old A publisher loses authority to B, resumes
-with exit 70, and cannot change B's registered subject or publication digest.
-
-Killing the B publisher after directory synchronization but before acknowledgement
-retains a spent token and its complete registered B subject. Matching request
-retry acknowledges without rewriting state; another subject or request is
-rejected. Deliberate post-commit storage drift still permits the matching
-historical acknowledgement, while fresh reader admission rejects the changed
-artifact. Restoring the original owned fixture bytes permits reader runtime 43.
-Acknowledgement and current storage admission are distinct evidence.
-
-The transaction interface adds an admission callback with its prior fixed-fixture
-admission as the default. The default process-crash study is rerun with 45
-observations after this interface change. Evidence is recorded separately from
-the compiler-closure prerequisites and added integration observations in
-=31.24-native-closure-publication-integration.json=. Entrypoint:
-=just audit-native-closure-publication=; owners: =publication_admission.py= and
-=publication_integration.py=. Retained compiler patches and deployment are unchanged.
-
-The trust boundary is cooperating processes and coordinator-owned registration;
-hashes do not authenticate the coordinator or enforce immutable storage. Receipt
-registration and publication are separate storage operations without a combined
-power-loss guarantee. Pinned roots are used by fresh processes, not a retention
-or live-cache protocol. External runtime closure, post-validation path/byte drift,
-hostile access, storage reclamation, and production integration remain open.
-The next contracts are trusted registration authority and immutable/retained
-reader storage, with acknowledgement kept separate from current storage admission.
-
-
-** 31.11.190 Reader Retention And Collection Gates
-The retention study registers two A readers before module loading, under the same
-advisory broker lock as publication and collection. Each persistent record binds
-reader identity, canonical root, publication epoch/digest, and receipt identity.
-B then publishes and reads as 43. A collection is refused while reader records
-exist. One owned launcher is killed before exec; its record remains. The surviving
-reader starts its Gerbil import after B selection and still reads A as 42.
-
-Releasing that surviving reader does not release the killed owner's record. The
-fixture explicitly releases the latter only after observing its own pre-exec
-launcher killed without children. This is a scoped control, not a general
-process-group recovery rule. Zero reader records still do not authorize A
-collection while writer quiescence is unknown. A trusted coordinator assertion
-of quiescence and absence of readers permits only inactive A to be collected;
-active B remains protected. A malformed reader record also blocks collection.
-
-Successful owned A collection first records retirement and removes its declared
-scratch root. The cooperating publication admission refuses a retired A subject
-without spending its new authority token. A bare historical pin with no retained
-reader record cannot load the app afterward and exits 70, while selected B remains
-readable as 43. Selection/pinning and persistent lifetime retention are distinct
-contracts, and reader release is independent from writer-quiescence evidence.
-
-Evidence: =31.25-native-reader-retention-study.json=, =publication_retention.py=,
-and =just audit-native-retention=. Roots are an exact declared scratch inventory;
-no installed source, external library, or other checkout is a collection target.
-Reader staging and records use fsync without a power-loss guarantee. No TTL or
-PID absence is used to infer safe collection. Canonical-root retention assumes
-stable path identity and cooperating actors; alias replacement is not qualified.
-
-The quiescence declaration is a trusted fixture assertion after successful make
-completion with known owned producers. It does not enforce writer-capability
-closure, authenticate registry changes, or resolve arbitrary escaped writers.
-Interrupted acquisition/release and collection recovery, live module caches,
-external runtime closure, storage confinement, and deployment remain open.
-Retirement intent and physical deletion are separate operations; a crash may
-leave retired storage and conservatively retained records. Prior integration
-and regression observations are not rerun or counted in this retention study.
-
-
-** 31.11.200 Retention Process-Crash Recovery
-The next study adds twelve acknowledged process-death checkpoints: four during
-reader acquisition, four during release, and four during collection. Before
-reader staging, the killed acquire operation has no record and never returns a
-pin or starts a reader. Staged or installed records conservatively block
-collection. Exact pre-load record cleanup is a trusted fixture-coordinator action
-only after this owned operation is known not to have returned or launched children.
-
-Release now records a full-handle intent before unlink. Pre-unlink deaths retain
-the reader record and matching retry completes release; post-unlink deaths allow
-matching acknowledgement replay from the intent. Changed handles are rejected.
-A missing reader record without matching intent is not inferred to be success.
-The caller remains responsible for ending actual reader use before release.
-
-Collection separates retirement intent from completed collection. Death after
-retirement, after a top-level child is removed, after root removal, or after
-completion recording leaves a fenced retired generation. Resume rechecks all
-collection gates. Revoked writer-quiescence flags block resume until the coordinator
-declares it again; retired A publication remains refused. Recovery removes the
-remaining owned A storage or acknowledges completed collection, while selected B
-imports as 43 after each case. A collected path that reappears is preserved and further collection is refused. Collection does not alter authoritative
-publication bytes.
-
-The collector cases are sequential isolated scratch fixtures. Original A bytes
-are restored from an owned backup between cases only after every operation has
-ended and reader records are released; B remains unchanged. This setup does not
-implement path recycling. The existing retention study is separately rerun to
-qualify default behavior after adding release/collection retry handling.
-
-Evidence: =31.26-native-retention-process-crash-study.json=, =retention_crash.py=,
-updated =publication_retention.py=, and =just audit-native-retention-crash=.
-The boundary is local process death with OS/filesystem still running. Separate
-intent/record/deletion writes do not establish power-loss recovery. General dead
-reader recovery, writer-capability closure, authentication, stable pathname
-ownership, migration/tombstone collection, external runtime closure, and deployment
-remain open. The partial-delete checkpoint is one explicit filesystem cut, not
-an exhaustive crash schedule. Retained compiler patches remain unchanged.
+Further implementation must start with a concrete defect in these native owners,
+include a reproducer through their existing build/test entrypoints, and repair the
+owning Gerbil interface. A second broker or a mechanical Scheme port of the
+removed Python lifecycle would preserve the same ownership error.
