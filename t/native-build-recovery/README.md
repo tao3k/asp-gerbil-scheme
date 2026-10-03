@@ -445,3 +445,58 @@ quiescence/reader-retention contract; switching to a new generation does not pro
 that old storage is safe to delete. A root-only lock or PID/process-group absence
 cannot substitute for those contracts. Root alias checks are point observations,
 not protection against subsequent pathname replacement.
+
+
+### Publication authority and application closure
+
+`publication.py` builds two real native modules, `publication/app` and its
+`publication/dep` dependency, in fresh private roots using the unchanged repaired
+installed make source. A cooperating Python broker owns publication authority.
+Its monotonically increasing token is issued under the same advisory file lock
+used for admission and selector replacement. Issuing a new token immediately
+supersedes the previous publisher; an invalid candidate leaves the active selector
+unchanged. A successful token cannot be reused during an uninterrupted run.
+
+```sh
+just audit-native-publication \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/make.ss \
+  t/native-build-recovery/installed-make.patch \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/bin/gsc \
+  /private/tmp/gerbil-publication-study
+```
+
+| Control | Observation |
+|---------|-------------|
+| Old publisher checks token, pauses, and later atomically replaces the selector | B initially imports as 43; resumed A replaces B and a fresh selector reader imports as 42 |
+| Old publisher checks again inside the grant/publication lock | A exits 70 after token 2 supersedes token 1; selector bytes stay unchanged and a fresh reader imports as 43 |
+| Fresh readers reuse the root pinned before A resumes | Readers of pinned B import as 43 in both controls |
+| Entry module retains a completion receipt but dependency files are absent | With an explicit alternate dependency load root, import succeeds with 101 instead of 43 |
+| Admission checks the explicit application graph and sealed inventory | Missing graph node, omitted dependency inventory, missing dependency files, and changed dependency object bytes are rejected; the previous selector stays unchanged |
+| Complete two-module closure and current unspent token | Publication succeeds and selected runtime imports as 43; token replay is rejected |
+
+The sealed inventory binds six artifact paths per module: SSI, two native
+objects, completion receipt, source snapshot, and interface snapshot. This is an
+explicit fixture graph and a successful-build-derived byte inventory, not a
+parser of arbitrary completion receipts or a general dependency discoverer.
+Installed runtime dependencies remain external. Hashing the supplied files does
+not itself prove that their bytes were produced by a trusted compiler.
+
+All writers in this experiment cooperate with `flock`. Token checks, admission,
+and selector replacement occur while that lock is held. Output roots are assumed
+quiescent and unchanged during validation and use; the lock does not constrain
+backends, pathname replacement, or writes to generation storage. The root-only
+control uses a deliberately configured fallback search path, not an assertion
+that every reader has such a path.
+
+Authority and active selector are separate atomic replacements without `fsync`.
+This experiment does not establish crash/power-loss consistency, transactional
+single-use tokens across interruption, distributed fencing, or authenticated
+broker access. It does not test a long-lived Gerbil process switching its module
+cache: every runtime check is a fresh process with an explicitly pinned load root.
+Reader retention, general dependency extraction, storage reclamation, and
+production compiler integration remain open. The broker and its controls only
+operate on runner-owned scratch paths.
+
+See `31.21-native-publication-closure-study.json` for exact observations, hashes,
+and evidence boundaries. These controls do not rerun the earlier 81 compiler
+probes or the 37 namespace observations.

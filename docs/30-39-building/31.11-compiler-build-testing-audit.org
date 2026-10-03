@@ -668,3 +668,42 @@ Original-group or PID absence alone is not quiescence proof for arbitrary backen
 descendants. Namespace observation also does not freeze future pathname changes.
 The compiler patches remain undeployed and their 81 earlier local probes are not
 reattributed to this separate namespace experiment.
+
+
+** 31.11.150 Publication Fencing And Application Closure
+The next experiment uses the same repaired installed source and private outputs,
+with two native application modules: =publication/app= imports =publication/dep=.
+Generation A returns 42 and B returns 43. A controlled old publisher pauses after
+checking its authority token. B obtains a newer token and publishes successfully.
+
+Atomic replacement alone permits A to overwrite B on resumption, changing the
+fresh selector reader's result back to 42. Rechecking the token inside the same
+advisory lock used for grants and publication rejects A with exit 70 and preserves
+B's selector bytes and runtime 43. Fresh readers pinned to B continue returning 43
+in both controls. These are cooperating Python publication processes; no claim
+of fencing untrusted writers or distributed storage is made.
+
+An entry module receipt does not bind a whole application closure. Removing B's
+dependency files while retaining its app receipt permits a fresh import through
+an explicitly supplied fallback dependency root, returning 101. A broker manifest
+with an explicit two-node dependency graph and six artifact hashes per module
+rejects an omitted graph node, incomplete inventory, absent dependency files, and
+a dependency object changed after sealing. Each rejection preserves the previous
+active selector. Complete B is admitted and returns 43; replaying the successful
+token is rejected in the uninterrupted broker run.
+
+The graph is fixture-owned, not extracted from general Gerbil imports. Installed
+runtime dependencies are external. Admission assumes successful trusted build
+completion and quiescent generation roots: hashes do not establish provenance or
+prevent mutation after validation. Authority and selector are separate atomic
+file replacements without durability synchronization, so crash-consistent token
+consumption and publication are not established. These controls also do not
+exercise a live process changing its Gerbil module cache, reader retention,
+namespace replacement, general closure extraction, or garbage collection.
+
+Evidence: =31.21-native-publication-closure-study.json=, =publication.py=, and
+=just audit-native-publication=. Retained compiler patches and deployment remain
+unchanged. Prior compiler and namespace observations are separate evidence.
+The next contracts are a crash-consistent authority/selector transaction, explicit
+admission trust and immutable storage, parser/compiler-owned dependency closure,
+and readers whose pinned generation lifetime is retained before reclamation.

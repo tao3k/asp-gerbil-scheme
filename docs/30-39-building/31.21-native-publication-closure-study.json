@@ -1,0 +1,393 @@
+{
+  "schema": "asp.native-publication-study.v1",
+  "patchedSourceSha256": "b7473bf5f013f5b65f0f7a08c6f5683ca45527e48a23dd5b96ef02b2f202a524",
+  "patchSha256": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+  "nativeGscSha256": "e780d799e1be2ce62c0de90758b81a9a4bdeec63276b82da932dced261a1b400",
+  "runnerSha256": "8162f6913329d868dcfb7e836456ec1cb82f94047179e531cf27e7b86a86872a",
+  "observations": [
+    {
+      "name": "build-a",
+      "exit": 0,
+      "marker": "BUILD-OK",
+      "expectedAnswer": null,
+      "stdoutSha256": "0adba9a36b6e5ca2e62c9627416cdeca1c2e2bfa1c7431cf0447659a32124aa7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "build-b",
+      "exit": 0,
+      "marker": "BUILD-OK",
+      "expectedAnswer": null,
+      "stdoutSha256": "c12681605b4e780a6106cbac9ae275fd655d73ce921f5161ea08576391b7614b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "build-fallback",
+      "exit": 0,
+      "marker": "BUILD-OK",
+      "expectedAnswer": null,
+      "stdoutSha256": "3a57dd7a54c0b6b322d386645b093caf29dbfb55477fa90879ffbbb2eb3b8493",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "generation-a-runtime",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "generation-b-runtime",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "partial-root-with-fallback",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 101,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "missing-closure-node-rejected",
+      "cause": "Incomplete application closure",
+      "activeSelectorUnchanged": true
+    },
+    {
+      "name": "missing-dependency-artifacts-rejected",
+      "cause": "Artifact digest mismatch: publication/dep.ssi",
+      "activeSelectorUnchanged": true
+    },
+    {
+      "name": "missing-inventory-rejected",
+      "cause": "Incomplete artifact inventory",
+      "activeSelectorUnchanged": true
+    },
+    {
+      "name": "dependency-byte-change-rejected",
+      "cause": "Artifact digest mismatch: publication/dep.o1",
+      "activeSelectorUnchanged": true
+    },
+    {
+      "name": "admitted-closure-runtime",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "spent-token-rejected",
+      "cause": "Publication authority superseded or spent"
+    },
+    {
+      "name": "unfenced-new-before-release",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "unfenced-stale-publisher",
+      "exit": 0,
+      "oldToken": 1,
+      "newToken": 2,
+      "activeToken": 1,
+      "selectorUnchanged": false,
+      "stdoutSha256": "07d97d714b6b8c6a4b7956ba0509850a3e70e576fbf1b33a8a8291390053907e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "unfenced-fresh-reader-after-release",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "unfenced-pinned-reader-after-release",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "fenced-new-before-release",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "fenced-stale-publisher",
+      "exit": 70,
+      "oldToken": 1,
+      "newToken": 2,
+      "activeToken": 2,
+      "selectorUnchanged": true,
+      "stdoutSha256": "3326a20f164e2f69684014d3f0dc1b55ce5c253e3679cc556cb3f1ed47188a6b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "fenced-fresh-reader-after-release",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "fenced-pinned-reader-after-release",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "retainedCompilerPatchChanged": false,
+  "date": "2026-10-03",
+  "headBeforeStudy": "a2b019ba503f80154b8ce729b99e7f47c46a03e4",
+  "observationCount": 20,
+  "gerbilCommandCount": 13,
+  "controlledPublisherSubprocessCount": 2,
+  "terminal": "PUBLICATION-FENCING-AND-APPLICATION-CLOSURE-STUDIED",
+  "retainedPatchDigests": {
+    "installed": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+    "candidate": "45f589752ca91fdb78d199e2580545bfdcecb9544e099bae126d31f3523bba81"
+  },
+  "conclusions": {
+    "atomicReplaceOnly": "Old token 1 passes early check, pauses, then replaces token 2; fresh selected runtime 43 to 42",
+    "lockedEpochCheck": "Old token 1 is rejected with exit 70 after token 2 publication; selector hash unchanged and fresh runtime 43",
+    "pinnedRoot": "Fresh readers pinned to B return 43 even after unfenced selector regression",
+    "rootReceiptOnly": "Entry receipt survives missing dependency; explicit alternate dependency search root permits import with 101",
+    "closureAdmission": "Missing graph node, omitted dependency inventory, missing dependency files, changed dependency object rejected with previous selector unchanged",
+    "completedClosure": "Two modules and 12 artifact hashes admitted; selected runtime 43; spent token rejected"
+  },
+  "evidenceBoundary": {
+    "broker": "Cooperating grant and publication processes use one advisory flock on owned scratch storage",
+    "authority": "New grant immediately supersedes older authority, even before new generation admission succeeds",
+    "closure": "Fixed app->dep graph; installed runtime dependencies external; seal derived after successful build, not general dependency or receipt parser",
+    "immutability": "Generation files assumed quiescent and stable during hashing and reading; no prevention of mutation or pathname replacement",
+    "durability": "Authority and active selector are separate atomic file replacements without fsync; no interruption or power-loss consistency claim",
+    "reader": "Each runtime is a fresh process with explicit load path; no live module cache switching or retention protocol",
+    "fallback": "Missing dependency counterexample supplies an explicit fallback load root with a different dependency value",
+    "trust": "Artifact hashes bind bytes but do not prove compiler provenance or authenticate broker clients",
+    "count": "Earlier 81 compiler probes and 37 namespace observations were not rerun or counted"
+  },
+  "nextContracts": [
+    "Crash-consistent authority and selector transaction with replay policy",
+    "Parser/compiler-owned application dependency closure with explicit external dependency boundary",
+    "Trusted completion admission and immutable generation storage",
+    "Reader generation pinning and retention lifetime before storage reclamation"
+  ],
+  "manifests": {
+    "a": {
+      "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-publication-study-ymc9eelv/lib-a",
+      "graph": {
+        "app": [
+          "dep"
+        ],
+        "dep": []
+      },
+      "files": {
+        "publication/app.ssi": "909944727e1cc972b2d5ff8f7f42b4ee3538281c7f1854f9694b0b9c57d35dc8",
+        "publication/app.o1": "d971477409f5e2a20c22c58a4512b0e36cb02db11d6731d1a201533b25355069",
+        "publication/app~0.o1": "17220340c14226c147d3a274efc06065f34d30cb0eba6d1873fa972acef3fd36",
+        "publication/app.native-complete": "47707096f2aa7ab0b038ee0f71899f080be2c83d83afb5d9dbfc2d4f3940d164",
+        "publication/app.native-source": "76e54cdbb3de86771148784761010ec5045be49f448e4c1b96af1c1359119797",
+        "publication/app.native-interface": "909944727e1cc972b2d5ff8f7f42b4ee3538281c7f1854f9694b0b9c57d35dc8",
+        "publication/dep.ssi": "2041592f8db9eea4826f015866428d6a992e1111be1373e13ea525b6cedc1e73",
+        "publication/dep.o1": "35cd7e062008170a242fbee9c2687f707438b121728f320f7f395d6e2e42037a",
+        "publication/dep~0.o1": "b16a3c4bd43fa1f78a804f9a6f46e6308f49a893e88bfd8f00aa8828eb50bbc1",
+        "publication/dep.native-complete": "47707096f2aa7ab0b038ee0f71899f080be2c83d83afb5d9dbfc2d4f3940d164",
+        "publication/dep.native-source": "7e8c74baf74ebe41bcbe6fdb99633d0602cded22c1dc07617cb29b01eabfe0ee",
+        "publication/dep.native-interface": "2041592f8db9eea4826f015866428d6a992e1111be1373e13ea525b6cedc1e73"
+      }
+    },
+    "b": {
+      "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-publication-study-ymc9eelv/lib-b",
+      "graph": {
+        "app": [
+          "dep"
+        ],
+        "dep": []
+      },
+      "files": {
+        "publication/app.ssi": "909944727e1cc972b2d5ff8f7f42b4ee3538281c7f1854f9694b0b9c57d35dc8",
+        "publication/app.o1": "d971477409f5e2a20c22c58a4512b0e36cb02db11d6731d1a201533b25355069",
+        "publication/app~0.o1": "0f56a9fe54885d998804d829a49888911f3fe85f3592d4943f51c28019270e9c",
+        "publication/app.native-complete": "4e1f6ab6d22fe2852dde8a06b5ab1de07a93885bee17e7d443e028bb24fdd400",
+        "publication/app.native-source": "76e54cdbb3de86771148784761010ec5045be49f448e4c1b96af1c1359119797",
+        "publication/app.native-interface": "909944727e1cc972b2d5ff8f7f42b4ee3538281c7f1854f9694b0b9c57d35dc8",
+        "publication/dep.ssi": "2041592f8db9eea4826f015866428d6a992e1111be1373e13ea525b6cedc1e73",
+        "publication/dep.o1": "35cd7e062008170a242fbee9c2687f707438b121728f320f7f395d6e2e42037a",
+        "publication/dep~0.o1": "fe390e102550f6eff4057a0cb33096185a6ec11ff6f95980c321dd5b98c930fb",
+        "publication/dep.native-complete": "4e1f6ab6d22fe2852dde8a06b5ab1de07a93885bee17e7d443e028bb24fdd400",
+        "publication/dep.native-source": "8d671f15adc6b8780f2a51d7fafed2f3b9788184a2e5e0ff49949ab41f0b8818",
+        "publication/dep.native-interface": "2041592f8db9eea4826f015866428d6a992e1111be1373e13ea525b6cedc1e73"
+      }
+    }
+  },
+  "rawLogs": [
+    {
+      "path": "/private/tmp/asp-publication-final/admitted-closure-runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/build-a.out",
+      "sha256": "0adba9a36b6e5ca2e62c9627416cdeca1c2e2bfa1c7431cf0447659a32124aa7"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/build-b.out",
+      "sha256": "c12681605b4e780a6106cbac9ae275fd655d73ce921f5161ea08576391b7614b"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/build-fallback.out",
+      "sha256": "3a57dd7a54c0b6b322d386645b093caf29dbfb55477fa90879ffbbb2eb3b8493"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/fenced-fresh-reader-after-release.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/fenced-new-before-release.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/fenced-pinned-reader-after-release.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/fenced.out",
+      "sha256": "3326a20f164e2f69684014d3f0dc1b55ce5c253e3679cc556cb3f1ed47188a6b"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/generation-a-runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/generation-b-runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/partial-root-with-fallback.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/unfenced-fresh-reader-after-release.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/unfenced-new-before-release.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/unfenced-pinned-reader-after-release.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/unfenced.out",
+      "sha256": "07d97d714b6b8c6a4b7956ba0509850a3e70e576fbf1b33a8a8291390053907e"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/admitted-closure-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/build-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/build-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/build-fallback.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/fenced-fresh-reader-after-release.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/fenced-new-before-release.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/fenced-pinned-reader-after-release.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/fenced.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/generation-a-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/generation-b-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/partial-root-with-fallback.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/unfenced-fresh-reader-after-release.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/unfenced-new-before-release.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/unfenced-pinned-reader-after-release.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-final/unfenced.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "qualificationLog": {
+    "path": "/private/tmp/asp-publication-final.log",
+    "sha256": "fc5ff14dafe164c5ec47a789eb59f73683f9c449e4bb50152c0c13d664ac2183"
+  },
+  "precedingExactHeadCI": {
+    "head": "a2b019ba503f80154b8ce729b99e7f47c46a03e4",
+    "checks": [
+      {
+        "name": "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Native Gerbil library (macos-latest, release-v0.19-2591dcd)",
+        "status": "IN_PROGRESS",
+        "conclusion": ""
+      },
+      {
+        "name": "Native Gerbil provider (ubuntu-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Native Gerbil provider (macos-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      }
+    ],
+    "boundary": "ASP CI does not run isolated compiler patches or the publication broker experiment"
+  }
+}
