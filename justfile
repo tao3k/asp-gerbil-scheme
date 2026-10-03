@@ -46,6 +46,13 @@ test-files +files:
 audit-native-recovery make_source patch output:
     python3 t/native-build-recovery/run.py --make-source "$1" --patch "$2" --output "$3"
 
+# Isolated compiler qualification; the lease mode remains experimental.
+audit-native-frontend make_source patch native_gsc output:
+    python3 t/native-build-recovery/frontend.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4/worker" --qualify
+    python3 t/native-build-recovery/frontend.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4/secondary" --qualify --fail-backend
+    python3 t/native-build-recovery/frontend.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4/coordinator" --qualify --coordinator-fault
+    python3 t/native-build-recovery/frontend.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4/lease" --qualify --experimental-lease --fail-backend
+
 clean-provider:
     {{gerbil}} env gerbil interactive build-provider.ss clean
 

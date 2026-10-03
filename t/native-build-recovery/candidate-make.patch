@@ -19,7 +19,7 @@
  (def (make buildspec . rest)
    (apply make/contexts buildspec rest)
    (void))
-@@ -212,6 +215,7 @@
+@@ -212,15 +215,34 @@
    (def settings (apply make-settings rest))
    (def started (##current-time-point))
    (def build-contexts #f)
@@ -27,10 +27,43 @@
    (when (settings-verbose>=? settings 3)
      (message "... build-observe phase=build event=start entries="
               (length buildspec)
-@@ -250,10 +254,11 @@
+              " workers=" (settings-parallelize settings)))
++  (def frontend-failed? #f)
++  (def frontend-error #f)
+   (def (build)
+-    (parameterize ((current-directory (settings-srcdir settings))
+-                   (current-expander-compiling? #t))
+-      (add-load-path! (settings-srcdir settings))
+-      (make-build buildspec settings)))
++    (with-catch
++      (lambda (e)
++        (set! frontend-failed? #t)
++        (set! frontend-error e)
++        (raise e))
++      (lambda ()
++        (parameterize ((current-directory (settings-srcdir settings))
++                       (current-expander-compiling? #t))
++          (add-load-path! (settings-srcdir settings))
++          (make-build buildspec settings)))))
++  (with-catch
++    (lambda (backend-error)
++      ;; The session owns its drain; retain the frontend cause if close raises.
++      (if frontend-failed?
++        (begin
++          (unless (eq? backend-error frontend-error)
++            (display-exception backend-error (current-error-port)))
++          (raise frontend-error))
++        (raise backend-error)))
++    (lambda ()
+   (if (> (settings-parallelize settings) 1)
+     (call-with-values
+      (lambda ()
+@@ -249,11 +271,12 @@
+     (begin
        (set! build-contexts (build))
        (when (settings-verbose>=? settings 3)
-         (message "... build-observe phase=native event=end mode=inline"))))
+-        (message "... build-observe phase=native event=end mode=inline"))))
++        (message "... build-observe phase=native event=end mode=inline"))))))
 +  (publish-native-receipts!)
    (when (settings-verbose>=? settings 3)
      (message "... build-observe phase=build event=end elapsedMs="
@@ -40,7 +73,7 @@
  
  (def (make-build buildspec-in settings)
    (parameterize ((current-compilation-target (settings-target settings)))
-@@ -315,7 +320,9 @@
+@@ -315,7 +338,9 @@
      (def (build? spec)
        (let ((inputs (spec-inputs spec settings))
              (outputs (spec-outputs spec settings)))
@@ -51,7 +84,92 @@
                     outputs)
              (ormap
               (lambda (input)
-@@ -645,9 +652,121 @@
+@@ -358,8 +383,9 @@
+ 
+     ;; the build worker itself
+     (def (build-worker)
+-      (try
+-       (for (entry workch)
++      (for (entry workch)
++        (def completion (hash-ref completions (build-entry-id entry)))
++        (try
+          (def entry-ready-at (##current-time-point))
+          (call-with-compile-job-slot
+           (lambda ()
+@@ -372,13 +398,15 @@
+                        " slotWaitMs=" slot-wait-ms
+                        " elapsedMs="
+                        (elapsed-milliseconds entry-started)))))
+-         (completion-post! (hash-ref completions (build-entry-id entry)) 'done))
+-       (catch (e)
+-         (barrier-error! build-barrier e)
+-         (raise e))))
++          (completion-post! completion 'done)
++          (catch (e)
++            (completion-error! completion e)
++            (barrier-error! build-barrier e)))))
+ 
+     ;; the build coordinator
+     (def (build-coordinator entry)
++      (def completion (hash-ref completions (build-entry-id entry)))
++      (try
+       (let ((spec (build-entry-spec entry))
+             (mod (build-entry-module entry)))
+         (for (in (module-context-import mod))
+@@ -390,7 +418,11 @@
+           ;; no need to build, unblock dependents
+           (completion-post! (hash-ref completions (build-entry-id entry)) 'done))
+         ;; clear the barrier
+-        (barrier-post! build-barrier)))
++        (barrier-post! build-barrier))
++        (catch (e)
++          ;; Propagate failed dependencies so their coordinators cannot wait forever.
++          (completion-error! completion e)
++          (barrier-error! build-barrier e))))
+ 
+     (def (consider in self)
+       (cond
+@@ -432,9 +464,11 @@
+ 
+     ;; spawn a thread for each spec that waits for the dependency completions
+     ;; and pushes to the work channel if necessary.
+-    (for (entry entries)
+-      (spawn/name `(build ,(spec-file (build-entry-spec entry) settings))
+-                  build-coordinator entry))
++    (def coordinators
++      (map (lambda (entry)
++             (spawn/name `(build ,(spec-file (build-entry-spec entry) settings))
++                         build-coordinator entry))
++           entries))
+ 
+     ;; spawn the workers and wait
+     (when (settings-verbose>=? settings 3)
+@@ -444,12 +478,19 @@
+                " coordinators=" (length buildspec)))
+     (let (workers (map (lambda (i) (spawn/name `(worker ,i) build-worker))
+                        (iota build-worker-count)))
+-      ;; wait for the coordinators to complete
+-      (barrier-wait! build-barrier)
+-      ;; close the channel (no more work)
++      ;; An error notification is not frontend quiescence. Join every producer
++      ;; and worker before returning or handing the native executor its drain.
++      (def failed? #f)
++      (def first-error #f)
++      (def (record-error e)
++        (unless failed? (set! failed? #t) (set! first-error e)))
++      (with-catch record-error (cut barrier-wait! build-barrier))
++      (for (coordinator coordinators)
++        (with-catch record-error (cut thread-join! coordinator)))
+       (channel-close workch)
+-      ;; and wait for the workers to complete
+-      (for-each thread-join! workers))
++      (for (worker workers)
++        (with-catch record-error (cut thread-join! worker)))
++      (when failed? (raise first-error)))
+     (when (settings-verbose>=? settings 3)
+       (message "... build-observe phase=gerbil event=end entries="
+                (length buildspec)
+@@ -645,9 +686,121 @@
      (else
       (error "Bad buildspec" spec))))
  
@@ -175,7 +293,7 @@
  
  (def (gsc-compile-opts opts)
    (match opts
-@@ -659,6 +778,12 @@
+@@ -659,6 +812,12 @@
    (message "... compile " mod)
    (def gsc-opts (gsc-compile-opts opts))
    (def srcpath (source-path mod ".ss" settings))
@@ -188,7 +306,7 @@
    (let (gxc-opts
          [invoke-gsc: invoke-gsc?
           target: (settings-target settings)
-@@ -670,7 +795,14 @@
+@@ -670,7 +829,14 @@
           verbose: (settings-verbose>=? settings 9)
           parallel: (> (settings-parallelize settings) 1)
           (when/list gsc-opts [gsc-options: gsc-opts]) ...])

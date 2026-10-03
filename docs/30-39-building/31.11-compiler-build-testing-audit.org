@@ -594,3 +594,40 @@ only after make-build returns. A production release-on-error design must cover
 frontend planning/worker failures as well as backend errors and preserve automatic
 recovery only after all write-capable jobs are quiescent. This source observation
 is not an additional runtime qualification of those failure paths.
+
+* Frontend producers must quiesce before native executor drain
+
+A controlled worker exception reproduced return from the earlier v3 make while a
+second frontend action was held and native backend jobs were paused. Releasing
+the late frontend action after return submitted two more native jobs. A drain of
+only the first observed queue would miss those later submissions.
+
+The amendment propagates worker and coordinator failures through module completions
+and the barrier, joins all coordinators, closes the work channel, and joins all
+frontend workers before raising the first error. Independent queued work is drained
+rather than canceled. Installed make then drains native work even on frontend failure
+and preserves the original frontend cause if backend close raises too. No completion
+receipt is published for the fresh failed fixture invocation.
+
+The candidate projection preserves contexts, slot sharing and session-owned drain,
+retaining the producer cause around close because native errors can mask it. Its
+matching compiler/runtime qualification remains blocked by the earlier installed
+call-with-compile-job-slot incompatibility; external source files are not modified.
+
+Four controlled seven-probe cases cover worker error, coordinator error, combined
+frontend/backend error, and an experimental directory claim that releases only after
+ordinary failure has drained. All four acknowledged direct native backend PIDs are
+absent before failure returns. Same-process recovery builds four modules; warm reuse
+preserves file mtimes and sizes, and fresh imports return 42, 43 and 44. This allows
+the claim experiment to preserve automatic ordinary failure recovery, but the claim
+is not applied to the retained compiler patches and forced-death recovery remains
+unqualified.
+
+The 53 native completion gates are rerun for this exact installed source, bringing
+local qualification to 81 probes. The receipt key remains v3: an initial migration
+harness used a v3 source and correctly compiled zero modules; that wrong control was
+replaced with an actual v2 source. Direct module expansion passed. These results do
+not establish new multi-writer, reader, forced-death, candidate bootstrap or compiler
+deployment capability. See 31.19-frontend-native-drain-receipts.json and the Justfile
+aggregate audit-native-frontend recipe. Historical failures and earlier exact-head
+CI remain separate evidence.

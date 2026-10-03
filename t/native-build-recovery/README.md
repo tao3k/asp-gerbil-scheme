@@ -324,3 +324,67 @@ only after make-build returns. A production release-on-error design must cover
 frontend planning/worker failures as well as backend errors and preserve automatic
 recovery only after all write-capable jobs are quiescent. This source observation
 is not an additional runtime qualification of those failure paths.
+
+## Frontend failure must precede native drain
+
+The earlier v3 make copy returned a frontend error while another frontend action
+and native backend jobs remained active. Releasing that delayed action after the
+error returned let it submit two more native jobs. Draining only the queue visible
+at the first error notification therefore does not establish quiescence.
+
+The current amendment keeps the v3 receipt format. Workers post errors to their
+module completions and the barrier while continuing to finish queued independent
+work. Coordinators propagate dependency errors to their own completions. The main
+frontend waits for every coordinator, closes the work channel, joins every worker,
+and then raises the recorded error. Installed make drains the native executor on
+that failure path before rethrowing the frontend cause. A secondary backend error
+is reported without replacing that first cause; no receipts are published for the
+failed fixture invocation.
+
+The candidate projection preserves its contexts, shared job slots, and session
+executor API. It retains the frontend error around the session-owned native drain,
+because session close can otherwise replace the producer error with a backend
+error. Its matching compiler build remains unqualified; installed expansion still
+fails at the preexisting `call-with-compile-job-slot` interface.
+
+```sh
+just audit-native-frontend \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/make.ss \
+  t/native-build-recovery/installed-make.patch \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/bin/gsc \
+  /private/tmp/gerbil-frontend-qualification
+```
+
+`frontend.py` injects controlled worker/coordinator exceptions only into a temporary
+make copy. A good target has acknowledged live native jobs, a late frontend action
+is held, and another target depends on the failed target. Qualification checks
+that make does not return with either gate held, releases the late action to submit
+its jobs, and then releases native compilation. On return all four acknowledged
+direct backend PIDs are absent. Tests preserve the frontend cause even when real
+native gsc also fails with an invalid C option. The same Gerbil process then builds
+all four modules, reuses them without writing files, and fresh processes import
+values 42, 43, and 44.
+
+The aggregate has four seven-probe cases: worker failure, secondary backend failure,
+coordinator failure, and an experimental directory claim with secondary failure.
+The claim remains held during frontend/native work and is released on the repaired
+ordinary-error return, allowing automatic same-process recovery. That prototype is
+not in either retained compiler patch. Forced owner death still cannot execute its
+release handler and requires a fenced recovery design; path aliases, nested roots,
+cleaning/reader coordination, and production claim ownership remain open.
+
+The native completion gates were also rerun for the exact amended installed source:
+9 live-input, 7 content identity, 10 snapshot/v2 migration, 17 recovery, 4 interruption,
+and 6 strict receipt-format probes. Total qualification is 81 recorded local probes,
+plus a separate two-observation early-return counterexample. The retained receipt
+schema is unchanged, so a v3-to-v3 control correctly reuses a valid record; the
+migration gate uses an actual v2 source. No rebuild is claimed merely because this
+lifecycle patch changed. Direct full module expansion passed. Compiler sources
+remain unchanged and no compiler patch is deployed. See
+`31.19-frontend-native-drain-receipts.json` for digests and exact results.
+
+This qualifies ordinary exceptions and finite, responding jobs in the controlled
+acyclic fixture. It does not add cancellation of queued independent work, a runtime
+reader transaction, multi-writer support, candidate bootstrap, or forced-death
+quiescence. Historical writer counterexamples and lease-abandonment results in
+31.18 belong to their recorded earlier v3 source and are not reattributed here.

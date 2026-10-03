@@ -10,7 +10,7 @@
          :gerbil/expander
          :std/sync/completion
          :std/sync/channel
-@@ -195,14 +196,18 @@
+@@ -195,14 +196,27 @@
      ([copy: file] [(library-path file #f settings)])
      (else (error "unknwon buildspec" spec))))
  
@@ -28,14 +28,23 @@
 +    (parameterize ((current-directory (settings-srcdir settings))
 +                   (current-expander-compiling? #t))
 +      (add-load-path! (settings-srcdir settings))
-+      (make-build buildspec settings))
++      (with-catch
++        (lambda (frontend-error)
++          ;; make-build has joined every frontend producer before raising.
++          ;; Drain native work even on failure, preserving the first cause.
++          (with-catch
++            (lambda (backend-error)
++              (display-exception backend-error (current-error-port)))
++            execute-pending-compile-jobs!)
++          (raise frontend-error))
++        (lambda () (make-build buildspec settings))))
 +    (when (> (settings-parallelize settings) 1)
 +      (execute-pending-compile-jobs!))
 +    (publish-native-receipts!)))
  
  (def (make-build buildspec-in settings)
    (parameterize ((current-compilation-target (settings-target settings)))
-@@ -247,7 +252,9 @@
+@@ -247,7 +261,9 @@
      (def (build? spec)
        (let ((inputs (spec-inputs spec settings))
              (outputs (spec-outputs spec settings)))
@@ -46,7 +55,82 @@
                     outputs)
              (ormap
               (lambda (input)
-@@ -490,9 +497,121 @@
+@@ -290,16 +306,19 @@
+ 
+     ;; the build worker itself
+     (def (build-worker)
+-      (try
+-       (for (spec workch)
+-         (build spec settings)
+-         (completion-post! (hash-ref completions (module-id spec)) 'done))
+-       (catch (e)
+-         (barrier-error! build-barrier e)
+-         (raise e))))
++      (for (spec workch)
++        (def completion (hash-ref completions (module-id spec)))
++        (try
++          (build spec settings)
++          (completion-post! completion 'done)
++          (catch (e)
++            (completion-error! completion e)
++            (barrier-error! build-barrier e)))))
+ 
+     ;; the build coordinator
+     (def (build-coordinator spec)
++      (def completion (hash-ref completions (module-id spec)))
++      (try
+       (let* ((file (spec-file spec settings))
+              (mod (import/mx file)))
+         (for (in (module-context-import mod))
+@@ -311,7 +330,11 @@
+           ;; no need to build, unblock dependents
+           (completion-post! (hash-ref completions (module-id spec)) 'done))
+         ;; clear the barrrier
+-        (barrier-post! build-barrier)))
++        (barrier-post! build-barrier))
++        (catch (e)
++          ;; Propagate failed dependencies so their coordinators cannot wait forever.
++          (completion-error! completion e)
++          (barrier-error! build-barrier e))))
+ 
+     (def (consider in self)
+       (cond
+@@ -344,18 +367,27 @@
+ 
+     ;; spawn a thread for each spec that waits for the dependency completions
+     ;; and pushes to the work channel if necessary.
+-    (for (spec buildspec)
+-      (spawn/name `(build ,(spec-file spec settings)) build-coordinator spec))
++    (def coordinators
++      (map (lambda (spec)
++             (spawn/name `(build ,(spec-file spec settings)) build-coordinator spec))
++           buildspec))
+ 
+     ;; spawn the workers and wait
+     (let (workers (map (lambda (i) (spawn/name `(worker ,i) build-worker))
+                        (iota build-worker-count)))
+-      ;; wait for the coordinators to complete
+-      (barrier-wait! build-barrier)
+-      ;; close the channel (no more work)
++      ;; An error notification is not frontend quiescence. Join every producer
++      ;; and worker before returning or handing the native executor its drain.
++      (def failed? #f)
++      (def first-error #f)
++      (def (record-error e)
++        (unless failed? (set! failed? #t) (set! first-error e)))
++      (with-catch record-error (cut barrier-wait! build-barrier))
++      (for (coordinator coordinators)
++        (with-catch record-error (cut thread-join! coordinator)))
+       (channel-close workch)
+-      ;; and wait for the workers to complete
+-      (for-each thread-join! workers))))
++      (for (worker workers)
++        (with-catch record-error (cut thread-join! worker)))
++      (when failed? (raise first-error)))))
+ 
+ ;; Dependencies may have been rebuilt since an earlier freshness check, including
+ ;; in this invocation. Always observe the current file and library timestamps.
+@@ -490,9 +522,121 @@
      (else
       (error "Bad buildspec" spec))))
  
@@ -170,7 +254,7 @@
  
  (def (gsc-compile-opts opts)
    (match opts
-@@ -504,6 +623,12 @@
+@@ -504,6 +648,12 @@
    (message "... compile " mod)
    (def gsc-opts (gsc-compile-opts opts))
    (def srcpath (source-path mod ".ss" settings))
@@ -183,7 +267,7 @@
    (let (gxc-opts
          [invoke-gsc: invoke-gsc?
           target: (settings-target settings)
-@@ -515,7 +640,14 @@
+@@ -515,7 +665,14 @@
           verbose: (settings-verbose>=? settings 9)
           parallel: (> (settings-parallelize settings) 1)
           (when/list gsc-opts [gsc-options: gsc-opts]) ...])
