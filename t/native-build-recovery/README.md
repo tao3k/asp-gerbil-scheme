@@ -98,3 +98,34 @@ or checker source digest. The remote HEAD observed before cloning is insufficien
 to establish the exact checked revision. Treat these as historical syntax checks,
 not a pinned, reproducible checker qualification. Future compiler checks need a
 recorded checker revision or a matching compiler's local expansion entrypoint.
+
+## Receipt file integrity regression
+
+The receipt reader now requires exactly one key expression followed by EOF
+(whitespace/comments are allowed). A valid key followed by another expression or
+a reader error is stale and triggers a real rebuild. The previous reader accepted
+trailing data because it read only the first expression.
+
+Run the focused six-probe suite with the installed source and patch:
+
+```sh
+env -u SDKROOT -u DEVELOPER_DIR python3 t/native-build-recovery/run.py \
+  --make-source /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/make.ss \
+  --patch t/native-build-recovery/installed-make.patch \
+  --output /private/tmp/gerbil-receipt-integrity \
+  --only-receipt-integrity
+```
+
+The focused regression reproduced acceptance of trailing data before the fix,
+then passed cold build, warm reuse, trailing record rebuild, malformed tail
+rebuild, warm no-write verification, and runtime import after the fix. The
+installed patched module was expanded with the installed Gerbil expander directly;
+no MCP checker is needed for this check. The candidate still fails expansion at
+its preexisting `call-with-compile-job-slot` API with this installed compiler.
+
+This is format validation, not content integrity or authentication. Source/SSI
+identity still uses modification times; native objects are checked for presence.
+Concurrent independent writers to the same output directory remain unqualified:
+publication uses a shared `.tmp` name and does not lock the entire output set.
+The historical 17+4 probes are not a rerun of the amended patch; the six focused
+probes qualify this amendment only. The isolated patch is still not deployed.

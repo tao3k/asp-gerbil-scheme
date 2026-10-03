@@ -397,3 +397,27 @@ library 日志包含要求 exit 42 的失败断言自检、终态 =OK=，以及�
 patches、candidate compiler build 或 Bazel。CI 的 provider 测试已实际
 执行，这一边界较前一轮“远程/provider 未运行”的历史快照有新证据。
 复核记录见 =31.13-mcp-provenance-ci-audit.json=。
+
+* 2026-10-03 完成记录严格读取回归
+
+继续审计 =gxc-native-current?= 发现它只读取第一个 S-expression：
+合法 key 后追加其他表达式仍被接受。旧补丁下真实 cold/warm 后追加
+=(extra-record)=，下一次 build 的 =compileCount=0=，负例回归失败。
+
+修复已同步到 installed/candidate patches，读取 key 后要求第二次
+=read= 为 EOF；追加表达式或 reader error 都判定为 stale。六个真实探针
+通过：cold、warm、额外 record 重建、未闭合尾部重建、最终 warm 无写入、
+运行时 =answer=42= 导入。来源和结果见
+=31.14-native-receipt-integrity-receipts.json=。原 17+4 个探针属于前一轮
+历史验证，本轮没有把它们当成修改后的重新运行结果。
+
+已安装版本的修改前后完整 module wrapper 通过已安装 expander 的
+=core-expand=；没有依赖 MCP。candidate 在同一 compiler 下仍因既有
+=call-with-compile-job-slot= 无法展开，不能宣称 candidate 完整资格通过。
+
+下一步需要分别验证两个契约边界：
+- source/SSI key 是 mtime，native outputs 是存在性检查；尚未覆盖内容变更
+  保留时间戳、损坏 object，或构建期间输入变化后的稳定绑定。
+- 独立进程共享输出目录尚未验证：临时文件名固定为 =receipt.tmp=，未对
+  整组 native outputs 加跨进程写入锁。单文件 rename 不能证明整组产物的
+  发布原子性，当前回归只涵盖单写入者。

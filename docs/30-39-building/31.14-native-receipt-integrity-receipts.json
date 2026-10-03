@@ -1,0 +1,164 @@
+{
+  "schema": "asp.native-receipt-integrity.v1",
+  "date": "2026-10-03",
+  "cores": 12,
+  "before": [
+    {
+      "name": "cold",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 3.871398290997604,
+      "userSeconds": 2.281628,
+      "systemSeconds": 1.300119,
+      "compileCount": 1
+    },
+    {
+      "name": "warm",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 1.5334047500000452,
+      "userSeconds": 0.5957889999999999,
+      "systemSeconds": 0.14727899999999994,
+      "compileCount": 0
+    },
+    {
+      "name": "trailing-record",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 1.4905555830046069,
+      "userSeconds": 0.6024580000000004,
+      "systemSeconds": 0.13501699999999994,
+      "compileCount": 0
+    }
+  ],
+  "beforeOutcome": "Focused regression failed: valid key plus trailing expression was accepted without compilation",
+  "after": [
+    {
+      "name": "cold",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 2.4695010829964303,
+      "userSeconds": 2.214969,
+      "systemSeconds": 1.1679819999999999,
+      "compileCount": 1
+    },
+    {
+      "name": "warm",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 1.0067584170028567,
+      "userSeconds": 0.578916,
+      "systemSeconds": 0.10489199999999999,
+      "compileCount": 0
+    },
+    {
+      "name": "trailing-record",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 2.081774416998087,
+      "userSeconds": 2.202682,
+      "systemSeconds": 0.9361620000000002,
+      "compileCount": 1
+    },
+    {
+      "name": "trailing-reader-error",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 2.255865333005204,
+      "userSeconds": 2.2258770000000005,
+      "systemSeconds": 0.964753,
+      "compileCount": 1
+    },
+    {
+      "name": "integrity-warm",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 0.7642345829954138,
+      "userSeconds": 0.5499779999999994,
+      "systemSeconds": 0.10116399999999981,
+      "compileCount": 0
+    },
+    {
+      "name": "runtime",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 1.527269541998976,
+      "userSeconds": 0.13184299999999993,
+      "systemSeconds": 0.04406299999999996,
+      "compileCount": 0
+    }
+  ],
+  "afterOutcome": "RECOVERY-SUITE-OK; final warm snapshot unchanged; runtime answer=42",
+  "expansion": {
+    "method": "Installed gxi :gerbil/expander core-expand on complete module wrapper",
+    "installedBefore": "MODULE-EXPANSION-OK",
+    "installedAfter": "MODULE-EXPANSION-OK",
+    "candidateAfter": "Unbound call-with-compile-job-slot; existing compiler compatibility blocker"
+  },
+  "patchSha256": {
+    "installed-make.patch": "a1d55e56fd351f44e99bd725a23ad020e730325d40cf2ebb3b51e77dba40732a",
+    "candidate-make.patch": "0ee6cd53539214358007eea3f176a9b2ad134cc5da7e80d549bfcaf809887b52"
+  },
+  "compilerDeployed": false,
+  "ciSnapshotBeforeThisAmendment": {
+    "headRefOid": "c418a20c5dc94bff4070cefea5b11d9615cb95ad",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-03T01:26:24Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37085932636/job/111096129276",
+        "name": "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-03T01:23:56Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37085932636/job/111096129382",
+        "name": "Native Gerbil library (macos-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-03T01:24:02Z",
+        "status": "IN_PROGRESS",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-03T01:26:22Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37085932636/job/111096129041",
+        "name": "Native Gerbil provider (ubuntu-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-03T01:23:56Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37085932636/job/111096129289",
+        "name": "Native Gerbil provider (macos-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-03T01:24:04Z",
+        "status": "IN_PROGRESS",
+        "workflowName": "CI"
+      }
+    ]
+  },
+  "remainingBoundaries": [
+    "mtime identity does not bind source or SSI content",
+    "native object presence does not bind contents",
+    "source/SSI stability during compilation not proven",
+    "independent concurrent writers share receipt.tmp; output set not locked",
+    "historical recovery/interruption suite not rerun for this amendment"
+  ]
+}

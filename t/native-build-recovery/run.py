@@ -16,7 +16,9 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--make-source', type=Path, required=True)
 parser.add_argument('--patch', type=Path)
 parser.add_argument('--output', type=Path, required=True)
-parser.add_argument('--only-interruption', action='store_true')
+modes = parser.add_mutually_exclusive_group()
+modes.add_argument('--only-interruption', action='store_true')
+modes.add_argument('--only-receipt-integrity', action='store_true')
 parser.add_argument('--timeout', type=float, default=180)
 args = parser.parse_args()
 source = args.make_source.resolve()
@@ -127,7 +129,18 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
                 assert completion.exists(), f'{name}: missing completion receipt'
         return row
 
-    if args.only_interruption:
+    if args.only_receipt_integrity:
+        run('cold')
+        assert run('warm')['compileCount'] == 0
+        completion.write_text(completion.read_text() + '\n(extra-record)\n')
+        assert run('trailing-record')['compileCount'] == 1, 'accepted trailing receipt data'
+        completion.write_text(completion.read_text() + '\n(unclosed\n')
+        assert run('trailing-reader-error')['compileCount'] == 1, 'accepted malformed receipt tail'
+        before = snapshot()
+        assert run('integrity-warm')['compileCount'] == 0
+        assert snapshot() == before, 'integrity warm build wrote outputs'
+        run('runtime', runtime=True)
+    elif args.only_interruption:
         run('cold')
         run('interrupted-backend', force=True, interrupt=True)
         assert run('interruption-recovery')['compileCount'] == 1

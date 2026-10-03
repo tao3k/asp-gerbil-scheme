@@ -51,7 +51,7 @@
                     outputs)
              (ormap
               (lambda (input)
-@@ -645,9 +652,79 @@
+@@ -645,9 +652,81 @@
      (else
       (error "Bad buildspec" spec))))
  
@@ -96,8 +96,10 @@
 +  (or (not (eq? (settings-target settings) 'C))
 +      (with-catch false
 +        (lambda ()
-+          (equal? (call-with-input-file (native-receipt-path mod settings) read)
-+                  (native-receipt-key mod opts settings))))))
++          (call-with-input-file (native-receipt-path mod settings)
++            (lambda (port)
++              (and (equal? (read port) (native-receipt-key mod opts settings))
++                   (eof-object? (read port)))))))))
 +
 +(def (spec-native-current? spec settings)
 +  (and (match spec
@@ -133,7 +135,7 @@
  
  (def (gsc-compile-opts opts)
    (match opts
-@@ -659,6 +736,10 @@
+@@ -659,6 +738,10 @@
    (message "... compile " mod)
    (def gsc-opts (gsc-compile-opts opts))
    (def srcpath (source-path mod ".ss" settings))
@@ -144,7 +146,7 @@
    (let (gxc-opts
          [invoke-gsc: invoke-gsc?
           target: (settings-target settings)
-@@ -670,7 +751,11 @@
+@@ -670,7 +753,11 @@
           verbose: (settings-verbose>=? settings 9)
           parallel: (> (settings-parallelize settings) 1)
           (when/list gsc-opts [gsc-options: gsc-opts]) ...])
