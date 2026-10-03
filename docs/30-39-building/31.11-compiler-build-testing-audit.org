@@ -698,3 +698,39 @@ Further implementation must start with a concrete defect in these native owners,
 include a reproducer through their existing build/test entrypoints, and repair the
 owning Gerbil interface. A second broker or a mechanical Scheme port of the
 removed Python lifecycle would preserve the same ownership error.
+
+* 2026-10-03 Native package-local prelude dependency
+
+The first repair after the ownership correction belongs to the existing
+=src/build-api/native-import-closure.ss= projection. An entry using
+=prelude: "./fixture-prelude"= projected only =syntax-helper.ss=, =a.ss=,
+=b.ss=, and =c.ss= before the amendment. Its local language prelude was absent
+from the BuildSpec returned by the real =build.ss spec= entrypoint.
+
+Gerbil stores a module's prelude separately from =module-context-import=.
+The source-context traversal now reads =core-context-prelude= and resolves the
+wrapper to its module in Gerbil's existing registry, then visits that module's
+own dependency graph. Compiled interfaces likewise store =prelude:= as header
+metadata; the existing SSI projection now reads that normalized module identity.
+External preludes retain the existing package-boundary behavior. Planning,
+currentness, native compilation, and cleaning remain owned by =std/make=.
+
+The existing native public-closure scenario now runs five native commands:
+=clean=, direct =spec=, public-entry =spec=, =compile=, and warm =spec=.
+Both closure lanes return the same five targets including =fixture-prelude.ss=;
+the unrelated module is excluded and direct declaration still returns only
+=c.ss=. Source traversal visits the prelude first; compiled metadata retains its
+existing higher-phase-first order. The test asserts each lane's exact order,
+so falling back to the source lane cannot silently satisfy the warm expectation.
+No ordering change was introduced to force the two lists to be identical.
+
+=timeout 90 just build= passed through the normal package build.
+=timeout 90 just test-files t/native-import-public-closure-scenario-test.ss
+t/package-native-declaration-test.ss t/package-build-contract-test.ss
+t/testing-extension-test.ss= passed all four modules with =MODULE-OK=,
+=HARNESS-OK=, final =OK=, and exit 0. The generated =c.ssi= records
+=prelude: :asp-native-import-public-closure-fixture/fixture-prelude=.
+An initial test expectation incorrectly required identical traversal order;
+it failed with status 42 and was corrected to preserve each native lane's order.
+English text and whitespace checks passed. Full aggregate performance acceptance,
+compiler-patch qualification, concurrent writers, and remote CI are separate gates.
