@@ -252,3 +252,75 @@ also remain open.
 The exact v3 installed copy passed 53 probes: 9 live input guards, 7 content
 identity, 10 snapshot and genuine v2 migration, 17 recovery, 4 interruption,
 and 6 strict receipt format probes. These local results do not qualify deployment.
+
+## Shared-output writer counterexample and lease experiment
+
+`writers.py` starts two independent compiler processes with sources 42 and 43,
+identical module IDs, and one shared output root. Each controlled backend captures
+its generated Scheme input before acknowledging the pause; real native gsc then
+writes the original shared `.o1` path using `-o`. Two single-writer runtime checks
+verify this instrumentation. This fixes the producer inputs for the experiment;
+it does not measure the frequency of naturally occurring races.
+
+```sh
+env -u SDKROOT -u DEVELOPER_DIR python3 t/native-build-recovery/writers.py \
+  --make-source /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/make.ss \
+  --patch t/native-build-recovery/installed-make.patch \
+  --native-gsc /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/bin/gsc \
+  --output /private/tmp/gerbil-writer-study
+```
+
+With release order B then A, B publishes a receipt and native import returns 43.
+A then overwrites the native objects and fails the source guard. B's receipt and
+input snapshots remain byte-identical, its warm build skips compilation without
+changing output bytes, and native import returns 42. A's rejection does not revoke another
+writer's receipt. In release order A then B, the final runtime is 43. The terminal
+marker `WRITER-GAP-REPRODUCED-AND-LEASE-EXPERIMENT-OK` records the counterexample
+and bounded prototype checks; it does not qualify concurrent output support.
+
+The runner also injects an experimental directory claim into its temporary make
+copy. Atomic directory creation acquires one canonical output root before planner
+imports; competing builds and cleaning fail immediately, before backend capture.
+Success releases the claim. Exceptions or frontend death leave it in place. The
+owner-death experiment kills only the frontend and requires each captured
+backend to acknowledge a new probe after its death, checks that a new writer is rejected, then kills the owned backend group
+and observes the captured processes are absent before explicit removal
+of this test-only claim and successful recovery. An initial broad clean assertion
+was corrected to check the expected native inventory: compiler intermediate files
+outside that inventory are not required to disappear.
+
+The directory claim prototype is **not applied to the retained compiler patches**.
+It demonstrates why a claim must outlive a failed frontend whose backend jobs can
+still write. It has no owner registry, automatic stale recovery, path alias or
+nested-root protocol, production timeout/wait policy, or coordination with runtime
+readers. Failure recovery deliberately sacrifices availability until quiescence
+is proved. Retaining it would change the previously qualified automatic backend
+failure recovery into operator-mediated recovery. Do not copy its temporary cleanup into production as PID-only recovery.
+
+Directly importing `:std/os/flock` into make is also not yet justified: the local
+stdlib build entry imports make before executing the build spec that contains the
+native flock target. Its FFI and clean-bootstrap behavior require qualification.
+An automatically released advisory lock must additionally account for surviving
+backend children; frontend death alone is not proof that native writes stopped.
+
+The next implementation contract needs an output namespace identity, an exclusive
+claim covering planning, compile jobs, receipt publication and cleaning, and a
+failure transition based on executor quiescence. A persistent claim needs an
+operator-visible recovery record and a fenced reclamation protocol. An isolated
+generation design instead needs producer-specific outputs, whole dependency
+closure publication, and readers pinned to one generation. Neither reader
+consistency nor full output atomicity follows from a unique `.tmp` name or a
+per-invocation mutex. Exact results and source digests are in
+`31.18-shared-output-writer-study.json`. The v3 compiler remains undeployed and
+concurrent writers remain unsupported by the retained patches.
+
+The writer study completed 25 recorded probes across single-writer controls,
+both overlap orders, lease contention/cleaning, owner death, and explicit recovery.
+The counterexample is retained as a known failure, not converted into acceptance.
+
+Source inspection of the installed compiler base shows that executor close joins
+workers before raising its recorded backend error. Normal make calls that drain
+only after make-build returns. A production release-on-error design must cover
+frontend planning/worker failures as well as backend errors and preserve automatic
+recovery only after all write-capable jobs are quiescent. This source observation
+is not an additional runtime qualification of those failure paths.

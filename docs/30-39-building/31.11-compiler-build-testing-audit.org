@@ -542,3 +542,55 @@ has been deployed and no clean bootstrap qualification has been performed.
 The exact v3 installed copy passed 53 probes: 9 live input guards, 7 content
 identity, 10 snapshot and genuine v2 migration, 17 recovery, 4 interruption,
 and 6 strict receipt format probes. These local results do not qualify deployment.
+
+* Independent shared-output writers
+
+The v3 input guard does not establish producer ownership of native objects. A
+controlled two-process experiment captures generated Scheme inputs independently
+and invokes real native gsc with the original shared object output path. Single
+writer controls return 42 and 43. Both release orders are tested.
+
+For B then A, B completes and returns 43 before A is released. A overwrites the
+objects and fails Native build inputs changed. B's receipt and source/SSI snapshots
+remain byte-identical; its warm build compiles nothing, but native import returns
+42. For A then B, final native import returns 43. Rejected compilation therefore
+can invalidate another successful writer's object ownership without invalidating
+its completion record. This is a controlled counterexample, not a measured race
+frequency or a claim that production naturally follows the same schedule.
+
+An isolated core-directory lease experiment blocks a competing build and cleaning
+before they write. Successful completion releases the claim. Frontend death leaves
+it occupied; captured backend jobs acknowledge a new probe after frontend death. Recovery in the owned test
+namespace kills the backend group, observes captured processes are absent,
+and explicitly removes the abandoned claim before rebuilding. The experiment is
+not retained in either compiler patch. No owner registry, automatic reclamation,
+path alias/nested namespace handling, reader protocol, or availability contract is
+qualified. Expected native cleaning is tested; intermediate compiler files outside
+that expected inventory may remain.
+
+Retaining this prototype would change automatic backend failure recovery into
+operator-mediated recovery, so it is not a compatible production amendment.
+The implementation seam is make before make-build/planner imports, together with
+make-clean and executor quiescence. std/os/flock uses native FFI; build-std imports
+make before processing build-spec's flock target, so directly importing flock into
+make still needs clean-bootstrap qualification. Advisory release on frontend death
+also needs a backend lifetime contract. Do not reclaim from PID absence or elapsed
+time alone. A persistent namespace claim requires fenced recovery; generation
+isolation requires whole closure publication and readers pinned to a generation.
+
+See 31.18-shared-output-writer-study.json and the executable writers.py harness.
+This adds research evidence without changing the retained v3 compiler patches or
+attributing their earlier 53 local probes to a new compiler amendment. Four remote
+ASP checks passed at exact head 3021d7594432694038950963f8a13c9262aeac8d; remote
+CI does not exercise these isolated compiler experiments.
+
+The writer study completed 25 recorded probes across single-writer controls,
+both overlap orders, lease contention/cleaning, owner death, and explicit recovery.
+The counterexample is retained as a known failure, not converted into acceptance.
+
+Source inspection of the installed compiler base shows that executor close joins
+workers before raising its recorded backend error. Normal make calls that drain
+only after make-build returns. A production release-on-error design must cover
+frontend planning/worker failures as well as backend errors and preserve automatic
+recovery only after all write-capable jobs are quiescent. This source observation
+is not an additional runtime qualification of those failure paths.
