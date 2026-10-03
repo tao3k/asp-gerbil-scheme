@@ -65,6 +65,10 @@ audit-native-publication make_source patch native_gsc output:
 audit-native-publication-crash make_source patch native_gsc output:
     python3 t/native-build-recovery/publication_crash.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4"
 
+# Expander facts and explicit external interface boundary; research only.
+audit-native-closure make_source patch native_gsc external_root output:
+    python3 t/native-build-recovery/closure.py --make-source "$1" --patch "$2" --native-gsc "$3" --external-root "$4" --output "$5"
+
 clean-provider:
     {{gerbil}} env gerbil interactive build-provider.ss clean
 

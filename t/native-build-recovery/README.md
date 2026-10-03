@@ -564,3 +564,71 @@ Generation storage is assumed quiescent and immutable; replay acknowledges the
 committed bytes' identity without rehashing live storage. General compiler-owned
 closure discovery, authenticated admission, generation lifetime retention, and
 production integration remain open. Earlier studies are not rerun or counted.
+
+
+### Compiler-owned application import closure
+
+`closure.ss` projects the native expander's `module-context-import` facts through
+module imports, import sets, exports, and owning contexts. It records resolved
+identity, path, import kind, and relative phase. Unsupported import or nested
+module-path representations fail explicitly. It does not scan source text for
+imports. `closure.py` supplies an explicit seven-module build inventory, expands
+those source owners, and computes reachability from the declared app entry.
+
+```sh
+just audit-native-closure \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/make.ss \
+  t/native-build-recovery/installed-make.patch \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/bin/gsc \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/lib \
+  /private/tmp/gerbil-compiler-closure-study
+```
+
+The fixture contains a leaf, a renamed/selected leaf import, a re-export bridge,
+a phase-one import with its own dependency, the app, and an unrelated built module.
+The expander-derived graph reaches six modules and excludes the unrelated module.
+Phase-one facts are retained, including the transitive dependency needed by that
+module. Relative phases are evidence on each edge; this control does not calculate
+absolute phase composition for arbitrary module graphs.
+
+Native object paths come from the retained make patch's structural SSI walker,
+`native-outputs`. The scratch copy exports a narrow wrapper solely for this study;
+the walker and retained patches are unchanged. This matters because bridge has
+one native object, app has three, and the other four reachable modules have two
+each. The manifest binds 36 files: those 12 native objects plus four interface,
+receipt, and snapshot files for each module. This replaces the earlier fixture's
+fixed two-object assumption. Live source bytes must equal their completed source
+snapshot before sealing the graph and artifacts.
+
+| Control | Observation |
+|---------|-------------|
+| Two fresh generations with compiler-derived graphs | A returns 42, B returns 43; both admit six reachable modules and 36 artifact hashes |
+| Renamed import and re-export bridge | Owning module facts retain leaf and bridge dependencies without interpreting source import spelling |
+| `for-syntax` import with a transitive dependency | Phase-one edge and dependent module are included in the union closure |
+| Built but unreachable module | Excluded from the selected application's artifact inventory |
+| B leaf removed, with A supplied as a fallback root | Native runtime becomes 42; resolved compiler fact points outside the expected local generation and admission is rejected |
+| Transitive phase dependency omitted from manifest inventory | Rejected against the compiler-derived reachable set and object paths |
+| Source changed after the successful build | Source/snapshot comparison rejects sealing stale compiler evidence |
+
+The external frontier records the explicitly imported installed list utility's
+resolved interface path and SHA-256 under an explicitly supplied installation
+root. Admission checks that frontier interface remains unchanged. It does not
+walk external runtime/native dependencies or bind the implicit language prelude,
+compiler, OS libraries, or whole installed runtime. A frontier hash is not a
+complete external environment pin or a provenance proof.
+
+Source owners are expanded in a fresh Gerbil process after compilation, with
+local import resolution through the completed output root. Expansion may execute
+compile-time code; this study runs authored fixture modules. It does not establish
+sandboxed expansion of untrusted inputs. Membership starts from declared build
+inventory and expander identities, not package-name heuristics. Generation roots
+and approved external paths remain assumed stable and quiescent; alias replacement
+and hostile mutation are outside this control.
+
+This qualifies a manifest input seam. It does not replace the previous broker's
+fixed admission function or deploy compiler publication. General nested modules,
+weak imports, absolute phase composition, dynamic runtime loads, external closure
+pinning, and integration with the single-record broker remain open. See
+`31.23-native-compiler-closure-study.json` for exact facts and identities. The final
+qualification records 15 observations, including 10 real Gerbil commands. Earlier
+compiler, namespace, publication, and crash observations are separate evidence.
