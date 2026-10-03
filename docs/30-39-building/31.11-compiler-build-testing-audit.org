@@ -509,3 +509,36 @@ Stable input consumption during compilation, ABA changes, native object content
 integrity, and independent concurrent output writers remain open. Publication is
 not atomic across the full output set. No compiler source checkout was modified,
 and no patch was deployed. Previous receipt files remain historical snapshots.
+
+* Live input mutation during backend compilation
+
+A controlled v2 counterexample changed source value 42 to 43 while native gsc was
+paused and restored nanosecond mtime. Completion and warm reuse succeeded, but a
+fresh import returned 42. Late publication copied the new source into the snapshot
+for the old native artifact. This is recorded as a counterexample, not acceptance.
+
+The v3 isolated patch captures source before compile-module and generated SSI after
+that call, queues the key, joins backend jobs, validates all pending witnesses,
+and only then publishes the queued keys. Observed source/SSI changes fail with
+Native build inputs changed and no completion receipt. The runner forwards body
+exceptions explicitly as exit 70. Recovery retains the same backend executable
+path to exclude compiler-key changes as the reason for rebuilding.
+
+The exact installed source expands with the installed Gerbil expander. Candidate
+expansion retains the preexisting call-with-compile-job-slot incompatibility.
+See 31.17-native-live-input-guard-receipts.json for exact patch digests and probes.
+The earlier v2 cost samples are historical; no v3 performance claim is made.
+
+This guard does not establish immutable frontend consumption: planner imports
+precede compilation, transient restored changes can evade comparison, and inputs
+are not frozen after validation. Cross-process writer exclusion and full output
+atomicity remain open. The pending-list mutex is invocation-local; shared native
+objects and snapshots remain exposed even with unique temporary receipt names.
+Next research needs controlled two-writer release order, producer/runtime binding,
+and explicit contracts for namespace locking or isolated generation publication,
+dependency readers, cleaning, interruption, and stale owners. No compiler patch
+has been deployed and no clean bootstrap qualification has been performed.
+
+The exact v3 installed copy passed 53 probes: 9 live input guards, 7 content
+identity, 10 snapshot and genuine v2 migration, 17 recovery, 4 interruption,
+and 6 strict receipt format probes. These local results do not qualify deployment.

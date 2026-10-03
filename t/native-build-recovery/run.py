@@ -24,6 +24,9 @@ modes.add_argument('--only-input-identity', action='store_true',
 modes.add_argument('--qualify-input-identity', action='store_true')
 modes.add_argument('--only-warm-cost', action='store_true')
 modes.add_argument('--only-snapshot-contract', action='store_true')
+modes.add_argument('--qualify-live-inputs', action='store_true')
+modes.add_argument('--reproduce-live-input-gap', action='store_true')
+parser.add_argument('--native-gsc', type=Path)
 parser.add_argument('--fixture-padding-bytes', type=int, default=0)
 parser.add_argument('--migration-source', type=Path)
 parser.add_argument('--timeout', type=float, default=180)
@@ -32,6 +35,9 @@ if args.fixture_padding_bytes < 0:
     parser.error('fixture padding must be nonnegative')
 if args.migration_source and not args.only_snapshot_contract:
     parser.error('migration source requires the snapshot contract mode')
+if args.qualify_live_inputs or args.reproduce_live_input_gap:
+    if not args.native_gsc or not args.native_gsc.is_file() or not os.access(args.native_gsc, os.X_OK):
+        parser.error('live input probes require an explicit executable native gsc')
 source = args.make_source.resolve()
 args.output.mkdir(parents=True, exist_ok=True)
 receipts = []
@@ -71,7 +77,7 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
         return {str(p.relative_to(lib)): (p.stat().st_mtime_ns, p.stat().st_size)
                 for p in lib.rglob('*') if p.is_file()}
 
-    def run(name, *, force=False, failure=False, debug=False, clean=False, runtime=False, interrupt=False, expected_answer=42):
+    def run(name, *, force=False, failure=False, debug=False, clean=False, runtime=False, interrupt=False, expected_answer=42, input_change=None, reuse_backend=False, expected_rejection=False):
         spec = '[gxc: "middle" "-cc-options" "-fasp-native-failure"]' if failure else '"middle"'
         if runtime:
             expression = ('(import :native-recovery/middle) (unless (= answer ' + str(expected_answer) + ') (error "wrong runtime value")) (displayln "RUNTIME-OK")')
@@ -84,9 +90,27 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
                           ('' if clean else ' parallelize: 12 force: ' + ('#t' if force else '#f') +
                            ' debug: ' + ('#t' if debug else '#f')) +
                           ') (displayln "NATIVE-COMPLETE-OK")')
+        imports, body = expression.split('\n', 1) if '\n' in expression else expression.split(') ', 1)
+        if '\n' not in expression:
+            imports += ')'
+        expression = (imports + '\n(with-catch (lambda (failure) (display-exception failure (current-error-port)) (exit 70)) (lambda () ' + body + '))')
         command = ['gerbil', 'interactive', '-e', expression]
         env = dict(os.environ, GERBIL_BUILD_CORES='12', GERBIL_PATH=str(root), GERBIL_LOADPATH=str(lib))
         marker = root / 'backend-started'
+        release = root / 'backend-release'
+        if input_change:
+            marker.unlink(missing_ok=True)
+            release.unlink(missing_ok=True)
+            backend = root / 'blocked-gsc'
+            backend.write_text('#!' + sys.executable + '\n' +
+                               'from pathlib import Path\nimport os, sys, time\n' +
+                               'Path(' + repr(str(marker)) + ').write_text("started")\n' +
+                               'while not Path(' + repr(str(release)) + ').exists(): time.sleep(0.01)\n' +
+                               'os.execv(' + repr(str(args.native_gsc.resolve())) + ', [' + repr(str(args.native_gsc.resolve())) + ', *sys.argv[1:]])\n')
+            backend.chmod(0o700)
+            env['GERBIL_GSC'] = str(backend)
+        if reuse_backend:
+            env['GERBIL_GSC'] = str(root / 'blocked-gsc')
         if interrupt:
             if marker.exists():
                 marker.unlink()
@@ -97,6 +121,8 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
                                'while True: time.sleep(1)\n')
             backend.chmod(0o700)
             env['GERBIL_GSC'] = str(backend)
+        interface_witness = outputs / "middle.native-interface"
+        previous_witness = interface_witness.stat().st_mtime_ns if interface_witness.exists() else None
         started = time.monotonic()
         before = resource.getrusage(resource.RUSAGE_CHILDREN)
         print(f'PROBE-START {name}', flush=True)
@@ -104,7 +130,7 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
             proc = subprocess.Popen(command, env=env, stdout=out, stderr=err, start_new_session=True)
             expired = False
             try:
-                if interrupt:
+                if interrupt or input_change:
                     # A controlled gsc subprocess acknowledges that a backend
                     # job is running. Compiler stdout is buffered, so it cannot
                     # serve as a reliable interruption boundary.
@@ -114,7 +140,27 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
                         if time.monotonic() - started >= args.timeout:
                             raise subprocess.TimeoutExpired(command, args.timeout)
                         time.sleep(0.01)
-                    os.killpg(proc.pid, signal.SIGTERM)
+                    if interrupt:
+                        os.killpg(proc.pid, signal.SIGTERM)
+                    else:
+                        if input_change == 'interface':
+                            # Backend launch can precede frontend completion. Wait
+                            # for this build's interface witness, not the old SSI.
+                            while not (interface_witness.exists()
+                                       and interface_witness.stat().st_mtime_ns != previous_witness
+                                       and interface_witness.read_bytes() == (outputs / 'middle.ssi').read_bytes()):
+                                if proc.poll() is not None:
+                                    raise AssertionError('build exited before interface capture')
+                                if time.monotonic() - started >= args.timeout:
+                                    raise subprocess.TimeoutExpired(command, args.timeout)
+                                time.sleep(0.01)
+                        changed = root / 'middle.ss'  if input_change == 'source' else outputs / 'middle.ssi'
+                        prior = changed.stat()
+                        data = changed.read_bytes()
+                        changed.write_bytes(data.replace(b'(def value 42)', b'(def value 43)') if input_change == 'source' else data + b'\n; changed during backend compilation\n')
+                        os.utime(changed, ns=(prior.st_atime_ns, prior.st_mtime_ns))
+                        assert changed.stat().st_mtime_ns == prior.st_mtime_ns
+                        release.write_text('release')
                 status = proc.wait(timeout=args.timeout)
             except subprocess.TimeoutExpired:
                 expired = True
@@ -138,12 +184,17 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
                                      (outputs / 'middle.native-source', outputs / 'middle.native-interface')
                                      if p.exists()),
                    receiptBytes=completion.stat().st_size if completion.exists() else None,
-                   expectedRuntimeAnswer=expected_answer if runtime else None)
+                   expectedRuntimeAnswer=expected_answer if runtime else None,
+                   inputChange=input_change, inputMtimePreserved=bool(input_change),
+                   interfaceCaptureAcknowledged=input_change == 'interface')
         receipts.append(row)
         (args.output / 'receipts.json').write_text(json.dumps(receipts, indent=2) + '\n')
         print('PROBE-END ' + json.dumps(row), flush=True)
         assert not expired, f'{name}: timed out'
-        if failure or interrupt:
+        if expected_rejection:
+            assert status == 70 and not completion.exists(), 'live change did not reject publication'
+            assert 'Native build inputs changed' in stderr, 'failure was not the input guard'
+        elif failure or interrupt:
             assert status != 0 and not completion.exists(), f'{name}: failure published a receipt'
         else:
             assert status == 0, f'{name}: {stderr}'
@@ -152,7 +203,26 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
                 assert completion.exists(), f'{name}: missing completion receipt'
         return row
 
-    if args.only_snapshot_contract:
+    if args.reproduce_live_input_gap:
+        run('cold')
+        run('source-change-during-backend', force=True, input_change='source')
+        assert run('wrong-warm-reuse', reuse_backend=True)['compileCount'] == 0
+        run('stale-runtime', runtime=True, expected_answer=42)
+    elif args.qualify_live_inputs:
+        run('cold')
+        run('source-change-during-backend', force=True, input_change='source', expected_rejection=True)
+        assert run('source-change-recovery', reuse_backend=True)['compileCount'] == 1
+        run('source-change-runtime', runtime=True, expected_answer=43)
+        before = snapshot()
+        assert run('source-change-warm', reuse_backend=True)['compileCount'] == 0
+        assert snapshot() == before
+        run('interface-change-during-backend', force=True, input_change='interface', expected_rejection=True)
+        assert run('interface-change-recovery', reuse_backend=True)['compileCount'] == 1
+        run('interface-change-runtime', runtime=True, expected_answer=43)
+        before = snapshot()
+        assert run('interface-change-warm', reuse_backend=True)['compileCount'] == 0
+        assert snapshot() == before
+    elif args.only_snapshot_contract:
         if args.migration_source:
             current_source = source
             source = args.migration_source.resolve()
@@ -252,6 +322,8 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
         assert not completion.exists(), 'clean retained a completion receipt'
         assert not (outputs / 'middle~empty.o1').exists(), 'clean retained a nested loader'
 print('KNOWN-IDENTITY-GAP-REPRODUCED' if args.only_input_identity
+      else 'LIVE-INPUT-GAP-REPRODUCED' if args.reproduce_live_input_gap
+      else 'LIVE-INPUT-GUARD-SUITE-OK' if args.qualify_live_inputs
       else 'CONTENT-IDENTITY-SUITE-OK' if args.qualify_input_identity
       else 'SNAPSHOT-CONTRACT-SUITE-OK' if args.only_snapshot_contract
       else 'WARM-COST-PROBES-OK' if args.only_warm_cost

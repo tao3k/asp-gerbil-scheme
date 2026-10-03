@@ -51,7 +51,7 @@
                     outputs)
              (ormap
               (lambda (input)
-@@ -645,9 +652,117 @@
+@@ -645,9 +652,121 @@
      (else
       (error "Bad buildspec" spec))))
  
@@ -110,11 +110,12 @@
 +                    (native-snapshot-path mod ".native-interface" settings))))
 +
 +(def (publish-native-snapshot! source destination)
++  (create-directory* (path-directory destination))
 +  (when (file-exists? destination) (delete-file destination))
 +  (copy-file source destination))
 +
 +(def (native-receipt-key mod opts settings)
-+  (list 'native-complete-v2-snapshots (gerbil-version-string) (gerbil-home)
++  (list 'native-complete-v3-checked-snapshots (gerbil-version-string) (gerbil-home)
 +        (settings-srcdir settings) (settings-libdir settings) (settings-prefix settings)
 +        (settings-optimize settings) (settings-debug settings)
 +        (gsc-compile-opts opts) (gerbil-gsc)
@@ -139,23 +140,26 @@
 +       (andmap (cut spec-native-current? <> settings) (spec-submodules spec))))
 +
 +(def (publish-native-receipts!)
-+  ;; A queued gsc job is not a completed native library. This is called only
-+  ;; after the executor has joined successfully; failures leave no receipt.
-+  (for (entry (cdr (current-native-receipts)))
++  ;; Validate every producer witness after backend jobs join, before publishing.
++  ;; These checks detect observed changes, not transient changes restored earlier.
++  (def entries (cdr (current-native-receipts)))
++  (for (entry entries)
 +    (match entry
-+      ([mod opts settings]
++      ([mod opts settings key]
++       (unless (and (equal? key (native-receipt-key mod opts settings))
++                    (native-snapshots-current? mod settings))
++         (error "Native build inputs changed" mod))
 +       (def paths (native-outputs mod settings))
 +       (unless (andmap file-exists? paths)
-+         (error "Incomplete native library outputs" mod paths))
-+       (publish-native-snapshot! (source-path mod ".ss" settings)
-+                                 (native-snapshot-path mod ".native-source" settings))
-+       (publish-native-snapshot! (library-path mod ".ssi" settings)
-+                                 (native-snapshot-path mod ".native-interface" settings))
++         (error "Incomplete native library outputs" mod paths)))))
++  (for (entry entries)
++    (match entry
++      ([mod opts settings key]
 +       (def receipt (native-receipt-path mod settings))
 +       (def temporary (string-append receipt ".tmp"))
 +       (when (file-exists? temporary) (delete-file temporary))
 +       (call-with-output-file temporary
-+         (lambda (port) (write (native-receipt-key mod opts settings) port)))
++         (lambda (port) (write key port)))
 +       (rename-file temporary receipt)))))
 +
  (def (gxc-outputs mod opts settings)
@@ -171,27 +175,32 @@
  
  (def (gsc-compile-opts opts)
    (match opts
-@@ -659,6 +774,10 @@
+@@ -659,6 +778,12 @@
    (message "... compile " mod)
    (def gsc-opts (gsc-compile-opts opts))
    (def srcpath (source-path mod ".ss" settings))
 +  (def native? (and invoke-gsc? (eq? (settings-target settings) 'C)))
 +  (when native?
 +    (let (receipt (native-receipt-path mod settings))
-+      (when (file-exists? receipt) (delete-file receipt))))
++      (when (file-exists? receipt) (delete-file receipt)))
++    (publish-native-snapshot! srcpath
++                              (native-snapshot-path mod ".native-source" settings)))
    (let (gxc-opts
          [invoke-gsc: invoke-gsc?
           target: (settings-target settings)
-@@ -670,7 +789,11 @@
+@@ -670,7 +795,14 @@
           verbose: (settings-verbose>=? settings 9)
           parallel: (> (settings-parallelize settings) 1)
           (when/list gsc-opts [gsc-options: gsc-opts]) ...])
 -      (compile-module srcpath gxc-opts)))
 +      (compile-module srcpath gxc-opts))
 +  (when native?
-+    (let (state (current-native-receipts))
++    (publish-native-snapshot! (library-path mod ".ssi" settings)
++                              (native-snapshot-path mod ".native-interface" settings))
++    (let ((state (current-native-receipts))
++          (key (native-receipt-key mod opts settings)))
 +      (with-lock (car state)
-+        (lambda () (set-cdr! state (cons [mod opts settings] (cdr state))))))))
++        (lambda () (set-cdr! state (cons [mod opts settings key] (cdr state))))))))
  
  (def (gsc-libpath mod settings)
    (def libdir-prefix (settings-libdir-prefix settings))
