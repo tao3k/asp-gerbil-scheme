@@ -296,7 +296,7 @@ focused test 和 aggregate wiring，不能用 allow-list 或抑制警告替代�
 失败断言，以及失败 batch 的 elapsed terminal receipt。
 
 =t/native-build-recovery/tool-main-exit.patch= 提供 compiler 修复；
-提取的真实 dispatcher 分支通过官方 MCP balance / syntax 检查及正反例。
+提取的真实 dispatcher 分支通过ober/gerbil-mcp 本地函数的 balance / syntax 检查及正反例。
 未重建或部署整个 Bach binary。
 
 ** 原生完成契约修复
@@ -323,7 +323,7 @@ clean 的邻接保护。额外 4 个探针验证受控 gsc 子进程中断后没
 在任务运行时终止，结果已丢弃。有效测试使用阻塞 backend 子进程的明确
 启动标记，再终止本次进程组。它没有把编译后的终止误称为中断恢复。
 
-已安装副本通过官方 Gerbil MCP syntax 检查。候选 std/make 的原始版本和
+已安装副本通过ober/gerbil-mcp 本地语法展开 检查。候选 std/make 的原始版本和
 修补版本在当前已安装 compiler 下均无法展开既有 =call-with-compile-job-slot=
 API；候选只通过 balance，仍需其匹配 compiler build 和上游测试。
 本次没有部署 compiler patches，没有运行 Bazel、provider 全量资格或远程 CI。
@@ -363,3 +363,37 @@ API；候选只通过 balance，仍需其匹配 compiler build 和上游测试�
 因此不是完整 build receipt。这些样本说明 wall 与 CPU 成本差异显著，
 仍不能单凭它们区分 scheduler、IO 与导入等待，也不能证明空闲主机达标。
 原始六行记录保存在修复 receipts 文件中。
+
+* 2026-10-03 MCP 来源及 PR CI 复核
+
+“官方 Gerbil MCP”的先前表述不准确，现已修正。实际来源为
+=https://git.cons.io/ober/gerbil-mcp=，由 compiler checkout 的
+=AGENTS.md= 指向。=/private/tmp/asp-gerbil-native-repair-mcp= 是临时
+clone 目录名；=repair= 只是本次任务目录的标签。
+
+当时直接导入 =:gerbil-mcp/tools/check-balance=、
+=:gerbil-mcp/tools/check-syntax=，通过本地 registry 的 =call-tool=
+调用，没有启动 MCP transport/server。前者只检查 delimiter；后者通过
+已安装 Gerbil expander 对完整 module wrapper 做展开。它们与 ASP build
+executor、parser/policy evidence 和 native completion receipt 是不同层。
+真实编译、运行时导入和失败传播以各自可执行回归为准。
+
+会话记录保留调用和结果，但临时 clone、wrapper 现已不存在；没有保留
+已验证的 clone HEAD 或 checker source digest。clone 前查询的 remote HEAD
+不能当成实际 checkout 的不可变证据。因此这些结果只能称为历史语法检查，
+不能称为已固定版本的 MCP 资格或第三方官方认证。
+
+PR #11 的 =c70fbc2e29dd45fc644ae00853a6883370df8ab3= 在 workflow
+=37019464757= 的四项 library/provider、Linux/macOS CI 均通过。
+library 日志包含要求 exit 42 的失败断言自检、终态 =OK=，以及原性能场景：
+
+| runner | native batch 秒 | startup median incremental 秒 |
+|--------+----------------+--------------------------------|
+| Linux  | 0.789367084    | 0.365461                       |
+| macOS  | 1.780396       | 0.560224                       |
+
+原 10 秒 batch 和 2.5 秒 startup 门槛未改。该远程结果补充了先前本地
+高负载失败，不能删除或改写本地失败记录；也不验证尚未部署的 compiler
+patches、candidate compiler build 或 Bazel。CI 的 provider 测试已实际
+执行，这一边界较前一轮“远程/provider 未运行”的历史快照有新证据。
+复核记录见 =31.13-mcp-provenance-ci-audit.json=。

@@ -53,7 +53,7 @@ for interrupting a live backend.
 
 ## Qualification boundary
 
-`installed-make.patch` was expanded with the official Gerbil MCP syntax checker
+`installed-make.patch` was expanded using the `ober/gerbil-mcp` syntax-check implementation
 and passed the native recovery and interruption gates against the installed
 2591dcd compiler. `candidate-make.patch` projects the same change onto the local
 compiler source with its existing `make/contexts` and executor modifications;
@@ -70,10 +70,31 @@ matching compiler build and upstream tests. Neither patch has been deployed.
 `tool-main-exit.patch` addresses `src/gerbil/main.ss`: the gxtest tool result
 must become the process exit status. The installed `gerbil test` returned zero
 for the intentional failure fixture. The extracted dispatcher in
-`tool-main-probe.ss` passes the official balance/syntax checks and returns 0 for
+`tool-main-probe.ss` passes the `ober/gerbil-mcp` balance/syntax checks and returns 0 for
 the positive fixture and 42 for the negative fixture. Its gxi/gxc branches are
 unused probe stubs; this qualifies the gxtest branch, not a rebuilt Bach binary.
 The full compiler patch has not been deployed.
 
 The repository's Justfile and CI invoke `:gerbil/tools/gxtest` directly with an
 explicit `exit` so they reject failed assertions on the current toolchain.
+
+## Checker provenance
+
+The earlier phrase "official Gerbil MCP" was inaccurate. The checker came from
+`https://git.cons.io/ober/gerbil-mcp`, referenced by the compiler checkout's
+AGENTS.md. `asp-gerbil-native-repair-mcp` was a temporary directory name, not an
+ASP module, dependency, or repair service.
+
+The checks imported `:gerbil-mcp/tools/check-balance` and
+`:gerbil-mcp/tools/check-syntax` and called the local tool registry directly.
+No MCP transport or server lifecycle was exercised. Balance checks delimiters;
+syntax checks expand a module wrapper through the installed Gerbil expander.
+Neither establishes native compilation, runtime semantics, or build completion.
+Those claims rely on the separate recovery harness and real gxtest invocations.
+
+The temporary checker clone and wrapper are no longer available. Session history
+records the calls and outputs, but the audit did not retain a verified clone HEAD
+or checker source digest. The remote HEAD observed before cloning is insufficient
+to establish the exact checked revision. Treat these as historical syntax checks,
+not a pinned, reproducible checker qualification. Future compiler checks need a
+recorded checker revision or a matching compiler's local expansion entrypoint.

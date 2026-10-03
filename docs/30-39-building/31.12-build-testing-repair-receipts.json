@@ -563,9 +563,10 @@
   ],
   "startupCpuBoundary": "Each process stopped at first phase marker; CPU includes cleanup. Not full builds or idle-host qualification.",
   "syntaxQualification": {
-    "installedMake": "Official Gerbil MCP balance and syntax passed",
+    "installedMake": "Historical ober/gerbil-mcp local function balance and expansion passed; checker revision not retained",
     "candidateMake": "Balance passed; baseline and patched syntax fail at preexisting call-with-compile-job-slot against installed compiler",
-    "toolMainProbe": "Official Gerbil MCP balance and syntax passed; extracted gxtest branch only"
+    "toolMainProbe": "Historical ober/gerbil-mcp local function balance and expansion passed; extracted gxtest branch only; checker revision not retained",
+    "provenanceAudit": "31.13-mcp-provenance-ci-audit.json"
   },
   "remainingGates": [
     {
