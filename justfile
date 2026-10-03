@@ -69,6 +69,10 @@ audit-native-publication-crash make_source patch native_gsc output:
 audit-native-closure make_source patch native_gsc external_root output:
     python3 t/native-build-recovery/closure.py --make-source "$1" --patch "$2" --native-gsc "$3" --external-root "$4" --output "$5"
 
+# Broker-owned compiler evidence and transactional publication; research only.
+audit-native-closure-publication make_source patch native_gsc external_root output:
+    python3 t/native-build-recovery/closure.py --make-source "$1" --patch "$2" --native-gsc "$3" --external-root "$4" --output "$5" --publication-study
+
 clean-provider:
     {{gerbil}} env gerbil interactive build-provider.ss clean
 

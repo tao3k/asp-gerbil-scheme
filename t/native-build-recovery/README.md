@@ -632,3 +632,70 @@ pinning, and integration with the single-record broker remain open. See
 `31.23-native-compiler-closure-study.json` for exact facts and identities. The final
 qualification records 15 observations, including 10 real Gerbil commands. Earlier
 compiler, namespace, publication, and crash observations are separate evidence.
+
+
+### Compiler evidence admitted by transactional publication
+
+`just audit-native-closure-publication` runs the same fresh compiler-closure
+fixtures and adds transactional publication. `publication_admission.py` registers
+compiler evidence through a trusted fixture coordinator, and
+`publication_integration.py` exercises independent publishing processes against
+that registration. The transaction core accepts an admission callback; its
+default fixed-fixture admission remains unchanged and is separately requalified.
+
+```sh
+just audit-native-closure-publication \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/make.ss \
+  t/native-build-recovery/installed-make.patch \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/bin/gsc \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/lib \
+  /private/tmp/gerbil-closure-publication-study
+```
+
+Registration stores the compiler-derived graph, canonical manifest digest, and
+source-import/output-fact hashes together with extractor, patched make, and
+native gsc identities under a content-addressed receipt ID. The coordinator
+registers after successful compilation, extraction, and sealing. A publisher
+submits `{receiptId, manifest}`. Inside the publication transaction lock, admission
+reads the broker-owned receipt, checks its content identity, compares the
+candidate with the registered build, then validates artifacts and the external
+interface frontier against that independently registered graph. Candidate graph
+or artifact hashes cannot redefine the admission contract.
+
+| Control | Observation |
+|---------|-------------|
+| Publish registered A, then registered B | Pinned fresh readers return 42 and 43; the previously pinned A root still returns 42 after B selection |
+| Unknown receipt, candidate graph change, or omitted phase artifact hash | Exit 70; authority remains unspent and active A is unchanged |
+| Registered receipt content changed in the owned fixture | Receipt digest mismatch exits 70; active A is unchanged |
+| Native object changed after registration | Artifact digest mismatch exits 70; updating the candidate hash also fails the registered-manifest comparison |
+| Old A publisher pauses after an early admission check; newer B token commits | Old publisher resumes with exit 70; B publication digest, receipt identity, and authoritative bytes are preserved |
+| B publisher killed after directory fsync before acknowledgement | Restart retains a spent token and the complete registered B subject; matching request retry returns `ACK-REPLAY` without rewriting state |
+| Retry with another registered subject or request identifier | Exit 70 without changing committed state |
+| Storage changed after committed publication | Matching historical request still returns `ACK-REPLAY`; a new reader's pin/admission rejects the changed object |
+| Owned fixture restores the original bytes | Reader admission succeeds again and fresh selected runtime returns 43 |
+
+The last control separates committed-request acknowledgement from current storage
+admission. It does not authorize a reader merely because a retry is acknowledged.
+A pin reads one authoritative transaction record and revalidates its registered
+subject before returning publication epoch, request, digest, receipt ID, and load
+root. Each runtime check is a fresh process using that pinned root; there is no
+live Gerbil module-cache switch or reader-retention service.
+
+Receipt registration is a trusted coordinator action on broker-owned scratch
+storage. Content addressing detects the tested changes but does not authenticate
+the coordinator, sign compiler provenance, stop new unauthorized registrations,
+or enforce storage immutability. Receipt registration and state publication are
+not one durability transaction, and no power-loss behavior is established. Source
+and object paths, external interfaces, and the lock remain assumed stable between
+checks and use. Post-validation mutation, hostile broker access, full external
+runtime closure, retention/garbage collection, and deployed compiler integration
+remain open. Controlled writes and restores affect only runner-owned fixtures.
+
+The primary run records 38 observations: 23 added integration observations and
+15 repeated closure prerequisites. It invokes 14 Gerbil commands, 13 completed
+broker commands, and one deliberately killed publisher. The separate default
+transaction regression records 45 observations.
+
+See `31.24-native-closure-publication-integration.json` for the integration run,
+its repeated closure prerequisites, and the separate 45-observation default
+transaction regression. Earlier published observations remain historical evidence.

@@ -82,6 +82,7 @@ def main():
     parser.add_argument('--native-gsc', type=Path, required=True)
     parser.add_argument('--external-root', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--publication-study', action='store_true')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     extractor = Path(__file__).with_suffix('.ss').resolve()
@@ -211,6 +212,13 @@ def main():
             mark('transitive-phase-inventory-rejected', cause=str(error))
         else:
             raise AssertionError('Transitive dependency omitted')
+        if args.publication_study:
+            import publication_integration
+            evidence = {key: dict(importFactsSha256=helper.sha(args.output / ('source-imports-' + key + '.facts.json')),
+                        outputFactsSha256=helper.sha(args.output / ('native-output-facts-' + key + '.out')),
+                        extractorSha256=helper.sha(extractor), patchedSourceSha256=patched_hash,
+                        nativeGscSha256=helper.sha(args.native_gsc)) for key in manifests}
+            publication_integration.study(root, args.output, manifests, evidence, mark, runtime)
         changed = inventories['b']['closure/app']; changed.write_text(changed.read_text() + '\n;; Changed after build.\n')
         try:
             seal(graphs['b'], inventories['b'], libs['b'])
@@ -223,7 +231,7 @@ def main():
                        patchedSourceSha256=patched_hash, instrumentedSourceSha256=helper.sha(make), patchSha256=helper.sha(args.patch),
                        nativeGscSha256=helper.sha(args.native_gsc), runnerSha256=helper.sha(Path(__file__)),
                        extractorSha256=helper.sha(extractor), sharedHarnessSha256=helper.sha(Path(helper.__file__)),
-                       externalRoot=str(args.external_root.resolve()), observations=observations,
+                       externalRoot=str(args.external_root.resolve()), publicationStudy=args.publication_study, observations=observations,
                        manifests=manifests, retainedCompilerPatchChanged=False))
     print('COMPILER-OWNED-APPLICATION-CLOSURE-STUDIED', flush=True)
 

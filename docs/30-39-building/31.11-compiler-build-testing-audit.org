@@ -787,3 +787,45 @@ fail explicitly. Weak imports, arbitrary nested modules, dynamic runtime loads,
 external closure pinning, immutable storage, and integration with the publication
 transaction remain open. Prior observations are not rerun or counted. Retained
 compiler patches and deployment remain unchanged.
+
+
+** 31.11.180 Compiler Evidence And Transactional Publication
+The integration study registers compiler-derived graph and manifest evidence
+through a trusted fixture coordinator. Receipt identity binds the graph, manifest
+digest, compiler import/output fact hashes, extractor identity, patched make, and
+native gsc. Publishing submits a registered receipt ID plus candidate manifest.
+The single-record broker calls admission while holding its transaction lock;
+admission reads independent registered evidence and checks candidate identity,
+artifacts, and the explicit external interface frontier.
+
+Registered A/B publish and fresh pinned readers return 42/43. The A root pinned
+before B publication still returns 42 afterward. Unregistered evidence, candidate
+graph or inventory rewrites, changed registered receipt content, changed native
+object bytes, and candidate rehashing are rejected with exit 70, preserving active
+A and unspent authority. A paused old A publisher loses authority to B, resumes
+with exit 70, and cannot change B's registered subject or publication digest.
+
+Killing the B publisher after directory synchronization but before acknowledgement
+retains a spent token and its complete registered B subject. Matching request
+retry acknowledges without rewriting state; another subject or request is
+rejected. Deliberate post-commit storage drift still permits the matching
+historical acknowledgement, while fresh reader admission rejects the changed
+artifact. Restoring the original owned fixture bytes permits reader runtime 43.
+Acknowledgement and current storage admission are distinct evidence.
+
+The transaction interface adds an admission callback with its prior fixed-fixture
+admission as the default. The default process-crash study is rerun with 45
+observations after this interface change. Evidence is recorded separately from
+the compiler-closure prerequisites and added integration observations in
+=31.24-native-closure-publication-integration.json=. Entrypoint:
+=just audit-native-closure-publication=; owners: =publication_admission.py= and
+=publication_integration.py=. Retained compiler patches and deployment are unchanged.
+
+The trust boundary is cooperating processes and coordinator-owned registration;
+hashes do not authenticate the coordinator or enforce immutable storage. Receipt
+registration and publication are separate storage operations without a combined
+power-loss guarantee. Pinned roots are used by fresh processes, not a retention
+or live-cache protocol. External runtime closure, post-validation path/byte drift,
+hostile access, storage reclamation, and production integration remain open.
+The next contracts are trusted registration authority and immutable/retained
+reader storage, with acknowledgement kept separate from current storage admission.

@@ -70,7 +70,8 @@ def grant(broker):
         return value['epoch']
 
 
-def publish(broker, token, request, manifest, checkpoint=lambda stage: None):
+def publish(broker, token, request, manifest, checkpoint=lambda stage: None,
+            admission=previous.admit):
     with previous.locked(broker):
         value = state(broker)
         if token != value['epoch']:
@@ -80,7 +81,7 @@ def publish(broker, token, request, manifest, checkpoint=lambda stage: None):
             if active['request'] == request and active['digest'] == digest(manifest):
                 return 'ACK-REPLAY'
             raise ValueError('Consumed token request mismatch')
-        previous.admit(manifest)
+        admission(manifest)
         value.update(spent=True, active=dict(epoch=token, request=request,
                                             manifest=manifest, digest=digest(manifest)))
         commit(broker, value, checkpoint)
