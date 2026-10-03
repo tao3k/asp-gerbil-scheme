@@ -1,0 +1,806 @@
+#+TITLE: 31.11 Compiler Build and Testing Audit
+#+AUTHOR: ASP Gerbil Scheme
+#+DATE: 2026-10-02
+#+OPTIONS: toc:2 num:nil
+
+* Scope and identities
+
+The initial snapshot and subsequent repairs are recorded separately. The latest
+qualification boundaries appear in the dated follow-up sections.
+
+The audit began with the compiler checkout's =doc/reference/dev/build.md=,
+=dev/test.md=, =dev/bootstrap.md=, =std/test.md=, and =std/make.md=, then traced
+implementation entrypoints. Existing compiler checkout changes were preserved.
+
+| Component | Audited identity |
+|-----------+------------------|
+| ASP | =c31711fca3008e7db97125d5c9f92b07b883f9a5=, main |
+| Compiler source | =poo-flow/.data/gerbil=, =d801e7a1c7f77df421f638e62aaebe370f193c97=, v0.19-staging, with uncommitted changes |
+| Executed toolchain | Homebrew Gerbil =2591dcd= / Gambit =dcd677c=, patchset =f5cedd8168cb365ba41289327601d9305738c9a0= |
+| Local dependency | =github.com/tao3k/gerbil-poo@099b381588360a8a49fd772f666a1a00351366f5= |
+| Build capacity | All 12 logical cores, =GERBIL_BUILD_CORES=12= |
+
+The checkout's =build/bin/gerbil= is not evidence that its current uncommitted
+changes have been built. Execution claims below apply to the installed toolchain;
+candidate source changes are not counted as verified improvements.
+
+* Compiler system map
+
+| System | Entrypoints and responsibility | Performance boundary |
+|--------+--------------------------------+----------------------|
+| Full toolchain build | Root =Makefile= / =build.sh= / =src/build.sh= | Gambit -> boot-gxi -> stage0 -> stage1 -> stdlib -> libgerbil -> lang -> tools; stages have real dependencies |
+| Configuration | =configure= / =build-env.sh= | Configures vendored Gambit, versions, features, ABI, and generated environment; absent from ordinary ASP package builds |
+| Bootstrap | =src/build/build0.scm=, =build1.ss=, =build-bach.ss= | Stage0 batch generation; stage1 core compilation and Bach construction; not a package incremental entrypoint |
+| libgerbil | =src/build/build-libgerbil.ss= | Candidate source uses manifest-driven Scheme-to-C and C-to-object phases; repeated stage commands are not package no-ops |
+| Libraries and packages | =:std/make=, =:std/build-script=, =:gerbil/tools/gxpkg= | Native dependency and freshness owner; ASP delegates here |
+| Compiler backend | =src/gerbil/compiler/base.ss=, =driver.ss= | Installed patch uses a fixed worker pool that continuously consumes native jobs, rather than the old whole-batch wait design |
+| Tools | =src/tools/build.ss=; candidate =build-aot.ss= | Compilation and linking belong to compiler release lifecycle |
+| Test CLI | =:gerbil/tools/gxtest= | Collects files, imports them to construct a harness, then invokes =:std/test= |
+| Test harness | =:std/test/base= | Module/suite/case setup, cleanup, results, and sequential execution |
+| Compiler tests | Root =make check= / =./build.sh test= | Core/std/lang/tools; gxc tests compile, link, and run real programs |
+| Compiler CI | =.github/workflows/ci.yml= | Four Gambit-revision/shared-mode combinations; explicit stage builds and installation, then gxtest in four directories |
+| Distributions | =dist/Makefile=, =dist/docker=, =dist/podman=, =dist/guix=, release/docker workflows | Container build/install/package lifecycle; Guix changes configuration/version generation; separate from package incremental builds |
+
+Full compiler builds and ASP package builds require separate measurements.
+Ordinary =gerbil build= does not rebuild Gambit, stage0, stage1, or libgerbil.
+This audit did not perform a full compiler rebuild or run all compiler tests.
+Root =make check= recursively selects =./...= through =build.sh= in the src
+environment; CI explicitly selects
+=src/gerbil/test/... src/std/... src/lang/... src/tools/...=.
+These directory scopes differ. Tutorial, misc, and distribution examples have
+separate contracts and should not automatically become ASP daily gates.
+=dist/docker/image.mk= explicitly uses =--no-cache= for distribution containers;
+the =src/build/build-release.ss= tarball helper runs configure/make/install.
+Those are release builds, not suitable package incremental performance samples.
+
+** Native no-op builds still import source
+
+Installed =src/std/make.ss:207= constructs a completion table. =module-id=
+imports source before checking =build?=. The coordinator waits for dependencies
+and checks timestamps using the real import graph; =import/mx= serializes imports.
+
+A process's module registry caches imports, so repeated =import-module= calls do
+not imply repeated expansion. Each fresh process reconstructs that registry,
+however. Complete disk outputs do not eliminate startup/dependency costs.
+Removing ASP's declaration layer alone cannot remove this native phase.
+
+The =std/make= documentation describes =build-deps:= caching and =force:=.
+Installed source accepts and stores these settings, but its freshness path does
+not consume them. Enabling a documented cache option is therefore not an
+established performance fix. A single-module probe returned success with
+=force: #t= and printed an expansion witness without a compile event.
+A separate cold/warm probe confirmed that a fresh warm process still prints
+=SOURCE-EXPANSION-WITNESS= without =compile example=: expansion executes even
+when native compilation is skipped.
+
+** Interrupted-build output completeness
+
+The first library build reached its measurement limit and its backend was
+terminated. A subsequent =gerbil build= returned 0 without recompiling, while
+11 of the 207 =.ssi= owners lacked their corresponding =.o1=.
+Installed =std/make.ss:493= lists only =.ssi= and static =.scm= in =gxc-outputs=.
+A successful repeat build therefore did not establish native output completeness.
+The native owner needs a complete output contract or a receipt published after
+all backend jobs succeed, with interruption, failure, deletion, and no-op cases.
+
+After restoring the 11 primary objects, runtime import still failed: the source
+loader treated =agent-basic~0.scm= as Gerbil code, reporting
+=Bad syntax; illegal expression= at its generated =declare=.
+Inspection of all 416 generated =.scm= files found four missing =~0.o1= sidecars.
+Completeness must cover phases, not only primary objects. The final recovery
+state is recorded below.
+
+* ASP Building API
+
+** Confirmed boundaries in the initial snapshot
+
+- Root =build.ss= creates a POO PackageSpec through source-relative bootstrap,
+  then delegates to =defbuild-script= / =std/make=: 207 library targets here.
+- A downstream public-entry closure has a separate scope. These 207 targets are
+  not every consumer's startup closure.
+- Ordinary =src/build-api/package-spec.ss:179= builds do not run the full parser
+  or policy. Full policy loads only when =ASP_GERBIL_SCHEME_POLICY=1= and the
+  selected command permits it.
+- Initially, ordinary projection resolved all target source paths, checked their
+  existence, and deduplicated them before checking whether policy was enabled.
+  This was removable overhead, without evidence that it dominated startup.
+- Provider preparation in =native-profile.ss= can invoke =brew --prefix= and
+  =pkg-config=. Meta/spec also evaluates BuildSpec first. Those external process
+  costs need separate observation; this pure library projection has no provider
+  preparation cost.
+- =just rebuild= explicitly runs clean -> deps -> build -> test. It discards
+  outputs and includes dependency lifecycle; it is not a =just build= no-op sample.
+
+** Repair priorities
+
+1. Measure CPU, wall, GC, and allocation separately for startup, source import,
+   spec projection, freshness, Scheme compilation, and native compilation.
+   Projection events occur after import and cannot explain earlier silence.
+2. Skip policy's target-to-source projection when policy is disabled, preserving
+   the native BuildSpec.
+3. Investigate native =std/make= context reuse or persistent caches bound to
+   compiler identity, options, imports, and source changes. Do not infer
+   dependencies from filenames.
+4. Measure provider preparation with a matching spec before deciding whether to
+   cache its results and explicitly bound inputs.
+
+* ASP testing system
+
+** Test commands combine different costs
+
+Initially, =just test= invoked one native =gerbil test= with 16 explicit files,
+not 16 ASP runner processes. The harness also included three paired fresh-process
+startup probes, batch warmup/four serial runs/batch/handoff/failure subprocesses,
+and the full-project policy gate in =t/project-policy-test.ss=.
+Its total duration combines semantic tests, process experiments, performance
+assertions, and project parsing. =just check= runs selected-source policy build
+before tests that include full-project policy. Their scopes and evidence-complete
+settings differ. Deduplication requires equivalent gate coverage first.
+
+** Discovery scope and filter timing
+
+Initial =src/testing/discovery-runner.ss:38= walked from the package root and
+selected =-test.ss= recursively once it encountered a =t= directory. It returned
+151 files, all under =./t/=, including fixtures and scenario tests: a different
+scope from the canonical 16-file list.
+
+Traversal skipped basename =dep=, but applied POO =ignoreDirectories= only after
+collection, so ignored directories still incurred traversal/stat costs. It could
+also enter visible nested packages. This audit did not establish scanning of
+=.git= or =.gerbil=: default enumeration did not include those hidden directories
+or installed dependency tests.
+
+Define package-owned roots and explicit selection, then apply validated POO
+boundaries before recursion. Scenarios should cover fixtures, visible nested
+packages, hidden directories, ignored subtrees, and explicit file arguments,
+without downstream project names as rule triggers.
+
+** Native batch subprocess costs
+
+=src/testing/extension.ss:577= groups compatible files and uses a workgroup to
+launch native gxtest subprocesses concurrently. Each reloads its import closure.
+Grouping uses file counts and runtime options, not shared expensive closures or
+measured duration. Twelve batches can reload the same closure twelve times.
+
+The four small fixtures establish startup amortization for that fixture set,
+not faster execution of a real shared parser/policy workload in 12 processes.
+Preserve POO resource/isolation declarations; compare one harness and multiple
+batches for shared imports, independent computation, and mixed durations using
+CPU, wall, RSS, and GC measurements.
+
+** Documentation drift
+
+The initial =51.06-gerbil-upstream-testing-audit.org= claimed discovery,
+selection, and execution owners were retired and only instrumentation remained.
+The public =testing-runner-api.ss= actually exports discovery, and extension owns
+selection, batch subprocess execution, and progress receipts. Document these
+current responsibilities and the canonical entrypoint. Upstream gxtest/std/test
+still own suite loading, setup/cleanup, assertions, and results.
+
+* Parser and performance evidence
+
+The installed runtime returned =(12 1 #t)=: CPU count 12, VM processor count 1,
+and compiled SMP support. =src/parser/parse-workers.ss:103= uses =spawn/name=
+green threads without adding VM processors for this parse.
+Initially =parse-worker-phase-row= reported =parallel=#t= whenever worker count
+exceeded one. Here that indicates task interleaving, not CPU parse parallelism.
+Record VM processors and distinguish concurrency from measured CPU parallelism;
+verify correctness and gains with parser-owned workloads before changing it.
+Native compiler subprocesses have a separate boundary: 12 concurrent gsc
+processes were observed.
+
+=parse-source-files/profile= parses sequentially and runs =##gc= per file;
+the ordinary path uses green-thread mailboxes. Diagnostic totals and hotspot
+shares cannot directly characterize ordinary concurrent parsing or daily gates.
+
+* Bazel and native toolchain drift
+
+=MODULE.bazel= accepts Gerbil v0.18.2 / =07c8481=, while local/native CI use
+0.19 / =2591dcd= + =f5cedd8168cb=. Bazel POO/Utils pins differ from =gerbil.pkg=;
+its provider exclusions differ from root =build.ss= declarations.
+Bazel was not run. This is not a performance comparison with equal toolchain,
+dependencies, or target graphs. Align identities or declare separate qualification
+scopes before comparing equivalent outputs.
+
+* Initial execution evidence and limitations
+
+Dependency installation, build, and test measurements after the user's capacity
+correction used 12 cores. An earlier two-core dependency attempt was stopped and
+excluded. Observed host load averaged roughly 113-180, with other repository
+builds active. These wall times are busy-host receipts, not stable benchmarks.
+
+| Operation | Wall s | User s | System s | Result |
+|-----------+--------+--------+----------+--------|
+| Interactive ready, early sample | 3.95 | 0.12 | 0.05 | Complete |
+| Root spec, early sample | 16.09 | 0.75 | 0.26 | Complete, 207 targets |
+| Verbose root spec, early sample | 18.13 | 0.69 | 0.22 | Complete; projection event 859 ms |
+| Default discovery with source imports | 46.71 | 1.90 | 0.61 | Exit 0, 151 files |
+| Tiny native alpha test | 25.87 | 1.13 | 0.33 | Exit 0; MODULE-OK / HARNESS-OK / OK |
+| Single-module cold witness | 15.42 | 1.60 | 0.65 | Exit 0; source expansion and native compile |
+| Fresh-process warm witness | 6.66 | 0.44 | 0.13 | Exit 0; expansion, no compile |
+| First ASP library build | 365.14 | Not collected | Not collected | Stopped after 360 s limit; 207 targets entered compilation, incomplete |
+| Native recovery after interruption | 83.05 | 5.50 | 1.55 | Exit 0, no compile; 11 missing .o1 |
+| Repeated native build | 96.94 | 5.48 | 1.54 | Exit 0, no compile; completeness not established |
+| Single-module force witness | 4.88 | 0.47 | 0.14 | Exit 0; force did not compile |
+| Recovery after invalidating incomplete interfaces | 117.84 | 13.23 | 4.90 | Exit 0; exactly 11 recompiles, all 207 primary .o1 present |
+| Runtime import after primary recovery | 47.16 | 3.30 | 0.92 | Exit 70; missing phase object caused generated Scheme to load incorrectly |
+| Focused support-list test | 15.19 | 1.06 | 0.29 | Exit 0; MODULE-OK / HARNESS-OK / OK |
+| Recovery after phase-owner invalidation | 106.24 | 21.65 | 7.67 | Exit 0; all 416 generated .scm had corresponding .o1 |
+| Runtime import after full recovery | 52.37 | 3.80 | 1.02 | Exit 0; IMPORT-OK |
+
+The first source-relative discovery probe lacked the installed package namespace
+load path and exited 70. Adding the package root with =add-load-path!= succeeded;
+the failed setup is not a discovery performance sample.
+A =gxtest-runtime= import probe did not finish within 90 seconds and was stopped.
+That timeout is not a proven loader error. Its =.scm= needs the corresponding
+=~0= runtime module; qualification requires real native outputs and loading.
+Two single-module setup probes exited 70 after missing =srcdir:= or using the
+unsupported =gerbil-path:= keyword. Later probes used installed =srcdir/libdir/bindir=
+interfaces; setup failures are excluded from toolchain performance samples.
+CPU totals for killed backend children were incomplete and omitted from the table.
+
+Historical stdout/stderr/JSON/probes were under
+=/private/tmp/asp-gerbil-build-test-audit/=; the measurement script was
+=/private/tmp/asp-gerbil-audit-measure.py=. It measured child CPU and terminated
+only its own process group at timeout. These temporary files are historical
+references and may no longer exist. At this initial snapshot, full ASP check,
+provider qualification, Bazel, and remote CI had not run. No stable speedup or
+qualification of candidate source changes is inferred from busy-host wall samples.
+
+** Final recovery supplement to the initial snapshot
+
+The 11 incomplete owners' =.ssi= files were saved, then only those interfaces were
+invalidated. Native =gerbil build= returned 0 with exactly 11 compile events.
+All 207 primary objects were present, but runtime validation exposed four missing
+phase sidecars. Invalidating those four interfaces and rebuilding returned 0;
+all 416 generated =.scm= files then had objects, with zero missing outputs.
+=gxtest-runtime= import returned 0 and =IMPORT-OK=. The second build compiled 19
+targets: the four owners and dependents affected by timestamps.
+This initial audit changed neither compiler nor ASP runtime source. Dependencies
+remained in the ignored local =.gerbil= directory.
+
+=31.11-compiler-build-testing-audit-receipts.json= records the aborted cold build,
+successful but incomplete repeats, and interface-invalidating recovery separately.
+They must not be combined into a successful cold-build performance sample.
+
+* Initial conclusions
+
+Prioritize native backend completeness, failure recovery, and the =force:=
+implementation/documentation mismatch. Then address cost/gate separation,
+discovery scope/pruning, parallelism receipts, and toolchain/documentation drift.
+Fresh-process import/freshness is a native cost the Building API must measure.
+Evidence does not attribute overall slowness to macro depth, POO style, or weak
+style enforcement. More whole-project scanning rules could increase gate costs.
+Every new style rule still requires parser facts, a policy scenario, benchmark
+metadata, a focused test, and aggregate wiring; allow-lists or suppressed warnings
+are not substitutes for source/parser repairs.
+
+* Follow-up repairs and deeper validation
+
+The initial statements that ASP source was unchanged and full check was not run
+apply to the read-only snapshot above. This section records the subsequent repairs
+requested by the user. Actual build capacity remained 12.
+
+** Test CLI exit status defect
+
+Installed =gerbil test= ran existing =failure-fixture.ss=: =1 => 2= failed but the
+process returned 0 and printed =MODULE-OK= / =HARNESS-OK=.
+=src/gerbil/main.ss= tool-main returned the tool result without converting the
+gxtest integer result into process exit status. Interactive explicit =exit= of the
+same result returned 42 for the negative fixture and 0 for the positive fixture.
+
+Consequently =asp-full-check= (545.98 s) and =asp-final-check= (401.20 s), despite
+exit 0, are invalid qualification. Neither had terminal =OK=; CLI status hid real
+assertion failures. =qualified-final-check= used the corrected entry and returned
+42. Earlier exit-0 runs and =HARNESS-OK= were not treated as acceptance.
+
+Justfile, CI, and onboarding now invoke =:gerbil/tools/gxtest= in one =gxi= process
+and explicitly propagate its result. Upstream owns selection, lifecycle,
+assertions, and reporting. CI's negative gate requires exit 42. Native batch
+comparison uses the same exit-propagating invocation.
+Three isolated failure-propagation regressions returned 0 and
+=STATUS-REGRESSIONS-OK=: comparison helper assertion failure, batch API assertion
+failure, and failed batch elapsed terminal receipt.
+
+=t/native-build-recovery/tool-main-exit.patch= contains the compiler fix.
+The extracted real dispatcher branch passed local =ober/gerbil-mcp= balance and
+syntax functions plus positive/negative execution. No full Bach binary was rebuilt
+or deployed. Checker provenance limitations are detailed below.
+
+** Native completion contract
+
+=installed-make.patch= was tested on an isolated installed std/make copy;
+=candidate-make.patch= preserves the compiler checkout's existing uncommitted
+changes. =patch-bases.json= binds exact base source SHA-256. The compiler checkout
+was not overwritten.
+
+The patch covers C-library =gxc:= targets. Compiler-generated SSI structural forms
+supply root, runtime/macro phase, nested, and empty nested loader outputs. No
+directory glob, source-name guess, or business-project name identifies outputs.
+Compilation invalidates the old receipt; publication follows successful joining
+of all backend jobs. Keys bind compiler version/home, source/SSI timestamps,
+native options, and other recorded inputs. Missing/corrupt receipts, missing
+objects, and option changes rebuild; force works and clean preserves neighbors.
+This is not a full toolchain content digest.
+
+The historical isolated suite passed 17 probes: six missing native objects,
+no-write warm reuse, force, debug options, corrupt receipt, real C failure,
+recovery, runtime import, and neighbor-preserving clean. Four additional probes
+covered controlled live gsc interruption without receipt publication, then real
+compiler recovery and =answer=42= import.
+Early interruption attempts used buffered compiler stdout and could terminate
+after completion; those results were discarded. Valid probes used an explicit
+start marker from a blocking backend before terminating the owned process group.
+
+The installed copy passed local =ober/gerbil-mcp= syntax expansion. Original and
+patched candidate sources both fail against the installed compiler at the existing
+=call-with-compile-job-slot= API. Candidate balance passed, but matching compiler
+build and upstream tests remain required. At this stage patches were undeployed;
+Bazel, full provider qualification, and remote CI had not run.
+
+** ASP repairs
+
+- Policy-off builds skip target-to-source projection; existing on/off gates remain.
+- Discovery prunes =ignoreDirectories= before directory access and resolves paths
+  relative to the supplied pkgdir. Relative/absolute roots have regressions;
+  =path-expand= handles composition.
+- Parser receipts include =concurrent= / =vmProcessorCount=. =parallel=#t= requires
+  both workers and VM processors above one. Twelve green threads are not reported
+  as twelve-core CPU parsing; VM processors were not changed.
+- R017 consumes existing =test-evidence-complete?:= scope. Production-only indexes
+  still check local adapter requirements; only a complete test scope can establish
+  a missing test witness. The existing table contract helper now executes;
+  aggregate tests and scenario metadata include regressions. No allow-list added.
+- Testing documentation matches executable discovery/process APIs.
+
+Native source policy recorded =findings=0 errors=0=. Semantic and performance
+qualification are separate in =31.12-build-testing-repair-receipts.json=.
+
+** Local performance gates still failed
+
+The corrected full =just check= took 416.28 s and exited 42: native batch 19.93 s
+exceeded 10 s, and first-event incremental 5.73 s exceeded 2.5 s. Host load average
+was 133.99 / 124.16 / 118.22. Thresholds were retained and these failures preserved.
+The other 15 aggregate modules separately returned 0 with terminal =OK=.
+That semantic receipt does not replace the full performance gate or establish a
+stable speedup. Comparable host-load qualification must distinguish process/import,
+policy, and backend costs.
+
+Three paired baseline/package first-event probes had wall increments
+4.37 / 4.48 / 5.94 s and child CPU increments 0.54 / 0.56 / 0.69 s.
+CPU includes termination cleanup; processes were stopped after the first event,
+so these are not full build receipts. They show a wall/CPU gap but cannot identify
+scheduler versus IO/import waiting or prove idle-host acceptance. Six raw rows are
+retained in the repair receipts.
+
+* 2026-10-03 Checker provenance and PR CI audit
+
+The earlier phrase "official Gerbil MCP" was inaccurate and has been corrected.
+The actual source was =https://git.cons.io/ober/gerbil-mcp=, referenced by the
+compiler checkout's AGENTS.md. =/private/tmp/asp-gerbil-native-repair-mcp= was a
+temporary clone directory; "repair" was only a task directory label.
+
+Checks directly imported =:gerbil-mcp/tools/check-balance= and
+=:gerbil-mcp/tools/check-syntax= and called the local =call-tool= registry.
+No MCP server/transport ran. Balance checks delimiters; syntax expands a complete
+module wrapper with the installed Gerbil expander. These differ from ASP build
+execution, parser/policy evidence, and native completion. Real compilation,
+runtime import, and failure propagation have separate executable regressions.
+
+Session traces retain calls/results, but the temporary clone and wrapper no
+longer exist. A verified clone HEAD and checker digest were not retained. The
+remote HEAD queried before cloning does not prove the actual clone revision.
+These are historical syntax checks, not pinned MCP qualification or official
+certification.
+
+PR #11 commit =c70fbc2e29dd45fc644ae00853a6883370df8ab3= passed all four
+Linux/macOS library/provider jobs in workflow =37019464757=. Library logs contain
+the exit-42 negative gate, terminal =OK=, and unchanged performance scenarios:
+
+| Runner | Native batch s | Startup median incremental s |
+|--------+----------------+------------------------------|
+| Linux | 0.789367084 | 0.365461 |
+| macOS | 1.780396 | 0.560224 |
+
+The 10 s batch and 2.5 s startup limits were unchanged. Remote results supplement
+local busy-host failures without erasing them. They do not qualify undeployed
+compiler patches, the candidate compiler build, or Bazel. Provider tests did run
+remotely, superseding the earlier snapshot's "not run" boundary for that scope.
+See =31.13-mcp-provenance-ci-audit.json=.
+
+* 2026-10-03 Strict completion-receipt reading
+
+=gxc-native-current?= read only the first S-expression. A valid key followed by
+=(extra-record)= was accepted: after cold/warm builds the next build reported
+=compileCount=0=, failing the negative regression.
+
+Both patches now require EOF after the key; an extra expression or reader error
+makes the record stale. Six real probes passed: cold, warm, extra-record rebuild,
+malformed-tail rebuild, no-write final warm, and =answer=42= runtime import.
+See =31.14-native-receipt-integrity-receipts.json=. Historical 17+4 probes were
+not rerun for this amendment and are not presented as new results.
+
+Before/after installed patched module wrappers passed direct =core-expand= in the
+installed compiler, without MCP. The candidate still fails at its existing
+=call-with-compile-job-slot= API and is not fully qualified.
+
+Remaining boundaries to investigate:
+- Source/SSI keys use mtime and native objects use existence. Content changes that
+  preserve timestamps, corrupt objects, and stable input binding during compilation
+  are not covered.
+- Independent writers sharing outputs are unqualified. Publication uses a fixed
+  =receipt.tmp= name without a lock over the complete native output set. One-file
+  rename does not establish atomic publication of all outputs; probes use one writer.
+
+* 2026-10-03 Input identity counterexample and rejected digest prototype
+
+All prose in this PR's documents and JSON annotations is now English. The audit
+translation preserves numerical measurements, failures, identities, and the
+chronological distinction between initial snapshots and later qualification.
+
+The timestamp identity gap is now executable with =--only-input-identity=.
+After cold/warm builds, the probe changes =(def value 42)= to =(def value 43)=
+while preserving the exact nanosecond source mtime and byte count. The next build
+reports =compileCount=0=; a fresh runtime import still returns 42, despite source
+value 43. Appending an SSI comment and restoring its nanosecond mtime likewise
+reports no compilation. Seven probes reproduce this known gap, ending with
+=KNOWN-IDENTITY-GAP-REPRODUCED=. That marker means the defect was reproduced,
+not that input identity is qualified. See
+=31.15-input-identity-study-receipts.json=.
+
+An isolated =native-complete-v2= experiment added source/SSI SHA-256 through
+=:std/crypto/digest= and =:std/misc/ports=. It passed installed module expansion
+and seven probes: preserved-mtime changes recompiled and runtime value became 43.
+The prototype was rejected and both committed patches were restored unchanged.
+
+The compiler's =src/std/build-std.ss= imports =make= before executing the stdlib
+build spec; that spec includes =crypto/libcrypto= and =crypto/digest=. Adding a
+native crypto dependency to =make= risks requiring crypto outputs before those
+outputs have been built. The experiment used an already installed crypto library
+and does not qualify clean bootstrap. No clean compiler bootstrap was run to
+resolve this dependency boundary. Its warm child CPU samples were also higher
+than the timestamp control; these unpaired busy-host samples do not establish
+an isolated digest overhead or a stable performance ratio.
+
+A retained solution must obtain content identity from a mechanism available in
+the compiler bootstrap phase, or introduce a separately qualified injected
+identity provider. It must cover source and SSI changes with preserved timestamps,
+format migration, no-write warm reuse, and actual runtime results. Stable input
+binding during compilation, native object corruption, and independent concurrent
+writers remain separate open contracts. The undeployed completion patch currently
+retains its timestamp identity boundary; no rejected crypto dependency was shipped.
+
+* 2026-10-03 Native binary snapshot amendment
+
+Algorithm families considered were native crypto digests, optional Gambit
+=_digest=, serialized exact byte vectors, and binary snapshots. Native crypto had
+an unqualified stdlib bootstrap dependency; Gambit's source module exists but is
+absent from the installed distribution. Neither was treated as a core capability.
+Serialized vectors passed seven identity probes, but a 262376-byte source produced
+an approximately 1 MB text receipt. That storage representation was not retained.
+
+The retained isolated patches use =native-complete-v2-snapshots= with owned
+=.native-source= / =.native-interface= files. Exact equality is checked in 8192-byte
+chunks using existing Gambit primitives, with no new module imports or FFI. Keys
+still bind options/timestamps and require EOF; v1 records rebuild. After backend
+success, publication copies source/SSI snapshots before publishing the receipt.
+Clean includes these exact owned paths. This supersedes the earlier timestamp-only
+check. Rebuild/runtime qualification here uses fresh processes with stable inputs
+during each build.
+
+The installed amended copy passed 44 real probes: 7 content identity, 10 binary
+snapshot/migration, 17 recovery, 4 controlled interruption, and 6 receipt-format
+probes. Preserved-mtime source changes now compile and fresh runtime returns 43.
+Missing/corrupt snapshots rebuild; normal warm builds have no writes; clean removes
+snapshots; genuine v1 records migrate through rebuilding. The installed module
+wrapper expands directly. Candidate expansion still fails at its existing
+=call-with-compile-job-slot= dependency, and clean compiler bootstrap was not run.
+
+AB/BA samples used the same 262144-byte comment padding and three fresh-process
+warm attempts per arm. For binary snapshots vs v1, median child CPU was
+0.6223505 / 0.6389625 seconds and median wall was 0.7680468 / 0.7401069 seconds.
+Snapshot storage was 263306 bytes and receipt 431 bytes, versus v1 receipt 421
+bytes. The serialized-vector experiment used a 1046508-byte receipt. These are
+fixture-specific costs, not a stable speedup or a bound for the complete ASP graph.
+See =31.16-native-binary-snapshot-receipts.json= for raw samples, patch/source hashes,
+qualification groups, and the retained/rejected representation decisions.
+
+Stable input consumption during compilation, ABA changes, native object content
+integrity, and independent concurrent output writers remain open. Publication is
+not atomic across the full output set. No compiler source checkout was modified,
+and no patch was deployed. Previous receipt files remain historical snapshots.
+
+* Live input mutation during backend compilation
+
+A controlled v2 counterexample changed source value 42 to 43 while native gsc was
+paused and restored nanosecond mtime. Completion and warm reuse succeeded, but a
+fresh import returned 42. Late publication copied the new source into the snapshot
+for the old native artifact. This is recorded as a counterexample, not acceptance.
+
+The v3 isolated patch captures source before compile-module and generated SSI after
+that call, queues the key, joins backend jobs, validates all pending witnesses,
+and only then publishes the queued keys. Observed source/SSI changes fail with
+Native build inputs changed and no completion receipt. The runner forwards body
+exceptions explicitly as exit 70. Recovery retains the same backend executable
+path to exclude compiler-key changes as the reason for rebuilding.
+
+The exact installed source expands with the installed Gerbil expander. Candidate
+expansion retains the preexisting call-with-compile-job-slot incompatibility.
+See 31.17-native-live-input-guard-receipts.json for exact patch digests and probes.
+The earlier v2 cost samples are historical; no v3 performance claim is made.
+
+This guard does not establish immutable frontend consumption: planner imports
+precede compilation, transient restored changes can evade comparison, and inputs
+are not frozen after validation. Cross-process writer exclusion and full output
+atomicity remain open. The pending-list mutex is invocation-local; shared native
+objects and snapshots remain exposed even with unique temporary receipt names.
+Next research needs controlled two-writer release order, producer/runtime binding,
+and explicit contracts for namespace locking or isolated generation publication,
+dependency readers, cleaning, interruption, and stale owners. No compiler patch
+has been deployed and no clean bootstrap qualification has been performed.
+
+The exact v3 installed copy passed 53 probes: 9 live input guards, 7 content
+identity, 10 snapshot and genuine v2 migration, 17 recovery, 4 interruption,
+and 6 strict receipt format probes. These local results do not qualify deployment.
+
+* Independent shared-output writers
+
+The v3 input guard does not establish producer ownership of native objects. A
+controlled two-process experiment captures generated Scheme inputs independently
+and invokes real native gsc with the original shared object output path. Single
+writer controls return 42 and 43. Both release orders are tested.
+
+For B then A, B completes and returns 43 before A is released. A overwrites the
+objects and fails Native build inputs changed. B's receipt and source/SSI snapshots
+remain byte-identical; its warm build compiles nothing, but native import returns
+42. For A then B, final native import returns 43. Rejected compilation therefore
+can invalidate another successful writer's object ownership without invalidating
+its completion record. This is a controlled counterexample, not a measured race
+frequency or a claim that production naturally follows the same schedule.
+
+An isolated core-directory lease experiment blocks a competing build and cleaning
+before they write. Successful completion releases the claim. Frontend death leaves
+it occupied; captured backend jobs acknowledge a new probe after frontend death. Recovery in the owned test
+namespace kills the backend group, observes captured processes are absent,
+and explicitly removes the abandoned claim before rebuilding. The experiment is
+not retained in either compiler patch. No owner registry, automatic reclamation,
+path alias/nested namespace handling, reader protocol, or availability contract is
+qualified. Expected native cleaning is tested; intermediate compiler files outside
+that expected inventory may remain.
+
+Retaining this prototype would change automatic backend failure recovery into
+operator-mediated recovery, so it is not a compatible production amendment.
+The implementation seam is make before make-build/planner imports, together with
+make-clean and executor quiescence. std/os/flock uses native FFI; build-std imports
+make before processing build-spec's flock target, so directly importing flock into
+make still needs clean-bootstrap qualification. Advisory release on frontend death
+also needs a backend lifetime contract. Do not reclaim from PID absence or elapsed
+time alone. A persistent namespace claim requires fenced recovery; generation
+isolation requires whole closure publication and readers pinned to a generation.
+
+See 31.18-shared-output-writer-study.json and the executable writers.py harness.
+This adds research evidence without changing the retained v3 compiler patches or
+attributing their earlier 53 local probes to a new compiler amendment. Four remote
+ASP checks passed at exact head 3021d7594432694038950963f8a13c9262aeac8d; remote
+CI does not exercise these isolated compiler experiments.
+
+The writer study completed 25 recorded probes across single-writer controls,
+both overlap orders, lease contention/cleaning, owner death, and explicit recovery.
+The counterexample is retained as a known failure, not converted into acceptance.
+
+Source inspection of the installed compiler base shows that executor close joins
+workers before raising its recorded backend error. Normal make calls that drain
+only after make-build returns. A production release-on-error design must cover
+frontend planning/worker failures as well as backend errors and preserve automatic
+recovery only after all write-capable jobs are quiescent. This source observation
+is not an additional runtime qualification of those failure paths.
+
+* Frontend producers must quiesce before native executor drain
+
+A controlled worker exception reproduced return from the earlier v3 make while a
+second frontend action was held and native backend jobs were paused. Releasing
+the late frontend action after return submitted two more native jobs. A drain of
+only the first observed queue would miss those later submissions.
+
+The amendment propagates worker and coordinator failures through module completions
+and the barrier, joins all coordinators, closes the work channel, and joins all
+frontend workers before raising the first error. Independent queued work is drained
+rather than canceled. Installed make then drains native work even on frontend failure
+and preserves the original frontend cause if backend close raises too. No completion
+receipt is published for the fresh failed fixture invocation.
+
+The candidate projection preserves contexts, slot sharing and session-owned drain,
+retaining the producer cause around close because native errors can mask it. Its
+matching compiler/runtime qualification remains blocked by the earlier installed
+call-with-compile-job-slot incompatibility; external source files are not modified.
+
+Four controlled seven-probe cases cover worker error, coordinator error, combined
+frontend/backend error, and an experimental directory claim that releases only after
+ordinary failure has drained. All four acknowledged direct native backend PIDs are
+absent before failure returns. Same-process recovery builds four modules; warm reuse
+preserves file mtimes and sizes, and fresh imports return 42, 43 and 44. This allows
+the claim experiment to preserve automatic ordinary failure recovery, but the claim
+is not applied to the retained compiler patches and forced-death recovery remains
+unqualified.
+
+The 53 native completion gates are rerun for this exact installed source, bringing
+local qualification to 81 probes. The receipt key remains v3: an initial migration
+harness used a v3 source and correctly compiled zero modules; that wrong control was
+replaced with an actual v2 source. Direct module expansion passed. These results do
+not establish new multi-writer, reader, forced-death, candidate bootstrap or compiler
+deployment capability. See 31.19-frontend-native-drain-receipts.json and the Justfile
+aggregate audit-native-frontend recipe. Historical failures and earlier exact-head
+CI remain separate evidence.
+
+* 2026-10-03 Build-system ownership correction
+
+The implementation direction in studies 31.20 through 31.26 is withdrawn.
+Standalone Python namespace claims, publication transactions, closure admission,
+reader records, retirement, and collection formed a separate build lifecycle.
+They were reachable through audit recipes only; neither =build.ss= nor the native
+PackageSpec projection invoked them. Labelling them research-only did not make
+this work an improvement to the project's build system.
+
+The implementations and seven Justfile recipes are removed. The companion
+=closure.ss= extractor is also removed: the real project already has a Gerbil
+import-closure owner, and a second test-specific closure stack is not a migration
+plan. Earlier detailed narratives are available in Git history at =353f1e1=.
+The JSON records 31.20 through 31.26 are retained solely as historical experiment
+records. Their counts, commands, temporary paths, and hashes describe that
+historical checkout; they are not current build capability or runnable recipes.
+
+** Actual implementation owners
+
+| Contract | Existing owner | Execution boundary |
+|----------+----------------+--------------------|
+| Library lifecycle | =build.ss= and =:std/build-script= | =just build= / =just clean= |
+| Provider lifecycle | =build-provider.ss= and =:std/build-script= | =just build-provider= / =just clean-provider= |
+| Package target projection | =src/build-api/package-spec.ss= | Ordinary native BuildSpec values |
+| Local import closure | =src/build-api/native-import-closure.ss= | Native expander contexts or compiled import declarations |
+| Planning, currentness, compilation, outputs | =:std/make= | Native compiler execution |
+| Native completion amendment | Retained =installed-make.patch= / =candidate-make.patch= | Isolated qualification; not deployed |
+
+The import-closure projection selects package-local targets. It is not proof of
+complete external runtime closure, artifact immutability, or publication safety.
+It must not take currentness or execution ownership away from =std/make=.
+
+** Findings that survive the rejected direction
+
+- Distinct canonical roots can still alias the same module output directory.
+  A native writer-ownership fix must account for its actual output inventory.
+- Original process-group death does not prove that all write-capable descendants
+  are gone. A native executor recovery design needs a real producer boundary.
+- Source and SSI snapshots do not protect objects against an independent writer
+  after completion. The retained receipt amendment remains bounded by this gap.
+- Phase imports and reexports have compiler-owned structure. Any target-selection
+  change belongs in the existing native import projection; loader-output changes
+  belong in =std/make= and its compiler-generated SSI inventory.
+
+The Python authority, retention, and crash controls establish behavior only of
+those removed prototypes. They do not establish Gerbil build publication,
+reader retention, or safe collection. No such feature is now claimed or deployed.
+
+** Validation boundary and next implementation gate
+
+Run the existing =package-build-contract-test=, =package-native-declaration-test=,
+and =native-import-public-closure-scenario-test= through =just test-files=. These
+exercise the real build declaration/projection paths, including native phase
+imports and exclusion of unrelated modules. They are separate from the earlier
+81 isolated compiler probes, which are historical and not rerun by this cleanup.
+
+The correction's focused run passed all three modules with =MODULE-OK=,
+=HARNESS-OK=, final =OK=, and process exit 0. The public closure scenario projected
+one direct target and four closure targets. Justfile parsing, changed-text English
+validation, JSON parsing, remaining Python syntax, and whitespace checks passed.
+This cleanup adds no native compiler feature and does not qualify deployment.
+
+Further implementation must start with a concrete defect in these native owners,
+include a reproducer through their existing build/test entrypoints, and repair the
+owning Gerbil interface. A second broker or a mechanical Scheme port of the
+removed Python lifecycle would preserve the same ownership error.
+
+* 2026-10-03 Native package-local prelude dependency
+
+The first repair after the ownership correction belongs to the existing
+=src/build-api/native-import-closure.ss= projection. An entry using
+=prelude: "./fixture-prelude"= projected only =syntax-helper.ss=, =a.ss=,
+=b.ss=, and =c.ss= before the amendment. Its local language prelude was absent
+from the BuildSpec returned by the real =build.ss spec= entrypoint.
+
+Gerbil stores a module's prelude separately from =module-context-import=.
+The source-context traversal now reads =core-context-prelude= and resolves the
+wrapper to its module in Gerbil's existing registry, then visits that module's
+own dependency graph. Compiled interfaces likewise store =prelude:= as header
+metadata; the existing SSI projection now reads that normalized module identity.
+External preludes retain the existing package-boundary behavior. Planning,
+currentness, native compilation, and cleaning remain owned by =std/make=.
+
+The existing native public-closure scenario now runs five native commands:
+=clean=, direct =spec=, public-entry =spec=, =compile=, and warm =spec=.
+Both closure lanes return the same five targets including =fixture-prelude.ss=;
+the unrelated module is excluded and direct declaration still returns only
+=c.ss=. Source traversal visits the prelude first; compiled metadata retains its
+existing higher-phase-first order. The test asserts each lane's exact order,
+so falling back to the source lane cannot silently satisfy the warm expectation.
+No ordering change was introduced to force the two lists to be identical.
+
+=timeout 90 just build= passed through the normal package build.
+=timeout 90 just test-files t/native-import-public-closure-scenario-test.ss
+t/package-native-declaration-test.ss t/package-build-contract-test.ss
+t/testing-extension-test.ss= passed all four modules with =MODULE-OK=,
+=HARNESS-OK=, final =OK=, and exit 0. The generated =c.ssi= records
+=prelude: :asp-native-import-public-closure-fixture/fixture-prelude=.
+An initial test expectation incorrectly required identical traversal order;
+it failed with status 42 and was corrected to preserve each native lane's order.
+English text and whitespace checks passed. Full aggregate performance acceptance,
+compiler-patch qualification, concurrent writers, and remote CI are separate gates.
+
+* 2026-10-03 Native import matched A/B
+
+The prelude repair is qualified against its historical source, not merely against
+the repaired test's expectations. =t/native-import-ab.ss= is a Gerbil benchmark
+driver; every lane uses upstream =:std/build-script= and the installed =std/make=.
+It does not apply the isolated compiler patches or implement another executor.
+Native Import still adds dependency traversal for optional public-entry scope;
+it is not evidence for all native make features or a performance optimization.
+
+** Identity and method
+
+- A is the exact =native-import-closure.ss= source at =b9b9adf=; SHA-256
+  =334fbd6ea746f76785cf58bfefdcded7f739334bf2d818f4c49bcfa9183348be=.
+- B is the source at =d6f97e83299f34ff1ba37de5fa40e12c2061b27b=; SHA-256
+  =7180ca83364c6c0b58ae3913cdf0e76cdcd064894f9bfe86f6c8b74aee4d17e3=.
+- The measured driver SHA-256 is
+  =6a4453d0a1747aa00327431fca5876b8427abb1738872bbb0ae2d7f044340530=.
+- C uses plain =defbuild-script= with explicit =fixture-prelude.ss=,
+  =syntax-helper.ss=, =a.ss=, =b.ss=, and =c.ss= targets.
+- All lanes copy the same current fixture sources and =package-build.ss=.
+  B invokes the same native closure function that PackageSpec uses; this isolates
+  its overhead rather than measuring the entire public facade or root build.
+- Installed Gerbil reports =2591dcd= on macOS arm64; native builds use two cores.
+  Installed =std/make.ss= SHA-256 is
+  =139d348ecbdb1b98edf0f6cf53fdd690f56b49c8bf6942383068da2d4ebe551a=.
+  Installed =std/build-script.ss= SHA-256 is
+  =15079985aaa920c0d1fa68c01122ca7e8a89402b2c547c9a9f20a4da03436cd4=.
+- Each lane starts in a fresh private root, runs cold =spec= and =compile=, then
+  warm =spec= and =compile=. Readers run outside the source tree with only the
+  lane's compiled library and normal toolchain libraries. Acceptance requires
+  =AB-RUNTIME=3=, because an expansion failure can discard process status.
+- Four matched pairs alternate B-C, C-B, B-C, C-B. Elapsed values include process
+  startup and projection; native frontend compile messages supply job counts.
+  The driver emits =NATIVE-IMPORT-AB-OK= only after all semantic gates pass.
+
+** Results and limits
+
+A compiles four modules, has no prelude SSI, and fails the compiled-only reader
+with =cannot find library module=. B and C each compile five modules, create the
+prelude interface, and load =fixture-c= as 3. All nine warm builds report zero
+compile jobs. Twenty corresponding B/C SSI files compare byte-for-byte equal.
+This checks interface equivalence and runtime behavior, not native object binary
+identity or every generated artifact. =31.27-native-import-ab-results.sexp=
+contains the nine lane records and all raw timing samples in microseconds.
+
+For equal target work, B/C cold compile medians are 7.176 / 6.432 seconds; warm
+compile medians are 1.681 / 1.564 seconds. Cold spec medians are 1.879 / 1.618;
+warm spec medians are 1.808 / 1.610. No speedup is established. Host load around
+70 and four small-fixture pairs limit extrapolation. The functional A/B and the
+matched performance comparison are deliberately separate: A does less work and
+is not a valid speed baseline for B.
+
+This does not qualify FFI, executables, JavaScript, arbitrary prelude mutation,
+producer failure, cancellation, concurrent writers, forced-death recovery, or
+the candidate compiler. Tests repeat build invocations to observe native reuse;
+the production build path does not contain that benchmark loop. Root ASP builds
+continue to use the default catalog rather than public-entry closure.
+
+** Reproduction
+
+#+begin_src sh
+git show b9b9adf:src/build-api/native-import-closure.ss > /tmp/native-import-before.ss
+timeout 300 just audit-native-import-ab /tmp/native-import-before.ss /tmp/native-import-ab-fresh
+#+end_src
+
+The output directory must not already exist. Exact timings and semantic results
+are in =results.sexp=; reader diagnostics are in each lane's =reader.log=.
+Per-command log files hold the final invocation of that command; use =tee= on
+the driver stdout if the complete cold/warm progress transcript is required.

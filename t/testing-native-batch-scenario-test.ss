@@ -7,6 +7,7 @@
         (only-in ../src/support/time call-with-timing)
         (only-in :asp-gerbil-scheme/testing-api
                  +asp-testing-interface+
+                 testing-interface-command-for
                  testing-interface-run-test-batch!)
         (only-in :asp-gerbil-scheme/testing-runner-api
                  testing-interface-test-files))
@@ -35,7 +36,9 @@
     (and entry (cdr entry))))
 
 (def (run-native-test-files files)
-  (run-process (append ["gerbil" "test"] files)
+  (run-process (testing-interface-command-for
+                +asp-testing-interface+ (car files) (cdr files))
+               stderr-redirection: #t
                coprocess: read-all-as-string))
 
 (def (run-native-test-files/serial files)
@@ -138,6 +141,13 @@
                     (native-batch-contract-ref
                      contract 'maxFirstOutputNanoseconds))
                  => #t))))
+    (test-case "comparison process propagates a failed native assertion"
+      (let ((raised? #f))
+        (with-catch
+         (lambda (_failure) (set! raised? #t))
+         (lambda ()
+           (run-native-test-files [+native-batch-failure-fixture+])))
+        (check raised? => #t)))
     (test-case "failed assertion propagates the native gxtest exit status"
       (let ((raised? #f))
         (with-catch

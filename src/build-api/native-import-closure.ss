@@ -5,6 +5,7 @@
 (import (only-in :gerbil/expander/module
                  __module-registry
                  core-resolve-module-path
+                 core-context-prelude
                  import-module
                  import-set? import-set-source
                  module-export? module-export-context
@@ -45,7 +46,12 @@
 ;; : (-> ImportBinding (Maybe ExpanderContext))
 (def (import-context value)
   (cond
-   ((or (module-context? value) (prelude-context? value)) value)
+   ((module-context? value) value)
+   ((prelude-context? value)
+    ;; A prelude context wraps a module's exports. Traverse the owning module,
+    ;; whose imports and own prelude remain authoritative dependency facts.
+    (alet (id (expander-context-id value))
+      (hash-get __module-registry id)))
    ((module-import? value) (import-context (module-import-source value)))
    ((module-export? value) (import-context (module-export-context value)))
    ((import-set? value) (import-context (import-set-source value)))
@@ -79,7 +85,7 @@
        arrows:
        (lambda (context)
          (if (project-source context)
-           (module-context-import context)
+           (cons (core-context-prelude context) (module-context-import context))
            []))
        arrow-target: import-context
        synthetic-attribute:
@@ -115,7 +121,11 @@
               (let loop ()
                 (let (datum (read port))
                   (unless (eof-object? datum)
-                    (walk datum)
+                    ;; Compiled preludes are header metadata rather than
+                    ;; %#import forms, but still own a native module dependency.
+                    (if (eq? datum 'prelude:)
+                      (collect (compiled-import-module (read port)))
+                      (walk datum))
                     (loop))))))))
     (map cdr
          (list-sort (lambda (left right)

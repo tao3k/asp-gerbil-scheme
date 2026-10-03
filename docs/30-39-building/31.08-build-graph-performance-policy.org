@@ -141,6 +141,48 @@ it must never suppress a declared target or decide =std/make= currentness.
 Root ASP =build.ss= uses the default catalog and does not exercise this
 public-entry shortcut.
 
+** Native import A/B follow-up (2026-10-03)
+
+Native Import performs additional dependency traversal to select package targets;
+it does not compile those targets or replace =std/make='s planner. Source imports
+use Gerbil's module registry, which the subsequent native planner also consults.
+The SSI timestamp check chooses projection metadata, not whether compilation is
+current. Tests intentionally invoke cold and warm builds to observe reuse; normal
+package execution has one =std/build-script= dispatch into =std/make=.
+
+An A/B of the prelude amendment compares historical projection A at =b9b9adf=
+with corrected projection B at =d6f97e8= using identical fixture inputs. A builds
+four targets and cannot load the application from compiled libraries alone,
+because its prelude SSI is absent. B builds five targets, includes that interface,
+and loads the application as 3 without the source tree in its load path.
+This is a correctness improvement, not a same-work performance comparison.
+
+The performance control C is plain =:std/build-script= with the same five targets
+explicitly declared. Four fresh B/C pairs alternate B-C, C-B, B-C, C-B. All eight
+cold builds compile exactly five modules; all eight warm builds compile zero.
+All twenty corresponding B/C SSI pairs are byte-identical, and all eight readers
+load the compiled-only application as 3.
+
+| Process elapsed median, seconds | B: native closure | C: explicit native targets |
+|--------------------------------+-------------------+----------------------------|
+| Cold spec | 1.879 | 1.618 |
+| Cold compile | 7.176 | 6.432 |
+| Warm spec | 1.808 | 1.610 |
+| Warm compile | 1.681 | 1.564 |
+
+There is no demonstrated speedup. This host-local sample shows additional
+projection overhead. Host load was approximately 70 during sampling, so these
+four pairs do not establish a stable percentage regression or representative
+production performance. For fixed package scope, explicit native module
+declarations avoid this extra projection. Public-entry closure is justified only
+by the requested target-selection behavior, not by a general native-build claim.
+
+The benchmark is a Gerbil observation driver at =t/native-import-ab.ss=.
+It creates private fixture roots and invokes upstream =spec= and =compile=;
+it contains no alternate planner, compiler, or artifact lifecycle. See
+=31.27-native-import-ab-results.sexp= and the build audit's A/B section for all
+samples, source identities, reproduction, and evidence limits.
+
 The separate V19 PackageSpec startup scenario passed locally with three
 paired incremental first-event samples of =0.249, 0.374, 0.333= seconds
 (median =0.333= seconds), below its unchanged =1.5=-second median gate. This

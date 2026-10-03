@@ -29,11 +29,13 @@
 ;;; Entry boundary: policy only consumes parser-owned adapter facts.
 ;;; It does not infer adapter quality from raw source text.
 ;; : (-> ProjectIndex (List TypeFinding) )
-(def (dependency-protocol-adapter-findings index)
+(def (dependency-protocol-adapter-findings index
+        test-evidence-complete?: (test-evidence-complete? #t))
   (apply append
          (map (lambda (file)
                 (filter-map
-                 (cut dependency-protocol-adapter-finding index file <>)
+                 (cut dependency-protocol-adapter-finding index file <>
+                      test-evidence-complete?: test-evidence-complete?)
                  (source-file-dependency-adapter-quality-facts file)))
               (project-index-files index))))
 
@@ -41,9 +43,11 @@
 ;;; contract witness triggers repair. Package policy can intentionally disable
 ;;; test-owner scanning for fast self-apply indexes.
 ;; : (-> ProjectIndex SourceFile DependencyAdapterQualityFact TypeFinding )
-(def (dependency-protocol-adapter-finding index file fact)
+(def (dependency-protocol-adapter-finding index file fact
+        test-evidence-complete?: (test-evidence-complete? #t))
   (and (index-source-runtime-file-path? index (source-file-path file))
-       (let (missing (dependency-protocol-adapter-missing-evidence index fact))
+       (let (missing (dependency-protocol-adapter-missing-evidence
+                     index fact test-evidence-complete?))
          (and (pair? missing)
               (make-type-finding
                (policy-rule-id +agent-dependency-protocol-adapter-rule+)
@@ -53,11 +57,15 @@
                (dependency-adapter-quality-fact-selector fact)
                (dependency-protocol-adapter-details index fact missing))))))
 
-;; : (-> ProjectIndex DependencyAdapterQualityFact (List MissingEvidence) )
-(def (dependency-protocol-adapter-missing-evidence index fact)
+;; : (-> ProjectIndex DependencyAdapterQualityFact Boolean (List MissingEvidence) )
+(def (dependency-protocol-adapter-missing-evidence index fact
+                                                 test-evidence-complete?)
   (unique
    (append (dependency-adapter-quality-fact-missing-evidence fact)
-           (if (dependency-adapter-generic-contract-witness-exists? index fact)
+           ;; Absence of a test witness is evidence only when test owners were
+           ;; included. Local adapter facts remain mandatory in either scope.
+           (if (or (not test-evidence-complete?)
+                   (dependency-adapter-generic-contract-witness-exists? index fact))
              []
              ["generic-contract-test-witness"]))))
 

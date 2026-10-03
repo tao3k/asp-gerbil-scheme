@@ -1,0 +1,285 @@
+--- a/src/std/make.ss
++++ b/src/std/make.ss
+@@ -3,7 +3,8 @@
+ ;;; support for library build scripts
+ ;;; build-spec: see documentation in doc/reference/make.md
+ 
+-(import :gerbil/compiler
++(import (only-in :gerbil/compiler/base module-id->path-string)
++        :gerbil/compiler
+         :gerbil/expander
+         :std/sync/completion
+         :std/sync/channel
+@@ -195,14 +196,27 @@
+     ([copy: file] [(library-path file #f settings)])
+     (else (error "unknwon buildspec" spec))))
+ 
++(def current-native-receipts (make-parameter #f))
++
+ (def (make buildspec . rest)
+   (def settings (apply make-settings rest))
+-  (parameterize ((current-directory (settings-srcdir settings))
+-                 (current-expander-compiling? #t))
+-    (add-load-path! (settings-srcdir settings))
+-    (make-build buildspec settings))
+-  (when (> (settings-parallelize settings) 1)
+-    (execute-pending-compile-jobs!)))
++  (parameterize ((current-native-receipts (cons (make-mutex) [])))
++    (parameterize ((current-directory (settings-srcdir settings))
++                   (current-expander-compiling? #t))
++      (add-load-path! (settings-srcdir settings))
++      (with-catch
++        (lambda (frontend-error)
++          ;; make-build has joined every frontend producer before raising.
++          ;; Drain native work even on failure, preserving the first cause.
++          (with-catch
++            (lambda (backend-error)
++              (display-exception backend-error (current-error-port)))
++            execute-pending-compile-jobs!)
++          (raise frontend-error))
++        (lambda () (make-build buildspec settings))))
++    (when (> (settings-parallelize settings) 1)
++      (execute-pending-compile-jobs!))
++    (publish-native-receipts!)))
+ 
+ (def (make-build buildspec-in settings)
+   (parameterize ((current-compilation-target (settings-target settings)))
+@@ -247,7 +261,9 @@
+     (def (build? spec)
+       (let ((inputs (spec-inputs spec settings))
+             (outputs (spec-outputs spec settings)))
+-        (or (ormap (lambda (f) (not (file-exists? f)))
++        (or (settings-force settings)
++            (not (spec-native-current? spec settings))
++            (ormap (lambda (f) (not (file-exists? f)))
+                    outputs)
+             (ormap
+              (lambda (input)
+@@ -290,16 +306,19 @@
+ 
+     ;; the build worker itself
+     (def (build-worker)
+-      (try
+-       (for (spec workch)
+-         (build spec settings)
+-         (completion-post! (hash-ref completions (module-id spec)) 'done))
+-       (catch (e)
+-         (barrier-error! build-barrier e)
+-         (raise e))))
++      (for (spec workch)
++        (def completion (hash-ref completions (module-id spec)))
++        (try
++          (build spec settings)
++          (completion-post! completion 'done)
++          (catch (e)
++            (completion-error! completion e)
++            (barrier-error! build-barrier e)))))
+ 
+     ;; the build coordinator
+     (def (build-coordinator spec)
++      (def completion (hash-ref completions (module-id spec)))
++      (try
+       (let* ((file (spec-file spec settings))
+              (mod (import/mx file)))
+         (for (in (module-context-import mod))
+@@ -311,7 +330,11 @@
+           ;; no need to build, unblock dependents
+           (completion-post! (hash-ref completions (module-id spec)) 'done))
+         ;; clear the barrrier
+-        (barrier-post! build-barrier)))
++        (barrier-post! build-barrier))
++        (catch (e)
++          ;; Propagate failed dependencies so their coordinators cannot wait forever.
++          (completion-error! completion e)
++          (barrier-error! build-barrier e))))
+ 
+     (def (consider in self)
+       (cond
+@@ -344,18 +367,27 @@
+ 
+     ;; spawn a thread for each spec that waits for the dependency completions
+     ;; and pushes to the work channel if necessary.
+-    (for (spec buildspec)
+-      (spawn/name `(build ,(spec-file spec settings)) build-coordinator spec))
++    (def coordinators
++      (map (lambda (spec)
++             (spawn/name `(build ,(spec-file spec settings)) build-coordinator spec))
++           buildspec))
+ 
+     ;; spawn the workers and wait
+     (let (workers (map (lambda (i) (spawn/name `(worker ,i) build-worker))
+                        (iota build-worker-count)))
+-      ;; wait for the coordinators to complete
+-      (barrier-wait! build-barrier)
+-      ;; close the channel (no more work)
++      ;; An error notification is not frontend quiescence. Join every producer
++      ;; and worker before returning or handing the native executor its drain.
++      (def failed? #f)
++      (def first-error #f)
++      (def (record-error e)
++        (unless failed? (set! failed? #t) (set! first-error e)))
++      (with-catch record-error (cut barrier-wait! build-barrier))
++      (for (coordinator coordinators)
++        (with-catch record-error (cut thread-join! coordinator)))
+       (channel-close workch)
+-      ;; and wait for the workers to complete
+-      (for-each thread-join! workers))))
++      (for (worker workers)
++        (with-catch record-error (cut thread-join! worker)))
++      (when failed? (raise first-error)))))
+ 
+ ;; Dependencies may have been rebuilt since an earlier freshness check, including
+ ;; in this invocation. Always observe the current file and library timestamps.
+@@ -490,9 +522,121 @@
+     (else
+      (error "Bad buildspec" spec))))
+ 
++ ;; SSI contains the compiler's loader calls and nested module declarations.
++;; Follow only those structural forms, never quoted data or import names.
++(def (native-outputs mod settings)
++  (def root (prefix/ (settings-prefix settings) (path-strip-extension mod)))
++  (def (object-path id)
++    (path-expand (string-append id ".o1") (settings-libdir settings)))
++  (def (owned? id)
++    (or (equal? root id) (string-prefix? (string-append root "~") id)))
++  (def (walk form owner)
++    (match form
++      ([(or '%#begin '%#begin-syntax) . forms]
++       (append-map (cut walk <> owner) forms))
++      (['%#module (? symbol? id) . forms]
++       (let (nested (string-append owner "~" (module-id->path-string id)))
++         (cons (object-path nested) (append-map (cut walk <> nested) forms))))
++      (['%#call ['%#ref 'load-module] ['%#quote (? string? id)]]
++       (if (owned? id) [(object-path id)] []))
++      (_ [])))
++  (call-with-input-file (library-path mod ".ssi" settings)
++    (lambda (port)
++      (let loop ((paths [(object-path root)]))
++        (let (form (read port))
++          (if (eof-object? form)
++            (delete-duplicates/hash paths)
++            (loop (append paths (walk form root)))))))))
++
++(def (native-receipt-path mod settings)
++  (library-path mod ".native-complete" settings))
++
++(def (native-snapshot-path mod suffix settings)
++  (library-path mod suffix settings))
++
++(def (file-bytes=? left right)
++  (call-with-input-file left
++    (lambda (left-port)
++      (call-with-input-file right
++        (lambda (right-port)
++          (let ((left-buffer (make-u8vector 8192))
++                (right-buffer (make-u8vector 8192)))
++            (let loop ()
++              (let ((left-count (read-subu8vector left-buffer 0 8192 left-port))
++                    (right-count (read-subu8vector right-buffer 0 8192 right-port)))
++                (and (= left-count right-count)
++                     (or (= left-count 0)
++                         (and (equal? (subu8vector left-buffer 0 left-count)
++                                      (subu8vector right-buffer 0 right-count))
++                              (loop))))))))))))
++
++(def (native-snapshots-current? mod settings)
++  (and (file-bytes=? (source-path mod ".ss" settings)
++                    (native-snapshot-path mod ".native-source" settings))
++       (file-bytes=? (library-path mod ".ssi" settings)
++                    (native-snapshot-path mod ".native-interface" settings))))
++
++(def (publish-native-snapshot! source destination)
++  (create-directory* (path-directory destination))
++  (when (file-exists? destination) (delete-file destination))
++  (copy-file source destination))
++
++(def (native-receipt-key mod opts settings)
++  (list 'native-complete-v3-checked-snapshots (gerbil-version-string) (gerbil-home)
++        (settings-srcdir settings) (settings-libdir settings) (settings-prefix settings)
++        (settings-optimize settings) (settings-debug settings)
++        (gsc-compile-opts opts) (gerbil-gsc)
++        (file-timestamp (source-path mod ".ss" settings))
++        (file-timestamp (library-path mod ".ssi" settings))))
++
++(def (gxc-native-current? mod opts settings)
++  (or (not (eq? (settings-target settings) 'C))
++      (with-catch false
++        (lambda ()
++          (call-with-input-file (native-receipt-path mod settings)
++            (lambda (port)
++              (and (equal? (read port) (native-receipt-key mod opts settings))
++                   (eof-object? (read port))
++                   (native-snapshots-current? mod settings))))))))
++
++(def (spec-native-current? spec settings)
++  (and (match spec
++         ((? string? mod) (gxc-native-current? mod #f settings))
++         ([gxc: mod . opts] (gxc-native-current? mod opts settings))
++         (_ #t))
++       (andmap (cut spec-native-current? <> settings) (spec-submodules spec))))
++
++(def (publish-native-receipts!)
++  ;; Validate every producer witness after backend jobs join, before publishing.
++  ;; These checks detect observed changes, not transient changes restored earlier.
++  (def entries (cdr (current-native-receipts)))
++  (for (entry entries)
++    (match entry
++      ([mod opts settings key]
++       (unless (and (equal? key (native-receipt-key mod opts settings))
++                    (native-snapshots-current? mod settings))
++         (error "Native build inputs changed" mod))
++       (def paths (native-outputs mod settings))
++       (unless (andmap file-exists? paths)
++         (error "Incomplete native library outputs" mod paths)))))
++  (for (entry entries)
++    (match entry
++      ([mod opts settings key]
++       (def receipt (native-receipt-path mod settings))
++       (def temporary (string-append receipt ".tmp"))
++       (when (file-exists? temporary) (delete-file temporary))
++       (call-with-output-file temporary
++         (lambda (port) (write key port)))
++       (rename-file temporary receipt)))))
++
+ (def (gxc-outputs mod opts settings)
+-  [(library-path mod ".ssi" settings)
+-   (static-path mod settings)])
++  (append [(library-path mod ".ssi" settings) (static-path mod settings)]
++          (if (eq? (settings-target settings) 'C)
++            (append [(native-receipt-path mod settings)
++                     (native-snapshot-path mod ".native-source" settings)
++                     (native-snapshot-path mod ".native-interface" settings)]
++                    (with-catch (lambda (_) []) (cut native-outputs mod settings)))
++            [])))
+ 
+ (def (gsc-compile-opts opts)
+   (match opts
+@@ -504,6 +648,12 @@
+   (message "... compile " mod)
+   (def gsc-opts (gsc-compile-opts opts))
+   (def srcpath (source-path mod ".ss" settings))
++  (def native? (and invoke-gsc? (eq? (settings-target settings) 'C)))
++  (when native?
++    (let (receipt (native-receipt-path mod settings))
++      (when (file-exists? receipt) (delete-file receipt)))
++    (publish-native-snapshot! srcpath
++                              (native-snapshot-path mod ".native-source" settings)))
+   (let (gxc-opts
+         [invoke-gsc: invoke-gsc?
+          target: (settings-target settings)
+@@ -515,7 +665,14 @@
+          verbose: (settings-verbose>=? settings 9)
+          parallel: (> (settings-parallelize settings) 1)
+          (when/list gsc-opts [gsc-options: gsc-opts]) ...])
+-      (compile-module srcpath gxc-opts)))
++      (compile-module srcpath gxc-opts))
++  (when native?
++    (publish-native-snapshot! (library-path mod ".ssi" settings)
++                              (native-snapshot-path mod ".native-interface" settings))
++    (let ((state (current-native-receipts))
++          (key (native-receipt-key mod opts settings)))
++      (with-lock (car state)
++        (lambda () (set-cdr! state (cons [mod opts settings key] (cdr state))))))))
+ 
+ (def (gsc-libpath mod settings)
+   (def libdir-prefix (settings-libdir-prefix settings))

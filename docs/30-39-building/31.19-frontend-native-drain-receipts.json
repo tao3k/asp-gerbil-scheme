@@ -1,0 +1,1843 @@
+{
+  "schema": "asp.frontend-native-drain.v1",
+  "date": "2026-10-03",
+  "headBeforeAmendment": "e6e1a82a0835ccf9afa9936df9e2d3448c24c8f4",
+  "cores": 12,
+  "receiptKey": "native-complete-v3-checked-snapshots",
+  "receiptSchemaChanged": false,
+  "patches": {
+    "installed": {
+      "baseSha256": "139d348ecbdb1b98edf0f6cf53fdd690f56b49c8bf6942383068da2d4ebe551a",
+      "patchSha256": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+      "patchedSourceSha256": "b7473bf5f013f5b65f0f7a08c6f5683ca45527e48a23dd5b96ef02b2f202a524"
+    },
+    "candidate": {
+      "baseSha256": "d4393b8ccb5ee2640bbdef971ccb0ee9e53b2bc36fca7eac79b4381693d153f2",
+      "patchSha256": "45f589752ca91fdb78d199e2580545bfdcecb9544e099bae126d31f3523bba81",
+      "patchedSourceSha256": "a83f2e739aa2829e76b02ed82da960b953e47a9bbe25537bc9d50b30c0077f82"
+    }
+  },
+  "counterexample": {
+    "probes": [
+      {
+        "name": "early-return",
+        "returnedBeforeBackendRelease": true,
+        "lateFrontendHeld": true
+      },
+      {
+        "name": "late-submission-after-return",
+        "capturedLateBackendJobs": 2
+      }
+    ],
+    "patchSha256": "43a32e707dcbbc034381b9a165e9b7faf63449a0e2eebefea05c89b97795b243",
+    "terminal": "FRONTEND-EARLY-RETURN-REPRODUCED",
+    "claim": "Returned frontend error with held late frontend action and paused backend; late action then submitted two native jobs"
+  },
+  "repair": {
+    "worker": "Post module completion error and barrier error; finish queued independent work",
+    "coordinator": "Propagate dependency failure through own completion and barrier",
+    "frontendReturn": "Join every coordinator, close channel, join every frontend worker, then raise captured error",
+    "installedMake": "On frontend exception, drain native executor before rethrowing original cause; report secondary backend error",
+    "candidateMake": "Preserve contexts, shared slots, session-owned drain and frontend error precedence; not runtime-qualified",
+    "publication": "Failure does not reach receipt publication"
+  },
+  "qualificationProbeCount": 81,
+  "qualification": {
+    "frontend-worker": [
+      {
+        "name": "waits-for-late-frontend",
+        "returned": false
+      },
+      {
+        "name": "waits-for-native-backends",
+        "returned": false
+      },
+      {
+        "name": "drained-failure",
+        "firstError": "Controlled frontend failure",
+        "failureLocation": "worker",
+        "secondaryBackendFailure": false,
+        "nativeJobsExited": 4,
+        "receiptCount": 0
+      },
+      {
+        "name": "same-process-recovery-and-warm",
+        "receiptCount": 4,
+        "recoveryCompileCount": 4,
+        "warmCompileCount": 0,
+        "warmNoWrite": true
+      },
+      {
+        "name": "runtime-good",
+        "answer": 42,
+        "exit": 0
+      },
+      {
+        "name": "runtime-late",
+        "answer": 43,
+        "exit": 0
+      },
+      {
+        "name": "runtime-dependent",
+        "answer": 44,
+        "exit": 0
+      }
+    ],
+    "frontend-secondary": [
+      {
+        "name": "waits-for-late-frontend",
+        "returned": false
+      },
+      {
+        "name": "waits-for-native-backends",
+        "returned": false
+      },
+      {
+        "name": "drained-failure",
+        "firstError": "Controlled frontend failure",
+        "failureLocation": "worker",
+        "secondaryBackendFailure": true,
+        "nativeJobsExited": 4,
+        "receiptCount": 0
+      },
+      {
+        "name": "same-process-recovery-and-warm",
+        "receiptCount": 4,
+        "recoveryCompileCount": 4,
+        "warmCompileCount": 0,
+        "warmNoWrite": true
+      },
+      {
+        "name": "runtime-good",
+        "answer": 42,
+        "exit": 0
+      },
+      {
+        "name": "runtime-late",
+        "answer": 43,
+        "exit": 0
+      },
+      {
+        "name": "runtime-dependent",
+        "answer": 44,
+        "exit": 0
+      }
+    ],
+    "frontend-coordinator": [
+      {
+        "name": "waits-for-late-frontend",
+        "returned": false
+      },
+      {
+        "name": "waits-for-native-backends",
+        "returned": false
+      },
+      {
+        "name": "drained-failure",
+        "firstError": "Controlled coordinator failure",
+        "failureLocation": "coordinator",
+        "secondaryBackendFailure": false,
+        "nativeJobsExited": 4,
+        "receiptCount": 0
+      },
+      {
+        "name": "same-process-recovery-and-warm",
+        "receiptCount": 4,
+        "recoveryCompileCount": 4,
+        "warmCompileCount": 0,
+        "warmNoWrite": true
+      },
+      {
+        "name": "runtime-good",
+        "answer": 42,
+        "exit": 0
+      },
+      {
+        "name": "runtime-late",
+        "answer": 43,
+        "exit": 0
+      },
+      {
+        "name": "runtime-dependent",
+        "answer": 44,
+        "exit": 0
+      }
+    ],
+    "frontend-lease": [
+      {
+        "name": "waits-for-late-frontend",
+        "returned": false
+      },
+      {
+        "name": "waits-for-native-backends",
+        "returned": false
+      },
+      {
+        "name": "drained-failure",
+        "experimentalLeaseReleased": true,
+        "firstError": "Controlled frontend failure",
+        "failureLocation": "worker",
+        "secondaryBackendFailure": true,
+        "nativeJobsExited": 4,
+        "receiptCount": 0
+      },
+      {
+        "name": "same-process-recovery-and-warm",
+        "receiptCount": 4,
+        "recoveryCompileCount": 4,
+        "warmCompileCount": 0,
+        "warmNoWrite": true
+      },
+      {
+        "name": "runtime-good",
+        "answer": 42,
+        "exit": 0
+      },
+      {
+        "name": "runtime-late",
+        "answer": 43,
+        "exit": 0
+      },
+      {
+        "name": "runtime-dependent",
+        "answer": 44,
+        "exit": 0
+      }
+    ],
+    "native-live": [
+      {
+        "name": "cold",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.9296967080008471,
+        "userSeconds": 2.081733,
+        "systemSeconds": 0.9474659999999999,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "source-change-during-backend",
+        "exit": 70,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.3425317500004894,
+        "userSeconds": 2.1773290000000003,
+        "systemSeconds": 0.9976770000000001,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": null,
+        "expectedRuntimeAnswer": null,
+        "inputChange": "source",
+        "inputMtimePreserved": true,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "source-change-recovery",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.7719713339974987,
+        "userSeconds": 2.2687929999999996,
+        "systemSeconds": 1.0370919999999997,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 445,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "source-change-runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.4747426660032943,
+        "userSeconds": 0.11560900000000007,
+        "systemSeconds": 0.03561900000000007,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 445,
+        "expectedRuntimeAnswer": 43,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "source-change-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.3314461250047316,
+        "userSeconds": 0.5648249999999999,
+        "systemSeconds": 0.11429900000000037,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 445,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "interface-change-during-backend",
+        "exit": 70,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 3.7318194170002243,
+        "userSeconds": 2.294174000000001,
+        "systemSeconds": 1.0574439999999998,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 968,
+        "snapshotBytes": 1162,
+        "receiptBytes": null,
+        "expectedRuntimeAnswer": null,
+        "inputChange": "interface",
+        "inputMtimePreserved": true,
+        "interfaceCaptureAcknowledged": true
+      },
+      {
+        "name": "interface-change-recovery",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.6998179580041324,
+        "userSeconds": 2.0923540000000003,
+        "systemSeconds": 1.002414,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 445,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "interface-change-runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.4313307909978903,
+        "userSeconds": 0.11026499999999828,
+        "systemSeconds": 0.03561499999999995,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 445,
+        "expectedRuntimeAnswer": 43,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "interface-change-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.5626657499960857,
+        "userSeconds": 0.4608030000000003,
+        "systemSeconds": 0.07677500000000048,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 445,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      }
+    ],
+    "native-identity": [
+      {
+        "name": "cold",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.7164027910039295,
+        "userSeconds": 1.993342,
+        "systemSeconds": 0.887077,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.6219434170052409,
+        "userSeconds": 0.482337,
+        "systemSeconds": 0.0988929999999999,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "same-mtime-source",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.5640652079964639,
+        "userSeconds": 1.9762030000000004,
+        "systemSeconds": 0.8269610000000002,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "changed-runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.4749691670003813,
+        "userSeconds": 0.11950099999999964,
+        "systemSeconds": 0.03975299999999993,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": 43,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "same-mtime-interface",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.5833392499989714,
+        "userSeconds": 1.965961,
+        "systemSeconds": 0.9169109999999998,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "identity-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.6702273749979213,
+        "userSeconds": 0.4862679999999999,
+        "systemSeconds": 0.1054170000000001,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "identity-runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.1967294159985613,
+        "userSeconds": 0.09643099999999993,
+        "systemSeconds": 0.02574600000000027,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": 43,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      }
+    ],
+    "native-contract": [
+      {
+        "name": "legacy-cold",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.2356938750017434,
+        "userSeconds": 2.127283,
+        "systemSeconds": 0.992397,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "legacy-migration",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.957140167003672,
+        "userSeconds": 2.079265,
+        "systemSeconds": 1.0306199999999999,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.6410014580033021,
+        "userSeconds": 0.47593200000000024,
+        "systemSeconds": 0.08389700000000033,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "missing-middle.native-source",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.891597375004494,
+        "userSeconds": 2.004283,
+        "systemSeconds": 0.9154609999999996,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "missing-middle.native-interface",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.0925617500033695,
+        "userSeconds": 2.0710229999999994,
+        "systemSeconds": 0.9442050000000002,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "corrupt-middle.native-source",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.0096023750011227,
+        "userSeconds": 2.0717870000000005,
+        "systemSeconds": 0.9728100000000004,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "corrupt-middle.native-interface",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.253780375001952,
+        "userSeconds": 2.1271649999999998,
+        "systemSeconds": 0.9900239999999991,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "snapshot-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.366693457996007,
+        "userSeconds": 0.5536989999999999,
+        "systemSeconds": 0.11842800000000064,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.819161166997219,
+        "userSeconds": 0.11254800000000031,
+        "systemSeconds": 0.034905000000000186,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": 42,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "clean",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.7421568330028094,
+        "userSeconds": 0.5689989999999998,
+        "systemSeconds": 0.12817799999999924,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": null,
+        "snapshotBytes": 0,
+        "receiptBytes": null,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      }
+    ],
+    "native-recovery": [
+      {
+        "name": "cold",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 6.209760416997597,
+        "userSeconds": 2.239631,
+        "systemSeconds": 1.006427,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.598985332995653,
+        "userSeconds": 0.6051569999999997,
+        "systemSeconds": 0.13409399999999994,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "missing-middle.o1",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 5.637185583000246,
+        "userSeconds": 2.2330330000000003,
+        "systemSeconds": 1.025743,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "missing-middle~0.o1",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 5.720724124999833,
+        "userSeconds": 2.259982,
+        "systemSeconds": 0.9905840000000001,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "missing-middle~1.o1",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 4.971165041999484,
+        "userSeconds": 2.1924090000000005,
+        "systemSeconds": 0.9974249999999998,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "missing-middle~inner.o1",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 4.492492249999486,
+        "userSeconds": 2.2435339999999986,
+        "systemSeconds": 1.015549,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "missing-middle~empty.o1",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 6.3447959999975865,
+        "userSeconds": 2.2940140000000007,
+        "systemSeconds": 1.0821129999999997,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "missing-middle~inner~0.o1",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.7260053330028313,
+        "userSeconds": 2.1372500000000016,
+        "systemSeconds": 0.9693190000000005,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "force",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.024054209003225,
+        "userSeconds": 2.096038,
+        "systemSeconds": 0.9610199999999995,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "post-force-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.8951825829935842,
+        "userSeconds": 0.5348479999999967,
+        "systemSeconds": 0.10721700000000034,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "debug-option",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.1103518749951036,
+        "userSeconds": 2.288603000000002,
+        "systemSeconds": 1.1456210000000002,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "post-debug-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.7287859169955482,
+        "userSeconds": 0.5268179999999987,
+        "systemSeconds": 0.10758000000000045,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "corrupt-receipt",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.3273408750028466,
+        "userSeconds": 2.1999449999999996,
+        "systemSeconds": 1.0444389999999988,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "backend-failure",
+        "exit": 70,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.9659802080059308,
+        "userSeconds": 1.8573490000000028,
+        "systemSeconds": 0.7284410000000001,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": null,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "failure-recovery",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.8119110000043293,
+        "userSeconds": 2.077819999999999,
+        "systemSeconds": 1.030209000000001,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 3.0575982080044923,
+        "userSeconds": 0.10473400000000055,
+        "systemSeconds": 0.028948999999999003,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": 42,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "clean",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.6118292500032112,
+        "userSeconds": 0.46865199999999874,
+        "systemSeconds": 0.0935990000000011,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": null,
+        "snapshotBytes": 0,
+        "receiptBytes": null,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      }
+    ],
+    "native-interruption": [
+      {
+        "name": "cold",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.6964536670056987,
+        "userSeconds": 2.026379,
+        "systemSeconds": 0.932322,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "interrupted-backend",
+        "exit": 70,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.938278875000833,
+        "userSeconds": 1.150953,
+        "systemSeconds": 0.20484500000000005,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": null,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "interruption-recovery",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.7316109579987824,
+        "userSeconds": 2.0385220000000004,
+        "systemSeconds": 0.984386,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.4806622079995577,
+        "userSeconds": 0.11814599999999942,
+        "systemSeconds": 0.038076999999999916,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": 42,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      }
+    ],
+    "native-format": [
+      {
+        "name": "cold",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.136874625000928,
+        "userSeconds": 2.103058,
+        "systemSeconds": 0.9859159999999999,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.7845591669974965,
+        "userSeconds": 0.5113540000000003,
+        "systemSeconds": 0.11035500000000009,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "trailing-record",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.690198167001654,
+        "userSeconds": 2.0165459999999995,
+        "systemSeconds": 0.9599040000000001,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "trailing-reader-error",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.635514499997953,
+        "userSeconds": 1.9650850000000002,
+        "systemSeconds": 0.9874860000000001,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "integrity-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.6609275000009802,
+        "userSeconds": 0.4898100000000003,
+        "systemSeconds": 0.09765599999999974,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": null,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      },
+      {
+        "name": "runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.2759647499988205,
+        "userSeconds": 0.11247799999999941,
+        "systemSeconds": 0.029008000000000145,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 439,
+        "expectedRuntimeAnswer": 42,
+        "inputChange": null,
+        "inputMtimePreserved": false,
+        "interfaceCaptureAcknowledged": false
+      }
+    ]
+  },
+  "experimentalLease": {
+    "retainedInCompilerPatches": false,
+    "scope": "Canonical identical test root; ordinary error handler releases only after repaired make returns quiescent",
+    "observations": "Held through both controlled gates; absent after frontend plus secondary native failure; same-process recovery succeeds",
+    "notQualified": [
+      "Forced-death reclamation",
+      "Path aliases or nested roots",
+      "Production ownership registry",
+      "Cleaning and reader coordination"
+    ]
+  },
+  "controlCorrections": {
+    "migration": "Initial control used earlier v3; zero compilation is correct because key/schema unchanged. Final gate uses actual v2 source, rebuilds, and passes",
+    "exceptionOutput": "Coordinator case required flushing the error port before marker publication; diagnostics are buffered",
+    "initialLog": {
+      "path": "/private/tmp/asp-frontend-study/initial-migration-control.log",
+      "sha256": "ebb17fba8008aeec1e711b93ad7b5ef6872b79b988c409a10978aa1963aa6b16"
+    }
+  },
+  "qualificationBoundary": [
+    "Fault injection only in temporary build/coordinator action; no policy/source-name trigger in production patch",
+    "Ordinary exceptions, finite responding jobs and valid acyclic fixture",
+    "Four acknowledged direct backend PIDs absent before failure returns",
+    "Same Gerbil process recovers four modules; warm file mtimes/sizes preserved; fresh runtime imports 42,43,44",
+    "Independent queued work drains; cancellation not introduced",
+    "No concurrent writer or runtime reader transaction support",
+    "No forced owner-death quiescence or compiler deployment",
+    "Candidate matching build and clean bootstrap still unqualified"
+  ],
+  "expansion": {
+    "installed": "Direct full module core-expand returned MODULE-EXPANSION-OK",
+    "candidate": "Reader succeeds; full expansion fails at preexisting call-with-compile-job-slot",
+    "transport": "No MCP transport exercised"
+  },
+  "precedingExactHeadCI": {
+    "head": "e6e1a82a0835ccf9afa9936df9e2d3448c24c8f4",
+    "nativeLibraryLinux": "SUCCESS",
+    "nativeLibraryMacOS": "SUCCESS",
+    "nativeProviderLinux": "SUCCESS",
+    "nativeProviderMacOS": "SUCCESS",
+    "boundary": "ASP CI does not execute isolated compiler patches or these experiments"
+  },
+  "rawLogs": [
+    {
+      "path": "/private/tmp/asp-frontend-before/build.err",
+      "sha256": "7c797dcbf65cad068ab0f8126a2f302f71b78c74d0a050c6554127b63be43ed6"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-before/build.out",
+      "sha256": "cb5f32f2bfba3308e0dafbbedd845e6454b2106a3acbd0ac2a79a08e997a29d6"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-before/identity.json",
+      "sha256": "e46ee6717c542f19bf2bb3b37cec0f6bf04ff1831e35f94261b730108f2a1e55"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-before/receipts.json",
+      "sha256": "ca8033c722cf6efa1921f4ebea12ecf77bc6a168474cbccef318eea3f6227a38"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-worker/build.err",
+      "sha256": "43be8b736d8f7f7a4cb28f63306050d203f0fa2044a21f7d4386df88ed4f4ae2"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-worker/build.out",
+      "sha256": "73c94f001e9dde4a2ab06af5c09d178379dd7d32edf3b14cd6941d5fd0e63b29"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-worker/dependent.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-worker/dependent.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-worker/good.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-worker/good.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-worker/identity.json",
+      "sha256": "6edce82edc0119e72eab95b4524ac5c3e678c925bb5e4f18fccccb2f69813c02"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-worker/late.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-worker/late.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-worker/receipts.json",
+      "sha256": "dd0444f159a8882edc66825c2998be0bfb72a43da1e89351a12eecda0f95eab4"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-secondary/build.err",
+      "sha256": "0c9e2505cb4682f207dd735b09a69a2a801854739afee825f08452719506c324"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-secondary/build.out",
+      "sha256": "adf3d4013a9594b403500c5907cbe65e0f94c255854b73d67b023704d234c6f2"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-secondary/dependent.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-secondary/dependent.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-secondary/good.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-secondary/good.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-secondary/identity.json",
+      "sha256": "7d05a39bbbd086fac92c0fd4cb8fe12a7e0bb1444497dbcb8a0e3b102ff427c6"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-secondary/late.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-secondary/late.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-secondary/receipts.json",
+      "sha256": "937dc342ecb62ea5f296828c43c05897e19639a2e6894e677bd5281710bfe557"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-coordinator/build.err",
+      "sha256": "de2aa964a0de746ff6f86670fbc52df8d5fcc478aa7668f3df3b478e4613b556"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-coordinator/build.out",
+      "sha256": "ea56ed64a99e81f88264a70bb292f12483c5f140e1115d54205b215b670fbe31"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-coordinator/dependent.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-coordinator/dependent.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-coordinator/good.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-coordinator/good.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-coordinator/identity.json",
+      "sha256": "738f8fa7c71315b022d0b936ffac6081a8bf8726fa5ca2f523ca9d68aefdbb19"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-coordinator/late.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-coordinator/late.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-coordinator/receipts.json",
+      "sha256": "12648863a9719ebb39b933ba224fab32879369dd4b542385ac32570c5a6237d1"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-lease/build.err",
+      "sha256": "673820584293ef1f9e312dbfc9e86686eee7f4081147f034e5200a7415afbc0b"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-lease/build.out",
+      "sha256": "c70444d0fa1f8340a77a64f17d574935b4f4897a9f6892a9b0cc9a85891904a8"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-lease/dependent.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-lease/dependent.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-lease/good.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-lease/good.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-lease/identity.json",
+      "sha256": "cf61d3d710f092834ee6181233ab8ed2972daea759a5158fd302aa5e1fda4c00"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-lease/late.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-lease/late.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/frontend-lease/receipts.json",
+      "sha256": "7c29652869decd6d4e73f44eec77b211fa05e182d00dc83f673d0f0cf17c2591"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/cold.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/cold.out",
+      "sha256": "14c143c458a3afcbfd8064fa294a2b51c132edd3ba4f8264bc3edaf6c781c300"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/interface-change-during-backend.err",
+      "sha256": "0ffa0567c911431d50b9afd75916dada2b834e8eeccc63f56cd033a47235c06f"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/interface-change-during-backend.out",
+      "sha256": "ac83a675cb47397695e30d7cfda56383e4217b524a811943a7b0cf15d26833ee"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/interface-change-recovery.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/interface-change-recovery.out",
+      "sha256": "14c143c458a3afcbfd8064fa294a2b51c132edd3ba4f8264bc3edaf6c781c300"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/interface-change-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/interface-change-runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/interface-change-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/interface-change-warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/receipts.json",
+      "sha256": "6bda5de2815438dac86b49be69539cff48c9d18b875c7a8fa5ca6b04c03ce233"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/source-change-during-backend.err",
+      "sha256": "0ffa0567c911431d50b9afd75916dada2b834e8eeccc63f56cd033a47235c06f"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/source-change-during-backend.out",
+      "sha256": "ac83a675cb47397695e30d7cfda56383e4217b524a811943a7b0cf15d26833ee"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/source-change-recovery.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/source-change-recovery.out",
+      "sha256": "14c143c458a3afcbfd8064fa294a2b51c132edd3ba4f8264bc3edaf6c781c300"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/source-change-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/source-change-runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/source-change-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-live/source-change-warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/changed-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/changed-runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/cold.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/cold.out",
+      "sha256": "b783838092720f3e8946cb0124a083a488e7a0eb17b6607f0e1e09bcb0fdd015"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/identity-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/identity-runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/identity-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/identity-warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/receipts.json",
+      "sha256": "81b9534e6a0d5a4f55110ec547e7f731a7417ab21e9008ad94bf65c6e3b3d2a1"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/same-mtime-interface.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/same-mtime-interface.out",
+      "sha256": "b783838092720f3e8946cb0124a083a488e7a0eb17b6607f0e1e09bcb0fdd015"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/same-mtime-source.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/same-mtime-source.out",
+      "sha256": "b783838092720f3e8946cb0124a083a488e7a0eb17b6607f0e1e09bcb0fdd015"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-identity/warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/clean.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/clean.out",
+      "sha256": "ad2017ff6719c95c3a2d5022c67c98d5d2d5cf5e03aa1e7ddd5708d99f8607b9"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/corrupt-middle.native-interface.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/corrupt-middle.native-interface.out",
+      "sha256": "618b910801f2b22eecaab5ba9ee90acadc978eabf23f0587b828c88c53de92bc"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/corrupt-middle.native-source.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/corrupt-middle.native-source.out",
+      "sha256": "618b910801f2b22eecaab5ba9ee90acadc978eabf23f0587b828c88c53de92bc"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/legacy-cold.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/legacy-cold.out",
+      "sha256": "618b910801f2b22eecaab5ba9ee90acadc978eabf23f0587b828c88c53de92bc"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/legacy-migration.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/legacy-migration.out",
+      "sha256": "618b910801f2b22eecaab5ba9ee90acadc978eabf23f0587b828c88c53de92bc"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/missing-middle.native-interface.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/missing-middle.native-interface.out",
+      "sha256": "618b910801f2b22eecaab5ba9ee90acadc978eabf23f0587b828c88c53de92bc"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/missing-middle.native-source.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/missing-middle.native-source.out",
+      "sha256": "618b910801f2b22eecaab5ba9ee90acadc978eabf23f0587b828c88c53de92bc"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/receipts.json",
+      "sha256": "831012ea1ef0f2a6076f4608e921e4c9a1e6001e5d9297f61e8982acdf28ec95"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/snapshot-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/snapshot-warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-contract/warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/backend-failure.err",
+      "sha256": "8488d6f738b4eaca2af7e371f889ce8282c13911ade2c9d953cd3ebd1af76871"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/backend-failure.out",
+      "sha256": "b9532554bc937974a72b4cb6181f6bf9bd2916ca6d9d91f90126633472d33f1a"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/clean.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/clean.out",
+      "sha256": "20ac63dad6a384eb09180729830f14c362fc815fc33e8e532631fa535686658d"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/cold.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/cold.out",
+      "sha256": "52d59d39e03051a860ac408914f1967efe18f03a445f221a98b8fe8df25512cf"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/corrupt-receipt.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/corrupt-receipt.out",
+      "sha256": "52d59d39e03051a860ac408914f1967efe18f03a445f221a98b8fe8df25512cf"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/debug-option.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/debug-option.out",
+      "sha256": "52d59d39e03051a860ac408914f1967efe18f03a445f221a98b8fe8df25512cf"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/failure-recovery.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/failure-recovery.out",
+      "sha256": "52d59d39e03051a860ac408914f1967efe18f03a445f221a98b8fe8df25512cf"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/force.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/force.out",
+      "sha256": "52d59d39e03051a860ac408914f1967efe18f03a445f221a98b8fe8df25512cf"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/missing-middle.o1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/missing-middle.o1.out",
+      "sha256": "52d59d39e03051a860ac408914f1967efe18f03a445f221a98b8fe8df25512cf"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/missing-middle~0.o1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/missing-middle~0.o1.out",
+      "sha256": "52d59d39e03051a860ac408914f1967efe18f03a445f221a98b8fe8df25512cf"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/missing-middle~1.o1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/missing-middle~1.o1.out",
+      "sha256": "52d59d39e03051a860ac408914f1967efe18f03a445f221a98b8fe8df25512cf"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/missing-middle~empty.o1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/missing-middle~empty.o1.out",
+      "sha256": "52d59d39e03051a860ac408914f1967efe18f03a445f221a98b8fe8df25512cf"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/missing-middle~inner.o1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/missing-middle~inner.o1.out",
+      "sha256": "52d59d39e03051a860ac408914f1967efe18f03a445f221a98b8fe8df25512cf"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/missing-middle~inner~0.o1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/missing-middle~inner~0.o1.out",
+      "sha256": "52d59d39e03051a860ac408914f1967efe18f03a445f221a98b8fe8df25512cf"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/post-debug-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/post-debug-warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/post-force-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/post-force-warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/receipts.json",
+      "sha256": "3e15bb55ec632f6500eb31db2a041a49fa04ee47a273b6b89fd3edaec85ac448"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-recovery/warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-interruption/cold.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-interruption/cold.out",
+      "sha256": "709eb540d42917a0faea3e8f74016d9c96a410b67720e2712cca78850d5df05b"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-interruption/interrupted-backend.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-interruption/interrupted-backend.out",
+      "sha256": "b2e2331af314fab08699c71059e60978752fca03849d6d09a377619e1d1f2a41"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-interruption/interruption-recovery.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-interruption/interruption-recovery.out",
+      "sha256": "709eb540d42917a0faea3e8f74016d9c96a410b67720e2712cca78850d5df05b"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-interruption/receipts.json",
+      "sha256": "0dcff735dfa21e5a58e8260120c0496cbb27149bd8f52f777af78b5bd4d89234"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-interruption/runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-interruption/runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/cold.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/cold.out",
+      "sha256": "ee302aaa360d3ac644afc87415f13d065f163873b02d7e23f0927538f3e49b8e"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/integrity-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/integrity-warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/receipts.json",
+      "sha256": "c50b15b17b73c5540e9ae1724483225daad0cfe91513fb0f1a15139cda7ce032"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/trailing-reader-error.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/trailing-reader-error.out",
+      "sha256": "ee302aaa360d3ac644afc87415f13d065f163873b02d7e23f0927538f3e49b8e"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/trailing-record.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/trailing-record.out",
+      "sha256": "ee302aaa360d3ac644afc87415f13d065f163873b02d7e23f0927538f3e49b8e"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-frontend-study/native-format/warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    }
+  ],
+  "runnerSha256": "26fa08d0d2080284d29baae10e195cc42c4af6f21bd0b3ccf07fc94b30b1bb1e"
+}

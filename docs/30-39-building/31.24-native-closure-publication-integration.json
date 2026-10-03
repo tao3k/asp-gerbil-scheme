@@ -1,0 +1,2307 @@
+{
+  "schema": "asp.native-closure-publication-integration.v1",
+  "patchedSourceSha256": "b7473bf5f013f5b65f0f7a08c6f5683ca45527e48a23dd5b96ef02b2f202a524",
+  "instrumentedSourceSha256": "80041f6b4c2c5d142f80419164b8afee9c204a4efc6f8fa10197a36af40fd585",
+  "patchSha256": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+  "nativeGscSha256": "e780d799e1be2ce62c0de90758b81a9a4bdeec63276b82da932dced261a1b400",
+  "runnerSha256": "37010aa18509aa9a4835af7d82928468527d0bca616863de30e84aa8a25a2d1b",
+  "extractorSha256": "fcf4790d8c331b5615d6b391d557e8827e0530211b55867fc9b14dcd1d75195e",
+  "sharedHarnessSha256": "8162f6913329d868dcfb7e836456ec1cb82f94047179e531cf27e7b86a86872a",
+  "externalRoot": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib",
+  "publicationStudy": true,
+  "observations": [
+    {
+      "name": "build-a",
+      "exit": 0,
+      "marker": "BUILD-OK",
+      "expectedAnswer": null,
+      "stdoutSha256": "9879bfc66f991745bd5b2bfa89a98c9c01f4e039323a74073b5edea67a59cf2f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "runtime-a",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-imports-a",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "da4465ed58b96ce1855586db0abfd89ad14b50b16f4fbcdee7d3b50f70dd97fa",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "native-output-facts-a",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "89d781dd268565cbda8ce613009895626c91d7c4e22daa225fd87f278a13094c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "derived-closure-a",
+      "modules": [
+        "closure/app",
+        "closure/bridge",
+        "closure/leaf",
+        "closure/middle",
+        "closure/phase",
+        "closure/phase-dep"
+      ],
+      "artifactCount": 36,
+      "phaseOneDependency": true,
+      "renamedBinding": true,
+      "externalFactCount": 1
+    },
+    {
+      "name": "build-b",
+      "exit": 0,
+      "marker": "BUILD-OK",
+      "expectedAnswer": null,
+      "stdoutSha256": "07c5bb6af617dd5dd033ccca58f586f704be588f817531761e45603ad6b0c459",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "runtime-b",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-imports-b",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "7e541f38f9e9617441fad5edec39f09e59e5ea292774a423c0c59e037b11e891",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "native-output-facts-b",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "91fd8dabc0c78ff4060fcec71c684569570baf0e566cf0bc73e5ac6a31849761",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "derived-closure-b",
+      "modules": [
+        "closure/app",
+        "closure/bridge",
+        "closure/leaf",
+        "closure/middle",
+        "closure/phase",
+        "closure/phase-dep"
+      ],
+      "artifactCount": 36,
+      "phaseOneDependency": true,
+      "renamedBinding": true,
+      "externalFactCount": 1
+    },
+    {
+      "name": "partial-runtime-with-fallback",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "partial-imports",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "e21f1370439968fbd142d558da71b8719f8a5569d10c6185722ed1a2bf16b283",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "fallback-local-owner-rejected",
+      "cause": "Local dependency resolved outside generation: closure/leaf"
+    },
+    {
+      "name": "transitive-phase-inventory-rejected",
+      "cause": "Incomplete compiler-derived inventory"
+    },
+    {
+      "name": "integration-registered-builds",
+      "receiptIds": {
+        "a": "6eace310f53fb9e12cfeee5f9c30db7adadee4b32375548b80559381dfc53ac9",
+        "b": "a1c448c32e60c37d8e8a8810e7e631c46157d8468882a438578f1a4ea5bf564d"
+      },
+      "trustedCoordinator": true,
+      "subjectDigests": {
+        "a": "09b6ffdc84a062cc323a165b3290703cde8bf325f7d2a989b1223e6a3e3b81c7",
+        "b": "10816597a470e0ba39a2642940eee394fdbcd92a3c26f1ca8f4997aa2332dabf"
+      }
+    },
+    {
+      "name": "integration-publish-a",
+      "commandKind": "broker",
+      "exit": 0,
+      "marker": "ACK-COMMITTED",
+      "stdoutSha256": "d36d18a48e2d1d00949ba6cd3359ef895d0d8cca5a286ab0b409cedb60f6b7b3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-initial-reader",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-unregistered-evidence",
+      "commandKind": "broker",
+      "exit": 70,
+      "marker": "Compiler evidence not registered",
+      "stdoutSha256": "cfe73733a0ca668115b19666689abeab4d84d1a31a3ef003bb37066a394ba980",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-candidate-graph-rewrite",
+      "commandKind": "broker",
+      "exit": 70,
+      "marker": "Candidate differs from registered build",
+      "stdoutSha256": "fddce16fb7946ab928ca3aa17eb8ce5beb73164092a65f4c0d83af2b36827bf7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-candidate-inventory-rewrite",
+      "commandKind": "broker",
+      "exit": 70,
+      "marker": "Candidate differs from registered build",
+      "stdoutSha256": "fddce16fb7946ab928ca3aa17eb8ce5beb73164092a65f4c0d83af2b36827bf7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-registered-receipt-drift",
+      "commandKind": "broker",
+      "exit": 70,
+      "marker": "Registered receipt digest mismatch",
+      "stdoutSha256": "55af97069d2e4b07ec6ab7ca817d09422e019985b32c8d3b2dafee2689df8d1d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-object-drift",
+      "commandKind": "broker",
+      "exit": 70,
+      "marker": "Artifact digest mismatch",
+      "stdoutSha256": "ae3706dace1372498396e4bd429ccfad6069bee356ab8f551d0a4eafc195640e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-candidate-rehash",
+      "commandKind": "broker",
+      "exit": 70,
+      "marker": "Candidate differs from registered build",
+      "stdoutSha256": "fddce16fb7946ab928ca3aa17eb8ce5beb73164092a65f4c0d83af2b36827bf7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-rejections-preserve-active-a",
+      "stateSha256": "052c3f712746ef24a316162a29c5cf0162f0d3ec6b02fe70b380c89e83f38bd6",
+      "activeReceiptId": "6eace310f53fb9e12cfeee5f9c30db7adadee4b32375548b80559381dfc53ac9",
+      "tokenUnspent": true
+    },
+    {
+      "name": "integration-publish-b",
+      "commandKind": "broker",
+      "exit": 0,
+      "marker": "ACK-COMMITTED",
+      "stdoutSha256": "d36d18a48e2d1d00949ba6cd3359ef895d0d8cca5a286ab0b409cedb60f6b7b3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-selected-b-reader",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-pinned-a-reader",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-old-publisher-rejected",
+      "commandKind": "broker",
+      "exit": 70,
+      "marker": "Publication authority superseded",
+      "stdoutSha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-stale-publisher-preserves-b",
+      "stateSha256": "cc21666cf2c34e5678226f9df70ceb792abba004c8bfd452ad1950300fab8e11",
+      "activeReceiptId": "a1c448c32e60c37d8e8a8810e7e631c46157d8468882a438578f1a4ea5bf564d",
+      "publicationDigest": "10816597a470e0ba39a2642940eee394fdbcd92a3c26f1ca8f4997aa2332dabf"
+    },
+    {
+      "name": "integration-killed-after-commit",
+      "commandKind": "broker",
+      "exit": -9,
+      "checkpoint": "directory-synced",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-committed-request-replay",
+      "commandKind": "broker",
+      "exit": 0,
+      "marker": "ACK-REPLAY",
+      "stdoutSha256": "c0505db97369bb48c07e67564e1ed9961a2894e8abc1e6a31a29976ed989f0cc",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-replay-different-evidence",
+      "commandKind": "broker",
+      "exit": 70,
+      "marker": "Consumed token request mismatch",
+      "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-replay-different-request",
+      "commandKind": "broker",
+      "exit": 70,
+      "marker": "Consumed token request mismatch",
+      "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-replay-with-storage-drift",
+      "commandKind": "broker",
+      "exit": 0,
+      "marker": "ACK-REPLAY",
+      "stdoutSha256": "c0505db97369bb48c07e67564e1ed9961a2894e8abc1e6a31a29976ed989f0cc",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-reader-rejects-storage-drift",
+      "cause": "Artifact digest mismatch: closure/phase-dep.o1",
+      "historicalAcknowledgementOnly": true,
+      "stateSha256": "ee2d0dc6f72adaa67ad3f04e012a19a93b0e349922fad4ea3afdb47d81c9f8e2"
+    },
+    {
+      "name": "integration-reader-after-recovery",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integration-committed-identity-retained",
+      "epoch": 4,
+      "receiptId": "a1c448c32e60c37d8e8a8810e7e631c46157d8468882a438578f1a4ea5bf564d",
+      "publicationDigest": "10816597a470e0ba39a2642940eee394fdbcd92a3c26f1ca8f4997aa2332dabf",
+      "stateSha256": "ee2d0dc6f72adaa67ad3f04e012a19a93b0e349922fad4ea3afdb47d81c9f8e2"
+    },
+    {
+      "name": "changed-source-evidence-rejected",
+      "cause": "Source changed since completed build: closure/app"
+    }
+  ],
+  "manifests": {
+    "a": {
+      "graph": {
+        "entry": "closure/app",
+        "modules": [
+          "closure/app",
+          "closure/bridge",
+          "closure/leaf",
+          "closure/middle",
+          "closure/phase",
+          "closure/phase-dep"
+        ],
+        "edges": [
+          {
+            "kind": "binding",
+            "phi": 1,
+            "to": "closure/phase",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/phase.ssi"
+          },
+          {
+            "phi": 1,
+            "to": "closure/phase",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/phase.ssi",
+            "kind": "set"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "from": "closure/app",
+            "to": "closure/bridge",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/bridge.ssi"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/middle.ssi",
+            "from": "closure/bridge",
+            "to": "closure/middle"
+          },
+          {
+            "kind": "set",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge"
+          },
+          {
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/leaf.ssi",
+            "from": "closure/middle",
+            "to": "closure/leaf",
+            "kind": "binding"
+          },
+          {
+            "kind": "binding",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/phase-dep.ssi",
+            "phi": 0,
+            "to": "closure/phase-dep",
+            "from": "closure/phase"
+          },
+          {
+            "kind": "set",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/phase-dep.ssi",
+            "phi": 0,
+            "to": "closure/phase-dep",
+            "from": "closure/phase"
+          }
+        ],
+        "externalFrontier": [
+          {
+            "phi": 0,
+            "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+            "from": "closure/app",
+            "to": "std/list/list",
+            "kind": "binding",
+            "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+          }
+        ],
+        "nativeObjects": {
+          "closure/app": [
+            "closure/app.o1",
+            "closure/app~1.o1",
+            "closure/app~0.o1"
+          ],
+          "closure/bridge": [
+            "closure/bridge.o1"
+          ],
+          "closure/leaf": [
+            "closure/leaf.o1",
+            "closure/leaf~0.o1"
+          ],
+          "closure/middle": [
+            "closure/middle.o1",
+            "closure/middle~0.o1"
+          ],
+          "closure/phase": [
+            "closure/phase.o1",
+            "closure/phase~0.o1"
+          ],
+          "closure/phase-dep": [
+            "closure/phase-dep.o1",
+            "closure/phase-dep~0.o1"
+          ]
+        }
+      },
+      "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a",
+      "files": {
+        "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+        "closure/app.native-complete": "0ba8f2840f415a7756079e4557aa713ef5efc9c0ca16ed6a2483f740383a6197",
+        "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+        "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+        "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+        "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+        "closure/app~0.o1": "fa2896f7d8ce5b0aaf7c69e412b6e1c935007affc5f369690a3947927ca477a7",
+        "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+        "closure/bridge.native-complete": "e603bd51057742bc44a9402f53143519589bf3775d1daff7c3bc11405c466cad",
+        "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+        "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+        "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+        "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+        "closure/leaf.native-complete": "e603bd51057742bc44a9402f53143519589bf3775d1daff7c3bc11405c466cad",
+        "closure/leaf.native-source": "b7d09d42b358cb0743cc4ce68f9d2e389d0df4a7d9c02e70eaa010ffaa4e1137",
+        "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+        "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+        "closure/leaf~0.o1": "139e31a73846f900edb8de6c45d4ee72d983bd103d545e8d41f71dd2a4432a35",
+        "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+        "closure/middle.native-complete": "e603bd51057742bc44a9402f53143519589bf3775d1daff7c3bc11405c466cad",
+        "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+        "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+        "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+        "closure/middle~0.o1": "26df355777b4db0f446b713e646bf40c3d5fda2f66efcf7e623c2ea9d35fd847",
+        "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+        "closure/phase.native-complete": "e603bd51057742bc44a9402f53143519589bf3775d1daff7c3bc11405c466cad",
+        "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+        "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+        "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+        "closure/phase~0.o1": "1651b73c47df60036674e9a6a9334a70ed429b614d50ad1791403be98ce66418",
+        "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+        "closure/phase-dep.native-complete": "e603bd51057742bc44a9402f53143519589bf3775d1daff7c3bc11405c466cad",
+        "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+        "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+        "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+        "closure/phase-dep~0.o1": "ffd8333b89d4139b3601cf23f26a8397e44c5fcbae78909c672e383c48de50c9"
+      }
+    },
+    "b": {
+      "graph": {
+        "entry": "closure/app",
+        "modules": [
+          "closure/app",
+          "closure/bridge",
+          "closure/leaf",
+          "closure/middle",
+          "closure/phase",
+          "closure/phase-dep"
+        ],
+        "edges": [
+          {
+            "kind": "binding",
+            "phi": 1,
+            "to": "closure/phase",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase.ssi"
+          },
+          {
+            "phi": 1,
+            "to": "closure/phase",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase.ssi",
+            "kind": "set"
+          },
+          {
+            "to": "closure/bridge",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/bridge.ssi",
+            "kind": "binding",
+            "phi": 0
+          },
+          {
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge",
+            "kind": "binding"
+          },
+          {
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge",
+            "kind": "set"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/leaf.ssi",
+            "from": "closure/middle",
+            "to": "closure/leaf"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "from": "closure/phase",
+            "to": "closure/phase-dep",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase-dep.ssi"
+          },
+          {
+            "kind": "set",
+            "phi": 0,
+            "from": "closure/phase",
+            "to": "closure/phase-dep",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase-dep.ssi"
+          }
+        ],
+        "externalFrontier": [
+          {
+            "to": "std/list/list",
+            "from": "closure/app",
+            "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+            "kind": "binding",
+            "phi": 0,
+            "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+          }
+        ],
+        "nativeObjects": {
+          "closure/app": [
+            "closure/app.o1",
+            "closure/app~1.o1",
+            "closure/app~0.o1"
+          ],
+          "closure/bridge": [
+            "closure/bridge.o1"
+          ],
+          "closure/leaf": [
+            "closure/leaf.o1",
+            "closure/leaf~0.o1"
+          ],
+          "closure/middle": [
+            "closure/middle.o1",
+            "closure/middle~0.o1"
+          ],
+          "closure/phase": [
+            "closure/phase.o1",
+            "closure/phase~0.o1"
+          ],
+          "closure/phase-dep": [
+            "closure/phase-dep.o1",
+            "closure/phase-dep~0.o1"
+          ]
+        }
+      },
+      "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b",
+      "files": {
+        "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+        "closure/app.native-complete": "439d1f420722cdf27ca6b1fbd9e73093bb6ff7aff3c658c03fbbfbe5ba4fd86f",
+        "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+        "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+        "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+        "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+        "closure/app~0.o1": "3b077e1eedded98eb99c48193a8a67ff7d0310be4394868296335b844677425e",
+        "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+        "closure/bridge.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+        "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+        "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+        "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+        "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+        "closure/leaf.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+        "closure/leaf.native-source": "a9911890fa18788143b25c2dec5429e46253af232c5494d6aad7804847a2513b",
+        "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+        "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+        "closure/leaf~0.o1": "3f3b6eeb420ca35537d9af991dbaf2f9fd45606f740c30677bb8e5097c8ee682",
+        "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+        "closure/middle.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+        "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+        "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+        "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+        "closure/middle~0.o1": "26d579b4a5efcd046f4dfe3dd626776fd3ce0f0b72babf00d81d1a1b157ce1eb",
+        "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+        "closure/phase.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+        "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+        "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+        "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+        "closure/phase~0.o1": "b6f577fa1dca5b8d75e78b5f92319f8de60eab6070eb04a1a4ebc9f30ad10ea6",
+        "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+        "closure/phase-dep.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+        "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+        "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+        "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+        "closure/phase-dep~0.o1": "0b4fb2e1c1b351d3124016aa9c9995e7a494d8713de09e43cc9455606618ccb1"
+      }
+    }
+  },
+  "retainedCompilerPatchChanged": false,
+  "date": "2026-10-03",
+  "headBeforeStudy": "0148f39024d80dea3dd2c9403dc7c18fdb34e96f",
+  "observationCount": 38,
+  "addedIntegrationObservationCount": 23,
+  "repeatedClosurePrerequisiteObservationCount": 15,
+  "gerbilCommandCount": 14,
+  "integrationGerbilCommandCount": 4,
+  "completedIntegrationBrokerCommandCount": 13,
+  "killedIntegrationBrokerProcessCount": 1,
+  "implementationDigests": {
+    "closure.py": "37010aa18509aa9a4835af7d82928468527d0bca616863de30e84aa8a25a2d1b",
+    "closure.ss": "fcf4790d8c331b5615d6b391d557e8827e0530211b55867fc9b14dcd1d75195e",
+    "publication.py": "8162f6913329d868dcfb7e836456ec1cb82f94047179e531cf27e7b86a86872a",
+    "publication_crash.py": "258c868646cfe3d43160d221f86285d8d5323d481ac52f03a1de7c6a3cbd845c",
+    "publication_admission.py": "8c74ab1e9a5668d7c30d43d42e68ed675839a6567cf430f84f0374760b026245",
+    "publication_integration.py": "dab850c7f93d2f7c19936c13612732c1d1410da0dd8397170bba86e8f3ed8761"
+  },
+  "retainedPatchDigests": {
+    "installed": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+    "candidate": "45f589752ca91fdb78d199e2580545bfdcecb9544e099bae126d31f3523bba81"
+  },
+  "conclusions": {
+    "receiptBinding": "Trusted registration binds derived graph, manifest digest, import/output fact hashes and compiler identities; candidate cannot redefine its graph or artifact hashes",
+    "invalidCandidates": "Unregistered evidence, graph/inventory rewrite, registered receipt drift, object drift, candidate rehash rejected with exit 70; active A and unspent current authority preserved",
+    "selection": "A selected reader 42, B selected reader 43; fresh reader reusing prior A pin returns 42 after B selection",
+    "stalePublisher": "Prechecked old A loses token to newer B and exits 70; B subject, digest and state bytes preserved",
+    "interruption": "Kill after directory fsync before ack retains complete B subject and spent token; identical retry ACK-REPLAY without state rewrite",
+    "replayIdentity": "Different registered subject or request identifier rejected with exit 70",
+    "historicalAck": "Post-commit object drift still permits identical historical ACK-REPLAY; new reader pin rejects artifact digest mismatch; restoring owned fixture bytes returns runtime 43"
+  },
+  "evidenceBoundary": {
+    "coordinator": "Registration is a trusted authored-fixture coordinator action after build/extraction/sealing, not authenticated arbitrary client input",
+    "identity": "Receipt ID addresses canonical registered evidence; active digest binds receipt ID plus candidate manifest",
+    "transaction": "Existing one-record broker with explicit admission callback; default fixed graph behavior independently requalified",
+    "reader": "Snapshot one state file, admit its registered subject, launch fresh Gerbil process with pinned root; no live cache switching or retention service",
+    "durability": "Receipt registration and state publication are separate operations; local fsync/process-kill controls do not prove power-loss durability",
+    "storage": "Hashes detect tested drift; no authenticated registration, compiler provenance signature, immutable-storage enforcement or post-validation mutation prevention",
+    "external": "Same single explicit external interface frontier; implicit language/compiler and transitive external runtime/native dependencies unbound",
+    "counts": "38 primary observations comprise 23 integration and 15 repeated prerequisites; default regression has 45 separately rerun observations; no earlier historical counts added"
+  },
+  "nextContracts": [
+    "Trusted registration authority with explicit provenance and broker access policy",
+    "Immutable admitted storage and reader lifetime retention",
+    "Explicit external runtime/native dependency pins",
+    "Receipt storage durability/recovery and production integration contracts"
+  ],
+  "registeredSubjects": {
+    "a": {
+      "receiptId": "6eace310f53fb9e12cfeee5f9c30db7adadee4b32375548b80559381dfc53ac9",
+      "manifest": {
+        "graph": {
+          "entry": "closure/app",
+          "modules": [
+            "closure/app",
+            "closure/bridge",
+            "closure/leaf",
+            "closure/middle",
+            "closure/phase",
+            "closure/phase-dep"
+          ],
+          "edges": [
+            {
+              "kind": "binding",
+              "phi": 1,
+              "to": "closure/phase",
+              "from": "closure/app",
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/phase.ssi"
+            },
+            {
+              "phi": 1,
+              "to": "closure/phase",
+              "from": "closure/app",
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/phase.ssi",
+              "kind": "set"
+            },
+            {
+              "kind": "binding",
+              "phi": 0,
+              "from": "closure/app",
+              "to": "closure/bridge",
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/bridge.ssi"
+            },
+            {
+              "kind": "binding",
+              "phi": 0,
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/middle.ssi",
+              "from": "closure/bridge",
+              "to": "closure/middle"
+            },
+            {
+              "kind": "set",
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/middle.ssi",
+              "phi": 0,
+              "to": "closure/middle",
+              "from": "closure/bridge"
+            },
+            {
+              "phi": 0,
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/leaf.ssi",
+              "from": "closure/middle",
+              "to": "closure/leaf",
+              "kind": "binding"
+            },
+            {
+              "kind": "binding",
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/phase-dep.ssi",
+              "phi": 0,
+              "to": "closure/phase-dep",
+              "from": "closure/phase"
+            },
+            {
+              "kind": "set",
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/phase-dep.ssi",
+              "phi": 0,
+              "to": "closure/phase-dep",
+              "from": "closure/phase"
+            }
+          ],
+          "externalFrontier": [
+            {
+              "phi": 0,
+              "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+              "from": "closure/app",
+              "to": "std/list/list",
+              "kind": "binding",
+              "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+            }
+          ],
+          "nativeObjects": {
+            "closure/app": [
+              "closure/app.o1",
+              "closure/app~1.o1",
+              "closure/app~0.o1"
+            ],
+            "closure/bridge": [
+              "closure/bridge.o1"
+            ],
+            "closure/leaf": [
+              "closure/leaf.o1",
+              "closure/leaf~0.o1"
+            ],
+            "closure/middle": [
+              "closure/middle.o1",
+              "closure/middle~0.o1"
+            ],
+            "closure/phase": [
+              "closure/phase.o1",
+              "closure/phase~0.o1"
+            ],
+            "closure/phase-dep": [
+              "closure/phase-dep.o1",
+              "closure/phase-dep~0.o1"
+            ]
+          }
+        },
+        "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a",
+        "files": {
+          "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+          "closure/app.native-complete": "0ba8f2840f415a7756079e4557aa713ef5efc9c0ca16ed6a2483f740383a6197",
+          "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+          "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+          "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+          "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+          "closure/app~0.o1": "fa2896f7d8ce5b0aaf7c69e412b6e1c935007affc5f369690a3947927ca477a7",
+          "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+          "closure/bridge.native-complete": "e603bd51057742bc44a9402f53143519589bf3775d1daff7c3bc11405c466cad",
+          "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+          "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+          "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+          "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+          "closure/leaf.native-complete": "e603bd51057742bc44a9402f53143519589bf3775d1daff7c3bc11405c466cad",
+          "closure/leaf.native-source": "b7d09d42b358cb0743cc4ce68f9d2e389d0df4a7d9c02e70eaa010ffaa4e1137",
+          "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+          "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+          "closure/leaf~0.o1": "139e31a73846f900edb8de6c45d4ee72d983bd103d545e8d41f71dd2a4432a35",
+          "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+          "closure/middle.native-complete": "e603bd51057742bc44a9402f53143519589bf3775d1daff7c3bc11405c466cad",
+          "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+          "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+          "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+          "closure/middle~0.o1": "26df355777b4db0f446b713e646bf40c3d5fda2f66efcf7e623c2ea9d35fd847",
+          "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+          "closure/phase.native-complete": "e603bd51057742bc44a9402f53143519589bf3775d1daff7c3bc11405c466cad",
+          "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+          "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+          "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+          "closure/phase~0.o1": "1651b73c47df60036674e9a6a9334a70ed429b614d50ad1791403be98ce66418",
+          "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+          "closure/phase-dep.native-complete": "e603bd51057742bc44a9402f53143519589bf3775d1daff7c3bc11405c466cad",
+          "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+          "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+          "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+          "closure/phase-dep~0.o1": "ffd8333b89d4139b3601cf23f26a8397e44c5fcbae78909c672e383c48de50c9"
+        }
+      }
+    },
+    "b": {
+      "receiptId": "a1c448c32e60c37d8e8a8810e7e631c46157d8468882a438578f1a4ea5bf564d",
+      "manifest": {
+        "graph": {
+          "entry": "closure/app",
+          "modules": [
+            "closure/app",
+            "closure/bridge",
+            "closure/leaf",
+            "closure/middle",
+            "closure/phase",
+            "closure/phase-dep"
+          ],
+          "edges": [
+            {
+              "kind": "binding",
+              "phi": 1,
+              "to": "closure/phase",
+              "from": "closure/app",
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase.ssi"
+            },
+            {
+              "phi": 1,
+              "to": "closure/phase",
+              "from": "closure/app",
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase.ssi",
+              "kind": "set"
+            },
+            {
+              "to": "closure/bridge",
+              "from": "closure/app",
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/bridge.ssi",
+              "kind": "binding",
+              "phi": 0
+            },
+            {
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/middle.ssi",
+              "phi": 0,
+              "to": "closure/middle",
+              "from": "closure/bridge",
+              "kind": "binding"
+            },
+            {
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/middle.ssi",
+              "phi": 0,
+              "to": "closure/middle",
+              "from": "closure/bridge",
+              "kind": "set"
+            },
+            {
+              "kind": "binding",
+              "phi": 0,
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/leaf.ssi",
+              "from": "closure/middle",
+              "to": "closure/leaf"
+            },
+            {
+              "kind": "binding",
+              "phi": 0,
+              "from": "closure/phase",
+              "to": "closure/phase-dep",
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase-dep.ssi"
+            },
+            {
+              "kind": "set",
+              "phi": 0,
+              "from": "closure/phase",
+              "to": "closure/phase-dep",
+              "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase-dep.ssi"
+            }
+          ],
+          "externalFrontier": [
+            {
+              "to": "std/list/list",
+              "from": "closure/app",
+              "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+              "kind": "binding",
+              "phi": 0,
+              "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+            }
+          ],
+          "nativeObjects": {
+            "closure/app": [
+              "closure/app.o1",
+              "closure/app~1.o1",
+              "closure/app~0.o1"
+            ],
+            "closure/bridge": [
+              "closure/bridge.o1"
+            ],
+            "closure/leaf": [
+              "closure/leaf.o1",
+              "closure/leaf~0.o1"
+            ],
+            "closure/middle": [
+              "closure/middle.o1",
+              "closure/middle~0.o1"
+            ],
+            "closure/phase": [
+              "closure/phase.o1",
+              "closure/phase~0.o1"
+            ],
+            "closure/phase-dep": [
+              "closure/phase-dep.o1",
+              "closure/phase-dep~0.o1"
+            ]
+          }
+        },
+        "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b",
+        "files": {
+          "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+          "closure/app.native-complete": "439d1f420722cdf27ca6b1fbd9e73093bb6ff7aff3c658c03fbbfbe5ba4fd86f",
+          "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+          "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+          "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+          "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+          "closure/app~0.o1": "3b077e1eedded98eb99c48193a8a67ff7d0310be4394868296335b844677425e",
+          "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+          "closure/bridge.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+          "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+          "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+          "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+          "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+          "closure/leaf.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+          "closure/leaf.native-source": "a9911890fa18788143b25c2dec5429e46253af232c5494d6aad7804847a2513b",
+          "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+          "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+          "closure/leaf~0.o1": "3f3b6eeb420ca35537d9af991dbaf2f9fd45606f740c30677bb8e5097c8ee682",
+          "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+          "closure/middle.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+          "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+          "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+          "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+          "closure/middle~0.o1": "26d579b4a5efcd046f4dfe3dd626776fd3ce0f0b72babf00d81d1a1b157ce1eb",
+          "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+          "closure/phase.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+          "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+          "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+          "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+          "closure/phase~0.o1": "b6f577fa1dca5b8d75e78b5f92319f8de60eab6070eb04a1a4ebc9f30ad10ea6",
+          "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+          "closure/phase-dep.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+          "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+          "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+          "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+          "closure/phase-dep~0.o1": "0b4fb2e1c1b351d3124016aa9c9995e7a494d8713de09e43cc9455606618ccb1"
+        }
+      }
+    }
+  },
+  "registeredReceipts": {
+    "a": {
+      "schema": "asp.compiler-closure-admission-study.v1",
+      "graph": {
+        "entry": "closure/app",
+        "modules": [
+          "closure/app",
+          "closure/bridge",
+          "closure/leaf",
+          "closure/middle",
+          "closure/phase",
+          "closure/phase-dep"
+        ],
+        "edges": [
+          {
+            "kind": "binding",
+            "phi": 1,
+            "to": "closure/phase",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/phase.ssi"
+          },
+          {
+            "phi": 1,
+            "to": "closure/phase",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/phase.ssi",
+            "kind": "set"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "from": "closure/app",
+            "to": "closure/bridge",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/bridge.ssi"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/middle.ssi",
+            "from": "closure/bridge",
+            "to": "closure/middle"
+          },
+          {
+            "kind": "set",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge"
+          },
+          {
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/leaf.ssi",
+            "from": "closure/middle",
+            "to": "closure/leaf",
+            "kind": "binding"
+          },
+          {
+            "kind": "binding",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/phase-dep.ssi",
+            "phi": 0,
+            "to": "closure/phase-dep",
+            "from": "closure/phase"
+          },
+          {
+            "kind": "set",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-a/closure/phase-dep.ssi",
+            "phi": 0,
+            "to": "closure/phase-dep",
+            "from": "closure/phase"
+          }
+        ],
+        "externalFrontier": [
+          {
+            "phi": 0,
+            "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+            "from": "closure/app",
+            "to": "std/list/list",
+            "kind": "binding",
+            "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+          }
+        ],
+        "nativeObjects": {
+          "closure/app": [
+            "closure/app.o1",
+            "closure/app~1.o1",
+            "closure/app~0.o1"
+          ],
+          "closure/bridge": [
+            "closure/bridge.o1"
+          ],
+          "closure/leaf": [
+            "closure/leaf.o1",
+            "closure/leaf~0.o1"
+          ],
+          "closure/middle": [
+            "closure/middle.o1",
+            "closure/middle~0.o1"
+          ],
+          "closure/phase": [
+            "closure/phase.o1",
+            "closure/phase~0.o1"
+          ],
+          "closure/phase-dep": [
+            "closure/phase-dep.o1",
+            "closure/phase-dep~0.o1"
+          ]
+        }
+      },
+      "manifestDigest": "9653fceb238272ef6e5e9745248ed14fd6f0cfa472a03ea0dd409d7e152f4d3b",
+      "evidence": {
+        "importFactsSha256": "2925ed55e4e375a98f9d349fe1a634dde31605d2f51225b9d993447e30bf8ab5",
+        "outputFactsSha256": "89d781dd268565cbda8ce613009895626c91d7c4e22daa225fd87f278a13094c",
+        "extractorSha256": "fcf4790d8c331b5615d6b391d557e8827e0530211b55867fc9b14dcd1d75195e",
+        "patchedSourceSha256": "b7473bf5f013f5b65f0f7a08c6f5683ca45527e48a23dd5b96ef02b2f202a524",
+        "nativeGscSha256": "e780d799e1be2ce62c0de90758b81a9a4bdeec63276b82da932dced261a1b400"
+      }
+    },
+    "b": {
+      "schema": "asp.compiler-closure-admission-study.v1",
+      "graph": {
+        "entry": "closure/app",
+        "modules": [
+          "closure/app",
+          "closure/bridge",
+          "closure/leaf",
+          "closure/middle",
+          "closure/phase",
+          "closure/phase-dep"
+        ],
+        "edges": [
+          {
+            "kind": "binding",
+            "phi": 1,
+            "to": "closure/phase",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase.ssi"
+          },
+          {
+            "phi": 1,
+            "to": "closure/phase",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase.ssi",
+            "kind": "set"
+          },
+          {
+            "to": "closure/bridge",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/bridge.ssi",
+            "kind": "binding",
+            "phi": 0
+          },
+          {
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge",
+            "kind": "binding"
+          },
+          {
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge",
+            "kind": "set"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/leaf.ssi",
+            "from": "closure/middle",
+            "to": "closure/leaf"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "from": "closure/phase",
+            "to": "closure/phase-dep",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase-dep.ssi"
+          },
+          {
+            "kind": "set",
+            "phi": 0,
+            "from": "closure/phase",
+            "to": "closure/phase-dep",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase-dep.ssi"
+          }
+        ],
+        "externalFrontier": [
+          {
+            "to": "std/list/list",
+            "from": "closure/app",
+            "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+            "kind": "binding",
+            "phi": 0,
+            "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+          }
+        ],
+        "nativeObjects": {
+          "closure/app": [
+            "closure/app.o1",
+            "closure/app~1.o1",
+            "closure/app~0.o1"
+          ],
+          "closure/bridge": [
+            "closure/bridge.o1"
+          ],
+          "closure/leaf": [
+            "closure/leaf.o1",
+            "closure/leaf~0.o1"
+          ],
+          "closure/middle": [
+            "closure/middle.o1",
+            "closure/middle~0.o1"
+          ],
+          "closure/phase": [
+            "closure/phase.o1",
+            "closure/phase~0.o1"
+          ],
+          "closure/phase-dep": [
+            "closure/phase-dep.o1",
+            "closure/phase-dep~0.o1"
+          ]
+        }
+      },
+      "manifestDigest": "ac9670218c84ef32f349ab8eb89845d4bd7fc503c02b38a5a7ab1171b8687d9f",
+      "evidence": {
+        "importFactsSha256": "a21f04b8a29ce956a04594d4dc50c9e5f92d3f8cfafcb3861972feb39126b9e1",
+        "outputFactsSha256": "91fd8dabc0c78ff4060fcec71c684569570baf0e566cf0bc73e5ac6a31849761",
+        "extractorSha256": "fcf4790d8c331b5615d6b391d557e8827e0530211b55867fc9b14dcd1d75195e",
+        "patchedSourceSha256": "b7473bf5f013f5b65f0f7a08c6f5683ca45527e48a23dd5b96ef02b2f202a524",
+        "nativeGscSha256": "e780d799e1be2ce62c0de90758b81a9a4bdeec63276b82da932dced261a1b400"
+      }
+    }
+  },
+  "committedState": {
+    "schema": "asp.publication-transaction-study.v1",
+    "epoch": 4,
+    "spent": true,
+    "active": {
+      "epoch": 4,
+      "request": "publish-b-crash",
+      "manifest": {
+        "receiptId": "a1c448c32e60c37d8e8a8810e7e631c46157d8468882a438578f1a4ea5bf564d",
+        "manifest": {
+          "graph": {
+            "entry": "closure/app",
+            "modules": [
+              "closure/app",
+              "closure/bridge",
+              "closure/leaf",
+              "closure/middle",
+              "closure/phase",
+              "closure/phase-dep"
+            ],
+            "edges": [
+              {
+                "kind": "binding",
+                "phi": 1,
+                "to": "closure/phase",
+                "from": "closure/app",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase.ssi"
+              },
+              {
+                "phi": 1,
+                "to": "closure/phase",
+                "from": "closure/app",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase.ssi",
+                "kind": "set"
+              },
+              {
+                "to": "closure/bridge",
+                "from": "closure/app",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/bridge.ssi",
+                "kind": "binding",
+                "phi": 0
+              },
+              {
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/middle.ssi",
+                "phi": 0,
+                "to": "closure/middle",
+                "from": "closure/bridge",
+                "kind": "binding"
+              },
+              {
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/middle.ssi",
+                "phi": 0,
+                "to": "closure/middle",
+                "from": "closure/bridge",
+                "kind": "set"
+              },
+              {
+                "kind": "binding",
+                "phi": 0,
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/leaf.ssi",
+                "from": "closure/middle",
+                "to": "closure/leaf"
+              },
+              {
+                "kind": "binding",
+                "phi": 0,
+                "from": "closure/phase",
+                "to": "closure/phase-dep",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase-dep.ssi"
+              },
+              {
+                "kind": "set",
+                "phi": 0,
+                "from": "closure/phase",
+                "to": "closure/phase-dep",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b/closure/phase-dep.ssi"
+              }
+            ],
+            "externalFrontier": [
+              {
+                "to": "std/list/list",
+                "from": "closure/app",
+                "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+                "kind": "binding",
+                "phi": 0,
+                "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+              }
+            ],
+            "nativeObjects": {
+              "closure/app": [
+                "closure/app.o1",
+                "closure/app~1.o1",
+                "closure/app~0.o1"
+              ],
+              "closure/bridge": [
+                "closure/bridge.o1"
+              ],
+              "closure/leaf": [
+                "closure/leaf.o1",
+                "closure/leaf~0.o1"
+              ],
+              "closure/middle": [
+                "closure/middle.o1",
+                "closure/middle~0.o1"
+              ],
+              "closure/phase": [
+                "closure/phase.o1",
+                "closure/phase~0.o1"
+              ],
+              "closure/phase-dep": [
+                "closure/phase-dep.o1",
+                "closure/phase-dep~0.o1"
+              ]
+            }
+          },
+          "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-mgpbzp7_/lib-b",
+          "files": {
+            "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+            "closure/app.native-complete": "439d1f420722cdf27ca6b1fbd9e73093bb6ff7aff3c658c03fbbfbe5ba4fd86f",
+            "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+            "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+            "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+            "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+            "closure/app~0.o1": "3b077e1eedded98eb99c48193a8a67ff7d0310be4394868296335b844677425e",
+            "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+            "closure/bridge.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+            "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+            "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+            "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+            "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+            "closure/leaf.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+            "closure/leaf.native-source": "a9911890fa18788143b25c2dec5429e46253af232c5494d6aad7804847a2513b",
+            "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+            "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+            "closure/leaf~0.o1": "3f3b6eeb420ca35537d9af991dbaf2f9fd45606f740c30677bb8e5097c8ee682",
+            "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+            "closure/middle.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+            "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+            "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+            "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+            "closure/middle~0.o1": "26d579b4a5efcd046f4dfe3dd626776fd3ce0f0b72babf00d81d1a1b157ce1eb",
+            "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+            "closure/phase.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+            "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+            "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+            "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+            "closure/phase~0.o1": "b6f577fa1dca5b8d75e78b5f92319f8de60eab6070eb04a1a4ebc9f30ad10ea6",
+            "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+            "closure/phase-dep.native-complete": "2b8e6337b091749d33067d6d62cc79aa57b2796c710f852859ee818b9c9382de",
+            "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+            "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+            "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+            "closure/phase-dep~0.o1": "0b4fb2e1c1b351d3124016aa9c9995e7a494d8713de09e43cc9455606618ccb1"
+          }
+        }
+      },
+      "digest": "10816597a470e0ba39a2642940eee394fdbcd92a3c26f1ca8f4997aa2332dabf"
+    }
+  },
+  "defaultTransactionRegression": {
+    "observationCount": 45,
+    "study": {
+      "schema": "asp.native-publication-crash-study.v1",
+      "patchedSourceSha256": "b7473bf5f013f5b65f0f7a08c6f5683ca45527e48a23dd5b96ef02b2f202a524",
+      "patchSha256": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+      "nativeGscSha256": "e780d799e1be2ce62c0de90758b81a9a4bdeec63276b82da932dced261a1b400",
+      "runnerSha256": "258c868646cfe3d43160d221f86285d8d5323d481ac52f03a1de7c6a3cbd845c",
+      "sharedHarnessSha256": "8162f6913329d868dcfb7e836456ec1cb82f94047179e531cf27e7b86a86872a",
+      "retainedCompilerPatchChanged": false,
+      "observations": [
+        {
+          "name": "build-a",
+          "exit": 0,
+          "marker": "BUILD-OK",
+          "expectedAnswer": null,
+          "stdoutSha256": "adf70d7a65febac80bace7a0db5466c8dd79e3ee459d9ca5648d6e056e44da3b",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "build-b",
+          "exit": 0,
+          "marker": "BUILD-OK",
+          "expectedAnswer": null,
+          "stdoutSha256": "b45646dd13eefe54662da3f2ed95af81d1e2f601cc4798c1e161fe439e849501",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "split-killed-between-records",
+          "stage": "selector-replaced",
+          "exit": -9,
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "split-restarted-state",
+          "selectorEpoch": 2,
+          "tokenSpent": false
+        },
+        {
+          "name": "split-before-replay",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 43,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "split-replay-different-manifest",
+          "exit": 0,
+          "marker": "ACK-SPLIT",
+          "expectedAnswer": null,
+          "stdoutSha256": "2c7806a55e1c99cec6b364dadfbec9b3e8b4c15198ca165db612d21bef186b6a",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "split-after-replay",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 42,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "before-stage-killed",
+          "stage": "before-stage",
+          "exit": -9,
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "before-stage-restarted-state",
+          "epoch": 2,
+          "spent": false,
+          "activeEpoch": 1,
+          "abandonedStagingFiles": 0
+        },
+        {
+          "name": "before-stage-runtime-before-retry",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 42,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "before-stage-same-request-retry",
+          "exit": 0,
+          "marker": "ACK-COMMITTED",
+          "expectedAnswer": null,
+          "stdoutSha256": "d36d18a48e2d1d00949ba6cd3359ef895d0d8cca5a286ab0b409cedb60f6b7b3",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "before-stage-different-manifest-rejected",
+          "exit": 70,
+          "marker": "Consumed token request mismatch",
+          "expectedAnswer": null,
+          "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "before-stage-different-request-rejected",
+          "exit": 70,
+          "marker": "Consumed token request mismatch",
+          "expectedAnswer": null,
+          "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "before-stage-runtime-after-retry",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 43,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "before-stage-superseded-token-rejected",
+          "exit": 70,
+          "marker": "Publication authority superseded",
+          "expectedAnswer": null,
+          "stdoutSha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stage-synced-killed",
+          "stage": "stage-synced",
+          "exit": -9,
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stage-synced-restarted-state",
+          "epoch": 2,
+          "spent": false,
+          "activeEpoch": 1,
+          "abandonedStagingFiles": 1
+        },
+        {
+          "name": "stage-synced-runtime-before-retry",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 42,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stage-synced-same-request-retry",
+          "exit": 0,
+          "marker": "ACK-COMMITTED",
+          "expectedAnswer": null,
+          "stdoutSha256": "d36d18a48e2d1d00949ba6cd3359ef895d0d8cca5a286ab0b409cedb60f6b7b3",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stage-synced-different-manifest-rejected",
+          "exit": 70,
+          "marker": "Consumed token request mismatch",
+          "expectedAnswer": null,
+          "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stage-synced-different-request-rejected",
+          "exit": 70,
+          "marker": "Consumed token request mismatch",
+          "expectedAnswer": null,
+          "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stage-synced-runtime-after-retry",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 43,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stage-synced-superseded-token-rejected",
+          "exit": 70,
+          "marker": "Publication authority superseded",
+          "expectedAnswer": null,
+          "stdoutSha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "replaced-killed",
+          "stage": "replaced",
+          "exit": -9,
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "replaced-restarted-state",
+          "epoch": 2,
+          "spent": true,
+          "activeEpoch": 2,
+          "abandonedStagingFiles": 0
+        },
+        {
+          "name": "replaced-runtime-before-retry",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 43,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "replaced-same-request-retry",
+          "exit": 0,
+          "marker": "ACK-REPLAY",
+          "expectedAnswer": null,
+          "stdoutSha256": "c0505db97369bb48c07e67564e1ed9961a2894e8abc1e6a31a29976ed989f0cc",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "replaced-different-manifest-rejected",
+          "exit": 70,
+          "marker": "Consumed token request mismatch",
+          "expectedAnswer": null,
+          "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "replaced-different-request-rejected",
+          "exit": 70,
+          "marker": "Consumed token request mismatch",
+          "expectedAnswer": null,
+          "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "replaced-runtime-after-retry",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 43,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "replaced-superseded-token-rejected",
+          "exit": 70,
+          "marker": "Publication authority superseded",
+          "expectedAnswer": null,
+          "stdoutSha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "directory-synced-killed",
+          "stage": "directory-synced",
+          "exit": -9,
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "directory-synced-restarted-state",
+          "epoch": 2,
+          "spent": true,
+          "activeEpoch": 2,
+          "abandonedStagingFiles": 0
+        },
+        {
+          "name": "directory-synced-runtime-before-retry",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 43,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "directory-synced-same-request-retry",
+          "exit": 0,
+          "marker": "ACK-REPLAY",
+          "expectedAnswer": null,
+          "stdoutSha256": "c0505db97369bb48c07e67564e1ed9961a2894e8abc1e6a31a29976ed989f0cc",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "directory-synced-different-manifest-rejected",
+          "exit": 70,
+          "marker": "Consumed token request mismatch",
+          "expectedAnswer": null,
+          "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "directory-synced-different-request-rejected",
+          "exit": 70,
+          "marker": "Consumed token request mismatch",
+          "expectedAnswer": null,
+          "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "directory-synced-runtime-after-retry",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 43,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "directory-synced-superseded-token-rejected",
+          "exit": 70,
+          "marker": "Publication authority superseded",
+          "expectedAnswer": null,
+          "stdoutSha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "missing-state-rejected",
+          "exit": 70,
+          "marker": "FileNotFoundError",
+          "expectedAnswer": null,
+          "stdoutSha256": "ab4a02aaf25d938cf2877dba56ba1ecb80a7537e1d5894e5d3e45845aad8072f",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "missing-state-preserved",
+          "authoritativeFileUnchanged": true
+        },
+        {
+          "name": "malformed-state-rejected",
+          "exit": 70,
+          "marker": "JSONDecodeError",
+          "expectedAnswer": null,
+          "stdoutSha256": "359269a2a22eb1e482f186fc33e7e1539ffc7ba57a3fb482f5cf12efeaad04a5",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "malformed-state-preserved",
+          "authoritativeFileUnchanged": true
+        },
+        {
+          "name": "inconsistent-state-rejected",
+          "exit": 70,
+          "marker": "Inconsistent authority and selector",
+          "expectedAnswer": null,
+          "stdoutSha256": "09827d15d07f029ebd5bfa714091c84afd1f88abcfd416ea1ac048b4fb4a6099",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "inconsistent-state-preserved",
+          "authoritativeFileUnchanged": true
+        }
+      ],
+      "manifests": {
+        "a": {
+          "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-publication-crash-o51lsfcb/lib-a",
+          "graph": {
+            "app": [
+              "dep"
+            ],
+            "dep": []
+          },
+          "files": {
+            "publication/app.ssi": "909944727e1cc972b2d5ff8f7f42b4ee3538281c7f1854f9694b0b9c57d35dc8",
+            "publication/app.o1": "d971477409f5e2a20c22c58a4512b0e36cb02db11d6731d1a201533b25355069",
+            "publication/app~0.o1": "31644dbaa57d276efbe6a3102e41a923947901b03b94a35fb9cab0c8d52d0315",
+            "publication/app.native-complete": "53d4d543051b1cbd7b67b50520ac3ca9bc2e5f69f94e8b407a7363fa6cda3942",
+            "publication/app.native-source": "76e54cdbb3de86771148784761010ec5045be49f448e4c1b96af1c1359119797",
+            "publication/app.native-interface": "909944727e1cc972b2d5ff8f7f42b4ee3538281c7f1854f9694b0b9c57d35dc8",
+            "publication/dep.ssi": "2041592f8db9eea4826f015866428d6a992e1111be1373e13ea525b6cedc1e73",
+            "publication/dep.o1": "35cd7e062008170a242fbee9c2687f707438b121728f320f7f395d6e2e42037a",
+            "publication/dep~0.o1": "2626bfc2718fec31136e25a8c0de41b1ac9f2d47a508da7e763f82cc0598e9d6",
+            "publication/dep.native-complete": "53d4d543051b1cbd7b67b50520ac3ca9bc2e5f69f94e8b407a7363fa6cda3942",
+            "publication/dep.native-source": "7e8c74baf74ebe41bcbe6fdb99633d0602cded22c1dc07617cb29b01eabfe0ee",
+            "publication/dep.native-interface": "2041592f8db9eea4826f015866428d6a992e1111be1373e13ea525b6cedc1e73"
+          }
+        },
+        "b": {
+          "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-publication-crash-o51lsfcb/lib-b",
+          "graph": {
+            "app": [
+              "dep"
+            ],
+            "dep": []
+          },
+          "files": {
+            "publication/app.ssi": "909944727e1cc972b2d5ff8f7f42b4ee3538281c7f1854f9694b0b9c57d35dc8",
+            "publication/app.o1": "d971477409f5e2a20c22c58a4512b0e36cb02db11d6731d1a201533b25355069",
+            "publication/app~0.o1": "3f15420b3f2cefe2f3eb9f9a87df50f6951851c54255e9a579fe955b5feed535",
+            "publication/app.native-complete": "75f24f3a926c113c88b867581f28cfc336784dda86b3034755d96fc611be739b",
+            "publication/app.native-source": "76e54cdbb3de86771148784761010ec5045be49f448e4c1b96af1c1359119797",
+            "publication/app.native-interface": "909944727e1cc972b2d5ff8f7f42b4ee3538281c7f1854f9694b0b9c57d35dc8",
+            "publication/dep.ssi": "2041592f8db9eea4826f015866428d6a992e1111be1373e13ea525b6cedc1e73",
+            "publication/dep.o1": "35cd7e062008170a242fbee9c2687f707438b121728f320f7f395d6e2e42037a",
+            "publication/dep~0.o1": "e8398105f1275c0635cb30519495d004fd7a619e3adb4d0f040ad39a00361f1f",
+            "publication/dep.native-complete": "75f24f3a926c113c88b867581f28cfc336784dda86b3034755d96fc611be739b",
+            "publication/dep.native-source": "8d671f15adc6b8780f2a51d7fafed2f3b9788184a2e5e0ff49949ab41f0b8818",
+            "publication/dep.native-interface": "2041592f8db9eea4826f015866428d6a992e1111be1373e13ea525b6cedc1e73"
+          }
+        }
+      }
+    },
+    "rawLogs": [
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-different-manifest-rejected.out",
+        "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-different-request-rejected.out",
+        "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-killed.out",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-runtime-after-retry.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-runtime-before-retry.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-same-request-retry.out",
+        "sha256": "d36d18a48e2d1d00949ba6cd3359ef895d0d8cca5a286ab0b409cedb60f6b7b3"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-superseded-token-rejected.out",
+        "sha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/build-a.out",
+        "sha256": "adf70d7a65febac80bace7a0db5466c8dd79e3ee459d9ca5648d6e056e44da3b"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/build-b.out",
+        "sha256": "b45646dd13eefe54662da3f2ed95af81d1e2f601cc4798c1e161fe439e849501"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-different-manifest-rejected.out",
+        "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-different-request-rejected.out",
+        "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-killed.out",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-runtime-after-retry.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-runtime-before-retry.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-same-request-retry.out",
+        "sha256": "c0505db97369bb48c07e67564e1ed9961a2894e8abc1e6a31a29976ed989f0cc"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-superseded-token-rejected.out",
+        "sha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/inconsistent-state-rejected.out",
+        "sha256": "09827d15d07f029ebd5bfa714091c84afd1f88abcfd416ea1ac048b4fb4a6099"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/malformed-state-rejected.out",
+        "sha256": "359269a2a22eb1e482f186fc33e7e1539ffc7ba57a3fb482f5cf12efeaad04a5"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/missing-state-rejected.out",
+        "sha256": "ab4a02aaf25d938cf2877dba56ba1ecb80a7537e1d5894e5d3e45845aad8072f"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-different-manifest-rejected.out",
+        "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-different-request-rejected.out",
+        "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-killed.out",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-runtime-after-retry.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-runtime-before-retry.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-same-request-retry.out",
+        "sha256": "c0505db97369bb48c07e67564e1ed9961a2894e8abc1e6a31a29976ed989f0cc"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-superseded-token-rejected.out",
+        "sha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/split-after-replay.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/split-before-replay.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/split-killed-between-records.out",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/split-replay-different-manifest.out",
+        "sha256": "2c7806a55e1c99cec6b364dadfbec9b3e8b4c15198ca165db612d21bef186b6a"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-different-manifest-rejected.out",
+        "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-different-request-rejected.out",
+        "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-killed.out",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-runtime-after-retry.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-runtime-before-retry.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-same-request-retry.out",
+        "sha256": "d36d18a48e2d1d00949ba6cd3359ef895d0d8cca5a286ab0b409cedb60f6b7b3"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-superseded-token-rejected.out",
+        "sha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-different-manifest-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-different-request-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-killed.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-runtime-after-retry.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-runtime-before-retry.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-same-request-retry.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/before-stage-superseded-token-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/build-a.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/build-b.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-different-manifest-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-different-request-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-killed.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-runtime-after-retry.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-runtime-before-retry.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-same-request-retry.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/directory-synced-superseded-token-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/inconsistent-state-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/malformed-state-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/missing-state-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-different-manifest-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-different-request-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-killed.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-runtime-after-retry.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-runtime-before-retry.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-same-request-retry.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/replaced-superseded-token-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/split-after-replay.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/split-before-replay.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/split-killed-between-records.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/split-replay-different-manifest.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-different-manifest-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-different-request-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-killed.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-runtime-after-retry.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-runtime-before-retry.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-same-request-retry.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-transaction-admission-regression/stage-synced-superseded-token-rejected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "qualificationLog": {
+      "path": "/private/tmp/asp-transaction-admission-regression.log",
+      "sha256": "67c36f7b1f660c2d2b9e01d6c5f14bbc50ab119840e17aa16d1da5949fa66348"
+    }
+  },
+  "rawLogs": [
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/build-a.out",
+      "sha256": "9879bfc66f991745bd5b2bfa89a98c9c01f4e039323a74073b5edea67a59cf2f"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/build-b.out",
+      "sha256": "07c5bb6af617dd5dd033ccca58f586f704be588f817531761e45603ad6b0c459"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-candidate-graph-rewrite.out",
+      "sha256": "fddce16fb7946ab928ca3aa17eb8ce5beb73164092a65f4c0d83af2b36827bf7"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-candidate-inventory-rewrite.out",
+      "sha256": "fddce16fb7946ab928ca3aa17eb8ce5beb73164092a65f4c0d83af2b36827bf7"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-candidate-rehash.out",
+      "sha256": "fddce16fb7946ab928ca3aa17eb8ce5beb73164092a65f4c0d83af2b36827bf7"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-commit-before-ack.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-committed-request-replay.out",
+      "sha256": "c0505db97369bb48c07e67564e1ed9961a2894e8abc1e6a31a29976ed989f0cc"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-initial-reader.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-object-drift.out",
+      "sha256": "ae3706dace1372498396e4bd429ccfad6069bee356ab8f551d0a4eafc195640e"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-old-publisher.out",
+      "sha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-pinned-a-reader.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-publish-a.out",
+      "sha256": "d36d18a48e2d1d00949ba6cd3359ef895d0d8cca5a286ab0b409cedb60f6b7b3"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-publish-b.out",
+      "sha256": "d36d18a48e2d1d00949ba6cd3359ef895d0d8cca5a286ab0b409cedb60f6b7b3"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-reader-after-recovery.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-registered-receipt-drift.out",
+      "sha256": "55af97069d2e4b07ec6ab7ca817d09422e019985b32c8d3b2dafee2689df8d1d"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-replay-different-evidence.out",
+      "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-replay-different-request.out",
+      "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-replay-with-storage-drift.out",
+      "sha256": "c0505db97369bb48c07e67564e1ed9961a2894e8abc1e6a31a29976ed989f0cc"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-selected-b-reader.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-unregistered-evidence.out",
+      "sha256": "cfe73733a0ca668115b19666689abeab4d84d1a31a3ef003bb37066a394ba980"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/native-output-facts-a.out",
+      "sha256": "89d781dd268565cbda8ce613009895626c91d7c4e22daa225fd87f278a13094c"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/native-output-facts-b.out",
+      "sha256": "91fd8dabc0c78ff4060fcec71c684569570baf0e566cf0bc73e5ac6a31849761"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/partial-imports.out",
+      "sha256": "e21f1370439968fbd142d558da71b8719f8a5569d10c6185722ed1a2bf16b283"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/partial-runtime-with-fallback.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/runtime-a.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/runtime-b.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/source-imports-a.out",
+      "sha256": "da4465ed58b96ce1855586db0abfd89ad14b50b16f4fbcdee7d3b50f70dd97fa"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/source-imports-b.out",
+      "sha256": "7e541f38f9e9617441fad5edec39f09e59e5ea292774a423c0c59e037b11e891"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/build-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/build-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-candidate-graph-rewrite.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-candidate-inventory-rewrite.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-candidate-rehash.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-commit-before-ack.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-committed-request-replay.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-initial-reader.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-object-drift.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-old-publisher.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-pinned-a-reader.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-publish-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-publish-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-reader-after-recovery.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-registered-receipt-drift.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-replay-different-evidence.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-replay-different-request.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-replay-with-storage-drift.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-selected-b-reader.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/integration-unregistered-evidence.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/native-output-facts-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/native-output-facts-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/partial-imports.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/partial-runtime-with-fallback.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/runtime-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/runtime-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/source-imports-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-closure-transaction-study/source-imports-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "qualificationLog": {
+    "path": "/private/tmp/asp-closure-transaction-study.log",
+    "sha256": "026f076f70a53e0b1bd74663ec941364b0940c3d3b97e1f8bf4c5b367cedb4f5"
+  },
+  "precedingExactHeadCI": {
+    "head": "0148f39024d80dea3dd2c9403dc7c18fdb34e96f",
+    "checks": [
+      {
+        "name": "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Native Gerbil library (macos-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Native Gerbil provider (ubuntu-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Native Gerbil provider (macos-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      }
+    ],
+    "boundary": "ASP CI does not execute isolated compiler patches or closure/admission publication controls"
+  }
+}

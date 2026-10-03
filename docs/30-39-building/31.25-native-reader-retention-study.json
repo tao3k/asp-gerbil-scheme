@@ -1,0 +1,1278 @@
+{
+  "schema": "asp.native-reader-retention-study.v1",
+  "patchedSourceSha256": "b7473bf5f013f5b65f0f7a08c6f5683ca45527e48a23dd5b96ef02b2f202a524",
+  "instrumentedSourceSha256": "80041f6b4c2c5d142f80419164b8afee9c204a4efc6f8fa10197a36af40fd585",
+  "patchSha256": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+  "nativeGscSha256": "e780d799e1be2ce62c0de90758b81a9a4bdeec63276b82da932dced261a1b400",
+  "runnerSha256": "e8a043827241e858b8988d6c1444e8ed1bd5f6612d95c639e7f5714a7da95332",
+  "extractorSha256": "fcf4790d8c331b5615d6b391d557e8827e0530211b55867fc9b14dcd1d75195e",
+  "sharedHarnessSha256": "8162f6913329d868dcfb7e836456ec1cb82f94047179e531cf27e7b86a86872a",
+  "externalRoot": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib",
+  "publicationStudy": false,
+  "retentionStudy": true,
+  "observations": [
+    {
+      "name": "build-a",
+      "exit": 0,
+      "marker": "BUILD-OK",
+      "expectedAnswer": null,
+      "stdoutSha256": "daa6a221ad0dfad7c241a32ea00acb8a2be4d821daf87757d1852c0e7c098672",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "runtime-a",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-imports-a",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "d34cabf1789fb0a85326c14f9f780d01e7b808199dc28d7a702ba934595e1cbb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "native-output-facts-a",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "883794b48ad9d5aeca616d2050239a23e8280ece0e679ed23befcad2f62b5549",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "derived-closure-a",
+      "modules": [
+        "closure/app",
+        "closure/bridge",
+        "closure/leaf",
+        "closure/middle",
+        "closure/phase",
+        "closure/phase-dep"
+      ],
+      "artifactCount": 36,
+      "phaseOneDependency": true,
+      "renamedBinding": true,
+      "externalFactCount": 1
+    },
+    {
+      "name": "build-b",
+      "exit": 0,
+      "marker": "BUILD-OK",
+      "expectedAnswer": null,
+      "stdoutSha256": "c357f3055e88aba5abc9bf895b10dd5535f4f81152d702d72a3840e116116822",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "runtime-b",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-imports-b",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "83dce6d9011e58fd63908108b0990c96cc308d881ed1676f750b77db21e4d710",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "native-output-facts-b",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "71c382d8531ead7ea7e9baddfa743f460dfe34573b68e3947e02a736c38fb307",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "derived-closure-b",
+      "modules": [
+        "closure/app",
+        "closure/bridge",
+        "closure/leaf",
+        "closure/middle",
+        "closure/phase",
+        "closure/phase-dep"
+      ],
+      "artifactCount": 36,
+      "phaseOneDependency": true,
+      "renamedBinding": true,
+      "externalFactCount": 1
+    },
+    {
+      "name": "partial-runtime-with-fallback",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "partial-imports",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "44fccefc269dd596bafdc89b411925de5cc85cd226510e1a278f7b3df5536eb3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "fallback-local-owner-rejected",
+      "cause": "Local dependency resolved outside generation: closure/leaf"
+    },
+    {
+      "name": "transitive-phase-inventory-rejected",
+      "cause": "Incomplete compiler-derived inventory"
+    },
+    {
+      "name": "retention-acquired-before-module-load",
+      "readerCount": 2,
+      "epoch": 1,
+      "receiptId": "2a07b71b8739b76f121f94ae61500ed64b14b6bde896b68d93563288ed4af423",
+      "publicationDigest": "53ea70b97bc9a82cb1566b5de4e3d90f359f13bad1d19b21693b693dbe211ceb"
+    },
+    {
+      "name": "retention-selected-b-runtime",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-live-readers-block-collection",
+      "commandKind": "collector",
+      "exit": 70,
+      "marker": "Readers retain generation",
+      "stdoutSha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-killed-preload-reader",
+      "commandKind": "reader-launcher",
+      "exit": -9,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retainedReaderCount": 2
+    },
+    {
+      "name": "retention-old-reader-loads-after-switch",
+      "commandKind": "native-reader",
+      "exit": 0,
+      "marker": "RETAINED-READER-OK",
+      "stdoutSha256": "da3ac63dad2af4d077ffcd8786b05fa230feae50f39e743c47fa5619fc9c01ff",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-dead-owner-record-blocks",
+      "commandKind": "collector",
+      "exit": 70,
+      "marker": "Readers retain generation",
+      "stdoutSha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-explicit-preload-owner-release",
+      "retainedReaderCount": 0,
+      "proof": "Owned launcher killed before exec; no children created"
+    },
+    {
+      "name": "retention-zero-readers-not-quiescence",
+      "commandKind": "collector",
+      "exit": 70,
+      "marker": "Writer quiescence unknown",
+      "stdoutSha256": "31c42670361e4ac2bae4f37cb463e7ba07b5e915c3c1d14a6febec4c63e22423",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-active-b-blocks-collection",
+      "commandKind": "collector",
+      "exit": 70,
+      "marker": "Active generation retained",
+      "stdoutSha256": "019447b9689709fc8722264b98ab7f51ed6bdbd06f3ab27916248d7ebc18a46d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-malformed-record-blocks",
+      "commandKind": "collector",
+      "exit": 70,
+      "marker": "JSONDecodeError",
+      "stdoutSha256": "359269a2a22eb1e482f186fc33e7e1539ffc7ba57a3fb482f5cf12efeaad04a5",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-quiescent-unretained-a-collected",
+      "commandKind": "collector",
+      "exit": 0,
+      "marker": "COLLECTED",
+      "stdoutSha256": "cf01585829633e2debef0696d8101ca4fb4702310a2f2256b3b17bd0e753ce8c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-retired-generation-publication-rejected",
+      "cause": "Generation retired",
+      "tokenUnspent": true
+    },
+    {
+      "name": "retention-bare-snapshot-after-collection",
+      "commandKind": "native-reader",
+      "exit": 70,
+      "marker": "cannot find library module",
+      "stdoutSha256": "e8dd4e3ce5b73fc8e28262ec7429f3e196591ead36fa13aa561eb61330d67c76",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-b-remains-readable",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-final-state",
+      "activeReceiptId": "8373e9afd0973d3c5f9cfcfb12d2fcad994ce23d082fa9f3a74ad6c4788f2532",
+      "retiredRoot": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a",
+      "survivingRoot": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b",
+      "retainedReaderCount": 0
+    },
+    {
+      "name": "changed-source-evidence-rejected",
+      "cause": "Source changed since completed build: closure/app"
+    }
+  ],
+  "manifests": {
+    "a": {
+      "graph": {
+        "entry": "closure/app",
+        "modules": [
+          "closure/app",
+          "closure/bridge",
+          "closure/leaf",
+          "closure/middle",
+          "closure/phase",
+          "closure/phase-dep"
+        ],
+        "edges": [
+          {
+            "kind": "binding",
+            "phi": 1,
+            "to": "closure/phase",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/phase.ssi"
+          },
+          {
+            "kind": "set",
+            "phi": 1,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/phase.ssi",
+            "from": "closure/app",
+            "to": "closure/phase"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "from": "closure/app",
+            "to": "closure/bridge",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/bridge.ssi"
+          },
+          {
+            "kind": "binding",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge"
+          },
+          {
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge",
+            "kind": "set"
+          },
+          {
+            "from": "closure/middle",
+            "to": "closure/leaf",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/leaf.ssi",
+            "kind": "binding",
+            "phi": 0
+          },
+          {
+            "from": "closure/phase",
+            "to": "closure/phase-dep",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/phase-dep.ssi",
+            "kind": "binding",
+            "phi": 0
+          },
+          {
+            "phi": 0,
+            "from": "closure/phase",
+            "to": "closure/phase-dep",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/phase-dep.ssi",
+            "kind": "set"
+          }
+        ],
+        "externalFrontier": [
+          {
+            "kind": "binding",
+            "phi": 0,
+            "from": "closure/app",
+            "to": "std/list/list",
+            "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+            "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+          }
+        ],
+        "nativeObjects": {
+          "closure/app": [
+            "closure/app.o1",
+            "closure/app~1.o1",
+            "closure/app~0.o1"
+          ],
+          "closure/bridge": [
+            "closure/bridge.o1"
+          ],
+          "closure/leaf": [
+            "closure/leaf.o1",
+            "closure/leaf~0.o1"
+          ],
+          "closure/middle": [
+            "closure/middle.o1",
+            "closure/middle~0.o1"
+          ],
+          "closure/phase": [
+            "closure/phase.o1",
+            "closure/phase~0.o1"
+          ],
+          "closure/phase-dep": [
+            "closure/phase-dep.o1",
+            "closure/phase-dep~0.o1"
+          ]
+        }
+      },
+      "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a",
+      "files": {
+        "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+        "closure/app.native-complete": "914c50797c602b1ad3cc77b1ea5088fd5fe20b5d1515c988ba082929ef746e08",
+        "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+        "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+        "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+        "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+        "closure/app~0.o1": "6279fb9624d34e1bdfd1385b9eb2ee1bbfcc0a6b99d488e288dabcd8a6477a39",
+        "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+        "closure/bridge.native-complete": "914c50797c602b1ad3cc77b1ea5088fd5fe20b5d1515c988ba082929ef746e08",
+        "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+        "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+        "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+        "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+        "closure/leaf.native-complete": "914c50797c602b1ad3cc77b1ea5088fd5fe20b5d1515c988ba082929ef746e08",
+        "closure/leaf.native-source": "b7d09d42b358cb0743cc4ce68f9d2e389d0df4a7d9c02e70eaa010ffaa4e1137",
+        "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+        "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+        "closure/leaf~0.o1": "a2e5e0e20cb4f79ac9771a9e1f8fce175220b1cd23ac6fc6ad82a0e28a34212d",
+        "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+        "closure/middle.native-complete": "914c50797c602b1ad3cc77b1ea5088fd5fe20b5d1515c988ba082929ef746e08",
+        "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+        "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+        "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+        "closure/middle~0.o1": "74cd5be2a5850281d281c967261c3d3c9152cb942dc6c693bcac7a141d1400e8",
+        "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+        "closure/phase.native-complete": "914c50797c602b1ad3cc77b1ea5088fd5fe20b5d1515c988ba082929ef746e08",
+        "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+        "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+        "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+        "closure/phase~0.o1": "a10413a719631fc39acbd29113d9afae7f4eeb663fb564bd9d25318527c518cf",
+        "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+        "closure/phase-dep.native-complete": "914c50797c602b1ad3cc77b1ea5088fd5fe20b5d1515c988ba082929ef746e08",
+        "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+        "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+        "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+        "closure/phase-dep~0.o1": "3a1b0b41be583616b6a4efa69767056c842252dfa5616ed84624435ef19ec710"
+      }
+    },
+    "b": {
+      "graph": {
+        "entry": "closure/app",
+        "modules": [
+          "closure/app",
+          "closure/bridge",
+          "closure/leaf",
+          "closure/middle",
+          "closure/phase",
+          "closure/phase-dep"
+        ],
+        "edges": [
+          {
+            "kind": "binding",
+            "phi": 1,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/phase.ssi",
+            "from": "closure/app",
+            "to": "closure/phase"
+          },
+          {
+            "kind": "set",
+            "phi": 1,
+            "from": "closure/app",
+            "to": "closure/phase",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/phase.ssi"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/bridge.ssi",
+            "from": "closure/app",
+            "to": "closure/bridge"
+          },
+          {
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge",
+            "kind": "binding"
+          },
+          {
+            "kind": "set",
+            "phi": 0,
+            "from": "closure/bridge",
+            "to": "closure/middle",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/middle.ssi"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/leaf.ssi",
+            "from": "closure/middle",
+            "to": "closure/leaf"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/phase-dep.ssi",
+            "from": "closure/phase",
+            "to": "closure/phase-dep"
+          },
+          {
+            "kind": "set",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/phase-dep.ssi",
+            "phi": 0,
+            "to": "closure/phase-dep",
+            "from": "closure/phase"
+          }
+        ],
+        "externalFrontier": [
+          {
+            "kind": "binding",
+            "phi": 0,
+            "from": "closure/app",
+            "to": "std/list/list",
+            "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+            "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+          }
+        ],
+        "nativeObjects": {
+          "closure/app": [
+            "closure/app.o1",
+            "closure/app~1.o1",
+            "closure/app~0.o1"
+          ],
+          "closure/bridge": [
+            "closure/bridge.o1"
+          ],
+          "closure/leaf": [
+            "closure/leaf.o1",
+            "closure/leaf~0.o1"
+          ],
+          "closure/middle": [
+            "closure/middle.o1",
+            "closure/middle~0.o1"
+          ],
+          "closure/phase": [
+            "closure/phase.o1",
+            "closure/phase~0.o1"
+          ],
+          "closure/phase-dep": [
+            "closure/phase-dep.o1",
+            "closure/phase-dep~0.o1"
+          ]
+        }
+      },
+      "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b",
+      "files": {
+        "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+        "closure/app.native-complete": "8d289946c3a5e025b2fe2bf8c03a16f34c73cbb7be389c084369ad7b7cba52f9",
+        "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+        "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+        "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+        "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+        "closure/app~0.o1": "d25cfad9dc347bc10233bd22351cb01991ee45310b1ce1c404a40974cd1a2731",
+        "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+        "closure/bridge.native-complete": "7f8d73050db95b1b257aea304df493a4ab3baf56572b3501df061a829731b7a7",
+        "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+        "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+        "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+        "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+        "closure/leaf.native-complete": "7f8d73050db95b1b257aea304df493a4ab3baf56572b3501df061a829731b7a7",
+        "closure/leaf.native-source": "a9911890fa18788143b25c2dec5429e46253af232c5494d6aad7804847a2513b",
+        "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+        "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+        "closure/leaf~0.o1": "c6c7d0e2e32fc212d0a0c79d97a8e0798b376fa91180457b292b48e4bd8362c7",
+        "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+        "closure/middle.native-complete": "7f8d73050db95b1b257aea304df493a4ab3baf56572b3501df061a829731b7a7",
+        "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+        "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+        "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+        "closure/middle~0.o1": "bbd9342550a247e51875297a151efbc7f1ef54e33d7e4b128ba85e435ddca60a",
+        "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+        "closure/phase.native-complete": "7f8d73050db95b1b257aea304df493a4ab3baf56572b3501df061a829731b7a7",
+        "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+        "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+        "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+        "closure/phase~0.o1": "00b9446069877848de52e260f9f2df17ffe21ec817d959f1cd1ce8cfbca6b235",
+        "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+        "closure/phase-dep.native-complete": "7f8d73050db95b1b257aea304df493a4ab3baf56572b3501df061a829731b7a7",
+        "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+        "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+        "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+        "closure/phase-dep~0.o1": "9fcb0bcc769816248f470ccd6f7e71a546749221898fa6b08515820282cb57a8"
+      }
+    }
+  },
+  "retainedCompilerPatchChanged": false,
+  "date": "2026-10-03",
+  "headBeforeStudy": "93880315a63df25d01a4ec9e1143e4f502b1d716",
+  "observationCount": 30,
+  "addedRetentionObservationCount": 15,
+  "repeatedClosurePrerequisiteObservationCount": 15,
+  "gerbilCommandCount": 14,
+  "collectorCommandCount": 6,
+  "killedPreloadPythonLauncherCount": 1,
+  "implementationDigests": {
+    "closure.py": "e8a043827241e858b8988d6c1444e8ed1bd5f6612d95c639e7f5714a7da95332",
+    "closure.ss": "fcf4790d8c331b5615d6b391d557e8827e0530211b55867fc9b14dcd1d75195e",
+    "publication.py": "8162f6913329d868dcfb7e836456ec1cb82f94047179e531cf27e7b86a86872a",
+    "publication_crash.py": "258c868646cfe3d43160d221f86285d8d5323d481ac52f03a1de7c6a3cbd845c",
+    "publication_admission.py": "8c74ab1e9a5668d7c30d43d42e68ed675839a6567cf430f84f0374760b026245",
+    "publication_retention.py": "3edca8058acdba4151d5e3e3d94a1d9b12ded19319709e724736272f0d659e2a"
+  },
+  "retainedPatchDigests": {
+    "installed": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+    "candidate": "45f589752ca91fdb78d199e2580545bfdcecb9544e099bae126d31f3523bba81"
+  },
+  "conclusions": {
+    "lateLoad": "A reader registers before module load; B selection reads 43; delayed A load after B selection reads 42",
+    "readerGates": "Live reader records block A collection; killed pre-exec Python launcher retains record after process death; release of surviving reader does not release killed owner",
+    "explicitRelease": "Owned killed launcher known to be pre-exec with no children; fixture explicitly releases only that record; no generic PID/TTL recovery",
+    "writerGate": "Zero readers do not authorize collection with writer quiescence unknown; declaration is an independent trusted fixture assertion",
+    "activeGate": "Selected B cannot be collected even with quiescence declared and no readers",
+    "recordCorruption": "Malformed reader JSON causes exit 70 and blocks collection",
+    "retirement": "Inactive A with zero readers and declared writer quiescence collected; subsequent A publication rejected without spending new token",
+    "barePin": "A historical pin without retained record cannot load after collection, exit 70; selected B still reads 43"
+  },
+  "evidenceBoundary": {
+    "protocol": "All participating publication, acquisition and collection use one advisory lock; roots are exact owned scratch inventory",
+    "reader": "Persistent record before launcher exec/module import; one delayed fresh Gerbil reader, one killed pre-exec Python launcher; no live module-cache switching",
+    "writer": "Quiescence is a trusted coordinator assertion after completed normal native make with known producers, not process absence or receipt-derived proof; no writer-capability enforcement",
+    "death": "Killed pre-exec launcher creates no children; only this scoped owned fact permits explicit release; no automatic record expiry",
+    "storage": "Stable canonical roots and cooperative records; no authentication, hostile actor protection or alias/path replacement qualification",
+    "durability": "File/directory fsync used for record creation; no power-loss guarantee; interrupted acquisition/release and collector restart not qualified",
+    "retirement": "Registry retirement intent and rmtree are separate operations; interruption may leave retired storage needing recovery; unknown/staging records conservatively block",
+    "external": "Implicit language/compiler and transitive external native/runtime dependencies still outside application closure",
+    "counts": "30 observations comprise 15 new retention and 15 repeated closure prerequisites; prior integration/default transaction regression not rerun or counted",
+    "scope": "Only runner-owned temporary roots removed; compiler patches, external installed/candidate sources and deployment unchanged"
+  },
+  "nextContracts": [
+    "Authenticated reader and quiescence/registration authority",
+    "Explicit closing and enforcement of generation writer capability",
+    "Interrupted acquisition/release/retirement recovery with conservative record handling",
+    "Immutable generation paths and complete external dependency boundary"
+  ],
+  "retirementRegistry": {
+    "ownedRoot": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92",
+    "generations": {
+      "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a": {
+        "writerQuiescent": true,
+        "retired": true
+      },
+      "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b": {
+        "writerQuiescent": true,
+        "retired": false
+      }
+    }
+  },
+  "finalTransactionState": {
+    "schema": "asp.publication-transaction-study.v1",
+    "epoch": 3,
+    "spent": false,
+    "active": {
+      "epoch": 2,
+      "request": "retention-b",
+      "manifest": {
+        "receiptId": "8373e9afd0973d3c5f9cfcfb12d2fcad994ce23d082fa9f3a74ad6c4788f2532",
+        "manifest": {
+          "graph": {
+            "entry": "closure/app",
+            "modules": [
+              "closure/app",
+              "closure/bridge",
+              "closure/leaf",
+              "closure/middle",
+              "closure/phase",
+              "closure/phase-dep"
+            ],
+            "edges": [
+              {
+                "kind": "binding",
+                "phi": 1,
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/phase.ssi",
+                "from": "closure/app",
+                "to": "closure/phase"
+              },
+              {
+                "kind": "set",
+                "phi": 1,
+                "from": "closure/app",
+                "to": "closure/phase",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/phase.ssi"
+              },
+              {
+                "kind": "binding",
+                "phi": 0,
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/bridge.ssi",
+                "from": "closure/app",
+                "to": "closure/bridge"
+              },
+              {
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/middle.ssi",
+                "phi": 0,
+                "to": "closure/middle",
+                "from": "closure/bridge",
+                "kind": "binding"
+              },
+              {
+                "kind": "set",
+                "phi": 0,
+                "from": "closure/bridge",
+                "to": "closure/middle",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/middle.ssi"
+              },
+              {
+                "kind": "binding",
+                "phi": 0,
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/leaf.ssi",
+                "from": "closure/middle",
+                "to": "closure/leaf"
+              },
+              {
+                "kind": "binding",
+                "phi": 0,
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/phase-dep.ssi",
+                "from": "closure/phase",
+                "to": "closure/phase-dep"
+              },
+              {
+                "kind": "set",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/phase-dep.ssi",
+                "phi": 0,
+                "to": "closure/phase-dep",
+                "from": "closure/phase"
+              }
+            ],
+            "externalFrontier": [
+              {
+                "kind": "binding",
+                "phi": 0,
+                "from": "closure/app",
+                "to": "std/list/list",
+                "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+                "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+              }
+            ],
+            "nativeObjects": {
+              "closure/app": [
+                "closure/app.o1",
+                "closure/app~1.o1",
+                "closure/app~0.o1"
+              ],
+              "closure/bridge": [
+                "closure/bridge.o1"
+              ],
+              "closure/leaf": [
+                "closure/leaf.o1",
+                "closure/leaf~0.o1"
+              ],
+              "closure/middle": [
+                "closure/middle.o1",
+                "closure/middle~0.o1"
+              ],
+              "closure/phase": [
+                "closure/phase.o1",
+                "closure/phase~0.o1"
+              ],
+              "closure/phase-dep": [
+                "closure/phase-dep.o1",
+                "closure/phase-dep~0.o1"
+              ]
+            }
+          },
+          "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b",
+          "files": {
+            "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+            "closure/app.native-complete": "8d289946c3a5e025b2fe2bf8c03a16f34c73cbb7be389c084369ad7b7cba52f9",
+            "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+            "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+            "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+            "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+            "closure/app~0.o1": "d25cfad9dc347bc10233bd22351cb01991ee45310b1ce1c404a40974cd1a2731",
+            "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+            "closure/bridge.native-complete": "7f8d73050db95b1b257aea304df493a4ab3baf56572b3501df061a829731b7a7",
+            "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+            "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+            "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+            "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+            "closure/leaf.native-complete": "7f8d73050db95b1b257aea304df493a4ab3baf56572b3501df061a829731b7a7",
+            "closure/leaf.native-source": "a9911890fa18788143b25c2dec5429e46253af232c5494d6aad7804847a2513b",
+            "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+            "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+            "closure/leaf~0.o1": "c6c7d0e2e32fc212d0a0c79d97a8e0798b376fa91180457b292b48e4bd8362c7",
+            "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+            "closure/middle.native-complete": "7f8d73050db95b1b257aea304df493a4ab3baf56572b3501df061a829731b7a7",
+            "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+            "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+            "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+            "closure/middle~0.o1": "bbd9342550a247e51875297a151efbc7f1ef54e33d7e4b128ba85e435ddca60a",
+            "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+            "closure/phase.native-complete": "7f8d73050db95b1b257aea304df493a4ab3baf56572b3501df061a829731b7a7",
+            "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+            "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+            "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+            "closure/phase~0.o1": "00b9446069877848de52e260f9f2df17ffe21ec817d959f1cd1ce8cfbca6b235",
+            "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+            "closure/phase-dep.native-complete": "7f8d73050db95b1b257aea304df493a4ab3baf56572b3501df061a829731b7a7",
+            "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+            "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+            "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+            "closure/phase-dep~0.o1": "9fcb0bcc769816248f470ccd6f7e71a546749221898fa6b08515820282cb57a8"
+          }
+        }
+      },
+      "digest": "be7bc51303e1d0c8b52712c8b50f974831eb1c7e4780eea6ca302dd31f8cf326"
+    }
+  },
+  "compilerImportFacts": {
+    "partial-imports.facts": [
+      {
+        "imports": [],
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/leaf.ss",
+        "id": "closure/leaf"
+      },
+      {
+        "imports": [
+          {
+            "kind": "binding",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/leaf.ssi",
+            "phi": 0,
+            "to": "closure/leaf",
+            "from": "closure/middle"
+          }
+        ],
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/middle.ss",
+        "id": "closure/middle"
+      },
+      {
+        "id": "closure/bridge",
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/bridge.ss",
+        "imports": [
+          {
+            "from": "closure/bridge",
+            "to": "closure/middle",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/partial/closure/middle.ssi",
+            "kind": "binding",
+            "phi": 0
+          },
+          {
+            "kind": "set",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/partial/closure/middle.ssi",
+            "from": "closure/bridge",
+            "to": "closure/middle"
+          }
+        ]
+      },
+      {
+        "id": "closure/phase-dep",
+        "imports": [],
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/phase-dep.ss"
+      },
+      {
+        "imports": [
+          {
+            "phi": 0,
+            "from": "closure/phase",
+            "to": "closure/phase-dep",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/partial/closure/phase-dep.ssi",
+            "kind": "binding"
+          },
+          {
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/partial/closure/phase-dep.ssi",
+            "from": "closure/phase",
+            "to": "closure/phase-dep",
+            "kind": "set"
+          }
+        ],
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/phase.ss",
+        "id": "closure/phase"
+      },
+      {
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/app.ss",
+        "imports": [
+          {
+            "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+            "phi": 0,
+            "to": "std/list/list",
+            "from": "closure/app",
+            "kind": "binding"
+          },
+          {
+            "phi": 1,
+            "from": "closure/app",
+            "to": "closure/phase",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/partial/closure/phase.ssi",
+            "kind": "binding"
+          },
+          {
+            "to": "closure/phase",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/partial/closure/phase.ssi",
+            "kind": "set",
+            "phi": 1
+          },
+          {
+            "kind": "binding",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/partial/closure/bridge.ssi",
+            "phi": 0,
+            "to": "closure/bridge",
+            "from": "closure/app"
+          }
+        ],
+        "id": "closure/app"
+      },
+      {
+        "imports": [],
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/unused.ss",
+        "id": "closure/unused"
+      }
+    ],
+    "source-imports-a.facts": [
+      {
+        "id": "closure/leaf",
+        "imports": [],
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-a/leaf.ss"
+      },
+      {
+        "id": "closure/middle",
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-a/middle.ss",
+        "imports": [
+          {
+            "from": "closure/middle",
+            "to": "closure/leaf",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/leaf.ssi",
+            "kind": "binding",
+            "phi": 0
+          }
+        ]
+      },
+      {
+        "id": "closure/bridge",
+        "imports": [
+          {
+            "kind": "binding",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge"
+          },
+          {
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge",
+            "kind": "set"
+          }
+        ],
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-a/bridge.ss"
+      },
+      {
+        "id": "closure/phase-dep",
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-a/phase-dep.ss",
+        "imports": []
+      },
+      {
+        "imports": [
+          {
+            "from": "closure/phase",
+            "to": "closure/phase-dep",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/phase-dep.ssi",
+            "kind": "binding",
+            "phi": 0
+          },
+          {
+            "phi": 0,
+            "from": "closure/phase",
+            "to": "closure/phase-dep",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/phase-dep.ssi",
+            "kind": "set"
+          }
+        ],
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-a/phase.ss",
+        "id": "closure/phase"
+      },
+      {
+        "id": "closure/app",
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-a/app.ss",
+        "imports": [
+          {
+            "kind": "binding",
+            "phi": 0,
+            "from": "closure/app",
+            "to": "std/list/list",
+            "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi"
+          },
+          {
+            "kind": "binding",
+            "phi": 1,
+            "to": "closure/phase",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/phase.ssi"
+          },
+          {
+            "kind": "set",
+            "phi": 1,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/phase.ssi",
+            "from": "closure/app",
+            "to": "closure/phase"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "from": "closure/app",
+            "to": "closure/bridge",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-a/closure/bridge.ssi"
+          }
+        ]
+      },
+      {
+        "id": "closure/unused",
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-a/unused.ss",
+        "imports": []
+      }
+    ],
+    "source-imports-b.facts": [
+      {
+        "id": "closure/leaf",
+        "imports": [],
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/leaf.ss"
+      },
+      {
+        "id": "closure/middle",
+        "imports": [
+          {
+            "kind": "binding",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/leaf.ssi",
+            "from": "closure/middle",
+            "to": "closure/leaf"
+          }
+        ],
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/middle.ss"
+      },
+      {
+        "id": "closure/bridge",
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/bridge.ss",
+        "imports": [
+          {
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge",
+            "kind": "binding"
+          },
+          {
+            "kind": "set",
+            "phi": 0,
+            "from": "closure/bridge",
+            "to": "closure/middle",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/middle.ssi"
+          }
+        ]
+      },
+      {
+        "imports": [],
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/phase-dep.ss",
+        "id": "closure/phase-dep"
+      },
+      {
+        "id": "closure/phase",
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/phase.ss",
+        "imports": [
+          {
+            "kind": "binding",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/phase-dep.ssi",
+            "from": "closure/phase",
+            "to": "closure/phase-dep"
+          },
+          {
+            "kind": "set",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/phase-dep.ssi",
+            "phi": 0,
+            "to": "closure/phase-dep",
+            "from": "closure/phase"
+          }
+        ]
+      },
+      {
+        "id": "closure/app",
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/app.ss",
+        "imports": [
+          {
+            "kind": "binding",
+            "phi": 0,
+            "from": "closure/app",
+            "to": "std/list/list",
+            "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi"
+          },
+          {
+            "kind": "binding",
+            "phi": 1,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/phase.ssi",
+            "from": "closure/app",
+            "to": "closure/phase"
+          },
+          {
+            "kind": "set",
+            "phi": 1,
+            "from": "closure/app",
+            "to": "closure/phase",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/phase.ssi"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/lib-b/closure/bridge.ssi",
+            "from": "closure/app",
+            "to": "closure/bridge"
+          }
+        ]
+      },
+      {
+        "id": "closure/unused",
+        "imports": [],
+        "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-_79vlz92/src-b/unused.ss"
+      }
+    ]
+  },
+  "rawLogs": [
+    {
+      "path": "/private/tmp/asp-retention-study/build-a.out",
+      "sha256": "daa6a221ad0dfad7c241a32ea00acb8a2be4d821daf87757d1852c0e7c098672"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/build-b.out",
+      "sha256": "c357f3055e88aba5abc9bf895b10dd5535f4f81152d702d72a3840e116116822"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/native-output-facts-a.out",
+      "sha256": "883794b48ad9d5aeca616d2050239a23e8280ece0e679ed23befcad2f62b5549"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/native-output-facts-b.out",
+      "sha256": "71c382d8531ead7ea7e9baddfa743f460dfe34573b68e3947e02a736c38fb307"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/partial-imports.out",
+      "sha256": "44fccefc269dd596bafdc89b411925de5cc85cd226510e1a278f7b3df5536eb3"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/partial-runtime-with-fallback.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-active-b-blocks-collection.out",
+      "sha256": "019447b9689709fc8722264b98ab7f51ed6bdbd06f3ab27916248d7ebc18a46d"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-b-remains-readable.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-bare-snapshot-after-collection.out",
+      "sha256": "e8dd4e3ce5b73fc8e28262ec7429f3e196591ead36fa13aa561eb61330d67c76"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-dead-owner-record-blocks.out",
+      "sha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-live-readers-block-collection.out",
+      "sha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-malformed-record-blocks.out",
+      "sha256": "359269a2a22eb1e482f186fc33e7e1539ffc7ba57a3fb482f5cf12efeaad04a5"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-quiescent-unretained-a-collected.out",
+      "sha256": "cf01585829633e2debef0696d8101ca4fb4702310a2f2256b3b17bd0e753ce8c"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-reader-0.out",
+      "sha256": "da3ac63dad2af4d077ffcd8786b05fa230feae50f39e743c47fa5619fc9c01ff"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-reader-1.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-selected-b-runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-zero-readers-not-quiescence.out",
+      "sha256": "31c42670361e4ac2bae4f37cb463e7ba07b5e915c3c1d14a6febec4c63e22423"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/runtime-a.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/runtime-b.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/source-imports-a.out",
+      "sha256": "d34cabf1789fb0a85326c14f9f780d01e7b808199dc28d7a702ba934595e1cbb"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/source-imports-b.out",
+      "sha256": "83dce6d9011e58fd63908108b0990c96cc308d881ed1676f750b77db21e4d710"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/build-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/build-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/native-output-facts-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/native-output-facts-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/partial-imports.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/partial-runtime-with-fallback.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-active-b-blocks-collection.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-b-remains-readable.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-bare-snapshot-after-collection.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-dead-owner-record-blocks.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-live-readers-block-collection.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-malformed-record-blocks.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-quiescent-unretained-a-collected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-reader-0.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-reader-1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-selected-b-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/retention-zero-readers-not-quiescence.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/runtime-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/runtime-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/source-imports-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-study/source-imports-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "qualificationLog": {
+    "path": "/private/tmp/asp-retention-study.log",
+    "sha256": "805654af1a4ebe7c4ed41c1f282eb4237db9f7f7580b483aed8cf3c31ad9538e"
+  },
+  "precedingExactHeadCI": {
+    "head": "93880315a63df25d01a4ec9e1143e4f502b1d716",
+    "checks": [
+      {
+        "name": "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Native Gerbil library (macos-latest, release-v0.19-2591dcd)",
+        "status": "QUEUED",
+        "conclusion": ""
+      },
+      {
+        "name": "Native Gerbil provider (ubuntu-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Native Gerbil provider (macos-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      }
+    ],
+    "boundary": "ASP CI does not execute isolated compiler patches or reader retention/collection research controls"
+  }
+}

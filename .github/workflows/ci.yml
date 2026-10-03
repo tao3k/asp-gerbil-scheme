@@ -49,6 +49,7 @@ jobs:
     env:
       GERBIL_REF: ${{ matrix.gerbil-ref }}
       GERBIL_PREFIX: ${{ github.workspace }}/.ci/gerbil/${{ matrix.gerbil-label }}
+      ASP_NATIVE_GXTEST_EXIT: "(import :gerbil/tools/gxtest) (exit (apply main (cdddr (command-line))))"
     steps:
       - name: Checkout harness
         uses: actions/checkout@v4
@@ -205,10 +206,22 @@ jobs:
           gerbil env gerbil interactive ./build-provider.ss compile
           test -x .gerbil/bin/asp-gerbil-scheme
 
+      - name: Verify native assertion failures reject the test gate
+        if: matrix.target == 'library'
+        run: |
+          set +e
+          gxi -e "$ASP_NATIVE_GXTEST_EXIT" \
+            t/scenarios/policy/upstream-gxtest-delegation/failure-fixture.ss \
+            > "$RUNNER_TEMP/native-negative-test.log" 2>&1
+          fixture_status=$?
+          set -e
+          cat "$RUNNER_TEMP/native-negative-test.log"
+          test "$fixture_status" -eq 42
+
       - name: Run canonical semantic library tests
         if: matrix.target == 'library'
         run: |
-          gerbil test \
+          gxi -e "$ASP_NATIVE_GXTEST_EXIT" \
             t/build-script-command-test.ss \
             t/build-api-startup-scenario-test.ss \
             t/package-build-contract-test.ss \
@@ -222,13 +235,14 @@ jobs:
             t/language-projection-test.ss \
             t/testing-extension-test.ss \
             t/testing-native-batch-scenario-test.ss \
+            t/policy/agent-dependency-adapter-test.ss \
             t/project-policy-test.ss
 
       - name: Run package policy boundary regressions
         if: matrix.target == 'library'
         timeout-minutes: 20
         run: |
-          gerbil test \
+          gxi -e "$ASP_NATIVE_GXTEST_EXIT" \
             t/policy/macro-governance-framework-test.ss \
             t/policy/modularity-test.ss \
             t/policy/agent-basic-core-test.ss \
@@ -244,9 +258,9 @@ jobs:
           # supplies only the Gerbil-side test client and shared semantic test
           # modules; it does not participate in producing the executable.
           gerbil build
-          gerbil test \
+          gxi -e "$ASP_NATIVE_GXTEST_EXIT" \
             t/provider-package-spec-test.ss
           # The HTTP suite owns a sub-millisecond service gate. Run it at full
           # machine performance without unrelated test processes competing for
           # its samples; do not lower native build/test capacity.
-          gerbil test t/provider-http-json-server-test.ss
+          gxi -e "$ASP_NATIVE_GXTEST_EXIT" t/provider-http-json-server-test.ss

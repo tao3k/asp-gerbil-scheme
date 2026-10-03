@@ -1,0 +1,15 @@
+{
+  "installed": {
+    "sourceSha256": "139d348ecbdb1b98edf0f6cf53fdd690f56b49c8bf6942383068da2d4ebe551a",
+    "version": "2591dcd.patchf5cedd8168cb"
+  },
+  "candidate": {
+    "sourceSha256": "d4393b8ccb5ee2640bbdef971ccb0ee9e53b2bc36fca7eac79b4381693d153f2",
+    "head": "d801e7a1c7f77df421f638e62aaebe370f193c97",
+    "containsPreexistingChanges": true
+  },
+  "toolMain": {
+    "sourceSha256": "5ecbb1719cc5ccfa28b3f0f5f881e7d8a9c7291d0c73faba672b851654fd6400",
+    "version": "2591dcd.patchf5cedd8168cb"
+  }
+}

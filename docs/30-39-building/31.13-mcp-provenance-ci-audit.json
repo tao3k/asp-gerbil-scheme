@@ -1,0 +1,720 @@
+{
+  "schema": "asp.checker-provenance-ci-audit.v1",
+  "date": "2026-10-03",
+  "checker": {
+    "source": "https://git.cons.io/ober/gerbil-mcp",
+    "temporaryDirectory": "/private/tmp/asp-gerbil-native-repair-mcp",
+    "sourceOfInstruction": "compiler checkout AGENTS.md",
+    "invocation": "Direct local Gerbil imports and call-tool registry calls; no MCP server/transport",
+    "tools": [
+      "gerbil_check_balance",
+      "gerbil_check_syntax"
+    ],
+    "authority": "Third-party checker implementation; official certification not established",
+    "observedRemoteHeadBeforeClone": "05ed8728a4871e3483fe9792480ecee2d9653e4b",
+    "verifiedCloneHead": null,
+    "sourceDigest": null,
+    "temporaryFilesAvailable": false,
+    "historicalOutputs": [
+      {
+        "at": "2026-10-02T13:34:21.567Z",
+        "subject": "installed std/make patched copy",
+        "result": "Syntax is valid."
+      },
+      {
+        "at": "2026-10-02T13:40:13.802Z",
+        "subject": "candidate std/make patched copy",
+        "result": "Balance OK: 83 top-level form(s)"
+      },
+      {
+        "at": "2026-10-02T14:05:53.668Z",
+        "subject": "extracted tool-main probe",
+        "result": "Syntax is valid."
+      }
+    ],
+    "limit": "Historical invocation trace is retained; checker identity was not immutably qualified. No semantic/build completion claim derives from these checks."
+  },
+  "ci": {
+    "conclusion": "success",
+    "event": "pull_request",
+    "headSha": "c70fbc2e29dd45fc644ae00853a6883370df8ab3",
+    "jobs": [
+      {
+        "completedAt": "2026-10-02T14:25:25Z",
+        "conclusion": "success",
+        "databaseId": 110878499529,
+        "name": "Native Gerbil provider (ubuntu-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-02T14:22:59Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-02T14:23:01Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-02T14:23:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:02Z",
+            "conclusion": "success",
+            "name": "Checkout harness",
+            "number": 2,
+            "startedAt": "2026-10-02T14:23:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:12Z",
+            "conclusion": "success",
+            "name": "Install Linux system dependencies",
+            "number": 3,
+            "startedAt": "2026-10-02T14:23:02Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:12Z",
+            "conclusion": "skipped",
+            "name": "Restore Homebrew cache",
+            "number": 4,
+            "startedAt": "2026-10-02T14:23:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:12Z",
+            "conclusion": "skipped",
+            "name": "Install macOS system dependencies",
+            "number": 5,
+            "startedAt": "2026-10-02T14:23:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:12Z",
+            "conclusion": "skipped",
+            "name": "Select macOS Gerbil compiler",
+            "number": 6,
+            "startedAt": "2026-10-02T14:23:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:12Z",
+            "conclusion": "skipped",
+            "name": "Save Homebrew cache",
+            "number": 7,
+            "startedAt": "2026-10-02T14:23:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:20Z",
+            "conclusion": "success",
+            "name": "Download verified Gerbil v0.19 release",
+            "number": 8,
+            "startedAt": "2026-10-02T14:23:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:21Z",
+            "conclusion": "success",
+            "name": "Restore Gerbil package dependency cache",
+            "number": 9,
+            "startedAt": "2026-10-02T14:23:20Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:39Z",
+            "conclusion": "success",
+            "name": "Install Gerbil package dependencies from gerbil.pkg",
+            "number": 10,
+            "startedAt": "2026-10-02T14:23:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:39Z",
+            "conclusion": "skipped",
+            "name": "Save Gerbil package dependency cache",
+            "number": 11,
+            "startedAt": "2026-10-02T14:23:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:39Z",
+            "conclusion": "skipped",
+            "name": "Build canonical library target",
+            "number": 12,
+            "startedAt": "2026-10-02T14:23:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:24:19Z",
+            "conclusion": "success",
+            "name": "Build canonical provider target",
+            "number": 13,
+            "startedAt": "2026-10-02T14:23:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:24:19Z",
+            "conclusion": "skipped",
+            "name": "Verify native assertion failures reject the test gate",
+            "number": 14,
+            "startedAt": "2026-10-02T14:24:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:24:19Z",
+            "conclusion": "skipped",
+            "name": "Run canonical semantic library tests",
+            "number": 15,
+            "startedAt": "2026-10-02T14:24:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:24:19Z",
+            "conclusion": "skipped",
+            "name": "Run package policy boundary regressions",
+            "number": 16,
+            "startedAt": "2026-10-02T14:24:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:23Z",
+            "conclusion": "success",
+            "name": "Run canonical provider tests",
+            "number": 17,
+            "startedAt": "2026-10-02T14:24:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:23Z",
+            "conclusion": "success",
+            "name": "Post Checkout harness",
+            "number": 34,
+            "startedAt": "2026-10-02T14:25:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:23Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 35,
+            "startedAt": "2026-10-02T14:25:23Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37019464757/job/110878499529"
+      },
+      {
+        "completedAt": "2026-10-02T14:27:25Z",
+        "conclusion": "success",
+        "databaseId": 110878499911,
+        "name": "Native Gerbil library (macos-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-02T14:23:06Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-02T14:23:08Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-02T14:23:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:10Z",
+            "conclusion": "success",
+            "name": "Checkout harness",
+            "number": 2,
+            "startedAt": "2026-10-02T14:23:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:10Z",
+            "conclusion": "skipped",
+            "name": "Install Linux system dependencies",
+            "number": 3,
+            "startedAt": "2026-10-02T14:23:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:17Z",
+            "conclusion": "success",
+            "name": "Restore Homebrew cache",
+            "number": 4,
+            "startedAt": "2026-10-02T14:23:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:30Z",
+            "conclusion": "success",
+            "name": "Install macOS system dependencies",
+            "number": 5,
+            "startedAt": "2026-10-02T14:23:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:31Z",
+            "conclusion": "success",
+            "name": "Select macOS Gerbil compiler",
+            "number": 6,
+            "startedAt": "2026-10-02T14:23:30Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:31Z",
+            "conclusion": "skipped",
+            "name": "Save Homebrew cache",
+            "number": 7,
+            "startedAt": "2026-10-02T14:23:31Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:43Z",
+            "conclusion": "success",
+            "name": "Download verified Gerbil v0.19 release",
+            "number": 8,
+            "startedAt": "2026-10-02T14:23:31Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:46Z",
+            "conclusion": "success",
+            "name": "Restore Gerbil package dependency cache",
+            "number": 9,
+            "startedAt": "2026-10-02T14:23:43Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:24:10Z",
+            "conclusion": "success",
+            "name": "Install Gerbil package dependencies from gerbil.pkg",
+            "number": 10,
+            "startedAt": "2026-10-02T14:23:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:24:10Z",
+            "conclusion": "skipped",
+            "name": "Save Gerbil package dependency cache",
+            "number": 11,
+            "startedAt": "2026-10-02T14:24:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:26:23Z",
+            "conclusion": "success",
+            "name": "Build canonical library target",
+            "number": 12,
+            "startedAt": "2026-10-02T14:24:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:26:23Z",
+            "conclusion": "skipped",
+            "name": "Build canonical provider target",
+            "number": 13,
+            "startedAt": "2026-10-02T14:26:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:26:25Z",
+            "conclusion": "success",
+            "name": "Verify native assertion failures reject the test gate",
+            "number": 14,
+            "startedAt": "2026-10-02T14:26:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:27:05Z",
+            "conclusion": "success",
+            "name": "Run canonical semantic library tests",
+            "number": 15,
+            "startedAt": "2026-10-02T14:26:25Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:27:18Z",
+            "conclusion": "success",
+            "name": "Run package policy boundary regressions",
+            "number": 16,
+            "startedAt": "2026-10-02T14:27:05Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:27:18Z",
+            "conclusion": "skipped",
+            "name": "Run canonical provider tests",
+            "number": 17,
+            "startedAt": "2026-10-02T14:27:18Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:27:20Z",
+            "conclusion": "success",
+            "name": "Post Checkout harness",
+            "number": 34,
+            "startedAt": "2026-10-02T14:27:18Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:27:22Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 35,
+            "startedAt": "2026-10-02T14:27:20Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37019464757/job/110878499911"
+      },
+      {
+        "completedAt": "2026-10-02T14:28:01Z",
+        "conclusion": "success",
+        "databaseId": 110878499915,
+        "name": "Native Gerbil provider (macos-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-02T14:23:07Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-02T14:23:10Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-02T14:23:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:12Z",
+            "conclusion": "success",
+            "name": "Checkout harness",
+            "number": 2,
+            "startedAt": "2026-10-02T14:23:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:12Z",
+            "conclusion": "skipped",
+            "name": "Install Linux system dependencies",
+            "number": 3,
+            "startedAt": "2026-10-02T14:23:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:19Z",
+            "conclusion": "success",
+            "name": "Restore Homebrew cache",
+            "number": 4,
+            "startedAt": "2026-10-02T14:23:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:35Z",
+            "conclusion": "success",
+            "name": "Install macOS system dependencies",
+            "number": 5,
+            "startedAt": "2026-10-02T14:23:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:36Z",
+            "conclusion": "success",
+            "name": "Select macOS Gerbil compiler",
+            "number": 6,
+            "startedAt": "2026-10-02T14:23:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:36Z",
+            "conclusion": "skipped",
+            "name": "Save Homebrew cache",
+            "number": 7,
+            "startedAt": "2026-10-02T14:23:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:51Z",
+            "conclusion": "success",
+            "name": "Download verified Gerbil v0.19 release",
+            "number": 8,
+            "startedAt": "2026-10-02T14:23:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:53Z",
+            "conclusion": "success",
+            "name": "Restore Gerbil package dependency cache",
+            "number": 9,
+            "startedAt": "2026-10-02T14:23:51Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:24:24Z",
+            "conclusion": "success",
+            "name": "Install Gerbil package dependencies from gerbil.pkg",
+            "number": 10,
+            "startedAt": "2026-10-02T14:23:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:24:24Z",
+            "conclusion": "skipped",
+            "name": "Save Gerbil package dependency cache",
+            "number": 11,
+            "startedAt": "2026-10-02T14:24:24Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:24:24Z",
+            "conclusion": "skipped",
+            "name": "Build canonical library target",
+            "number": 12,
+            "startedAt": "2026-10-02T14:24:24Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:35Z",
+            "conclusion": "success",
+            "name": "Build canonical provider target",
+            "number": 13,
+            "startedAt": "2026-10-02T14:24:24Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:35Z",
+            "conclusion": "skipped",
+            "name": "Verify native assertion failures reject the test gate",
+            "number": 14,
+            "startedAt": "2026-10-02T14:25:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:35Z",
+            "conclusion": "skipped",
+            "name": "Run canonical semantic library tests",
+            "number": 15,
+            "startedAt": "2026-10-02T14:25:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:35Z",
+            "conclusion": "skipped",
+            "name": "Run package policy boundary regressions",
+            "number": 16,
+            "startedAt": "2026-10-02T14:25:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:27:54Z",
+            "conclusion": "success",
+            "name": "Run canonical provider tests",
+            "number": 17,
+            "startedAt": "2026-10-02T14:25:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:27:55Z",
+            "conclusion": "success",
+            "name": "Post Checkout harness",
+            "number": 34,
+            "startedAt": "2026-10-02T14:27:54Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:27:58Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 35,
+            "startedAt": "2026-10-02T14:27:55Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37019464757/job/110878499915"
+      },
+      {
+        "completedAt": "2026-10-02T14:25:23Z",
+        "conclusion": "success",
+        "databaseId": 110878500106,
+        "name": "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-02T14:22:59Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-02T14:23:00Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-02T14:23:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:01Z",
+            "conclusion": "success",
+            "name": "Checkout harness",
+            "number": 2,
+            "startedAt": "2026-10-02T14:23:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:12Z",
+            "conclusion": "success",
+            "name": "Install Linux system dependencies",
+            "number": 3,
+            "startedAt": "2026-10-02T14:23:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:12Z",
+            "conclusion": "skipped",
+            "name": "Restore Homebrew cache",
+            "number": 4,
+            "startedAt": "2026-10-02T14:23:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:12Z",
+            "conclusion": "skipped",
+            "name": "Install macOS system dependencies",
+            "number": 5,
+            "startedAt": "2026-10-02T14:23:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:12Z",
+            "conclusion": "skipped",
+            "name": "Select macOS Gerbil compiler",
+            "number": 6,
+            "startedAt": "2026-10-02T14:23:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:12Z",
+            "conclusion": "skipped",
+            "name": "Save Homebrew cache",
+            "number": 7,
+            "startedAt": "2026-10-02T14:23:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:19Z",
+            "conclusion": "success",
+            "name": "Download verified Gerbil v0.19 release",
+            "number": 8,
+            "startedAt": "2026-10-02T14:23:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:19Z",
+            "conclusion": "success",
+            "name": "Restore Gerbil package dependency cache",
+            "number": 9,
+            "startedAt": "2026-10-02T14:23:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:38Z",
+            "conclusion": "success",
+            "name": "Install Gerbil package dependencies from gerbil.pkg",
+            "number": 10,
+            "startedAt": "2026-10-02T14:23:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:23:38Z",
+            "conclusion": "skipped",
+            "name": "Save Gerbil package dependency cache",
+            "number": 11,
+            "startedAt": "2026-10-02T14:23:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:24:59Z",
+            "conclusion": "success",
+            "name": "Build canonical library target",
+            "number": 12,
+            "startedAt": "2026-10-02T14:23:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:24:59Z",
+            "conclusion": "skipped",
+            "name": "Build canonical provider target",
+            "number": 13,
+            "startedAt": "2026-10-02T14:24:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:00Z",
+            "conclusion": "success",
+            "name": "Verify native assertion failures reject the test gate",
+            "number": 14,
+            "startedAt": "2026-10-02T14:24:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:18Z",
+            "conclusion": "success",
+            "name": "Run canonical semantic library tests",
+            "number": 15,
+            "startedAt": "2026-10-02T14:25:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:22Z",
+            "conclusion": "success",
+            "name": "Run package policy boundary regressions",
+            "number": 16,
+            "startedAt": "2026-10-02T14:25:18Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:22Z",
+            "conclusion": "skipped",
+            "name": "Run canonical provider tests",
+            "number": 17,
+            "startedAt": "2026-10-02T14:25:22Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:22Z",
+            "conclusion": "success",
+            "name": "Post Checkout harness",
+            "number": 34,
+            "startedAt": "2026-10-02T14:25:22Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-02T14:25:22Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 35,
+            "startedAt": "2026-10-02T14:25:22Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37019464757/job/110878500106"
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37019464757"
+  },
+  "ciMetricLogLines": [
+    "Native Gerbil library (macos-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:26:50.4140660Z [native-clan-testing-batch-scenario] fixtureCount=4 serialNs=7359094000 batchNs=1780396000",
+    "Native Gerbil library (macos-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:26:57.5964040Z [build-api-startup-scenario] medianIncrementalNs=560224000",
+    "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:25:13.1389944Z [native-clan-testing-batch-scenario] fixtureCount=4 serialNs=3179331965 batchNs=789367084",
+    "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:25:16.9170352Z [build-api-startup-scenario] medianIncrementalNs=365461000"
+  ],
+  "ciTerminalOkLogLines": [
+    "Native Gerbil provider (ubuntu-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:23:14.7809959Z /home/runner/work/_temp/gerbil-v0.19-2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb-linux-x86_64-portable-full-single-host-unlimited-patchf5cedd8168cb.tar.gz: OK",
+    "Native Gerbil provider (ubuntu-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:25:20.8074293Z OK",
+    "Native Gerbil provider (ubuntu-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:25:22.9691668Z OK",
+    "Native Gerbil library (macos-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:23:33.6970800Z /Users/runner/work/_temp/gerbil-v0.19-2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb-darwin-aarch64-gcc16-arm64-aot-tools-single-host-unlimited-patchf5cedd8168cb.tar.gz: OK",
+    "Native Gerbil library (macos-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:27:00.5358240Z OK",
+    "Native Gerbil library (macos-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:27:14.7176820Z OK",
+    "Native Gerbil provider (macos-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:23:38.8353430Z /Users/runner/work/_temp/gerbil-v0.19-2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb-darwin-aarch64-gcc16-arm64-aot-tools-single-host-unlimited-patchf5cedd8168cb.tar.gz: OK",
+    "Native Gerbil provider (macos-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:27:42.3678220Z OK",
+    "Native Gerbil provider (macos-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:27:51.0422290Z OK",
+    "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:23:13.7397926Z /home/runner/work/_temp/gerbil-v0.19-2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb-linux-x86_64-portable-full-single-host-unlimited-patchf5cedd8168cb.tar.gz: OK",
+    "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:25:18.6427039Z OK",
+    "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)\tUNKNOWN STEP\t2026-10-02T14:25:22.1601357Z OK"
+  ],
+  "ciLogSha256": "e9535f2a3201f1a25e04a90b58bf224b05f93696437ffa8b0ad7ecabd406069e",
+  "qualificationBoundary": "CI qualifies c70fbc2 library/provider scenarios on its runners. Previous local performance failures remain. No compiler patch deployment, candidate compiler build, MCP transport conformance, or Bazel qualification."
+}

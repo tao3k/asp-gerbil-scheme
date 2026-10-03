@@ -1,0 +1,876 @@
+{
+  "schema": "asp.native-writer-study.v1",
+  "identities": {
+    "baseSha256": "139d348ecbdb1b98edf0f6cf53fdd690f56b49c8bf6942383068da2d4ebe551a",
+    "patchSha256": "43a32e707dcbbc034381b9a165e9b7faf63449a0e2eebefea05c89b97795b243",
+    "patchedSourceSha256": "f8b5ab53305577e2790c9dbf374df71257e2f67030e4d3c4a5c6d0fe616df6ea",
+    "experimentalSourceSha256": "412f2b461f24ce9be6b78d813e7b82a85949a9955e8e5c0a22db61d9b1a81d1a",
+    "nativeGscSha256": "e780d799e1be2ce62c0de90758b81a9a4bdeec63276b82da932dced261a1b400"
+  },
+  "experiment": "Captured generated Scheme inputs; real gsc -o writes shared native paths",
+  "retainedCompilerPatchChanged": false,
+  "experimentalLeaseRetained": false,
+  "probes": [
+    {
+      "case": "single-a",
+      "name": "build",
+      "writer": "a",
+      "exit": 0,
+      "wallSeconds": 2.7274104579992127,
+      "compileCount": 1,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": null,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "770e62f9f5153e942d34dda6fad35d82142fb96ea9a360a3834452951041f739",
+        "middle~0.o1": "ee313965130242cfa4b0f0c9d271fac2885175f1e102218397d7ea7f1cb87322",
+        "middle.native-source": "277e14e9fdef5df6b8014c8a6b260b4a2a0c38861f8bd62ee7d5b700543edfcd",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "a63fb138c12f5dc408d3a787969825601d9cb80292c41b396eee7750bdf05448"
+      }
+    },
+    {
+      "case": "single-a",
+      "name": "runtime",
+      "writer": "a",
+      "exit": 0,
+      "wallSeconds": 0.5609625829965807,
+      "compileCount": 0,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": 42,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "770e62f9f5153e942d34dda6fad35d82142fb96ea9a360a3834452951041f739",
+        "middle~0.o1": "ee313965130242cfa4b0f0c9d271fac2885175f1e102218397d7ea7f1cb87322",
+        "middle.native-source": "277e14e9fdef5df6b8014c8a6b260b4a2a0c38861f8bd62ee7d5b700543edfcd",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "a63fb138c12f5dc408d3a787969825601d9cb80292c41b396eee7750bdf05448"
+      }
+    },
+    {
+      "case": "single-b",
+      "name": "build",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 2.017769624995708,
+      "compileCount": 1,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": null,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "7fc08c952735c135b31448239cd102f1dbbe8fffe3c0ffeabe32f3f5a62b4fda",
+        "middle~0.o1": "c620ee86779fbab22610771400e4ac122ae01ac9addc331c66f0282229eea9c6",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "52be2ae9fe9e8615d0e701ee5f2dddf67df784287a86b9315d0a59ef6d9f9d11"
+      }
+    },
+    {
+      "case": "single-b",
+      "name": "runtime",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 0.5630967079996481,
+      "compileCount": 0,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": 43,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "7fc08c952735c135b31448239cd102f1dbbe8fffe3c0ffeabe32f3f5a62b4fda",
+        "middle~0.o1": "c620ee86779fbab22610771400e4ac122ae01ac9addc331c66f0282229eea9c6",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "52be2ae9fe9e8615d0e701ee5f2dddf67df784287a86b9315d0a59ef6d9f9d11"
+      }
+    },
+    {
+      "case": "overlap-ab",
+      "name": "a-build",
+      "writer": "a",
+      "exit": 70,
+      "wallSeconds": 3.175080291002814,
+      "compileCount": 1,
+      "receiptPresent": false,
+      "expectedRuntimeAnswer": null,
+      "rejection": "Native build inputs changed",
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "450a2a2987706f6aac0cbac93227dcc0863331bb5725a3c5cc4c24a77972417f",
+        "middle~0.o1": "64ca84aa61e2f3f19e126f33036b6f32f38c7fbb4ce5f02190c5c3aa87598e4d",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56"
+      }
+    },
+    {
+      "case": "overlap-ab",
+      "name": "b-build",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 2.2128484999993816,
+      "compileCount": 1,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": null,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "450a2a2987706f6aac0cbac93227dcc0863331bb5725a3c5cc4c24a77972417f",
+        "middle~0.o1": "b734e1539c3658106537221aa970b0564dd9cdd9a6cbea2d93fb0796cd423dbb",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "131ca865437f4c7db9adef3e68f7035c8fcf9c91359f4e8bc4a31dd01d5fed43"
+      }
+    },
+    {
+      "case": "overlap-ab",
+      "name": "runtime-after-b",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 0.5612606249997043,
+      "compileCount": 0,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": 43,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "450a2a2987706f6aac0cbac93227dcc0863331bb5725a3c5cc4c24a77972417f",
+        "middle~0.o1": "b734e1539c3658106537221aa970b0564dd9cdd9a6cbea2d93fb0796cd423dbb",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "131ca865437f4c7db9adef3e68f7035c8fcf9c91359f4e8bc4a31dd01d5fed43"
+      }
+    },
+    {
+      "case": "overlap-ab",
+      "name": "b-warm",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 0.5536897919955663,
+      "compileCount": 0,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": null,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "450a2a2987706f6aac0cbac93227dcc0863331bb5725a3c5cc4c24a77972417f",
+        "middle~0.o1": "b734e1539c3658106537221aa970b0564dd9cdd9a6cbea2d93fb0796cd423dbb",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "131ca865437f4c7db9adef3e68f7035c8fcf9c91359f4e8bc4a31dd01d5fed43"
+      }
+    },
+    {
+      "case": "overlap-ab",
+      "name": "final-runtime",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 0.18512033399747452,
+      "compileCount": 0,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": 43,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "450a2a2987706f6aac0cbac93227dcc0863331bb5725a3c5cc4c24a77972417f",
+        "middle~0.o1": "b734e1539c3658106537221aa970b0564dd9cdd9a6cbea2d93fb0796cd423dbb",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "131ca865437f4c7db9adef3e68f7035c8fcf9c91359f4e8bc4a31dd01d5fed43"
+      }
+    },
+    {
+      "case": "overlap-ba",
+      "name": "b-build",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 1.8234922500050743,
+      "compileCount": 1,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": null,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "b4525f8fddad1e804fcf8c6dd6252f5250627b3682b6fb542833337c652a3214",
+        "middle~0.o1": "5076093521f155a71c9b9b0ee0f8262024b456e61cbee31ca77be4b789221a91",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "f94945b266e746999c4dc5ce8f46553ab498efe2ff2cbd2000b8963cea693fa4"
+      }
+    },
+    {
+      "case": "overlap-ba",
+      "name": "runtime-after-b",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 0.5678020420018584,
+      "compileCount": 0,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": 43,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "b4525f8fddad1e804fcf8c6dd6252f5250627b3682b6fb542833337c652a3214",
+        "middle~0.o1": "5076093521f155a71c9b9b0ee0f8262024b456e61cbee31ca77be4b789221a91",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "f94945b266e746999c4dc5ce8f46553ab498efe2ff2cbd2000b8963cea693fa4"
+      }
+    },
+    {
+      "case": "overlap-ba",
+      "name": "a-build",
+      "writer": "a",
+      "exit": 70,
+      "wallSeconds": 4.1975254170029075,
+      "compileCount": 1,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": null,
+      "rejection": "Native build inputs changed",
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "b4525f8fddad1e804fcf8c6dd6252f5250627b3682b6fb542833337c652a3214",
+        "middle~0.o1": "094b2ecc0d11d3c228da0c35bfe467e4f892514083952557c195a561ea6ebb02",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "f94945b266e746999c4dc5ce8f46553ab498efe2ff2cbd2000b8963cea693fa4"
+      }
+    },
+    {
+      "case": "overlap-ba",
+      "name": "b-warm",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 0.7421271250059363,
+      "compileCount": 0,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": null,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "b4525f8fddad1e804fcf8c6dd6252f5250627b3682b6fb542833337c652a3214",
+        "middle~0.o1": "094b2ecc0d11d3c228da0c35bfe467e4f892514083952557c195a561ea6ebb02",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "f94945b266e746999c4dc5ce8f46553ab498efe2ff2cbd2000b8963cea693fa4"
+      }
+    },
+    {
+      "case": "overlap-ba",
+      "name": "final-runtime",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 0.6225439590052702,
+      "compileCount": 0,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": 42,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "b4525f8fddad1e804fcf8c6dd6252f5250627b3682b6fb542833337c652a3214",
+        "middle~0.o1": "094b2ecc0d11d3c228da0c35bfe467e4f892514083952557c195a561ea6ebb02",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "f94945b266e746999c4dc5ce8f46553ab498efe2ff2cbd2000b8963cea693fa4"
+      }
+    },
+    {
+      "case": "experimental-lease",
+      "name": "b-contended",
+      "writer": "b",
+      "exit": 70,
+      "wallSeconds": 0.5653935829977854,
+      "compileCount": 0,
+      "receiptPresent": false,
+      "expectedRuntimeAnswer": null,
+      "rejection": "Native output namespace is busy or abandoned",
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "ca4caa54672fcc93330afce4f75fa6f9206fc515276d25d226b354b57268452e",
+        "middle.native-source": "277e14e9fdef5df6b8014c8a6b260b4a2a0c38861f8bd62ee7d5b700543edfcd"
+      }
+    },
+    {
+      "case": "experimental-lease",
+      "name": "clean-contended",
+      "writer": "b",
+      "exit": 70,
+      "wallSeconds": 0.6079914169968106,
+      "compileCount": 0,
+      "receiptPresent": false,
+      "expectedRuntimeAnswer": null,
+      "rejection": "Native output namespace is busy or abandoned",
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "ca4caa54672fcc93330afce4f75fa6f9206fc515276d25d226b354b57268452e",
+        "middle.native-source": "277e14e9fdef5df6b8014c8a6b260b4a2a0c38861f8bd62ee7d5b700543edfcd"
+      }
+    },
+    {
+      "case": "experimental-lease",
+      "name": "a-build",
+      "writer": "a",
+      "exit": 0,
+      "wallSeconds": 3.0286185840013786,
+      "compileCount": 1,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": null,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "ca4caa54672fcc93330afce4f75fa6f9206fc515276d25d226b354b57268452e",
+        "middle~0.o1": "3f58f574ad84e3923f98f40938a371e605d792d61d766ded7b10a74db756f3b2",
+        "middle.native-source": "277e14e9fdef5df6b8014c8a6b260b4a2a0c38861f8bd62ee7d5b700543edfcd",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "00b437fbdbf21b435e959415b876f4e7a07585f16734af7c8ee0c5460bbfe6e8"
+      }
+    },
+    {
+      "case": "experimental-lease",
+      "name": "a-runtime",
+      "writer": "a",
+      "exit": 0,
+      "wallSeconds": 0.6299525419963174,
+      "compileCount": 0,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": 42,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "ca4caa54672fcc93330afce4f75fa6f9206fc515276d25d226b354b57268452e",
+        "middle~0.o1": "3f58f574ad84e3923f98f40938a371e605d792d61d766ded7b10a74db756f3b2",
+        "middle.native-source": "277e14e9fdef5df6b8014c8a6b260b4a2a0c38861f8bd62ee7d5b700543edfcd",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "00b437fbdbf21b435e959415b876f4e7a07585f16734af7c8ee0c5460bbfe6e8"
+      }
+    },
+    {
+      "case": "experimental-lease",
+      "name": "b-after-release",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 1.9465839999975287,
+      "compileCount": 1,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": null,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "824bc071141a609753eb7903850a573ff88053079f15523599db0804c09aa53b",
+        "middle~0.o1": "ee71a2fb242cf9d40d6146809d4c08ebc1cf8c8c4d2e3de186063b2bef09271d",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "8660857b57fa1a16f918321bdf27c13f147841b062468d2493083b4c904f56bf"
+      }
+    },
+    {
+      "case": "experimental-lease",
+      "name": "b-runtime",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 0.5649519159996998,
+      "compileCount": 0,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": 43,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "824bc071141a609753eb7903850a573ff88053079f15523599db0804c09aa53b",
+        "middle~0.o1": "ee71a2fb242cf9d40d6146809d4c08ebc1cf8c8c4d2e3de186063b2bef09271d",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "8660857b57fa1a16f918321bdf27c13f147841b062468d2493083b4c904f56bf"
+      }
+    },
+    {
+      "case": "experimental-lease",
+      "name": "clean-after-release",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 0.6139625829964643,
+      "compileCount": 0,
+      "receiptPresent": false,
+      "expectedRuntimeAnswer": null,
+      "rejection": null,
+      "inventory": {
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle~0.scm": "824bc071141a609753eb7903850a573ff88053079f15523599db0804c09aa53b"
+      }
+    },
+    {
+      "case": "experimental-abandonment",
+      "name": "owner-killed",
+      "exit": -9,
+      "capturedBackendsAcknowledgedAfterOwnerDeath": true,
+      "receiptPresent": false
+    },
+    {
+      "case": "experimental-abandonment",
+      "name": "b-after-owner-death",
+      "writer": "b",
+      "exit": 70,
+      "wallSeconds": 0.6745965419977438,
+      "compileCount": 0,
+      "receiptPresent": false,
+      "expectedRuntimeAnswer": null,
+      "rejection": "Native output namespace is busy or abandoned",
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "9aa8b9af4edb805ac456217e4c93e4cedc2240e94646e980c2870b571746ccb9",
+        "middle.native-source": "277e14e9fdef5df6b8014c8a6b260b4a2a0c38861f8bd62ee7d5b700543edfcd"
+      }
+    },
+    {
+      "case": "experimental-abandonment",
+      "name": "b-after-explicit-recovery",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 1.938859166999464,
+      "compileCount": 1,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": null,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "04b1768b9db1da99ff64e127a57bd92a8b91c8cddd668522126b389bdb65f51e",
+        "middle~0.o1": "343cf258acf24885648927f656dbca1d04743116e89229aacefaaf59c2aadc2f",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "f0e461c3b0cc583ba4eb3f650e10a1aad490cdc06c78a6968e413852c073ca99"
+      }
+    },
+    {
+      "case": "experimental-abandonment",
+      "name": "b-runtime",
+      "writer": "b",
+      "exit": 0,
+      "wallSeconds": 0.567172582996136,
+      "compileCount": 0,
+      "receiptPresent": true,
+      "expectedRuntimeAnswer": 43,
+      "rejection": null,
+      "inventory": {
+        "middle.ssi": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle.scm": "205fb0207b1d74e7836baea8e90f5598ad07d4d572150b2bdb164c96c23ab8d7",
+        "middle.ssxi.ss": "04f180f0b47de403370fd0f5f3498d8d6c0cd4842d0fba5bc5bb99a24e46eeb3",
+        "middle.native-interface": "cf0e6206e1a7b7c6f34fdf95c9a1df3367436a3c56cc54b20afb70069caa20a7",
+        "middle~0.scm": "04b1768b9db1da99ff64e127a57bd92a8b91c8cddd668522126b389bdb65f51e",
+        "middle~0.o1": "343cf258acf24885648927f656dbca1d04743116e89229aacefaaf59c2aadc2f",
+        "middle.native-source": "dc7aeed230eaec6ea4a8d2276c2981b1db0079cc08941365a459ca5b7995456a",
+        "middle.o1": "52266b28a43da9e2cfefaf76aa430120de78bd3b6abfb9035cad33f0a1f31e56",
+        "middle.native-complete": "f0e461c3b0cc583ba4eb3f650e10a1aad490cdc06c78a6968e413852c073ca99"
+      }
+    }
+  ],
+  "date": "2026-10-03",
+  "headBeforeStudy": "3021d7594432694038950963f8a13c9262aeac8d",
+  "probeCount": 25,
+  "runnerSha256": "d73681276739bd1f3a1ac450d27b3652d22c85d53e7a7934a3f98fedaabccab4",
+  "terminal": "WRITER-GAP-REPRODUCED-AND-LEASE-EXPERIMENT-OK",
+  "counterexample": {
+    "order": "B then A",
+    "bRuntimeBeforeA": 43,
+    "aRejection": "Native build inputs changed",
+    "bReceiptAndInputSnapshotsUnchanged": true,
+    "nativeObjectBytesChanged": true,
+    "bWarmCompileCount": 0,
+    "finalRuntime": 42,
+    "expectedBSourceValue": 43,
+    "otherOrderFinalRuntime": 43,
+    "evidenceBoundary": "Captured producer Scheme inputs; real gsc writes shared paths; does not estimate natural race frequency"
+  },
+  "experimentResults": {
+    "singleWriterControls": [
+      42,
+      43
+    ],
+    "directoryClaim": "Acquired atomically before planner imports; identical canonical output roots only",
+    "contention": "Build and cleaning fail with status 70 and compile count 0; output bytes unchanged",
+    "successfulRelease": "Following writer builds and returns 43; expected native inventory cleans",
+    "ownerDeath": "Only frontend is killed first; each captured backend acknowledges a new probe after owner death; claim persists and next writer is rejected",
+    "explicitTestRecovery": "Kill owned backend process group, observe captured PIDs absent, remove test-only claim, rebuild and return 43",
+    "automaticRecovery": "Not implemented; no PID-only or age-based reclamation"
+  },
+  "decisions": {
+    "retainedCompilerPatches": "Both exact v3 patch digests unchanged; no deployment",
+    "directoryPrototype": "Kept only as reproducible test instrumentation; not applied to retained compiler patches",
+    "reasonNotAdopted": "Leaves claims on failure and changes automatic backend recovery to operator-mediated recovery; missing namespace and recovery contracts",
+    "nativeFlock": "Do not add native FFI import without clean-bootstrap qualification and backend lifetime ownership",
+    "uniqueReceiptTemporary": "Insufficient: original backend can still overwrite shared objects after another receipt is published",
+    "objectSnapshotOnly": "Not qualified as producer binding: late snapshots can observe another writer and active readers remain exposed"
+  },
+  "nextImplementation": {
+    "owners": [
+      "make before make-build and planner imports",
+      "make-clean",
+      "compiler compile-job executor quiescence",
+      "runtime generation lookup for reader consistency"
+    ],
+    "claimTransitions": [
+      "Vacant to owned via atomic claim",
+      "Owned to vacant after all write-capable jobs are quiescent and successful publication",
+      "Failed owner to abandoned unless executor quiescence is established",
+      "Abandoned to vacant only via fenced recovery"
+    ],
+    "remainingExperiments": [
+      "Backend failure while other jobs remain active",
+      "Path aliases and nested output roots",
+      "Nested build reentrancy",
+      "Competing cleaner and dependency reader",
+      "Forced owner death with backend descendants",
+      "Reader pinned to one immutable generation",
+      "Matching candidate compiler and clean bootstrap"
+    ]
+  },
+  "evidenceLimitations": [
+    "Not support for concurrent writers in the retained v3 patch",
+    "No whole output transaction or runtime reader coordination",
+    "No production owner registry or automatic recovery",
+    "No native flock or clean bootstrap qualification",
+    "Warm output equality is byte equality, not a filesystem syscall trace",
+    "Runtime checks use the simple two-object fixture; earlier 53 probes belong to unchanged v3 patch"
+  ],
+  "rawLogs": [
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-abandonment/a-build.captures.json",
+      "sha256": "50828ed608238419f647340284c6807415f4125ae0da67711f920f3af5a84f1b"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-abandonment/a-build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-abandonment/a-build.out",
+      "sha256": "b2e2331af314fab08699c71059e60978752fca03849d6d09a377619e1d1f2a41"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-abandonment/b-after-explicit-recovery.captures.json",
+      "sha256": "8416c1559c4fc5ef2565e2a48e09a57459f487e187f4d087363608b621256f25"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-abandonment/b-after-explicit-recovery.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-abandonment/b-after-explicit-recovery.out",
+      "sha256": "2326e8af22df6c975e356a59def73c4b7eb766a4425b089adaf44a9e4555d3b6"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-abandonment/b-after-owner-death.err",
+      "sha256": "166f302ed8d1e63ed4cf0b68d69a2546ccf897772e4ccabe26b9a6e50e597aa9"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-abandonment/b-after-owner-death.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-abandonment/b-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-abandonment/b-runtime.out",
+      "sha256": "e9b21025bc2317c9520066440e55b537748157d6f7f7b94ad8632837dc895534"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/a-build.captures.json",
+      "sha256": "b78e5b7d9f42aaab75fc749447febe8fb3fb2d8250581426295c6267eb913b7b"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/a-build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/a-build.out",
+      "sha256": "d44a3a382845d6c238aa853e12cd02352358194dcc854224efe0d9812c489827"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/a-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/a-runtime.out",
+      "sha256": "b7f9549fb8e01d0160307d914f0fc994a748abbf7f80e0057d80a462c96fab1f"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/b-after-release.captures.json",
+      "sha256": "da4a3b9ac89e85e3dbf416fe5aebcd16f8248a85270088052c6b978c8fab63ae"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/b-after-release.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/b-after-release.out",
+      "sha256": "d44a3a382845d6c238aa853e12cd02352358194dcc854224efe0d9812c489827"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/b-contended.err",
+      "sha256": "6a1da682dc7e497f17968bf93d5b8ff2310fcb4d53358fb6e8ac5fb9ce93e182"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/b-contended.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/b-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/b-runtime.out",
+      "sha256": "e9b21025bc2317c9520066440e55b537748157d6f7f7b94ad8632837dc895534"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/clean-after-release.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/clean-after-release.out",
+      "sha256": "9a8a246033b424a3db02e8d6e86fd91ae47568f3fd9e61fa92022e332a9eecad"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/clean-contended.err",
+      "sha256": "b4505883703dfef8238004d613a2e0f95c159644ecbe992e0fdf720931212187"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/experimental-lease/clean-contended.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ab/a-build.captures.json",
+      "sha256": "a1dd0560d778400cb14b33189102b39b9992f3b3651273e7909f249563ea6549"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ab/a-build.err",
+      "sha256": "b2aa621a47fb63d90d0a433ddc9468717d61c4f9a33dea51eda780e8da46dd00"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ab/a-build.out",
+      "sha256": "d31e63cbbcfc0d5e80e1f33d6544d5f240dda65b77543957b18497223d289a16"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ab/b-build.captures.json",
+      "sha256": "de9372d7cd024284e852ba01c3ddac6ee68381a7f0efaf28d20abcdf259b4197"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ab/b-build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ab/b-build.out",
+      "sha256": "a3606bfc0d0a5d2f09384399f0c4d62da74c298a5382530736104a2092ab9703"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ab/b-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ab/b-warm.out",
+      "sha256": "68ff1c8c79613a8870607bcba04539154b609870fef324c18636f75c43aeacd7"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ab/final-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ab/final-runtime.out",
+      "sha256": "e9b21025bc2317c9520066440e55b537748157d6f7f7b94ad8632837dc895534"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ab/runtime-after-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ab/runtime-after-b.out",
+      "sha256": "e9b21025bc2317c9520066440e55b537748157d6f7f7b94ad8632837dc895534"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ba/a-build.captures.json",
+      "sha256": "4b04bcab84dddb9d649f0a9c5dab8cbca9dbd0eb9f6a2b9e231a3d546857fb80"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ba/a-build.err",
+      "sha256": "178f62087352dea3498f005a82af742f3919928c6492968f3e26bf3b541f1259"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ba/a-build.out",
+      "sha256": "493bd2b0b6a49cfafc2e9a456788e9d69247f739daf031641a7a87cd6f9241da"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ba/b-build.captures.json",
+      "sha256": "f4a3bf0efa1125b2085ddeee33e85463b3db44d944f016122b5431b7a58393de"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ba/b-build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ba/b-build.out",
+      "sha256": "6df140d25c029d02b2f312e78961f8c4589fc69ceb796e2dd7dd43acdac21025"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ba/b-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ba/b-warm.out",
+      "sha256": "68ff1c8c79613a8870607bcba04539154b609870fef324c18636f75c43aeacd7"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ba/final-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ba/final-runtime.out",
+      "sha256": "b7f9549fb8e01d0160307d914f0fc994a748abbf7f80e0057d80a462c96fab1f"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ba/runtime-after-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/overlap-ba/runtime-after-b.out",
+      "sha256": "e9b21025bc2317c9520066440e55b537748157d6f7f7b94ad8632837dc895534"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/single-a/build.captures.json",
+      "sha256": "dbde88587e2f85510bcd8b902984fcdfb3f269dfe21353cd24f28df46c8d1eb6"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/single-a/build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/single-a/build.out",
+      "sha256": "20efc83009648a89e588cb8775125a4d2d779426d8830994b8db489b9be4d956"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/single-a/runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/single-a/runtime.out",
+      "sha256": "b7f9549fb8e01d0160307d914f0fc994a748abbf7f80e0057d80a462c96fab1f"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/single-b/build.captures.json",
+      "sha256": "d4f907ba9c4dad6771607791d2144ccc8983cf037b7be760936534e02c01ffaa"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/single-b/build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/single-b/build.out",
+      "sha256": "c1c4b522bcc4e7b5cb9f35a0ccdca97423ae82ec9009642bdc8177fb6ffba4ee"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/single-b/runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-writer-study/qualification/single-b/runtime.out",
+      "sha256": "e9b21025bc2317c9520066440e55b537748157d6f7f7b94ad8632837dc895534"
+    }
+  ],
+  "qualificationLog": {
+    "path": "/private/tmp/asp-writer-study/qualification.log",
+    "sha256": "cdcbadcceee623d19d08218d7c93ec33b5126512cd72da95e4fc1ab88df6a5fd"
+  },
+  "precedingExactHeadCI": {
+    "head": "3021d7594432694038950963f8a13c9262aeac8d",
+    "nativeLibraryLinux": "SUCCESS",
+    "nativeLibraryMacOS": "SUCCESS",
+    "nativeProviderLinux": "SUCCESS",
+    "nativeProviderMacOS": "SUCCESS",
+    "boundary": "ASP CI does not exercise isolated compiler patches or writer experiments"
+  },
+  "bootstrapSourceEvidence": [
+    {
+      "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/build-std.ss",
+      "sha256": "c0fe65e899a534a6272d5ae7ba27af33e5dac5a02bf7816da650634d92d636f9"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/build-spec.ss",
+      "sha256": "4bb1ea7f9f0a9633e7a635aca56fc4b07b8f6fa4cc5f5c7667218c65e09fb9ae"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/os/flock.ss",
+      "sha256": "23a76209a268e8040478037b6c720fccfce1102f08f88e60bc0d8c3ac9c192e9"
+    }
+  ],
+  "executorSourceAudit": {
+    "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/gerbil/compiler/base.ss",
+    "sha256": "7b4f277eccb85964f732c7599e94b68749eae77961fa7af2aa9e2d5e68218f30",
+    "observation": "compile-executor close! joins worker threads before raising first-error; normal make calls execute-pending only after make-build returns",
+    "boundary": "Source inspection, not a new failure-path runtime qualification; frontend errors and forced owner death need separate quiescence contracts"
+  }
+}

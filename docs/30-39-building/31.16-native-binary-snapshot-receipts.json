@@ -1,0 +1,1743 @@
+{
+  "schema": "asp.native-binary-snapshot.v1",
+  "date": "2026-10-03",
+  "cores": 12,
+  "headBeforeAmendment": "29562f232d793da27f48c3566b88596fc8364798",
+  "key": "native-complete-v2-snapshots",
+  "retainedRepresentation": "Binary source/SSI snapshots compared in 8192-byte chunks; no new imports",
+  "rejectedRepresentation": "Serialized exact u8vectors: correct identity but unnecessary text/storage expansion",
+  "digestAlternatives": {
+    "nativeCrypto": "Rejected due unqualified bootstrap dependency",
+    "gambitDigest": "Source exists; not installed; not treated as core availability"
+  },
+  "patches": {
+    "installed": {
+      "baseSha256": "139d348ecbdb1b98edf0f6cf53fdd690f56b49c8bf6942383068da2d4ebe551a",
+      "patchSha256": "0b2fe81a0a4e1995478288bd8688b4ec51cf53840a1248eb8bb69a841c4b9e09",
+      "patchedSourceSha256": "ed613b726b4367ceb7b4998bf16be74ba2857cb7d56d02501d85d98779a0c18a",
+      "compilerCheckoutUnchanged": true
+    },
+    "candidate": {
+      "baseSha256": "d4393b8ccb5ee2640bbdef971ccb0ee9e53b2bc36fca7eac79b4381693d153f2",
+      "patchSha256": "3cec728f75bd6b9b7c24bf3dca3e830160e59b150916b233afc7160f1487466a",
+      "patchedSourceSha256": "2691c04744b85d6194dffe492a72d56274df3476f7a7785070aab1c0632e2de8",
+      "compilerCheckoutUnchanged": true
+    }
+  },
+  "qualificationProbeCount": 44,
+  "qualification": {
+    "snapshots-identity": [
+      {
+        "name": "cold",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 3.751379499997711,
+        "userSeconds": 2.170639,
+        "systemSeconds": 0.9586889999999999,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.9908439999999246,
+        "userSeconds": 0.5236689999999999,
+        "systemSeconds": 0.10566000000000009,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "same-mtime-source",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.3989972909985227,
+        "userSeconds": 2.2013900000000004,
+        "systemSeconds": 0.9868579999999998,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "changed-runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.2227832499993383,
+        "userSeconds": 0.09927999999999937,
+        "systemSeconds": 0.026793000000000067,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": 43
+      },
+      {
+        "name": "same-mtime-interface",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.106169459002558,
+        "userSeconds": 2.1447030000000007,
+        "systemSeconds": 0.9848440000000003,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "identity-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.8952054580004187,
+        "userSeconds": 0.547987,
+        "systemSeconds": 0.10735199999999967,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "identity-runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.2625848339957884,
+        "userSeconds": 0.1198099999999993,
+        "systemSeconds": 0.0328280000000003,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": 43
+      }
+    ],
+    "snapshot-contract": [
+      {
+        "name": "legacy-cold",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.014979958003096,
+        "userSeconds": 2.157378,
+        "systemSeconds": 0.954519,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 0,
+        "receiptBytes": 421,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "legacy-migration",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.1119111250009155,
+        "userSeconds": 2.1268100000000003,
+        "systemSeconds": 0.93932,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.8638319590027095,
+        "userSeconds": 0.5289759999999992,
+        "systemSeconds": 0.11553199999999975,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "missing-middle.native-source",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.0205815829976927,
+        "userSeconds": 2.1074790000000005,
+        "systemSeconds": 0.909875,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "missing-middle.native-interface",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.0641707079994376,
+        "userSeconds": 2.122133,
+        "systemSeconds": 1.0001060000000002,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "corrupt-middle.native-source",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.0512625409974135,
+        "userSeconds": 2.161906,
+        "systemSeconds": 0.9543900000000001,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "corrupt-middle.native-interface",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.046600624998973,
+        "userSeconds": 2.0916259999999998,
+        "systemSeconds": 0.9491959999999997,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "snapshot-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.6574763329990674,
+        "userSeconds": 0.5138169999999995,
+        "systemSeconds": 0.09201300000000057,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.618392042000778,
+        "userSeconds": 0.11973099999999981,
+        "systemSeconds": 0.03737199999999952,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": 42
+      },
+      {
+        "name": "clean",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.6759079580006073,
+        "userSeconds": 0.4998010000000015,
+        "systemSeconds": 0.08167599999999986,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": null,
+        "snapshotBytes": 0,
+        "receiptBytes": null,
+        "expectedRuntimeAnswer": null
+      }
+    ],
+    "snapshot-recovery": [
+      {
+        "name": "cold",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.0177043750009034,
+        "userSeconds": 2.122874,
+        "systemSeconds": 0.950483,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.7279080419975799,
+        "userSeconds": 0.5197080000000001,
+        "systemSeconds": 0.09878000000000009,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "missing-middle.o1",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.2049107499988168,
+        "userSeconds": 2.192342,
+        "systemSeconds": 0.994467,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "missing-middle~0.o1",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.1276866659973166,
+        "userSeconds": 2.1126050000000003,
+        "systemSeconds": 0.9667140000000001,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "missing-middle~1.o1",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.074829999997746,
+        "userSeconds": 2.140802,
+        "systemSeconds": 0.9176289999999998,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "missing-middle~inner.o1",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.9727375000002212,
+        "userSeconds": 2.070741,
+        "systemSeconds": 0.9607110000000003,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "missing-middle~empty.o1",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.9801443750038743,
+        "userSeconds": 2.136367999999999,
+        "systemSeconds": 0.9711119999999998,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "missing-middle~inner~0.o1",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.9728595420019701,
+        "userSeconds": 2.1233000000000004,
+        "systemSeconds": 0.9632019999999999,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "force",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.843087834000471,
+        "userSeconds": 2.0880110000000016,
+        "systemSeconds": 0.9493049999999998,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "post-force-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.6107877920003375,
+        "userSeconds": 0.479182999999999,
+        "systemSeconds": 0.08573200000000014,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "debug-option",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.138538833001803,
+        "userSeconds": 2.283404000000001,
+        "systemSeconds": 1.0319139999999996,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "post-debug-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.8760194159985986,
+        "userSeconds": 0.5014409999999998,
+        "systemSeconds": 0.10146600000000028,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "corrupt-receipt",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.006965417000174,
+        "userSeconds": 2.2427719999999987,
+        "systemSeconds": 1.049251,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "backend-failure",
+        "exit": 70,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.011284332998912,
+        "userSeconds": 1.8722400000000015,
+        "systemSeconds": 0.7710919999999994,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": null,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "failure-recovery",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.9860178749950137,
+        "userSeconds": 2.1755180000000003,
+        "systemSeconds": 0.9332530000000006,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.1665716669958783,
+        "userSeconds": 0.11581799999999731,
+        "systemSeconds": 0.029041000000001205,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": 42
+      },
+      {
+        "name": "clean",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.8243095420039026,
+        "userSeconds": 0.5083400000000005,
+        "systemSeconds": 0.09885399999999933,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": null,
+        "snapshotBytes": 0,
+        "receiptBytes": null,
+        "expectedRuntimeAnswer": null
+      }
+    ],
+    "snapshot-interruption": [
+      {
+        "name": "cold",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.1178607910042047,
+        "userSeconds": 2.151616,
+        "systemSeconds": 0.9193129999999999,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "interrupted-backend",
+        "exit": 70,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.033499874996778,
+        "userSeconds": 1.2636049999999996,
+        "systemSeconds": 0.18689500000000014,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": null,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "interruption-recovery",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.094203499997093,
+        "userSeconds": 2.135574,
+        "systemSeconds": 0.9377629999999999,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.9830807079997612,
+        "userSeconds": 0.12065799999999971,
+        "systemSeconds": 0.0339109999999998,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": 42
+      }
+    ],
+    "snapshot-receipt-format": [
+      {
+        "name": "cold",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 2.096656540998083,
+        "userSeconds": 2.122228,
+        "systemSeconds": 0.893938,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.7258602080037235,
+        "userSeconds": 0.515152,
+        "systemSeconds": 0.09477599999999997,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "trailing-record",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.9865012920054141,
+        "userSeconds": 2.1172999999999997,
+        "systemSeconds": 0.992579,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "trailing-reader-error",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.862026208997122,
+        "userSeconds": 2.1195180000000002,
+        "systemSeconds": 0.9916659999999999,
+        "compileCount": 1,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "integrity-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 0.8224022920039715,
+        "userSeconds": 0.5436500000000004,
+        "systemSeconds": 0.11018499999999998,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": null
+      },
+      {
+        "name": "runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.244912292000663,
+        "userSeconds": 0.11795199999999983,
+        "systemSeconds": 0.029436000000000018,
+        "compileCount": 0,
+        "sourceBytes": 232,
+        "interfaceBytes": 930,
+        "snapshotBytes": 1162,
+        "receiptBytes": 431,
+        "expectedRuntimeAnswer": 42
+      }
+    ]
+  },
+  "warmCosts": {
+    "cost": {
+      "order": [
+        "v1",
+        "bytes",
+        "bytes",
+        "v1"
+      ],
+      "paddingBytes": 262144,
+      "attemptsPerArm": 3,
+      "arms": [
+        {
+          "position": 0,
+          "representation": "v1",
+          "rows": [
+            {
+              "name": "cold",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 3.201200791998417,
+              "userSeconds": 2.266973,
+              "systemSeconds": 0.982047,
+              "compileCount": 1,
+              "sourceBytes": 262376,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-0",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 1.4877736249982263,
+              "userSeconds": 0.585528,
+              "systemSeconds": 0.12072399999999994,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-1",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 1.5954832499992335,
+              "userSeconds": 0.579472,
+              "systemSeconds": 0.12120100000000011,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-2",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 1.481293500000902,
+              "userSeconds": 0.5447789999999997,
+              "systemSeconds": 0.1202939999999999,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            }
+          ]
+        },
+        {
+          "position": 1,
+          "representation": "bytes",
+          "rows": [
+            {
+              "name": "cold",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 3.502297125000041,
+              "userSeconds": 2.300294,
+              "systemSeconds": 1.002177,
+              "compileCount": 1,
+              "sourceBytes": 262376,
+              "receiptBytes": 1046508,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-0",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 1.3814269590002368,
+              "userSeconds": 0.6164459999999998,
+              "systemSeconds": 0.1179619999999999,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "receiptBytes": 1046508,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-1",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 1.2138730000006035,
+              "userSeconds": 0.583208,
+              "systemSeconds": 0.10888900000000001,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "receiptBytes": 1046508,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-2",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.7902416670040111,
+              "userSeconds": 0.6062469999999998,
+              "systemSeconds": 0.11779000000000006,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "receiptBytes": 1046508,
+              "expectedRuntimeAnswer": null
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "representation": "bytes",
+          "rows": [
+            {
+              "name": "cold",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 2.2109397500025807,
+              "userSeconds": 2.262683,
+              "systemSeconds": 0.998583,
+              "compileCount": 1,
+              "sourceBytes": 262376,
+              "receiptBytes": 1046508,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-0",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.7724002500035567,
+              "userSeconds": 0.5903830000000001,
+              "systemSeconds": 0.10203699999999993,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "receiptBytes": 1046508,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-1",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.8519254999991972,
+              "userSeconds": 0.5815790000000001,
+              "systemSeconds": 0.116479,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "receiptBytes": 1046508,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-2",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.8703442920013913,
+              "userSeconds": 0.5775700000000001,
+              "systemSeconds": 0.10838999999999999,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "receiptBytes": 1046508,
+              "expectedRuntimeAnswer": null
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "representation": "v1",
+          "rows": [
+            {
+              "name": "cold",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 2.2510227090024273,
+              "userSeconds": 2.236733,
+              "systemSeconds": 1.043397,
+              "compileCount": 1,
+              "sourceBytes": 262376,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-0",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.8371240409978782,
+              "userSeconds": 0.5256529999999997,
+              "systemSeconds": 0.11421900000000007,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-1",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.8741233749969979,
+              "userSeconds": 0.5336700000000003,
+              "systemSeconds": 0.10654999999999992,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-2",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.8848001249934896,
+              "userSeconds": 0.5088869999999996,
+              "systemSeconds": 0.09610800000000008,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "v1": {
+          "medianCpuSeconds": 0.6526464999999999,
+          "medianWallSeconds": 1.1830468124971958,
+          "receiptBytes": 421,
+          "snapshotBytes": null
+        },
+        "bytes": {
+          "medianCpuSeconds": 0.695239,
+          "medianWallSeconds": 0.8611348960002942,
+          "receiptBytes": 1046508,
+          "snapshotBytes": null
+        }
+      }
+    },
+    "binary-cost": {
+      "order": [
+        "v1",
+        "snapshots",
+        "snapshots",
+        "v1"
+      ],
+      "paddingBytes": 262144,
+      "attemptsPerArm": 3,
+      "arms": [
+        {
+          "position": 0,
+          "representation": "v1",
+          "rows": [
+            {
+              "name": "cold",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 2.6557244159994298,
+              "userSeconds": 2.135369,
+              "systemSeconds": 0.938534,
+              "compileCount": 1,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 0,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-0",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.7052969170035794,
+              "userSeconds": 0.5458890000000003,
+              "systemSeconds": 0.09699799999999992,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 0,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-1",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.747806291001325,
+              "userSeconds": 0.5057229999999997,
+              "systemSeconds": 0.10617500000000013,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 0,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-2",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.9174129169987282,
+              "userSeconds": 0.5350280000000001,
+              "systemSeconds": 0.10027300000000006,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 0,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            }
+          ]
+        },
+        {
+          "position": 1,
+          "representation": "snapshots",
+          "rows": [
+            {
+              "name": "cold",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 2.099372584001685,
+              "userSeconds": 2.121991,
+              "systemSeconds": 0.963537,
+              "compileCount": 1,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 263306,
+              "receiptBytes": 431,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-0",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.8176648340013344,
+              "userSeconds": 0.5112700000000001,
+              "systemSeconds": 0.09607899999999991,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 263306,
+              "receiptBytes": 431,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-1",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.729918084005476,
+              "userSeconds": 0.523072,
+              "systemSeconds": 0.09330400000000005,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 263306,
+              "receiptBytes": 431,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-2",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.7012438340025255,
+              "userSeconds": 0.5231149999999998,
+              "systemSeconds": 0.09973300000000007,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 263306,
+              "receiptBytes": 431,
+              "expectedRuntimeAnswer": null
+            }
+          ]
+        },
+        {
+          "position": 2,
+          "representation": "snapshots",
+          "rows": [
+            {
+              "name": "cold",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 1.8465299589952338,
+              "userSeconds": 2.008024,
+              "systemSeconds": 0.9319999999999999,
+              "compileCount": 1,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 263306,
+              "receiptBytes": 431,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-0",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.8330664579989389,
+              "userSeconds": 0.5524249999999999,
+              "systemSeconds": 0.10702600000000007,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 263306,
+              "receiptBytes": 431,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-1",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.7451924999986659,
+              "userSeconds": 0.5228360000000003,
+              "systemSeconds": 0.09901699999999991,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 263306,
+              "receiptBytes": 431,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-2",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.7909011250012554,
+              "userSeconds": 0.5394700000000001,
+              "systemSeconds": 0.10210200000000014,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 263306,
+              "receiptBytes": 431,
+              "expectedRuntimeAnswer": null
+            }
+          ]
+        },
+        {
+          "position": 3,
+          "representation": "v1",
+          "rows": [
+            {
+              "name": "cold",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 1.7979057919947081,
+              "userSeconds": 2.060117,
+              "systemSeconds": 0.932213,
+              "compileCount": 1,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 0,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-0",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.6476654580037575,
+              "userSeconds": 0.4916290000000001,
+              "systemSeconds": 0.09323199999999998,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 0,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-1",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.7691485000032117,
+              "userSeconds": 0.5424389999999999,
+              "systemSeconds": 0.10018499999999997,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 0,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            },
+            {
+              "name": "warm-2",
+              "exit": 0,
+              "timeout": false,
+              "cores": 12,
+              "wallSeconds": 0.732407499999681,
+              "userSeconds": 0.5509309999999998,
+              "systemSeconds": 0.10559200000000013,
+              "compileCount": 0,
+              "sourceBytes": 262376,
+              "interfaceBytes": 930,
+              "snapshotBytes": 0,
+              "receiptBytes": 421,
+              "expectedRuntimeAnswer": null
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "v1": {
+          "medianCpuSeconds": 0.6389625,
+          "medianWallSeconds": 0.740106895500503,
+          "receiptBytes": 421,
+          "snapshotBytes": 0
+        },
+        "snapshots": {
+          "medianCpuSeconds": 0.6223505,
+          "medianWallSeconds": 0.7680468124999607,
+          "receiptBytes": 431,
+          "snapshotBytes": 263306
+        }
+      }
+    }
+  },
+  "serializedIdentityExperiment": [
+    {
+      "name": "cold",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 2.7703498330010916,
+      "userSeconds": 2.184824,
+      "systemSeconds": 1.016952,
+      "compileCount": 1,
+      "sourceBytes": 232,
+      "receiptBytes": 4548,
+      "expectedRuntimeAnswer": null
+    },
+    {
+      "name": "warm",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 1.5892151250009192,
+      "userSeconds": 0.564327,
+      "systemSeconds": 0.11768,
+      "compileCount": 0,
+      "sourceBytes": 232,
+      "receiptBytes": 4548,
+      "expectedRuntimeAnswer": null
+    },
+    {
+      "name": "same-mtime-source",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 3.9135937499959255,
+      "userSeconds": 2.260208,
+      "systemSeconds": 0.9665619999999999,
+      "compileCount": 1,
+      "sourceBytes": 232,
+      "receiptBytes": 4548,
+      "expectedRuntimeAnswer": null
+    },
+    {
+      "name": "changed-runtime",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 1.6316642079982557,
+      "userSeconds": 0.12084500000000009,
+      "systemSeconds": 0.03567600000000004,
+      "compileCount": 0,
+      "sourceBytes": 232,
+      "receiptBytes": 4548,
+      "expectedRuntimeAnswer": 43
+    },
+    {
+      "name": "same-mtime-interface",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 2.8757517080011894,
+      "userSeconds": 2.1922810000000004,
+      "systemSeconds": 0.9408349999999999,
+      "compileCount": 1,
+      "sourceBytes": 232,
+      "receiptBytes": 4548,
+      "expectedRuntimeAnswer": null
+    },
+    {
+      "name": "identity-warm",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 1.0140267919996404,
+      "userSeconds": 0.5394689999999995,
+      "systemSeconds": 0.1196600000000001,
+      "compileCount": 0,
+      "sourceBytes": 232,
+      "receiptBytes": 4548,
+      "expectedRuntimeAnswer": null
+    },
+    {
+      "name": "identity-runtime",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 1.5404091250020429,
+      "userSeconds": 0.13907699999999945,
+      "systemSeconds": 0.042928999999999995,
+      "compileCount": 0,
+      "sourceBytes": 232,
+      "receiptBytes": 4548,
+      "expectedRuntimeAnswer": 43
+    }
+  ],
+  "expansion": {
+    "installed": "Direct core-expand of complete module wrapper passed",
+    "candidate": "Unbound call-with-compile-job-slot, existing compatibility blocker",
+    "cleanBootstrapRun": false
+  },
+  "ciBeforeAmendment": {
+    "headRefOid": "29562f232d793da27f48c3566b88596fc8364798",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-03T01:40:08Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37086811858/job/111098720337",
+        "name": "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-03T01:37:43Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-03T01:41:02Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37086811858/job/111098720473",
+        "name": "Native Gerbil library (macos-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-03T01:37:47Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-03T01:40:06Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37086811858/job/111098720552",
+        "name": "Native Gerbil provider (ubuntu-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-03T01:37:41Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-03T01:42:25Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37086811858/job/111098720523",
+        "name": "Native Gerbil provider (macos-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-03T01:37:49Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      }
+    ]
+  },
+  "compilerDeployed": false,
+  "remainingBoundaries": [
+    "Stable compiler input consumption during compilation",
+    "ABA input changes",
+    "Native object content identity",
+    "Independent concurrent output writers",
+    "Atomic publication across all outputs",
+    "Matching candidate compiler and clean bootstrap",
+    "Whole-project memory/IO/storage/performance qualification"
+  ],
+  "rawLogReferences": [
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/cold.out",
+      "sha256": "6580ede0d0809d549b5ed9bab27f9f8077d3732f41bca0926ea679b1ece94779"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/cold.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/same-mtime-source.out",
+      "sha256": "6580ede0d0809d549b5ed9bab27f9f8077d3732f41bca0926ea679b1ece94779"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/same-mtime-source.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/changed-runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/changed-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/same-mtime-interface.out",
+      "sha256": "6580ede0d0809d549b5ed9bab27f9f8077d3732f41bca0926ea679b1ece94779"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/same-mtime-interface.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/identity-warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/identity-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/identity-runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshots-identity/identity-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/legacy-cold.out",
+      "sha256": "3a8cae28867893ea02a14d0d5b5f44696d4e4461728925fa2b242c363c388a78"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/legacy-cold.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/legacy-migration.out",
+      "sha256": "3a8cae28867893ea02a14d0d5b5f44696d4e4461728925fa2b242c363c388a78"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/legacy-migration.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/missing-middle.native-source.out",
+      "sha256": "3a8cae28867893ea02a14d0d5b5f44696d4e4461728925fa2b242c363c388a78"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/missing-middle.native-source.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/missing-middle.native-interface.out",
+      "sha256": "3a8cae28867893ea02a14d0d5b5f44696d4e4461728925fa2b242c363c388a78"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/missing-middle.native-interface.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/corrupt-middle.native-source.out",
+      "sha256": "3a8cae28867893ea02a14d0d5b5f44696d4e4461728925fa2b242c363c388a78"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/corrupt-middle.native-source.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/corrupt-middle.native-interface.out",
+      "sha256": "3a8cae28867893ea02a14d0d5b5f44696d4e4461728925fa2b242c363c388a78"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/corrupt-middle.native-interface.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/snapshot-warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/snapshot-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/clean.out",
+      "sha256": "da570db102b8c86b12f3c1cec732ea88d41bafe6f759cdc0783d22661b69e701"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-contract/clean.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/cold.out",
+      "sha256": "702d39da90b900eb2d8ba15ac29a3510eb4cf5d06c6ee9725bf9b73cbe942f57"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/cold.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/missing-middle.o1.out",
+      "sha256": "702d39da90b900eb2d8ba15ac29a3510eb4cf5d06c6ee9725bf9b73cbe942f57"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/missing-middle.o1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/missing-middle~0.o1.out",
+      "sha256": "702d39da90b900eb2d8ba15ac29a3510eb4cf5d06c6ee9725bf9b73cbe942f57"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/missing-middle~0.o1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/missing-middle~1.o1.out",
+      "sha256": "702d39da90b900eb2d8ba15ac29a3510eb4cf5d06c6ee9725bf9b73cbe942f57"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/missing-middle~1.o1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/missing-middle~inner.o1.out",
+      "sha256": "702d39da90b900eb2d8ba15ac29a3510eb4cf5d06c6ee9725bf9b73cbe942f57"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/missing-middle~inner.o1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/missing-middle~empty.o1.out",
+      "sha256": "702d39da90b900eb2d8ba15ac29a3510eb4cf5d06c6ee9725bf9b73cbe942f57"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/missing-middle~empty.o1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/missing-middle~inner~0.o1.out",
+      "sha256": "702d39da90b900eb2d8ba15ac29a3510eb4cf5d06c6ee9725bf9b73cbe942f57"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/missing-middle~inner~0.o1.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/force.out",
+      "sha256": "702d39da90b900eb2d8ba15ac29a3510eb4cf5d06c6ee9725bf9b73cbe942f57"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/force.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/post-force-warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/post-force-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/debug-option.out",
+      "sha256": "702d39da90b900eb2d8ba15ac29a3510eb4cf5d06c6ee9725bf9b73cbe942f57"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/debug-option.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/post-debug-warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/post-debug-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/corrupt-receipt.out",
+      "sha256": "702d39da90b900eb2d8ba15ac29a3510eb4cf5d06c6ee9725bf9b73cbe942f57"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/corrupt-receipt.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/backend-failure.out",
+      "sha256": "837998e3907526469ecc1b82c79b10543323eb3cadb91b16dd7f2ece50e1eab9"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/backend-failure.err",
+      "sha256": "b137e8afb94952aa8c2536c2b11067570118dc24587963216c71c69dba8fd987"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/failure-recovery.out",
+      "sha256": "702d39da90b900eb2d8ba15ac29a3510eb4cf5d06c6ee9725bf9b73cbe942f57"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/failure-recovery.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/clean.out",
+      "sha256": "b16675d2f0ce0e02a9e265a9e830fd9b44e3ec965d1e318a29b6a94c3ce4cd4e"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-recovery/clean.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-interruption/cold.out",
+      "sha256": "dc93bc4d953441392c9e55ef7f4be91059712c9e866483e8e5adcd016aae8c33"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-interruption/cold.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-interruption/interrupted-backend.out",
+      "sha256": "b2e2331af314fab08699c71059e60978752fca03849d6d09a377619e1d1f2a41"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-interruption/interrupted-backend.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-interruption/interruption-recovery.out",
+      "sha256": "dc93bc4d953441392c9e55ef7f4be91059712c9e866483e8e5adcd016aae8c33"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-interruption/interruption-recovery.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-interruption/runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-interruption/runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-receipt-format/cold.out",
+      "sha256": "73cf975bf4d93a4cad7b37175ed14fe72214ef82ab7101cef6fa679b672368a7"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-receipt-format/cold.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-receipt-format/warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-receipt-format/warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-receipt-format/trailing-record.out",
+      "sha256": "73cf975bf4d93a4cad7b37175ed14fe72214ef82ab7101cef6fa679b672368a7"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-receipt-format/trailing-record.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-receipt-format/trailing-reader-error.out",
+      "sha256": "73cf975bf4d93a4cad7b37175ed14fe72214ef82ab7101cef6fa679b672368a7"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-receipt-format/trailing-reader-error.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-receipt-format/integrity-warm.out",
+      "sha256": "2bcb79585cb707387a74c7d2fe9716182d013525206b807e5159f3c2b0b227f8"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-receipt-format/integrity-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-receipt-format/runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-byte-identity/snapshot-receipt-format/runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

@@ -107,7 +107,8 @@
    (comment-quality-findings index)
    (controlled-branch-shape-findings index)
    (predicate-family-combinator-findings index)
-   (dependency-protocol-adapter-findings index)
+   (dependency-protocol-adapter-findings
+    index test-evidence-complete?: test-evidence-complete?)
    (explicit-precise-import-findings index)
    (package-build-responsibility-findings index)
    (package-build-canonical-shape-findings index)

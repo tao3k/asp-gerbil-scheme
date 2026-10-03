@@ -15,21 +15,29 @@ The upstream stack already owns the complete testing lifecycle. The
 =gerbil-poo= package demonstrates the minimal =unit-tests.ss= entry:
 =:clan/testing= initializes the test environment and imports the package
 version module. Current Gerbil exposes the same lifecycle through
-=gerbil test=.
+=:gerbil/tools/gxtest=.
 
-The prior ASP framework duplicated discovery, selection, execution, report,
-receipt, and build responsibilities. Those owners are retired. The stable ASP
-surface now exports only POO instrumentation profiles and small observation
-helpers.
+The prior ASP framework duplicated suite loading, filtering, reports, and
+build responsibilities. Native Gerbil owns those operations. ASP also exposes
+an optional package discovery trampoline and a process scheduler for POO
+memory, isolation, and serial-resource profiles. These are executable APIs;
+they are not used by the repository's direct =just test= invocation.
+
+The installed 2591dcd Bach =gerbil test= dispatcher returned exit 0 for an
+intentional assertion failure. Repository and CI commands invoke native gxtest
+through =gxi -e= and explicitly =exit= with its result. The regression checks
+both a successful fixture and a failed assertion; =HARNESS-OK= alone is not a
+test qualification receipt.
 
 ** Current contract
 
 | Concern | Owner |
 |---------+-------|
-| test arguments and recursive directories | =gerbil test= |
+| test arguments and recursive directories | =:gerbil/tools/gxtest= |
 | suite loading, setup/cleanup, filtering, summary | =:clan/testing= |
 | package/module graph | ASP Building API PackageSpec and =std/make= |
 | memory/performance/debug/resource declaration | ASP POO profiles |
+| optional package discovery and process grouping | ASP =testing-runner-api= / =testing-api= |
 | POO method tracing | =:clan/poo/debug= |
 
 ** Audit gates
@@ -38,4 +46,7 @@ helpers.
 - public Build API contains no retired framework owner;
 - a clean =gerbil build= compiles only the current extension modules;
 - policy scope derives from the upstream module graph;
-- repository tests contain no runtime dependency on the retired runner.
+- repository tests exercise the optional ASP discovery and process APIs while
+  native Gerbil owns assertions, suite lifecycle, and terminal exit status;
+- discovery ignore directories prune traversal relative to the supplied
+  package root, including absolute roots.

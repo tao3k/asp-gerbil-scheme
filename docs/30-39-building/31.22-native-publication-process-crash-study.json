@@ -1,0 +1,760 @@
+{
+  "schema": "asp.native-publication-crash-study.v1",
+  "patchedSourceSha256": "b7473bf5f013f5b65f0f7a08c6f5683ca45527e48a23dd5b96ef02b2f202a524",
+  "patchSha256": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+  "nativeGscSha256": "e780d799e1be2ce62c0de90758b81a9a4bdeec63276b82da932dced261a1b400",
+  "runnerSha256": "f35c571a45b244bcb61b36f7bd16aee34c3ef3bcc172ae8213a7b46d38a31061",
+  "sharedHarnessSha256": "8162f6913329d868dcfb7e836456ec1cb82f94047179e531cf27e7b86a86872a",
+  "retainedCompilerPatchChanged": false,
+  "observations": [
+    {
+      "name": "build-a",
+      "exit": 0,
+      "marker": "BUILD-OK",
+      "expectedAnswer": null,
+      "stdoutSha256": "752625b16b749d533747f72ff8f37f9eb34f9f9abda0586bb9047d8dbc6863a7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "build-b",
+      "exit": 0,
+      "marker": "BUILD-OK",
+      "expectedAnswer": null,
+      "stdoutSha256": "560063a18d72407c253e0db95c4b6d4b6d73ef1d2d6abb75e9c5d52f43d49fa6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "split-killed-between-records",
+      "stage": "selector-replaced",
+      "exit": -9,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "split-restarted-state",
+      "selectorEpoch": 2,
+      "tokenSpent": false
+    },
+    {
+      "name": "split-before-replay",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "split-replay-different-manifest",
+      "exit": 0,
+      "marker": "ACK-SPLIT",
+      "expectedAnswer": null,
+      "stdoutSha256": "2c7806a55e1c99cec6b364dadfbec9b3e8b4c15198ca165db612d21bef186b6a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "split-after-replay",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-stage-killed",
+      "stage": "before-stage",
+      "exit": -9,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-stage-restarted-state",
+      "epoch": 2,
+      "spent": false,
+      "activeEpoch": 1,
+      "abandonedStagingFiles": 0
+    },
+    {
+      "name": "before-stage-runtime-before-retry",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-stage-same-request-retry",
+      "exit": 0,
+      "marker": "ACK-COMMITTED",
+      "expectedAnswer": null,
+      "stdoutSha256": "d36d18a48e2d1d00949ba6cd3359ef895d0d8cca5a286ab0b409cedb60f6b7b3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-stage-different-manifest-rejected",
+      "exit": 70,
+      "marker": "Consumed token request mismatch",
+      "expectedAnswer": null,
+      "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-stage-different-request-rejected",
+      "exit": 70,
+      "marker": "Consumed token request mismatch",
+      "expectedAnswer": null,
+      "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-stage-runtime-after-retry",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "before-stage-superseded-token-rejected",
+      "exit": 70,
+      "marker": "Publication authority superseded",
+      "expectedAnswer": null,
+      "stdoutSha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "stage-synced-killed",
+      "stage": "stage-synced",
+      "exit": -9,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "stage-synced-restarted-state",
+      "epoch": 2,
+      "spent": false,
+      "activeEpoch": 1,
+      "abandonedStagingFiles": 1
+    },
+    {
+      "name": "stage-synced-runtime-before-retry",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "stage-synced-same-request-retry",
+      "exit": 0,
+      "marker": "ACK-COMMITTED",
+      "expectedAnswer": null,
+      "stdoutSha256": "d36d18a48e2d1d00949ba6cd3359ef895d0d8cca5a286ab0b409cedb60f6b7b3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "stage-synced-different-manifest-rejected",
+      "exit": 70,
+      "marker": "Consumed token request mismatch",
+      "expectedAnswer": null,
+      "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "stage-synced-different-request-rejected",
+      "exit": 70,
+      "marker": "Consumed token request mismatch",
+      "expectedAnswer": null,
+      "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "stage-synced-runtime-after-retry",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "stage-synced-superseded-token-rejected",
+      "exit": 70,
+      "marker": "Publication authority superseded",
+      "expectedAnswer": null,
+      "stdoutSha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "replaced-killed",
+      "stage": "replaced",
+      "exit": -9,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "replaced-restarted-state",
+      "epoch": 2,
+      "spent": true,
+      "activeEpoch": 2,
+      "abandonedStagingFiles": 0
+    },
+    {
+      "name": "replaced-runtime-before-retry",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "replaced-same-request-retry",
+      "exit": 0,
+      "marker": "ACK-REPLAY",
+      "expectedAnswer": null,
+      "stdoutSha256": "c0505db97369bb48c07e67564e1ed9961a2894e8abc1e6a31a29976ed989f0cc",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "replaced-different-manifest-rejected",
+      "exit": 70,
+      "marker": "Consumed token request mismatch",
+      "expectedAnswer": null,
+      "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "replaced-different-request-rejected",
+      "exit": 70,
+      "marker": "Consumed token request mismatch",
+      "expectedAnswer": null,
+      "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "replaced-runtime-after-retry",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "replaced-superseded-token-rejected",
+      "exit": 70,
+      "marker": "Publication authority superseded",
+      "expectedAnswer": null,
+      "stdoutSha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "directory-synced-killed",
+      "stage": "directory-synced",
+      "exit": -9,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "directory-synced-restarted-state",
+      "epoch": 2,
+      "spent": true,
+      "activeEpoch": 2,
+      "abandonedStagingFiles": 0
+    },
+    {
+      "name": "directory-synced-runtime-before-retry",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "directory-synced-same-request-retry",
+      "exit": 0,
+      "marker": "ACK-REPLAY",
+      "expectedAnswer": null,
+      "stdoutSha256": "c0505db97369bb48c07e67564e1ed9961a2894e8abc1e6a31a29976ed989f0cc",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "directory-synced-different-manifest-rejected",
+      "exit": 70,
+      "marker": "Consumed token request mismatch",
+      "expectedAnswer": null,
+      "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "directory-synced-different-request-rejected",
+      "exit": 70,
+      "marker": "Consumed token request mismatch",
+      "expectedAnswer": null,
+      "stdoutSha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "directory-synced-runtime-after-retry",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "directory-synced-superseded-token-rejected",
+      "exit": 70,
+      "marker": "Publication authority superseded",
+      "expectedAnswer": null,
+      "stdoutSha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "missing-state-rejected",
+      "exit": 70,
+      "marker": "FileNotFoundError",
+      "expectedAnswer": null,
+      "stdoutSha256": "b5991e34d1a90585576d4e2501d416621bd8cf77a4c474b241a84e4f1e0f07d9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "missing-state-preserved",
+      "authoritativeFileUnchanged": true
+    },
+    {
+      "name": "malformed-state-rejected",
+      "exit": 70,
+      "marker": "JSONDecodeError",
+      "expectedAnswer": null,
+      "stdoutSha256": "359269a2a22eb1e482f186fc33e7e1539ffc7ba57a3fb482f5cf12efeaad04a5",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "malformed-state-preserved",
+      "authoritativeFileUnchanged": true
+    },
+    {
+      "name": "inconsistent-state-rejected",
+      "exit": 70,
+      "marker": "Inconsistent authority and selector",
+      "expectedAnswer": null,
+      "stdoutSha256": "09827d15d07f029ebd5bfa714091c84afd1f88abcfd416ea1ac048b4fb4a6099",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "inconsistent-state-preserved",
+      "authoritativeFileUnchanged": true
+    }
+  ],
+  "manifests": {
+    "a": {
+      "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-publication-crash-48bo2zmm/lib-a",
+      "graph": {
+        "app": [
+          "dep"
+        ],
+        "dep": []
+      },
+      "files": {
+        "publication/app.ssi": "909944727e1cc972b2d5ff8f7f42b4ee3538281c7f1854f9694b0b9c57d35dc8",
+        "publication/app.o1": "d971477409f5e2a20c22c58a4512b0e36cb02db11d6731d1a201533b25355069",
+        "publication/app~0.o1": "a49b924853961214aec6c1dd8669f0a3d1325762f1804a3d86e20e12655045f7",
+        "publication/app.native-complete": "d8a2f3531183e72f6cd6dc5704501acc53ae7a4114ab2a3a8ea0633574613711",
+        "publication/app.native-source": "76e54cdbb3de86771148784761010ec5045be49f448e4c1b96af1c1359119797",
+        "publication/app.native-interface": "909944727e1cc972b2d5ff8f7f42b4ee3538281c7f1854f9694b0b9c57d35dc8",
+        "publication/dep.ssi": "2041592f8db9eea4826f015866428d6a992e1111be1373e13ea525b6cedc1e73",
+        "publication/dep.o1": "35cd7e062008170a242fbee9c2687f707438b121728f320f7f395d6e2e42037a",
+        "publication/dep~0.o1": "f916ae1545af3454f5fb607adbe65ee30e5eb1823879a4a09554be49f3d25fe2",
+        "publication/dep.native-complete": "d8a2f3531183e72f6cd6dc5704501acc53ae7a4114ab2a3a8ea0633574613711",
+        "publication/dep.native-source": "7e8c74baf74ebe41bcbe6fdb99633d0602cded22c1dc07617cb29b01eabfe0ee",
+        "publication/dep.native-interface": "2041592f8db9eea4826f015866428d6a992e1111be1373e13ea525b6cedc1e73"
+      }
+    },
+    "b": {
+      "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-publication-crash-48bo2zmm/lib-b",
+      "graph": {
+        "app": [
+          "dep"
+        ],
+        "dep": []
+      },
+      "files": {
+        "publication/app.ssi": "909944727e1cc972b2d5ff8f7f42b4ee3538281c7f1854f9694b0b9c57d35dc8",
+        "publication/app.o1": "d971477409f5e2a20c22c58a4512b0e36cb02db11d6731d1a201533b25355069",
+        "publication/app~0.o1": "16906a6551eb2201557c238a62eb555ec414eaabf98ea89ee15e9bc1d9f3b71f",
+        "publication/app.native-complete": "2095d10640574b5a6a3a726061d3197ab9158643d4ff117d397b6cdff9aba793",
+        "publication/app.native-source": "76e54cdbb3de86771148784761010ec5045be49f448e4c1b96af1c1359119797",
+        "publication/app.native-interface": "909944727e1cc972b2d5ff8f7f42b4ee3538281c7f1854f9694b0b9c57d35dc8",
+        "publication/dep.ssi": "2041592f8db9eea4826f015866428d6a992e1111be1373e13ea525b6cedc1e73",
+        "publication/dep.o1": "35cd7e062008170a242fbee9c2687f707438b121728f320f7f395d6e2e42037a",
+        "publication/dep~0.o1": "30940e3e1dcca9e3b39693b9d7a89a5fdcd7a8a491edb8fda8b4a9b11dbcb644",
+        "publication/dep.native-complete": "2095d10640574b5a6a3a726061d3197ab9158643d4ff117d397b6cdff9aba793",
+        "publication/dep.native-source": "8d671f15adc6b8780f2a51d7fafed2f3b9788184a2e5e0ff49949ab41f0b8818",
+        "publication/dep.native-interface": "2041592f8db9eea4826f015866428d6a992e1111be1373e13ea525b6cedc1e73"
+      }
+    }
+  },
+  "date": "2026-10-03",
+  "headBeforeStudy": "47e51bfb409d55cf368ee872512b2a969e80cabf",
+  "observationCount": 45,
+  "gerbilCommandCount": 12,
+  "completedBrokerCommandCount": 20,
+  "killedBrokerProcessCount": 5,
+  "directStateObservationCount": 8,
+  "terminal": "PUBLICATION-PROCESS-CRASH-TRANSACTION-STUDIED",
+  "retainedPatchDigests": {
+    "installed": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+    "candidate": "45f589752ca91fdb78d199e2580545bfdcecb9544e099bae126d31f3523bba81"
+  },
+  "conclusions": {
+    "splitRecords": "Kill after selector replacement leaves token 2 unspent; same-token different-manifest replay succeeds and selected runtime 43 to 42",
+    "preReplacement": "Before staging and after staging fsync retain active A and unspent token 2; original request retry commits B and runtime 43",
+    "postReplacement": "After replacement and after directory fsync retain active B and spent token 2; original request retry acknowledged without rewriting authoritative bytes",
+    "replayBinding": "Different manifest or request identifier rejected with exit 70; new token 3 supersedes old token 2",
+    "abandonedStaging": "Uncommitted staging file remains at stage-synced kill and is ignored on restart",
+    "invalidState": "Missing, malformed, or inconsistent authoritative state rejected with exit 70 and no reset or overwrite"
+  },
+  "evidenceBoundary": {
+    "termination": "SIGKILL after explicit acknowledged checkpoints; host, OS, and filesystem stay running",
+    "durability": "File and directory fsync calls complete in the local run; no power-loss, device-flush, machine-restart or remote-filesystem claim",
+    "transaction": "One schema/current-epoch/spent/active record replaced under stable advisory lock; authoritative state only, no pending-file fallback",
+    "acknowledgement": "Matching current epoch/request/manifest digest acknowledges committed request without rewriting; superseded retry rejected; no historical result ledger",
+    "closure": "Successful native two-module fixture; admission/seal reused unchanged from publication.py; general compiler-owned discovery absent",
+    "storage": "Completed generation files assumed immutable and quiescent; retry acknowledgement does not rehash live artifacts",
+    "untested": "Interrupted grant issuance, schema migration, hostile publisher or lock-path replacement, general concurrent readers/writers, retention/reclamation",
+    "count": "Prior 81 compiler probes, 37 namespace observations and 20 publication observations are separate and were not rerun"
+  },
+  "nextContracts": [
+    "Compiler-owned dependency closure with explicit external dependencies",
+    "Authenticated publication authority and stable lock identity",
+    "Storage durability and immutable generation admission contract",
+    "Reader pinning/retention before storage reclamation",
+    "Interrupted grant and historical acknowledgement semantics if required"
+  ],
+  "rawLogs": [
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-different-manifest-rejected.out",
+      "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-different-request-rejected.out",
+      "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-killed.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-runtime-after-retry.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-runtime-before-retry.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-same-request-retry.out",
+      "sha256": "d36d18a48e2d1d00949ba6cd3359ef895d0d8cca5a286ab0b409cedb60f6b7b3"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-superseded-token-rejected.out",
+      "sha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/build-a.out",
+      "sha256": "752625b16b749d533747f72ff8f37f9eb34f9f9abda0586bb9047d8dbc6863a7"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/build-b.out",
+      "sha256": "560063a18d72407c253e0db95c4b6d4b6d73ef1d2d6abb75e9c5d52f43d49fa6"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-different-manifest-rejected.out",
+      "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-different-request-rejected.out",
+      "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-killed.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-runtime-after-retry.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-runtime-before-retry.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-same-request-retry.out",
+      "sha256": "c0505db97369bb48c07e67564e1ed9961a2894e8abc1e6a31a29976ed989f0cc"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-superseded-token-rejected.out",
+      "sha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/inconsistent-state-rejected.out",
+      "sha256": "09827d15d07f029ebd5bfa714091c84afd1f88abcfd416ea1ac048b4fb4a6099"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/malformed-state-rejected.out",
+      "sha256": "359269a2a22eb1e482f186fc33e7e1539ffc7ba57a3fb482f5cf12efeaad04a5"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/missing-state-rejected.out",
+      "sha256": "b5991e34d1a90585576d4e2501d416621bd8cf77a4c474b241a84e4f1e0f07d9"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-different-manifest-rejected.out",
+      "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-different-request-rejected.out",
+      "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-killed.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-runtime-after-retry.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-runtime-before-retry.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-same-request-retry.out",
+      "sha256": "c0505db97369bb48c07e67564e1ed9961a2894e8abc1e6a31a29976ed989f0cc"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-superseded-token-rejected.out",
+      "sha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/split-after-replay.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/split-before-replay.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/split-killed-between-records.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/split-replay-different-manifest.out",
+      "sha256": "2c7806a55e1c99cec6b364dadfbec9b3e8b4c15198ca165db612d21bef186b6a"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-different-manifest-rejected.out",
+      "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-different-request-rejected.out",
+      "sha256": "63ee20a7589ed79049a3913b48b99a1ab73a9feb999229311ff4fd539b8fc0f8"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-killed.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-runtime-after-retry.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-runtime-before-retry.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-same-request-retry.out",
+      "sha256": "d36d18a48e2d1d00949ba6cd3359ef895d0d8cca5a286ab0b409cedb60f6b7b3"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-superseded-token-rejected.out",
+      "sha256": "e36b968d9827a0c69a4f138f82b3324668bb22da5e2e22142420f426c1fb27f0"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-different-manifest-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-different-request-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-killed.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-runtime-after-retry.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-runtime-before-retry.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-same-request-retry.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/before-stage-superseded-token-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/build-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/build-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-different-manifest-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-different-request-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-killed.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-runtime-after-retry.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-runtime-before-retry.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-same-request-retry.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/directory-synced-superseded-token-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/inconsistent-state-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/malformed-state-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/missing-state-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-different-manifest-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-different-request-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-killed.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-runtime-after-retry.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-runtime-before-retry.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-same-request-retry.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/replaced-superseded-token-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/split-after-replay.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/split-before-replay.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/split-killed-between-records.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/split-replay-different-manifest.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-different-manifest-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-different-request-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-killed.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-runtime-after-retry.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-runtime-before-retry.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-same-request-retry.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-publication-crash-study/stage-synced-superseded-token-rejected.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "qualificationLog": {
+    "path": "/private/tmp/asp-publication-crash-study.log",
+    "sha256": "dc9e18c9b078f8d5adcfeb10190887398f60d479b3608f57db7aa1b4d9ea7486"
+  },
+  "precedingExactHeadCI": {
+    "head": "47e51bfb409d55cf368ee872512b2a969e80cabf",
+    "checks": [
+      {
+        "name": "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Native Gerbil library (macos-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Native Gerbil provider (ubuntu-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Native Gerbil provider (macos-latest, release-v0.19-2591dcd)",
+        "status": "IN_PROGRESS",
+        "conclusion": ""
+      }
+    ],
+    "boundary": "ASP CI does not execute isolated compiler patches or publication interruption controls"
+  }
+}

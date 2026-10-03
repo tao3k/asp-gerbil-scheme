@@ -1,0 +1,334 @@
+{
+  "date": "2026-10-02",
+  "aspHead": "c31711fca3008e7db97125d5c9f92b07b883f9a5",
+  "compilerSourceHead": "d801e7a1c7f77df421f638e62aaebe370f193c97",
+  "compilerSourceDirty": true,
+  "executedGerbilHead": "2591dcd9b7c6d2c4e9dd8611a17c5b1a5d82bbdb",
+  "executedPatchset": "f5cedd8168cb365ba41289327601d9305738c9a0",
+  "runtimeProbe": {
+    "cpuCount": 12,
+    "vmProcessorCount": 1,
+    "smpConfigured": true
+  },
+  "capacity": 12,
+  "loadAverageObservedRange": [
+    113,
+    180
+  ],
+  "logDirectory": "/private/tmp/asp-gerbil-build-test-audit",
+  "measurementScript": "/private/tmp/asp-gerbil-audit-measure.py",
+  "notes": [
+    "Wall times are not stable performance benchmarks on this heavily loaded host.",
+    "CPU reported on forcibly terminated process trees may omit descendant CPU.",
+    "Cold build timed out. Resume/repeat exited zero while native outputs were incomplete."
+  ],
+  "missingMainArtifactsAfterResume": [
+    ".gerbil/lib/asp-gerbil-scheme/policy-api.ssi",
+    ".gerbil/lib/asp-gerbil-scheme/src/snapshot/facade.ssi",
+    ".gerbil/lib/asp-gerbil-scheme/src/build-api/policy-runner.ssi",
+    ".gerbil/lib/asp-gerbil-scheme/src/scenario/policy.ssi",
+    ".gerbil/lib/asp-gerbil-scheme/src/commands/fmt.ssi",
+    ".gerbil/lib/asp-gerbil-scheme/src/commands/agent.ssi",
+    ".gerbil/lib/asp-gerbil-scheme/src/commands/info.ssi",
+    ".gerbil/lib/asp-gerbil-scheme/src/policy/facade.ssi",
+    ".gerbil/lib/asp-gerbil-scheme/src/policy/gxtest.ssi",
+    ".gerbil/lib/asp-gerbil-scheme/src/policy/gxtest-report.ssi",
+    ".gerbil/lib/asp-gerbil-scheme/src/policy/gxtest-runtime.ssi"
+  ],
+  "missingPhaseArtifactsAfterMainRepair": [
+    ".gerbil/lib/asp-gerbil-scheme/src/runtime/provider-semantic-evidence~0.scm",
+    ".gerbil/lib/asp-gerbil-scheme/src/protocol/structural-facts~0.scm",
+    ".gerbil/lib/asp-gerbil-scheme/src/protocol/json~0.scm",
+    ".gerbil/lib/asp-gerbil-scheme/src/policy/agent-basic~0.scm"
+  ],
+  "recoveredGeneratedScmCount": 416,
+  "recoveredMissingNativeArtifactCount": 0,
+  "samples": [
+    {
+      "name": "discovery",
+      "command": [
+        "gerbil",
+        "env",
+        "gerbil",
+        "interactive",
+        "-e",
+        "(import \"./src/testing/discovery-runner\" \"./src/testing/extension\") (let (files (testing-interface-test-files +asp-testing-interface+ \"unit-tests.ss\")) (displayln \"FILE-COUNT=\" (length files)) (for-each displayln files))"
+      ],
+      "exit": 70,
+      "timeout": false,
+      "wallSeconds": 58.24426629100344,
+      "userSeconds": 3.012126,
+      "systemSeconds": 0.8881979999999999,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    {
+      "name": "discovery-source",
+      "command": [
+        "gerbil",
+        "interactive",
+        "-e",
+        "(add-load-path! (current-directory)) (eval (quote (begin (import :asp-gerbil-scheme/src/testing/discovery-runner :asp-gerbil-scheme/src/testing/extension) (let (files (testing-interface-test-files +asp-testing-interface+ \"unit-tests.ss\")) (displayln \"FILE-COUNT=\" (length files)) (for-each displayln files)))))"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 46.708403333002934,
+      "userSeconds": 1.899232,
+      "systemSeconds": 0.607263,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    {
+      "name": "native-test-one",
+      "command": [
+        "gerbil",
+        "test",
+        "t/scenarios/policy/upstream-gxtest-delegation/expected/t/alpha-test.ss"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 25.865180332999444,
+      "userSeconds": 1.130931,
+      "systemSeconds": 0.334788,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    {
+      "name": "upstream-tiny-cold",
+      "command": [
+        "gerbil",
+        "interactive",
+        "build.ss"
+      ],
+      "exit": 70,
+      "timeout": false,
+      "wallSeconds": 10.456027167005232,
+      "userSeconds": 0.472105,
+      "systemSeconds": 0.141903,
+      "cores": "12",
+      "cwd": "/private/tmp/asp-gerbil-build-test-audit/warm-import"
+    },
+    {
+      "name": "upstream-tiny-cold-configured",
+      "command": [
+        "gerbil",
+        "interactive",
+        "build.ss"
+      ],
+      "exit": 70,
+      "timeout": false,
+      "wallSeconds": 12.527171333000297,
+      "userSeconds": 0.48739299999999997,
+      "systemSeconds": 0.15023,
+      "cores": "12",
+      "cwd": "/private/tmp/asp-gerbil-build-test-audit/warm-import"
+    },
+    {
+      "name": "upstream-tiny-cold-final",
+      "command": [
+        "gerbil",
+        "interactive",
+        "build.ss"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 15.416910625004675,
+      "userSeconds": 1.6014,
+      "systemSeconds": 0.645953,
+      "cores": "12",
+      "cwd": "/private/tmp/asp-gerbil-build-test-audit/warm-import"
+    },
+    {
+      "name": "upstream-tiny-warm",
+      "command": [
+        "gerbil",
+        "interactive",
+        "build.ss"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 6.658698709012242,
+      "userSeconds": 0.44,
+      "systemSeconds": 0.13308599999999998,
+      "cores": "12",
+      "cwd": "/private/tmp/asp-gerbil-build-test-audit/warm-import"
+    },
+    {
+      "name": "upstream-tiny-force",
+      "command": [
+        "gerbil",
+        "interactive",
+        "build-force.ss"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 4.875520375004271,
+      "userSeconds": 0.469964,
+      "systemSeconds": 0.141797,
+      "cores": "12",
+      "cwd": "/private/tmp/asp-gerbil-build-test-audit/warm-import"
+    },
+    {
+      "name": "native-build-cold",
+      "command": [
+        "env",
+        "-u",
+        "SDKROOT",
+        "-u",
+        "DEVELOPER_DIR",
+        "gerbil",
+        "build"
+      ],
+      "exit": -9,
+      "timeout": true,
+      "wallSeconds": 365.13951941599953,
+      "userSeconds": 1.738213,
+      "systemSeconds": 0.578749,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    {
+      "name": "native-build-resume",
+      "command": [
+        "env",
+        "-u",
+        "SDKROOT",
+        "-u",
+        "DEVELOPER_DIR",
+        "gerbil",
+        "build"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 83.05050399998436,
+      "userSeconds": 5.495486,
+      "systemSeconds": 1.550472,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    {
+      "name": "native-build-repeat",
+      "command": [
+        "env",
+        "-u",
+        "SDKROOT",
+        "-u",
+        "DEVELOPER_DIR",
+        "gerbil",
+        "build"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 96.93878774999757,
+      "userSeconds": 5.481968,
+      "systemSeconds": 1.541018,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    {
+      "name": "interrupted-library-import",
+      "command": [
+        "gerbil",
+        "interactive",
+        "-e",
+        "(import :asp-gerbil-scheme/src/policy/gxtest-runtime) (displayln \"IMPORT-OK\")"
+      ],
+      "exit": -15,
+      "timeout": true,
+      "wallSeconds": 90.50394983301521,
+      "userSeconds": 2.8556209999999997,
+      "systemSeconds": 0.836926,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    {
+      "name": "native-artifact-recovery",
+      "command": [
+        "env",
+        "-u",
+        "SDKROOT",
+        "-u",
+        "DEVELOPER_DIR",
+        "gerbil",
+        "build"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 117.8398735000228,
+      "userSeconds": 13.233852,
+      "systemSeconds": 4.900215,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    {
+      "name": "recovered-library-import",
+      "command": [
+        "gerbil",
+        "interactive",
+        "-e",
+        "(import :asp-gerbil-scheme/src/policy/gxtest-runtime) (displayln \"IMPORT-OK\")"
+      ],
+      "exit": 70,
+      "timeout": false,
+      "wallSeconds": 47.15741841599811,
+      "userSeconds": 3.303844,
+      "systemSeconds": 0.916338,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    {
+      "name": "focused-support-test",
+      "command": [
+        "gerbil",
+        "test",
+        "t/support-list-test.ss"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 15.193098874995485,
+      "userSeconds": 1.060571,
+      "systemSeconds": 0.29389499999999996,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    {
+      "name": "native-phase-artifact-recovery",
+      "command": [
+        "env",
+        "-u",
+        "SDKROOT",
+        "-u",
+        "DEVELOPER_DIR",
+        "gerbil",
+        "build"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 106.24188108299859,
+      "userSeconds": 21.649246,
+      "systemSeconds": 7.673846,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    },
+    {
+      "name": "fully-recovered-library-import",
+      "command": [
+        "gerbil",
+        "interactive",
+        "-e",
+        "(import :asp-gerbil-scheme/src/policy/gxtest-runtime) (displayln \"IMPORT-OK\")"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "wallSeconds": 52.366045792005025,
+      "userSeconds": 3.799982,
+      "systemSeconds": 1.021915,
+      "cores": "12",
+      "cwd": "/Users/guangtao/ghq/github.com/tao3k/asp-gerbil-scheme"
+    }
+  ],
+  "finalRuntimeImport": {
+    "exit": 0,
+    "marker": "IMPORT-OK"
+  }
+}

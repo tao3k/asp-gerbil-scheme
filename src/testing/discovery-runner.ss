@@ -12,11 +12,10 @@
                  set-default-entry-point!)
         (only-in :std/cli/print-exit silent-exit)
         (only-in :std/source this-source-file)
-        (only-in :std/list/list filter)
         (only-in :std/string/path path-expand path-directory)
         (only-in :std/text/pregexp pregexp-match)
         (only-in ./extension
-                 testing-interface-test-file-included?
+                 testing-interface-ignore-directories-for
                  testing-interface-run-test-files!))
 
 (export testing-interface-test-files
@@ -38,22 +37,31 @@
 (def (testing-interface-test-files testing test
                                    pkgdir: (pkgdir ".")
                                    regex: (regex "-test.ss$"))
-  (filter (cut testing-interface-test-file-included? testing test <>)
-          (let (files [])
-            (let walk ((path pkgdir) (inside-test-dir? #f))
-              (let (info (file-info path #f))
-                (cond
-                 ((and info (eq? (file-info-type info) 'directory))
-                  (unless (equal? (path-strip-directory path) "dep")
-                    (for-each
-                     (lambda (name)
-                       (unless (or (equal? name ".") (equal? name ".."))
-                         (walk (path-expand name path)
-                               (or inside-test-dir? (equal? name "t")))))
-                     (directory-files path))))
-                 ((and inside-test-dir? (pregexp-match regex path))
-                  (set! files (cons path files))))))
-            (list-sort string<? files))))
+  (let ((files [])
+        (ignored (testing-interface-ignore-directories-for testing test)))
+    (def (ignored? relative)
+      (ormap (lambda (directory)
+               (or (equal? relative directory)
+                   (string-prefix? (string-append directory "/") relative)))
+             ignored))
+    ;; Profile paths are relative to pkgdir even when the caller supplies an
+    ;; absolute root. Prune before file-info or directory-files touches a path.
+    (let walk ((path pkgdir) (relative "") (inside-test-dir? #f))
+      (unless (ignored? relative)
+        (let (info (file-info path #f))
+          (cond
+           ((and info (eq? (file-info-type info) 'directory))
+            (unless (equal? (path-strip-directory path) "dep")
+              (for-each
+               (lambda (name)
+                 (unless (or (equal? name ".") (equal? name ".."))
+                   (walk (path-expand name path)
+                         (path-expand name relative)
+                         (or inside-test-dir? (equal? name "t")))))
+               (directory-files path))))
+           ((and inside-test-dir? (pregexp-match regex path))
+            (set! files (cons path files)))))))
+    (list-sort string<? files)))
 
 ;; %set-test-environment!
 ;;   : (-> Path Void)
