@@ -1,0 +1,561 @@
+{
+  "schema": "asp.native-namespace-study.v1",
+  "patchedSourceSha256": "b7473bf5f013f5b65f0f7a08c6f5683ca45527e48a23dd5b96ef02b2f202a524",
+  "instrumentedSourceSha256": "d40a6fc5c58d06c82860d1b2f92b9f15c8a47ab72cda67260389ee8740fe38c7",
+  "patchSha256": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+  "nativeGscSha256": "e780d799e1be2ce62c0de90758b81a9a4bdeec63276b82da932dced261a1b400",
+  "retainedCompilerPatchChanged": false,
+  "observations": [
+    {
+      "case": "root-alias",
+      "name": "a-build-capture",
+      "jobs": 2,
+      "detached": false
+    },
+    {
+      "case": "root-alias",
+      "name": "b-alias-contended",
+      "exit": 70,
+      "compileCount": 0,
+      "cause": "Output namespace occupied",
+      "runtime": null
+    },
+    {
+      "case": "root-alias",
+      "name": "same-directory-claim",
+      "samePhysicalRoot": true
+    },
+    {
+      "case": "root-alias",
+      "name": "a-build",
+      "exit": 0,
+      "compileCount": 1,
+      "cause": null,
+      "runtime": null
+    },
+    {
+      "case": "root-alias",
+      "name": "b-after-release-capture",
+      "jobs": 2,
+      "detached": false
+    },
+    {
+      "case": "root-alias",
+      "name": "b-after-release",
+      "exit": 0,
+      "compileCount": 1,
+      "cause": null,
+      "runtime": null
+    },
+    {
+      "case": "root-alias",
+      "name": "b-runtime",
+      "exit": 0,
+      "compileCount": 0,
+      "cause": null,
+      "runtime": 43
+    },
+    {
+      "case": "descendant-alias",
+      "name": "a-build-capture",
+      "jobs": 2,
+      "detached": false
+    },
+    {
+      "case": "descendant-alias",
+      "name": "b-build-capture",
+      "jobs": 2,
+      "detached": false
+    },
+    {
+      "case": "descendant-alias",
+      "name": "two-claims-one-write-set",
+      "distinctCanonicalRoots": true,
+      "samePhysicalModuleDirectory": true
+    },
+    {
+      "case": "descendant-alias",
+      "name": "b-build",
+      "exit": 0,
+      "compileCount": 1,
+      "cause": null,
+      "runtime": null
+    },
+    {
+      "case": "descendant-alias",
+      "name": "runtime-before-a",
+      "exit": 0,
+      "compileCount": 0,
+      "cause": null,
+      "runtime": 43
+    },
+    {
+      "case": "descendant-alias",
+      "name": "a-build",
+      "exit": 70,
+      "compileCount": 1,
+      "cause": "Native build inputs changed",
+      "runtime": null
+    },
+    {
+      "case": "descendant-alias",
+      "name": "b-warm",
+      "exit": 0,
+      "compileCount": 0,
+      "cause": null,
+      "runtime": null
+    },
+    {
+      "case": "descendant-alias",
+      "name": "runtime-after-a",
+      "exit": 0,
+      "compileCount": 0,
+      "cause": null,
+      "runtime": 42
+    },
+    {
+      "case": "descendant-alias",
+      "name": "root-canonicalization-insufficient",
+      "receiptUnchanged": true,
+      "objectsChanged": true
+    },
+    {
+      "case": "escaped-shared",
+      "name": "a-build-capture",
+      "jobs": 2,
+      "detached": true
+    },
+    {
+      "case": "escaped-shared",
+      "name": "direct-group-gone-detached-workers-alive",
+      "directWrappersAbsent": true,
+      "detachedAcknowledgments": 2
+    },
+    {
+      "case": "escaped-shared",
+      "name": "b-before-reclamation",
+      "exit": 70,
+      "compileCount": 0,
+      "cause": "Output namespace occupied",
+      "runtime": null
+    },
+    {
+      "case": "escaped-shared",
+      "name": "unsafe-test-reclamation",
+      "directGroupOnly": true
+    },
+    {
+      "case": "escaped-shared",
+      "name": "b-build-capture",
+      "jobs": 2,
+      "detached": false
+    },
+    {
+      "case": "escaped-shared",
+      "name": "b-build",
+      "exit": 0,
+      "compileCount": 1,
+      "cause": null,
+      "runtime": null
+    },
+    {
+      "case": "escaped-shared",
+      "name": "runtime-before-old-write",
+      "exit": 0,
+      "compileCount": 0,
+      "cause": null,
+      "runtime": 43
+    },
+    {
+      "case": "escaped-shared",
+      "name": "escaped-backends-exited",
+      "jobs": 2
+    },
+    {
+      "case": "escaped-shared",
+      "name": "b-warm",
+      "exit": 0,
+      "compileCount": 0,
+      "cause": null,
+      "runtime": null
+    },
+    {
+      "case": "escaped-shared",
+      "name": "runtime-after-old-write",
+      "exit": 0,
+      "compileCount": 0,
+      "cause": null,
+      "runtime": 42
+    },
+    {
+      "case": "escaped-generations",
+      "name": "a-build-capture",
+      "jobs": 2,
+      "detached": true
+    },
+    {
+      "case": "escaped-generations",
+      "name": "direct-group-gone-detached-workers-alive",
+      "directWrappersAbsent": true,
+      "detachedAcknowledgments": 2
+    },
+    {
+      "case": "escaped-generations",
+      "name": "b-build-capture",
+      "jobs": 2,
+      "detached": false
+    },
+    {
+      "case": "escaped-generations",
+      "name": "b-build",
+      "exit": 0,
+      "compileCount": 1,
+      "cause": null,
+      "runtime": null
+    },
+    {
+      "case": "escaped-generations",
+      "name": "runtime-before-old-write",
+      "exit": 0,
+      "compileCount": 0,
+      "cause": null,
+      "runtime": 43
+    },
+    {
+      "case": "escaped-generations",
+      "name": "reader-pins-completed-generation",
+      "generation": "b",
+      "receiptPresent": true
+    },
+    {
+      "case": "escaped-generations",
+      "name": "escaped-backends-exited",
+      "jobs": 2
+    },
+    {
+      "case": "escaped-generations",
+      "name": "old-private-runtime",
+      "exit": 0,
+      "compileCount": 0,
+      "cause": null,
+      "runtime": 42
+    },
+    {
+      "case": "escaped-generations",
+      "name": "pinned-runtime-after-old-write",
+      "exit": 0,
+      "compileCount": 0,
+      "cause": null,
+      "runtime": 43
+    },
+    {
+      "case": "escaped-generations",
+      "name": "b-warm",
+      "exit": 0,
+      "compileCount": 0,
+      "cause": null,
+      "runtime": null
+    },
+    {
+      "case": "escaped-generations",
+      "name": "old-writes-confined-to-private-generation",
+      "oldClaimRetained": true,
+      "activePointerUnchanged": true,
+      "activeObjectsUnchanged": true
+    }
+  ],
+  "date": "2026-10-03",
+  "headBeforeStudy": "29f544d6d502e5dcc3f1f7a75c8affc82fe43bed",
+  "observationCount": 37,
+  "gerbilCommandCount": 21,
+  "completedCommandCount": 19,
+  "deliberatelyKilledFrontendCount": 2,
+  "retainedPatchDigests": {
+    "installed": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+    "candidate": "45f589752ca91fdb78d199e2580545bfdcecb9544e099bae126d31f3523bba81"
+  },
+  "runnerSha256": "fe28c5d4055df20b578ffbae8f4cafd765f4249df10321bd2afc7be3bb02a4ac",
+  "terminal": "NAMESPACE-ALIASES-ESCAPED-BACKENDS-AND-GENERATIONS-STUDIED",
+  "conclusions": {
+    "rootAlias": "Two paths resolve to one claim directory; competing writer rejected with exit 70 and zero compilation",
+    "descendantAlias": "Distinct canonical roots share physical module directory; claims do not exclude one another; B receipt/snapshots unchanged after A overwrites objects; runtime 43 to 42 and warm skips",
+    "escapedBackends": "Frontend and direct wrappers die; two independently sessioned workers acknowledge after original group death",
+    "groupOnlyReclamation": "Test-only removal of occupied claim permits B success followed by escaped A object overwrite; runtime 43 to 42",
+    "privateGenerations": "Retain abandoned A claim; late A objects import as 42 only from A; pinned B reader remains 43; B object bytes and selector unchanged"
+  },
+  "evidenceBoundary": {
+    "instrumentation": "Capture producer Scheme input and use real native gsc -o to original object path; explicit fork/setsid only in detached control",
+    "notMeasured": "Natural race frequency or naturally detaching unmodified gsc",
+    "temporaryActions": "All removed claims and killed process groups belong to the runner-owned temporary fixture",
+    "publication": "Python harness atomically replaces a small selector only after B make succeeds; reader uses selected root in its environment",
+    "reader": "Fresh process pinned to B root; two-object single-module fixture, installed dependencies outside generation",
+    "authority": "Backend obeys supplied paths; no OS sandbox or malicious-backend confinement claimed"
+  },
+  "decisions": {
+    "rootNormalization": "Do not treat distinct canonical roots as proof of disjoint writes",
+    "recovery": "Do not reclaim from direct PID/original process-group absence alone",
+    "direction": "Fresh producer generation plus separately fenced publication and pinned admitted readers",
+    "retainedCompilerPatches": "Unchanged; no namespace claim or generation production implementation/deployment",
+    "previousQualification": "81 probes qualified earlier exact source; not rerun or added to this study count"
+  },
+  "nextContracts": [
+    "Allocate unique fresh output generation; do not recycle path while old jobs may write",
+    "Publish only with current authority token; superseded live frontend cannot overwrite selector",
+    "Admission binds completed generation and dependency closure",
+    "Readers pin admitted generation for lifetime of lookup/module-cache scope",
+    "Garbage collection requires independent writer-quiescence and reader-retention evidence",
+    "Account for other target write paths and pathname replacement; observed aliases do not freeze them"
+  ],
+  "rawLogs": [
+    {
+      "path": "/private/tmp/asp-namespace-study/descendant-alias/a-build.captures.json",
+      "sha256": "2edccf600ccce346746ffa243556a2f01004fa96e6429d291c6a6c691108a714"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/descendant-alias/a-build.err",
+      "sha256": "4b46512e458a9727470f2858b0c5eb2439efae615af8ac0bc1be99004eebe4fe"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/descendant-alias/a-build.out",
+      "sha256": "079100740d5b112da5f3e4150fa753367d4e6d2d7b86635a7c4a9fab4eddf1ea"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/descendant-alias/b-build.captures.json",
+      "sha256": "8c013288f5209b8d5e7a9b0a8becdc2206f4bb0b245578fc0b6781020c657d7e"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/descendant-alias/b-build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/descendant-alias/b-build.out",
+      "sha256": "4fcb67597cf3789bdfc1fb9c827d376793e87ebad85f5e2a664098778020b26e"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/descendant-alias/b-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/descendant-alias/b-warm.out",
+      "sha256": "68ff1c8c79613a8870607bcba04539154b609870fef324c18636f75c43aeacd7"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/descendant-alias/runtime-after-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/descendant-alias/runtime-after-a.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/descendant-alias/runtime-before-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/descendant-alias/runtime-before-a.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/a-build.captures.json",
+      "sha256": "05b7613a8eab7222749030066ece37a26591d08aa5fe256d2197890f819c574a"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/a-build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/a-build.out",
+      "sha256": "b2e2331af314fab08699c71059e60978752fca03849d6d09a377619e1d1f2a41"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/b-build.captures.json",
+      "sha256": "091c8e93b098d7a44340fcc024b1ed18040a84206481e78107bcd65fc600f78a"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/b-build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/b-build.out",
+      "sha256": "382323c1b7ab5c5d2d063d14c9fe1347aae43f3466353f8e4b9eaba11497a25e"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/b-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/b-warm.out",
+      "sha256": "68ff1c8c79613a8870607bcba04539154b609870fef324c18636f75c43aeacd7"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/old-private-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/old-private-runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/pinned-runtime-after-old-write.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/pinned-runtime-after-old-write.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/runtime-before-old-write.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-generations/runtime-before-old-write.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/a-build.captures.json",
+      "sha256": "b2aa41d4023c41ceff62a4371590e447df9967fd2a34ba18d5d31e0f9a0645b3"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/a-build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/a-build.out",
+      "sha256": "b2e2331af314fab08699c71059e60978752fca03849d6d09a377619e1d1f2a41"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/b-before-reclamation.err",
+      "sha256": "2c64a2a48e85318d03c7df207c3233711e7e6acadebfb87edb72bea77ddb1733"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/b-before-reclamation.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/b-build.captures.json",
+      "sha256": "6e1ab11b3081f52e3dcbf711aea694947ad583443ae157ae584f39d332229e47"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/b-build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/b-build.out",
+      "sha256": "09f820fbe1f0d3a38a88223a7648cf56b80baa9653361db2e6ef0af64632fa4b"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/b-warm.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/b-warm.out",
+      "sha256": "68ff1c8c79613a8870607bcba04539154b609870fef324c18636f75c43aeacd7"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/runtime-after-old-write.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/runtime-after-old-write.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/runtime-before-old-write.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/escaped-shared/runtime-before-old-write.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/root-alias/a-build.captures.json",
+      "sha256": "be5081dd348a7bf8962bc46d5ed18fe2951ec88dcc8f38494b66393f463bc4a4"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/root-alias/a-build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/root-alias/a-build.out",
+      "sha256": "5634cc2bf8ade4b7f5c8741b01c725786e5e3c5a7b74087bd0260590c6de1a93"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/root-alias/b-after-release.captures.json",
+      "sha256": "3850072a929b47a64bc06d47ea890a97589b8051e88d71db0b5998ad8ec414c9"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/root-alias/b-after-release.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/root-alias/b-after-release.out",
+      "sha256": "15bf35f8ec51b69f2a34ac648781c20da6143d833fc3b775d357cba3eb6bc89a"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/root-alias/b-alias-contended.err",
+      "sha256": "72241fa630ecdbbf2c06f0c79b3cb57d018f0aeafeb74075d02ca2924361d016"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/root-alias/b-alias-contended.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/root-alias/b-runtime.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-namespace-study/root-alias/b-runtime.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    }
+  ],
+  "qualificationLog": {
+    "path": "/private/tmp/asp-namespace-study.log",
+    "sha256": "99620cea1a95172f60c029e84ece3cd2a3221fe077111c1766b724d55ce79dbb"
+  },
+  "precedingExactHeadCI": {
+    "headRefOid": "29f544d6d502e5dcc3f1f7a75c8affc82fe43bed",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-03T02:47:17Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37090869783/job/111110742779",
+        "name": "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-03T02:44:58Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-03T02:49:37Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37090869783/job/111110742705",
+        "name": "Native Gerbil library (macos-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-03T02:45:04Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-03T02:47:31Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37090869783/job/111110742664",
+        "name": "Native Gerbil provider (ubuntu-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-03T02:44:58Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-03T02:48:18Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tao3k/asp-gerbil-scheme/actions/runs/37090869783/job/111110742711",
+        "name": "Native Gerbil provider (macos-latest, release-v0.19-2591dcd)",
+        "startedAt": "2026-10-03T02:45:24Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      }
+    ],
+    "boundary": "ASP CI does not execute isolated compiler patches or namespace controls"
+  }
+}

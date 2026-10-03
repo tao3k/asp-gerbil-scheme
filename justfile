@@ -53,6 +53,10 @@ audit-native-frontend make_source patch native_gsc output:
     python3 t/native-build-recovery/frontend.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4/coordinator" --qualify --coordinator-fault
     python3 t/native-build-recovery/frontend.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4/lease" --qualify --experimental-lease --fail-backend
 
+# Research controls only: no production recovery or generation publication.
+audit-native-namespace make_source patch native_gsc output:
+    python3 t/native-build-recovery/namespace.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4"
+
 clean-provider:
     {{gerbil}} env gerbil interactive build-provider.ss clean
 

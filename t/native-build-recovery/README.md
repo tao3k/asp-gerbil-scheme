@@ -388,3 +388,60 @@ acyclic fixture. It does not add cancellation of queued independent work, a runt
 reader transaction, multi-writer support, candidate bootstrap, or forced-death
 quiescence. Historical writer counterexamples and lease-abandonment results in
 31.18 belong to their recorded earlier v3 source and are not reattributed here.
+
+## Namespace aliases and escaped backend lifetime
+
+`namespace.py` studies the current repaired make source with an isolated directory
+claim wrapper. Neither this claim nor generation selection is applied to the
+retained compiler patches.
+
+```sh
+just audit-native-namespace \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/make.ss \
+  t/native-build-recovery/installed-make.patch \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/bin/gsc \
+  /private/tmp/gerbil-namespace-study
+```
+
+| Controlled case | Result | Contract boundary |
+| --- | --- | --- |
+| Two spellings of one output root, via a symlink | The competing writer is rejected before compilation | A claim inside that root reaches the same physical directory |
+| Distinct canonical roots whose module subdirectories alias one shared directory | Both claims succeed; B returns 43, A writes 42, B skips warm compilation and returns 42 | Canonical root equality does not establish disjoint compiler write sets |
+| Frontend and original process group killed; backend children started their own sessions | Both children acknowledge a new probe after direct wrappers disappear | Original process-group death does not prove all write-capable descendants are dead |
+| Deliberate group-only reclamation in the owned shared-output fixture | B completes with 43; escaped old jobs then overwrite it to 42 | Recovery counterexample; the claim removal is confined to the scratch fixture |
+| Two private output generations, with a reader pinned to completed B | Old A writes 42 only in generation A; B objects and selector stay unchanged and its reader returns 43 | Output isolation can protect the new generation without reclaiming the old claim |
+
+The alias and detached-worker controls capture each producer's Scheme input before
+acknowledgment and invoke real native gsc with the original object destination.
+Detached workers are explicit test instrumentation using a new process session;
+this does not claim that unmodified gsc ordinarily detaches or estimate race
+frequency. All process groups and any removed claims belong to this temporary
+fixture. The shared-output counterexample knowingly removes a test-only claim
+while escaped workers are alive to falsify group-only recovery.
+
+The generation control creates fresh, separate output roots and atomically writes
+a small test selector for completed B. A fresh reader copies that root into its
+load path before import. The abandoned A claim stays in place; A's missing
+completion receipt stays missing even after its real objects finish and import as
+42. B's selector and output bytes remain unchanged after those old writes, and
+its warm build compiles nothing. This proves isolation for the simple two-object
+fixture and an explicitly pinned fresh-process reader. It is not a production
+publication protocol, full dependency closure, syscall confinement, generation
+allocator, or hot module-cache switching.
+
+The study records 37 observations over 21 Gerbil process invocations (19 completed
+commands and two deliberately killed frontends). The terminal marker is
+`NAMESPACE-ALIASES-ESCAPED-BACKENDS-AND-GENERATIONS-STUDIED`, not concurrent-writer
+acceptance. See `31.20-native-namespace-generation-study.json` for exact identities,
+control records, and logs. Both retained compiler patch digests remain unchanged;
+the earlier 81-probe compiler qualification is not counted as rerun here.
+
+The next implementation should allocate a fresh producer generation and never
+reuse its path for another producer while old jobs can still write. Publication
+needs a separately owned selector and a fencing token: an old still-live frontend
+must not publish after its authority is superseded. Readers must pin one admitted
+generation including its dependency closure. Reclaiming old storage needs its own
+quiescence/reader-retention contract; switching to a new generation does not prove
+that old storage is safe to delete. A root-only lock or PID/process-group absence
+cannot substitute for those contracts. Root alias checks are point observations,
+not protection against subsequent pathname replacement.

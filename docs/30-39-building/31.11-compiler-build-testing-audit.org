@@ -631,3 +631,40 @@ not establish new multi-writer, reader, forced-death, candidate bootstrap or com
 deployment capability. See 31.19-frontend-native-drain-receipts.json and the Justfile
 aggregate audit-native-frontend recipe. Historical failures and earlier exact-head
 CI remain separate evidence.
+
+* Namespace identity and forced-death recovery
+
+The namespace study uses the exact repaired source from 31.19 without changing
+its retained patches. An isolated directory-claim wrapper rejects two root paths
+that are aliases of the same directory. However, distinct canonical roots can
+contain module subdirectories that alias one shared directory. Both root claims
+then succeed while both producers write the same objects. Controlled B-then-A
+release again leaves B's receipt and input snapshots unchanged but changes the
+runtime from 43 to 42, with warm compilation skipped. Root canonicalization is
+insufficient for write-set ownership.
+
+Another control starts native backend children in independent sessions. After
+killing the frontend and original process group, the direct backend wrappers are
+absent but both detached children acknowledge a new probe. Removing the claim in
+this owned scratch fixture based only on that original group's death permits B
+to publish 43, followed by old A's overwrite to 42. This intentionally unsafe test
+reclamation is counterexample evidence and is never applied to a real workspace.
+The control does not assert that normal gsc naturally detaches.
+
+With separate fresh generations, B can complete while old backend jobs are paused
+in abandoned generation A. A's later native writes finish and import as 42, but B's
+objects and selector remain byte-identical and a reader pinned to B returns 43.
+The old claim is retained and A has no completion receipt. The selector is an
+atomic test metadata file, not an implemented production publication protocol.
+Full dependency closure, stale frontend publication fencing, unique generation
+allocation, reader retention, garbage collection and hot cache switching remain
+unqualified.
+
+There are 37 recorded observations across 21 Gerbil process invocations. See
+31.20-native-namespace-generation-study.json, namespace.py and the
+just audit-native-namespace entrypoint. This advances the recovery design toward
+private producer outputs, separately fenced publication and pinned readers.
+Original-group or PID absence alone is not quiescence proof for arbitrary backend
+descendants. Namespace observation also does not freeze future pathname changes.
+The compiler patches remain undeployed and their 81 earlier local probes are not
+reattributed to this separate namespace experiment.
