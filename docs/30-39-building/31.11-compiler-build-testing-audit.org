@@ -734,3 +734,73 @@ An initial test expectation incorrectly required identical traversal order;
 it failed with status 42 and was corrected to preserve each native lane's order.
 English text and whitespace checks passed. Full aggregate performance acceptance,
 compiler-patch qualification, concurrent writers, and remote CI are separate gates.
+
+* 2026-10-03 Native import matched A/B
+
+The prelude repair is qualified against its historical source, not merely against
+the repaired test's expectations. =t/native-import-ab.ss= is a Gerbil benchmark
+driver; every lane uses upstream =:std/build-script= and the installed =std/make=.
+It does not apply the isolated compiler patches or implement another executor.
+Native Import still adds dependency traversal for optional public-entry scope;
+it is not evidence for all native make features or a performance optimization.
+
+** Identity and method
+
+- A is the exact =native-import-closure.ss= source at =b9b9adf=; SHA-256
+  =334fbd6ea746f76785cf58bfefdcded7f739334bf2d818f4c49bcfa9183348be=.
+- B is the source at =d6f97e83299f34ff1ba37de5fa40e12c2061b27b=; SHA-256
+  =7180ca83364c6c0b58ae3913cdf0e76cdcd064894f9bfe86f6c8b74aee4d17e3=.
+- The measured driver SHA-256 is
+  =6a4453d0a1747aa00327431fca5876b8427abb1738872bbb0ae2d7f044340530=.
+- C uses plain =defbuild-script= with explicit =fixture-prelude.ss=,
+  =syntax-helper.ss=, =a.ss=, =b.ss=, and =c.ss= targets.
+- All lanes copy the same current fixture sources and =package-build.ss=.
+  B invokes the same native closure function that PackageSpec uses; this isolates
+  its overhead rather than measuring the entire public facade or root build.
+- Installed Gerbil reports =2591dcd= on macOS arm64; native builds use two cores.
+  Installed =std/make.ss= SHA-256 is
+  =139d348ecbdb1b98edf0f6cf53fdd690f56b49c8bf6942383068da2d4ebe551a=.
+  Installed =std/build-script.ss= SHA-256 is
+  =15079985aaa920c0d1fa68c01122ca7e8a89402b2c547c9a9f20a4da03436cd4=.
+- Each lane starts in a fresh private root, runs cold =spec= and =compile=, then
+  warm =spec= and =compile=. Readers run outside the source tree with only the
+  lane's compiled library and normal toolchain libraries. Acceptance requires
+  =AB-RUNTIME=3=, because an expansion failure can discard process status.
+- Four matched pairs alternate B-C, C-B, B-C, C-B. Elapsed values include process
+  startup and projection; native frontend compile messages supply job counts.
+  The driver emits =NATIVE-IMPORT-AB-OK= only after all semantic gates pass.
+
+** Results and limits
+
+A compiles four modules, has no prelude SSI, and fails the compiled-only reader
+with =cannot find library module=. B and C each compile five modules, create the
+prelude interface, and load =fixture-c= as 3. All nine warm builds report zero
+compile jobs. Twenty corresponding B/C SSI files compare byte-for-byte equal.
+This checks interface equivalence and runtime behavior, not native object binary
+identity or every generated artifact. =31.27-native-import-ab-results.sexp=
+contains the nine lane records and all raw timing samples in microseconds.
+
+For equal target work, B/C cold compile medians are 7.176 / 6.432 seconds; warm
+compile medians are 1.681 / 1.564 seconds. Cold spec medians are 1.879 / 1.618;
+warm spec medians are 1.808 / 1.610. No speedup is established. Host load around
+70 and four small-fixture pairs limit extrapolation. The functional A/B and the
+matched performance comparison are deliberately separate: A does less work and
+is not a valid speed baseline for B.
+
+This does not qualify FFI, executables, JavaScript, arbitrary prelude mutation,
+producer failure, cancellation, concurrent writers, forced-death recovery, or
+the candidate compiler. Tests repeat build invocations to observe native reuse;
+the production build path does not contain that benchmark loop. Root ASP builds
+continue to use the default catalog rather than public-entry closure.
+
+** Reproduction
+
+#+begin_src sh
+git show b9b9adf:src/build-api/native-import-closure.ss > /tmp/native-import-before.ss
+timeout 300 just audit-native-import-ab /tmp/native-import-before.ss /tmp/native-import-ab-fresh
+#+end_src
+
+The output directory must not already exist. Exact timings and semantic results
+are in =results.sexp=; reader diagnostics are in each lane's =reader.log=.
+Per-command log files hold the final invocation of that command; use =tee= on
+the driver stdout if the complete cold/warm progress transcript is required.

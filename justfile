@@ -42,6 +42,10 @@ test:
 test-files +files:
     {{gxi}} -e '{{gxtest_exit}}' "$@"
 
+# Observation-only A/B; baseline is an exact historical native closure source.
+audit-native-import-ab baseline_source output:
+    {{gxi}} t/native-import-ab.ss "$1" "$2"
+
 # Isolated compiler regression; supply the exact std/make source and patch base.
 audit-native-recovery make_source patch output:
     python3 t/native-build-recovery/run.py --make-source "$1" --patch "$2" --output "$3"
