@@ -1,0 +1,2281 @@
+{
+  "schema": "asp.native-retention-process-crash-study.v1",
+  "patchedSourceSha256": "b7473bf5f013f5b65f0f7a08c6f5683ca45527e48a23dd5b96ef02b2f202a524",
+  "instrumentedSourceSha256": "80041f6b4c2c5d142f80419164b8afee9c204a4efc6f8fa10197a36af40fd585",
+  "patchSha256": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+  "nativeGscSha256": "e780d799e1be2ce62c0de90758b81a9a4bdeec63276b82da932dced261a1b400",
+  "runnerSha256": "3740753bed868b6c0588c0cd09449bf92c93dbf12270f4eeb8e88e6a09288726",
+  "extractorSha256": "fcf4790d8c331b5615d6b391d557e8827e0530211b55867fc9b14dcd1d75195e",
+  "sharedHarnessSha256": "8162f6913329d868dcfb7e836456ec1cb82f94047179e531cf27e7b86a86872a",
+  "externalRoot": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib",
+  "publicationStudy": false,
+  "retentionStudy": false,
+  "retentionCrashStudy": true,
+  "observations": [
+    {
+      "name": "build-a",
+      "exit": 0,
+      "marker": "BUILD-OK",
+      "expectedAnswer": null,
+      "stdoutSha256": "725fb90f0f819cbb82085c53f4334ce8212ad99df3b7c01cf5ee45bcd0ea74ed",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "runtime-a",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-imports-a",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "4a78cf8f02be654d78a921ffeb5f7a9a5f1686bc75db0c79d9bfa151b3aefd71",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "native-output-facts-a",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "c12b2ebabfd87f22a4d0c764a952571c991d6259e817171e9157ef9d390f2b81",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "derived-closure-a",
+      "modules": [
+        "closure/app",
+        "closure/bridge",
+        "closure/leaf",
+        "closure/middle",
+        "closure/phase",
+        "closure/phase-dep"
+      ],
+      "artifactCount": 36,
+      "phaseOneDependency": true,
+      "renamedBinding": true,
+      "externalFactCount": 1
+    },
+    {
+      "name": "build-b",
+      "exit": 0,
+      "marker": "BUILD-OK",
+      "expectedAnswer": null,
+      "stdoutSha256": "cf84bded03bc4d64aaccf2907db35f388d77ca8a7fe17ce625addc2e6b744f42",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "runtime-b",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-imports-b",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "29033a26de2fa7ab085d4fd7fc138217b5751bf945f5982d0bf7c2bebb2fbaaf",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "native-output-facts-b",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "c2d529a2dea3ef6eaf28d9615c0c33697137f373b8b0d5a6c14629d506b456c6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "derived-closure-b",
+      "modules": [
+        "closure/app",
+        "closure/bridge",
+        "closure/leaf",
+        "closure/middle",
+        "closure/phase",
+        "closure/phase-dep"
+      ],
+      "artifactCount": 36,
+      "phaseOneDependency": true,
+      "renamedBinding": true,
+      "externalFactCount": 1
+    },
+    {
+      "name": "partial-runtime-with-fallback",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 42,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "partial-imports",
+      "exit": 0,
+      "marker": null,
+      "expectedAnswer": null,
+      "stdoutSha256": "41064426d00ce545a52f67133fcd476df50139325791af60406ff52a0ab93cbb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "fallback-local-owner-rejected",
+      "cause": "Local dependency resolved outside generation: closure/leaf"
+    },
+    {
+      "name": "transitive-phase-inventory-rejected",
+      "cause": "Incomplete compiler-derived inventory"
+    },
+    {
+      "name": "retention-crash-acquire-before-reader-stage",
+      "commandKind": "retention-operation",
+      "exit": -9,
+      "stage": "before-reader-stage",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-no-reader-started",
+      "stage": "before-reader-stage",
+      "readerRecordCount": 0,
+      "proof": "Killed acquisition worker has no module launcher or children"
+    },
+    {
+      "name": "retention-crash-acquire-reader-stage-synced",
+      "commandKind": "retention-operation",
+      "exit": -9,
+      "stage": "reader-stage-synced",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-acquire-blocks-reader-stage-synced",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Unrecognized reader record",
+      "stdoutSha256": "2477e0f4d342578a934d9eaa188a0faf8d7a0b3f77d08373c74b284822593434",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-owned-preload-record-recovered-reader-stage-synced",
+      "proof": "Owned killed acquisition never returned or launched a reader",
+      "readerRecordCount": 0
+    },
+    {
+      "name": "retention-crash-acquire-reader-record-installed",
+      "commandKind": "retention-operation",
+      "exit": -9,
+      "stage": "reader-record-installed",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-acquire-blocks-reader-record-installed",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Readers retain generation",
+      "stdoutSha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-owned-preload-record-recovered-reader-record-installed",
+      "proof": "Owned killed acquisition never returned or launched a reader",
+      "readerRecordCount": 0
+    },
+    {
+      "name": "retention-crash-acquire-reader-directory-synced",
+      "commandKind": "retention-operation",
+      "exit": -9,
+      "stage": "reader-directory-synced",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-acquire-blocks-reader-directory-synced",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Readers retain generation",
+      "stdoutSha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-owned-preload-record-recovered-reader-directory-synced",
+      "proof": "Owned killed acquisition never returned or launched a reader",
+      "readerRecordCount": 0
+    },
+    {
+      "name": "retention-crash-release-before-release-intent",
+      "commandKind": "retention-operation",
+      "exit": -9,
+      "stage": "before-release-intent",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-blocks-before-release-intent",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Readers retain generation",
+      "stdoutSha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-wrong-release-before-release-intent",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Reader handle does not match retained record",
+      "stdoutSha256": "dda0485b114fccb7f69915565175f8bfadf905bf90a41cc10cfd5ae6d3ed0b7e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-retry-before-release-intent",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "RELEASED",
+      "stdoutSha256": "47656717dc22a401765b486daaf31d5b6f20f2607f28902581527183ad4ac8ce",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-replay-before-release-intent",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "ACK-RELEASE-REPLAY",
+      "stdoutSha256": "75660bea0dd231996916d7892697c0ff83b741e3b89675a740ec332552da16b6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-release-intent-recorded",
+      "commandKind": "retention-operation",
+      "exit": -9,
+      "stage": "release-intent-recorded",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-blocks-release-intent-recorded",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Readers retain generation",
+      "stdoutSha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-wrong-release-release-intent-recorded",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Release intent does not match handle",
+      "stdoutSha256": "772a721ec3e0b0adc33928ba22a452613438a9c0063eefa77e11a8dbdf3318f3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-retry-release-intent-recorded",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "RELEASED",
+      "stdoutSha256": "47656717dc22a401765b486daaf31d5b6f20f2607f28902581527183ad4ac8ce",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-replay-release-intent-recorded",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "ACK-RELEASE-REPLAY",
+      "stdoutSha256": "75660bea0dd231996916d7892697c0ff83b741e3b89675a740ec332552da16b6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-reader-record-unlinked",
+      "commandKind": "retention-operation",
+      "exit": -9,
+      "stage": "reader-record-unlinked",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-unlinked-with-release-intent-reader-record-unlinked",
+      "exactReleaseIntent": true
+    },
+    {
+      "name": "retention-crash-wrong-release-reader-record-unlinked",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Release intent does not match handle",
+      "stdoutSha256": "772a721ec3e0b0adc33928ba22a452613438a9c0063eefa77e11a8dbdf3318f3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-retry-reader-record-unlinked",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "ACK-RELEASE-REPLAY",
+      "stdoutSha256": "75660bea0dd231996916d7892697c0ff83b741e3b89675a740ec332552da16b6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-replay-reader-record-unlinked",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "ACK-RELEASE-REPLAY",
+      "stdoutSha256": "75660bea0dd231996916d7892697c0ff83b741e3b89675a740ec332552da16b6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-release-directory-synced",
+      "commandKind": "retention-operation",
+      "exit": -9,
+      "stage": "release-directory-synced",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-unlinked-with-release-intent-release-directory-synced",
+      "exactReleaseIntent": true
+    },
+    {
+      "name": "retention-crash-wrong-release-release-directory-synced",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Release intent does not match handle",
+      "stdoutSha256": "772a721ec3e0b0adc33928ba22a452613438a9c0063eefa77e11a8dbdf3318f3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-retry-release-directory-synced",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "ACK-RELEASE-REPLAY",
+      "stdoutSha256": "75660bea0dd231996916d7892697c0ff83b741e3b89675a740ec332552da16b6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-release-replay-release-directory-synced",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "ACK-RELEASE-REPLAY",
+      "stdoutSha256": "75660bea0dd231996916d7892697c0ff83b741e3b89675a740ec332552da16b6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-collect-retirement-recorded",
+      "commandKind": "retention-operation",
+      "exit": -9,
+      "stage": "retirement-recorded",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-retired-publication-refused-retirement-recorded",
+      "cause": "Generation retired",
+      "tokenUnspent": true
+    },
+    {
+      "name": "retention-crash-resume-rechecks-quiescence-retirement-recorded",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Writer quiescence unknown",
+      "stdoutSha256": "31c42670361e4ac2bae4f37cb463e7ba07b5e915c3c1d14a6febec4c63e22423",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-collection-resume-retirement-recorded",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "COLLECTION-RESUMED",
+      "stdoutSha256": "2d7bef73500a325fd7ccc8f816f89459a5d57b98145b0fa351ad64ac48a72b2e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-collection-replay-retirement-recorded",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "ACK-COLLECTION-REPLAY",
+      "stdoutSha256": "f11251e7ea8141e1db41e09bc62cc55559539a394f723611e20545cea929275d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-surviving-b-retirement-recorded",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-collect-collection-partial-delete",
+      "commandKind": "retention-operation",
+      "exit": -9,
+      "stage": "collection-partial-delete",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-retired-publication-refused-collection-partial-delete",
+      "cause": "Generation retired",
+      "tokenUnspent": true
+    },
+    {
+      "name": "retention-crash-resume-rechecks-quiescence-collection-partial-delete",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Writer quiescence unknown",
+      "stdoutSha256": "31c42670361e4ac2bae4f37cb463e7ba07b5e915c3c1d14a6febec4c63e22423",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-collection-resume-collection-partial-delete",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "COLLECTION-RESUMED",
+      "stdoutSha256": "2d7bef73500a325fd7ccc8f816f89459a5d57b98145b0fa351ad64ac48a72b2e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-collection-replay-collection-partial-delete",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "ACK-COLLECTION-REPLAY",
+      "stdoutSha256": "f11251e7ea8141e1db41e09bc62cc55559539a394f723611e20545cea929275d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-surviving-b-collection-partial-delete",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-collect-collection-root-removed",
+      "commandKind": "retention-operation",
+      "exit": -9,
+      "stage": "collection-root-removed",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-retired-publication-refused-collection-root-removed",
+      "cause": "Generation retired",
+      "tokenUnspent": true
+    },
+    {
+      "name": "retention-crash-resume-rechecks-quiescence-collection-root-removed",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Writer quiescence unknown",
+      "stdoutSha256": "31c42670361e4ac2bae4f37cb463e7ba07b5e915c3c1d14a6febec4c63e22423",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-collection-resume-collection-root-removed",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "COLLECTION-RESUMED",
+      "stdoutSha256": "2d7bef73500a325fd7ccc8f816f89459a5d57b98145b0fa351ad64ac48a72b2e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-collection-replay-collection-root-removed",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "ACK-COLLECTION-REPLAY",
+      "stdoutSha256": "f11251e7ea8141e1db41e09bc62cc55559539a394f723611e20545cea929275d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-surviving-b-collection-root-removed",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-collect-collection-completion-recorded",
+      "commandKind": "retention-operation",
+      "exit": -9,
+      "stage": "collection-completion-recorded",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-retired-publication-refused-collection-completion-recorded",
+      "cause": "Generation retired",
+      "tokenUnspent": true
+    },
+    {
+      "name": "retention-crash-resume-rechecks-quiescence-collection-completion-recorded",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Writer quiescence unknown",
+      "stdoutSha256": "31c42670361e4ac2bae4f37cb463e7ba07b5e915c3c1d14a6febec4c63e22423",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-collection-resume-collection-completion-recorded",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "ACK-COLLECTION-REPLAY",
+      "stdoutSha256": "f11251e7ea8141e1db41e09bc62cc55559539a394f723611e20545cea929275d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-collection-replay-collection-completion-recorded",
+      "commandKind": "retention-operation",
+      "exit": 0,
+      "marker": "ACK-COLLECTION-REPLAY",
+      "stdoutSha256": "f11251e7ea8141e1db41e09bc62cc55559539a394f723611e20545cea929275d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-surviving-b-collection-completion-recorded",
+      "exit": 0,
+      "marker": "RUNTIME-OK",
+      "expectedAnswer": 43,
+      "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-reappeared-root-refused",
+      "commandKind": "retention-operation",
+      "exit": 70,
+      "marker": "Collected generation root reappeared",
+      "stdoutSha256": "e794559c9ac7903b2aae9c6676bd2196332d110dff6875736396d6521e524290",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "retention-crash-final",
+      "readerRecordCount": 0,
+      "retiredAndCollected": true,
+      "activeReceiptId": "ff79437c083c6aa07e0b3553b0fa5247c1a307c269648d85057bf76c4c3e211f"
+    },
+    {
+      "name": "changed-source-evidence-rejected",
+      "cause": "Source changed since completed build: closure/app"
+    }
+  ],
+  "manifests": {
+    "a": {
+      "graph": {
+        "entry": "closure/app",
+        "modules": [
+          "closure/app",
+          "closure/bridge",
+          "closure/leaf",
+          "closure/middle",
+          "closure/phase",
+          "closure/phase-dep"
+        ],
+        "edges": [
+          {
+            "phi": 1,
+            "from": "closure/app",
+            "to": "closure/phase",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-a/closure/phase.ssi",
+            "kind": "binding"
+          },
+          {
+            "kind": "set",
+            "phi": 1,
+            "to": "closure/phase",
+            "from": "closure/app",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-a/closure/phase.ssi"
+          },
+          {
+            "phi": 0,
+            "from": "closure/app",
+            "to": "closure/bridge",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-a/closure/bridge.ssi",
+            "kind": "binding"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-a/closure/middle.ssi",
+            "from": "closure/bridge",
+            "to": "closure/middle"
+          },
+          {
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-a/closure/middle.ssi",
+            "phi": 0,
+            "to": "closure/middle",
+            "from": "closure/bridge",
+            "kind": "set"
+          },
+          {
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-a/closure/leaf.ssi",
+            "from": "closure/middle",
+            "to": "closure/leaf",
+            "kind": "binding"
+          },
+          {
+            "from": "closure/phase",
+            "to": "closure/phase-dep",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-a/closure/phase-dep.ssi",
+            "kind": "binding",
+            "phi": 0
+          },
+          {
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-a/closure/phase-dep.ssi",
+            "from": "closure/phase",
+            "to": "closure/phase-dep",
+            "kind": "set"
+          }
+        ],
+        "externalFrontier": [
+          {
+            "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+            "phi": 0,
+            "to": "std/list/list",
+            "from": "closure/app",
+            "kind": "binding",
+            "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+          }
+        ],
+        "nativeObjects": {
+          "closure/app": [
+            "closure/app.o1",
+            "closure/app~1.o1",
+            "closure/app~0.o1"
+          ],
+          "closure/bridge": [
+            "closure/bridge.o1"
+          ],
+          "closure/leaf": [
+            "closure/leaf.o1",
+            "closure/leaf~0.o1"
+          ],
+          "closure/middle": [
+            "closure/middle.o1",
+            "closure/middle~0.o1"
+          ],
+          "closure/phase": [
+            "closure/phase.o1",
+            "closure/phase~0.o1"
+          ],
+          "closure/phase-dep": [
+            "closure/phase-dep.o1",
+            "closure/phase-dep~0.o1"
+          ]
+        }
+      },
+      "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-a",
+      "files": {
+        "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+        "closure/app.native-complete": "117b87ff40eafe7a84caf233ff543970bfd828b627c50b12bbe093c3a5191401",
+        "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+        "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+        "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+        "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+        "closure/app~0.o1": "403c71e8ca2f7b2e0c18a3e80f2cc9094211069b9699620d03aa3774babd12d9",
+        "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+        "closure/bridge.native-complete": "117b87ff40eafe7a84caf233ff543970bfd828b627c50b12bbe093c3a5191401",
+        "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+        "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+        "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+        "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+        "closure/leaf.native-complete": "117b87ff40eafe7a84caf233ff543970bfd828b627c50b12bbe093c3a5191401",
+        "closure/leaf.native-source": "b7d09d42b358cb0743cc4ce68f9d2e389d0df4a7d9c02e70eaa010ffaa4e1137",
+        "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+        "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+        "closure/leaf~0.o1": "4028d1ac977dbca67501c21d447519b711df2f1b331fd7c3affe810bdd545526",
+        "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+        "closure/middle.native-complete": "117b87ff40eafe7a84caf233ff543970bfd828b627c50b12bbe093c3a5191401",
+        "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+        "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+        "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+        "closure/middle~0.o1": "fb931d094e5151b9047f081eeb43a383f3c6de4d8ae1d275e74fdaa2889be250",
+        "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+        "closure/phase.native-complete": "117b87ff40eafe7a84caf233ff543970bfd828b627c50b12bbe093c3a5191401",
+        "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+        "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+        "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+        "closure/phase~0.o1": "dc630daeb99d06a5d7ee2b69ddbe7a2d8cd433f99da4f16585b480b374234bad",
+        "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+        "closure/phase-dep.native-complete": "117b87ff40eafe7a84caf233ff543970bfd828b627c50b12bbe093c3a5191401",
+        "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+        "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+        "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+        "closure/phase-dep~0.o1": "9414a3453fbc14ca7579196b8c6d729072bae16226dc411cfff242dd255426fd"
+      }
+    },
+    "b": {
+      "graph": {
+        "entry": "closure/app",
+        "modules": [
+          "closure/app",
+          "closure/bridge",
+          "closure/leaf",
+          "closure/middle",
+          "closure/phase",
+          "closure/phase-dep"
+        ],
+        "edges": [
+          {
+            "kind": "binding",
+            "phi": 1,
+            "from": "closure/app",
+            "to": "closure/phase",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/phase.ssi"
+          },
+          {
+            "kind": "set",
+            "phi": 1,
+            "from": "closure/app",
+            "to": "closure/phase",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/phase.ssi"
+          },
+          {
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/bridge.ssi",
+            "phi": 0,
+            "to": "closure/bridge",
+            "from": "closure/app",
+            "kind": "binding"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "from": "closure/bridge",
+            "to": "closure/middle",
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/middle.ssi"
+          },
+          {
+            "kind": "set",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/middle.ssi",
+            "from": "closure/bridge",
+            "to": "closure/middle"
+          },
+          {
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/leaf.ssi",
+            "phi": 0,
+            "to": "closure/leaf",
+            "from": "closure/middle",
+            "kind": "binding"
+          },
+          {
+            "kind": "binding",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/phase-dep.ssi",
+            "from": "closure/phase",
+            "to": "closure/phase-dep"
+          },
+          {
+            "kind": "set",
+            "phi": 0,
+            "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/phase-dep.ssi",
+            "from": "closure/phase",
+            "to": "closure/phase-dep"
+          }
+        ],
+        "externalFrontier": [
+          {
+            "from": "closure/app",
+            "to": "std/list/list",
+            "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+            "kind": "binding",
+            "phi": 0,
+            "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+          }
+        ],
+        "nativeObjects": {
+          "closure/app": [
+            "closure/app.o1",
+            "closure/app~1.o1",
+            "closure/app~0.o1"
+          ],
+          "closure/bridge": [
+            "closure/bridge.o1"
+          ],
+          "closure/leaf": [
+            "closure/leaf.o1",
+            "closure/leaf~0.o1"
+          ],
+          "closure/middle": [
+            "closure/middle.o1",
+            "closure/middle~0.o1"
+          ],
+          "closure/phase": [
+            "closure/phase.o1",
+            "closure/phase~0.o1"
+          ],
+          "closure/phase-dep": [
+            "closure/phase-dep.o1",
+            "closure/phase-dep~0.o1"
+          ]
+        }
+      },
+      "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b",
+      "files": {
+        "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+        "closure/app.native-complete": "4798543548608403f62b63add7c3d4690818264482eafa3ae2147287f7b4d566",
+        "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+        "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+        "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+        "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+        "closure/app~0.o1": "69430ce8ef7a7acd0a7d3191b5b5b4c9f4a14b18bdaff62b77bcc48a8ae86247",
+        "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+        "closure/bridge.native-complete": "32a5519053d6f449c86126a3cee21c41fd0eb28e13f9385db4a0420bb8ec672b",
+        "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+        "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+        "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+        "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+        "closure/leaf.native-complete": "32a5519053d6f449c86126a3cee21c41fd0eb28e13f9385db4a0420bb8ec672b",
+        "closure/leaf.native-source": "a9911890fa18788143b25c2dec5429e46253af232c5494d6aad7804847a2513b",
+        "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+        "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+        "closure/leaf~0.o1": "da70102ed35dbd6e05788dcbf0f8dc2e3c5db7e1504d2b97e70e3a95694f5b7c",
+        "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+        "closure/middle.native-complete": "32a5519053d6f449c86126a3cee21c41fd0eb28e13f9385db4a0420bb8ec672b",
+        "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+        "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+        "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+        "closure/middle~0.o1": "ecb21d22244741a50e2f23eeb377841af114b72bbdbfe74ae23cca7dd34a2987",
+        "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+        "closure/phase.native-complete": "32a5519053d6f449c86126a3cee21c41fd0eb28e13f9385db4a0420bb8ec672b",
+        "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+        "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+        "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+        "closure/phase~0.o1": "c6b1da2b2380e7bda81074185d5c96730faea063853305775443ffc62c213677",
+        "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+        "closure/phase-dep.native-complete": "32a5519053d6f449c86126a3cee21c41fd0eb28e13f9385db4a0420bb8ec672b",
+        "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+        "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+        "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+        "closure/phase-dep~0.o1": "55132f45d7e0cc2f0747ed40547126c72449c603607c6c0c6a353729f40b8687"
+      }
+    }
+  },
+  "retainedCompilerPatchChanged": false,
+  "date": "2026-10-03",
+  "headBeforeStudy": "98e5c393334ab6b36ece53d921ad3218d5f0e863",
+  "observationCount": 72,
+  "addedRecoveryObservationCount": 57,
+  "repeatedClosurePrerequisiteObservationCount": 15,
+  "gerbilCommandCount": 14,
+  "completedRetentionOperationCommandCount": 30,
+  "killedOperationProcessCount": 12,
+  "acquisitionKillCount": 4,
+  "releaseKillCount": 4,
+  "collectionKillCount": 4,
+  "implementationDigests": {
+    "closure.py": "3740753bed868b6c0588c0cd09449bf92c93dbf12270f4eeb8e88e6a09288726",
+    "closure.ss": "fcf4790d8c331b5615d6b391d557e8827e0530211b55867fc9b14dcd1d75195e",
+    "publication.py": "8162f6913329d868dcfb7e836456ec1cb82f94047179e531cf27e7b86a86872a",
+    "publication_crash.py": "258c868646cfe3d43160d221f86285d8d5323d481ac52f03a1de7c6a3cbd845c",
+    "publication_admission.py": "8c74ab1e9a5668d7c30d43d42e68ed675839a6567cf430f84f0374760b026245",
+    "publication_retention.py": "3bb1de8782a0c049c436fa51f2c27e90cf2d0f28e84c07d970ebf290723c9cca",
+    "retention_crash.py": "25f8b677c4c6b27db29b1fae862c46bf315abbae2b5864aa5ee31342bb8feed3"
+  },
+  "retainedPatchDigests": {
+    "installed": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+    "candidate": "45f589752ca91fdb78d199e2580545bfdcecb9544e099bae126d31f3523bba81"
+  },
+  "conclusions": {
+    "acquisition": "Pre-stage death leaves no record or launched reader; pending/installed records block collection; owned pre-load recovery verifies exact records",
+    "releaseIntent": "Pre-unlink death leaves reader retained; matching retry completes release; post-unlink intent permits ACK-RELEASE-REPLAY; changed handles rejected",
+    "collectionIntent": "Death after retirement, first child deletion, root removal or completion recording keeps A fenced; resume removes remainder or acknowledges completion",
+    "resumeGates": "Revoked writer-quiescence flag rejects every collector resume until coordinator redeclares it; retired publication refused",
+    "stateBinding": "Collector recovery/replay does not change authoritative publication state; selected B runtime 43 after all four cases",
+    "pathReappearance": "Collected A path recreated in scratch fixture is refused and preserved, not deleted again"
+  },
+  "evidenceBoundary": {
+    "death": "12 acknowledged SIGKILL checkpoints with host and filesystem still running; no power-loss/disk-restart claim",
+    "acquisitionRecovery": "Only owned acquisition operation that never returned a handle or launched any reader/children is cleaned; no generic dead-reader or TTL recovery",
+    "release": "Full-handle intent resolves identity but does not prove reader use ended; cooperative caller owns release authorization",
+    "collection": "Exact owned scratch roots, persistent retired/collected distinction, shared advisory lock and rechecked gates; writer declaration remains trusted assertion",
+    "fixtureIsolation": "Collector cases sequentially restore original scratch A bytes from owned backup after all operation processes ended and reader records released; no production path recycling protocol",
+    "partialDelete": "One explicit first top-level child removal checkpoint, not exhaustive syscall cut coverage",
+    "durability": "Intent, reader record, registry and filesystem deletion are separate operations; ordering under power loss or distributed storage not qualified",
+    "open": "Authentication, live-reader termination proof, writer-capability closure, alias replacement, tombstone cleanup/migration and full external runtime closure",
+    "counts": "72 primary observations are 57 added recovery plus 15 repeated prerequisites; separate baseline retention run has 30 rerun observations; older historical probe counts not added",
+    "scope": "Only owned temporary storage changed; retained compiler patches, installed/candidate sources and deployment unchanged"
+  },
+  "nextContracts": [
+    "Enforce and authenticate writer-capability closure before quiescence declaration",
+    "Trusted reader ownership/release and staging recovery authority",
+    "Storage durability and immutable path identity",
+    "Release tombstone lifecycle and interrupted schema/recovery migration"
+  ],
+  "finalRegistry": {
+    "ownedRoot": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p",
+    "generations": {
+      "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-a": {
+        "writerQuiescent": true,
+        "retired": true,
+        "collected": true
+      },
+      "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b": {
+        "writerQuiescent": false,
+        "retired": false
+      }
+    }
+  },
+  "finalTransactionState": {
+    "schema": "asp.publication-transaction-study.v1",
+    "epoch": 21,
+    "spent": false,
+    "active": {
+      "epoch": 17,
+      "request": "select-b-17",
+      "manifest": {
+        "receiptId": "ff79437c083c6aa07e0b3553b0fa5247c1a307c269648d85057bf76c4c3e211f",
+        "manifest": {
+          "graph": {
+            "entry": "closure/app",
+            "modules": [
+              "closure/app",
+              "closure/bridge",
+              "closure/leaf",
+              "closure/middle",
+              "closure/phase",
+              "closure/phase-dep"
+            ],
+            "edges": [
+              {
+                "kind": "binding",
+                "phi": 1,
+                "from": "closure/app",
+                "to": "closure/phase",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/phase.ssi"
+              },
+              {
+                "kind": "set",
+                "phi": 1,
+                "from": "closure/app",
+                "to": "closure/phase",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/phase.ssi"
+              },
+              {
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/bridge.ssi",
+                "phi": 0,
+                "to": "closure/bridge",
+                "from": "closure/app",
+                "kind": "binding"
+              },
+              {
+                "kind": "binding",
+                "phi": 0,
+                "from": "closure/bridge",
+                "to": "closure/middle",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/middle.ssi"
+              },
+              {
+                "kind": "set",
+                "phi": 0,
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/middle.ssi",
+                "from": "closure/bridge",
+                "to": "closure/middle"
+              },
+              {
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/leaf.ssi",
+                "phi": 0,
+                "to": "closure/leaf",
+                "from": "closure/middle",
+                "kind": "binding"
+              },
+              {
+                "kind": "binding",
+                "phi": 0,
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/phase-dep.ssi",
+                "from": "closure/phase",
+                "to": "closure/phase-dep"
+              },
+              {
+                "kind": "set",
+                "phi": 0,
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b/closure/phase-dep.ssi",
+                "from": "closure/phase",
+                "to": "closure/phase-dep"
+              }
+            ],
+            "externalFrontier": [
+              {
+                "from": "closure/app",
+                "to": "std/list/list",
+                "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+                "kind": "binding",
+                "phi": 0,
+                "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+              }
+            ],
+            "nativeObjects": {
+              "closure/app": [
+                "closure/app.o1",
+                "closure/app~1.o1",
+                "closure/app~0.o1"
+              ],
+              "closure/bridge": [
+                "closure/bridge.o1"
+              ],
+              "closure/leaf": [
+                "closure/leaf.o1",
+                "closure/leaf~0.o1"
+              ],
+              "closure/middle": [
+                "closure/middle.o1",
+                "closure/middle~0.o1"
+              ],
+              "closure/phase": [
+                "closure/phase.o1",
+                "closure/phase~0.o1"
+              ],
+              "closure/phase-dep": [
+                "closure/phase-dep.o1",
+                "closure/phase-dep~0.o1"
+              ]
+            }
+          },
+          "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-l6rw8j1p/lib-b",
+          "files": {
+            "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+            "closure/app.native-complete": "4798543548608403f62b63add7c3d4690818264482eafa3ae2147287f7b4d566",
+            "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+            "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+            "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+            "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+            "closure/app~0.o1": "69430ce8ef7a7acd0a7d3191b5b5b4c9f4a14b18bdaff62b77bcc48a8ae86247",
+            "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+            "closure/bridge.native-complete": "32a5519053d6f449c86126a3cee21c41fd0eb28e13f9385db4a0420bb8ec672b",
+            "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+            "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+            "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+            "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+            "closure/leaf.native-complete": "32a5519053d6f449c86126a3cee21c41fd0eb28e13f9385db4a0420bb8ec672b",
+            "closure/leaf.native-source": "a9911890fa18788143b25c2dec5429e46253af232c5494d6aad7804847a2513b",
+            "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+            "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+            "closure/leaf~0.o1": "da70102ed35dbd6e05788dcbf0f8dc2e3c5db7e1504d2b97e70e3a95694f5b7c",
+            "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+            "closure/middle.native-complete": "32a5519053d6f449c86126a3cee21c41fd0eb28e13f9385db4a0420bb8ec672b",
+            "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+            "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+            "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+            "closure/middle~0.o1": "ecb21d22244741a50e2f23eeb377841af114b72bbdbfe74ae23cca7dd34a2987",
+            "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+            "closure/phase.native-complete": "32a5519053d6f449c86126a3cee21c41fd0eb28e13f9385db4a0420bb8ec672b",
+            "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+            "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+            "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+            "closure/phase~0.o1": "c6b1da2b2380e7bda81074185d5c96730faea063853305775443ffc62c213677",
+            "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+            "closure/phase-dep.native-complete": "32a5519053d6f449c86126a3cee21c41fd0eb28e13f9385db4a0420bb8ec672b",
+            "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+            "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+            "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+            "closure/phase-dep~0.o1": "55132f45d7e0cc2f0747ed40547126c72449c603607c6c0c6a353729f40b8687"
+          }
+        }
+      },
+      "digest": "6dcd6049048474954b991dc4877f096a8398625338069ba8c688a9d92d4b1e64"
+    }
+  },
+  "retentionRegression": {
+    "observationCount": 30,
+    "study": {
+      "schema": "asp.native-compiler-closure-study.v1",
+      "patchedSourceSha256": "b7473bf5f013f5b65f0f7a08c6f5683ca45527e48a23dd5b96ef02b2f202a524",
+      "instrumentedSourceSha256": "80041f6b4c2c5d142f80419164b8afee9c204a4efc6f8fa10197a36af40fd585",
+      "patchSha256": "54f9dff5a448d189d7d387824965f6e5a1bfb0eb2aa58f12b98e8ab6b9375e61",
+      "nativeGscSha256": "e780d799e1be2ce62c0de90758b81a9a4bdeec63276b82da932dced261a1b400",
+      "runnerSha256": "3740753bed868b6c0588c0cd09449bf92c93dbf12270f4eeb8e88e6a09288726",
+      "extractorSha256": "fcf4790d8c331b5615d6b391d557e8827e0530211b55867fc9b14dcd1d75195e",
+      "sharedHarnessSha256": "8162f6913329d868dcfb7e836456ec1cb82f94047179e531cf27e7b86a86872a",
+      "externalRoot": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib",
+      "publicationStudy": false,
+      "retentionStudy": true,
+      "retentionCrashStudy": false,
+      "observations": [
+        {
+          "name": "build-a",
+          "exit": 0,
+          "marker": "BUILD-OK",
+          "expectedAnswer": null,
+          "stdoutSha256": "2c69f64b21bfcba8bc5a0624fc493fbc3189db277cc243e414d2eece36a6ee28",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "runtime-a",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 42,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "source-imports-a",
+          "exit": 0,
+          "marker": null,
+          "expectedAnswer": null,
+          "stdoutSha256": "dc21670305f62b09ba5c15141e363f00f1bdce26bf332bd1deeaccee0da0274f",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "native-output-facts-a",
+          "exit": 0,
+          "marker": null,
+          "expectedAnswer": null,
+          "stdoutSha256": "81ee6fedd34052df474cd9690d4ce3bcb3fa7c64ba7f9944eb7e626002b56f57",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "derived-closure-a",
+          "modules": [
+            "closure/app",
+            "closure/bridge",
+            "closure/leaf",
+            "closure/middle",
+            "closure/phase",
+            "closure/phase-dep"
+          ],
+          "artifactCount": 36,
+          "phaseOneDependency": true,
+          "renamedBinding": true,
+          "externalFactCount": 1
+        },
+        {
+          "name": "build-b",
+          "exit": 0,
+          "marker": "BUILD-OK",
+          "expectedAnswer": null,
+          "stdoutSha256": "5ed3bcd3d9f5f9e29860df7ca8ca8b6781929f709bebc44db9d16d5476ffa618",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "runtime-b",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 43,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "source-imports-b",
+          "exit": 0,
+          "marker": null,
+          "expectedAnswer": null,
+          "stdoutSha256": "475c39fb75daf40f28100620ae4ee2444386b8ad3ef0f14656b44e477a7d7a16",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "native-output-facts-b",
+          "exit": 0,
+          "marker": null,
+          "expectedAnswer": null,
+          "stdoutSha256": "e0adaf674e2a530e8440a8af642c146adc08adc5cc23a4e263a0282980f2e2bd",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "derived-closure-b",
+          "modules": [
+            "closure/app",
+            "closure/bridge",
+            "closure/leaf",
+            "closure/middle",
+            "closure/phase",
+            "closure/phase-dep"
+          ],
+          "artifactCount": 36,
+          "phaseOneDependency": true,
+          "renamedBinding": true,
+          "externalFactCount": 1
+        },
+        {
+          "name": "partial-runtime-with-fallback",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 42,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "partial-imports",
+          "exit": 0,
+          "marker": null,
+          "expectedAnswer": null,
+          "stdoutSha256": "eb2180cc701860c3148480fdb55108d33fcac8244fdfae4dd85b1d4a23054ed5",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "fallback-local-owner-rejected",
+          "cause": "Local dependency resolved outside generation: closure/leaf"
+        },
+        {
+          "name": "transitive-phase-inventory-rejected",
+          "cause": "Incomplete compiler-derived inventory"
+        },
+        {
+          "name": "retention-acquired-before-module-load",
+          "readerCount": 2,
+          "epoch": 1,
+          "receiptId": "1bd58c41af8ce1e8804de7c83b5c15eafaf4460615026d9ff3aa7870d349908d",
+          "publicationDigest": "89bed3d49343d686bd867e44c32f38db3a1e6ed6804a3ffd41128d242e8bf929"
+        },
+        {
+          "name": "retention-selected-b-runtime",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 43,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "retention-live-readers-block-collection",
+          "commandKind": "collector",
+          "exit": 70,
+          "marker": "Readers retain generation",
+          "stdoutSha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "retention-killed-preload-reader",
+          "commandKind": "reader-launcher",
+          "exit": -9,
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "retainedReaderCount": 2
+        },
+        {
+          "name": "retention-old-reader-loads-after-switch",
+          "commandKind": "native-reader",
+          "exit": 0,
+          "marker": "RETAINED-READER-OK",
+          "stdoutSha256": "da3ac63dad2af4d077ffcd8786b05fa230feae50f39e743c47fa5619fc9c01ff",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "retention-dead-owner-record-blocks",
+          "commandKind": "collector",
+          "exit": 70,
+          "marker": "Readers retain generation",
+          "stdoutSha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "retention-explicit-preload-owner-release",
+          "retainedReaderCount": 0,
+          "proof": "Owned launcher killed before exec; no children created"
+        },
+        {
+          "name": "retention-zero-readers-not-quiescence",
+          "commandKind": "collector",
+          "exit": 70,
+          "marker": "Writer quiescence unknown",
+          "stdoutSha256": "31c42670361e4ac2bae4f37cb463e7ba07b5e915c3c1d14a6febec4c63e22423",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "retention-active-b-blocks-collection",
+          "commandKind": "collector",
+          "exit": 70,
+          "marker": "Active generation retained",
+          "stdoutSha256": "019447b9689709fc8722264b98ab7f51ed6bdbd06f3ab27916248d7ebc18a46d",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "retention-malformed-record-blocks",
+          "commandKind": "collector",
+          "exit": 70,
+          "marker": "JSONDecodeError",
+          "stdoutSha256": "359269a2a22eb1e482f186fc33e7e1539ffc7ba57a3fb482f5cf12efeaad04a5",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "retention-quiescent-unretained-a-collected",
+          "commandKind": "collector",
+          "exit": 0,
+          "marker": "COLLECTED",
+          "stdoutSha256": "cf01585829633e2debef0696d8101ca4fb4702310a2f2256b3b17bd0e753ce8c",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "retention-retired-generation-publication-rejected",
+          "cause": "Generation retired",
+          "tokenUnspent": true
+        },
+        {
+          "name": "retention-bare-snapshot-after-collection",
+          "commandKind": "native-reader",
+          "exit": 70,
+          "marker": "cannot find library module",
+          "stdoutSha256": "e8dd4e3ce5b73fc8e28262ec7429f3e196591ead36fa13aa561eb61330d67c76",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "retention-b-remains-readable",
+          "exit": 0,
+          "marker": "RUNTIME-OK",
+          "expectedAnswer": 43,
+          "stdoutSha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "retention-final-state",
+          "activeReceiptId": "450f7f16ce2dc38548379ff54e589e8dc891fd8023ca91cb0f32c2fe526146ef",
+          "retiredRoot": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-a",
+          "survivingRoot": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-b",
+          "retainedReaderCount": 0
+        },
+        {
+          "name": "changed-source-evidence-rejected",
+          "cause": "Source changed since completed build: closure/app"
+        }
+      ],
+      "manifests": {
+        "a": {
+          "graph": {
+            "entry": "closure/app",
+            "modules": [
+              "closure/app",
+              "closure/bridge",
+              "closure/leaf",
+              "closure/middle",
+              "closure/phase",
+              "closure/phase-dep"
+            ],
+            "edges": [
+              {
+                "phi": 1,
+                "from": "closure/app",
+                "to": "closure/phase",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-a/closure/phase.ssi",
+                "kind": "binding"
+              },
+              {
+                "to": "closure/phase",
+                "from": "closure/app",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-a/closure/phase.ssi",
+                "kind": "set",
+                "phi": 1
+              },
+              {
+                "kind": "binding",
+                "phi": 0,
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-a/closure/bridge.ssi",
+                "from": "closure/app",
+                "to": "closure/bridge"
+              },
+              {
+                "phi": 0,
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-a/closure/middle.ssi",
+                "from": "closure/bridge",
+                "to": "closure/middle",
+                "kind": "binding"
+              },
+              {
+                "to": "closure/middle",
+                "from": "closure/bridge",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-a/closure/middle.ssi",
+                "kind": "set",
+                "phi": 0
+              },
+              {
+                "kind": "binding",
+                "phi": 0,
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-a/closure/leaf.ssi",
+                "from": "closure/middle",
+                "to": "closure/leaf"
+              },
+              {
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-a/closure/phase-dep.ssi",
+                "phi": 0,
+                "to": "closure/phase-dep",
+                "from": "closure/phase",
+                "kind": "binding"
+              },
+              {
+                "kind": "set",
+                "phi": 0,
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-a/closure/phase-dep.ssi",
+                "from": "closure/phase",
+                "to": "closure/phase-dep"
+              }
+            ],
+            "externalFrontier": [
+              {
+                "kind": "binding",
+                "phi": 0,
+                "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+                "from": "closure/app",
+                "to": "std/list/list",
+                "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+              }
+            ],
+            "nativeObjects": {
+              "closure/app": [
+                "closure/app.o1",
+                "closure/app~1.o1",
+                "closure/app~0.o1"
+              ],
+              "closure/bridge": [
+                "closure/bridge.o1"
+              ],
+              "closure/leaf": [
+                "closure/leaf.o1",
+                "closure/leaf~0.o1"
+              ],
+              "closure/middle": [
+                "closure/middle.o1",
+                "closure/middle~0.o1"
+              ],
+              "closure/phase": [
+                "closure/phase.o1",
+                "closure/phase~0.o1"
+              ],
+              "closure/phase-dep": [
+                "closure/phase-dep.o1",
+                "closure/phase-dep~0.o1"
+              ]
+            }
+          },
+          "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-a",
+          "files": {
+            "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+            "closure/app.native-complete": "e4cd0f72ab3b20da993999af8f74cad8b9296020578a0377f765f766c71f801c",
+            "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+            "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+            "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+            "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+            "closure/app~0.o1": "403c71e8ca2f7b2e0c18a3e80f2cc9094211069b9699620d03aa3774babd12d9",
+            "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+            "closure/bridge.native-complete": "ee76667cd2a326b44e7c3cddb22d5b5e5ff75158c1c0922415ee89a69d90cda5",
+            "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+            "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+            "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+            "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+            "closure/leaf.native-complete": "ee76667cd2a326b44e7c3cddb22d5b5e5ff75158c1c0922415ee89a69d90cda5",
+            "closure/leaf.native-source": "b7d09d42b358cb0743cc4ce68f9d2e389d0df4a7d9c02e70eaa010ffaa4e1137",
+            "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+            "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+            "closure/leaf~0.o1": "4028d1ac977dbca67501c21d447519b711df2f1b331fd7c3affe810bdd545526",
+            "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+            "closure/middle.native-complete": "ee76667cd2a326b44e7c3cddb22d5b5e5ff75158c1c0922415ee89a69d90cda5",
+            "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+            "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+            "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+            "closure/middle~0.o1": "fb931d094e5151b9047f081eeb43a383f3c6de4d8ae1d275e74fdaa2889be250",
+            "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+            "closure/phase.native-complete": "ee76667cd2a326b44e7c3cddb22d5b5e5ff75158c1c0922415ee89a69d90cda5",
+            "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+            "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+            "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+            "closure/phase~0.o1": "dc630daeb99d06a5d7ee2b69ddbe7a2d8cd433f99da4f16585b480b374234bad",
+            "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+            "closure/phase-dep.native-complete": "ee76667cd2a326b44e7c3cddb22d5b5e5ff75158c1c0922415ee89a69d90cda5",
+            "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+            "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+            "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+            "closure/phase-dep~0.o1": "9414a3453fbc14ca7579196b8c6d729072bae16226dc411cfff242dd255426fd"
+          }
+        },
+        "b": {
+          "graph": {
+            "entry": "closure/app",
+            "modules": [
+              "closure/app",
+              "closure/bridge",
+              "closure/leaf",
+              "closure/middle",
+              "closure/phase",
+              "closure/phase-dep"
+            ],
+            "edges": [
+              {
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-b/closure/phase.ssi",
+                "phi": 1,
+                "to": "closure/phase",
+                "from": "closure/app",
+                "kind": "binding"
+              },
+              {
+                "kind": "set",
+                "phi": 1,
+                "to": "closure/phase",
+                "from": "closure/app",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-b/closure/phase.ssi"
+              },
+              {
+                "kind": "binding",
+                "phi": 0,
+                "from": "closure/app",
+                "to": "closure/bridge",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-b/closure/bridge.ssi"
+              },
+              {
+                "kind": "binding",
+                "phi": 0,
+                "from": "closure/bridge",
+                "to": "closure/middle",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-b/closure/middle.ssi"
+              },
+              {
+                "kind": "set",
+                "phi": 0,
+                "to": "closure/middle",
+                "from": "closure/bridge",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-b/closure/middle.ssi"
+              },
+              {
+                "phi": 0,
+                "from": "closure/middle",
+                "to": "closure/leaf",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-b/closure/leaf.ssi",
+                "kind": "binding"
+              },
+              {
+                "kind": "binding",
+                "phi": 0,
+                "from": "closure/phase",
+                "to": "closure/phase-dep",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-b/closure/phase-dep.ssi"
+              },
+              {
+                "kind": "set",
+                "phi": 0,
+                "to": "closure/phase-dep",
+                "from": "closure/phase",
+                "path": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-b/closure/phase-dep.ssi"
+              }
+            ],
+            "externalFrontier": [
+              {
+                "kind": "binding",
+                "phi": 0,
+                "path": "/opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/2591dcd/lib/std/list/list.ssi",
+                "from": "closure/app",
+                "to": "std/list/list",
+                "interfaceSha256": "d7b8207af2bb9a21d006639600de508977889bad1626ae8d7d73b455b62de7f4"
+              }
+            ],
+            "nativeObjects": {
+              "closure/app": [
+                "closure/app.o1",
+                "closure/app~1.o1",
+                "closure/app~0.o1"
+              ],
+              "closure/bridge": [
+                "closure/bridge.o1"
+              ],
+              "closure/leaf": [
+                "closure/leaf.o1",
+                "closure/leaf~0.o1"
+              ],
+              "closure/middle": [
+                "closure/middle.o1",
+                "closure/middle~0.o1"
+              ],
+              "closure/phase": [
+                "closure/phase.o1",
+                "closure/phase~0.o1"
+              ],
+              "closure/phase-dep": [
+                "closure/phase-dep.o1",
+                "closure/phase-dep~0.o1"
+              ]
+            }
+          },
+          "libdir": "/private/var/folders/pj/n33bqzy94yn9wxggj3rny0d00000gn/T/gerbil-compiler-closure-6vqm5syw/lib-b",
+          "files": {
+            "closure/app.ssi": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+            "closure/app.native-complete": "4775d4e10be4c4879fc86c9b0814c6f327a8cb777069b8a8f208f91868602b92",
+            "closure/app.native-source": "58404def7af453e1218218e73bc6d571e7f0ee359fc25f9afeec16fe5c2572fc",
+            "closure/app.native-interface": "307bbf53c20c97175a9daa2f1f935e09291cde7c22d0ac640ef45e967a2585f5",
+            "closure/app.o1": "368431b4a5ff44df698633db4d84e1d1e62fe98c2bf666f1841009d2a0e01d7b",
+            "closure/app~1.o1": "1c80ccbb59d577b00291075f435321007c39444947e5a24f5500110938b8f260",
+            "closure/app~0.o1": "69430ce8ef7a7acd0a7d3191b5b5b4c9f4a14b18bdaff62b77bcc48a8ae86247",
+            "closure/bridge.ssi": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+            "closure/bridge.native-complete": "86db4b1c94b4c8bf319428255adcad69cb94e21186f6412a09315e9645140b94",
+            "closure/bridge.native-source": "6efa56a3bd9ba11c61823c0cb6c6da18f1de6b3ca1c840b20c3079e368704c67",
+            "closure/bridge.native-interface": "6d395830fc4dea77d577bb3ba6ccf9578883ad34fb390c4e75ac0e15941b26d5",
+            "closure/bridge.o1": "92b8ea3a3e99803c079dfe9d6db2e7029f69c6ca292acf0c2be893ee3adaf530",
+            "closure/leaf.ssi": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+            "closure/leaf.native-complete": "86db4b1c94b4c8bf319428255adcad69cb94e21186f6412a09315e9645140b94",
+            "closure/leaf.native-source": "a9911890fa18788143b25c2dec5429e46253af232c5494d6aad7804847a2513b",
+            "closure/leaf.native-interface": "544f92e23c04a8f27d0170a429d392ea9b23b67193de31631525ddd7afc56263",
+            "closure/leaf.o1": "dedbf171d60e506cd5d7672f16f45b3a7c96813a9dbd2b151fffaa6c75f7ef79",
+            "closure/leaf~0.o1": "da70102ed35dbd6e05788dcbf0f8dc2e3c5db7e1504d2b97e70e3a95694f5b7c",
+            "closure/middle.ssi": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+            "closure/middle.native-complete": "86db4b1c94b4c8bf319428255adcad69cb94e21186f6412a09315e9645140b94",
+            "closure/middle.native-source": "6c84b3bc233e19983f68f2cbfd6984acb51a5c6dd21823a9627895335842da02",
+            "closure/middle.native-interface": "678b75e5ca1f4bb2347ad5b60a61c82947102d78dd5c0fb86e48625906594c2b",
+            "closure/middle.o1": "e5780823652bc40707f853281e5d4b563457e1dbea7e3deaa512363341b8d9d3",
+            "closure/middle~0.o1": "ecb21d22244741a50e2f23eeb377841af114b72bbdbfe74ae23cca7dd34a2987",
+            "closure/phase.ssi": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+            "closure/phase.native-complete": "86db4b1c94b4c8bf319428255adcad69cb94e21186f6412a09315e9645140b94",
+            "closure/phase.native-source": "4280d4f8c8c02b1463d21655e4dcb860020a3c7d8acf116334255c4269e2d066",
+            "closure/phase.native-interface": "2c1dcd1e1748e94e76465b626874d875ef8b55337eb5aeea85b3ba45e442a9f1",
+            "closure/phase.o1": "5658a56d92a5b7a7dc42ea9e66a61ec3cbceaa2067e3c24c7d706e92087489f2",
+            "closure/phase~0.o1": "c6b1da2b2380e7bda81074185d5c96730faea063853305775443ffc62c213677",
+            "closure/phase-dep.ssi": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+            "closure/phase-dep.native-complete": "86db4b1c94b4c8bf319428255adcad69cb94e21186f6412a09315e9645140b94",
+            "closure/phase-dep.native-source": "134e40e2696a0f2453790edf4222b78539fc30d8446100d0e5df510cf7fcb7ac",
+            "closure/phase-dep.native-interface": "edd4f35f3208cddb26a0841c7077f2fb660b67776abc57647f1c8ddcbf5f6c61",
+            "closure/phase-dep.o1": "4fceee922df9736a87636472535b5ce2c8e1ccdcc945be0329426f9c18fb5ee5",
+            "closure/phase-dep~0.o1": "55132f45d7e0cc2f0747ed40547126c72449c603607c6c0c6a353729f40b8687"
+          }
+        }
+      },
+      "retainedCompilerPatchChanged": false
+    },
+    "rawLogs": [
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/build-a.out",
+        "sha256": "2c69f64b21bfcba8bc5a0624fc493fbc3189db277cc243e414d2eece36a6ee28"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/build-b.out",
+        "sha256": "5ed3bcd3d9f5f9e29860df7ca8ca8b6781929f709bebc44db9d16d5476ffa618"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/native-output-facts-a.out",
+        "sha256": "81ee6fedd34052df474cd9690d4ce3bcb3fa7c64ba7f9944eb7e626002b56f57"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/native-output-facts-b.out",
+        "sha256": "e0adaf674e2a530e8440a8af642c146adc08adc5cc23a4e263a0282980f2e2bd"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/partial-imports.out",
+        "sha256": "eb2180cc701860c3148480fdb55108d33fcac8244fdfae4dd85b1d4a23054ed5"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/partial-runtime-with-fallback.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-active-b-blocks-collection.out",
+        "sha256": "019447b9689709fc8722264b98ab7f51ed6bdbd06f3ab27916248d7ebc18a46d"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-b-remains-readable.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-bare-snapshot-after-collection.out",
+        "sha256": "e8dd4e3ce5b73fc8e28262ec7429f3e196591ead36fa13aa561eb61330d67c76"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-dead-owner-record-blocks.out",
+        "sha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-live-readers-block-collection.out",
+        "sha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-malformed-record-blocks.out",
+        "sha256": "359269a2a22eb1e482f186fc33e7e1539ffc7ba57a3fb482f5cf12efeaad04a5"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-quiescent-unretained-a-collected.out",
+        "sha256": "cf01585829633e2debef0696d8101ca4fb4702310a2f2256b3b17bd0e753ce8c"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-reader-0.out",
+        "sha256": "da3ac63dad2af4d077ffcd8786b05fa230feae50f39e743c47fa5619fc9c01ff"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-reader-1.out",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-selected-b-runtime.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-zero-readers-not-quiescence.out",
+        "sha256": "31c42670361e4ac2bae4f37cb463e7ba07b5e915c3c1d14a6febec4c63e22423"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/runtime-a.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/runtime-b.out",
+        "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/source-imports-a.out",
+        "sha256": "dc21670305f62b09ba5c15141e363f00f1bdce26bf332bd1deeaccee0da0274f"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/source-imports-b.out",
+        "sha256": "475c39fb75daf40f28100620ae4ee2444386b8ad3ef0f14656b44e477a7d7a16"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/build-a.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/build-b.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/native-output-facts-a.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/native-output-facts-b.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/partial-imports.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/partial-runtime-with-fallback.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-active-b-blocks-collection.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-b-remains-readable.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-bare-snapshot-after-collection.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-dead-owner-record-blocks.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-live-readers-block-collection.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-malformed-record-blocks.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-quiescent-unretained-a-collected.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-reader-0.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-reader-1.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-selected-b-runtime.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/retention-zero-readers-not-quiescence.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/runtime-a.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/runtime-b.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/source-imports-a.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/tmp/asp-retention-recovery-regression/source-imports-b.err",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "qualificationLog": {
+      "path": "/private/tmp/asp-retention-recovery-regression.log",
+      "sha256": "f3d42ea3b250c72ecaba730b01343c16551d03faacfb68142d93d77d24c0a6ea"
+    }
+  },
+  "rawLogs": [
+    {
+      "path": "/private/tmp/asp-retention-crash-study/build-a.out",
+      "sha256": "725fb90f0f819cbb82085c53f4334ce8212ad99df3b7c01cf5ee45bcd0ea74ed"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/build-b.out",
+      "sha256": "cf84bded03bc4d64aaccf2907db35f388d77ca8a7fe17ce625addc2e6b744f42"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/native-output-facts-a.out",
+      "sha256": "c12b2ebabfd87f22a4d0c764a952571c991d6259e817171e9157ef9d390f2b81"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/native-output-facts-b.out",
+      "sha256": "c2d529a2dea3ef6eaf28d9615c0c33697137f373b8b0d5a6c14629d506b456c6"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/partial-imports.out",
+      "sha256": "41064426d00ce545a52f67133fcd476df50139325791af60406ff52a0ab93cbb"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/partial-runtime-with-fallback.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-before-reader-stage.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-blocks-reader-directory-synced.out",
+      "sha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-blocks-reader-record-installed.out",
+      "sha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-blocks-reader-stage-synced.out",
+      "sha256": "2477e0f4d342578a934d9eaa188a0faf8d7a0b3f77d08373c74b284822593434"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-reader-directory-synced.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-reader-record-installed.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-reader-stage-synced.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collect-collection-completion-recorded.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collect-collection-partial-delete.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collect-collection-root-removed.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collect-retirement-recorded.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-replay-collection-completion-recorded.out",
+      "sha256": "f11251e7ea8141e1db41e09bc62cc55559539a394f723611e20545cea929275d"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-replay-collection-partial-delete.out",
+      "sha256": "f11251e7ea8141e1db41e09bc62cc55559539a394f723611e20545cea929275d"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-replay-collection-root-removed.out",
+      "sha256": "f11251e7ea8141e1db41e09bc62cc55559539a394f723611e20545cea929275d"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-replay-retirement-recorded.out",
+      "sha256": "f11251e7ea8141e1db41e09bc62cc55559539a394f723611e20545cea929275d"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-resume-collection-completion-recorded.out",
+      "sha256": "f11251e7ea8141e1db41e09bc62cc55559539a394f723611e20545cea929275d"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-resume-collection-partial-delete.out",
+      "sha256": "2d7bef73500a325fd7ccc8f816f89459a5d57b98145b0fa351ad64ac48a72b2e"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-resume-collection-root-removed.out",
+      "sha256": "2d7bef73500a325fd7ccc8f816f89459a5d57b98145b0fa351ad64ac48a72b2e"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-resume-retirement-recorded.out",
+      "sha256": "2d7bef73500a325fd7ccc8f816f89459a5d57b98145b0fa351ad64ac48a72b2e"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-reappeared-root-refused.out",
+      "sha256": "e794559c9ac7903b2aae9c6676bd2196332d110dff6875736396d6521e524290"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-before-release-intent.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-blocks-before-release-intent.out",
+      "sha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-blocks-release-intent-recorded.out",
+      "sha256": "7b7fcefe9c46f8bf501714ff02742b3a1cf728f8bd3b3936887fad238cf3d07c"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-reader-record-unlinked.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-release-directory-synced.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-release-intent-recorded.out",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-replay-before-release-intent.out",
+      "sha256": "75660bea0dd231996916d7892697c0ff83b741e3b89675a740ec332552da16b6"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-replay-reader-record-unlinked.out",
+      "sha256": "75660bea0dd231996916d7892697c0ff83b741e3b89675a740ec332552da16b6"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-replay-release-directory-synced.out",
+      "sha256": "75660bea0dd231996916d7892697c0ff83b741e3b89675a740ec332552da16b6"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-replay-release-intent-recorded.out",
+      "sha256": "75660bea0dd231996916d7892697c0ff83b741e3b89675a740ec332552da16b6"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-retry-before-release-intent.out",
+      "sha256": "47656717dc22a401765b486daaf31d5b6f20f2607f28902581527183ad4ac8ce"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-retry-reader-record-unlinked.out",
+      "sha256": "75660bea0dd231996916d7892697c0ff83b741e3b89675a740ec332552da16b6"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-retry-release-directory-synced.out",
+      "sha256": "75660bea0dd231996916d7892697c0ff83b741e3b89675a740ec332552da16b6"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-retry-release-intent-recorded.out",
+      "sha256": "47656717dc22a401765b486daaf31d5b6f20f2607f28902581527183ad4ac8ce"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-resume-rechecks-quiescence-collection-completion-recorded.out",
+      "sha256": "31c42670361e4ac2bae4f37cb463e7ba07b5e915c3c1d14a6febec4c63e22423"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-resume-rechecks-quiescence-collection-partial-delete.out",
+      "sha256": "31c42670361e4ac2bae4f37cb463e7ba07b5e915c3c1d14a6febec4c63e22423"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-resume-rechecks-quiescence-collection-root-removed.out",
+      "sha256": "31c42670361e4ac2bae4f37cb463e7ba07b5e915c3c1d14a6febec4c63e22423"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-resume-rechecks-quiescence-retirement-recorded.out",
+      "sha256": "31c42670361e4ac2bae4f37cb463e7ba07b5e915c3c1d14a6febec4c63e22423"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-surviving-b-collection-completion-recorded.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-surviving-b-collection-partial-delete.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-surviving-b-collection-root-removed.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-surviving-b-retirement-recorded.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-wrong-release-before-release-intent.out",
+      "sha256": "dda0485b114fccb7f69915565175f8bfadf905bf90a41cc10cfd5ae6d3ed0b7e"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-wrong-release-reader-record-unlinked.out",
+      "sha256": "772a721ec3e0b0adc33928ba22a452613438a9c0063eefa77e11a8dbdf3318f3"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-wrong-release-release-directory-synced.out",
+      "sha256": "772a721ec3e0b0adc33928ba22a452613438a9c0063eefa77e11a8dbdf3318f3"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-wrong-release-release-intent-recorded.out",
+      "sha256": "772a721ec3e0b0adc33928ba22a452613438a9c0063eefa77e11a8dbdf3318f3"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/runtime-a.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/runtime-b.out",
+      "sha256": "6470926dd382cce4dff7c085511fcc321a4410e629c9710233614964b0d0a022"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/source-imports-a.out",
+      "sha256": "4a78cf8f02be654d78a921ffeb5f7a9a5f1686bc75db0c79d9bfa151b3aefd71"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/source-imports-b.out",
+      "sha256": "29033a26de2fa7ab085d4fd7fc138217b5751bf945f5982d0bf7c2bebb2fbaaf"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/build-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/build-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/native-output-facts-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/native-output-facts-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/partial-imports.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/partial-runtime-with-fallback.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-before-reader-stage.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-blocks-reader-directory-synced.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-blocks-reader-record-installed.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-blocks-reader-stage-synced.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-reader-directory-synced.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-reader-record-installed.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-acquire-reader-stage-synced.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collect-collection-completion-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collect-collection-partial-delete.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collect-collection-root-removed.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collect-retirement-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-replay-collection-completion-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-replay-collection-partial-delete.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-replay-collection-root-removed.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-replay-retirement-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-resume-collection-completion-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-resume-collection-partial-delete.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-resume-collection-root-removed.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-collection-resume-retirement-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-reappeared-root-refused.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-before-release-intent.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-blocks-before-release-intent.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-blocks-release-intent-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-reader-record-unlinked.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-release-directory-synced.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-release-intent-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-replay-before-release-intent.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-replay-reader-record-unlinked.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-replay-release-directory-synced.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-replay-release-intent-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-retry-before-release-intent.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-retry-reader-record-unlinked.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-retry-release-directory-synced.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-release-retry-release-intent-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-resume-rechecks-quiescence-collection-completion-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-resume-rechecks-quiescence-collection-partial-delete.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-resume-rechecks-quiescence-collection-root-removed.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-resume-rechecks-quiescence-retirement-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-surviving-b-collection-completion-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-surviving-b-collection-partial-delete.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-surviving-b-collection-root-removed.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-surviving-b-retirement-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-wrong-release-before-release-intent.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-wrong-release-reader-record-unlinked.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-wrong-release-release-directory-synced.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/retention-crash-wrong-release-release-intent-recorded.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/runtime-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/runtime-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/source-imports-a.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/asp-retention-crash-study/source-imports-b.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "qualificationLog": {
+    "path": "/private/tmp/asp-retention-crash-study.log",
+    "sha256": "f45ba643a37f72de90858ec5f4be260d0beeb60bc1d98e5b713cab1bc9e4326f"
+  },
+  "precedingExactHeadCI": {
+    "head": "98e5c393334ab6b36ece53d921ad3218d5f0e863",
+    "checks": [
+      {
+        "name": "Native Gerbil library (ubuntu-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Native Gerbil library (macos-latest, release-v0.19-2591dcd)",
+        "status": "IN_PROGRESS",
+        "conclusion": ""
+      },
+      {
+        "name": "Native Gerbil provider (ubuntu-latest, release-v0.19-2591dcd)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Native Gerbil provider (macos-latest, release-v0.19-2591dcd)",
+        "status": "IN_PROGRESS",
+        "conclusion": ""
+      }
+    ],
+    "boundary": "ASP CI does not execute isolated compiler patches or retention process-crash controls"
+  }
+}

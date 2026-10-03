@@ -47,7 +47,7 @@ def publish(broker, token, request, subject):
                                admission=lambda candidate: admissible(broker, candidate))
 
 
-def acquire(broker):
+def acquire(broker, checkpoint=lambda stage, handle: None):
     # Snapshot, admission, and persistent reader-record creation share the same
     # lock as cooperating publication and collection, before any module load.
     with files.locked(broker):
@@ -59,26 +59,49 @@ def acquire(broker):
                       epoch=active['epoch'], receiptId=subject['receiptId'],
                       publicationDigest=active['digest'])
         directory = broker / 'readers'; directory.mkdir(exist_ok=True)
+        checkpoint('before-reader-stage', handle)
         fd, staging = tempfile.mkstemp(prefix=handle['readerId'], suffix='.pending', dir=directory)
         with os.fdopen(fd, 'w') as stream:
             stream.write(json.dumps(handle) + '\n'); stream.flush(); os.fsync(stream.fileno())
+        checkpoint('reader-stage-synced', handle)
         os.replace(staging, directory / (handle['readerId'] + '.json'))
+        checkpoint('reader-record-installed', handle)
         parent = os.open(directory, os.O_RDONLY)
         try:
             os.fsync(parent)
         finally:
             os.close(parent)
+        checkpoint('reader-directory-synced', handle)
         return handle
 
 
-def release(broker, handle):
+def release(broker, handle, checkpoint=lambda stage: None):
     with files.locked(broker):
         if not isinstance(handle['readerId'], str) or len(handle['readerId']) != 32 or any(c not in '0123456789abcdef' for c in handle['readerId']):
             raise ValueError('Invalid reader handle')
         path = broker / 'readers' / (handle['readerId'] + '.json')
-        if not path.exists() or files.read(path) != handle:
+        history = broker / 'released'; history.mkdir(exist_ok=True)
+        intent = history / (handle['readerId'] + '.json')
+        if intent.exists() and files.read(intent) != handle:
+            raise ValueError('Release intent does not match handle')
+        if not path.exists():
+            if intent.exists():
+                return 'ACK-RELEASE-REPLAY'
             raise ValueError('Reader handle does not match retained record')
+        if files.read(path) != handle:
+            raise ValueError('Reader handle does not match retained record')
+        checkpoint('before-release-intent')
+        files.replace(intent, handle)
+        checkpoint('release-intent-recorded')
         path.unlink()
+        checkpoint('reader-record-unlinked')
+        parent = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(parent)
+        finally:
+            os.close(parent)
+        checkpoint('release-directory-synced')
+        return 'RELEASED'
 
 
 def readers(broker, root):
@@ -107,7 +130,7 @@ def declare_quiescent(broker, libdir):
         files.replace(broker / 'retention.json', value)
 
 
-def collect(broker, libdir):
+def collect(broker, libdir, checkpoint=lambda stage: None):
     with files.locked(broker):
         value, root, status = generation(broker, libdir)
         active = transaction.state(broker)['active']
@@ -117,16 +140,34 @@ def collect(broker, libdir):
             raise ValueError('Readers retain generation')
         if not status['writerQuiescent']:
             raise ValueError('Writer quiescence unknown')
-        if status['retired']:
-            raise ValueError('Generation already retired')
         owned = Path(value['ownedRoot']).resolve()
         target = Path(root)
         if target == owned or not target.is_relative_to(owned):
             raise ValueError('Collection target outside owned scratch root')
+        if status.get('collected', False):
+            if target.exists():
+                raise ValueError('Collected generation root reappeared')
+            return 'ACK-COLLECTION-REPLAY'
+        resuming = status['retired']
         status['retired'] = True
         files.replace(broker / 'retention.json', value)
-        shutil.rmtree(target)
-        return 'COLLECTED'
+        checkpoint('retirement-recorded')
+        if target.exists():
+            # The first child is a deterministic checkpoint inside deletion.
+            # Only exact owned scratch roots reach this branch.
+            for index, child in enumerate(sorted(target.iterdir())):
+                if child.is_dir() and not child.is_symlink():
+                    shutil.rmtree(child)
+                else:
+                    child.unlink()
+                if index == 0:
+                    checkpoint('collection-partial-delete')
+            target.rmdir()
+        checkpoint('collection-root-removed')
+        status['collected'] = True
+        files.replace(broker / 'retention.json', value)
+        checkpoint('collection-completion-recorded')
+        return 'COLLECTION-RESUMED' if resuming else 'COLLECTED'
 
 
 def worker(arguments):

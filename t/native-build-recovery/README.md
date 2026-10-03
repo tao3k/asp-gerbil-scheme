@@ -768,3 +768,74 @@ one deliberately killed Python reader launcher before exec.
 See `31.25-native-reader-retention-study.json` for exact counts and observations.
 The closure prerequisites are repeated in this run; prior integration and
 transaction regression results are separate historical evidence.
+
+
+### Interrupted reader records and resumable collection
+
+`retention_crash.py` extends the retention control with acknowledged SIGKILL
+checkpoints. The same fresh compiler closure supplies the native A/B bytes.
+The previous retention study is separately rerun because release and collection
+now support matching retries.
+
+```sh
+just audit-native-retention-crash \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/make.ss \
+  t/native-build-recovery/installed-make.patch \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/bin/gsc \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/lib \
+  /private/tmp/gerbil-retention-crash-study
+```
+
+| Interrupted operation | Restart observation and recovery |
+|-----------------------|----------------------------------|
+| Acquire before staging | No reader record exists; the killed acquisition never returned a pin or launched a reader |
+| Acquire after staging fsync | A pending record blocks collection as unrecognized reader state; only the owned pre-load fixture coordinator removes the exact verified record |
+| Acquire after record installation or directory fsync | Persisted reader record blocks collection; exact-handle release is required |
+| Release before release intent or after intent before unlink | Reader record still blocks collection; exact-handle retry completes release |
+| Release after unlink or directory fsync | The exact release intent resolves matching retry as `ACK-RELEASE-REPLAY`; a changed handle is rejected |
+| Collect after retirement intent | Root still exists and is fenced from publication; retry completes collection |
+| Collect after first child deletion | Root exists with incomplete contents; retirement remains fenced and retry removes the remainder |
+| Collect after root removal, before completion record | Missing root is consistent with recorded retirement; retry records completion |
+| Collect after completion record, before acknowledgement | Retry returns `ACK-COLLECTION-REPLAY` |
+
+Release persists a full-handle intent before unlinking the reader record. A retry
+cannot treat a missing record as proof of success unless matching recorded intent
+exists. Incorrect handle epochs are rejected at every tested release stage.
+The release intent is an identity/recovery record, not proof that an arbitrary
+reader has stopped using storage; the cooperative caller still owns that duty.
+
+Collection records retired and collected as distinct states. Every retry checks
+active selection, reader records, declared writer quiescence, and exact owned root
+before progressing. The experiment revokes the quiescence flag after each kill;
+resume refuses until the fixture coordinator declares it again. Retired A cannot
+be published, authoritative publication bytes remain unchanged by collection,
+and selected B imports as 43 after every recovery. If a collected root reappears,
+collection refuses to delete it again instead of assuming it is the old storage.
+
+The four collector checkpoint cases run sequentially. Between isolated cases,
+the runner restores its original scratch A bytes from an owned backup only after
+all owned operation processes ended and every reader record was released. This
+is fixture setup, not a generation path recycling protocol. B is not reset.
+
+Acquisition recovery is deliberately narrow: the killed operation did not return
+or launch a reader and created no children. Staging cleanup verifies its exact
+handle bytes under the broker lock. This is not generic orphan-reader recovery,
+TTL expiry, or PID-based admission. In production, unknown readers or writers
+still require independent trusted evidence and authority.
+
+The host/filesystem remain running during SIGKILL. Release intent, reader record,
+retirement registry, and physical directory removal are separate storage actions;
+this control does not establish power-loss ordering, distributed filesystem
+semantics, authenticated recovery, live reader termination, path immutability,
+or writer-capability closure. Partial deletion is one explicit top-level child
+checkpoint, not an exhaustive cut of every filesystem operation. Tombstone
+retention and migration also remain open. Only owned scratch storage is mutated.
+
+The primary run records 72 observations: 57 added recovery observations and 15
+repeated closure prerequisites. It invokes 14 Gerbil commands, 30 completed
+retention-operation commands, and 12 deliberately killed operation processes. The
+separate baseline retention regression records 30 observations.
+
+See `31.26-native-retention-process-crash-study.json` for current counts,
+checkpoints, hashes, and the separate retention regression. Earlier publication
+and transaction qualification counts are not added to this run.

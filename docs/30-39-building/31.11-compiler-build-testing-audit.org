@@ -869,3 +869,42 @@ external runtime closure, storage confinement, and deployment remain open.
 Retirement intent and physical deletion are separate operations; a crash may
 leave retired storage and conservatively retained records. Prior integration
 and regression observations are not rerun or counted in this retention study.
+
+
+** 31.11.200 Retention Process-Crash Recovery
+The next study adds twelve acknowledged process-death checkpoints: four during
+reader acquisition, four during release, and four during collection. Before
+reader staging, the killed acquire operation has no record and never returns a
+pin or starts a reader. Staged or installed records conservatively block
+collection. Exact pre-load record cleanup is a trusted fixture-coordinator action
+only after this owned operation is known not to have returned or launched children.
+
+Release now records a full-handle intent before unlink. Pre-unlink deaths retain
+the reader record and matching retry completes release; post-unlink deaths allow
+matching acknowledgement replay from the intent. Changed handles are rejected.
+A missing reader record without matching intent is not inferred to be success.
+The caller remains responsible for ending actual reader use before release.
+
+Collection separates retirement intent from completed collection. Death after
+retirement, after a top-level child is removed, after root removal, or after
+completion recording leaves a fenced retired generation. Resume rechecks all
+collection gates. Revoked writer-quiescence flags block resume until the coordinator
+declares it again; retired A publication remains refused. Recovery removes the
+remaining owned A storage or acknowledges completed collection, while selected B
+imports as 43 after each case. A collected path that reappears is preserved and further collection is refused. Collection does not alter authoritative
+publication bytes.
+
+The collector cases are sequential isolated scratch fixtures. Original A bytes
+are restored from an owned backup between cases only after every operation has
+ended and reader records are released; B remains unchanged. This setup does not
+implement path recycling. The existing retention study is separately rerun to
+qualify default behavior after adding release/collection retry handling.
+
+Evidence: =31.26-native-retention-process-crash-study.json=, =retention_crash.py=,
+updated =publication_retention.py=, and =just audit-native-retention-crash=.
+The boundary is local process death with OS/filesystem still running. Separate
+intent/record/deletion writes do not establish power-loss recovery. General dead
+reader recovery, writer-capability closure, authentication, stable pathname
+ownership, migration/tombstone collection, external runtime closure, and deployment
+remain open. The partial-delete checkpoint is one explicit filesystem cut, not
+an exhaustive crash schedule. Retained compiler patches remain unchanged.
