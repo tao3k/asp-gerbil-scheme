@@ -61,6 +61,10 @@ audit-native-namespace make_source patch native_gsc output:
 audit-native-publication make_source patch native_gsc output:
     python3 t/native-build-recovery/publication.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4"
 
+# Local process-death controls; no power-loss or production durability claim.
+audit-native-publication-crash make_source patch native_gsc output:
+    python3 t/native-build-recovery/publication_crash.py --make-source "$1" --patch "$2" --native-gsc "$3" --output "$4"
+
 clean-provider:
     {{gerbil}} env gerbil interactive build-provider.ss clean
 

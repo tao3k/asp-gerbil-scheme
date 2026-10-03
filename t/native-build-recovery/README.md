@@ -500,3 +500,67 @@ operate on runner-owned scratch paths.
 See `31.21-native-publication-closure-study.json` for exact observations, hashes,
 and evidence boundaries. These controls do not rerun the earlier 81 compiler
 probes or the 37 namespace observations.
+
+
+### Process interruption and a single publication record
+
+`publication_crash.py` reuses `publication.py` admission and manifest sealing,
+builds fresh native A/B application closures, and kills its own publisher process
+at acknowledged checkpoints. The retained compiler patches are unchanged.
+
+```sh
+just audit-native-publication-crash \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/make.ss \
+  t/native-build-recovery/installed-make.patch \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/bin/gsc \
+  /private/tmp/gerbil-publication-crash-study
+```
+
+The split-record control follows the previous broker's order: replace
+`active.json`, then replace `authority.json` with `spent=true`. SIGKILL between
+those operations releases the advisory lock and leaves active B with an unspent
+token. A fresh publisher accepts the same token with manifest A, changing the
+selected native runtime from 43 back to 42. The completed module bytes were not
+modified; the selector was republished with another admitted closure.
+
+The transaction control stores schema, current epoch, spent flag, and active
+publication in one `state.json`. The active record binds publication epoch,
+request identifier, manifest, and its canonical JSON SHA-256. Grants and
+publication share one stable advisory lock. A commit writes a unique staging
+file, flushes and fsyncs it, atomically replaces the authoritative file, and
+fsyncs the parent directory before returning an acknowledgement.
+
+| Kill checkpoint | Restarted authority and selector | Retry behavior |
+|-----------------|----------------------------------|----------------|
+| Before staging | Token 2 unspent; active A at epoch 1, runtime 42 | Original B request commits, then runtime 43 |
+| After staging file fsync, before replacement | Same A state; one abandoned staging file is ignored | Original B request commits, then runtime 43 |
+| After authoritative replacement, before directory fsync | Token 2 spent; active B at epoch 2, runtime 43 on this host | Same request and manifest receive a replay acknowledgement without rewriting state |
+| After directory fsync, before acknowledgement | Same complete B state, runtime 43 | Same request and manifest receive a replay acknowledgement without rewriting state |
+
+In all four transaction cases, reusing the consumed token with another manifest
+or request identifier exits 70 without changing the authoritative bytes. Issuing
+token 3 rejects token 2 even when its previous request matches. Missing,
+malformed, or structurally inconsistent authoritative state exits 70 and is not
+reset, overwritten, or reconstructed from staging files. Fixture initialization
+is an explicit separate action.
+
+The run records 45 observations: 12 Gerbil commands, 20 completed broker commands,
+five killed broker processes, and eight direct state observations. The split
+control contributes one kill and the transaction control contributes four.
+Raw command output hashes, fixture manifests, shared-helper identity, and source
+identities are in `31.22-native-publication-process-crash-study.json`.
+
+This tests process death at explicit local checkpoints; the OS and filesystem
+remain running. Calls to fsync do not establish power-loss durability, remote
+filesystem semantics, or hardware flush guarantees. A crash during grant issuance,
+schema migration, lock-file replacement, hostile publishers, and general
+reader/writer concurrency are not exercised. An unacknowledged committed request
+is resolved by matching the currently authoritative epoch, request identifier,
+and manifest digest. A newer grant supersedes that retry authority; this prototype
+has no historical acknowledgement ledger or request lookup service.
+
+The application dependency graph remains the explicit two-module fixture.
+Generation storage is assumed quiescent and immutable; replay acknowledges the
+committed bytes' identity without rehashing live storage. General compiler-owned
+closure discovery, authenticated admission, generation lifetime retention, and
+production integration remain open. Earlier studies are not rerun or counted.

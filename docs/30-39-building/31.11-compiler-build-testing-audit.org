@@ -707,3 +707,43 @@ unchanged. Prior compiler and namespace observations are separate evidence.
 The next contracts are a crash-consistent authority/selector transaction, explicit
 admission trust and immutable storage, parser/compiler-owned dependency closure,
 and readers whose pinned generation lifetime is retained before reclamation.
+
+
+** 31.11.160 Process-Crash Publication Transaction
+The previous broker performs two atomic replacements. A new SIGKILL control
+pauses after replacing the active selector and before consuming the authority
+token. Restart sees active B and token 2 still unspent. A fresh publisher uses
+the same token with admitted manifest A, moving native runtime from 43 to 42.
+This is a publication-state failure even with immutable generation outputs.
+
+The single-record control commits current authority and active publication
+in one =state.json=. A publication binds epoch, request identifier, complete
+fixture manifest, and canonical manifest digest. All grants and publications
+use one stable advisory lock. The writer fsyncs a unique staging file, replaces
+the authoritative state, and fsyncs the parent directory before acknowledgement.
+
+Four checkpoint deaths yield consistent state on restart: before staging and
+after staging-file fsync retain A with the newer token unspent; after replacement
+and after directory fsync retain B with the token spent. An abandoned staging
+file is ignored. Retrying the original request commits B in the first two cases
+and returns a replay acknowledgement without rewriting state in the latter two.
+Every selected B reader returns 43. A consumed token with a different manifest
+or request is rejected; a newer grant also rejects the older token. Missing,
+malformed, and inconsistent authoritative records fail closed without reset.
+
+Evidence: =31.22-native-publication-process-crash-study.json=,
+=publication_crash.py=, and =just audit-native-publication-crash=. The run has
+45 observations, including 12 native Gerbil command invocations, 20 completed
+broker command invocations, and five deliberately killed broker processes.
+Eight additional observations record restarted or rejected-state preservation.
+Earlier observations and retained compiler patches remain separate and unchanged.
+
+The bound is process termination on a live local filesystem, not power loss or
+machine restart. Durability calls were exercised without establishing device or
+remote-filesystem guarantees. Grants interrupted during issuance, historical
+acknowledgement lookup, schema migration, untrusted publishers, lock pathname
+replacement, and general reader/writer concurrency remain untested. Admission
+still uses an explicit application graph and assumes immutable completed storage.
+The next implementation seam is compiler-owned dependency closure; publication
+integration also needs authenticated authority, retained readers, and explicit
+storage and durability contracts.
