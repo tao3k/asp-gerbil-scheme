@@ -20,9 +20,18 @@ modes = parser.add_mutually_exclusive_group()
 modes.add_argument('--only-interruption', action='store_true')
 modes.add_argument('--only-receipt-integrity', action='store_true')
 modes.add_argument('--only-input-identity', action='store_true',
-                   help='Reproduce the known mtime identity gap; success is not qualification')
+                   help='Reproduce the legacy v1 mtime gap; requires a legacy make source')
+modes.add_argument('--qualify-input-identity', action='store_true')
+modes.add_argument('--only-warm-cost', action='store_true')
+modes.add_argument('--only-snapshot-contract', action='store_true')
+parser.add_argument('--fixture-padding-bytes', type=int, default=0)
+parser.add_argument('--migration-source', type=Path)
 parser.add_argument('--timeout', type=float, default=180)
 args = parser.parse_args()
+if args.fixture_padding_bytes < 0:
+    parser.error('fixture padding must be nonnegative')
+if args.migration_source and not args.only_snapshot_contract:
+    parser.error('migration source requires the snapshot contract mode')
 source = args.make_source.resolve()
 args.output.mkdir(parents=True, exist_ok=True)
 receipts = []
@@ -49,6 +58,11 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
 (defsyntax (identity stx) (syntax-case stx () ((_ x) #'x)))
 (def answer (identity value))
 ''')
+    if args.fixture_padding_bytes:
+        line = b';' + b'x' * 78 + b'\n'
+        whole, tail = divmod(args.fixture_padding_bytes, len(line))
+        fixture_source = root / 'middle.ss'
+        fixture_source.write_bytes(fixture_source.read_bytes() + line * whole + b'\n' * tail)
     lib = root / 'lib'
     outputs = lib / 'native-recovery'
     completion = outputs / 'middle.native-complete'
@@ -117,7 +131,14 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
                    wallSeconds=time.monotonic()-started,
                    userSeconds=after.ru_utime-before.ru_utime,
                    systemSeconds=after.ru_stime-before.ru_stime,
-                   compileCount=stdout.count('... compile middle'))
+                   compileCount=stdout.count('... compile middle'),
+                   sourceBytes=(root / 'middle.ss').stat().st_size,
+                   interfaceBytes=(outputs / 'middle.ssi').stat().st_size if (outputs / 'middle.ssi').exists() else None,
+                   snapshotBytes=sum(p.stat().st_size for p in
+                                     (outputs / 'middle.native-source', outputs / 'middle.native-interface')
+                                     if p.exists()),
+                   receiptBytes=completion.stat().st_size if completion.exists() else None,
+                   expectedRuntimeAnswer=expected_answer if runtime else None)
         receipts.append(row)
         (args.output / 'receipts.json').write_text(json.dumps(receipts, indent=2) + '\n')
         print('PROBE-END ' + json.dumps(row), flush=True)
@@ -131,7 +152,42 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
                 assert completion.exists(), f'{name}: missing completion receipt'
         return row
 
-    if args.only_input_identity:
+    if args.only_snapshot_contract:
+        if args.migration_source:
+            current_source = source
+            source = args.migration_source.resolve()
+            run('legacy-cold')
+            source = current_source
+            assert run('legacy-migration')['compileCount'] == 1
+        else:
+            run('cold')
+        assert run('warm')['compileCount'] == 0
+        witnesses = [outputs / 'middle.native-source', outputs / 'middle.native-interface']
+        assert all(p.exists() for p in witnesses), 'missing binary snapshots'
+        for witness in witnesses:
+            witness.unlink()
+            assert run('missing-' + witness.name)['compileCount'] == 1
+        for witness in witnesses:
+            old_stat = witness.stat()
+            data = witness.read_bytes()
+            witness.write_bytes(bytes([data[0] ^ 1]) + data[1:])
+            os.utime(witness, ns=(old_stat.st_atime_ns, old_stat.st_mtime_ns))
+            assert run('corrupt-' + witness.name)['compileCount'] == 1
+        before = snapshot()
+        assert run('snapshot-warm')['compileCount'] == 0
+        assert snapshot() == before, 'snapshot warm build wrote outputs'
+        run('runtime', runtime=True)
+        run('clean', clean=True)
+        assert not any(p.exists() for p in witnesses), 'clean retained binary snapshots'
+    elif args.only_warm_cost:
+        run('cold')
+        before = snapshot()
+        for attempt in range(3):
+            assert run('warm-' + str(attempt))['compileCount'] == 0
+        assert snapshot() == before, 'warm cost probe wrote outputs'
+    elif args.only_input_identity or args.qualify_input_identity:
+        expected_compile = 1 if args.qualify_input_identity else 0
+        expected_value = 43 if args.qualify_input_identity else 42
         run('cold')
         assert run('warm')['compileCount'] == 0
         source_file = root / 'middle.ss'
@@ -139,19 +195,18 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
         source_file.write_text(source_file.read_text().replace('(def value 42)', '(def value 43)'))
         os.utime(source_file, ns=(old_stat.st_atime_ns, old_stat.st_mtime_ns))
         assert source_file.stat().st_mtime_ns == old_stat.st_mtime_ns
-        assert run('same-mtime-source')['compileCount'] == 0, 'known source identity gap changed; reassess this probe'
-        # The source is 43, but the retained native object still returns 42.
-        run('stale-runtime', runtime=True, expected_answer=42)
+        assert run('same-mtime-source')['compileCount'] == expected_compile, 'source identity result differs from selected mode'
+        run('changed-runtime', runtime=True, expected_answer=expected_value)
         ssi = outputs / 'middle.ssi'
         old_stat = ssi.stat()
         ssi.write_text(ssi.read_text() + '\n; changed interface bytes\n')
         os.utime(ssi, ns=(old_stat.st_atime_ns, old_stat.st_mtime_ns))
         assert ssi.stat().st_mtime_ns == old_stat.st_mtime_ns
-        assert run('same-mtime-interface')['compileCount'] == 0, 'known SSI identity gap changed; reassess this probe'
+        assert run('same-mtime-interface')['compileCount'] == expected_compile, 'SSI identity result differs from selected mode'
         before = snapshot()
         assert run('identity-warm')['compileCount'] == 0
         assert snapshot() == before, 'identity warm build wrote outputs'
-        run('identity-runtime', runtime=True, expected_answer=42)
+        run('identity-runtime', runtime=True, expected_answer=expected_value)
     elif args.only_receipt_integrity:
         run('cold')
         assert run('warm')['compileCount'] == 0
@@ -197,4 +252,7 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
         assert not completion.exists(), 'clean retained a completion receipt'
         assert not (outputs / 'middle~empty.o1').exists(), 'clean retained a nested loader'
 print('KNOWN-IDENTITY-GAP-REPRODUCED' if args.only_input_identity
+      else 'CONTENT-IDENTITY-SUITE-OK' if args.qualify_input_identity
+      else 'SNAPSHOT-CONTRACT-SUITE-OK' if args.only_snapshot_contract
+      else 'WARM-COST-PROBES-OK' if args.only_warm_cost
       else 'RECOVERY-SUITE-OK', flush=True)

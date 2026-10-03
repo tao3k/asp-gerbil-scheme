@@ -469,3 +469,43 @@ format migration, no-write warm reuse, and actual runtime results. Stable input
 binding during compilation, native object corruption, and independent concurrent
 writers remain separate open contracts. The undeployed completion patch currently
 retains its timestamp identity boundary; no rejected crypto dependency was shipped.
+
+* 2026-10-03 Native binary snapshot amendment
+
+Algorithm families considered were native crypto digests, optional Gambit
+=_digest=, serialized exact byte vectors, and binary snapshots. Native crypto had
+an unqualified stdlib bootstrap dependency; Gambit's source module exists but is
+absent from the installed distribution. Neither was treated as a core capability.
+Serialized vectors passed seven identity probes, but a 262376-byte source produced
+an approximately 1 MB text receipt. That storage representation was not retained.
+
+The retained isolated patches use =native-complete-v2-snapshots= with owned
+=.native-source= / =.native-interface= files. Exact equality is checked in 8192-byte
+chunks using existing Gambit primitives, with no new module imports or FFI. Keys
+still bind options/timestamps and require EOF; v1 records rebuild. After backend
+success, publication copies source/SSI snapshots before publishing the receipt.
+Clean includes these exact owned paths. This supersedes the earlier timestamp-only
+check. Rebuild/runtime qualification here uses fresh processes with stable inputs
+during each build.
+
+The installed amended copy passed 44 real probes: 7 content identity, 10 binary
+snapshot/migration, 17 recovery, 4 controlled interruption, and 6 receipt-format
+probes. Preserved-mtime source changes now compile and fresh runtime returns 43.
+Missing/corrupt snapshots rebuild; normal warm builds have no writes; clean removes
+snapshots; genuine v1 records migrate through rebuilding. The installed module
+wrapper expands directly. Candidate expansion still fails at its existing
+=call-with-compile-job-slot= dependency, and clean compiler bootstrap was not run.
+
+AB/BA samples used the same 262144-byte comment padding and three fresh-process
+warm attempts per arm. For binary snapshots vs v1, median child CPU was
+0.6223505 / 0.6389625 seconds and median wall was 0.7680468 / 0.7401069 seconds.
+Snapshot storage was 263306 bytes and receipt 431 bytes, versus v1 receipt 421
+bytes. The serialized-vector experiment used a 1046508-byte receipt. These are
+fixture-specific costs, not a stable speedup or a bound for the complete ASP graph.
+See =31.16-native-binary-snapshot-receipts.json= for raw samples, patch/source hashes,
+qualification groups, and the retained/rejected representation decisions.
+
+Stable input consumption during compilation, ABA changes, native object content
+integrity, and independent concurrent output writers remain open. Publication is
+not atomic across the full output set. No compiler source checkout was modified,
+and no patch was deployed. Previous receipt files remain historical snapshots.

@@ -127,22 +127,62 @@ This is format validation, not content integrity or authentication. Source/SSI
 identity still uses modification times; native objects are checked for presence.
 Concurrent independent writers to the same output directory remain unqualified:
 publication uses a shared `.tmp` name and does not lock the entire output set.
-The historical 17+4 probes are not a rerun of the amended patch; the six focused
-probes qualify this amendment only. The isolated patch is still not deployed.
+At the strict-EOF amendment, the historical 17+4 probes had not been rerun;
+only six focused probes qualified that amendment. The later binary snapshot
+qualification below reruns these gates for its own exact patch. No patch is deployed.
 
 ## Known input identity gap
 
-`--only-input-identity` reproduces the existing timestamp limitation. It changes
+`--only-input-identity` reproduces the legacy v1 timestamp limitation when
+supplied with the earlier v1 make source. The current v2 patch fixes this case;
+use `--qualify-input-identity` with the current patch. It changes
 the source value from 42 to 43 while preserving nanosecond mtime, verifies that
 native compilation is skipped and the runtime still returns 42, then changes SSI
 bytes with the same mtime. Its terminal marker is
 `KNOWN-IDENTITY-GAP-REPRODUCED`, not `RECOVERY-SUITE-OK`. A successful reproduction
-is evidence of the gap, not acceptance of content identity. If the behavior is
-fixed later, these assertions must become rebuild/new-runtime qualification.
+is evidence of the gap, not acceptance of content identity. The current qualification mode requires rebuild and the new runtime value;
+the legacy reproduction remains available for v1 controls.
 
 An isolated SHA-256 experiment fixed these cases on the installed toolchain but
 was rejected: directly importing the native crypto library into `std/make`
 introduces an unqualified bootstrap dependency. The stdlib build imports make
-before building crypto targets. The committed patches retain their previous
-imports and v1 timestamp keys. See the input-identity study receipts for the
+before building crypto targets. At that stage the patches retained their previous imports and v1 timestamp keys;
+the later binary snapshot amendment below supersedes that identity scheme. See the input-identity study receipts for the
 experiment and rejection; no compiler patch has been deployed.
+
+## Binary snapshot content identity
+
+The current patch uses `native-complete-v2-snapshots`. Receipt reuse requires
+byte-for-byte equality between source/SSI and their owned `.native-source` /
+`.native-interface` snapshots, plus the existing timestamp/options key and strict
+EOF check. Legacy v1 keys rebuild directly. Comparison streams two 8192-byte
+buffers using existing Gambit file/u8vector primitives; no additional module
+imports or crypto FFI are introduced. Snapshots are written after backend success,
+then the completion receipt is published. Clean owns and deletes the snapshots.
+
+Use the installed source and current patch with `--qualify-input-identity` to run
+seven source/SSI preserved-mtime and runtime probes. `--only-snapshot-contract`
+runs deletion, same-mtime corruption, no-write warm, runtime, and clean probes.
+Its optional `--migration-source` accepts an isolated earlier v1 make copy to
+verify a genuine v1-to-v2 rebuild. `--only-warm-cost --fixture-padding-bytes 262144`
+records three fresh-process warm samples without changing performance thresholds.
+
+The exact amended installed copy passed 44 probes: 7 content identity, 10 snapshot
+and migration, 17 recovery, 4 interruption, and 6 strict receipt parsing. The
+installed complete module wrapper expanded directly. Candidate expansion retains
+its existing `call-with-compile-job-slot` blocker. Full clean compiler bootstrap
+has not run: use of existing core primitives removes the new crypto dependency,
+not the requirement for matching compiler/bootstrap qualification.
+
+In serialized byte-vector experimentation, a 262376-byte source made a
+1046508-byte receipt. Binary snapshots instead total 263306 bytes with a 431-byte
+receipt. An AB/BA warm comparison had median CPU 0.62235s vs v1 0.63896s and wall
+0.76805s vs 0.74011s. These fixture samples do not establish a stable speedup or
+whole-project cost bound. Exact identity requires storing source/SSI bytes and
+reading them during freshness checks; costs grow with input size. Measurements
+and patch digests are in `31.16-native-binary-snapshot-receipts.json`.
+
+The qualified fixture inputs remain stable while compiling and use a single
+writer. Content changes during compilation, ABA input changes, corrupt native
+objects, and independent concurrent writers remain unqualified. Receipt rename
+does not atomically publish the entire output set. The patches remain undeployed.

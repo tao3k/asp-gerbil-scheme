@@ -51,7 +51,7 @@
                     outputs)
              (ormap
               (lambda (input)
-@@ -645,9 +652,81 @@
+@@ -645,9 +652,117 @@
      (else
       (error "Bad buildspec" spec))))
  
@@ -84,8 +84,37 @@
 +(def (native-receipt-path mod settings)
 +  (library-path mod ".native-complete" settings))
 +
++(def (native-snapshot-path mod suffix settings)
++  (library-path mod suffix settings))
++
++(def (file-bytes=? left right)
++  (call-with-input-file left
++    (lambda (left-port)
++      (call-with-input-file right
++        (lambda (right-port)
++          (let ((left-buffer (make-u8vector 8192))
++                (right-buffer (make-u8vector 8192)))
++            (let loop ()
++              (let ((left-count (read-subu8vector left-buffer 0 8192 left-port))
++                    (right-count (read-subu8vector right-buffer 0 8192 right-port)))
++                (and (= left-count right-count)
++                     (or (= left-count 0)
++                         (and (equal? (subu8vector left-buffer 0 left-count)
++                                      (subu8vector right-buffer 0 right-count))
++                              (loop))))))))))))
++
++(def (native-snapshots-current? mod settings)
++  (and (file-bytes=? (source-path mod ".ss" settings)
++                    (native-snapshot-path mod ".native-source" settings))
++       (file-bytes=? (library-path mod ".ssi" settings)
++                    (native-snapshot-path mod ".native-interface" settings))))
++
++(def (publish-native-snapshot! source destination)
++  (when (file-exists? destination) (delete-file destination))
++  (copy-file source destination))
++
 +(def (native-receipt-key mod opts settings)
-+  (list 'native-complete-v1 (gerbil-version-string) (gerbil-home)
++  (list 'native-complete-v2-snapshots (gerbil-version-string) (gerbil-home)
 +        (settings-srcdir settings) (settings-libdir settings) (settings-prefix settings)
 +        (settings-optimize settings) (settings-debug settings)
 +        (gsc-compile-opts opts) (gerbil-gsc)
@@ -99,7 +128,8 @@
 +          (call-with-input-file (native-receipt-path mod settings)
 +            (lambda (port)
 +              (and (equal? (read port) (native-receipt-key mod opts settings))
-+                   (eof-object? (read port)))))))))
++                   (eof-object? (read port))
++                   (native-snapshots-current? mod settings))))))))
 +
 +(def (spec-native-current? spec settings)
 +  (and (match spec
@@ -117,6 +147,10 @@
 +       (def paths (native-outputs mod settings))
 +       (unless (andmap file-exists? paths)
 +         (error "Incomplete native library outputs" mod paths))
++       (publish-native-snapshot! (source-path mod ".ss" settings)
++                                 (native-snapshot-path mod ".native-source" settings))
++       (publish-native-snapshot! (library-path mod ".ssi" settings)
++                                 (native-snapshot-path mod ".native-interface" settings))
 +       (def receipt (native-receipt-path mod settings))
 +       (def temporary (string-append receipt ".tmp"))
 +       (when (file-exists? temporary) (delete-file temporary))
@@ -129,13 +163,15 @@
 -   (static-path mod settings)])
 +  (append [(library-path mod ".ssi" settings) (static-path mod settings)]
 +          (if (eq? (settings-target settings) 'C)
-+            (cons (native-receipt-path mod settings)
-+                  (with-catch (lambda (_) []) (cut native-outputs mod settings)))
++            (append [(native-receipt-path mod settings)
++                     (native-snapshot-path mod ".native-source" settings)
++                     (native-snapshot-path mod ".native-interface" settings)]
++                    (with-catch (lambda (_) []) (cut native-outputs mod settings)))
 +            [])))
  
  (def (gsc-compile-opts opts)
    (match opts
-@@ -659,6 +738,10 @@
+@@ -659,6 +774,10 @@
    (message "... compile " mod)
    (def gsc-opts (gsc-compile-opts opts))
    (def srcpath (source-path mod ".ss" settings))
@@ -146,7 +182,7 @@
    (let (gxc-opts
          [invoke-gsc: invoke-gsc?
           target: (settings-target settings)
-@@ -670,7 +753,11 @@
+@@ -670,7 +789,11 @@
           verbose: (settings-verbose>=? settings 9)
           parallel: (> (settings-parallelize settings) 1)
           (when/list gsc-opts [gsc-options: gsc-opts]) ...])
