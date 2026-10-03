@@ -129,3 +129,20 @@ Concurrent independent writers to the same output directory remain unqualified:
 publication uses a shared `.tmp` name and does not lock the entire output set.
 The historical 17+4 probes are not a rerun of the amended patch; the six focused
 probes qualify this amendment only. The isolated patch is still not deployed.
+
+## Known input identity gap
+
+`--only-input-identity` reproduces the existing timestamp limitation. It changes
+the source value from 42 to 43 while preserving nanosecond mtime, verifies that
+native compilation is skipped and the runtime still returns 42, then changes SSI
+bytes with the same mtime. Its terminal marker is
+`KNOWN-IDENTITY-GAP-REPRODUCED`, not `RECOVERY-SUITE-OK`. A successful reproduction
+is evidence of the gap, not acceptance of content identity. If the behavior is
+fixed later, these assertions must become rebuild/new-runtime qualification.
+
+An isolated SHA-256 experiment fixed these cases on the installed toolchain but
+was rejected: directly importing the native crypto library into `std/make`
+introduces an unqualified bootstrap dependency. The stdlib build imports make
+before building crypto targets. The committed patches retain their previous
+imports and v1 timestamp keys. See the input-identity study receipts for the
+experiment and rejection; no compiler patch has been deployed.

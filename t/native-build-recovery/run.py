@@ -19,6 +19,8 @@ parser.add_argument('--output', type=Path, required=True)
 modes = parser.add_mutually_exclusive_group()
 modes.add_argument('--only-interruption', action='store_true')
 modes.add_argument('--only-receipt-integrity', action='store_true')
+modes.add_argument('--only-input-identity', action='store_true',
+                   help='Reproduce the known mtime identity gap; success is not qualification')
 parser.add_argument('--timeout', type=float, default=180)
 args = parser.parse_args()
 source = args.make_source.resolve()
@@ -55,10 +57,10 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
         return {str(p.relative_to(lib)): (p.stat().st_mtime_ns, p.stat().st_size)
                 for p in lib.rglob('*') if p.is_file()}
 
-    def run(name, *, force=False, failure=False, debug=False, clean=False, runtime=False, interrupt=False):
+    def run(name, *, force=False, failure=False, debug=False, clean=False, runtime=False, interrupt=False, expected_answer=42):
         spec = '[gxc: "middle" "-cc-options" "-fasp-native-failure"]' if failure else '"middle"'
         if runtime:
-            expression = '(import :native-recovery/middle) (unless (= answer 42) (error "wrong runtime value")) (displayln "RUNTIME-OK")'
+            expression = ('(import :native-recovery/middle) (unless (= answer ' + str(expected_answer) + ') (error "wrong runtime value")) (displayln "RUNTIME-OK")')
         else:
             expression = ('(import ' + json.dumps(str(source)) + ')\n' +
                           ('(make-clean ' if clean else '(make ') + '[' + spec + ']' +
@@ -129,7 +131,28 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
                 assert completion.exists(), f'{name}: missing completion receipt'
         return row
 
-    if args.only_receipt_integrity:
+    if args.only_input_identity:
+        run('cold')
+        assert run('warm')['compileCount'] == 0
+        source_file = root / 'middle.ss'
+        old_stat = source_file.stat()
+        source_file.write_text(source_file.read_text().replace('(def value 42)', '(def value 43)'))
+        os.utime(source_file, ns=(old_stat.st_atime_ns, old_stat.st_mtime_ns))
+        assert source_file.stat().st_mtime_ns == old_stat.st_mtime_ns
+        assert run('same-mtime-source')['compileCount'] == 0, 'known source identity gap changed; reassess this probe'
+        # The source is 43, but the retained native object still returns 42.
+        run('stale-runtime', runtime=True, expected_answer=42)
+        ssi = outputs / 'middle.ssi'
+        old_stat = ssi.stat()
+        ssi.write_text(ssi.read_text() + '\n; changed interface bytes\n')
+        os.utime(ssi, ns=(old_stat.st_atime_ns, old_stat.st_mtime_ns))
+        assert ssi.stat().st_mtime_ns == old_stat.st_mtime_ns
+        assert run('same-mtime-interface')['compileCount'] == 0, 'known SSI identity gap changed; reassess this probe'
+        before = snapshot()
+        assert run('identity-warm')['compileCount'] == 0
+        assert snapshot() == before, 'identity warm build wrote outputs'
+        run('identity-runtime', runtime=True, expected_answer=42)
+    elif args.only_receipt_integrity:
         run('cold')
         assert run('warm')['compileCount'] == 0
         completion.write_text(completion.read_text() + '\n(extra-record)\n')
@@ -173,4 +196,5 @@ with tempfile.TemporaryDirectory(prefix='gerbil-native-recovery-') as directory:
         assert neighbor.exists(), 'clean removed a neighboring module'
         assert not completion.exists(), 'clean retained a completion receipt'
         assert not (outputs / 'middle~empty.o1').exists(), 'clean retained a nested loader'
-print('RECOVERY-SUITE-OK', flush=True)
+print('KNOWN-IDENTITY-GAP-REPRODUCED' if args.only_input_identity
+      else 'RECOVERY-SUITE-OK', flush=True)

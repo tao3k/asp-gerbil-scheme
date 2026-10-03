@@ -1,0 +1,230 @@
+{
+  "schema": "asp.input-identity-study.v1",
+  "date": "2026-10-03",
+  "cores": 12,
+  "controlFailure": [
+    {
+      "name": "cold",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 2.525744250000571,
+      "userSeconds": 2.153419,
+      "systemSeconds": 1.285658,
+      "compileCount": 1
+    },
+    {
+      "name": "warm",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 1.189914292001049,
+      "userSeconds": 0.5831240000000002,
+      "systemSeconds": 0.148466,
+      "compileCount": 0
+    },
+    {
+      "name": "same-mtime-source",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 1.5040138330004993,
+      "userSeconds": 0.6080359999999998,
+      "systemSeconds": 0.14269700000000007,
+      "compileCount": 0
+    }
+  ],
+  "knownGapReproduction": [
+    {
+      "name": "cold",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 2.336890124999627,
+      "userSeconds": 2.145976,
+      "systemSeconds": 0.9905409999999999,
+      "compileCount": 1
+    },
+    {
+      "name": "warm",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 0.7807567080017179,
+      "userSeconds": 0.5163510000000002,
+      "systemSeconds": 0.11264400000000008,
+      "compileCount": 0
+    },
+    {
+      "name": "same-mtime-source",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 0.7384237500009476,
+      "userSeconds": 0.5133269999999999,
+      "systemSeconds": 0.10600100000000001,
+      "compileCount": 0
+    },
+    {
+      "name": "stale-runtime",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 1.4545989170001121,
+      "userSeconds": 0.11090899999999992,
+      "systemSeconds": 0.03288800000000003,
+      "compileCount": 0
+    },
+    {
+      "name": "same-mtime-interface",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 0.9492873330018483,
+      "userSeconds": 0.549963,
+      "systemSeconds": 0.11731599999999998,
+      "compileCount": 0
+    },
+    {
+      "name": "identity-warm",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 0.7882582090023789,
+      "userSeconds": 0.51437,
+      "systemSeconds": 0.10354399999999986,
+      "compileCount": 0
+    },
+    {
+      "name": "identity-runtime",
+      "exit": 0,
+      "timeout": false,
+      "cores": 12,
+      "wallSeconds": 0.18610854200233007,
+      "userSeconds": 0.1137459999999999,
+      "systemSeconds": 0.03334900000000007,
+      "compileCount": 0
+    }
+  ],
+  "controlSourceMutation": {
+    "beforeValue": 42,
+    "afterValue": 43,
+    "mtimeNanosecondsPreserved": true,
+    "byteCountPreserved": true,
+    "sourceMutationReplacement": "(def value 42) -> (def value 43)",
+    "observedNativeCompileCount": 0,
+    "freshRuntimeValue": 42
+  },
+  "interfaceMutation": {
+    "operation": "Append a Scheme comment and restore exact nanosecond mtime",
+    "observedNativeCompileCount": 0
+  },
+  "reproductionMarker": "KNOWN-IDENTITY-GAP-REPRODUCED",
+  "reproductionIsQualification": false,
+  "rejectedPrototype": {
+    "key": "native-complete-v2",
+    "identity": "source and SSI mtime plus SHA-256",
+    "imports": [
+      ":std/crypto/digest sha256",
+      ":std/misc/ports read-all-as-u8vector"
+    ],
+    "installedModuleExpansion": "MODULE-EXPANSION-OK",
+    "probes": [
+      {
+        "name": "cold",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 10.283344082999974,
+        "userSeconds": 3.6879820000000003,
+        "systemSeconds": 1.31847,
+        "compileCount": 1
+      },
+      {
+        "name": "warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 6.011717084002157,
+        "userSeconds": 1.8775999999999997,
+        "systemSeconds": 0.36231900000000006,
+        "compileCount": 0
+      },
+      {
+        "name": "same-mtime-source",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 6.530873333998898,
+        "userSeconds": 3.5353019999999997,
+        "systemSeconds": 1.1962540000000002,
+        "compileCount": 1
+      },
+      {
+        "name": "changed-runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.521123082995473,
+        "userSeconds": 0.11962199999999967,
+        "systemSeconds": 0.03932699999999967,
+        "compileCount": 0
+      },
+      {
+        "name": "same-mtime-interface",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 6.788564792004763,
+        "userSeconds": 3.471433000000001,
+        "systemSeconds": 1.2256050000000003,
+        "compileCount": 1
+      },
+      {
+        "name": "identity-warm",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 6.239667333000398,
+        "userSeconds": 1.9553379999999994,
+        "systemSeconds": 0.39822199999999963,
+        "compileCount": 0
+      },
+      {
+        "name": "identity-runtime",
+        "exit": 0,
+        "timeout": false,
+        "cores": 12,
+        "wallSeconds": 1.8510498749965336,
+        "userSeconds": 0.1182540000000003,
+        "systemSeconds": 0.03849000000000036,
+        "compileCount": 0
+      }
+    ],
+    "sourceSha256": {
+      "installed": "d0bfc0e4a264284d31ed857610038c196dc74bd3dc80df78b9b4a6dd9defaaa6",
+      "candidate": "42fa45ab0c054a674b7e08b89b5c1d65cf34b4fc3b1fcc88e0213f64c96f5d0c"
+    },
+    "freshRuntimeValue": 43,
+    "retained": false,
+    "rejection": "Native crypto dependency in std/make requires clean-bootstrap qualification; already installed crypto success does not establish it",
+    "bootstrapEvidence": {
+      "buildEntrypoint": "src/std/build-std.ss imports make before build-spec execution",
+      "buildSpec": "src/std/build-spec.ss includes crypto/libcrypto and crypto/digest",
+      "cleanBootstrapRun": false
+    },
+    "timingBoundary": "Busy-host samples are unpaired; no stable ratio or isolated digest cost established"
+  },
+  "retainedPatchIdentity": "native-complete-v1 timestamp key with strict EOF validation",
+  "retainedPatchSha256": {
+    "installed-make.patch": "a1d55e56fd351f44e99bd725a23ad020e730325d40cf2ebb3b51e77dba40732a",
+    "candidate-make.patch": "0ee6cd53539214358007eea3f176a9b2ad134cc5da7e80d549bfcaf809887b52"
+  },
+  "compilerDeployed": false,
+  "remainingContracts": [
+    "bootstrap-compatible content identity",
+    "source/SSI stability during compilation",
+    "native object content identity",
+    "independent concurrent output writers"
+  ]
+}
