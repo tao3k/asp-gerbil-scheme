@@ -73,6 +73,10 @@ audit-native-closure make_source patch native_gsc external_root output:
 audit-native-closure-publication make_source patch native_gsc external_root output:
     python3 t/native-build-recovery/closure.py --make-source "$1" --patch "$2" --native-gsc "$3" --external-root "$4" --output "$5" --publication-study
 
+# Cooperating readers and owned scratch collection; explicit quiescence required.
+audit-native-retention make_source patch native_gsc external_root output:
+    python3 t/native-build-recovery/closure.py --make-source "$1" --patch "$2" --native-gsc "$3" --external-root "$4" --output "$5" --retention-study
+
 clean-provider:
     {{gerbil}} env gerbil interactive build-provider.ss clean
 

@@ -699,3 +699,72 @@ transaction regression records 45 observations.
 See `31.24-native-closure-publication-integration.json` for the integration run,
 its repeated closure prerequisites, and the separate 45-observation default
 transaction regression. Earlier published observations remain historical evidence.
+
+
+### Reader retention and owned generation collection
+
+`publication_retention.py` adds a cooperating retention layer around the existing
+registered-subject transaction. Acquisition reads the active subject, validates
+it, and writes a unique persistent reader record under the same broker lock used
+for publication and collection. A record binds reader ID, canonical load root,
+publication epoch/digest, and receipt identity before any module load. Staging and
+record writes use file/directory fsync; they are not a power-loss qualification.
+Release requires the exact retained handle. Records have no TTL or PID-based expiry.
+
+```sh
+just audit-native-retention \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/src/std/make.ss \
+  t/native-build-recovery/installed-make.patch \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/bin/gsc \
+  /opt/homebrew/Cellar/gerbil-scheme@0.19/0.19.2591dcd.patchf5cedd8168cb/current/lib \
+  /private/tmp/gerbil-reader-retention-study
+```
+
+The fixture declares its two exact owned generation roots. Collection must find
+that root in the ownership registry, reject the active root, observe no reader
+records for it, and require an independent writer-quiescence declaration. Unknown
+reader files or malformed records conservatively block collection. After those
+checks, collection marks the root retired and removes only that declared scratch
+root. The cooperating publication callback rejects retired generations.
+
+| Control | Observation |
+|---------|-------------|
+| Two A readers register before loading; B is published | B reader returns 43; collection of A exits 70 while A records exist |
+| One A launcher is killed before it can exec Gerbil | Both records still retain A; process disappearance does not expire the record |
+| Surviving A reader loads modules after B selection | Returns 42; after its explicit release, the killed launcher's record still blocks A collection |
+| Explicitly release the owned killed pre-load launcher's record | Allowed only because this launcher was killed before exec and never created children; this is not generic dead-owner recovery |
+| A has zero reader records but unknown writer quiescence | Collection exits 70 and retains A |
+| A/B receive trusted fixture quiescence declarations | Active B still cannot be collected |
+| A reader record is deliberately malformed in scratch storage | Collection exits 70; corruption is not treated as zero readers |
+| A is inactive, unretained, and declared quiescent | Its owned root is collected and marked retired; later A publication is rejected without spending authority |
+| A bare pin saved without retention is used after collection | Gerbil cannot find the app module and exits 70 |
+| Retained selected B is read afterward | Returns 43; B storage and publication identity survive |
+
+The quiescence flags are explicit trusted fixture-coordinator assertions after
+successful native make completion and known owned producers, not proof inferred
+from completion receipts, elapsed time, PID absence, or arbitrary detached jobs.
+This study does not enforce the closing of a generation's writer capability.
+
+Reader records are compared by canonical storage root, independently of their
+receipt IDs or epochs. The delayed readers are fresh
+Gerbil processes started after acquisition; one pauses before exec and imports
+after B selection. This establishes retention before late module lookup, not
+live module-cache switching, arbitrary cross-generation imports, or shared OS
+storage confinement.
+
+The layer assumes every participating publisher, reader, and collector uses this
+protocol on stable paths. Registry/reader records and quiescence declarations are
+not authenticated. Hostile writers, path replacement, interrupted acquisition or
+release, collector crash/restart, and power loss are not qualified. Retirement
+intent and directory removal are separate operations; interruption can leave
+retired storage requiring an explicit recovery policy. Abandoned staging/reader
+records block rather than authorize reclamation. External runtime dependencies
+remain outside the application closure, and no deployed compiler behavior changes.
+
+The run records 30 observations: 15 added retention observations and 15 repeated
+closure prerequisites. It invokes 14 Gerbil commands, six collector commands, and
+one deliberately killed Python reader launcher before exec.
+
+See `31.25-native-reader-retention-study.json` for exact counts and observations.
+The closure prerequisites are repeated in this run; prior integration and
+transaction regression results are separate historical evidence.

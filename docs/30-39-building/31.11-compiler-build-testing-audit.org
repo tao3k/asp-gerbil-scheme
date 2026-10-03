@@ -829,3 +829,43 @@ or live-cache protocol. External runtime closure, post-validation path/byte drif
 hostile access, storage reclamation, and production integration remain open.
 The next contracts are trusted registration authority and immutable/retained
 reader storage, with acknowledgement kept separate from current storage admission.
+
+
+** 31.11.190 Reader Retention And Collection Gates
+The retention study registers two A readers before module loading, under the same
+advisory broker lock as publication and collection. Each persistent record binds
+reader identity, canonical root, publication epoch/digest, and receipt identity.
+B then publishes and reads as 43. A collection is refused while reader records
+exist. One owned launcher is killed before exec; its record remains. The surviving
+reader starts its Gerbil import after B selection and still reads A as 42.
+
+Releasing that surviving reader does not release the killed owner's record. The
+fixture explicitly releases the latter only after observing its own pre-exec
+launcher killed without children. This is a scoped control, not a general
+process-group recovery rule. Zero reader records still do not authorize A
+collection while writer quiescence is unknown. A trusted coordinator assertion
+of quiescence and absence of readers permits only inactive A to be collected;
+active B remains protected. A malformed reader record also blocks collection.
+
+Successful owned A collection first records retirement and removes its declared
+scratch root. The cooperating publication admission refuses a retired A subject
+without spending its new authority token. A bare historical pin with no retained
+reader record cannot load the app afterward and exits 70, while selected B remains
+readable as 43. Selection/pinning and persistent lifetime retention are distinct
+contracts, and reader release is independent from writer-quiescence evidence.
+
+Evidence: =31.25-native-reader-retention-study.json=, =publication_retention.py=,
+and =just audit-native-retention=. Roots are an exact declared scratch inventory;
+no installed source, external library, or other checkout is a collection target.
+Reader staging and records use fsync without a power-loss guarantee. No TTL or
+PID absence is used to infer safe collection. Canonical-root retention assumes
+stable path identity and cooperating actors; alias replacement is not qualified.
+
+The quiescence declaration is a trusted fixture assertion after successful make
+completion with known owned producers. It does not enforce writer-capability
+closure, authenticate registry changes, or resolve arbitrary escaped writers.
+Interrupted acquisition/release and collection recovery, live module caches,
+external runtime closure, storage confinement, and deployment remain open.
+Retirement intent and physical deletion are separate operations; a crash may
+leave retired storage and conservatively retained records. Prior integration
+and regression observations are not rerun or counted in this retention study.

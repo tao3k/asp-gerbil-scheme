@@ -82,7 +82,9 @@ def main():
     parser.add_argument('--native-gsc', type=Path, required=True)
     parser.add_argument('--external-root', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--publication-study', action='store_true')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--publication-study', action='store_true')
+    mode.add_argument('--retention-study', action='store_true')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     extractor = Path(__file__).with_suffix('.ss').resolve()
@@ -219,6 +221,9 @@ def main():
                         extractorSha256=helper.sha(extractor), patchedSourceSha256=patched_hash,
                         nativeGscSha256=helper.sha(args.native_gsc)) for key in manifests}
             publication_integration.study(root, args.output, manifests, evidence, mark, runtime)
+        if args.retention_study:
+            import publication_retention
+            publication_retention.study(root, args.output, manifests, mark, runtime, env)
         changed = inventories['b']['closure/app']; changed.write_text(changed.read_text() + '\n;; Changed after build.\n')
         try:
             seal(graphs['b'], inventories['b'], libs['b'])
@@ -231,7 +236,8 @@ def main():
                        patchedSourceSha256=patched_hash, instrumentedSourceSha256=helper.sha(make), patchSha256=helper.sha(args.patch),
                        nativeGscSha256=helper.sha(args.native_gsc), runnerSha256=helper.sha(Path(__file__)),
                        extractorSha256=helper.sha(extractor), sharedHarnessSha256=helper.sha(Path(helper.__file__)),
-                       externalRoot=str(args.external_root.resolve()), publicationStudy=args.publication_study, observations=observations,
+                       externalRoot=str(args.external_root.resolve()), publicationStudy=args.publication_study,
+                       retentionStudy=args.retention_study, observations=observations,
                        manifests=manifests, retainedCompilerPatchChanged=False))
     print('COMPILER-OWNED-APPLICATION-CLOSURE-STUDIED', flush=True)
 
