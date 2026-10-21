@@ -2,8 +2,12 @@
 
 (import :std/test
         (only-in :clan/poo/object .call .cc .ref object?)
+        (only-in :std/cli/multicall call-entry-point)
         "../src/testing/extension"
         "../src/testing/discovery-runner"
+        (rename-in (only-in "./fixtures/relocated-test-entry/dev/entry" entry-source main)
+                   (entry-source relocated-entry-source)
+                   (main relocated-entry-main))
         "../src/testing/source-admission"
         (only-in ../src/build-api/native-import-closure
                  asp-gerbil-scheme-prepared-native-import-closure)
@@ -90,6 +94,14 @@
                 testing "unit-tests.ss"
                 pkgdir: (path-expand root (current-directory)))
                => [])))
+
+    (test-case "a dev entry retains the parent package discovery root"
+      (check (eq? relocated-entry-main call-entry-point) => #t)
+      (let* ((root (path-expand ".." (path-directory relocated-entry-source)))
+             (files (testing-interface-test-files
+                     +asp-testing-interface+ "dev/unit-tests.ss" pkgdir: root)))
+        (check (length files) => 1)
+        (check (path-strip-directory (car files)) => "root-test.ss")))
 
     (test-case "POO import footprint profile rejects repeated heavy owners"
       (let* ((profile
