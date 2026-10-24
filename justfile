@@ -37,10 +37,14 @@ check-policy:
     ASP_GERBIL_SCHEME_POLICY=1 {{gerbil}} build
 
 test:
-    {{gxi}} -e '{{gxtest_exit}}' t/support-list-test.ss t/build-script-command-test.ss t/package-build-contract-test.ss t/package-native-declaration-test.ss t/native-import-public-closure-scenario-test.ss t/build-api-source-bootstrap-test.ss t/build-api-policy-projection-test.ss t/build-api-startup-scenario-test.ss t/provider-owned-schema-registry-test.ss t/exact-source-projection-test.ss t/projection-batch-test.ss t/projection-batch-scenario-test.ss t/language-projection-test.ss t/testing-extension-test.ss t/testing-native-batch-scenario-test.ss t/policy/agent-dependency-adapter-test.ss t/project-policy-test.ss
+    {{gxi}} -e '{{gxtest_exit}}' t/support-list-test.ss t/build-script-command-test.ss t/package-build-contract-test.ss t/package-native-declaration-test.ss t/native-import-public-closure-scenario-test.ss t/build-api-source-bootstrap-test.ss t/build-api-policy-projection-test.ss t/build-api-startup-scenario-test.ss t/provider-owned-schema-registry-test.ss t/exact-source-projection-test.ss t/projection-batch-test.ss t/projection-batch-scenario-test.ss t/language-projection-test.ss t/testing-extension-test.ss t/testing-native-batch-scenario-test.ss t/testing-batch-failure-test.ss t/policy/agent-dependency-adapter-test.ss t/project-policy-test.ss
 
 test-files +files:
     {{gxi}} -e '{{gxtest_exit}}' "$@"
+
+# The scheduler regression includes child processes; fence the parent first.
+test-batch-failures:
+    timeout --signal=TERM --kill-after=5s 120s {{gxi}} -:max-heap=1G,debug=q -e '{{gxtest_exit}}' t/testing-batch-failure-test.ss
 
 # Observation-only A/B; baseline is an exact historical native closure source.
 audit-native-import-ab baseline_source output:

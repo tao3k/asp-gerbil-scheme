@@ -584,6 +584,12 @@
             (testing-interface-test-file-batches testing parallel-files))
            (serial-batches
             (map list serial-files))
+           ;; Each worker owns one result cell. The joining thread reads them
+           ;; only after wg-wait!, so an exception cannot kill a pool worker
+           ;; and leave queued batches waiting for the outer process deadline.
+           ;; A singleton preserves every raised value, including #f.
+           (parallel-failures (map (lambda (_) (box [])) parallel-batches))
+           (serial-failures (map (lambda (_) (box [])) serial-batches))
            (worker-count
             (testing-interface-worker-count (length parallel-batches)))
            (workgroup (and (> worker-count 0) (make-wg worker-count))))
@@ -595,15 +601,26 @@
       (force-output)
       (when workgroup
         (for-each
-         (lambda (test-files)
+         (lambda (test-files failure)
            (wg-add! workgroup
-                    (cut testing-interface-run-test-batch! testing test-files)))
-         parallel-batches)
+                    (lambda ()
+                      (with-exception-catcher
+                       (lambda (exception) (set-box! failure [exception]))
+                       (cut testing-interface-run-test-batch! testing test-files)))))
+         parallel-batches parallel-failures)
         (wg-wait! workgroup))
       ;; Shared-resource profiles run one process at a time only after the
       ;; parallel lane has fully quiesced.
-      (for-each (cut testing-interface-run-test-batch! testing <>)
-                serial-batches)
+      (for-each
+       (lambda (test-files failure)
+         (with-exception-catcher
+          (lambda (exception) (set-box! failure [exception]))
+          (cut testing-interface-run-test-batch! testing test-files)))
+       serial-batches serial-failures)
+      (for-each
+       (lambda (failure)
+         (when (pair? (unbox failure)) (raise (car (unbox failure)))))
+       (append parallel-failures serial-failures))
       (displayln "[asp-testing] phase=all-batches-complete fileCount="
                  (length test-files))
       (force-output)
