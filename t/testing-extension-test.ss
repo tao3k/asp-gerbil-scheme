@@ -2,6 +2,7 @@
 
 (import :std/test
         (only-in :clan/poo/object .call .cc .ref object?)
+        (only-in :clan/poo/mop validate TypeError?)
         (only-in :std/cli/multicall call-entry-point)
         "../src/testing/extension"
         "../src/testing/discovery-runner"
@@ -32,7 +33,19 @@
     (test-case "the object names the upstream executor without replacing it"
       (check (object? +asp-testing-interface+) => #t)
       (check (.ref +asp-testing-interface+ 'upstream) => ':gerbil/tools/gxtest)
-      (check (.ref +asp-testing-interface+ 'command) => 'gerbil-test))
+      (check (procedure? (.ref +asp-testing-interface+ 'command)) => #t))
+
+    (test-case "native command Function survives profile composition and checks argv"
+      (def native
+        (.cc +asp-testing-interface+
+          command: (validate TestingCommand
+                     (lambda (options arguments) (append ["native-gxtest"] options arguments)))))
+      (def profiled (testing-interface-add-profile native +testing-memory-profile+))
+      (check (testing-interface-command-for profiled "t/example-test.ss" ["-q"])
+        => ["native-gxtest" "-:max-heap=1024M" "-q" "t/example-test.ss"])
+      (check-exception ((.ref profiled 'command) [1] []) TypeError?)
+      (def bad-result (validate TestingCommand (lambda (_options _arguments) [1])))
+      (check-exception (bad-result [] []) TypeError?))
 
     (test-case "scenario profiles are enabled by default"
       (check (testing-interface-profile-names +asp-testing-interface+)

@@ -6,6 +6,8 @@
 
 (import :gerbil/runtime/gambit
         (only-in :clan/poo/object .cc .o .ref .slot? object?)
+        (only-in :clan/poo/mop Function validate)
+        (only-in :clan/poo/type List String)
         (only-in :std/string/path path-directory path-expand path-normalize)
         (only-in :std/sync/wg make-wg wg-add! wg-wait!)
         (only-in :std/misc/process run-process)
@@ -17,7 +19,8 @@
                  testing-import-footprint-datum-owners
                  testing-import-footprint-file-owners))
 
-(export testing-profile
+(export TestingCommand
+        testing-profile
         testing-profile?
         testing-profile-name
         testing-test-selector
@@ -128,12 +131,22 @@
 ;;; Resolve transformation methods against the current POO receiver.  A
 ;;; downstream `.cc` extension therefore remains the receiver when `.call`
 ;;; delegates to the canonical immutable transformations below.
+(def +native-gxtest-exit-expression+
+  "(import :gerbil/tools/gxtest) (exit (apply main (cdddr (command-line))))")
+
+;; A command is an ordinary checked Function from runtime options and native
+;; gxtest arguments to argv. Profiles retain this capability through composition.
+(def TestingCommand
+  (Function (list (List String)) (list (List String) (List String))))
+(def (native-gxtest-command runtime-options arguments)
+  (append ["gxi"] runtime-options ["-e" +native-gxtest-exit-expression+] arguments))
+
 (def (testing-interface profiles: (initial-profiles [])
                         bindings: (initial-bindings []))
   (.o (:: self)
       kind: 'testing-interface-extension
       upstream: ':gerbil/tools/gxtest
-      command: 'gerbil-test
+      command: (validate TestingCommand native-gxtest-command)
       profiles: initial-profiles
       bindings: initial-bindings
       .remove:
@@ -421,15 +434,11 @@
 
 ;;; The public declaration is the POO profile. This is its private projection
 ;;; at the fresh-process boundary, before the upstream test module is loaded.
-(def +native-gxtest-exit-expression+
-  "(import :gerbil/tools/gxtest) (exit (apply main (cdddr (command-line))))")
 
 (def (testing-interface-command-for testing test (arguments []))
-  (append ["gxi"]
-          (testing-interface-runtime-options-for testing test)
-          ["-e" +native-gxtest-exit-expression+]
-          arguments
-          [test]))
+  ((.ref testing 'command)
+   (testing-interface-runtime-options-for testing test)
+   (append arguments [test])))
 
 (def (testing-interface-run-test! testing test
                                   arguments: (arguments [])
@@ -533,12 +542,11 @@
             (loop other (foldl cons batches-rev groups)))))))))
 
 (def (testing-interface-command-for-files testing test-files)
-  (append ["gxi"]
-          (if (null? test-files)
-            []
-            (testing-interface-runtime-options-for testing (car test-files)))
-          ["-e" +native-gxtest-exit-expression+]
-          test-files))
+  ((.ref testing 'command)
+   (if (null? test-files)
+     []
+     (testing-interface-runtime-options-for testing (car test-files)))
+   test-files))
 
 (def (testing-interface-run-test-batch! testing test-files)
   (displayln "[asp-testing] phase=batch-start fileCount="

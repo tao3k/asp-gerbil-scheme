@@ -75,3 +75,7 @@ rebuild:
     just deps
     just build
     just test
+
+# Bound the worker before importing its package source or native gxtest.
+test-file path:
+    GERBIL_LOADPATH="{{justfile_directory()}}${GERBIL_LOADPATH:+:$GERBIL_LOADPATH}" timeout --signal=TERM --kill-after=5s 120s {{gerbil}} env gxi -:max-heap=1G,debug=q -e '{{gxtest_exit}}' "{{path}}"
