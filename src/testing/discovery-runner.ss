@@ -64,18 +64,18 @@
     (list-sort string<? files)))
 
 ;; %set-test-environment!
-;;   : (-> Path Void)
+;;   : (-> Path Path Void)
 ;;   | doc m%
 ;;       Install the declaring package root as the native test environment.
 ;;
 ;;       # Examples
 ;;       ```scheme
-;;       (%set-test-environment! "/workspace/unit-tests.ss")
+;;       (%set-test-environment! "/workspace/dev/unit-tests.ss" "..")
 ;;       ;; => current-directory is /workspace
 ;;       ```
 ;;     %
-(def (%set-test-environment! script-path)
-  (let (root (path-directory script-path))
+(def (%set-test-environment! script-path relative-root)
+  (let (root (path-expand relative-root (path-directory script-path)))
     (current-directory root)
     (set-load-path! (cons root (load-path)))))
 
@@ -108,17 +108,23 @@
 ;;       ```scheme
 ;;       (init-profiled-test-environment! +asp-testing-interface+)
 ;;       ;; => native gxtest entrypoint declarations
+;;       (init-profiled-test-environment! +asp-testing-interface+ pkgdir: "..")
+;;       ;; => a dev/ entry discovers the parent package without changing profiles
 ;;       ```
 ;;     %
 (defrules init-profiled-test-environment! ()
   ((ctx testing)
-   (begin
+   (ctx testing pkgdir: "."))
+  ((ctx testing pkgdir: relative-root)
+   ;; main is a caller-visible entrypoint, not a private hygienic binding.
+   (with-id ((main ctx main))
+    (begin
      (def here (this-source-file ctx))
      (def main call-entry-point)
      (define-entry-point (asp-profiled-unit-tests)
        (help: "Run Gerbil unit tests through ASP POO profiles"
         getopt: [])
-       (%set-test-environment! here)
+       (%set-test-environment! here relative-root)
        (displayln "[asp-testing] phase=entry-ready")
        (force-output)
        (silent-exit
@@ -130,4 +136,4 @@
                      " fileCount=" (length test-files))
           (force-output)
           (testing-interface-run-test-files! testing test-files))))
-     (set-default-entry-point! 'asp-profiled-unit-tests))))
+     (set-default-entry-point! 'asp-profiled-unit-tests)))))

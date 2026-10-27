@@ -2,8 +2,13 @@
 
 (import :std/test
         (only-in :clan/poo/object .call .cc .ref object?)
+        (only-in :clan/poo/mop validate TypeError?)
+        (only-in :std/cli/multicall call-entry-point)
         "../src/testing/extension"
         "../src/testing/discovery-runner"
+        (rename-in (only-in "./fixtures/relocated-test-entry/dev/entry" entry-source main)
+                   (entry-source relocated-entry-source)
+                   (main relocated-entry-main))
         "../src/testing/source-admission"
         (only-in ../src/build-api/native-import-closure
                  asp-gerbil-scheme-prepared-native-import-closure)
@@ -28,7 +33,19 @@
     (test-case "the object names the upstream executor without replacing it"
       (check (object? +asp-testing-interface+) => #t)
       (check (.ref +asp-testing-interface+ 'upstream) => ':gerbil/tools/gxtest)
-      (check (.ref +asp-testing-interface+ 'command) => 'gerbil-test))
+      (check (procedure? (.ref +asp-testing-interface+ 'command)) => #t))
+
+    (test-case "native command Function survives profile composition and checks argv"
+      (def native
+        (.cc +asp-testing-interface+
+          command: (validate TestingCommand
+                     (lambda (options arguments) (append ["native-gxtest"] options arguments)))))
+      (def profiled (testing-interface-add-profile native +testing-memory-profile+))
+      (check (testing-interface-command-for profiled "t/example-test.ss" ["-q"])
+        => ["native-gxtest" "-:max-heap=1024M" "-q" "t/example-test.ss"])
+      (check-exception ((.ref profiled 'command) [1] []) TypeError?)
+      (def bad-result (validate TestingCommand (lambda (_options _arguments) [1])))
+      (check-exception (bad-result [] []) TypeError?))
 
     (test-case "scenario profiles are enabled by default"
       (check (testing-interface-profile-names +asp-testing-interface+)
@@ -90,6 +107,14 @@
                 testing "unit-tests.ss"
                 pkgdir: (path-expand root (current-directory)))
                => [])))
+
+    (test-case "a dev entry retains the parent package discovery root"
+      (check (eq? relocated-entry-main call-entry-point) => #t)
+      (let* ((root (path-expand ".." (path-directory relocated-entry-source)))
+             (files (testing-interface-test-files
+                     +asp-testing-interface+ "dev/unit-tests.ss" pkgdir: root)))
+        (check (length files) => 1)
+        (check (path-strip-directory (car files)) => "root-test.ss")))
 
     (test-case "POO import footprint profile rejects repeated heavy owners"
       (let* ((profile
