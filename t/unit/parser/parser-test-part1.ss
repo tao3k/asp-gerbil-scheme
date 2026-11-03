@@ -1,5 +1,6 @@
 ;;; -*- Gerbil -*-
-(import :std/test
+(import "./formal-precision-test.ss"
+        :std/test
         (only-in :asp-gerbil-scheme/src/parser/package read-project-package)
         :asp-gerbil-scheme/src/extensions/facade
         :asp-gerbil-scheme/src/parser/facade
@@ -118,6 +119,7 @@
 ;; TestSuite
 (def parser-test-part-1
   (test-suite "gerbil scheme harness parser part 1"
+    formal-precision-test
     (test-case "native reader captures package and definitions"
           (let* ((root (path-normalize "."))
                  (file (parse-source-file root "t/fixtures/sample.ss")))

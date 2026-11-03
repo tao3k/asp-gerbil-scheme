@@ -430,7 +430,10 @@
                  "syntax-datum-registry-key")
             (and (tree-contains-symbol? datum 'let-syntax)
                  "phase-local-syntax-binding")
-            (and (tree-contains-symbol? datum 'set!)
+            ;; Declarative templates emit code; their assignments do not run
+            ;; in the transformer. Retain the procedural mutation signal.
+            (and (not (member head '(defrule defrules)))
+                 (tree-contains-symbol? datum 'set!)
                  "global-macro-state-mutation")
             (and (or (tree-contains-symbol? datum 'identifier?)
                      (tree-contains-symbol? datum 'identifier-list?)

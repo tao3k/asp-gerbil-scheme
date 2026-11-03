@@ -44,7 +44,7 @@
 
 ;; : (-> Datum Boolean)
 (def (definition-method-name-head? head)
-  (member head '(defmethod defclass .defclass defgeneric .defgeneric
+  (member head '(defstruct defmethod defclass .defclass defgeneric .defgeneric
                  .defmethod defsyntax defsyntax-for-match
                  defsyntax-for-import defsyntax-for-export
                  defsyntax-for-import-export
@@ -84,7 +84,7 @@
   (filter-map
    (lambda (formal)
      (and (symbol? formal) (datum->string formal)))
-   (definition-formal-datums datum name)))
+   (definition-full-formal-datums datum name)))
 
 ;;; Boundary:
 ;;; - Arity is derived from parser-owned formal evidence so contract policy and call facts share one shape source.
@@ -191,3 +191,24 @@
    ((symbol? datum) datum)
    ((and (pair? datum) (symbol? (car datum))) (car datum))
    (else #f)))
+
+;;; Full callable names retain optional bindings. The legacy arity field uses
+;;; its original projection, so call-policy admission is not changed.
+;; : (-> Datum Symbol (List Symbol))
+(def (definition-full-formal-datums datum name)
+  (let* ((head (safe-cadr datum)) (value (safe-caddr datum))
+         (raw (cond ((and (pair? head) (eq? (car head) name)) (cdr head))
+                    ((and (eq? head name) (pair? value) (eq? (car value) 'lambda)) (safe-cadr value))
+                    (else #f))))
+    (if raw
+      (let names ((rest raw))
+        (cond ((null? rest) '()) ((symbol? rest) [rest])
+              ((not (pair? rest)) '())
+              ((keyword? (car rest)) (names (cdr rest)))
+              ((symbol? (car rest))
+               (if (eq? (car rest) '...) (names (cdr rest))
+                 (cons (car rest) (names (cdr rest)))))
+              ((and (pair? (car rest)) (symbol? (caar rest)))
+               (cons (caar rest) (names (cdr rest))))
+              (else (names (cdr rest)))))
+      (definition-formal-datums datum name))))

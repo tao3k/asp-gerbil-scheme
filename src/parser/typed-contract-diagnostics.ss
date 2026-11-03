@@ -229,7 +229,9 @@
   (cond
    ((= arrow-count 0) "declaration")
    ((equal? (definition-kind definition) "defrules") "macro-syntax")
-   ((= (definition-arity definition) contract-input-count) "aligned")
+   ((and (number? (definition-arity definition))
+         (<= (definition-arity definition) contract-input-count
+             (length (definition-formals definition)))) "aligned")
    (else "input-count-mismatch")))
 
 ;; : (-> Definition Boolean )
