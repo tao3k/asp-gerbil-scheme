@@ -430,10 +430,15 @@
                  "syntax-datum-registry-key")
             (and (tree-contains-symbol? datum 'let-syntax)
                  "phase-local-syntax-binding")
-            ;; Declarative templates emit code; their assignments do not run
-            ;; in the transformer. Retain the procedural mutation signal.
-            (and (not (member head '(defrule defrules)))
-                 (tree-contains-symbol? datum 'set!)
+            ;; Runtime assignments in declarative templates do not execute
+            ;; in the transformer. Explicit generated phase code stays visible.
+            (and (tree-contains-symbol? datum 'set!)
+                 (or (not (member head '(defrule defrules)))
+                     (ormap (lambda (phase-form)
+                              (tree-contains-symbol? datum phase-form))
+                            '(begin-syntax defsyntax defsyntax-for-match
+                              defsyntax-for-import defsyntax-for-export
+                              defsyntax-for-import-export)))
                  "global-macro-state-mutation")
             (and (or (tree-contains-symbol? datum 'identifier?)
                      (tree-contains-symbol? datum 'identifier-list?)

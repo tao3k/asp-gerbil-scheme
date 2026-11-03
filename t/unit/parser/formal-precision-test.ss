@@ -24,13 +24,19 @@
     (check-equal? (typed-contract-arity-alignment d 1 3) "input-count-mismatch")))
   (test-case "declarative assignments are templates, procedural mutations remain visible"
    (for-each
-    (lambda (head)
+    (lambda (form)
      (check-equal?
-      (member "global-macro-state-mutation"
-              (macro-quality-facets head
-               (list head '(bump value) '(let ((counter value)) (set! counter (+ counter 1))))))
+      (member "global-macro-state-mutation" (macro-quality-facets (car form) form))
       #f))
-    '(defrule defrules))
+    '((defrule (bump value) (let ((counter value)) (set! counter (+ counter 1))))
+      (defrules bump () ((_ value) (let ((counter value)) (set! counter (+ counter 1)))))))
+   (for-each
+    (lambda (form)
+     (check (member "global-macro-state-mutation" (macro-quality-facets (car form) form))
+            ? pair?))
+    '((defrule (register!) (begin-syntax (set! registry (cons 'entry registry))))
+      (defrules register! ()
+       ((_) (defsyntax (inner stx) (set! registry (cons 'entry registry)) stx)))))
    (check (member "global-macro-state-mutation"
                   (macro-quality-facets 'defsyntax
                    '(defsyntax (bump stx) (set! global-counter (+ global-counter 1)) stx)))
