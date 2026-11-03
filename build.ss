@@ -1,4 +1,4 @@
-#!/usr/bin/env gerbil
+#!/usr/bin/env -S gerbil -:max-heap=2G,debug=q
 
 ;;; -*- Gerbil -*-
 
@@ -6,6 +6,13 @@
         (only-in "./src/build-api/source-bootstrap"
                  asp-gerbil-scheme-package-spec!
                  asp-gerbil-scheme-library-package-prototype))
+
+;; Package compilation and its children own their heap budget. Do not export
+;; this budget from the package manager to its later gxtags process.
+(let (options (getenv "GAMBOPT" #f))
+  (setenv "GAMBOPT"
+    (string-append (if options (string-append options ",") "")
+                   "max-heap=2G,debug=q")))
 
 (def +product-entry-modules+
   '("provider-package-spec"

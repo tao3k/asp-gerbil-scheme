@@ -108,6 +108,20 @@
 (def (slot-prototype-table-<-list slots)
   slots)
 
+;;; Carrier validation boundary:
+;;; - Derived table operations require a proper alist with symbol keys.
+;;; - Key/value contracts remain in .validate, with their original order.
+;; : (-> SlotPrototype SlotPrototype )
+(def (slot-prototype-table-validate-shape prototype)
+  (unless (list? prototype)
+    (raise-type-error "Not a slot prototype alist" prototype))
+  (for-each
+   (lambda (slot)
+     (unless (and (pair? slot) (symbol? (car slot)))
+       (raise-type-error "Not a slot prototype binding" slot)))
+   prototype)
+  prototype)
+
 ;;; Table adapter boundary:
 ;;; - SlotPrototype is an association-list backed table from slot keys to values.
 ;;; - methods.table owns the derived .ref/opt, .merge, .update, and list helpers.
@@ -116,6 +130,7 @@
 (define-type (SlotPrototypeTable. @ [methods.table])
   Key: Any
   Value: Any
+  .validate-shape: slot-prototype-table-validate-shape
   .validate: => (lambda (super)
                   (lambda (prototype)
                     (unless (list? prototype)

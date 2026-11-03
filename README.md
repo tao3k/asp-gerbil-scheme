@@ -57,6 +57,12 @@ owner. Optional native behavior is composed through PackageSpec and
 NativeProfile POO slots; it does not add another public build framework.
 Testing and benchmark capabilities are separately owned by
 `:asp-gerbil-scheme/testing-api` and `:asp-gerbil-scheme/benchmark-api`.
+The testing interface's `command` Slot is a native `TestingCommand` Function:
+it accepts runtime options and upstream arguments, and returns argv. For example,
+`(.cc testing command: (validate TestingCommand (lambda (options arguments)
+(append ["project-gxtest"] options arguments))))` selects a native SDK gxtest image.
+Profile composition retains this checked capability; discovery, process isolation,
+worker limits, and serial resources remain owned by the same test interface.
 Standalone policy inspection remains available from
 `:asp-gerbil-scheme/policy-api`; the Building API default uses the same rule
 set on the sources selected for this build.
