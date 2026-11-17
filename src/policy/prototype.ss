@@ -2,7 +2,7 @@
 ;;; POO-backed slot prototype helpers for policy descriptors.
 
 (import :gerbil/runtime/gambit
-        (only-in :clan/poo/mop define-type Any raise-type-error validate)
+        (only-in :clan/poo/type define-type Any raise-type-error validate)
         (only-in :clan/poo/object
                  .alist
                  .call

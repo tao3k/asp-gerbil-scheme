@@ -2,7 +2,7 @@
 
 (import :std/test
         (only-in :clan/poo/object .call .cc .ref object?)
-        (only-in :clan/poo/mop validate TypeError?)
+        (only-in :clan/poo/type validate TypeError?)
         (only-in :std/cli/multicall call-entry-point)
         "../src/testing/extension"
         "../src/testing/discovery-runner"

@@ -6,8 +6,7 @@
 
 (import :gerbil/runtime/gambit
         (only-in :clan/poo/object .cc .o .ref .slot? object?)
-        (only-in :clan/poo/mop Function validate)
-        (only-in :clan/poo/type List String)
+        (only-in :clan/poo/type Function validate List String)
         (only-in :std/string/path path-directory path-expand path-normalize)
         (only-in :std/sync/wg make-wg wg-add! wg-wait!)
         (only-in :std/misc/process run-process)
