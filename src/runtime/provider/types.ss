@@ -5,7 +5,7 @@
 
 (import :gerbil/runtime/gambit
         (only-in :clan/poo/object .ref .slot? object?)
-        (only-in :clan/poo/mop Type. define-type element? validate)
+        (only-in :clan/poo/type Type. define-type element? validate)
         (only-in :std/struct/lru LRUCache? LRUCache-cap)
         (only-in :std/list/list every))
 

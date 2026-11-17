@@ -5,7 +5,7 @@
 
 (import :gerbil/runtime/gambit
         (only-in :clan/poo/object .def .o .ref .slot? object?)
-        (only-in :clan/poo/mop Type. define-type element? validate)
+        (only-in :clan/poo/type Type. define-type element? validate)
         (only-in :std/list/list every)
 
         (only-in "../object-family/syntax"

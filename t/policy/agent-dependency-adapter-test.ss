@@ -63,6 +63,15 @@
                    => 2)
             (check (.call SlotPrototypeTable. .list<- sample) => sample)
             (check (slot-prototype-ref sample 'missing 'fallback) => 'fallback)))
+    (test-case "slot prototype carrier validation rejects malformed tables"
+      (let (sample '((alpha . 1) (beta . 2)))
+        (check (eq? (.call SlotPrototypeTable. .validate-shape sample) sample) => #t)
+        (check (.call SlotPrototypeTable. .validate-shape '()) => '()))
+      (for-each
+       (lambda (malformed)
+         (check-exception (.call SlotPrototypeTable. .validate-shape malformed)
+                          exception?))
+       (list #f '((alpha . 1) . tail) '(alpha) '((1 . value)))))
     (test-case "incomplete test scope preserves local adapter requirements"
       (let* ((root ".run/policy-dependency-adapter-production-only")
              (_ (write-dependency-protocol-adapter-project root #t #f))
