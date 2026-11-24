@@ -11,7 +11,7 @@
                  compute-precedence-list!
                  object?
                  object<-alist)
-        (only-in :clan/poo/proto compose-proto* instantiate-proto)
+        (only-in :clan/poo/mop/prototype-composition compose-proto* instantiate-proto)
         (only-in :clan/poo/table methods.table)
         (only-in :std/list/list find fold)
         )

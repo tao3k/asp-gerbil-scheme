@@ -7,7 +7,7 @@
 (export check-poo-runtime-witnesses)
 ;; ParsedData
 (def (load-poo-runtime!)
-  (eval '(import :clan/poo/proto
+  (eval '(import :clan/poo/mop/prototype-composition
                  :clan/poo/object
                  :clan/poo/brace
                  :clan/poo/debug
