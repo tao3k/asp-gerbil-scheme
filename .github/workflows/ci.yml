@@ -235,6 +235,7 @@ jobs:
             t/language-projection-test.ss \
             t/testing-extension-test.ss \
             t/testing-native-batch-scenario-test.ss \
+            t/testing-batch-failure-test.ss \
             t/policy/agent-dependency-adapter-test.ss \
             t/project-policy-test.ss
 

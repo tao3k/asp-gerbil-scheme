@@ -50,7 +50,7 @@
 (def (calls-from-definition-stx relpath expr-stx head datum caller local-types)
   (cond
    ((member head +macro-definition-heads+) '())
-   ((member head '(defclass .defclass defgeneric .defgeneric)) '())
+   ((member head '(defstruct defclass .defclass defgeneric .defgeneric)) '())
    (else
     (calls-from-body-stxes relpath
                            (stx-form-body-items expr-stx datum)
