@@ -7,26 +7,37 @@
 ;;; Built directly on Gerbil 0.19 `:std/net/http/server` + `:std/encoding/json`
 ;;; + pure native reader AST ops (`./ast-ops.ss`).
 
-(import :std/encoding/json
-        :std/interface
-        :std/io
-        :std/list/walist
-        :std/log
-        :std/net/address
-        :std/net/http/server
-        :std/net/url
-        :std/sync/channel
-        :std/time/timeout
-        "./ast-ops.ss")
+(import (only-in :std/encoding/json read-json write-json)
+        (only-in :std/io
+                 BufferedWriter-flush
+                 BufferedWriter-write-string-utf8
+                 Socket-address
+                 Socket-close
+                 read-all-from-reader
+                 tcp-listen)
+        (only-in :std/list/walist WAList? walist->list)
+        (only-in :std/log stderr-log-sink)
+        (only-in :std/net/address InetAddress InetAddress-port localhost4)
+        (only-in :std/net/http/server
+                 OK
+                 Request-body
+                 Request-method
+                 Request-url
+                 ResponseHandler-begin!
+                 Server-start!
+                 Server-stop!
+                 ServerConfig
+                 new-closure-handler
+                 new-http-server
+                 new-static-mux)
+        (only-in :std/net/url URL-path)
+        (only-in :std/sync/channel channel-get channel-try-put make-channel)
+        (only-in :std/time/timeout IOTimeout)
+        (only-in "./ast-ops.ss"
+                 handle-gerbil-ast-inspect
+                 handle-gerbil-ast-verify))
 
 (export main)
-
-(defclass (silent-log-sink BasicLogger) () final: #t)
-(defmethod {log silent-log-sink} (lambda (_self _record) (void)) interface: Logger)
-(defmethod {start! silent-log-sink} void interface: LogSink)
-(defmethod {stop! silent-log-sink} void interface: LogSink)
-(@implement Logger silent-log-sink)
-(@implement LogSink silent-log-sink)
 
 (def (mk-obj . pairs)
   (list->hash-table pairs))
@@ -173,12 +184,11 @@
                   path: "/health" (new-closure-handler (make-provider-handler shutdown-ch))
                   path: "/v1/provider-runtime" (new-closure-handler (make-provider-handler shutdown-ch))
                   path: "/shutdown" (new-closure-handler (make-provider-handler shutdown-ch)))
-            log: (LogSink (silent-log-sink name: "asp-gerbil-scheme" level: ERROR))
+            log: (stderr-log-sink)
             listen: (list (string-append "inet4:" address))
             response-timeout: (IOTimeout 30))))
          (out (current-output-port)))
-    (using (s server : Server)
-      (s.start!))
+    (Server-start! server)
     (write-json
      out
      (mk-obj
@@ -192,5 +202,4 @@
     (newline out)
     (force-output out)
     (channel-get shutdown-ch)
-    (using (s server : Server)
-      (s.stop!))))
+    (Server-stop! server)))
