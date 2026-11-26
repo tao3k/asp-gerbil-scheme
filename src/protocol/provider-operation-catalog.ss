@@ -115,6 +115,16 @@
     "query"
     "agent.semantic-protocols.provider-native-exact-request" "1"
     "agent.semantic-protocols.provider-native-exact-projection" "1"
+    #f)
+   (provider-operation-contract
+    "ast-inspect"
+    "agent.semantic-protocols.ast-inspect" "1"
+    "agent.semantic-protocols.ast-inspect" "1"
+    #f)
+   (provider-operation-contract
+    "ast-verify"
+    "agent.semantic-protocols.ast-verify" "1"
+    "agent.semantic-protocols.ast-verify" "1"
     #f)])
 
 (def (provider-operation-contract-by-operation operation)

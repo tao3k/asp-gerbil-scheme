@@ -35,6 +35,7 @@
     "src/runtime/provider/types.ss"
     "src/runtime/provider/objects.ss"
     "src/runtime/provider/interface.ss"
+    "src/runtime/ast-ops.ss"
     "src/runtime/provider-operation.ss"
     "src/runtime/provider-http-json-server.ss"
     "src/commands/provider-runtime.ss"))
