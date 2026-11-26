@@ -28,8 +28,8 @@
              (methods (hash-get language 'methods))
              (descriptors (hash-get language 'methodDescriptors)))
         (check methods
-               => '("projection-batch" "project-resolution" "query"))
-        (check (length descriptors) => 3)
+               => '("projection-batch" "project-resolution" "query" "ast-inspect" "ast-verify"))
+        (check (length descriptors) => 5)
         (check (hash-ref (car descriptors) "operation")
                => "projection-batch")
         (check (.slot? (car provider-operation-contracts) 'execute) => #f)))
