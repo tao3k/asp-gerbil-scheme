@@ -10,6 +10,9 @@
                  project-provider-projection-batch)
         (only-in :asp-gerbil-scheme/src/exact-source-projection
                  project-provider-native-exact-request)
+        (only-in :asp-gerbil-scheme/src/runtime/ast-ops
+                 handle-gerbil-ast-inspect
+                 handle-gerbil-ast-verify)
         (only-in :asp-gerbil-scheme/src/protocol/provider-operation-catalog
                  provider-operation-contract-memoizable?
                  provider-operation-contract-operation
@@ -213,6 +216,20 @@
       (required-payload-string wire-value "parserIdentityDigest")
       (required-payload-string wire-value "queryPackDigest")))))
 
+;; : (-> ProviderOperationPayload ProviderOperationResult)
+(def (execute-ast-inspect payload)
+  (provider-operation-result
+   "ast-inspect"
+   (handle-gerbil-ast-inspect
+    (operation-payload-wire-value "ast-inspect" payload))))
+
+;; : (-> ProviderOperationPayload ProviderOperationResult)
+(def (execute-ast-verify payload)
+  (provider-operation-result
+   "ast-verify"
+   (handle-gerbil-ast-verify
+    (operation-payload-wire-value "ast-verify" payload))))
+
 ;; : (-> ProviderOperationContract Procedure ProviderOperationDescriptor)
 (def (bind-provider-operation contract execute)
   (provider-operation-descriptor
@@ -229,7 +246,9 @@
 (def +provider-operation-executors+
   `(("projection-batch" . ,execute-projection-batch)
     ("project-resolution" . ,execute-project-resolution)
-    ("query" . ,execute-native-exact-query)))
+    ("query" . ,execute-native-exact-query)
+    ("ast-inspect" . ,execute-ast-inspect)
+    ("ast-verify" . ,execute-ast-verify)))
 
 (def (provider-operation-executor contract)
   (let (entry (assoc (provider-operation-contract-operation contract)

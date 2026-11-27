@@ -17,6 +17,8 @@
     "src/runtime/provider/types"
     "src/runtime/provider/objects"
     "src/runtime/provider/interface"
+    "src/runtime/ast-ops"
+    "src/runtime/ast-provider-http-server"
     "src/runtime/provider-operation"
     "src/runtime/provider-http-json-server"))
 
