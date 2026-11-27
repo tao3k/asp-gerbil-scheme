@@ -9,6 +9,19 @@
 (export handle-gerbil-ast-inspect
         handle-gerbil-ast-verify)
 
+(def (str-contains? hay needle)
+  (let ((hlen (string-length hay))
+        (nlen (string-length needle)))
+    (cond
+     ((= nlen 0) #t)
+     ((> nlen hlen) #f)
+     (else
+      (let loop ((i 0))
+        (cond
+         ((> (+ i nlen) hlen) #f)
+         ((string=? (substring hay i (+ i nlen)) needle) #t)
+         (else (loop (+ i 1)))))))))
+
 (def (mk-obj . pairs)
   (list->hash-table pairs))
 
@@ -223,6 +236,78 @@
 (def (mk-edge src dst rel line)
   (mk-obj (cons "src" src) (cons "dst" dst) (cons "relation" rel) (cons "line" line)))
 
+(def (mk-attr key val)
+  (mk-obj (cons "key" key) (cons "value" val)))
+
+(def (infer-gerbil-module-role path)
+  (let ((n (string-length path)))
+    (cond
+     ((or (and (>= n 10) (string=? (substring path (- n 10) n) "objects.ss"))
+          (str-contains? path "/objects.ss")) "objects")
+     ((or (and (>= n 8) (string=? (substring path (- n 8) n) "funcs.ss"))
+          (str-contains? path "/funcs.ss")) "funcs")
+     ((or (and (>= n 12) (string=? (substring path (- n 12) n) "interface.ss"))
+          (str-contains? path "/interface.ss")) "interface")
+     ((or (and (>= n 9) (string=? (substring path (- n 9) n) "config.ss"))
+          (str-contains? path "/config.ss")) "config")
+     ((str-contains? path "c-abi/") "c-abi")
+     ((or (str-contains? path "-test.ss") (str-contains? path "/t/")) "test")
+     (else "module"))))
+
+(def (collect-gerbil-export-names spans)
+  (let ((names (make-hash-table)))
+    (for-each
+     (lambda (entry)
+       (let ((datum (with-catch (lambda (_) #f)
+                      (lambda () (call-with-input-string (list-ref entry 3) read)))))
+         (when (and (pair? datum) (eq? (car datum) 'export))
+           (for-each
+            (lambda (spec)
+              (cond
+               ((symbol? spec) (hash-put! names (symbol->string spec) #t))
+               ((and (pair? spec) (eq? (car spec) 'rename-out))
+                (for-each
+                 (lambda (pair)
+                   (when (and (pair? pair) (pair? (cdr pair)) (symbol? (cadr pair)))
+                     (hash-put! names (symbol->string (cadr pair)) #t)))
+                 (cdr spec)))))
+            (cdr datum)))))
+     spans)
+    names))
+
+(def (collect-scheme-error-literals form acc)
+  (cond
+   ((or (not (pair? form)) (>= (length acc) 8)) acc)
+   ((memq (car form) '(quote quasiquote)) acc)
+   ((and (eq? (car form) 'error) (pair? (cdr form)) (string? (cadr form)))
+    (let ((msg (cadr form)))
+      (if (and (>= (string-length msg) 3) (<= (string-length msg) 120)
+               (not (member msg acc)))
+        (cons msg acc)
+        acc)))
+   (else
+    (let loop ((rest form) (cur acc))
+      (if (pair? rest)
+        (loop (cdr rest) (collect-scheme-error-literals (car rest) cur))
+        cur)))))
+
+(def (collect-scheme-ffi-edges path line form acc)
+  (cond
+   ((not (pair? form)) acc)
+   ((and (eq? (car form) 'c-define) (>= (length form) 5)
+         (pair? (cadr form)) (symbol? (caadr form)) (string? (list-ref form 4)))
+    (cons (mk-edge (string-append path "#fn:" (symbol->string (caadr form)))
+                   (list-ref form 4)
+                   "ffi_binds"
+                   line)
+          acc))
+   ((eq? (car form) 'begin-ffi)
+    (let loop ((rest (cdr form)) (cur acc))
+      (if (pair? rest)
+        (loop (cdr rest) (collect-scheme-ffi-edges path line (car rest) cur))
+        cur)))
+   (else acc)))
+
 (def (extract-top-level-edges path line datum)
   (if (not (and (pair? datum) (symbol? (car datum)) (pair? (cdr datum))))
     '()
@@ -232,6 +317,8 @@
        ((eq? head 'import)
         (map (lambda (mod) (mk-edge path mod "imports" line))
              (extract-scheme-import-targets (cdr datum))))
+       ((memq head '(begin-ffi c-define))
+        (reverse (collect-scheme-ffi-edges path line datum '())))
        ((and (memq head '(def define def* defmethod)) (pair? target) (symbol? (car target)))
         (let ((loc (string-append path "#fn:" (symbol->string (car target))))
               (callees (let loop ((exprs (cddr datum)) (acc '()))
@@ -241,7 +328,7 @@
           (map (lambda (callee) (mk-edge loc callee "calls" line)) callees)))
        (else '())))))
 
-(def (classify-top-level-form path start end line text)
+(def (classify-top-level-form path start end line text export-table module-role)
   (let ((datum (with-catch (lambda (_) #f)
                  (lambda () (call-with-input-string text read)))))
     (if (not (and (pair? datum) (symbol? (car datum)) (pair? (cdr datum))))
@@ -277,11 +364,25 @@
                 (else #f))))
         (if (not classified)
           (values #f edges)
-          (let ((kind (list-ref classified 0))
-                (lang-kind (list-ref classified 1))
-                (tag (list-ref classified 2))
-                (name (list-ref classified 3))
-                (span (mk-obj (cons "start" start) (cons "end" end))))
+          (let* ((kind (list-ref classified 0))
+                 (lang-kind (list-ref classified 1))
+                 (tag (list-ref classified 2))
+                 (name (list-ref classified 3))
+                 (span (mk-obj (cons "start" start) (cons "end" end)))
+                 (exported? (and (not (string=? kind "import"))
+                                 (hash-get export-table name)))
+                 (err-lits (if (string=? kind "function")
+                             (reverse (collect-scheme-error-literals (cddr datum) '()))
+                             '()))
+                 (attrs (append
+                          (if (string=? kind "import")
+                            '()
+                            (list (mk-attr "moduleRole" module-role)))
+                          (if exported?
+                            (list (mk-attr "exported" "true")
+                                  (mk-attr "visibility" "export"))
+                            '())
+                          (map (lambda (m) (mk-attr "error_literal" m)) err-lits))))
             (values
               (mk-obj
                (cons "locator" (string-append path "#" tag ":" name))
@@ -291,7 +392,7 @@
                (cons "line" line)
                (cons "outerSpan" span)
                (cons "innerSpan" span)
-               (cons "attrs" '()))
+               (cons "attrs" attrs))
               edges)))))))
 
 (def (handle-gerbil-ast-inspect payload)
@@ -309,9 +410,11 @@
                         (cons "message" (or err-msg "Gerbil Scheme reader error"))
                         (cons "expectedTokens" (error-expected-tokens (or err-msg ""))))))
          (cons "syntaxSurface" +gerbil-scheme-syntax-surface+))
-        (let ((spans (scan-top-level-form-spans source))
-              (nodes '())
-              (edges '()))
+        (let* ((spans (scan-top-level-form-spans source))
+               (export-table (collect-gerbil-export-names spans))
+               (module-role (infer-gerbil-module-role path))
+               (nodes '())
+               (edges '()))
           (for-each
            (lambda (entry)
              (let-values (((node form-edges)
@@ -320,7 +423,9 @@
                              (list-ref entry 0)
                              (list-ref entry 1)
                              (list-ref entry 2)
-                             (list-ref entry 3))))
+                             (list-ref entry 3)
+                             export-table
+                             module-role)))
                (when node (set! nodes (cons node nodes)))
                (for-each (lambda (e) (set! edges (cons e edges))) form-edges)))
            spans)
