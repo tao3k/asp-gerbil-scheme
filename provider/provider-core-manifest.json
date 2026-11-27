@@ -6,6 +6,12 @@
   "displayName": "Gerbil Scheme",
   "extensions": [".ss", ".scm"],
   "projectMarkers": ["gerbil.pkg", "manifest.ss"],
+  "project": {
+    "markers": ["gerbil.pkg", "manifest.ss"],
+    "entryFiles": ["init.ss", "build.ss", "interface.ss"],
+    "workspaceFiles": ["gerbil.pkg"],
+    "configFiles": ["gerbil.pkg", "build.ss"]
+  },
   "syntaxSurface": {
     "lineComment": ";",
     "blockComment": ["#|", "|#"],
@@ -24,5 +30,40 @@
     "astVerify": true,
     "openEdb": true,
     "projectResolution": true
+  },
+  "special": {
+    "kindMappings": [
+      { "nativeLanguageKind": "def", "generalKind": "function", "description": "Gerbil procedure or method definition" },
+      { "nativeLanguageKind": "defconst", "generalKind": "constant", "description": "Gerbil constant binding" },
+      { "nativeLanguageKind": "defstruct", "generalKind": "struct", "description": "Gerbil struct declaration" },
+      { "nativeLanguageKind": "defclass", "generalKind": "type", "description": "Gerbil class declaration" },
+      { "nativeLanguageKind": "defsyntax", "generalKind": "macro", "description": "Gerbil hygienic macro (defsyntax/defrules)" },
+      { "nativeLanguageKind": "poo_def", "generalKind": "item", "description": "Gerbil POO prototype (.def ...)" },
+      { "nativeLanguageKind": "deflanguage", "generalKind": "item", "description": ":gerbil-parser deflanguage grammar" },
+      { "nativeLanguageKind": "import", "generalKind": "import", "description": "Gerbil module import declaration" }
+    ],
+    "specialRelations": [
+      "scheme_def",
+      "scheme_const",
+      "scheme_struct",
+      "scheme_class",
+      "scheme_macro",
+      "scheme_poo_def",
+      "scheme_grammar"
+    ],
+    "schema": {
+      "type": "object",
+      "properties": {
+        "exported": {
+          "type": "boolean",
+          "description": "Filter Gerbil bindings published by (export ...)"
+        },
+        "moduleRole": {
+          "type": "string",
+          "enum": ["interface", "objects", "funcs", "config", "types", "syntax"],
+          "description": "Yuanxu/Marlin Scheme module role"
+        }
+      }
+    }
   }
 }

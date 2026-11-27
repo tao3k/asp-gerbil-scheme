@@ -179,13 +179,76 @@
    ((and (pair? datum) (symbol? (car datum))) (symbol->string (car datum)))
    (else #f)))
 
+(def +scheme-non-call-heads+
+  '(quote quasiquote unquote unquote-splicing lambda fn case-lambda
+    let let* letrec letrec* let-values let*-values
+    if cond case when unless and or begin do set!
+    def define def* defvalues defmethod defstruct defclass defsyntax defrules defrule
+    import export declare else =>))
+
+(def (collect-scheme-call-targets form acc)
+  (cond
+   ((not (pair? form)) acc)
+   ((memq (car form) '(quote quasiquote)) acc)
+   (else
+    (let* ((head (car form))
+           (acc1 (cond
+                  ((and (symbol? head) (not (memq head +scheme-non-call-heads+)))
+                   (let ((s (symbol->string head)))
+                     (if (member s acc) acc (cons s acc))))
+                  ((pair? head) (collect-scheme-call-targets head acc))
+                  (else acc))))
+      (let loop ((rest (cdr form)) (cur acc1))
+        (if (pair? rest)
+          (loop (cdr rest) (collect-scheme-call-targets (car rest) cur))
+          cur))))))
+
+(def (extract-scheme-import-targets specs)
+  (let loop ((rest specs) (acc '()))
+    (if (not (pair? rest))
+      (reverse acc)
+      (let* ((spec (car rest))
+             (target
+               (cond
+                ((symbol? spec) (symbol->string spec))
+                ((string? spec) spec)
+                ((and (pair? spec) (pair? (cdr spec)) (memq (car spec) '(only-in except-in prefix-in rename-in)))
+                 (let ((mod (cadr spec)))
+                   (cond ((symbol? mod) (symbol->string mod))
+                         ((string? mod) mod)
+                         (else #f))))
+                (else #f))))
+        (loop (cdr rest) (if target (cons target acc) acc))))))
+
+(def (mk-edge src dst rel line)
+  (mk-obj (cons "src" src) (cons "dst" dst) (cons "relation" rel) (cons "line" line)))
+
+(def (extract-top-level-edges path line datum)
+  (if (not (and (pair? datum) (symbol? (car datum)) (pair? (cdr datum))))
+    '()
+    (let ((head (car datum))
+          (target (cadr datum)))
+      (cond
+       ((eq? head 'import)
+        (map (lambda (mod) (mk-edge path mod "imports" line))
+             (extract-scheme-import-targets (cdr datum))))
+       ((and (memq head '(def define def* defmethod)) (pair? target) (symbol? (car target)))
+        (let ((loc (string-append path "#fn:" (symbol->string (car target))))
+              (callees (let loop ((exprs (cddr datum)) (acc '()))
+                         (if (pair? exprs)
+                           (loop (cdr exprs) (collect-scheme-call-targets (car exprs) acc))
+                           (reverse acc)))))
+          (map (lambda (callee) (mk-edge loc callee "calls" line)) callees)))
+       (else '())))))
+
 (def (classify-top-level-form path start end line text)
   (let ((datum (with-catch (lambda (_) #f)
                  (lambda () (call-with-input-string text read)))))
     (if (not (and (pair? datum) (symbol? (car datum)) (pair? (cdr datum))))
-      #f
+      (values #f '())
       (let* ((head (car datum))
              (target (cadr datum))
+             (edges (extract-top-level-edges path line datum))
              (classified
                (cond
                 ((memq head '(def define def* defvalues defmethod))
@@ -213,21 +276,23 @@
                  (list "import" "import" "import" (string-append "import_line_" (number->string line))))
                 (else #f))))
         (if (not classified)
-          #f
+          (values #f edges)
           (let ((kind (list-ref classified 0))
                 (lang-kind (list-ref classified 1))
                 (tag (list-ref classified 2))
                 (name (list-ref classified 3))
                 (span (mk-obj (cons "start" start) (cons "end" end))))
-            (mk-obj
-             (cons "locator" (string-append path "#" tag ":" name))
-             (cons "kind" kind)
-             (cons "languageKind" lang-kind)
-             (cons "name" name)
-             (cons "line" line)
-             (cons "outerSpan" span)
-             (cons "innerSpan" span)
-             (cons "attrs" '()))))))))
+            (values
+              (mk-obj
+               (cons "locator" (string-append path "#" tag ":" name))
+               (cons "kind" kind)
+               (cons "languageKind" lang-kind)
+               (cons "name" name)
+               (cons "line" line)
+               (cons "outerSpan" span)
+               (cons "innerSpan" span)
+               (cons "attrs" '()))
+              edges)))))))
 
 (def (handle-gerbil-ast-inspect payload)
   (let* ((path (or (hash-ref payload "path" #f) "<memory>"))
@@ -237,25 +302,32 @@
         (mk-obj
          (cons "accepted" #f)
          (cons "nodes" '())
+         (cons "edges" '())
          (cons "diagnostics"
           (list (mk-obj (cons "byteStart" (u8vector-length (string->utf8 source)))
                         (cons "byteEnd" (u8vector-length (string->utf8 source)))
                         (cons "message" (or err-msg "Gerbil Scheme reader error"))
                         (cons "expectedTokens" (error-expected-tokens (or err-msg ""))))))
          (cons "syntaxSurface" +gerbil-scheme-syntax-surface+))
-        (let* ((spans (scan-top-level-form-spans source))
-               (nodes (filter (lambda (x) x)
-                              (map (lambda (entry)
-                                     (classify-top-level-form
-                                       path
-                                       (list-ref entry 0)
-                                       (list-ref entry 1)
-                                       (list-ref entry 2)
-                                       (list-ref entry 3)))
-                                   spans))))
+        (let ((spans (scan-top-level-form-spans source))
+              (nodes '())
+              (edges '()))
+          (for-each
+           (lambda (entry)
+             (let-values (((node form-edges)
+                           (classify-top-level-form
+                             path
+                             (list-ref entry 0)
+                             (list-ref entry 1)
+                             (list-ref entry 2)
+                             (list-ref entry 3))))
+               (when node (set! nodes (cons node nodes)))
+               (for-each (lambda (e) (set! edges (cons e edges))) form-edges)))
+           spans)
           (mk-obj
            (cons "accepted" #t)
-           (cons "nodes" nodes)
+           (cons "nodes" (reverse nodes))
+           (cons "edges" (reverse edges))
            (cons "diagnostics" '())
            (cons "syntaxSurface" +gerbil-scheme-syntax-surface+)))))))
 
